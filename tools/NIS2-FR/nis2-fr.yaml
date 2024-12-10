@@ -1,0 +1,1839 @@
+urn: urn:intuitem:risk:library:NIS2-FR
+locale: fr
+ref_id: NIS2-FR
+name: NIS2-FR
+description: "Liste des exigences NIS2 pr\xE9sentes dans le projet de loi fran\xE7\
+  ais "
+copyright: N/A
+version: 1
+provider: "Gouvernement fran\xE7ais"
+packager: Steef
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:NIS2-FR
+    ref_id: NIS2-FR
+    name: NIS2-FR
+    description: "Liste des exigences NIS2 pr\xE9sentes dans le projet de loi fran\xE7\
+      ais "
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch1
+      name: "L\u2019ENTITE RECENSE SES SYSTEMES D\u2019INFORMATION"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1
+      ref_id: NIS2-ch1-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1
+      ref_id: NIS2-ch1-sec1-(a)
+      description: "L\u2019entit\xE9 liste l\u2019ensemble de ses activit\xE9s et\
+        \ services, y compris les activit\xE9s et services qui ne\ncorrespondent pas\
+        \ aux crit\xE8res pour lesquels l\u2019entit\xE9 est devenue une entit\xE9\
+        \ importante ou\nessentielle (par exemple : une entit\xE9 devenue entit\xE9\
+        \ essentielle car elle exploite un ol\xE9oduc liste, en\nplus des activit\xE9\
+        s et services participant \xE0 l\u2019exploitation de l\u2019ol\xE9oduc, toutes\
+        \ les autres activit\xE9s et\nservices qu\u2019elle fournit).\nPour chaque\
+        \ entr\xE9e de cette liste, l\u2019entit\xE9 :\no identifie un responsable\
+        \ de l\u2019activit\xE9 ou du service ;\no liste les syst\xE8mes d\u2019information\
+        \ les supportant"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1
+      ref_id: NIS2-ch1-sec1-(b)
+      description: "L\u2019entit\xE9 peut, au cas par cas et en le justifiant, exclure\
+        \ certaines portions de ses syst\xE8mes d\u2019information du moment qu'il\
+        \ ne sont pas soumis a des besoin en mati\xE8re de disponibilit\xE9, d'int\xE9\
+        grit\xE9, de confidentialit\xE9\nou de tracabilit\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1
+      ref_id: NIS2-ch1-sec1-(c)
+      description: "Les syst\xE8mes d\u2019information exclus conform\xE9ment au (c)\
+        \ sont distingu\xE9s des autres syst\xE8mes\nd\u2019information dans la liste\
+        \ pr\xE9vue au (a).\nLa justification de l\u2019exclusion doit figurer dans\
+        \ cette liste."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch1-sec1
+      ref_id: NIS2-ch1-sec1-(d)
+      description: "L\u2019entit\xE9 valide et r\xE9examine annuellement, ou en tant\
+        \ que de besoin notamment en cas de mise\nen service d\u2019un nouveau syst\xE8\
+        me d\u2019information, la pertinence des exclusions pr\xE9vues en (c)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch2
+      name: "L\u2019ENTITE DISPOSE D\u2019UN CADRE DE GOUVERNANCE DE LA SECURITE NUMERIQUE"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2
+      ref_id: NIS2-ch2-sec1
+      name: "Role et responsabilit\xE9s"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec1
+      ref_id: NIS2-ch2-sec1-(a)
+      description: "Le directeur de l'entit\xE9 est responsable de la s\xE9curit\xE9\
+        \ num\xE9rique au sein de son entit\xE9 et en particulier du suivi de la conformit\xE9\
+        \ des SI reglement\xE9s NIS 2"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec1
+      ref_id: NIS2-ch2-sec1-(b)
+      description: "Le directeur de l'entit\xE9 doit designer une personne qui l'accompagne\
+        \ dans l'exercice de cette responsabilit\xE9 qui sera le point de contact\
+        \ privil\xE9gi\xE9 de l'ANSSI"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec1
+      ref_id: NIS2-ch2-sec1-(c)
+      description: "L'entit\xE9 d\xE9finie et met en oeuvre une organisation adapt\xE9\
+        e pour assurer sa s\xE9curit\xE9 num\xE9rique"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2
+      ref_id: NIS2-ch2-sec2
+      name: "politique de s\xE9curit\xE9 des syst\xE8mes d'informations"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2
+      ref_id: NIS2-ch2-sec2-(a)
+      description: "L\u2019entit\xE9 d\xE9finit et met en oeuvre une politique de\
+        \ s\xE9curit\xE9 des syst\xE8mes d\u2019information (PSSI)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2
+      ref_id: NIS2-ch2-sec2-(b)
+      description: "Cette PSSI comprend :\n\u2022 L\u2019organisation de la gouvernance\
+        \ de la s\xE9curit\xE9 num\xE9rique et notamment les r\xF4les et les responsabilit\xE9\
+        s du personnel interne et externe (par exemple : prestataires,\nfournisseurs)\
+        \ ;\n\u2022 Les orientations et objectifs strat\xE9giques en mati\xE8re de\
+        \ s\xE9curit\xE9 num\xE9rique d\xE9clin\xE9s de la strat\xE9gie globale de\
+        \ l\u2019entit\xE9 ;\n\u2022 L\u2019engagement du directeur de l\u2019entit\xE9\
+        \ \xE0 assurer la s\xE9curit\xE9 num\xE9rique des syst\xE8mes d\u2019information\
+        \ r\xE9glement\xE9s dont il est responsable ;\n\u2022 L\u2019engagement du\
+        \ directeur de l\u2019entit\xE9 \xE0 assurer la conformit\xE9 aux exigences\
+        \ l\xE9gales et r\xE9glementaires et en particulier celles d\xE9finies dans\
+        \ la transposition nationale de la directive NIS 2."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2
+      ref_id: NIS2-ch2-sec2-(c)
+      description: Le directeur doit approuver la PSSI
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2
+      ref_id: NIS2-ch2-sec2-(d)
+      description: "La PSSI est revue annuellement et mise \xE0 jour lorsque n\xE9\
+        cessaire, notamment en cas d\u2019\xE9volutions\nmajeures du contexte m\xE9\
+        tier, technique ou organisationnel intervenues apr\xE8s son approbation."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2
+      ref_id: NIS2-ch2-sec2-(e)
+      description: "L\u2019entit\xE9 d\xE9cline, en tant que de besoin, la PSSI en\
+        \ politiques de s\xE9curit\xE9 relatives \xE0 des th\xE8mes\npr\xE9cis et\
+        \ permettant de couvrir tout ou partie des pr\xE9sentes mesures."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec2
+      ref_id: NIS2-ch2-sec2-(f)
+      description: "En particulier, et conform\xE9ment \xE0 la directive NIS 2, l\u2019\
+        entit\xE9 d\xE9finit et met en oeuvre des\npolitiques de s\xE9curit\xE9 en\
+        \ mati\xE8re :\n\u2022 D\u2019usage du chiffrement ;\n\u2022 De contr\xF4\
+        le d\u2019acc\xE8s physique et logique ;\n\u2022 De revue de l\u2019application\
+        \ des mesures de s\xE9curit\xE9 mises en oeuvre ;\n\u2022 De maintien en condition\
+        \ de s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2
+      ref_id: NIS2-ch2-sec3
+      name: "Gestion de la conformit\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3
+      ref_id: NIS2-ch2-sec3-(a)
+      description: "Pour chaque syst\xE8me d\u2019information r\xE9glement\xE9, l\u2019\
+        entit\xE9 r\xE9alise et maintient \xE0 jour une analyse de la conformit\xE9\
+        \ du syst\xE8me d\u2019information r\xE9glement\xE9 vis-\xE0-vis des pr\xE9\
+        sentes mesures.\nL\u2019analyse de la conformit\xE9 identifie les \xE9carts\
+        \ entre les mesures mises en oeuvre par l\u2019entit\xE9, les pr\xE9sentes\
+        \ mesures et les objectifs fix\xE9s par la r\xE9glementation."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3
+      ref_id: NIS2-ch2-sec3-(b)
+      description: "L\u2019entit\xE9 \xE9tablit, met en oeuvre et suit dans la dur\xE9\
+        e un plan d\u2019action pour corriger ces \xE9carts et atteindre les objectifs\
+        \ fix\xE9s par la r\xE9glementation.\nCe plan d\u2019action pr\xE9voit, au\
+        \ minimum, une \xE9ch\xE9ance et un responsable pour la r\xE9alisation de\
+        \ chaque action."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3
+      ref_id: NIS2-ch2-sec3-(c)
+      description: "En cas de recours \xE0 une ou plusieurs alternatives pr\xE9vues\
+        \ dans les pr\xE9sentes mesures, l\u2019entit\xE9 les renseigne dans l\u2019\
+        analyse de la conformit\xE9 avec les justifications associ\xE9es."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch2-sec3
+      ref_id: NIS2-ch2-sec3-(d)
+      description: "L\u2019entit\xE9 est capable de d\xE9montrer \xE0 tout moment\
+        \ l\u2019atteinte des objectifs fix\xE9s par la r\xE9glementation, notamment\
+        \ en cas de contr\xF4le.\nL\u2019atteinte des objectifs fix\xE9s par la r\xE9\
+        glementation est r\xE9sum\xE9e lorsque l\u2019entit\xE9 respecte les pr\xE9\
+        sentes mesures. Dans le cas contraire, elle est en capacit\xE9 de fournir\
+        \ les \xE9l\xE9ments n\xE9cessaires pour d\xE9montrer l\u2019atteinte des\
+        \ objectifs fix\xE9s par la r\xE9glementation."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch3
+      name: "L\u2019ENTITE ESSENTIELLE MET EN \u0152UVRE UNE APPROCHE PAR LES RISQUES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3
+      ref_id: NIS2-ch3-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1
+      ref_id: NIS2-ch3-sec1-(a)
+      description: "L\u2019entit\xE9 d\xE9finit, met en oeuvre et maintient \xE0 jour\
+        \ une gouvernance par les risques.\nCette gouvernance vise \xE0 s\u2019assurer\
+        \ que le risque num\xE9rique est pris en compte par le directeur de l\u2019\
+        entit\xE9 et les responsables d\u2019activit\xE9 ou de service de l\u2019\
+        entit\xE9 et que les moyens financiers, humains ou techniques ad\xE9quats\
+        \ sont allou\xE9s pour ma\xEEtriser ce risque.\nCette gouvernance int\xE8\
+        gre les \xE9l\xE9ments issus de l\u2019approche par la conformit\xE9 (cf.\
+        \ Objectif de s\xE9curit\xE9 2) et la compl\xE8te par une approche par les\
+        \ risques, r\xE9alis\xE9e dans les conditions d\xE9finies ci-apr\xE8s. Ces\
+        \ approches sont compl\xE9mentaires et peuvent \xEAtre mutualis\xE9es, notamment\
+        \ en termes de livrables attendus."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1
+      ref_id: NIS2-ch3-sec1-(b)
+      description: "L\u2019entit\xE9 s\u2019assure que chaque syst\xE8me d\u2019information\
+        \ \xE9glement\xE9 fait l\u2019objet d\u2019une analyse de risques.\nCette\
+        \ analyse de risques s\u2019appuie sur les \xE9l\xE9ments issus :\n\u2022\
+        \ De la PSSI (cf. Objectif de s\xE9curit\xE9 2) ;\n\u2022 De la ma\xEEtrise\
+        \ de l\u2019\xE9cosyst\xE8me (cf. Objectif de s\xE9curit\xE9 4) ;\n\u2022\
+        \ De la ma\xEEtrise du syst\xE8me d\u2019information r\xE9glement\xE9 (cf.\
+        \ Objectif de s\xE9curit\xE9 7) ;\n\u2022 De l\u2019approche par conformit\xE9\
+        \ (cf. section Objectif de s\xE9curit\xE9 3) ;\n\u2022 Des audits (cf. Objectif\
+        \ de s\xE9curit\xE9 5)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1
+      ref_id: NIS2-ch3-sec1-(c)
+      description: "L\u2019entit\xE9 valide l\u2019analyse de risques, accepte les\
+        \ risques r\xE9siduels et met en oeuvre le plan d\u2019action pour ma\xEE\
+        triser ces risques.\nLe plan d\u2019action pr\xE9voit, au minimum, une \xE9\
+        ch\xE9ance et un responsable pour la r\xE9alisation de chaque action."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch3-sec1
+      ref_id: NIS2-ch3-sec1-(d)
+      description: "L\u2019entit\xE9 r\xE9examine de l\u2019analyse de risques au\
+        \ minimum tous les 3 ans et en tant que de besoin, notamment en cas l\u2019\
+        incident de s\xE9curit\xE9 ou d\u2019\xE9volutions majeures du contexte m\xE9\
+        tier, technique ou organisationnel."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch4
+      name: "L\u2019ENTITE MAITRISE SON ECOSYSTEME"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4
+      ref_id: NIS2-ch4-sec1
+      name: "Cartographie de l'\xE9cosysteme"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4-sec1
+      ref_id: NIS2-ch4-sec1-(a)
+      description: "L\u2019entit\xE9 d\xE9finit et maintient \xE0 jour une cartographie\
+        \ de l\u2019\xE9cosyst\xE8me dans lequel ses syst\xE8mes d\u2019information\
+        \ r\xE9glement\xE9s sont mis en oeuvre et contenant, au minimum, les informations\
+        \ suivantes :\n\u2022 La liste des prestataires et fournisseurs informatiques\
+        \ contribuant \xE0 la r\xE9alisation des activit\xE9s ou des services de l\u2019\
+        entit\xE9 ;\n\u2022 La liste des interconnexions avec les syst\xE8mes d\u2019\
+        information r\xE9glement\xE9s de l\u2019entit\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4-sec1
+      ref_id: NIS2-ch4-sec1-(b)
+      description: "L\u2019entit\xE9 renseigne les coordonn\xE9es d\u2019au moins\
+        \ un point de contact pour chaque entr\xE9e figurant dans la cartographie\
+        \ de l\u2019\xE9cosyst\xE8me."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4
+      ref_id: NIS2-ch4-sec2
+      name: "S\xE9curit\xE9 num\xE9rique dans les contrats avec les prestataires et\
+        \ fournisseur informatique"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4-sec2-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch4-sec2
+      ref_id: NIS2-ch4-sec2-(a)
+      description: "En cas de recours \xE0 un prestataire, l\u2019entit\xE9 s\u2019\
+        assure de la conformit\xE9 de la prestation aux exigences de la directive\
+        \ NIS 2, et dispose des assurances contractuelles de cette  conformit\xE9\
+        .\nLa v\xE9rification de la conformit\xE9 peut s\u2019appuyer sur des audits\
+        \ dont les conditions sont pr\xE9cis\xE9es par les moyens acceptables de conformit\xE9\
+        \ (b), (d) et (e) relatifs \xE0 l\u2019audit (cf. Objectif de s\xE9curit\xE9\
+        \ 5)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch5
+      name: "L\u2019ENTITE ESSENTIELLE AUDITE LA SECURITE DE SES SYSTEMES D\u2019\
+        INFORMATION REGLEMENTES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5
+      ref_id: NIS2-ch5-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1
+      ref_id: NIS2-ch5-sec1-(a)
+      description: "L\u2019entit\xE9 d\xE9finit et met en oeuvre un programme d\u2019\
+        audit et s\u2019assure que l\u2019ensemble de ses syst\xE8mes d\u2019information\
+        \ r\xE9glement\xE9s font l\u2019objet d\u2019un audit au moins tous les trois\
+        \ ans."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1
+      ref_id: NIS2-ch5-sec1-(b)
+      description: "L\u2019audit de s\xE9curit\xE9 permet :\n\u2022 De v\xE9rifier,\
+        \ sur le p\xE9rim\xE8tre d\xE9fini, l\u2019atteinte des objectifs fix\xE9\
+        s par la r\xE9glementation via\no La conformit\xE9 aux pr\xE9sentes mesures,\
+        \ ou\no La mise en oeuvre de mesures alternatives ; et\n\u2022 D\u2019\xE9\
+        valuer le niveau de s\xE9curit\xE9 du ou des syst\xE8mes d\u2019information\
+        \ couverts au regard\ndes menaces et des vuln\xE9rabilit\xE9s connues."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1
+      ref_id: NIS2-ch5-sec1-(c)
+      description: "L\u2019audit de s\xE9curit\xE9 comprend un test d\u2019intrusion\
+        \ (couvrant au minimum les interfaces expos\xE9es\n\xE0 des SI tiers), un\
+        \ audit de configuration, un audit d\u2019architecture, un audit organisationnel\
+        \ et physique et, lorsque cela est pertinent, un audit de code."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1
+      ref_id: NIS2-ch5-sec1-(d)
+      description: "Le rapport de l\u2019audit de s\xE9curit\xE9 pr\xE9sente :\n\u2022\
+        \ Une synth\xE8se de la conformit\xE9 aux pr\xE9sentes mesures ou aux mesures\
+        \ d\xE9finies par l\u2019entit\xE9 pour atteindre les objectifs fix\xE9s par\
+        \ la r\xE9glementation et du niveau de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information audit\xE9s ;\n\u2022 Les constats de non-conformit\xE9 et les\
+        \ vuln\xE9rabilit\xE9s identifi\xE9es ;\n\u2022 Les recommandations pour y\
+        \ rem\xE9dier."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch5-sec1
+      ref_id: NIS2-ch5-sec1-(e)
+      description: "L\u2019entit\xE9 d\xE9finit et met en oeuvre un plan d\u2019action\
+        \ visant \xE0 corriger les non-conformit\xE9s et les  vuln\xE9rabilit\xE9\
+        s identifi\xE9es.\nCe plan d\u2019action pr\xE9voit, au minimum, une \xE9\
+        ch\xE9ance et un responsable pour la r\xE9alisation de chaque action."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch6
+      name: "L\u2019ENTITE PREND EN COMPTE LA SECURITE NUMERIQUE DANS LA GESTION DE\
+        \ SES RESSOURCES HUMAINES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6
+      ref_id: NIS2-ch6-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1
+      ref_id: NIS2-ch6-sec1-(a)
+      description: "L\u2019entit\xE9 d\xE9finit et met en oeuvre une charte d\u2019\
+        usage des syst\xE8mes d\u2019information, applicable au minimum aux syst\xE8\
+        mes d\u2019information r\xE9glement\xE9s, et la rend opposable \xE0 chacun\
+        \ des utilisateurs de ces syst\xE8mes d\u2019information."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1
+      ref_id: NIS2-ch6-sec1-(b)
+      description: "L\u2019entit\xE9 d\xE9finit et met en oeuvre un programme de sensibilisation\
+        \ \xE0 la s\xE9curit\xE9 num\xE9rique de l\u2019ensemble des utilisateurs\
+        \ des syst\xE8mes d\u2019information r\xE9glement\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1
+      ref_id: NIS2-ch6-sec1-(c)
+      description: "L\u2019entit\xE9 pr\xE9voit des clauses de s\xE9curit\xE9 dans\
+        \ les contrats de travail."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1
+      ref_id: NIS2-ch6-sec1-(d)
+      description: "L\u2019entit\xE9 d\xE9finit et met en oeuvre un processus de gestion\
+        \ des arriv\xE9es, des d\xE9parts et des changements de fonction des personnels\
+        \ et des tiers acc\xE9dant aux syst\xE8mes d\u2019information r\xE9glement\xE9\
+        s. Ce processus pr\xE9voit :\n\u2022 La prise de connaissance par le personnel\
+        \ des r\xE8gles de s\xE9curit\xE9 en vigueur lors de son arriv\xE9e ;\n\u2022\
+        \ La mise \xE0 jour des acc\xE8s lors d\u2019un changement de fonction ;\n\
+        \u2022 Lors du d\xE9part d\u2019un personnel, la restitution de l\u2019ensemble\
+        \ du mat\xE9riel qui lui a \xE9t\xE9 mis \xE0 disposition et la d\xE9sactivation\
+        \ de l\u2019ensemble de ses acc\xE8s logiques aux SI et physiques\naux locaux\
+        \ et salles."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch6-sec1
+      ref_id: NIS2-ch6-sec1-(e)
+      description: "L\u2019entit\xE9 d\xE9finit et met en oeuvre, pour les fonctions\
+        \ assumant des responsabilit\xE9s dans le domaine du num\xE9rique, un programme\
+        \ de formations d\xE9di\xE9es \xE0 la s\xE9curit\xE9 num\xE9rique adapt\xE9\
+        \ \xE0 leurs responsabilit\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch7
+      name: "L\u2019ENTITE MAITRISE SES SYSTEMES D\u2019INFORMATION REGLEMENTES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7
+      ref_id: NIS2-ch7-sec1
+      name: "Maintient en condition op\xE9rationelle et de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec1
+      ref_id: NIS2-ch7-sec1-(a)
+      description: "L\u2019entit\xE9 \xE9labore et maintient \xE0 jour une cartographie\
+        \ de ses syst\xE8mes d\u2019information \nr\xE9glement\xE9s dont le niveau\
+        \ de d\xE9tail est suffisant pour lui permettre :\n- d\u2019assurer le maintien\
+        \ en condition op\xE9rationnel et de s\xE9curit\xE9 de ces syst\xE8mes (par\
+        \ \nexemple : \xEAtre capable d\u2019identifier les ressources mat\xE9rielles\
+        \ ou logicielles vuln\xE9rables \nsuite \xE0 la publication d\u2019un bulletin\
+        \ d\u2019alerte) ;\n- de pouvoir r\xE9agir dans un d\xE9lai raisonnable \xE0\
+        \ un incident de s\xE9curit\xE9 affectant ces \nsyst\xE8mes d\u2019information\
+        \ (par exemple : \xEAtre capable d\u2019identifier les ressources \nmat\xE9\
+        rielles ou logicielles affect\xE9es par un incident de s\xE9curit\xE9 et ainsi\
+        \ limiter les \ncons\xE9quences de l\u2019incident)"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7
+      name: "Maintient en condition op\xE9rationelle et de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(a)
+      description: "L\u2019entit\xE9 \xE9labore, met en \u0153uvre et maintient \xE0\
+        \ jour une proc\xE9dure de maintien en conditions \nop\xE9rationnelle et de\
+        \ s\xE9curit\xE9 des ressources mat\xE9rielles et logicielles de ses syst\xE8\
+        mes \nd\u2019information r\xE9glement\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(b)
+      description: "L\u2019entit\xE9 maintient \xE0 jour des bases de connaissances\
+        \ des outils de protection contre les codes \nmalveillants (par exemple :\
+        \ la mise \xE0 jour de la base antivirale de l\u2019antivirus, la mise \xE0\
+        \ jour des \nsignatures utilis\xE9es par la solution d\u2019EDR)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(c)
+      description: "L\u2019entit\xE9 met en \u0153uvre une veille sur les vuln\xE9\
+        rabilit\xE9s, les correctifs de s\xE9curit\xE9 et des mesures \nd\u2019att\xE9\
+        nuation pr\xE9conis\xE9es susceptibles de concerner les ressources de ses\
+        \ syst\xE8mes \nd\u2019information r\xE9glement\xE9s (SIR), qui sont diffus\xE9\
+        es notamment par les fournisseurs ou les \nfabricants de ces ressources, par\
+        \ un prestataire mandat\xE9 ou par des centres de pr\xE9vention et \nd\u2019\
+        alerte en mati\xE8re de cyber s\xE9curit\xE9 tels que le CERT-FR (centre gouvernemental\
+        \ de veille, \nd\u2019alerte et de r\xE9ponse aux attaques informatiques)\
+        \ ou les CSIRT."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(d)
+      description: "L\u2019entit\xE9 installe sans d\xE9lai les correctifs de s\xE9\
+        curit\xE9 sur les ressources expos\xE9es \xE0 des r\xE9seaux \ntiers (par\
+        \ exemple : un serveur Web, un pare-feu expos\xE9 sur Internet, un serveur\
+        \ de messagerie) et \nles postes de travail des utilisateurs."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(e)
+      description: "L\u2019entit\xE9 essentielle planifie et installe sur l\u2019\
+        ensemble de ses ressources les correctifs de s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(f)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas l\u2019installation des \ncorrectifs de s\xE9curit\xE9 sur les ressources\
+        \ concern\xE9es, l\u2019entit\xE9 met en \u0153uvre des mesures\nd\u2019att\xE9\
+        nuation pour r\xE9duire les risques li\xE9s \xE0 l\u2019utilisation d\u2019\
+        une version comportant des \nvuln\xE9rabilit\xE9s connues."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(g)
+      description: "L\u2019entit\xE9 installe et maintient \xE0 jour les ressources\
+        \ logicielles de ses SIR, y compris les logiciels \nembarqu\xE9s, dans des\
+        \ versions support\xE9es par leurs fournisseurs ou leurs fabricants et \n\
+        comportant les mises \xE0 jour de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(h)
+      description: "L\u2019entit\xE9 v\xE9rifie que toute nouvelle version est t\xE9\
+        l\xE9charg\xE9e depuis les ressources mises \xE0 \ndisposition par les \xE9\
+        diteurs ou les fournisseurs."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(i)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(i)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas l\u2019installation d\u2019une \nversion support\xE9e par le fournisseur\
+        \ ou l\u2019\xE9diteur, l\u2019entit\xE9 met en \u0153uvre des mesures pour\
+        \ \nr\xE9duire les risques li\xE9s \xE0 l\u2019utilisation d\u2019une version\
+        \ obsol\xE8te"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(j)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(j)
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre des m\xE9canismes\
+        \ permettant de prendre connaissance, dans \nles meilleurs d\xE9lais, des\
+        \ alertes \xE9mises par l\u2019Agence nationale de s\xE9curit\xE9 des syst\xE8\
+        mes \nd\u2019information, les \xE9diteurs de produits utilis\xE9s par l\u2019\
+        entit\xE9 ou le prestataire mandat\xE9 par l\u2019entit\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch7-sec2-(k)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:node54
+      ref_id: NIS2-ch7-sec2-(k)
+      description: "L\u2019entit\xE9 s\u2019assure de la mise en \u0153uvre d\u2019\
+        une proc\xE9dure pour traiter ces alertes et le cas \xE9ch\xE9ant \nappliquer\
+        \ les mesures pr\xE9conis\xE9es."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch8
+      name: "L\u2019ENTITE MAITRISE LES ACCES PHYSIQUES A SES LOCAUX"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8
+      ref_id: NIS2-ch8-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1
+      ref_id: NIS2-ch8-sec1-(a)
+      description: "L\u2019entit\xE9 met en place des mesures de s\xE9curit\xE9 permettant\
+        \ de limiter l\u2019acc\xE8s de personnes \nnon autoris\xE9es \xE0 ses locaux,\
+        \ ses salles serveurs et ses locaux techniques."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1
+      ref_id: NIS2-ch8-sec1-(b)
+      description: "L\u2019entit\xE9 s\u2019assure de la protection physique des locaux,\
+        \ salles serveurs et locaux techniques\n(par exemple : vid\xE9osurveillance,\
+        \ gardiennage, alarme).\nCette protection physique permet de pr\xE9venir,\
+        \ de surveiller et de r\xE9agir aux acc\xE8s non \nautoris\xE9s \xE0 ces locaux"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1
+      ref_id: NIS2-ch8-sec1-(c)
+      description: "L\u2019entit\xE9 s\u2019assure du contr\xF4le des acc\xE8s aux\
+        \ locaux, aux salles serveurs et aux locaux \ntechniques."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1
+      ref_id: NIS2-ch8-sec1-(d)
+      description: "L\u2019entit\xE9 s\u2019assure que les droits d'acc\xE8s physique\
+        \ sont attribu\xE9s au regard du besoin \nstrictement n\xE9cessaire \xE0 l\u2019\
+        ex\xE9cution des missions des personnes."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch8-sec1
+      ref_id: NIS2-ch8-sec1-(e)
+      description: "L'entit\xE9 s'assure que les personnes externes acc\xE9dant aux\
+        \ locaux techniques et salles \nserveurs de l\u2019entit\xE9 sont accompagn\xE9\
+        es."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch9
+      name: "L\u2019ENTITE SECURISE L\u2019ARCHITECTURE DE SES SYSTEMES D\u2019INFORMATION\
+        \ REGLEMENTES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9
+      ref_id: NIS2-ch9-sec1
+      name: Cloisonnement
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      ref_id: NIS2-ch9-sec1-(a)
+      description: "L\u2019entit\xE9 cloisonne physiquement ou logiquement l\u2019\
+        ensemble de ses syst\xE8mes d\u2019information \nr\xE9glement\xE9s vis-\xE0\
+        -vis des autres syst\xE8mes d\u2019information (les syst\xE8mes d\u2019information\
+        \ non \nr\xE9glement\xE9s et syst\xE8mes d\u2019information tiers)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      ref_id: NIS2-ch9-sec1-(b)
+      description: "L\u2019entit\xE9 cloisonne physiquement ou logiquement chaque\
+        \ syst\xE8me d\u2019information r\xE9glement\xE9 \nvis-\xE0-vis des autres\
+        \ syst\xE8mes d\u2019information (les autres syst\xE8mes d\u2019information\
+        \ r\xE9glement\xE9s, les \nsyst\xE8mes d\u2019information non r\xE9glement\xE9\
+        s et syst\xE8mes d\u2019information tiers)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      ref_id: NIS2-ch9-sec1-(c)
+      description: "L\u2019entit\xE9 m\xE8ne des r\xE9flexions, pour chaque syst\xE8\
+        me d\u2019information r\xE9glement\xE9, sur la pertinence \nde d\xE9finir\
+        \ des sous-syst\xE8mes. Lorsqu\u2019elle n\u2019identifie aucun sous-syst\xE8\
+        me, l\u2019entit\xE9 en apporte la \njustification.\nUn sous-syst\xE8me regroupe\
+        \ des ressources assurant des fonctionnalit\xE9s similaires et ayant des \n\
+        niveaux de sensibilit\xE9, d\u2019exposition et de s\xE9curit\xE9 homog\xE8\
+        nes"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      ref_id: NIS2-ch9-sec1-(d)
+      description: "Les sous-syst\xE8mes identifi\xE9s \xE0 la mesure (b) sont cloisonn\xE9\
+        s entre eux physiquement ou \nlogiquement."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      ref_id: NIS2-ch9-sec1-(e)
+      description: "L\u2019entit\xE9 met en \u0153uvre au moins un sous-syst\xE8me\
+        \ \u201Cpasserelle sortante\u201D permettant :\n\u2022 aux ressources des\
+        \ SIR d\u2019acc\xE9der aux SI tiers;\n\u2022 d\u2019authentifier, de filtrer\
+        \ et de tracer les acc\xE8s aux SI tiers (par exemple : un serveur \nmandataire)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      ref_id: NIS2-ch9-sec1-(f)
+      description: "L\u2019entit\xE9 met en \u0153uvre au moins un sous-syst\xE8me\
+        \ \u201Cpasserelle entrante\u201D permettant :\n\u2022 d\u2019exposer des\
+        \ ressources des SIR aux SI tiers;de filtrer et de tracer les acc\xE8s depuis\
+        \ des SI tiers (par exemple : un serveur mandataire \ninverse ou un relai"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      ref_id: NIS2-ch9-sec1-(g)
+      description: "Seules les interconnexions n\xE9cessaires \xE0 la r\xE9alisation\
+        \ des activit\xE9s et services de l\u2019entit\xE9 ou au \nmaintien en condition\
+        \ op\xE9rationnelle ou de s\xE9curit\xE9 sont mises en \u0153uvre entre l\u2019\
+        ensemble des\nsyst\xE8mes d\u2019information r\xE9glement\xE9s et les autres\
+        \ syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1-(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec1
+      ref_id: NIS2-ch9-sec1-(h)
+      description: "Seules les interconnexions n\xE9cessaires \xE0 la r\xE9alisation\
+        \ des activit\xE9s et services de l\u2019entit\xE9 ou au \nmaintien en condition\
+        \ op\xE9rationnelle ou de s\xE9curit\xE9 sont mises en \u0153uvre entre chaque\
+        \ syst\xE8me \nd\u2019information r\xE9glement\xE9 et les autres syst\xE8\
+        mes d\u2019information, ou entre les sous-syst\xE8mes du \nsyst\xE8me d\u2019\
+        information r\xE9glement\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9
+      ref_id: NIS2-ch9-sec2
+      name: Filtrage des communications
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2
+      ref_id: NIS2-ch9-sec2-(a)
+      description: "L\u2019entit\xE9 d\xE9finit et documente les communications n\xE9\
+        cessaires \xE0 la r\xE9alisation des activit\xE9s et \nservices de l\u2019\
+        entit\xE9 ou au maintien en condition op\xE9rationnelle de s\xE9curit\xE9\
+        \ circulant entre \nl\u2019ensemble des syst\xE8mes d\u2019information r\xE9\
+        glement\xE9s et les autres syst\xE8mes d\u2019information."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2
+      ref_id: NIS2-ch9-sec2-(b)
+      description: "L\u2019entit\xE9 d\xE9finit et documente les communications n\xE9\
+        cessaires \xE0 la r\xE9alisation des activit\xE9s et \nservices de l\u2019\
+        entit\xE9 ou au maintien en condition op\xE9rationnelle de s\xE9curit\xE9\
+        \ circulant entre \nchaque syst\xE8me d\u2019information r\xE9glement\xE9\
+        \ et les autres syst\xE8mes d\u2019information, ou entre les \nsous-syst\xE8\
+        mes du syst\xE8me d\u2019information r\xE9glement\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2
+      ref_id: NIS2-ch9-sec2-(c)
+      description: "L\u2019entit\xE9 met en \u0153uvre, au niveau des interconnexions,\
+        \ les r\xE8gles de filtrage pour n\u2019autoriser que \nles communications\
+        \ identifi\xE9es \xE0 la mesure (a) ou (b). Les autres communications sont\
+        \ bloqu\xE9es par d\xE9faut."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2
+      ref_id: NIS2-ch9-sec2-(d)
+      description: "Au minimum, les communications entre les syst\xE8mes d\u2019information\
+        \ r\xE9glement\xE9s de l\u2019entit\xE9 et \nles SI tiers sont filtr\xE9s\
+        \ par un ou des pares-feux d\xE9di\xE9s \xE0 cet usage.\n(par exemple : une\
+        \ entit\xE9 mettant en \u0153uvre un pare-feu pour filtrer les communications\
+        \ entre ses \nsyst\xE8mes d\u2019information (r\xE9glement\xE9s ou non) d\u2019\
+        une part et les SI tiers d\u2019autre part est une solution acceptable)"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch9-sec2
+      ref_id: NIS2-ch9-sec2-(e)
+      description: "L\u2019entit\xE9 effectue annuellement une revue de la mise en\
+        \ \u0153uvre technique des r\xE8gles de filtrage \nmentionn\xE9es \xE0 la\
+        \ mesure (c)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch10
+      name: "L\u2019ENTITE SECURISE LES ACCES DISTANTS A SES SYSTEMES D\u2019INFORMATION\
+        \ REGLEMENTES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10
+      ref_id: NIS2-ch10-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1
+      ref_id: NIS2-ch10-sec1-(a)
+      description: "L\u2019entit\xE9 prot\xE8ge les acc\xE8s \xE0 ses syst\xE8mes\
+        \ d\u2019information r\xE9glement\xE9s (SIR) effectu\xE9s \xE0 travers un\
+        \ \nsyst\xE8me d\u2019information tiers au moyen de m\xE9canismes de chiffrement\
+        \ conformes aux r\xE8gles \npr\xE9conis\xE9es par l'Agence nationale de la\
+        \ s\xE9curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1
+      ref_id: NIS2-ch10-sec1-(b)
+      description: "De plus, lorsque les acc\xE8s vis\xE9s \xE0 la mesure (a) sont\
+        \ effectu\xE9s par l\u2019entit\xE9 ou un prestataire qu\u2019elle a mandat\xE9\
+        \ \xE0 cet effet, l\u2019entit\xE9 prot\xE8ge les acc\xE8s aux SIR par un\
+        \ m\xE9canisme d'authentification conforme aux mesures de l\u2019Objectif\
+        \ de s\xE9curit\xE9 13."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1
+      ref_id: NIS2-ch10-sec1-(c)
+      description: "Pour les acc\xE8s vis\xE9s \xE0 la mesure (b), le m\xE9canisme\
+        \ d\u2019authentification s\u2019appuie sur une \nauthentification multifacteur\
+        \ reposant au moins sur un facteur de connaissance."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1
+      ref_id: NIS2-ch10-sec1-(d)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas la mise en \u0153uvre d\u2019une \nauthentification multifacteur, l\u2019\
+        entit\xE9 met en \u0153uvre des mesures permettant de r\xE9duire le risque\
+        \ \nassoci\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch10-sec1
+      ref_id: NIS2-ch10-sec1-(e)
+      description: "Les m\xE9moires de masse (par exemple : les \xAB disques \xBB\
+        ) des postes de travail et \xE9quipements mobiles\npermettant aux personnels\
+        \ et prestataires de l\u2019entit\xE9 d\u2019acc\xE9der \xE0 distance au SIR\
+        \ depuis un lieu \nqui n\u2019est pas ma\xEEtris\xE9 par l\u2019entit\xE9\
+        , sont en permanence prot\xE9g\xE9es par des m\xE9canismes de \nchiffrement\
+        \ et d\u2019authentification conformes \xE0 l\u2019\xE9tat de l\u2019art tel\
+        \ que pr\xE9conis\xE9 par l\u2019Agence \nnationale de la s\xE9curit\xE9 des\
+        \ syst\xE8mes d\u2019information."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch11
+      name: "L\u2019ENTITE PROTEGE SES SYSTEMES D\u2019INFORMATION REGLEMENTES CONTRE\
+        \ LES CODES MALVEILLANTS"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11
+      ref_id: NIS2-ch11-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1
+      ref_id: NIS2-ch11-sec1-(a)
+      description: "Seules les ressources mat\xE9rielles de l\u2019entit\xE9, de ses\
+        \ personnels ou de ses prestataires clairement \nidentifi\xE9es et participant\
+        \ \xE0 la r\xE9alisation des activit\xE9s ou la fourniture des services de\
+        \ l\u2019entit\xE9 ou \nau maintien en condition op\xE9rationnelle et de s\xE9\
+        curit\xE9 se connectent aux syst\xE8mes \nd\u2019information r\xE9glement\xE9\
+        s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1
+      ref_id: NIS2-ch11-sec1-(b)
+      description: "Seules les ressources mat\xE9rielles dont l\u2019entit\xE9, ou\
+        \ le prestataire qu\u2019elle a mandat\xE9, assure la \ngestion et participant\
+        \ \xE0 la r\xE9alisation des activit\xE9s ou la fourniture des services de\
+        \ l\u2019entit\xE9 ou au \nmaintien en condition op\xE9rationnelle et de s\xE9\
+        curit\xE9 se connectent aux syst\xE8mes d\u2019information \nr\xE9glement\xE9\
+        s"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1
+      ref_id: NIS2-ch11-sec1-(c)
+      description: "L\u2019entit\xE9 met en \u0153uvre des mesures organisationnelles\
+        \ ou techniques visant \xE0 emp\xEAcher la \nconnexion des ressources mat\xE9\
+        rielles autres que celles identifi\xE9es \xE0 la mesure (a) sur ses \nsyst\xE8\
+        mes d\u2019information r\xE9glement\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1
+      ref_id: NIS2-ch11-sec1-(d)
+      description: "L\u2019entit\xE9 met en \u0153uvre des mesures organisationnelles\
+        \ ou techniques visant \xE0 emp\xEAcher la \nconnexion des ressources mat\xE9\
+        rielles autres que celles identifi\xE9es \xE0 la mesure (b) sur ses \nsyst\xE8\
+        mes d\u2019information r\xE9glement\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1
+      ref_id: NIS2-ch11-sec1-(e)
+      description: "Seuls les supports amovibles r\xE9inscriptibles n\xE9cessaires\
+        \ \xE0 la r\xE9alisation des activit\xE9s et services \nde l\u2019entit\xE9\
+        \ ou au maintien en condition op\xE9rationnelle ou de s\xE9curit\xE9 se connectent\
+        \ \xE0 ses \nsyst\xE8mes d\u2019information r\xE9glement\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1
+      ref_id: NIS2-ch11-sec1-(f)
+      description: "Les postes de travail, les serveurs et les \xE9quipements mobiles\
+        \ ma\xEEtris\xE9s par l\u2019entit\xE9, qui sont \namen\xE9s \xE0 traiter\
+        \ de donn\xE9es provenant de sources externes (comme par exemple les supports\
+        \ \namovibles, la messagerie ou la navigation web), disposent de m\xE9canismes\
+        \ de protection contre \nles risques d'ex\xE9cution de codes malveillants."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch11-sec1
+      ref_id: NIS2-ch11-sec1-(g)
+      description: "L\u2019entit\xE9 proc\xE8de \xE0 l\u2019analyse des donn\xE9es\
+        \ provenant de sources externes lors de leur r\xE9ception, \npour y rechercher\
+        \ des codes malveillants."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch12
+      name: "L\u2019ENTITE ESSENTIELLE SECURISE LA CONFIGURATION DES RESSOURCES DE\
+        \ SES SYSTEMES D\u2019INFORMATION REGLEMENTES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12
+      ref_id: NIS2-ch12-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1
+      ref_id: NIS2-ch12-sec1-(a)
+      description: "Seules les ressources logicielles n\xE9cessaires \xE0 la r\xE9\
+        alisation des activit\xE9s et services de l\u2019entit\xE9 \nou au maintien\
+        \ en condition op\xE9rationnelle ou de s\xE9curit\xE9 sont install\xE9es ou\
+        \ conserv\xE9es sur \nles syst\xE8mes d\u2019information r\xE9glement\xE9\
+        s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1
+      ref_id: NIS2-ch12-sec1-(b)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de d\xE9sactiver ou \nd\xE9sinstaller une ressource logicielle, l\u2019\
+        entit\xE9 met en \u0153uvre des mesures permettant de r\xE9duire \nle risque\
+        \ associ\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1
+      ref_id: NIS2-ch12-sec1-(c)
+      description: "L\u2019entit\xE9 configure les ressources de ses SIR de mani\xE8\
+        re s\xE9curis\xE9e et en s\u2019appuyant sur les \nrecommandations de l\u2019\
+        \xE9diteur de la fonctionnalit\xE9, du fabricant de la ressource ou de \n\
+        l\u2019autorit\xE9 nationale de s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch12-sec1
+      ref_id: NIS2-ch12-sec1-(d)
+      description: "L\u2019entit\xE9 effectue annuellement une revue de configuration\
+        \ des ressources de ses SIR pour \nv\xE9rifier l\u2019application des mesures\
+        \ pr\xE9c\xE9dentes. Il est recommand\xE9 que cette revue s\u2019appuie \n\
+        sur un ou des outils automatis\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch13
+      name: "L\u2019ENTITE GERE LES IDENTITES ET LES ACCES DES UTILISATEURS A SES\
+        \ SYSTEMES D\u2019INFORMATION REGLEMENTES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13
+      ref_id: NIS2-ch13-sec1
+      name: Identification
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1
+      ref_id: NIS2-ch13-sec1-(a)
+      description: "Les utilisateurs et les processus automatiques acc\xE9dant aux\
+        \ ressources des syst\xE8mes d\u2019information r\xE9glement\xE9s (SIR) de\
+        \ l\u2019entit\xE9 importante ou essentielle disposent de comptes individuels.\
+        \ Les utilisateurs peuvent, le cas \xE9ch\xE9ant, disposer de plusieurs comptes\
+        \ individuels."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1
+      ref_id: NIS2-ch13-sec1-(b)
+      description: "L\u2019emploi d\u2019un compte individuel du SIR est r\xE9serv\xE9\
+        \ \xE0 l\u2019utilisateur ou au processus automatique\nauquel ce compte a\
+        \ \xE9t\xE9 attribu\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1
+      ref_id: NIS2-ch13-sec1-(c)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de cr\xE9er de comptes individuels pour les utilisateurs ou pour les\
+        \ processus automatiques, l\u2019entit\xE9 met en place des mesures permettant\
+        \ de r\xE9duire le risque li\xE9 \xE0 l'utilisation de comptes partag\xE9\
+        s et d'assurer la tra\xE7abilit\xE9 de l'utilisation de ces comptes."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1
+      ref_id: NIS2-ch13-sec1-(d)
+      description: "Lorsqu'un SIR est utilis\xE9 pour diffuser de l'information au\
+        \ public, l\u2019entit\xE9 n'est pas tenue de cr\xE9er de comptes pour l'acc\xE8\
+        s du public \xE0 cette information."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec1
+      ref_id: NIS2-ch13-sec1-(e)
+      description: "L\u2019entit\xE9 d\xE9sactive sans d\xE9lai les comptes qui ne\
+        \ sont plus n\xE9cessaires."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13
+      ref_id: NIS2-ch13-sec2
+      name: Authentification
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(a)
+      description: "L\u2019entit\xE9 prot\xE8ge les acc\xE8s des utilisateurs et processus\
+        \ automatiques aux ressources de ses syst\xE8mes d\u2019information r\xE9\
+        glement\xE9s (SIR) au moyen d'un m\xE9canisme d'authentification (par exemple\
+        \ : un m\xE9canisme d\u2019authentification mono- ou multi-facteur) impliquant\
+        \ au moins un \xE9l\xE9ment secret (par exemple : un facteur de connaissance\
+        \ tel qu\u2019un mot de passe)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(b)
+      description: "L\u2019entit\xE9 d\xE9finit, conform\xE9ment \xE0 sa politique\
+        \ de contr\xF4le d\u2019acc\xE8s physique et logique, les r\xE8gles \nde gestion\
+        \ des facteurs d'authentification mis en \u0153uvre dans ses SIR."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(c)
+      description: "L\u2019entit\xE9 change les \xE9l\xE9ments secrets configur\xE9\
+        s par d\xE9faut, avant la mise en service d\u2019une \nressource. \xC0 cet\
+        \ effet, l\u2019entit\xE9 s'assure aupr\xE8s du fabricant ou du fournisseur\
+        \ de la ressource \nqu'elle dispose des moyens et des droits permettant d\u2019\
+        effectuer ces changements"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(d)
+      description: "L\u2019\xE9l\xE9ment secret d'un compte partag\xE9 est renouvel\xE9\
+        \ \xE0 chaque retrait d'un utilisateur de ce \ncompte."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(e)
+      description: "L\u2019\xE9l\xE9ment secret d\u2019un compte n\u2019est connu,\
+        \ accessible en clair ou modifiable que des utilisateurs \nqui en ont la responsabilit\xE9\
+        . "
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(f)
+      description: "Les facteurs d\u2019authentification sont conformes \xE0 l\u2019\
+        \xE9tat de l'art pr\xE9conis\xE9 par l'Agence nationale \nde la s\xE9curit\xE9\
+        \ des syst\xE8mes d'information en mati\xE8re de complexit\xE9, en tenant\
+        \ compte du \nniveau de complexit\xE9 maximal permis par la ressource concern\xE9\
+        e, et en mati\xE8re de fr\xE9quence \nde renouvellement"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(g)
+      description: "L\u2019entit\xE9 modifie sans d\xE9lai l\u2019\xE9l\xE9ment secret\
+        \ associ\xE9 \xE0 un compte d\xE9sactiv\xE9"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(h)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de modifier l'\xE9l\xE9ment \nsecret, l\u2019entit\xE9 met en \u0153\
+        uvre un contr\xF4le d'acc\xE8s appropri\xE9 \xE0 la ressource concern\xE9\
+        e ainsi que \ndes mesures de r\xE9duction du risque li\xE9 \xE0 l'utilisation\
+        \ d'un \xE9l\xE9ment secret d'authentification fixe."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2-(i)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec2
+      ref_id: NIS2-ch13-sec2-(i)
+      description: "Dans le cadre de cette exception, l\u2019entit\xE9 met \xE9galement\
+        \ en \u0153uvre des mesures de s\xE9curit\xE9 \npermettant d'assurer la tra\xE7\
+        abilit\xE9 des acc\xE8s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13
+      ref_id: NIS2-ch13-sec3
+      name: "Droits d'acc\xE8s"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3
+      ref_id: NIS2-ch13-sec3-(a)
+      description: "L\u2019entit\xE9 n\u2019attribue des droits qu\u2019aux utilisateurs\
+        \ et processus automatiques authentifi\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3
+      ref_id: NIS2-ch13-sec3-(b)
+      description: "Pour chaque utilisateur ou chaque processus automatique, l\u2019\
+        entit\xE9 n'attribue les droits d'acc\xE8s \nqu\u2019aux seules ressources\
+        \ n\xE9cessaires \xE0 la r\xE9alisation des activit\xE9s et services de l\u2019\
+        entit\xE9 ou au \nmaintien en condition op\xE9rationnelle ou de s\xE9curit\xE9\
+        ."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3
+      ref_id: NIS2-ch13-sec3-(c)
+      description: "Pour chaque ressource du SIR, l\u2019entit\xE9 n\u2019attribue\
+        \ les droits d\u2019acc\xE8s qu\u2019aux seuls utilisateurs et \nprocessus\
+        \ automatiques justifiant d\u2019un besoin au regard de leurs missions."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch13-sec3
+      ref_id: NIS2-ch13-sec3-(d)
+      description: "L\u2019entit\xE9 effectue p\xE9riodiquement, au moins annuellement,\
+        \ une revue des droits d\u2019acc\xE8s. Cette \nrevue doit notamment v\xE9\
+        rifier le respect de la pr\xE9sente mesure et, le cas \xE9ch\xE9ant, corriger\
+        \ les \nanomalies."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch14
+      name: "L\u2019ENTITE MAITRISE L\u2019ADMINISTRATION DE SES SYSTEMES D\u2019\
+        INFORMATION REGLEMENTES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14
+      ref_id: NIS2-ch14-sec1
+      name: Comptes d'administration
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(a)
+      description: "Les actions d\u2019administration sur les syst\xE8mes d\u2019\
+        information r\xE9glement\xE9s sont effectu\xE9es au moyen de comptes d\u2019\
+        administration d\xE9di\xE9s \xE0 cet usage."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(b)
+      description: "Les comptes d\u2019administration ne sont utilis\xE9s que par\
+        \ des administrateurs ou des personnes \nautoris\xE9es"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(c)
+      description: "Les comptes d\u2019administration sont des comptes qui respectent\
+        \ les mesures relatives \xE0 \nl\u2019identification (cf. Objectif de s\xE9\
+        curit\xE9 13)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(d)
+      description: "Un compte d'administration est utilis\xE9 exclusivement pour se\
+        \ connecter \xE0 un syst\xE8me \nd'information d'administration, ou \xE0 une\
+        \ ressource pour effectuer des actions d\u2019administration"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(e)
+      description: "Les actions d'administration sont effectu\xE9es exclusivement\
+        \ \xE0 partir de comptes \nd'administration, et inversement, les comptes d'administration\
+        \ sont utilis\xE9s exclusivement pour \nles actions d'administration"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(f)
+      description: "L\u2019octroi de privil\xE8ges administrateur \xE0 un compte utilisateur\
+        \ est interdit"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(g)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas d\u2019effectuer des actions \nd\u2019administration \xE0 partir d'un\
+        \ compte d'administration, l\u2019entit\xE9 met en \u0153uvre des mesures\
+        \ \npermettant d'assurer le contr\xF4le de ces actions d'administration et\
+        \ des mesures de r\xE9duction \ndu risque li\xE9 \xE0 l'utilisation d'un compte\
+        \ non sp\xE9cifique \xE0 l'administration. "
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(h)
+      description: "L\u2019entit\xE9 met \xE9galement en \u0153uvre des mesures permettant\
+        \ d'assurer la tra\xE7abilit\xE9 des actions \nd'administration r\xE9alis\xE9\
+        es"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(i)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(i)
+      description: "L\u2019entit\xE9 \xE9tablit et tient \xE0 jour la liste des comptes\
+        \ d'administration de ses SIR"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(j)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(j)
+      description: "L\u2019attribution des droits aux comptes d\u2019administration\
+        \ est limit\xE9e aux droits n\xE9cessaires aux \nactions d\u2019administration\
+        \ de ce compte, sur les seuls p\xE9rim\xE8tres techniques et fonctionnels\
+        \ qu\u2019il \nadministre.\nEn particulier, afin de limiter la port\xE9e des\
+        \ droits individuels, ils sont attribu\xE9s \xE0 chaque compte \nd\u2019administration\
+        \ en les restreignant autant que possible au p\xE9rim\xE8tre fonctionnel et\
+        \ technique \nde ce dernier. Pour ceci, il est recommand\xE9 d\u2019octroyer\
+        \ les droits d\u2019administration au travers des \ngroupes dont les comptes\
+        \ d\u2019administration sont membres."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(k)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(k)
+      description: "Les administrateurs ne r\xE9utilisent pas les \xE9l\xE9ments secrets\
+        \ entre comptes d\u2019administration, ou \nentre un compte d\u2019administration\
+        \ et un compte utilisateur."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1-(l)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec1
+      ref_id: NIS2-ch14-sec1-(l)
+      description: "Lors de toute modification d'un compte d\u2019administration (ajout,\
+        \ suppression, suspension ou \nmodification des droits associ\xE9s), l\u2019\
+        entit\xE9 v\xE9rifie que les droits d'acc\xE8s aux ressources et \nfonctionnalit\xE9\
+        s sont attribu\xE9s en coh\xE9rence avec les besoins d'utilisation du compte."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14
+      ref_id: NIS2-ch14-sec2
+      name: "S\xE9curit\xE9 des annuaires"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2
+      ref_id: NIS2-ch14-sec2-(a)
+      description: "La s\xE9curit\xE9 des syst\xE8mes d\u2019information r\xE9glement\xE9\
+        s (SIR) de l\u2019entit\xE9 repose en grande partie sur \nla s\xE9curit\xE9\
+        \ du ou des annuaires g\xE9rant les utilisateurs ou les ressources des SIR.\n\
+        L\u2019ensemble des ressources regroupant ces annuaires, les ressources mat\xE9\
+        rielles et logicielles \nh\xE9bergeant ces annuaires ou permettant de prendre\
+        \ le contr\xF4le de ces annuaires est d\xE9sign\xE9 par \n\xAB c\u0153ur de\
+        \ confiance \xBB."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2
+      ref_id: NIS2-ch14-sec2-(b)
+      description: "Les actions d\u2019administration du c\u0153ur de confiance sont\
+        \ r\xE9alis\xE9es via des comptes \nd\u2019administration d\xE9di\xE9s exclusivement\
+        \ \xE0 cet usage."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2
+      ref_id: NIS2-ch14-sec2-(c)
+      description: "Les actions d'administration du c\u0153ur de confiance sont r\xE9\
+        alis\xE9es via des ressources d\xE9di\xE9es \nexclusivement \xE0 cet usage."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2
+      ref_id: NIS2-ch14-sec2-(d)
+      description: "Les connexions externes au c\u0153ur de confiance, \xE0 destination\
+        \ des ressources d\u2019administration du \nc\u0153ur de confiance sont interdites\
+        \ par un dispositif de filtrage sur les ressources d\u2019administration."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch14-sec2
+      ref_id: NIS2-ch14-sec2-(e)
+      description: "L\u2019entit\xE9 effectue annuellement une revue de la configuration\
+        \ des annuaires g\xE9rant les utilisateurs \nou les ressources de ses SIR,\
+        \ afin d\u2019identifier tout \xE9l\xE9ment inutile ou anormal. Il est recommand\xE9\
+        \ \nque cette revue s\u2019appuie sur un outil automatis\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch15
+      name: "L\u2019ENTITE ESSENTIELLE REALISE LES ACTIONS D\u2019ADMINISTRATION DEPUIS\
+        \ DES RESSOURCES DEDIEES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15
+      ref_id: NIS2-ch15-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(a)
+      description: "Les actions d\u2019administration sur les syst\xE8mes d\u2019\
+        information r\xE9glement\xE9s sont effectu\xE9es au \nmoyen d\u2019un syst\xE8\
+        me d\u2019information d\u2019administration."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(b)
+      description: "Les ressources des syst\xE8mes d'information d'administration\
+        \ sont g\xE9r\xE9es et configur\xE9es par \nl\u2019entit\xE9 ou le prestataire\
+        \ qu'elle a mandat\xE9 pour r\xE9aliser les actions d'administration."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(c)
+      description: "Les ressources mat\xE9rielles des syst\xE8mes d\u2019information\
+        \ d\u2019administration sont utilis\xE9es \nexclusivement pour r\xE9aliser\
+        \ des actions d\u2019administration."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(d)
+      description: "Le syst\xE8me d\u2019exploitation utilis\xE9 pour effectuer des\
+        \ actions d'administration est utilis\xE9 \nexclusivement pour r\xE9aliser\
+        \ des actions d\u2019administration."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(e)
+      description: "La connexion des administrateurs \xE0 un syst\xE8me d\u2019information\
+        \ d\u2019administration s\u2019effectue au \nmoyen d\u2019un syst\xE8me d\u2019\
+        exploitation utilis\xE9 exclusivement pour des actions d\u2019administration."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(f)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de d\xE9dier le poste de \ntravail physique de l'administrateur pour\
+        \ les actions d'administration, l\u2019entit\xE9 met en \u0153uvre des \n\
+        mesures de durcissement et de cloisonnement du syst\xE8me d'exploitation du\
+        \ poste de travail \npermettant d'isoler le syst\xE8me d\u2019exploitation\
+        \ utilis\xE9 pour les actions d'administration du \nsyst\xE8me d\u2019exploitation\
+        \ utilis\xE9 pour les autres actions. "
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(g)
+      description: "Les syst\xE8mes d'information d'administration sont connect\xE9\
+        s aux ressources du SIR \xE0 administrer \nau travers d'une liaison r\xE9\
+        seau physique utilis\xE9e exclusivement pour les actions d'administration.\
+        \ \nCes ressources sont administr\xE9es au travers de leur interface d'administration\
+        \ physique."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(h)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas d'administrer une \nressource au travers d'une liaison r\xE9seau physique\
+        \ ou de son interface d'administration \nphysique, l\u2019entit\xE9 met en\
+        \ \u0153uvre des mesures de r\xE9duction du risque telles que des mesures\
+        \ de \ns\xE9curit\xE9 logique."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(i)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(i)
+      description: "Les communications associ\xE9es \xE0 des actions d\u2019administration\
+        \ sont prot\xE9g\xE9es par des \nm\xE9canismes de chiffrement et d\u2019authentification\
+        \ conformes \xE0 l\u2019\xE9tat de l'art tel que celui \npr\xE9conis\xE9 par\
+        \ l\u2019Agence nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019information. "
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(j)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(j)
+      description: "Les communications associ\xE9es \xE0 des actions d\u2019administration\
+        \ qui transitent sur des r\xE9seaux non \nd\xE9di\xE9s \xE0 ces communications\
+        \ sont cloisonn\xE9es au moyen de m\xE9canismes de chiffrement et \nd\u2019\
+        authentification conformes aux mesures pr\xE9conis\xE9es par l\u2019Agence\
+        \ nationale de la s\xE9curit\xE9 des \nsyst\xE8mes d\u2019information."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1-(k)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch15-sec1
+      ref_id: NIS2-ch15-sec1-(k)
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de recourir \xE0 des \nm\xE9canismes de chiffrement ou d\u2019authentification\
+        \ de ces communications, l\u2019entit\xE9 met en \u0153uvre \ndes mesures\
+        \ permettant de prot\xE9ger la confidentialit\xE9 et l\u2019int\xE9grit\xE9\
+        \ de ces flux et de renforcer \nle contr\xF4le et la tra\xE7abilit\xE9 des\
+        \ actions d\u2019administration."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch16
+      name: "L\u2019ENTITE ESSENTIELLE SUPERVISE LA SECURITE DE SES SYSTEMES D\u2019\
+        INFORMATION REGLEMENTES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16
+      ref_id: NIS2-ch16-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1
+      ref_id: NIS2-ch16-sec1-(a)
+      description: "L\u2019entit\xE9 essentielle \xE9labore, tient \xE0 jour et met\
+        \ en \u0153uvre, conform\xE9ment \xE0 sa politique de \ns\xE9curit\xE9 des\
+        \ syst\xE8mes d'information, une proc\xE9dure de d\xE9tection des incidents\
+        \ de s\xE9curit\xE9 \nsusceptibles d'affecter ses syst\xE8mes d\u2019information\
+        \ r\xE9glement\xE9s (SIR)"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1
+      ref_id: NIS2-ch16-sec1-(b)
+      description: "Cette proc\xE9dure pr\xE9voit des mesures organisationnelles et\
+        \ techniques destin\xE9es \xE0 d\xE9tecter les \nincidents de s\xE9curit\xE9\
+        .\nLes mesures organisationnelles comprennent les modalit\xE9s :\n\u2022 De\
+        \ collecte des journaux n\xE9cessaires \xE0 la d\xE9tection ; \n\u2022 D'exploitation\
+        \ des dispositifs de d\xE9tection ;\n\u2022 D\u2019analyse des \xE9v\xE9nements\
+        \ de s\xE9curit\xE9 ;\n\u2022 D\u2019am\xE9lioration des techniques de d\xE9\
+        tection dans le temps.\nLes mesures techniques pr\xE9cisent notamment la nature\
+        \ et le positionnement des dispositifs de \nd\xE9tection."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1
+      ref_id: NIS2-ch16-sec1-(c)
+      description: "Pour chacun de ses SIR, l\u2019entit\xE9 essentielle configure\
+        \ les ressources suivantes afin qu\u2019ils \njournalisent des \xE9v\xE8nements\
+        \ de s\xE9curit\xE9 :\n\u2022 Les serveurs applicatifs ;\n\u2022 Les serveurs\
+        \ d'infrastructure ;\n\u2022 Les \xE9quipements de s\xE9curit\xE9 ;\n\u2022\
+        \ Les \xE9quipements r\xE9seau ;\n\u2022 Les postes de travail des administrateurs\
+        \ \u2022 Les stations d\u2019ing\xE9nierie, les postes de maintenance et les\
+        \ consoles de programmation \ndes syst\xE8mes industriels et des syst\xE8\
+        mes de s\xFBret\xE9 des personnes et des installations.\nLes \xE9v\xE8nements\
+        \ de s\xE9curit\xE9 issus de ces ressources incluent au moins les \xE9v\xE8\
+        nements li\xE9s :\n\u2022 \xC0 l'authentification des utilisateurs ;\n\u2022\
+        \ \xC0 la gestion des comptes et des droits d'acc\xE8s ;\n\u2022 \xC0 l'acc\xE8\
+        s aux ressources ;\n\u2022 Aux modifications des r\xE8gles de s\xE9curit\xE9\
+        \ du SIR ;\n\u2022 Au fonctionnement du SIR. \nLes journaux et \xE9v\xE9nements\
+        \ de s\xE9curit\xE9 sont configur\xE9s de fa\xE7on \xE0 ne pas enregistrer\
+        \ des \nchamps suppos\xE9s inclure des mots de passe ou autres \xE9l\xE9ments\
+        \ secrets d'authentification, en \nclair ou sous forme d\u2019empreinte cryptographique."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1
+      ref_id: NIS2-ch16-sec1-(d)
+      description: "L\u2019entit\xE9 met en \u0153uvre des dispositifs de d\xE9tection\
+        \ analysant notamment l'ensemble des \ncommunications entre les SIR et les\
+        \ syst\xE8mes d'information tiers.\nL\u2019entit\xE9 essentielle veille \xE0\
+        \ ce que l'installation et l'exploitation de ces dispositifs de d\xE9tection\
+        \ \nn'affectent pas la s\xE9curit\xE9 et le fonctionnement de ses SIR.\nL\u2019\
+        entit\xE9 essentielle s\u2019assure que les \xE9v\xE9nements de s\xE9curit\xE9\
+        \ issus des journaux et des dispositifs \nde d\xE9tections sont horodat\xE9\
+        s au moyen de sources de temps synchronis\xE9es."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1
+      ref_id: NIS2-ch16-sec1-(e)
+      description: "L\u2019entit\xE9 essentielle enregistre et centralise les \xE9\
+        v\xE9nements de s\xE9curit\xE9 issus des journaux et des \ndispositifs de\
+        \ d\xE9tection de ses SIR dans un syst\xE8me de corr\xE9lation et d\u2019\
+        analyse.\nLe syst\xE8me d'analyse conserve les \xE9v\xE9nements de s\xE9curit\xE9\
+        \ sur une dur\xE9e d'au moins six mois, \nnotamment pour permettre une exploitation\
+        \ \xE0 post\xE9riori.\nLe syst\xE8me d'analyse de journaux est install\xE9\
+        \ et exploit\xE9 sur un syst\xE8me d\u2019information mis en \nplace exclusivement\
+        \ \xE0 des fins de d\xE9tection des incidents de s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch16-sec1
+      ref_id: NIS2-ch16-sec1-(f)
+      description: "Dans le cas particulier d'un SIR en charge du transit de communications\
+        \ pour le compte de \ntiers (par exemple l\u2019appairage pour l'\xE9change\
+        \ de trafic internet), l\u2019entit\xE9 essentielle ne met en \n\u0153uvre\
+        \ des dispositifs de d\xE9tection que pour les flux de donn\xE9es autres que\
+        \ ceux \ncorrespondant aux flux des tiers."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch17
+      name: "L\u2019ENTITE EST EN CAPACITE DE REAGIR AUX INCIDENTS DE SECURITE"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17
+      ref_id: NIS2-ch17-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(a)
+      description: "Le dirigeant ex\xE9cutif de l\u2019entit\xE9 d\xE9signe un ou\
+        \ plusieurs points de contact sur les sujets relatifs \n\xE0 la s\xE9curit\xE9\
+        \ num\xE9rique.\nL\u2019entit\xE9 communique \xE0 l\u2019Agence nationale\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d\u2019information et, le cas \n\xE9\
+        ch\xE9ant, aux autorit\xE9s nationales comp\xE9tentes les coordonn\xE9es de\
+        \ ces points de contact et \nleurs mises \xE0 jour."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(b)
+      description: "Le dirigeant ex\xE9cutif de l\u2019entit\xE9 essentielle s\u2019\
+        assure de l\u2019\xE9laboration, du maintien \xE0 jour et de \nla mise en\
+        \ \u0153uvre d\u2019une proc\xE9dure de traitement des incidents de s\xE9\
+        curit\xE9 affectant ses \nsyst\xE8mes d\u2019information r\xE9glement\xE9\
+        s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(c)
+      description: "Le dirigeant ex\xE9cutif de l\u2019entit\xE9 s\u2019assure de\
+        \ la notification des incidents qui ont ou sont \nsusceptibles d\u2019avoir,\
+        \ compte tenu notamment du nombre d\u2019utilisateurs et de la zone \ng\xE9\
+        ographique touch\xE9s ainsi que de la dur\xE9e de l\u2019incident, un impact\
+        \ significatif sur la \ncontinuit\xE9 de ses activit\xE9s et de ces services\
+        \ via le guichet mis \xE0 sa disposition par l\u2019Agence \nnationale de\
+        \ la s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(d)
+      description: "Le dirigeant ex\xE9cutif de l\u2019entit\xE9 s\u2019assure de\
+        \ la mise en \u0153uvre des outils permettant de collecter \nles signalements\
+        \ remont\xE9s, en particulier par les sources suivantes :\n\u2022 Les employ\xE9\
+        s de l\u2019entit\xE9 essentielle ;\n\u2022 Les clients et les usagers des\
+        \ activit\xE9s et services mis en \u0153uvre par l\u2019entit\xE9 essentielle\
+        \ ;\n\u2022 Les prestataires ou fournisseurs contractant avec l\u2019entit\xE9\
+        \ essentielle."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(e)
+      description: "Le dirigeant ex\xE9cutif de l\u2019entit\xE9 essentielle s\u2019\
+        assure de la d\xE9finition et de la mise en \u0153uvre des \nm\xE9canismes\
+        \ permettant d\u2019analyser et de qualifier les \xE9v\xE9nements remont\xE9\
+        s et d\u2019identifier les \nincidents potentiels ou av\xE9r\xE9s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(f)
+      description: "Le dirigeant ex\xE9cutif de l\u2019entit\xE9 essentielle s\u2019\
+        assure de la d\xE9finition et de la mise en \u0153uvre des \nm\xE9canismes\
+        \ organisationnels et techniques permettant de r\xE9agir en cas d\u2019incident\
+        \ et de \nlimiter les cons\xE9quences sur la fourniture des services.\nCes\
+        \ m\xE9canismes sont repris, le cas \xE9ch\xE9ant, dans la d\xE9finition des\
+        \ plans de continuit\xE9 et de \nreprise d\u2019activit\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(g)
+      description: "Apr\xE8s chaque incident majeur, le dirigeant ex\xE9cutif de l\u2019\
+        entit\xE9 essentielle s\u2019assure qu\u2019une \nanalyse des causes de l\u2019\
+        incident a \xE9t\xE9 r\xE9alis\xE9e.\nL\u2019analyse des causes vise \xE0\
+        \ d\xE9finir et mettre en \u0153uvre les mesures de s\xE9curit\xE9 permettant\
+        \ de \nlimiter la vraisemblance d\u2019un nouvel incident ou d\u2019en r\xE9\
+        duire l\u2019imPact."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(h)
+      description: "L\u2019entit\xE9 conserve les relev\xE9s techniques produits dans\
+        \ le cadre de la gestion des incidents et \npouvant \xEAtre utilis\xE9s comme\
+        \ \xE9l\xE9ments de preuve en cas de judiciarisation. Ces relev\xE9s \ntechniques\
+        \ sont conserv\xE9s hors ligne pour une dur\xE9e pertinente au regard de la\
+        \ protection des \ndonn\xE9es \xE0 caract\xE8re personnel et en particulier\
+        \ la finalit\xE9 du traitement"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1-(i)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch17-sec1
+      ref_id: NIS2-ch17-sec1-(i)
+      description: "Un syst\xE8me d\u2019information sp\xE9cifique doit \xEAtre mis\
+        \ en place pour traiter les incidents, \nnotamment pour stocker les relev\xE9\
+        s techniques relatifs aux analyses des incidents. Ce syst\xE8me \nest cloisonn\xE9\
+        \ vis-\xE0-vis du syst\xE8me d\u2019information r\xE9glement\xE9 concern\xE9\
+        \ par l\u2019incident."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch18
+      name: "L\u2019ENTITE DISPOSE DE CAPACITE DE CONTINUITE ET DE REPRISE D\u2019\
+        ACTIVITE"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18
+      ref_id: NIS2-ch18-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1
+      ref_id: NIS2-ch18-sec1-(a)
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre des proc\xE9\
+        dures de sauvegarde et de restauration de ses \nsyst\xE8mes d\u2019information\
+        \ r\xE9glement\xE9s (SIR) et des donn\xE9es qu\u2019ils manipulent."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1
+      ref_id: NIS2-ch18-sec1-(b)
+      description: "Les m\xE9canismes de sauvegarde sont dimensionn\xE9s pour r\xE9\
+        pondre aux besoins de disponibilit\xE9 \nassoci\xE9s aux diff\xE9rents services\
+        \ et aux diff\xE9rentes activit\xE9s fournis par l\u2019entit\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1
+      ref_id: NIS2-ch18-sec1-(c)
+      description: "L\u2019entit\xE9 s\u2019assure que le processus de sauvegardes\
+        \ est test\xE9 au minimum une fois par an. Ces \ntests visent notamment \xE0\
+        \ v\xE9rifier la bonne r\xE9alisation des sauvegardes et leur bonne \nrestauration."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1
+      ref_id: NIS2-ch18-sec1-(d)
+      description: "Les sauvegardes sont prot\xE9g\xE9es d\u2019un incident les rendant\
+        \ inexploitables (par exemple : le \nstockage hors-ligne pour r\xE9pondre\
+        \ \xE0 un incident de type ran\xE7ongiciel)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1
+      ref_id: NIS2-ch18-sec1-(e)
+      description: "L\u2019entit\xE9, pour chacun de ses activit\xE9s et services,\
+        \ d\xE9finit et documente la dur\xE9e maximale \nd\u2019interruption admissible\
+        \ (DMIA) et la perte de donn\xE9es maximale admissible (PDMA)."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1
+      ref_id: NIS2-ch18-sec1-(f)
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre un plan de continuit\xE9\
+        \ d\u2019activit\xE9 (PCA) et un plan de reprise \nd\u2019activit\xE9 (PRA)\
+        \ adapt\xE9s aux sc\xE9narios de crises d\u2019origine cyber et coh\xE9rent\
+        \ avec la dur\xE9e \nmaximale d\u2019interruption admissible et la perte de\
+        \ donn\xE9es maximale admissible."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch18-sec1
+      ref_id: NIS2-ch18-sec1-(g)
+      description: "L\u2019identification de ces mesures de continuit\xE9 s\u2019\
+        appuie notamment :\n\u2022 Sur la cartographie de l\u2019\xE9cosyst\xE8me\
+        \ (cf. Objectif de s\xE9curit\xE9 4) ;\n\u2022 Sur la proc\xE9dure de gestion\
+        \ des incidents pour d\xE9tecter et r\xE9agir au plus t\xF4t aux \nincidents\
+        \ ;\n\u2022 Sur la proc\xE9dure de gestion des crises d\u2019origine cyber\
+        \ pour permettre la reprise au \nplus t\xF4t des services."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch19
+      name: "L\u2019ENTITE EST EN CAPACITE DE REAGIR AUX CRISES D\u2019ORIGINE CYBER"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19
+      ref_id: NIS2-ch19-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(a)
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition, du maintien\
+        \ \xE0 jour et de la mise en \u0153uvre d\u2019une proc\xE9dure \nde gestion\
+        \ de crises en cas d\u2019incident de s\xE9curit\xE9 significatif sur les\
+        \ syst\xE8mes d\u2019information \nr\xE9glement\xE9s"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(b)
+      description: "L\u2019entit\xE9 s\u2019assure du maintien \xE0 jour d\u2019une\
+        \ liste des personnes mobilisables dans la gestion de \nla crise sur les sujets\
+        \ relatifs \xE0 la s\xE9curit\xE9 num\xE9rique ainsi que leurs coordonn\xE9\
+        es."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(c)
+      description: "L\u2019entit\xE9 s\u2019assure du maintien \xE0 jour d\u2019un\
+        \ annuaire des parties prenantes externes \xE0 l\u2019entit\xE9 \npertinente\
+        \ dans la gestion de la crise en s\u2019appuyant sur la cartographie de l\u2019\
+        \xE9cosyst\xE8me.\nCes informations sont tenues \xE0 la disposition des autorit\xE9\
+        s nationales comp\xE9tentes et en \nparticulier de l\u2019Agence nationale\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(d)
+      description: "L\u2019entit\xE9 s\u2019assure de la d\xE9finition et de la mise\
+        \ en \u0153uvre des m\xE9canismes de retour \nd\u2019exp\xE9rience (RETEX)\
+        \ permettant d\u2019identifier les axes d\u2019am\xE9lioration et les mesures\
+        \ associ\xE9es \n\xE0 mettre en \u0153uvre suite \xE0 un entra\xEEnement,\
+        \ un exercice ou une crise r\xE9elle"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(e)
+      description: "L\u2019entit\xE9 essentielle s\u2019assure de la d\xE9finition\
+        \ et de la mise en \u0153uvre des crit\xE8res permettant \nd\u2019activer\
+        \ et de d\xE9sactiver le dispositif de gestion de crise prenant en compte\
+        \ les menaces \ncyber"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(f)
+      description: "L\u2019entit\xE9 essentielle s\u2019assure de la d\xE9finition\
+        \ et de la mise en \u0153uvre des proc\xE9dures et des \nm\xE9canismes de\
+        \ gestion de la crise adapt\xE9s \xE0 la menace cyber en s\u2019appuyant sur\
+        \ les \nrecommandations de l\u2019Agence nationale de la s\xE9curit\xE9 des\
+        \ syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(g)
+      description: "L\u2019entit\xE9 essentielle s\u2019assure de la d\xE9finition\
+        \ et de la mise en \u0153uvre des mesures pour isoler, \nprot\xE9ger et, le\
+        \ cas \xE9ch\xE9ant, reconstruire les syst\xE8mes d\u2019information r\xE9\
+        glement\xE9s concern\xE9s, \nactivables en cas d\u2019incident de s\xE9curit\xE9\
+        \ significatif.\nCes mesures prennent en compte les infrastructures, applicatifs\
+        \ et services num\xE9riques \nexternalis\xE9s \xE0 des prestataires et sont\
+        \ mises en place en coh\xE9rence avec les plans de \ncontinuit\xE9 et de reprise\
+        \ d\u2019activit\xE9."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(h)
+      description: "L\u2019entit\xE9 essentielle s\u2019assure de la d\xE9finition\
+        \ d\u2019une strat\xE9gie de communication adapt\xE9e aux \ncrises d\u2019\
+        origine cyber, incluant des sc\xE9narios de crise, le sch\xE9ma d\u2019organisation\
+        \ de la \ncommunication de crise, les outils de pilotage de la communication\
+        \ et des \xE9l\xE9ments de \nlangage sur des sujets sensibles ou de crise.\
+        \ Cette strat\xE9gie prend en compte les sc\xE9narios de \nmenaces cyber identifi\xE9\
+        s."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1-(i)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch19-sec1
+      ref_id: NIS2-ch19-sec1-(i)
+      description: "L\u2019entit\xE9 essentielle s\u2019assure de la disponibilit\xE9\
+        \ de moyens de communication de secours en \ntemps de crise lorsque les moyens\
+        \ de communication habituels sont indisponibles."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20
+      assessable: false
+      depth: 1
+      ref_id: NIS2-ch20
+      name: "L\u2019ENTITE DISPOSE DE MOYENS POUR VERIFIER LE FONCTIONNEMENT DE SES\
+        \ CAPACITES OPERATIONNELLES"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20
+      ref_id: NIS2-ch20-sec1
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1-(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1
+      ref_id: NIS2-ch20-sec1-(a)
+      description: "L\u2019entit\xE9 s\u2019assure de la sensibilisation et de l\u2019\
+        entra\xEEnement des personnes mobilisables dans \nle dispositif de gestion\
+        \ des crises d\u2019origine cyber."
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1-(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1
+      ref_id: NIS2-ch20-sec1-(b)
+      description: "L\u2019entit\xE9 d\xE9finit et met en \u0153uvre une strat\xE9\
+        gie d\u2019entra\xEEnement qui comporte, au minimum, \nles \xE9l\xE9ments\
+        \ suivants :\n\u2022 Une liste des acteurs amen\xE9s \xE0 participer aux diff\xE9\
+        rents dispositifs exig\xE9s dans les \npr\xE9sentes r\xE8gles \xE0 entra\xEE\
+        ner et/ou \xE0 tester ;\n\u2022 Une liste d\u2019exercices permettant d\u2019\
+        entra\xEEner ou de tester les capacit\xE9s \nop\xE9rationnelles ;\n\u2022\
+        \ Les moyens de v\xE9rification ou d\u2019\xE9valuation d\u2019atteinte de\
+        \ ces objectifs ;\n\u2022 Les sc\xE9narios de risques ou d\u2019attaques \xE0\
+        \ tester en priorit\xE9 ;\n\u2022 La comitologie de suivi de la strat\xE9\
+        gie"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1-(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1
+      ref_id: NIS2-ch20-sec1-(c)
+      description: "Cette strat\xE9gie d\u2019entra\xEEnement vise \xE0 tester les\
+        \ dispositifs mis en \u0153uvre par l\u2019entit\xE9 \nessentielle en mati\xE8\
+        re :\n\u2022 De gestion des alertes relatives aux incidents, aux vuln\xE9\
+        rabilit\xE9s et menaces ;\n\u2022 De continuit\xE9 et de reprise d\u2019activit\xE9\
+        \ ;\n\u2022 De gestion des crises d\u2019origine cyber"
+    - urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1-(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:NIS2-FR:nis2-ch20-sec1
+      ref_id: NIS2-ch20-sec1-(d)
+      description: "L\u2019entit\xE9 d\xE9cline cette strat\xE9gie dans la d\xE9finition\
+        \ et la mise en \u0153uvre d\u2019un programme \ntriennal d\u2019entra\xEE\
+        nement et d\u2019exercice. Ce programme pr\xE9cise notamment la fr\xE9quence\
+        \ de \nces entra\xEEnements et exercices ainsi que leur nature et que leurs\
+        \ objectifs"
