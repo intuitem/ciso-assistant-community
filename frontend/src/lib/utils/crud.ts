@@ -673,24 +673,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		]
 	},
-	'ro-to': {
-		endpointUrl: 'ebios-rm/ro-to',
-		name: 'roto',
-		localName: 'roto',
-		localNamePlural: 'roto',
-		verboseName: 'Ro to',
-		verboseNamePlural: 'Ro to',
-		foreignKeyFields: [
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
-			{ field: 'feared_events', urlModel: 'feared-events' }
-		],
-		selectFields: [
-			{ field: 'risk-origin' },
-			{ field: 'motivation' },
-			{ field: 'resources' },
-			{ field: 'pertinence' }
-		]
-	},
 	attack_paths: {
 		endpointUrl: 'ebios-rm/attack-paths',
 		name: 'attackpath',
