@@ -54,6 +54,17 @@
 		modalStore.trigger(modal);
 	}
 
+    let activeActivity: string | null = null;
+
+    $page.url.searchParams.forEach((value, key) => {
+        if (key === 'activity' && value === 'one') {
+            activeActivity = 'one';
+        }
+        else if (key === 'activity' && value === 'two') {
+            activeActivity = 'two';
+        }
+    });
+
 	let tabSet = 0;
 </script>
 
@@ -84,9 +95,10 @@
 		</div>
 		<div
 			id="activityOne"
-			class="relative p-4 space-y-4 border-2 border-primary-500 rounded-md w-full flex flex-col items-center"
-		>
-			<span class="absolute -top-3 bg-white font-bold text-primary-500">{m.activityOne()}</span>
+			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center 
+                {activeActivity === 'one' ? 'border-2 border-primary-500' : 'border-2 border-gray-300 border-dashed'}"
+        >
+			<span class="absolute -top-3 bg-white font-bold {activeActivity === 'one' ? 'text-primary-500' : 'text-gray-500'}">{m.activityOne()}</span>
 			{#if ebiosRmStudy.description}
 				<p class="text-gray-600">{ebiosRmStudy.description}</p>
 			{/if}
@@ -128,9 +140,10 @@
 		</div>
 		<div
 			id="activityTwo"
-			class="relative p-4 space-y-4 border-2 border-dashed rounded-md w-full flex flex-col items-center"
-		>
-			<span class="absolute -top-3 bg-white font-bold text-gray-500">{m.activityTwo()}</span>
+			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center 
+                {activeActivity === 'two' ? 'border-2 border-primary-500' : 'border-2 border-gray-300 border-dashed'}"
+        >
+			<span class="absolute -top-3 bg-white font-bold {activeActivity === 'two' ? 'text-primary-500' : 'text-gray-500'}">{m.activityTwo()}</span>
 			{#if Object.keys(data.relatedModels).length > 0}
 				<div class="card shadow-lg mt-8 bg-white w-full">
 					<TabGroup justify="justify-center">

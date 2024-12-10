@@ -15,12 +15,12 @@
 			{
 				title: safeTranslate(m.ebiosWs1_1()),
 				status: 'done',
-				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_2()),
 				status: 'done',
-				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?activity=two&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_3()),
