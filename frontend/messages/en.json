@@ -955,6 +955,7 @@
 	"fairlyRelevant": "Fairly relevant",
 	"highlyRelevant": "Highly relevant",
 	"roTo": "RO/TO",
+	"roToCouple": "RO/TO couple",
 	"addRoto": "Add RO/TO couple",
 	"organizedCrime": "Organized crime",
 	"terrorist": "Terrorist",
@@ -962,5 +963,19 @@
 	"professional": "Professional",
 	"amateur": "Amateur",
 	"avenger": "Avenger",
-	"pathological": "Pathological"
+	"pathological": "Pathological",
+	"currentDependency": "Current dependency",
+	"currentPenetration": "Current penetration",
+	"currentMaturity": "Current maturity",
+	"currentTrust": "Current trust",
+	"residualDependency": "Residual dependency",
+	"residualPenetration": "Residual penetration",
+	"residualMaturity": "Residual maturity",
+	"residualTrust": "Residual trust",
+	"selected": "Selected",
+	"likelihood": "Likelihood",
+	"stakeholders": "Stakeholders",
+	"addAttackPath": "Add attack path",
+	"currentCriticality": "Current criticality",
+	"residualCriticality": "Residual criticality"
 }
