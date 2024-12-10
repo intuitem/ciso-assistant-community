@@ -216,6 +216,14 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class AssetWriteSerializer(BaseModelSerializer):
+    ebios_rm_studies = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=EbiosRMStudy.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+
     class Meta:
         model = Asset
         fields = "__all__"

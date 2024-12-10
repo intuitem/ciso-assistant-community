@@ -979,5 +979,9 @@
 	"attackPath": "Attack path",
 	"attackPaths": "Attack paths",
 	"currentCriticality": "Current criticality",
-	"residualCriticality": "Residual criticality"
+	"residualCriticality": "Residual criticality",
+	"ebiosRm": "Ebios RM",
+	"workshopOne": "Workshop 1",
+	"refIdSemiColon": "Refence ID:",
+	"addFearedEvent": "Add feared event"
 }

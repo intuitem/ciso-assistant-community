@@ -206,7 +206,8 @@ export const AssetSchema = z.object({
 		.optional(),
 	reference_link: z.string().url().optional().or(z.literal('')),
 	owner: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	ebios_rm_studies: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({

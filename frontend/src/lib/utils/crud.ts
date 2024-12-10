@@ -384,7 +384,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' }
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [
@@ -609,7 +610,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
-		]
+		],
+		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }]
 	},
 	'feared-events': {
 		endpointUrl: 'ebios-rm/feared-events',
