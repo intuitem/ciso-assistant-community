@@ -36,7 +36,6 @@
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
 	export let thFiler = false;
-	export let tags = true;
 
 	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
