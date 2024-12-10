@@ -1,5 +1,6 @@
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.serializers import RiskMatrixReadSerializer
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -35,12 +36,25 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get gravity choices")
     def gravity(self, request, pk):
-        study: EbiosRMStudy = self.get_object()
+        ebios_rm_study: EbiosRMStudy = self.get_object()
         undefined = dict([(-1, "--")])
         _choices = dict(
             zip(
                 list(range(0, 64)),
-                [x["name"] for x in study.parsed_matrix["impact"]],
+                [x["name"] for x in ebios_rm_study.parsed_matrix["impact"]],
+            )
+        )
+        choices = undefined | _choices
+        return Response(choices)
+
+    @action(detail=True, name="Get likelihood choices")
+    def likelihood(self, request, pk):
+        ebios_rm_study: EbiosRMStudy = self.get_object()
+        undefined = dict([(-1, "--")])
+        _choices = dict(
+            zip(
+                list(range(0, 64)),
+                [x["name"] for x in ebios_rm_study.parsed_matrix["probability"]],
             )
         )
         choices = undefined | _choices
@@ -120,3 +134,26 @@ class AttackPathViewSet(BaseModelViewSet):
 
 class OperationalScenarioViewSet(BaseModelViewSet):
     model = OperationalScenario
+
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
+
+    @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
+    def risk_matrix(self, request, pk=None):
+        attack_path = self.get_object()
+        return Response(RiskMatrixReadSerializer(attack_path.risk_matrix).data)
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=True, name="Get likelihood choices")
+    def likelihood(self, request, pk):
+        attack_path: AttackPath = self.get_object()
+        undefined = dict([(-1, "--")])
+        _choices = dict(
+            zip(
+                list(range(0, 64)),
+                [x["name"] for x in attack_path.parsed_matrix["probability"]],
+            )
+        )
+        choices = undefined | _choices
+        return Response(choices)

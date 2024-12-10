@@ -671,6 +671,46 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		]
+	},
+	'ro-to': {
+		endpointUrl: 'ebios-rm/ro-to',
+		name: 'roto',
+		localName: 'roto',
+		localNamePlural: 'roto',
+		verboseName: 'Ro to',
+		verboseNamePlural: 'Ro to',
+		foreignKeyFields: [
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'feared_events', urlModel: 'feared-events' }
+		],
+		selectFields: [
+			{ field: 'risk-origin' },
+			{ field: 'motivation' },
+			{ field: 'resources' },
+			{ field: 'pertinence' }
+		]
+	},
+	attack_paths: {
+		endpointUrl: 'ebios-rm/attack-paths',
+		name: 'attackpath',
+		localName: 'attackPath',
+		localNamePlural: 'attackPaths',
+		verboseName: 'Attack path',
+		verboseNamePlural: 'Attack paths'
+	},
+	'operational-scenarios': {
+		endpointUrl: 'ebios-rm/operational-scenarios',
+		name: 'operationalscenario',
+		localName: 'operationalScenario',
+		localNamePlural: 'operationalScenarios',
+		verboseName: 'Operational scenario',
+		verboseNamePlural: 'Operational scenarios',
+		foreignKeyFields: [
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'attack_paths', urlModel: 'attack-paths' }
+		],
+		selectFields: [{ field: 'likelihood', valueType: 'number' }]
 	}
 };
 

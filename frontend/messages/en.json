@@ -385,7 +385,7 @@
 	"exportDatabase": "Export database",
 	"upload": "Upload",
 	"add": "Add",
-	"undefined": "undefined",
+	"undefined": "--",
 	"production": "Production",
 	"design": "Design",
 	"development": "Development",
@@ -976,6 +976,8 @@
 	"likelihood": "Likelihood",
 	"stakeholders": "Stakeholders",
 	"addAttackPath": "Add attack path",
+	"attackPath": "Attack path",
+	"attackPaths": "Attack paths",
 	"currentCriticality": "Current criticality",
 	"residualCriticality": "Residual criticality"
 }
