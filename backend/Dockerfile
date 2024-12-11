@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Based on https://docs.docker.com/samples/django/
 
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -26,7 +26,7 @@ COPY poetry.lock /code/
 COPY startup.sh /code/
 
 RUN pip install --upgrade pip && \
-    pip install poetry==1.8.3
+    pip install poetry==1.8.5
 RUN poetry install
 RUN rm -rf $POETRY_CACHE_DIR
 
