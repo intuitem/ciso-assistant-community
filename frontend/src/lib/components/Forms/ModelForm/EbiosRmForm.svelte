@@ -3,10 +3,10 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
 	import * as m from '$paraglide/messages.js';
 	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
+	import { page } from '$app/stores';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -14,6 +14,16 @@
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
 	export let context: string;
+
+	let activeActivity: string | null = null;
+
+	$page.url.searchParams.forEach((value, key) => {
+		if (key === 'activity' && value === 'one') {
+			activeActivity = 'one';
+		} else if (key === 'activity' && value === 'two') {
+			activeActivity = 'two';
+		}
+	});
 </script>
 
 {#if context !== 'ebiosRmStudy'}
@@ -50,8 +60,18 @@
 		helpText={m.ebiosRmMatrixHelpText()}
 	/>
 {:else if context === 'ebiosRmStudy'}
-	<div class="relative p-2 space-y-2 border rounded-md">
-		<p class="absolute -top-3 bg-white font-bold">{m.activityOne()}</p>
+	<div
+		class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
+			? 'border-2 border-primary-500'
+			: 'border-2 border-gray-300 border-dashed'}"
+	>
+		<p
+			class="absolute -top-3 bg-white font-bold {activeActivity === 'one'
+				? 'text-primary-500'
+				: 'text-gray-500'}"
+		>
+			{m.activityOne()}
+		</p>
 		<TextField
 			{form}
 			field="version"
@@ -92,8 +112,18 @@
 			label={m.reviewers()}
 		/>
 	</div>
-	<div class="relative p-2 space-y-2 border rounded-md">
-		<p class="absolute -top-3 bg-white font-bold">{m.activityTwo()}</p>
+	<div
+		class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'
+			? 'border-2 border-primary-500'
+			: 'border-2 border-gray-300 border-dashed'}"
+	>
+		<p
+			class="absolute -top-3 bg-white font-bold {activeActivity === 'two'
+				? 'text-primary-500'
+				: 'text-gray-500'}"
+		>
+			{m.activityTwo()}
+		</p>
 		<AutocompleteSelect
 			multiple
 			{form}
