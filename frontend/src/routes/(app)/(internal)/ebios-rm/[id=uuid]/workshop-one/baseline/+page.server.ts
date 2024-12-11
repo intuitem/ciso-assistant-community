@@ -20,12 +20,19 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'compliance-assessments';
 	const createSchema = modelSchema(URLModel);
+	const updateSchema = modelSchema('ebios-rm')
 	const initialData = {
 		ebios_rm_studies: [params.id]
 	};
+	const updatedModel: ModelInfo = getModelInfo('ebios-rm');
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
+	const objectEndpoint = `${BASE_API_URL}/${updatedModel.endpointUrl}/${params.id}/object/`;
+	const objectResponse = await fetch(objectEndpoint);
+	const object = await objectResponse.json();
+	const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);
 	const foreignKeyFields = urlParamModelForeignKeyFields(URLModel);
+	const updateForeignKeyFields = urlParamModelForeignKeyFields('ebios-rm');
 	const selectFields = model.selectFields;
 
 	const foreignKeys: Record<string, any> = {};
@@ -45,6 +52,25 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	}
 
 	model['foreignKeys'] = foreignKeys;
+
+	const updateForeignKeys: Record<string, any> = {};
+
+	for (const keyField of updateForeignKeyFields) {
+		const model = getModelInfo(keyField.urlModel);
+		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+		const url = model.endpointUrl
+			? `${BASE_API_URL}/${model.endpointUrl}/${queryParams}`
+			: `${BASE_API_URL}/${model.urlModel}/${queryParams}`;
+		const response = await fetch(url);
+		if (response.ok) {
+			updateForeignKeys[keyField.field] = await response.json().then((data) => data.results);
+		}
+		else {
+			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+		}
+	}
+
+	updatedModel['foreignKeys'] = updateForeignKeys
 
 	const selectOptions: Record<string, any> = {};
 
@@ -91,7 +117,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: data // metaData
 	};
 
-	return { createForm, deleteForm, model, URLModel, table };
+	return { createForm, deleteForm, model, URLModel, table, updateForm, updatedModel, object };
 };
 
 export const actions: Actions = {
@@ -106,5 +132,8 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return defaultDeleteFormAction({ event, urlModel: 'compliance-assessments' });
+	},
+	update: async (event) => {
+		return defaultWriteFormAction({ event, urlModel: 'ebios-rm', action: 'edit' });
 	}
 };

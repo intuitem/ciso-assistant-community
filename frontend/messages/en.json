@@ -986,5 +986,6 @@
 	"addFearedEvent": "Add feared event",
 	"addEbiosRMstudy": "Add Ebios RM Study",
 	"noAuthor": "No author assigned",
-	"noReviewer": "No reviewer assigned"
+	"noReviewer": "No reviewer assigned",
+	"selectAudit": "Select audit"
 }
