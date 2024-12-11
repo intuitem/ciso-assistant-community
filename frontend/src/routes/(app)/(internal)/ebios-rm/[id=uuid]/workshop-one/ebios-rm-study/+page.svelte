@@ -107,7 +107,7 @@
 			{#if ebiosRmStudy.description}
 				<p class="text-gray-600">{ebiosRmStudy.description}</p>
 			{:else}
-				<p class="text-gray-600">{m.noDescription}</p>
+				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
@@ -145,9 +145,9 @@
 					<span>{m.observation()}</span>
 				</h3>
 				{#if ebiosRmStudy.observation}
-				<p class="text-gray-600">{ebiosRmStudy.observation}</p>
+					<p class="text-gray-600">{ebiosRmStudy.observation}</p>
 				{:else}
-				<p class="text-gray-600">{m.noObservation()}</p>
+					<p class="text-gray-600">{m.noObservation()}</p>
 				{/if}
 			</div>
 		</div>
