@@ -1,7 +1,6 @@
 *.pyc
 *.DS_Store
 *~$*
-**/*.mo
 .git*
 .pytest*
 .idea*
