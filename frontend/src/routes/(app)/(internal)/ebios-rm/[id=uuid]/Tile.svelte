@@ -5,7 +5,6 @@
 	export let title = 'activity';
 	export let status = '';
 	export let meta = null;
-	export let href = '#';
 	export let accent_color = '';
 	export let createRiskAnalysis = false;
 </script>
