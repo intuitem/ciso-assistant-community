@@ -29,10 +29,7 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		if (
-			checkConstraints(
-				data.createForm.constraints, data.model.foreignKeys).length > 0
-		) {
+		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
 			modalComponent = {
 				ref: MissingConstraintsModal
 			};
