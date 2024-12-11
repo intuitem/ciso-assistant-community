@@ -106,42 +106,50 @@
 			>
 			{#if ebiosRmStudy.description}
 				<p class="text-gray-600">{ebiosRmStudy.description}</p>
+			{:else}
+				<p class="text-gray-600">{m.noDescription}</p>
 			{/if}
-			{#if ebiosRmStudy.authors?.length}
-				<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-user text-purple-500"></i>
-						<span>{m.authors()}</span>
-					</h3>
-					<ul class="list-disc list-inside text-gray-600">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+					<i class="fa-solid fa-user text-purple-500"></i>
+					<span>{m.authors()}</span>
+				</h3>
+				<ul class="list-disc list-inside text-gray-600">
+					{#if ebiosRmStudy.authors?.length}
 						{#each ebiosRmStudy.authors as author}
 							<li>{author.str}</li>
 						{/each}
-					</ul>
-				</div>
-			{/if}
-			{#if ebiosRmStudy.reviewers?.length}
-				<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-users text-blue-500"></i>
-						<span>{m.reviewers()}</span>
-					</h3>
-					<ul class="list-disc list-inside text-gray-600">
+					{:else}
+						<li>{m.noAuthor()}</li>
+					{/if}
+				</ul>
+			</div>
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+					<i class="fa-solid fa-users text-blue-500"></i>
+					<span>{m.reviewers()}</span>
+				</h3>
+				<ul class="list-disc list-inside text-gray-600">
+					{#if ebiosRmStudy.reviewers?.length}
 						{#each ebiosRmStudy.reviewers as reviewer}
 							<li>{reviewer.str}</li>
 						{/each}
-					</ul>
-				</div>
-			{/if}
-			{#if ebiosRmStudy.observation}
-				<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
-						<span>{m.observation()}</span>
-					</h3>
-					<p class="text-gray-600">{ebiosRmStudy.observation}</p>
-				</div>
-			{/if}
+					{:else}
+						<li>{m.noReviewer()}</li>
+					{/if}
+				</ul>
+			</div>
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
+					<span>{m.observation()}</span>
+				</h3>
+				{#if ebiosRmStudy.observation}
+				<p class="text-gray-600">{ebiosRmStudy.observation}</p>
+				{:else}
+				<p class="text-gray-600">{m.noObservation()}</p>
+				{/if}
+			</div>
 		</div>
 		<div
 			id="activityTwo"
