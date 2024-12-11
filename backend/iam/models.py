@@ -391,6 +391,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
+        # Make sure to always convert username to lowercase for easier comparison with SSO
+        if self.email:
+            self.email = self.email.lower()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
 

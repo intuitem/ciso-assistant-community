@@ -135,7 +135,7 @@ class FinishACSView(SAMLViewMixin, View):
             login.state["next"] = next_url
         try:
             email = auth._nameid
-            user = User.objects.get(email=email)
+            user = User.objects.get(email=email.lower())
             idp_first_name = auth._attributes.get(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", [""]
             )[0]

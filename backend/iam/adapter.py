@@ -54,7 +54,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         email_address = next(iter(sociallogin.account.extra_data.values()))[0]
         try:
-            user = User.objects.get(email=email_address)
+            user = User.objects.get(email=email_address.lower())
             sociallogin.user = user
             sociallogin.connect(request, user)
         except User.DoesNotExist:
