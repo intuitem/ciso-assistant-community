@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0002_alter_roto_target_objective'),
+        ("ebios_rm", "0002_alter_roto_target_objective"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='ebiosrmstudy',
-            name='risk_assessments',
+            model_name="ebiosrmstudy",
+            name="risk_assessments",
         ),
     ]

@@ -32,7 +32,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(EbiosRMStudy.Status.choices))
-    
+
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
         ebios_rm_study = self.get_object()
