@@ -212,7 +212,7 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
 
     class Meta:
         model = RiskAssessment
-        fields = "__all__"
+        exclude = ["ebios_rm_study"]
 
 
 class AssetWriteSerializer(BaseModelSerializer):
