@@ -5,7 +5,7 @@ import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 import { BASE_API_URL } from './constants';
-import { URL_MODEL, type urlModel } from './types';
+import { type urlModel } from './types';
 
 type GetOptionsParams = {
 	objects: any[];
