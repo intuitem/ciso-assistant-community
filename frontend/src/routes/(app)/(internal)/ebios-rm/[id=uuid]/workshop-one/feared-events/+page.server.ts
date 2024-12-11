@@ -50,9 +50,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	for (const keyField of foreignKeyFields) {
 		const model = getModelInfo(keyField.urlModel);
 		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-		const url = model.endpointUrl
+		let url = model.endpointUrl
 			? `${BASE_API_URL}/${model.endpointUrl}/${queryParams}`
 			: `${BASE_API_URL}/${model.urlModel}/${queryParams}`;
+		if (model.urlModel === 'assets') {
+			url = `${BASE_API_URL}/${model.urlModel}/${queryParams}${params.id}`;
+			console.log(url);
+		}
 		const response = await fetch(url);
 		if (response.ok) {
 			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
