@@ -385,7 +385,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' }
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [
@@ -609,8 +610,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
-		]
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' }
+		],
+		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }]
 	},
 	'feared-events': {
 		endpointUrl: 'ebios-rm/feared-events',
@@ -621,7 +624,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Feared events',
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'assets', urlModel: 'assets', urlParams: 'ebios_rm_studies=' },
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
 		selectFields: [{ field: 'gravity', valueType: 'number', detail: true }]

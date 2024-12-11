@@ -88,7 +88,7 @@ export const loadDetail = async ({ event, model, id }) => {
 				if (info.foreignKeyFields) {
 					for (const keyField of info.foreignKeyFields) {
 						const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-						const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+						const url = `${BASE_API_URL}/${keyField.endpointUrl || keyField.urlModel}/${queryParams}`;
 						const response = await event.fetch(url);
 						if (response.ok) {
 							foreignKeys[keyField.field] = await response.json().then((data) => data.results);
