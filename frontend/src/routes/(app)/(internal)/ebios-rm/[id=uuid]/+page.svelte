@@ -88,11 +88,31 @@
 			}
 		],
 		ws5: [
-			{ title: safeTranslate(m.ebiosWs5_1()), status: riskAnalysisCreated ? 'done' : 'to_do', href: '#' },
-			{ title: safeTranslate(m.ebiosWs5_2()), status: 'done', href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}` },
-			{ title: safeTranslate(m.ebiosWs5_3()), status: 'to_do', href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}` },
-			{ title: safeTranslate(m.ebiosWs5_4()), status: 'to_do', href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}` },
-			{ title: safeTranslate(m.ebiosWs5_5()), status: 'done', href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}` }
+			{
+				title: safeTranslate(m.ebiosWs5_1()),
+				status: riskAnalysisCreated ? 'done' : 'to_do',
+				href: '#'
+			},
+			{
+				title: safeTranslate(m.ebiosWs5_2()),
+				status: 'done',
+				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
+			},
+			{
+				title: safeTranslate(m.ebiosWs5_3()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
+			},
+			{
+				title: safeTranslate(m.ebiosWs5_4()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
+			},
+			{
+				title: safeTranslate(m.ebiosWs5_5()),
+				status: 'done',
+				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
+			}
 		]
 	};
 
@@ -111,9 +131,7 @@
 			title: safeTranslate('add-' + data.model.localName)
 		};
 		if (
-			checkConstraints(
-				data.createRiskAnalysisForm.constraints, data.model.foreignKeys)
-			.length > 0
+			checkConstraints(data.createRiskAnalysisForm.constraints, data.model.foreignKeys).length > 0
 		) {
 			modalComponent = {
 				ref: MissingConstraintsModal
@@ -138,7 +156,13 @@
 		<Tile title={m.ebiosWs2()} accent_color="bg-fuchsia-900" status="to_do" meta={dummydata.ws2} />
 		<Tile title={m.ebiosWs3()} accent_color="bg-teal-500" status="to_do" meta={dummydata.ws3} />
 		<Tile title={m.ebiosWs4()} accent_color="bg-yellow-600" status="to_do" meta={dummydata.ws4} />
-		<Tile title={m.ebiosWs5()} accent_color="bg-red-500" status="to_do" meta={dummydata.ws5} createRiskAnalysis={true}>
+		<Tile
+			title={m.ebiosWs5()}
+			accent_color="bg-red-500"
+			status="to_do"
+			meta={dummydata.ws5}
+			createRiskAnalysis={true}
+		>
 			<div slot="addRiskAnalysis">
 				<button class="flex flex-col text-left hover:text-purple-800" on:click={modalCreateForm}>
 					<span
