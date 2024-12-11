@@ -14,12 +14,12 @@
 	export let model: ModelInfo;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let formAction = '?/update';
-    export let context = 'default';
-    export let object: Record<string, any> = {};
+	export let context = 'default';
+	export let object: Record<string, any> = {};
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
-    export let selectOptions: Record<string, any> = {};
-    export let foreignKeys: Record<string, any> = {};
+	export let selectOptions: Record<string, any> = {};
+	export let foreignKeys: Record<string, any> = {};
 
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
@@ -48,18 +48,19 @@
 			</div>
 		</div>
 		<ModelForm
+			customNameDescription
 			{form}
-            {object}
+			{object}
 			{suggestions}
 			{parent}
-            action={formAction}
+			action={formAction}
 			{invalidateAll}
 			{model}
 			{closeModal}
 			{context}
 			caching={true}
-            selectOptions={selectOptions}
-            foreignKeys={foreignKeys}
+			{selectOptions}
+			{foreignKeys}
 			{debug}
 		/>
 	</div>

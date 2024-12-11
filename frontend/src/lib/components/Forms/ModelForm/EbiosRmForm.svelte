@@ -26,7 +26,17 @@
 	});
 </script>
 
-{#if context !== 'ebiosRmStudy'}
+{#if context != 'selectAudit'}
+	<TextField
+		{form}
+		field="name"
+		label={m.name()}
+		cacheLock={cacheLocks['name']}
+		bind:cachedValue={formDataCache['name']}
+		data-focusindex="0"
+	/>
+{/if}
+{#if context !== 'ebiosRmStudy' && context !== 'selectAudit'}
 	<TextField
 		{form}
 		field="version"
@@ -72,6 +82,14 @@
 		>
 			{m.activityOne()}
 		</p>
+		<TextArea
+			{form}
+			field="description"
+			label={m.description()}
+			cacheLock={cacheLocks['description']}
+			bind:cachedValue={formDataCache['description']}
+			data-focusindex="1"
+		/>
 		<TextField
 			{form}
 			field="version"
@@ -85,13 +103,6 @@
 			label={m.refId()}
 			cacheLock={cacheLocks['ref_id']}
 			bind:cachedValue={formDataCache['ref_id']}
-		/>
-		<TextArea
-			{form}
-			field="observation"
-			label={m.observation()}
-			cacheLock={cacheLocks['observation']}
-			bind:cachedValue={formDataCache['observation']}
 		/>
 		<AutocompleteSelect
 			multiple
@@ -136,4 +147,21 @@
 			label={m.assets()}
 		/>
 	</div>
+	<TextArea
+		{form}
+		field="observation"
+		label={m.observation()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+{:else}
+	<AutocompleteSelect
+		multiple
+		{form}
+		options={getOptions({ objects: model.foreignKeys['compliance_assessments'] })}
+		field="compliance_assessments"
+		cacheLock={cacheLocks['compliance_assessments']}
+		bind:cachedValue={formDataCache['compliance_assessments']}
+		label={m.complianceAssessment()}
+	/>
 {/if}

@@ -20,7 +20,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'compliance-assessments';
 	const createSchema = modelSchema(URLModel);
-	const updateSchema = modelSchema('ebios-rm')
+	const updateSchema = modelSchema('ebios-rm');
 	const initialData = {
 		ebios_rm_studies: [params.id]
 	};
@@ -64,13 +64,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		const response = await fetch(url);
 		if (response.ok) {
 			updateForeignKeys[keyField.field] = await response.json().then((data) => data.results);
-		}
-		else {
+		} else {
 			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
 		}
 	}
 
-	updatedModel['foreignKeys'] = updateForeignKeys
+	updatedModel['foreignKeys'] = updateForeignKeys;
 
 	const selectOptions: Record<string, any> = {};
 

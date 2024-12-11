@@ -60,6 +60,7 @@
 				model: data.updatedModel,
 				object: data.object,
 				foreignKeys: data.updatedModel.foreignKeys,
+				context: 'selectAudit'
 			}
 		};
 		let modal: ModalSettings = {

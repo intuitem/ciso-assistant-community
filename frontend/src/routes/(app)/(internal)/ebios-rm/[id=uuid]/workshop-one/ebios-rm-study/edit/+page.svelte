@@ -6,6 +6,7 @@
 
 <div class="card p-4 bg-white shadow-lg">
 	<ModelForm
+		customNameDescription
 		form={data.form}
 		object={data.object}
 		selectOptions={data.selectOptions}

@@ -400,7 +400,8 @@ export const ebiosRMSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	assets: z.string().uuid().optional().array().optional(),
-	folder: z.string()
+	folder: z.string(),
+	compliance_assessments: z.string().uuid().optional().array().optional()
 });
 
 export const fearedEventsSchema = z.object({

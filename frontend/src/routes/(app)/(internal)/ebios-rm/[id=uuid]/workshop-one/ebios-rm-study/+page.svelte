@@ -139,17 +139,6 @@
 					{/if}
 				</ul>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
-				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
-					<span>{m.observation()}</span>
-				</h3>
-				{#if ebiosRmStudy.observation}
-					<p class="text-gray-600">{ebiosRmStudy.observation}</p>
-				{:else}
-					<p class="text-gray-600">{m.noObservation()}</p>
-				{/if}
-			</div>
 		</div>
 		<div
 			id="activityTwo"
@@ -203,6 +192,17 @@
 						</svelte:fragment>
 					</TabGroup>
 				</div>
+			{/if}
+		</div>
+		<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+				<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
+				<span>{m.observation()}</span>
+			</h3>
+			{#if ebiosRmStudy.observation}
+				<p class="text-gray-600">{ebiosRmStudy.observation}</p>
+			{:else}
+				<p class="text-gray-600">{m.noObservation()}</p>
 			{/if}
 		</div>
 	</div>

@@ -265,7 +265,6 @@
 				<slot name="addButton" />
 			{/if}
 		</div>
-		
 	</header>
 	<!-- Table -->
 	<table
