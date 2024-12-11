@@ -170,7 +170,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
 62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
 63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
-64. Annex to the Implementing Regulation of NIS 2 on Technical and methodological requirements 🇪🇺
+64. NIS2 technical and methodological requirements 2024/2690 🇪🇺
 
 ### Community contributions
 
