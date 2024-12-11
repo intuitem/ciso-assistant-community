@@ -191,7 +191,6 @@ class ProjectReadSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentWriteSerializer(BaseModelSerializer):
-    
     class Meta:
         model = RiskAssessment
         exclude = ["created_at", "updated_at"]
