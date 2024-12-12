@@ -39,7 +39,7 @@
 				<i class="fa-solid fa-key" />
 			</div>
 			<p class="text-gray-600 text-sm text-center">
-				{m.youCanSetPAsswordHere()}.<br />
+				{m.youCanSetPAsswordHere()}<br />
 			</p>
 			<!-- SuperForm with dataType 'form' -->
 			<div class="flex w-full">
@@ -50,12 +50,12 @@
 					let:form
 					validators={zod(ResetPasswordSchema)}
 				>
-					<TextField type="password" {form} field="new_password" label="New password" />
+					<TextField type="password" {form} field="new_password" label={m.newPassword()} />
 					<TextField
 						type="password"
 						{form}
 						field="confirm_new_password"
-						label="Confirm new password"
+						label={m.confirmNewPassword()}
 					/>
 					<p class="pt-3">
 						<button
