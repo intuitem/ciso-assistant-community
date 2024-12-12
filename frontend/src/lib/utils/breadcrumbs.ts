@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import { goto as _goto } from '$app/navigation';
 import * as m from '$paraglide/messages';
 
-interface Breadcrumb {
+export interface Breadcrumb {
 	label: string;
 	href: string;
 	icon?: string;
@@ -13,15 +13,15 @@ const homeCrumb: Breadcrumb = { label: m.home(), href: '/', icon: 'fa-regular fa
 const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 	const breadcrumbs = writable<Breadcrumb[]>(initialValue);
 
-	function push(crumb: Breadcrumb) {
+	function push(crumb: Breadcrumb[]) {
 		breadcrumbs.update((value) => {
-			return [...value, crumb];
+			return [...value, ...crumb];
 		});
 	}
 
-	function replace(crumb: Breadcrumb) {
+	function replace(crumb: Breadcrumb[]) {
 		breadcrumbs.update(() => {
-			return [homeCrumb, crumb];
+			return [homeCrumb, ...crumb];
 		});
 	}
 
@@ -54,6 +54,6 @@ export function goto(
 
 	const { crumbs, label, breadcrumbAction } = opts;
 	const crumb = { label, href: url };
-	crumbs[breadcrumbAction](crumb);
+	crumbs[breadcrumbAction]([crumb]);
 	return _goto(url, opts);
 }
