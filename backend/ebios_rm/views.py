@@ -64,9 +64,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
 
-    filterset_fields = [
-        "ebios_rm_study",
-    ]
+    filterset_fields = ["ebios_rm_study", "ro_to_couples"]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
