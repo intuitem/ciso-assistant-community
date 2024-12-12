@@ -982,5 +982,14 @@
 	"residualCriticality": "Residual criticality",
 	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
 	"resetPasswordHere": "You can reset your password here.",
-	"resetPassword": "Reset password"
+	"resetPassword": "Reset password",
+	"ebiosRm": "Ebios RM",
+	"workshopOne": "Workshop 1",
+	"refIdSemiColon": "Refence ID:",
+	"addFearedEvent": "Add feared event",
+	"addEbiosRMstudy": "Add Ebios RM Study",
+	"noAuthor": "No author assigned",
+	"noReviewer": "No reviewer assigned",
+	"selectAudit": "Select audit",
+	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles."
 }
