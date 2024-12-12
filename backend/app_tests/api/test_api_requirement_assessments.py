@@ -135,12 +135,6 @@ class TestRequirementAssessmentsAuthenticated:
                         0
                     ].typical_evidence,
                     "ref_id": RequirementNode.objects.all()[0].ref_id,
-                    "associated_reference_controls": RequirementNode.objects.all()[
-                        0
-                    ].associated_reference_controls,
-                    "associated_threats": RequirementNode.objects.all()[
-                        0
-                    ].associated_threats,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -262,12 +256,6 @@ class TestRequirementAssessmentsAuthenticated:
                         0
                     ].typical_evidence,
                     "ref_id": RequirementNode.objects.all()[0].ref_id,
-                    "associated_reference_controls": RequirementNode.objects.all()[
-                        0
-                    ].associated_reference_controls,
-                    "associated_threats": RequirementNode.objects.all()[
-                        0
-                    ].associated_threats,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"

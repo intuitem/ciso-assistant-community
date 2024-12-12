@@ -1051,26 +1051,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     question = models.JSONField(blank=True, null=True, verbose_name=_("Question"))
 
     @property
-    def associated_reference_controls(self):
-        _reference_controls = self.reference_controls.all()
-        reference_controls = []
-        for control in _reference_controls:
-            reference_controls.append(
-                {"str": control.display_long, "urn": control.urn, "id": control.id}
-            )
-        return reference_controls
-
-    @property
-    def associated_threats(self):
-        _threats = self.threats.all()
-        threats = []
-        for control in _threats:
-            threats.append(
-                {"str": control.display_long, "urn": control.urn, "id": control.id}
-            )
-        return threats
-
-    @property
     def parent_requirement(self):
         parent_requirement = RequirementNode.objects.filter(urn=self.parent_urn).first()
         if not parent_requirement:

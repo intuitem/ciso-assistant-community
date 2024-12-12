@@ -621,26 +621,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
-    name = serializers.CharField(source="__str__")
-    description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
     assessable = serializers.BooleanField(source="requirement.assessable")
-    requirement = FieldsRelatedField(
-        [
-            "id",
-            "urn",
-            "annotation",
-            "name",
-            "description",
-            "typical_evidence",
-            "ref_id",
-            "associated_reference_controls",
-            "associated_threats",
-            "parent_requirement",
-        ]
-    )
+    requirement = RequirementNodeReadSerializer()
 
     class Meta:
         model = RequirementAssessment
