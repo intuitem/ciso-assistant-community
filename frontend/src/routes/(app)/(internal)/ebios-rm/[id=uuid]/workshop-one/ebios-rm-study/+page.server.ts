@@ -1,65 +1,22 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { loadDetail } from '$lib/utils/load';
+import type { PageServerLoad } from './$types';
 import { getModelInfo } from '$lib/utils/crud';
-import { modelSchema } from '$lib/utils/schemas';
-import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import type { PageServerLoad, Actions } from './$types';
-import { defaultWriteFormAction } from '$lib/utils/actions';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
+import type { Actions } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
-	const URLModel = 'ebios-rm';
-	const model = getModelInfo(URLModel);
-	const schema = modelSchema(URLModel);
-	const objectEndpoint = `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/object/`;
-	const objectResponse = await event.fetch(objectEndpoint);
-	const object = await objectResponse.json();
-
-	const form = await superValidate(object, zod(schema), { errors: false });
-	const foreignKeyFields = model.foreignKeyFields;
-	const selectFields = model.selectFields;
-
-	const foreignKeys: Record<string, any> = {};
-
-	if (foreignKeyFields) {
-		for (const keyField of foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await event.fetch(url);
-			if (response.ok) {
-				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
-		}
-	}
-
-	const selectOptions: Record<string, any> = {};
-
-	if (selectFields) {
-		for (const selectField of selectFields) {
-			const url = `${BASE_API_URL}/${URLModel}/${
-				selectField.detail ? event.params.id + '/' : ''
-			}${selectField.field}/`;
-			const response = await event.fetch(url);
-			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
-			} else {
-				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
-			}
-		}
-	}
-	model.foreignKeys = foreignKeys;
-	model.selectOptions = selectOptions;
-	return { form, model, object, foreignKeys, selectOptions, URLModel };
+	return await loadDetail({ event, model: getModelInfo('ebios-rm'), id: event.params.id });
 };
 
 export const actions: Actions = {
-	default: async (event) => {
-		return defaultWriteFormAction({ event, urlModel: 'ebios-rm', action: 'edit' });
+	create: async (event) => {
+		return defaultWriteFormAction({
+			event,
+			urlModel: 'assets',
+			action: 'create'
+		});
+	},
+	delete: async (event) => {
+		return defaultDeleteFormAction({ event, urlModel: 'assets' });
 	}
 };

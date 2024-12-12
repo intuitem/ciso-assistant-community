@@ -259,9 +259,12 @@
 		{#if pagination && rowsPerPage}
 			<RowsPerPage {handler} />
 		{/if}
-		{#if canCreateObject}
-			<slot name="addButton" />
-		{/if}
+		<div class="flex space-x-2 items-center">
+			<slot name="optButton" />
+			{#if canCreateObject}
+				<slot name="addButton" />
+			{/if}
+		</div>
 	</header>
 	<!-- Table -->
 	<table
