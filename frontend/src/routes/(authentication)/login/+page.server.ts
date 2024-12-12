@@ -8,6 +8,7 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { mfaAuthenticateSchema } from './mfa/utils/schemas';
+import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 interface AuthenticationFlow {
 	id:
@@ -125,8 +126,8 @@ export const actions: Actions = {
 		const preferencesRes = await fetch(`${BASE_API_URL}/user-preferences/`);
 		const preferences = await preferencesRes.json();
 
-		const currentLang = cookies.get('ciso_lang') || 'en';
-		const preferedLang = preferences.lang || 'en';
+		const currentLang = cookies.get('ciso_lang') || DEFAULT_LANGUAGE;
+		const preferedLang = preferences.lang || DEFAULT_LANGUAGE;
 
 		if (currentLang !== preferedLang) {
 			cookies.set('ciso_lang', preferedLang, {

@@ -6,6 +6,12 @@ export const BASE_API_URL = `${
 		: 'http://localhost:8000/api'
 }`;
 
+export const DEFAULT_LANGUAGE = `${
+	Object.hasOwn(env, 'PUBLIC_DEFAULT_LANGUAGE')
+		? env.PUBLIC_DEFAULT_LANGUAGE
+		: 'en'
+}`;
+
 export const ALLAUTH_API_URL = `${BASE_API_URL}/_allauth/app/v1`;
 
 export const BACKEND_API_EXPOSED_URL = `${
