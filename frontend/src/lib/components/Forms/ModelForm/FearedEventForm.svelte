@@ -7,6 +7,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -66,3 +67,4 @@
 	field="qualifications"
 	label={m.qualifications()}
 />
+<Checkbox {form} field="is_selected" label={m.isSelected()} />
