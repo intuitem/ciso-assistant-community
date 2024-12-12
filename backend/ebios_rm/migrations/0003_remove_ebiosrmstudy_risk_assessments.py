@@ -13,18 +13,4 @@ class Migration(migrations.Migration):
             model_name="ebiosrmstudy",
             name="risk_assessments",
         ),
-        migrations.RemoveField(
-            model_name="roto",
-            name="pertinence",
-        ),
-        migrations.AlterField(
-            model_name="roto",
-            name="feared_events",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="ro_to_couples",
-                to="ebios_rm.fearedevent",
-                verbose_name="Feared events",
-            ),
-        ),
     ]
