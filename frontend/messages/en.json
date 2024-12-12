@@ -979,5 +979,6 @@
 	"attackPath": "Attack path",
 	"attackPaths": "Attack paths",
 	"currentCriticality": "Current criticality",
-	"residualCriticality": "Residual criticality"
+	"residualCriticality": "Residual criticality",
+	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles."
 }
