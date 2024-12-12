@@ -125,7 +125,6 @@ class TestRequirementAssessmentsAuthenticated:
                     "str": compliance_assessment.name,
                 },
                 "requirement": {
-                    "str": str(RequirementNode.objects.all()[0]),
                     "id": str(RequirementNode.objects.all()[0].id),
                     "urn": RequirementNode.objects.all()[0].urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
@@ -252,7 +251,6 @@ class TestRequirementAssessmentsAuthenticated:
                     "str": compliance_assessment.name,
                 },
                 "requirement": {
-                    "str": str(RequirementNode.objects.all()[0]),
                     "id": str(RequirementNode.objects.all()[0].id),
                     "urn": RequirementNode.objects.all()[0].urn,
                     "annotation": RequirementNode.objects.all()[0].annotation,
