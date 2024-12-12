@@ -21,6 +21,7 @@
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
@@ -336,30 +337,36 @@
 					{/if}
 				</div>
 				{#if canEditObject}
-					<a
+					<Anchor
+						breadcrumbAction="push"
 						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 						class="btn variant-filled-primary h-fit"
-						data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
+						data-testid="edit-button"
+						><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
 					>
 				{/if}
 			</div>
 			{#if !$page.data.user.is_third_party}
-				<a href={`${$page.url.pathname}/action-plan`} class="btn variant-filled-primary h-fit"
-					><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
+				<Anchor
+					href={`${$page.url.pathname}/action-plan`}
+					class="btn variant-filled-primary h-fit"
+					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
 				>
 			{/if}
 			<span class="pt-4 font-light text-sm">Power-ups:</span>
 			{#if !$page.data.user.is_third_party}
-				<a
+				<Anchor
+					breadcrumbAction="push"
 					href={`${$page.url.pathname}/flash-mode`}
 					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
-					><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
+					><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</Anchor
 				>
 			{/if}
-			<a
+			<Anchor
+				breadcrumbAction="push"
 				href={`${$page.url.pathname}/table-mode`}
 				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-yellow-500 h-fit"
-				><i class="fa-solid fa-table-list mr-2" /> {m.tableMode()}</a
+				><i class="fa-solid fa-table-list mr-2" /> {m.tableMode()}</Anchor
 			>
 			{#if !$page.data.user.is_third_party}
 				<button
