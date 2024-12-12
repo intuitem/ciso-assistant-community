@@ -61,7 +61,10 @@
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`);
+		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
+			label: rowMetaData.str ?? rowMetaData.name ?? rowMetaData[identifierField],
+			breadcrumbAction: 'push'
+		});
 	}
 
 	function onRowKeydown(
@@ -97,7 +100,8 @@
 	$: classesBase = `${classProp || 'bg-white'}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
-	import { goto } from '$app/navigation';
+	import { goto as _goto } from '$app/navigation';
+	import { goto } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { DataHandler } from '@vincjo/datatables';
 	import Pagination from './Pagination.svelte';
@@ -163,7 +167,7 @@
 				}
 			}
 		}
-		if (browser) goto($page.url);
+		if (browser) _goto($page.url);
 	}
 
 	$: {
