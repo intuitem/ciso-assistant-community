@@ -37,17 +37,17 @@
 			{
 				title: safeTranslate(m.ebiosWs2_1()),
 				status: 'to_do',
-				href: `${$page.url.pathname}/workshop-two/ro-to?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-two/ro-to?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_2()),
 				status: 'to_do',
-				href: `${$page.url.pathname}/workshop-two/ro-to?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-two/ro-to?activity=two&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_3()),
 				status: 'to_do',
-				href: `${$page.url.pathname}/workshop-two/ro-to?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-two/ro-to?activity=three&next=${$page.url.pathname}`
 			}
 		],
 		ws3: [

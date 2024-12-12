@@ -926,6 +926,7 @@
 	"ebiosRmMatrixHelpText": "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`",
 	"activityOne": "Activity 1",
 	"activityTwo": "Activity 2",
+	"activityThree": "Activity 3",
 	"ebiosRmStudy": "Ebios RM study",
 	"qualifications": "Qualifications",
 	"impacts": "Impacts",
@@ -979,5 +980,6 @@
 	"attackPath": "Attack path",
 	"attackPaths": "Attack paths",
 	"currentCriticality": "Current criticality",
-	"residualCriticality": "Residual criticality"
+	"residualCriticality": "Residual criticality",
+	"notSelected": "Not selected"
 }

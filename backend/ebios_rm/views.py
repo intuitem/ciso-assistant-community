@@ -107,10 +107,6 @@ class RoToViewSet(BaseModelViewSet):
     def resources(self, request):
         return Response(dict(RoTo.Resources.choices))
 
-    @action(detail=False, name="Get pertinence choices")
-    def pertinence(self, request):
-        return Response(dict(RoTo.Pertinence.choices))
-
 
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
