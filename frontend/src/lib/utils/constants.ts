@@ -7,9 +7,7 @@ export const BASE_API_URL = `${
 }`;
 
 export const DEFAULT_LANGUAGE = `${
-	Object.hasOwn(env, 'PUBLIC_DEFAULT_LANGUAGE')
-		? env.PUBLIC_DEFAULT_LANGUAGE
-		: 'en'
+	Object.hasOwn(env, 'PUBLIC_DEFAULT_LANGUAGE') ? env.PUBLIC_DEFAULT_LANGUAGE : 'en'
 }`;
 
 export const ALLAUTH_API_URL = `${BASE_API_URL}/_allauth/app/v1`;

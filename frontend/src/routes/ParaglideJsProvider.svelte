@@ -1,9 +1,5 @@
 <script>
-	import {
-		languageTag,
-		onSetLanguageTag,
-		setLanguageTag,
-	} from '$paraglide/runtime';
+	import { languageTag, onSetLanguageTag, setLanguageTag } from '$paraglide/runtime';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { getCookie, deleteCookie, setCookie } from '$lib/utils/cookies';
