@@ -220,6 +220,20 @@ class AssetWriteSerializer(BaseModelSerializer):
         model = Asset
         fields = "__all__"
 
+    def validate_parent_assets(self, parent_assets):
+        """
+        Check that the assets graph will not contain cycles
+        """
+        if not self.instance:
+            return parent_assets
+        if parent_assets:
+            for asset in parent_assets:
+                if self.instance in asset.ancestors_plus_self():
+                    raise serializers.ValidationError(
+                        "errorAssetGraphMustNotContainCycles"
+                    )
+        return parent_assets
+
 
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
