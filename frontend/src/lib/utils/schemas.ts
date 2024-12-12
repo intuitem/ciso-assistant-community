@@ -96,7 +96,8 @@ export const RiskAssessmentSchema = z.object({
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	ebios_rm_study: z.string().uuid().optional()
 });
 
 export const ThreatSchema = z.object({
