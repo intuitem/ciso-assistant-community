@@ -4,6 +4,7 @@ from iam.models import User, Folder
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
 from django.utils.translation import gettext_lazy as _
 
+
 class Command(BaseCommand):
     help = "Send reset email"
 
