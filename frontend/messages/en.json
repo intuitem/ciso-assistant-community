@@ -984,5 +984,6 @@
 	"notSelected": "Not selected",
 	"identifyRoTo": "Identify RO/TO",
 	"evaluateRoTo": "Evaluate RO/TO",
-	"selectRoTo": "Select RO/TO"
+	"selectRoTo": "Select RO/TO",
+	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles."
 }
