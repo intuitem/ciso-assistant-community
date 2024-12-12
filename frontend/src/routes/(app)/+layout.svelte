@@ -10,10 +10,24 @@
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
 	import * as m from '$paraglide/messages';
+	import { page } from '$app/stores';
+	import { breadcrumbs } from '$lib/utils/breadcrumbs';
 
 	let sidebarOpen = true;
 
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-7 lg:ml-64' : 'ml-7');
+
+	$: {
+		$pageTitle = safeTranslate(
+			$page.data.title ||
+				$page.data.str ||
+				$page.data.name ||
+				$breadcrumbs[1]?.label ||
+				$page.url.pathname.split('/').pop()
+		);
+		if ($breadcrumbs.length < 2)
+			breadcrumbs.push([{ label: $pageTitle, href: $page.url.pathname }]);
+	}
 
 	$: if (browser) {
 		const fromLogin = getCookie('from_login');
