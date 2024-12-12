@@ -415,12 +415,11 @@ export const fearedEventsSchema = z.object({
 
 export const roToSchema = z.object({
 	ebios_rm_study: z.string(),
-	feared_events: z.string().uuid().array(),
+	feared_events: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string(),
 	target_objective: z.string(),
 	motivation: z.number().default(0).optional(),
 	resources: z.number().default(0).optional(),
-	pertinence: z.number().default(0).optional(),
 	activity: z.number().min(0).max(4).optional().default(0),
 	is_selected: z.boolean().optional().default(false),
 	justification: z.string().optional()
