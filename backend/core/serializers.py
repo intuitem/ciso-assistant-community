@@ -212,7 +212,7 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
 
     class Meta:
         model = RiskAssessment
-        fields = "__all__"
+        exclude = ["ebios_rm_study"]
 
 
 class AssetWriteSerializer(BaseModelSerializer):
@@ -227,6 +227,20 @@ class AssetWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Asset
         fields = "__all__"
+
+    def validate_parent_assets(self, parent_assets):
+        """
+        Check that the assets graph will not contain cycles
+        """
+        if not self.instance:
+            return parent_assets
+        if parent_assets:
+            for asset in parent_assets:
+                if self.instance in asset.ancestors_plus_self():
+                    raise serializers.ValidationError(
+                        "errorAssetGraphMustNotContainCycles"
+                    )
+        return parent_assets
 
 
 class AssetReadSerializer(AssetWriteSerializer):
@@ -629,26 +643,29 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
+    class FilteredNodeSerializer(RequirementNodeReadSerializer):
+        class Meta:
+            model = RequirementNode
+            fields = [
+                "id",
+                "urn",
+                "annotation",
+                "name",
+                "description",
+                "typical_evidence",
+                "ref_id",
+                "associated_reference_controls",
+                "associated_threats",
+                "parent_requirement",
+            ]
+
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
     assessable = serializers.BooleanField(source="requirement.assessable")
-    requirement = FieldsRelatedField(
-        [
-            "id",
-            "urn",
-            "annotation",
-            "name",
-            "description",
-            "typical_evidence",
-            "ref_id",
-            "associated_reference_controls",
-            "associated_threats",
-            "parent_requirement",
-        ]
-    )
+    requirement = FilteredNodeSerializer()
 
     class Meta:
         model = RequirementAssessment

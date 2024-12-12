@@ -1581,12 +1581,28 @@ class Asset(
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
+        def format_seconds(seconds: int) -> str:
+            hours, remainder = divmod(seconds, 3600)
+            minutes, secs = divmod(remainder, 60)
+
+            parts = []
+            if hours > 0:
+                parts.append(f"{hours}h")
+            if minutes > 0:
+                parts.append(f"{minutes:02d}m")
+            if secs > 0 or (
+                not parts
+            ):  # Always show seconds if no other parts, or if > 0
+                parts.append(f"{secs:02d}s")
+
+            return "".join(parts)
+
         """
         Gets the disaster recovery objectives of a given asset as strings.
         """
         disaster_recovery_objectives = self.get_disaster_recovery_objectives()
         return [
-            {"str": f"{key}: {content.get('value', 0)}"}
+            {"str": f"{key}: {format_seconds(content.get('value', 0))}"}
             for key, content in disaster_recovery_objectives.get(
                 "objectives", {}
             ).items()
@@ -1980,6 +1996,14 @@ class RiskAssessment(Assessment):
     )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+    ebios_rm_study = models.ForeignKey(
+        "ebios_rm.EbiosRMStudy",
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="risk_assessments",
     )
 
     class Meta:

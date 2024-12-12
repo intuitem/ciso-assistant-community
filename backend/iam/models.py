@@ -39,7 +39,6 @@ from ciso_assistant.settings import (
 
 import structlog
 from django.utils import translation
-import os
 
 logger = structlog.get_logger(__name__)
 
@@ -287,10 +286,6 @@ class UserManager(BaseUserManager):
         )
 
         logger.info("user created sucessfully", user=user)
-        FORCE_LANGUAGE = os.environ.get("FORCE_LANGUAGE")
-        if FORCE_LANGUAGE:
-            translation.activate(FORCE_LANGUAGE)
-            print("FORCE_LANGUAGE:", FORCE_LANGUAGE)
 
         if mailing:
             try:

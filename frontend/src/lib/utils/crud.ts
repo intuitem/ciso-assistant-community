@@ -5,7 +5,7 @@ import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 import { BASE_API_URL } from './constants';
-import { URL_MODEL, type urlModel } from './types';
+import { type urlModel } from './types';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -191,7 +191,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' }
+			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' }
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
 		selectFields: [{ field: 'status' }],
@@ -673,24 +674,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' },
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
-		]
-	},
-	'ro-to': {
-		endpointUrl: 'ebios-rm/ro-to',
-		name: 'roto',
-		localName: 'roto',
-		localNamePlural: 'roto',
-		verboseName: 'Ro to',
-		verboseNamePlural: 'Ro to',
-		foreignKeyFields: [
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
-			{ field: 'feared_events', urlModel: 'feared-events' }
-		],
-		selectFields: [
-			{ field: 'risk-origin' },
-			{ field: 'motivation' },
-			{ field: 'resources' },
-			{ field: 'pertinence' }
 		]
 	},
 	attack_paths: {
