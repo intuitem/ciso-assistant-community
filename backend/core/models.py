@@ -1553,7 +1553,8 @@ class Asset(
                     disaster_recovery_objectives[key] = content
                 else:
                     disaster_recovery_objectives[key]["value"] = min(
-                        disaster_recovery_objectives[key].get("value", 0), content.get("value", 0)
+                        disaster_recovery_objectives[key].get("value", 0),
+                        content.get("value", 0),
                     )
 
         return {"objectives": disaster_recovery_objectives}
