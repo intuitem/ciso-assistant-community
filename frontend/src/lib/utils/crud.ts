@@ -639,7 +639,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Ro to',
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'feared_events', urlModel: 'feared-events', endpointUrl: 'ebios-rm/feared-events', urlParams: 'ebios_rm_study=', detail: true }
+			{
+				field: 'feared_events',
+				urlModel: 'feared-events',
+				endpointUrl: 'ebios-rm/feared-events',
+				urlParams: 'ebios_rm_study=',
+				detail: true
+			}
 		],
 		selectFields: [
 			{ field: 'risk-origin' },
