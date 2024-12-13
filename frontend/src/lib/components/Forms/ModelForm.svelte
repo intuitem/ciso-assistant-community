@@ -273,7 +273,7 @@
 	{:else if URLModel === 'attack-paths'}
 		<AttackPathForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'operational-scenarios'}
-		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context}/>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

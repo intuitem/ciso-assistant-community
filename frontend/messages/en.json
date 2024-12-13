@@ -993,7 +993,12 @@
 	"noReviewer": "No reviewer assigned",
 	"selectAudit": "Select audit",
 	"operarionalScenario": "Operational scenario",
+	"operationalScenarios": "Operational scenarios",
 	"addOperationalScenario": "Add operational scenario",
 	"workshopFour": "Workshop 4",
-	"noThreat": "No threat"
+	"noThreat": "No threat",
+	"likely": "Likely",
+	"unlikely": "Unlikely",
+	"veryLikely": "Very likely",
+	"certain": "Certain"
 }
