@@ -71,8 +71,6 @@
 		$formData.residual_maturity,
 		$formData.residual_trust
 	);
-
-	$: console.log('stakeholder page data', $page.data);
 </script>
 
 <div
@@ -188,16 +186,16 @@
 
 {#if context === 'edit'}
 	<div
-		class="relative p-2 space-y-2 rounded-container-token {activeActivity === 'two'
+		class="relative p-2 space-y-2 rounded-container-token {activeActivity === 'three'
 			? 'border-2 border-primary-500'
 			: 'border-2 border-gray-300 border-dashed'}"
 	>
 		<p
-			class="absolute -top-3 {activityBackground} font-bold {activeActivity === 'two'
+			class="absolute -top-3 {activityBackground} font-bold {activeActivity === 'three'
 				? 'text-primary-500'
 				: 'text-gray-500'}"
 		>
-			{m.activityTwo()}
+			{m.activityThree()}
 		</p>
 		<div class="flex">
 			<div class="w-full mr-2">
