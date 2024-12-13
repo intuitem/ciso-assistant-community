@@ -79,12 +79,12 @@
 			{
 				title: safeTranslate(m.ebiosWs4_1()),
 				status: 'to_do',
-				href: `${$page.url.pathname}/workshop-four/operational-scenario?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-four/operational-scenario?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs4_2()),
 				status: 'to_do',
-				href: `${$page.url.pathname}/workshop-four/operational-scenario?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-four/operational-scenario?activity=two&next=${$page.url.pathname}`
 			}
 		],
 		ws5: [

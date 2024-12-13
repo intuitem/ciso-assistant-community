@@ -5,6 +5,8 @@
 
 	export let data: PageData;
 
+	const customNameDescription = ['operational-scenarios'].includes(data.model.urlModel);
+
 	breadcrumbObject.set(data.object);
 </script>
 
@@ -14,5 +16,6 @@
 	selectOptions={data.selectOptions}
 	foreignKeys={data.foreignKeys}
 	model={data.model}
+	customNameDescription={customNameDescription}
 	context="edit"
 />

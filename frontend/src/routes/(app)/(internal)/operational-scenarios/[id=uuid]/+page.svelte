@@ -21,13 +21,12 @@
 		}
 	});
 
-	// const pertinenceColor = {
-	// 	undefined: 'bg-gray-200 text-gray-700',
-	// 	irrelevant: 'bg-green-200 text-green-700',
-	// 	'partially relevant': 'bg-yellow-200 text-yellow-700',
-	// 	fairly_relevant: 'bg-orange-200 text-orange-700',
-	// 	higly_relevant: 'bg-red-200 text-red-700'
-	// };
+    const likelihoodChoices = [
+        { label: m.unlikely(), value: 0 },
+        { label: m.likely(), value: 1 },
+        { label: m.veryLikely(), value: 2 },
+        { label: m.certain(), value: 3 },
+    ];
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -82,7 +81,7 @@
 				<ul class="list-disc list-inside text-gray-600">
 					{#if operationalScenario.threats?.length}
 						{#each operationalScenario.threats as threat}
-							<li>{threat.str}</li>
+							<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
 						{/each}
 					{:else}
 						<li>{m.noThreat()}</li>
@@ -116,6 +115,27 @@
 					<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
 				{/if}
 			</p>
+            <div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+                <h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+					<i class="fa-solid fa-dice text-black opacity-75"></i>
+					<span>{m.likelihood()}</span>
+				</h3>
+                <div class="grid grid-cols-4 gap-2 p-2">
+                    {#each likelihoodChoices as choice}
+                        {#if operationalScenario.likelihood.value === choice.value}
+                            <div style="background-color: {operationalScenario.likelihood.hexcolor}" class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold">
+                                <span>{choice.label}</span>
+                                <span>({choice.value})</span>
+                            </div>
+                        {:else}
+                            <div class="flex flex-col items-center justify-center border rounded-md bg-gray-200 p-4 text-gray-500">
+                                <span>{choice.label}</span>
+                                <span>({choice.value})</span>
+                            </div>
+                        {/if}
+                    {/each}
+                </div>
+            </div>
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
