@@ -49,7 +49,7 @@
 			<h1
 				class="font-bold text-xl {activeActivity === 'one' ? 'text-primary-500' : 'text-gray-500'}"
 			>
-				{m.identifyRoTo()}
+				{m.ebiosWs2_1()}
 			</h1>
 			<div class="flex flex-row space-x-1">
 				<p class="flex flex-col items-center">
@@ -84,7 +84,7 @@
 			<h1
 				class="font-bold text-xl {activeActivity === 'two' ? 'text-primary-500' : 'text-gray-500'}"
 			>
-				{m.evaluateRoTo()}
+				{m.ebiosWs2_2()}
 			</h1>
 			<div class="flex space-x-6">
 				<p class="flex flex-col items-center">
@@ -127,7 +127,7 @@
 					? 'text-primary-500'
 					: 'text-gray-500'}"
 			>
-				{m.selectRoTo()}
+				{m.ebiosWs2_3()}
 			</h1>
 			<p>
 				{#if roto.is_selected}
