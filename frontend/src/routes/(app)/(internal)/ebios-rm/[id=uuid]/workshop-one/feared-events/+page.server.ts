@@ -55,7 +55,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			: `${BASE_API_URL}/${model.urlModel}/${queryParams}`;
 		if (model.urlModel === 'assets') {
 			url = `${BASE_API_URL}/${model.urlModel}/${queryParams}${params.id}`;
-			console.log(url);
 		}
 		const response = await fetch(url);
 		if (response.ok) {
