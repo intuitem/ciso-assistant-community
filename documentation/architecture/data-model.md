@@ -1267,7 +1267,7 @@ The frontend for risk study shall propose the following steps:
 ```mermaid
 erDiagram
     DOMAIN                ||--o{ EBIOS_RM_STUDY       : contains
-    DOMAIN                ||--o{ STAKEHOLDER     : contains
+    DOMAIN                ||--o{ STAKEHOLDER          : contains
     DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
     DOMAIN                ||--o{ FEARED_EVENT         : contains
     DOMAIN                ||--o{ RO_TO                : contains
@@ -1289,7 +1289,7 @@ erDiagram
     EBIOS_RM_STUDY        }o--o| ENTITY               : studies
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
-    EBIOS_RM_STUDY        }o--o{ RISK_ASSESSMENT      : generates
+    EBIOS_RM_STUDY        |o--o{ RISK_ASSESSMENT      : generates
     ATTACK_PATH           }o--|| RO_TO                : derives
     RO_TO                 }o--o{ FEARED_EVENT         : corresponds_to
     OPERATIONAL_SCENARIO  }o--|{ ATTACK_PATH          : derives
