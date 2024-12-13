@@ -16,6 +16,6 @@
 	selectOptions={data.selectOptions}
 	foreignKeys={data.foreignKeys}
 	model={data.model}
-	customNameDescription={customNameDescription}
+	{customNameDescription}
 	context="edit"
 />

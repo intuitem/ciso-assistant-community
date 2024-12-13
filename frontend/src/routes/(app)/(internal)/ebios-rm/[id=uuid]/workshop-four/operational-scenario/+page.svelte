@@ -21,7 +21,8 @@
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model
+				model: data.model,
+				customNameDescription: true
 			}
 		};
 		let modal: ModalSettings = {
@@ -64,7 +65,12 @@
 	});
 </script>
 
-<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel} detailQueryParameter={`activity=${activeActivity}`}>
+<ModelTable
+	source={data.table}
+	deleteForm={data.deleteForm}
+	{URLModel}
+	detailQueryParameter={`activity=${activeActivity}`}
+>
 	<div slot="addButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 			<button
