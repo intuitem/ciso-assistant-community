@@ -16,10 +16,9 @@ export const load: LayoutServerLoad = async (event) => {
 	const URLModel = 'stakeholders';
 	const schema = modelSchema(URLModel);
 	const model = getModelInfo(URLModel);
-	const objectEndpoint = model.endpointUrl
-		? `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/object/`
-		: `${BASE_API_URL}/${URLModel}/${event.params.id}/object/`;
-	const object = await event.fetch(objectEndpoint).then((res) => res.json());
+	const stakeholderEndpoint = `${BASE_API_URL}/ebios-rm/stakeholders/${event.params.id}/`;
+	const stakeholder = await event.fetch(stakeholderEndpoint).then((res) => res.json());
+	const object = await event.fetch(`${stakeholderEndpoint}object`).then((res) => res.json());
 
 	const form = await superValidate(object, zod(schema), { errors: false });
 	const foreignKeyFields = model.foreignKeyFields;
@@ -92,7 +91,7 @@ export const load: LayoutServerLoad = async (event) => {
 
 	const measureCreateSchema = modelSchema('applied-controls');
 	const initialData = {
-		folder: object.folder
+		folder: stakeholder.folder.id
 	};
 	const measureCreateForm = await superValidate(initialData, zod(measureCreateSchema), {
 		errors: false
