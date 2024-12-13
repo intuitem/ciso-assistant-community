@@ -991,5 +991,9 @@
 	"noAuthor": "No author assigned",
 	"noReviewer": "No reviewer assigned",
 	"selectAudit": "Select audit",
-	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles."
+	"operarionalScenario": "Operational scenario",
+	"addOperationalScenario": "Add operational scenario",
+	"workshopFour": "Workshop 4",
+	"notSelected": "Not selected",
+	"noThreat": "No threat"
 }
