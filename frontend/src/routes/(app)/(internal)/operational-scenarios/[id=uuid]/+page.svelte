@@ -47,7 +47,7 @@
 			<h1
 				class="font-bold text-xl {activeActivity === 'one' ? 'text-primary-500' : 'text-gray-500'}"
 			>
-				<!-- {m.identifyRoTo()} -->
+				{m.ebiosWs4_1()}
 			</h1>
 			<a
 				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
@@ -71,7 +71,7 @@
 					regionBody="bg-gray-50"
 					regionHeadCell="uppercase bg-gray-50 text-gray-700"
 					source={data.table}
-					URLModel="feared-events"
+					URLModel="attack-paths"
 				></ModelTable>
 			</div>
             <div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
@@ -107,7 +107,7 @@
 					? 'text-primary-500'
 					: 'text-gray-500'}"
 			>
-                <!-- {m.identifyRoTo()} -->
+                {m.ebiosWs4_2()}
 			</h1>
 			<p>
 				{#if operationalScenario.is_selected}
