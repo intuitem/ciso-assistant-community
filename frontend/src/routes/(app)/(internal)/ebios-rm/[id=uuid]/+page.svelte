@@ -62,7 +62,7 @@
 			{
 				title: safeTranslate(m.ebiosWs3_1()),
 				status: 'to_do',
-				href: `${$page.url.pathname}/workshop-three/ecosystem?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-three/ecosystem?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs3_2()),
@@ -72,7 +72,7 @@
 			{
 				title: safeTranslate(m.ebiosWs3_3()),
 				status: 'done',
-				href: `${$page.url.pathname}/workshop-three/ecosystem?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-three/ecosystem?activity=three&next=${$page.url.pathname}`
 			}
 		],
 		ws4: [
