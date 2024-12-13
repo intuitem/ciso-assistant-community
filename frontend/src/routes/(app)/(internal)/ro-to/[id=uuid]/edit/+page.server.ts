@@ -22,7 +22,7 @@ export const load: PageServerLoad = async (event) => {
 
 	if (foreignKeyFields) {
 		for (const keyField of foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			const queryParams = keyField.urlParams ? `?${keyField.urlParams}${keyField.detail ? object.ebios_rm_study : ''}` : '';
 			const url = `${BASE_API_URL}/${keyField.endpointUrl || keyField.urlModel}/${queryParams}`;
 			const response = await event.fetch(url);
 			if (response.ok) {
