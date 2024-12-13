@@ -32,7 +32,9 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	for (const keyField of foreignKeyFields) {
 		const keyModel = getModelInfo(keyField.urlModel);
-		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+		const queryParams = keyField.urlParams
+			? `?${keyField.urlParams}${keyField.detail ? params.id : ''}`
+			: '';
 		const url = `${BASE_API_URL}/${keyModel.endpointUrl ?? keyModel.urlModel}/${queryParams}`;
 		const response = await fetch(url);
 		if (response.ok) {

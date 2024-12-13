@@ -1210,7 +1210,7 @@ The object risk_origin_target_objective (workshop 2) contains the following fiel
 - target objective (text)
 - motivation (--/1 very low/2 low/3 significant/4 strong) (--/très peu/peu/assez/fortement motivé)
 - resources (--/1 limited/2 significant/3 important/4 unlimited) (--/limitées/significatives/importantes/illimitées)
-- pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
+- pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent) -> calculated
 - activity (--/1/2/3/4)
 - selected
 - justification
@@ -1267,7 +1267,7 @@ The frontend for risk study shall propose the following steps:
 ```mermaid
 erDiagram
     DOMAIN                ||--o{ EBIOS_RM_STUDY       : contains
-    DOMAIN                ||--o{ STAKEHOLDER     : contains
+    DOMAIN                ||--o{ STAKEHOLDER          : contains
     DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
     DOMAIN                ||--o{ FEARED_EVENT         : contains
     DOMAIN                ||--o{ RO_TO                : contains
@@ -1289,7 +1289,7 @@ erDiagram
     EBIOS_RM_STUDY        }o--o| ENTITY               : studies
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
-    EBIOS_RM_STUDY        }o--o{ RISK_ASSESSMENT      : generates
+    EBIOS_RM_STUDY        |o--o{ RISK_ASSESSMENT      : generates
     ATTACK_PATH           }o--|| RO_TO                : derives
     RO_TO                 }o--o{ FEARED_EVENT         : corresponds_to
     OPERATIONAL_SCENARIO  }o--|{ ATTACK_PATH          : derives
@@ -1326,7 +1326,6 @@ erDiagram
         string target_objective
         int    motivation
         int    resources
-        int    pertinence
         int    activity
         bool   selected
         string justification

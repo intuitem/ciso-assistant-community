@@ -43,7 +43,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		const initialData = {};
 		await Promise.all(
 			model.reverseForeignKeyFields.map(async (e) => {
-				const relEndpoint = `${BASE_API_URL}/${e.urlModel}/?${e.field}=${event.params.id}`;
+				const relEndpoint = `${BASE_API_URL}/${e.endpointUrl || e.urlModel}/?${e.field}=${event.params.id}`;
 				const res = await event.fetch(relEndpoint);
 				const revData = await res.json().then((res) => res.results);
 
@@ -103,7 +103,7 @@ export const loadDetail = async ({ event, model, id }) => {
 				if (info.selectFields) {
 					await Promise.all(
 						info.selectFields.map(async (selectField) => {
-							const url = `${BASE_API_URL}/${urlModel}/${selectField.field}/`;
+							const url = `${BASE_API_URL}/${e.endpointUrl || e.urlModel}/${selectField.field}/`;
 							const response = await event.fetch(url);
 							if (response.ok) {
 								selectOptions[selectField.field] = await response.json().then((data) =>
