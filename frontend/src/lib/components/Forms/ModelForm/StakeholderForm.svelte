@@ -182,6 +182,15 @@
 			</span>
 		</div>
 	</div>
+
+	<Checkbox {form} field="is_selected" label={m.selected()} />
+	<TextArea
+		{form}
+		field="justification"
+		label={m.justification()}
+		cacheLock={cacheLocks['justification']}
+		bind:cachedValue={formDataCache['justification']}
+	/>
 </div>
 
 {#if context === 'edit'}
@@ -296,14 +305,5 @@
 				</span>
 			</div>
 		</div>
-
-		<Checkbox {form} field="is_selected" label={m.selected()} />
-		<TextArea
-			{form}
-			field="justification"
-			label={m.justification()}
-			cacheLock={cacheLocks['justification']}
-			bind:cachedValue={formDataCache['justification']}
-		/>
 	</div>
 {/if}
