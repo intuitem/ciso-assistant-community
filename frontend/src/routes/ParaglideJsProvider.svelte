@@ -1,17 +1,13 @@
 <script>
-	import {
-		languageTag,
-		onSetLanguageTag,
-		setLanguageTag,
-		sourceLanguageTag
-	} from '$paraglide/runtime';
+	import { languageTag, onSetLanguageTag, setLanguageTag } from '$paraglide/runtime';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { getCookie, deleteCookie, setCookie } from '$lib/utils/cookies';
+	import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 	onMount(() => {
-		// const valueFromSession = sessionStorage.getItem('lang') || sourceLanguageTag;
-		const valueFromCookies = getCookie('ciso_lang') || sourceLanguageTag;
+		// const valueFromSession = sessionStorage.getItem('lang') || DEFAULT_LANGUAGE;
+		const valueFromCookies = getCookie('ciso_lang') || DEFAULT_LANGUAGE;
 		// @ts-ignore
 		setCookie('ciso_lang', valueFromCookies);
 		setLanguageTag(valueFromCookies);
