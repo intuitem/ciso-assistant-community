@@ -982,9 +982,6 @@
 	"currentCriticality": "Current criticality",
 	"residualCriticality": "Residual criticality",
 	"notSelected": "Not selected",
-	"identifyRoTo": "Identify RO/TO",
-	"evaluateRoTo": "Evaluate RO/TO",
-	"selectRoTo": "Select RO/TO",
 	"resetPasswordHere": "You can reset your password here.",
 	"resetPassword": "Reset password",
 	"ebiosRm": "Ebios RM",
@@ -998,6 +995,5 @@
 	"operarionalScenario": "Operational scenario",
 	"addOperationalScenario": "Add operational scenario",
 	"workshopFour": "Workshop 4",
-	"notSelected": "Not selected",
 	"noThreat": "No threat"
 }
