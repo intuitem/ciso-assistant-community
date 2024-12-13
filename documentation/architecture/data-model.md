@@ -1210,7 +1210,7 @@ The object risk_origin_target_objective (workshop 2) contains the following fiel
 - target objective (text)
 - motivation (--/1 very low/2 low/3 significant/4 strong) (--/très peu/peu/assez/fortement motivé)
 - resources (--/1 limited/2 significant/3 important/4 unlimited) (--/limitées/significatives/importantes/illimitées)
-- pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
+- pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent) -> calculated
 - activity (--/1/2/3/4)
 - selected
 - justification
@@ -1326,7 +1326,6 @@ erDiagram
         string target_objective
         int    motivation
         int    resources
-        int    pertinence
         int    activity
         bool   selected
         string justification
