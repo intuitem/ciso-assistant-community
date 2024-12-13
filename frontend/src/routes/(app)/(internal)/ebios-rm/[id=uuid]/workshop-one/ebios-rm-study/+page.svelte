@@ -105,7 +105,7 @@
 					: 'text-gray-500'}">{m.activityOne()}</span
 			>
 			{#if ebiosRmStudy.description}
-				<p class="text-gray-600">{ebiosRmStudy.description}</p>
+				<p class="text-gray-600 whitespace-pre-wrap text-justify w-full">{ebiosRmStudy.description}</p>
 			{:else}
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
@@ -117,7 +117,7 @@
 				<ul class="list-disc list-inside text-gray-600">
 					{#if ebiosRmStudy.authors?.length}
 						{#each ebiosRmStudy.authors as author}
-							<li>{author.str}</li>
+							<li><a class="anchor" href="/users/{author.id}">{author.str}</a></li>
 						{/each}
 					{:else}
 						<li>{m.noAuthor()}</li>
@@ -132,7 +132,7 @@
 				<ul class="list-disc list-inside text-gray-600">
 					{#if ebiosRmStudy.reviewers?.length}
 						{#each ebiosRmStudy.reviewers as reviewer}
-							<li>{reviewer.str}</li>
+							<li><a class="anchor" href="/users/{reviewer.id}">{reviewer.str}</a></li>
 						{/each}
 					{:else}
 						<li>{m.noReviewer()}</li>
