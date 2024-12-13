@@ -105,7 +105,9 @@
 					: 'text-gray-500'}">{m.activityOne()}</span
 			>
 			{#if ebiosRmStudy.description}
-				<p class="text-gray-600 whitespace-pre-wrap text-justify w-full">{ebiosRmStudy.description}</p>
+				<p class="text-gray-600 whitespace-pre-wrap text-justify w-full">
+					{ebiosRmStudy.description}
+				</p>
 			{:else}
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
