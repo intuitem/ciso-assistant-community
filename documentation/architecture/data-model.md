@@ -257,6 +257,7 @@ erDiagram
         url      link
         string   effort
         float    cost
+        int      progression
     }
 
     VULNERABILITY {
@@ -620,6 +621,7 @@ A applied control has the following specific fields:
 - an effort (--/S/M/L/XL)
 - a cost (--/float value)
 - a url link
+- a progression (between 0 and 100)
 
 When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
 
