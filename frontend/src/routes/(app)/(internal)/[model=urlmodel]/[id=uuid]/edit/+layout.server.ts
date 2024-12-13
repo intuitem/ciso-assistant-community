@@ -52,7 +52,10 @@ export const load: LayoutServerLoad = async (event) => {
 			let url = keyModel.endpointUrl
 				? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
 				: `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}`;
-			if (['assets', 'attack-paths'].includes(keyModel.urlModel) && ['feared-events', 'operational-scenarios'].includes(event.params.model)) {
+			if (
+				['assets', 'attack-paths'].includes(keyModel.urlModel) &&
+				['feared-events', 'operational-scenarios'].includes(event.params.model)
+			) {
 				url = `${BASE_API_URL}/${keyModel.endpointUrl || keyModel.urlModel}/${queryParams}${object.ebios_rm_study}`;
 			}
 			const response = await event.fetch(url);

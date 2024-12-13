@@ -692,7 +692,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
-			{ field: 'attack_paths', urlModel: 'attack-paths', endpointUrl: 'ebios-rm/attack-paths', urlParams: 'ebios_rm_study=', detail: true },
+			{
+				field: 'attack_paths',
+				urlModel: 'attack-paths',
+				endpointUrl: 'ebios-rm/attack-paths',
+				urlParams: 'ebios_rm_study=',
+				detail: true
+			}
 		],
 		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
 	}

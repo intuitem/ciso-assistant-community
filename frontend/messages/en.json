@@ -1000,5 +1000,6 @@
 	"likely": "Likely",
 	"unlikely": "Unlikely",
 	"veryLikely": "Very likely",
-	"certain": "Certain"
+	"certain": "Certain",
+	"minor": "Minor"
 }
