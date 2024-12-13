@@ -49,9 +49,12 @@ export const load: LayoutServerLoad = async (event) => {
 		for (const keyField of foreignKeyFields) {
 			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
 			const keyModel = getModelInfo(keyField.urlModel);
-			const url = keyModel.endpointUrl
+			let url = keyModel.endpointUrl
 				? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
 				: `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}`;
+			if (keyModel.urlModel === 'assets' && event.params.model === 'feared-events') {
+				url = `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}${object.ebios_rm_study}`;
+			}
 			const response = await event.fetch(url);
 			if (response.ok) {
 				foreignKeys[keyField.field] = await response.json().then((data) => data.results);

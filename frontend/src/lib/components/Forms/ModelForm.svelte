@@ -58,6 +58,7 @@
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
 	export let duplicate = false;
+	export let customNameDescription = false;
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -163,7 +164,7 @@
 			}}
 		/>
 	{/if}
-	{#if shape.name}
+	{#if shape.name && !customNameDescription}
 		<TextField
 			{form}
 			field="name"
@@ -173,7 +174,7 @@
 			data-focusindex="0"
 		/>
 	{/if}
-	{#if shape.description}
+	{#if shape.description && !customNameDescription}
 		<TextArea
 			{form}
 			field="description"
