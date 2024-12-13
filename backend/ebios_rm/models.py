@@ -194,7 +194,10 @@ class RoTo(AbstractBaseModel, FolderMixin):
         on_delete=models.CASCADE,
     )
     feared_events = models.ManyToManyField(
-        FearedEvent, verbose_name=_("Feared events"), related_name="ro_to_couples"
+        FearedEvent,
+        verbose_name=_("Feared events"),
+        related_name="ro_to_couples",
+        blank=True,
     )
 
     risk_origin = models.CharField(
@@ -210,11 +213,6 @@ class RoTo(AbstractBaseModel, FolderMixin):
         verbose_name=_("Resources"),
         choices=Resources.choices,
         default=Resources.UNDEFINED,
-    )
-    pertinence = models.PositiveSmallIntegerField(
-        verbose_name=_("Pertinence"),
-        choices=Pertinence.choices,
-        default=Pertinence.UNDEFINED,
     )
     activity = models.PositiveSmallIntegerField(
         verbose_name=_("Activity"), default=0, validators=[MaxValueValidator(4)]
@@ -233,6 +231,20 @@ class RoTo(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+
+    @property
+    def get_pertinence(self):
+        PERTINENCE_MATRIX = [
+            [1, 1, 2, 2],
+            [1, 2, 3, 3],
+            [2, 3, 3, 4],
+            [2, 3, 4, 4],
+        ]
+        if self.motivation == 0 or self.resources == 0:
+            return self.Pertinence(self.Pertinence.UNDEFINED).label
+        return self.Pertinence(
+            PERTINENCE_MATRIX[self.motivation - 1][self.resources - 1]
+        ).label
 
 
 class Stakeholder(AbstractBaseModel, FolderMixin):
