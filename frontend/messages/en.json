@@ -980,7 +980,6 @@
 	"attackPaths": "Attack paths",
 	"currentCriticality": "Current criticality",
 	"residualCriticality": "Residual criticality",
-	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
 	"resetPasswordHere": "You can reset your password here.",
 	"resetPassword": "Reset password",
 	"ebiosRm": "Ebios RM",
