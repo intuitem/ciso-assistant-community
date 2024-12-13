@@ -42,6 +42,7 @@
 	// Props (styles)
 	export let element: CssClasses = 'table';
 	export let text: CssClasses = 'text-xs';
+	export let backgroundColor: CssClasses = 'bg-white';
 	export let color: CssClasses = '';
 	export let regionHead: CssClasses = '';
 	export let regionHeadCell: CssClasses = 'uppercase bg-white text-gray-700';
@@ -94,7 +95,7 @@
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
 
-	$: classesBase = `${classProp || 'bg-white'}`;
+	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
 	import { goto } from '$app/navigation';
