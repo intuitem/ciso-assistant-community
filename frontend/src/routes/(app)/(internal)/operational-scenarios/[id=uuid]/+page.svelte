@@ -21,12 +21,18 @@
 		}
 	});
 
-    const likelihoodChoices = [
-        { label: m.unlikely(), value: 0 },
-        { label: m.likely(), value: 1 },
-        { label: m.veryLikely(), value: 2 },
-        { label: m.certain(), value: 3 },
-    ];
+	const likelihoodChoices = [
+		{ label: m.unlikely(), value: 0 },
+		{ label: m.likely(), value: 1 },
+		{ label: m.veryLikely(), value: 2 },
+		{ label: m.certain(), value: 3 }
+	];
+	const gravityChoices = [
+		{ label: m.minor(), value: 0 },
+		{ label: m.significant(), value: 1 },
+		{ label: m.important(), value: 2 },
+		{ label: m.critical(), value: 3 }
+	];
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -55,12 +61,12 @@
 				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
 				{m.edit()}
 			</a>
-            {#if operationalScenario.description}
+			{#if operationalScenario.description}
 				<p class="text-gray-600">{operationalScenario.description}</p>
 			{:else}
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
-            <div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-table text-gray-500 opacity-75"></i>
 					<span>{m.attackPaths()}</span>
@@ -73,7 +79,7 @@
 					URLModel="attack-paths"
 				></ModelTable>
 			</div>
-            <div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
@@ -102,11 +108,9 @@
 					: 'text-gray-500'}">{m.activityTwo()}</span
 			>
 			<h1
-				class="font-bold text-xl {activeActivity === 'two'
-					? 'text-primary-500'
-					: 'text-gray-500'}"
+				class="font-bold text-xl {activeActivity === 'two' ? 'text-primary-500' : 'text-gray-500'}"
 			>
-                {m.ebiosWs4_2()}
+				{m.ebiosWs4_2()}
 			</h1>
 			<p>
 				{#if operationalScenario.is_selected}
@@ -115,27 +119,58 @@
 					<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
 				{/if}
 			</p>
-            <div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
-                <h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-dice text-black opacity-75"></i>
 					<span>{m.likelihood()}</span>
 				</h3>
-                <div class="grid grid-cols-4 gap-2 p-2">
-                    {#each likelihoodChoices as choice}
-                        {#if operationalScenario.likelihood.value === choice.value}
-                            <div style="background-color: {operationalScenario.likelihood.hexcolor}" class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold">
-                                <span>{choice.label}</span>
-                                <span>({choice.value})</span>
-                            </div>
-                        {:else}
-                            <div class="flex flex-col items-center justify-center border rounded-md bg-gray-200 p-4 text-gray-500">
-                                <span>{choice.label}</span>
-                                <span>({choice.value})</span>
-                            </div>
-                        {/if}
-                    {/each}
-                </div>
-            </div>
+				<div class="grid grid-cols-4 gap-2 p-2">
+					{#each likelihoodChoices as choice}
+						{#if operationalScenario.likelihood.value === choice.value}
+							<div
+								style="background-color: {operationalScenario.likelihood.hexcolor}"
+								class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold"
+							>
+								<span>{choice.label}</span>
+								<span>({choice.value})</span>
+							</div>
+						{:else}
+							<div
+								class="flex flex-col items-center justify-center border rounded-md bg-gray-200 p-4 text-gray-500"
+							>
+								<span>{choice.label}</span>
+								<span>({choice.value})</span>
+							</div>
+						{/if}
+					{/each}
+				</div>
+			</div>
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+					<i class="fa-solid fa-bomb text-black opacity-75"></i>
+					<span>{m.gravity()}</span>
+				</h3>
+				<div class="grid grid-cols-4 gap-2 p-2">
+					{#each gravityChoices as choice}
+						{#if operationalScenario.gravity.value === choice.value}
+							<div
+								style="background-color: {operationalScenario.gravity.hexcolor}"
+								class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold"
+							>
+								<span>{choice.label}</span>
+								<span>({choice.value})</span>
+							</div>
+						{:else}
+							<div
+								class="flex flex-col items-center justify-center border rounded-md bg-gray-200 p-4 text-gray-500"
+							>
+								<span>{choice.label}</span>
+								<span>({choice.value})</span>
+							</div>
+						{/if}
+					{/each}
+				</div>
+			</div>
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>

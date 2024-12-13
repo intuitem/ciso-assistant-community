@@ -246,6 +246,14 @@ class RoTo(AbstractBaseModel, FolderMixin):
             PERTINENCE_MATRIX[self.motivation - 1][self.resources - 1]
         ).label
 
+    @property
+    def gravity(self):
+        gravity = -1
+        for feared_event in self.feared_events.all():
+            if feared_event.gravity > gravity:
+                gravity = feared_event.gravity
+        return gravity
+
 
 class Stakeholder(AbstractBaseModel, FolderMixin):
     class Category(models.TextChoices):
@@ -398,6 +406,9 @@ class AttackPath(AbstractBaseModel, FolderMixin):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 
+    def get_gravity(self):
+        return self.ro_to_couple.gravity
+
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):
     ebios_rm_study = models.ForeignKey(
@@ -454,4 +465,22 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         return {
             **risk_matrix["probability"][self.likelihood],
             "value": self.likelihood,
+        }
+
+    def get_gravity_display(self):
+        gravity = -1
+        for attack_path in self.attack_paths.all():
+            if attack_path.get_gravity() > gravity:
+                gravity = attack_path.get_gravity()
+        if gravity < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
+        risk_matrix = self.parsed_matrix
+        return {
+            **risk_matrix["impact"][gravity],
+            "value": gravity,
         }
