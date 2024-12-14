@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { Command } from 'cmdk-sv';
 	import { goto } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
+	import { writable } from 'svelte/store';
 
-	let open = false;
+	// Create a store for command palette visibility
+	export const commandPaletteOpen = writable(false);
 
 	// Custom case-insensitive filter
 	function caseInsensitiveFilter(value: string, search: string) {
-		// Normalize both value and search to lowercase for comparison
 		return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
 	}
 
@@ -16,7 +18,7 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (browser && (e.metaKey || e.ctrlKey) && e.key === 'k') {
 			e.preventDefault();
-			open = !open;
+			commandPaletteOpen.update((current) => !current);
 		}
 	}
 
@@ -25,19 +27,33 @@
 		{
 			label: 'Home',
 			value: '/',
-			onSelect: () => goto('/')
+			onSelect: () => {
+				commandPaletteOpen.set(false);
+				goto('/');
+			}
 		},
 		{
 			label: 'About',
 			value: '/about',
-			onSelect: () => goto('/about')
+			onSelect: () => {
+				commandPaletteOpen.set(false);
+				goto('/about');
+			}
 		},
 		{
 			label: 'Settings',
 			value: '/settings',
-			onSelect: () => goto('/settings')
+			onSelect: () => {
+				commandPaletteOpen.set(false);
+				goto('/settings');
+			}
 		}
 	];
+
+	// Close command palette on route change
+	$: if ($page.url.pathname) {
+		commandPaletteOpen.set(false);
+	}
 
 	// Add global event listener
 	onMount(() => {
@@ -53,12 +69,11 @@
 	});
 </script>
 
-<Command.Dialog bind:open label="Command Menu">
+<Command.Dialog bind:open={$commandPaletteOpen} label="Command Menu">
 	<Command.Root filter={caseInsensitiveFilter}>
 		<Command.Input placeholder="Type a command..." />
 		<Command.List>
 			<Command.Empty>No results found.</Command.Empty>
-
 			<Command.Group heading="Navigation">
 				{#each navigationCommands as command}
 					<Command.Item value={command.label} onSelect={command.onSelect}>
@@ -66,7 +81,6 @@
 					</Command.Item>
 				{/each}
 			</Command.Group>
-
 			<Command.Separator />
 		</Command.List>
 	</Command.Root>
