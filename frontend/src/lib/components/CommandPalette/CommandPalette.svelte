@@ -2,9 +2,11 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { Command } from 'cmdk-sv';
-	import { goto } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { navigationLinks } from './paletteData.ts';
+	import { goto } from '$app/navigation';
 
 	// Create a store for command palette visibility
 	export const commandPaletteOpen = writable(false);
@@ -22,33 +24,15 @@
 		}
 	}
 
-	// Navigation commands
-	const navigationCommands = [
-		{
-			label: 'Home',
-			value: '/',
-			onSelect: () => {
-				commandPaletteOpen.set(false);
-				goto('/');
-			}
-		},
-		{
-			label: 'About',
-			value: '/about',
-			onSelect: () => {
-				commandPaletteOpen.set(false);
-				goto('/about');
-			}
-		},
-		{
-			label: 'Settings',
-			value: '/settings',
-			onSelect: () => {
-				commandPaletteOpen.set(false);
-				goto('/settings');
-			}
+	// Generate navigation commands with automatic close
+	const navigationCommands = navigationLinks.map((link) => ({
+		label: safeTranslate(link.label),
+		value: link.href,
+		onSelect: () => {
+			commandPaletteOpen.set(false);
+			goto(link.href);
 		}
-	];
+	}));
 
 	// Close command palette on route change
 	$: if ($page.url.pathname) {
