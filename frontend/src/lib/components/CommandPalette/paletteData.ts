@@ -31,6 +31,10 @@ export const navigationLinks: NavigationLink[] = [
 		href: '/risk-assessments'
 	},
 	{
+		label: 'riskScenarios',
+		href: '/risk-scenarios'
+	},
+	{
 		label: 'actionPlan',
 		href: '/applied-controls'
 	},
