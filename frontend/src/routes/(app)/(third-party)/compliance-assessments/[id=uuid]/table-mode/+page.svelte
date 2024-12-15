@@ -193,11 +193,12 @@
 					>
 				</span>
 			{:else}
+				<div class="h-2"></div>
 				<div
-					class="flex flex-col items-center justify-center border px-4 py-2 shadow rounded space-y-2"
+					class="flex flex-col items-center justify-center border px-4 py-2 shadow rounded-xl space-y-2"
 				>
 					{#if requirementAssessment.description}
-						<div class="flex w-full justify-center items-center font-semibold">
+						<div class="flex w-full font-semibold">
 							{requirementAssessment.description}
 						</div>
 					{/if}
