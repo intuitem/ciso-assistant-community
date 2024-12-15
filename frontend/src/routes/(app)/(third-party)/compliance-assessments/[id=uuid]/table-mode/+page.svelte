@@ -180,10 +180,11 @@
 			</div>
 		{/if}
 		{#each data.requirement_assessments as requirementAssessment}
+			<div class="h-2"></div>
 			<div
-				class="flex flex-col items-center justify-center border pb-2 px-2 shadow-lg rounded-md space-y-2"
+				class="flex flex-col items-center justify-center border px-4 py-2 shadow rounded space-y-2"
 			>
-				<h1 class="font-semibold text-xl">{title(requirementAssessment)}</h1>
+				<h1 class="font-semibold text-xl text-orange-600">{title(requirementAssessment)}</h1>
 				{#if requirementAssessment.description}
 					<div class="flex w-full justify-center items-center font-semibold">
 						{requirementAssessment.description}
@@ -197,9 +198,9 @@
 						method="post"
 					>
 						{#if !questionnaireMode}
-							<div class="flex flex-row w-full space-x-2">
+							<div class="flex flex-row w-full space-x-2 my-4">
 								<div class="flex flex-col items-center w-1/2">
-									<p class="flex items-center font-semibold">{m.status()}</p>
+									<p class="flex items-center font-semibold text-blue-600 italic">{m.status()}</p>
 									<RadioGroup class="w-full flex-wrap items-center">
 										{#each status_options as option}
 											<RadioItem
@@ -223,7 +224,7 @@
 									</RadioGroup>
 								</div>
 								<div class="flex flex-col items-center w-1/2">
-									<p class="flex items-center font-semibold">{m.result()}</p>
+									<p class="flex items-center font-semibold text-purple-600 italic">{m.result()}</p>
 									<RadioGroup class="w-full flex-wrap items-center">
 										{#each result_options as option}
 											<RadioItem
