@@ -1350,7 +1350,7 @@ erDiagram
     EBIOS_RM_STUDY        |o--o{ RISK_ASSESSMENT      : generates
     ATTACK_PATH           }o--|| RO_TO                : derives
     RO_TO                 }o--o{ FEARED_EVENT         : corresponds_to
-    OPERATIONAL_SCENARIO  }o--|{ ATTACK_PATH          : derives
+    OPERATIONAL_SCENARIO  |o--|| ATTACK_PATH          : derives
     OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
     ATTACK_PATH           }o--o{ STAKEHOLDER          : leverages
     STAKEHOLDER           }o--o{ APPLIED_CONTROL      : reinforces
@@ -1406,13 +1406,15 @@ erDiagram
     }
 
     ATTACK_PATH {
+        string ref_id
+        string name
         string description
         bool   selected
         string justification
     }
 
     OPERATIONAL_SCENARIO {
-        string description
+        string operating_modes_description
         int    likelihood
         bool   selected
         string justification
