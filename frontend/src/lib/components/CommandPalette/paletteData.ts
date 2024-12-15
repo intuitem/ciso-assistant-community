@@ -1,4 +1,3 @@
-import { goto } from '$app/navigation';
 import * as m from '$paraglide/messages';
 
 export interface NavigationLink {
@@ -8,11 +7,51 @@ export interface NavigationLink {
 
 export const navigationLinks: NavigationLink[] = [
 	{
-		label: m.analytics(),
+		label: 'analytics',
 		href: '/'
 	},
 	{
-		label: m.settings(),
+		label: 'myAssignments',
+		href: '/my-assignments'
+	},
+	{
+		label: 'domains',
+		href: '/folders'
+	},
+	{
+		label: 'assets',
+		href: '/assets'
+	},
+	{
+		label: 'complianceAssessments',
+		href: '/compliance-assessments'
+	},
+	{
+		label: 'riskAssessments',
+		href: '/risk-assessments'
+	},
+	{
+		label: 'actionPlan',
+		href: '/applied-controls'
+	},
+	{
+		label: 'evidences',
+		href: '/evidences'
+	},
+	{
+		label: 'xRays',
+		href: '/x-rays'
+	},
+	{
+		label: 'libraries',
+		href: '/libraries'
+	},
+	{
+		label: 'myProfile',
+		href: '/my-profile'
+	},
+	{
+		label: 'settings',
 		href: '/settings'
 	}
 ];
