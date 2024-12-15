@@ -443,7 +443,7 @@ The perimeter has the following fields:
 - description
 - status: --/Design/Development/Production/End of life/Dropped
 
-An assessment can only be only attached to a perimeter that is in the same domain as the assessment.
+An assessment can only be attached to a perimeter that is in the same domain as the assessment.
 
 Note: perimeters where previously named "projects", but this was misleading.
 
