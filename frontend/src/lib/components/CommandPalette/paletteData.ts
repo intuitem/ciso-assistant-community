@@ -47,6 +47,10 @@ export const navigationLinks: NavigationLink[] = [
 		href: '/x-rays'
 	},
 	{
+		label: 'tpSolutions',
+		href: '/solutions'
+	},
+	{
 		label: 'libraries',
 		href: '/libraries'
 	},
