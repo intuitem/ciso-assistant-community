@@ -2070,14 +2070,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             object_type=ComplianceAssessment,
         )
         if UUID(pk) in viewable_objects:
-            response = {
-                "none": [],
-                "to_do": [],
-                "in_progress": [],
-                "on_hold": [],
-                "active": [],
-                "deprecated": [],
-            }
+            response = []
             compliance_assessment_object: ComplianceAssessment = self.get_object()
             requirement_assessments_objects = (
                 compliance_assessment_object.get_requirement_assessments(
@@ -2099,10 +2092,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     .filter(applied_controls=applied_control["id"])
                     .count()
                 )
-                if applied_control["status"] == "--":
-                    response["none"].append(applied_control)
-                else:
-                    response[applied_control["status"].lower()].append(applied_control)
+                response.append(applied_control)
 
         return Response(response)
 
