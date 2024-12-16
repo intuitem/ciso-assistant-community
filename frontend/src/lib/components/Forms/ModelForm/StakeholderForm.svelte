@@ -105,9 +105,9 @@
 		/>
 	</span>
 
+	<h4 class="h4 font-semibold self-start">{m.currentAssessment()}</h4>
 	<div class="flex flex-row items-center space-x-4">
 		<div class="flex flex-col space-y-4 w-fit items-center">
-			<h4 class="h4 font-semibold self-start">{m.currentAssessment()}</h4>
 			<span class="flex flex-row items-center space-x-4">
 				<RadioGroupInput
 					{form}
@@ -173,7 +173,7 @@
 			>
 		</div>
 		<i class="fa-solid fa-equals" />
-		<div class="flex flex-col">
+		<div class="flex flex-col mb-5">
 			<label for="current_criticality" class="text-sm font-semibold">
 				{m.criticality()}
 			</label>
@@ -206,8 +206,8 @@
 		>
 			{m.activityThree()}
 		</p>
-		<div class="flex">
-			<div class="w-full mr-2">
+		<div class="flex flex-row space-x-2">
+			<div class="w-full">
 				<AutocompleteSelect
 					multiple
 					{form}
@@ -219,18 +219,16 @@
 					label={m.appliedControls()}
 				/>
 			</div>
-			<div class="flex items-center justify-center">
-				<div class="">
-					<button class="btn bg-gray-300 h-10 w-10" on:click={modalMeasureCreateForm} type="button"
-						><i class="fa-solid fa-plus text-sm" /></button
-					>
-				</div>
+			<div class="flex items-end">
+				<button class="btn input h-11 w-11" on:click={modalMeasureCreateForm} type="button"
+					><i class="fa-solid fa-plus text-sm" />
+				</button>
 			</div>
 		</div>
 
+		<h4 class="h4 font-semibold self-start">{m.targetAssessment()}</h4>
 		<div class="flex flex-row items-center space-x-4">
 			<div class="flex flex-col space-y-4 w-fit items-center">
-				<h4 class="h4 font-semibold self-start">{m.targetAssessment()}</h4>
 				<span class="flex flex-row items-center space-x-4">
 					<RadioGroupInput
 						{form}
@@ -296,7 +294,7 @@
 				>
 			</div>
 			<i class="fa-solid fa-equals" />
-			<div class="flex flex-col">
+			<div class="flex flex-col mb-5">
 				<label for="residual_criticality" class="text-sm font-semibold">
 					{m.criticality()}
 				</label>
