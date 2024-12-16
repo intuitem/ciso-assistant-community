@@ -1003,5 +1003,6 @@
 	"unlikely": "Unlikely",
 	"veryLikely": "Very likely",
 	"certain": "Certain",
-	"minor": "Minor"
+	"minor": "Minor",
+	"operatingModesDescription": "Operating modes description"
 }

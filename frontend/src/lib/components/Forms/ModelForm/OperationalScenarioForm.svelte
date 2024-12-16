@@ -53,10 +53,10 @@
 	</p>
 	<TextArea
 		{form}
-		field="description"
-		label={m.description()}
-		cacheLock={cacheLocks['description']}
-		bind:cachedValue={formDataCache['description']}
+		field="operating_modes_description"
+		label={m.operatingModesDescription()}
+		cacheLock={cacheLocks['operating_modes_description']}
+		bind:cachedValue={formDataCache['operating_modes_description']}
 		data-focusindex="1"
 	/>
 	<AutocompleteSelect

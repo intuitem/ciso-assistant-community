@@ -458,7 +458,7 @@ export const operationalScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	attack_path: z.string().uuid(),
 	threats: z.string().uuid().optional().array().optional(),
-	description: z.string(),
+	operating_modes_description: z.string(),
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().optional().default(false),
 	justification: z.string().optional()
