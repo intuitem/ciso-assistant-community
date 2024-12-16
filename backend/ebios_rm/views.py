@@ -1,3 +1,4 @@
+import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from core.serializers import RiskMatrixReadSerializer
@@ -123,12 +124,22 @@ class StakeholderViewSet(BaseModelViewSet):
         return Response(dict(Stakeholder.Category.choices))
 
 
+class AttackPathFilter(df.FilterSet):
+    used = df.BooleanFilter(method="is_used", label="Used")
+    
+    def is_used(self, queryset, name, value):
+        if value:
+            return queryset.filter(operational_scenario__isnull=False)
+        return queryset.filter(operational_scenario__isnull=True)
+    class Meta:
+        model = AttackPath
+        fields = ["ebios_rm_study", "is_selected", "used"]
+
+
 class AttackPathViewSet(BaseModelViewSet):
     model = AttackPath
 
-    filterset_fields = [
-        "ebios_rm_study",
-    ]
+    filterset_class = AttackPathFilter
 
 
 class OperationalScenarioViewSet(BaseModelViewSet):
