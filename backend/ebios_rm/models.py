@@ -458,12 +458,11 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     @property
     def ref_id(self):
-        sorted_operational_scenarios = list(
-            OperationalScenario.objects.filter(
-                ebios_rm_study=self.ebios_rm_study
-            ).order_by("created_at")
-        )
-        return sorted_operational_scenarios.index(self) + 1
+        return self.attack_path.ref_id
+
+    @property
+    def name(self):
+        return self.attack_path.name
 
     @property
     def gravity(self):
@@ -476,6 +475,14 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     @property
     def ro_to(self):
         return self.attack_path.ro_to_couple
+
+    def get_assets(self):
+        return Asset.objects.filter(
+            feared_events__in=self.attack_path.ro_to_couple.feared_events.all()
+        )
+
+    def get_applied_controls(self):
+        return AppliedControl.objects.filter(stakeholders__in=self.stakeholders.all())
 
     def get_likelihood_display(self):
         if self.likelihood < 0:
