@@ -219,6 +219,7 @@
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { popup } from '@skeletonlabs/skeleton';
 	import { browser } from '$app/environment';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const popupFilter: PopupSettings = {
 		event: 'click',
@@ -324,10 +325,8 @@
 													<li>
 														{#if val.str && val.id}
 															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${val.id}`}
-															<a
-																href={itemHref}
-																class="anchor"
-																on:click={(e) => e.stopPropagation()}>{val.str}</a
+															<Anchor href={itemHref} class="anchor" stopPropagation
+																>{val.str}</Anchor
 															>
 														{:else if val.str}
 															{val.str}
@@ -345,8 +344,8 @@
 										{:else if value && value.str}
 											{#if value.id}
 												{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-												<a href={itemHref} class="anchor" on:click={(e) => e.stopPropagation()}
-													>{value.str ?? '-'}</a
+												<Anchor href={itemHref} class="anchor" stopPropagation
+													>{value.str ?? '-'}</Anchor
 												>
 											{:else}
 												{value.str ?? '-'}

@@ -89,7 +89,7 @@
 				breadcrumbAction="push"
 				label={m.edit()}
 				href={editURL}
-				on:click={stopPropagation}
+				stopPropagation
 				class="unstyled cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-edit-button"><i class="fa-solid fa-pen-to-square" /></Anchor
 			>
