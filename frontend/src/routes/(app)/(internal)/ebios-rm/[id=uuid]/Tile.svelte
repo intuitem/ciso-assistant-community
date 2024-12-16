@@ -30,7 +30,7 @@
 						{#each meta as step, i}
 							{#if step.status == 'done'}
 								<li class="mb-10 ms-6">
-									<Anchor breadcrumbAction="push" href={step.href} class="hover:text-purple-800">
+									<Anchor href={step.href} class="hover:text-purple-800">
 										<span
 											class="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white"
 										>
@@ -42,7 +42,7 @@
 								</li>
 							{:else}
 								<li class="mb-10 ms-6">
-									<Anchor breadcrumbAction="push" href={step.href} class="hover:text-purple-800">
+									<Anchor href={step.href} class="hover:text-purple-800">
 										<span
 											class="absolute flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full -start-4 ring-4 ring-white"
 										>
