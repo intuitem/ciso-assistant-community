@@ -43,24 +43,24 @@ jobs:
           cp .meta ./backend/
           cp .meta ./backend/ciso_assistant/
 
-      - name: Build and Push Frontend Docker Image
+      - name: Build and Push Enterprise Frontend Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: .
+          file: ./enterprise/frontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
-            ghcr.io/${{ github.repository }}/frontend:latest
+            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ env.VERSION }}
+            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
 
-      - name: Build and Push Backend Docker Image
+      - name: Build and Push Enterprise Backend Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: ./backend
-          file: ./backend/Dockerfile
+          context: .
+          file: ./enterprise/backend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
-            ghcr.io/${{ github.repository }}/backend:latest
+            ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ env.VERSION }}
+            ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
