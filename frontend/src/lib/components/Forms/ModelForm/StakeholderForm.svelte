@@ -86,6 +86,14 @@
 		{m.activityOne()}
 	</p>
 	<span class="flex flex-row space-x-4">
+		<Select
+			{form}
+			options={model.selectOptions['category']}
+			field="category"
+			label={m.category()}
+			cacheLock={cacheLocks['category']}
+			bind:cachedValue={formDataCache['category']}
+		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['entity'] })}
@@ -95,19 +103,11 @@
 			label={m.entity()}
 			hidden={initialData.entity}
 		/>
-		<Select
-			{form}
-			options={model.selectOptions['category']}
-			field="category"
-			label={m.category()}
-			cacheLock={cacheLocks['category']}
-			bind:cachedValue={formDataCache['category']}
-		/>
 	</span>
 
-	<div class="flex flex-row items-center space-x-4 card bg-inherit p-4">
+	<div class="flex flex-row items-center space-x-4">
 		<div class="flex flex-col space-y-4 w-fit items-center">
-			<h4 class="h4 font-semibold self-start">{m.current()}</h4>
+			<h4 class="h4 font-semibold self-start">{m.currentAssessment()}</h4>
 			<span class="flex flex-row items-center space-x-4">
 				<RadioGroupInput
 					{form}
@@ -228,9 +228,9 @@
 			</div>
 		</div>
 
-		<div class="flex flex-row items-center space-x-4 card bg-inherit p-4">
+		<div class="flex flex-row items-center space-x-4">
 			<div class="flex flex-col space-y-4 w-fit items-center">
-				<h4 class="h4 font-semibold self-start">{m.residual()}</h4>
+				<h4 class="h4 font-semibold self-start">{m.targetAssessment()}</h4>
 				<span class="flex flex-row items-center space-x-4">
 					<RadioGroupInput
 						{form}
