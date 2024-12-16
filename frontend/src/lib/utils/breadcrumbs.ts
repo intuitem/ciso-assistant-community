@@ -8,6 +8,8 @@ export interface Breadcrumb {
 	icon?: string;
 }
 
+const BREADCRUMBS_MAX_DEPTH = 5;
+
 const homeCrumb: Breadcrumb = { label: m.home(), href: '/', icon: 'fa-regular fa-compass' };
 
 const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
@@ -15,7 +17,8 @@ const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 
 	function push(crumb: Breadcrumb[]) {
 		breadcrumbs.update((value) => {
-			return [...value, ...crumb];
+			const newCrumbs = [...value.slice(1, value.length), ...crumb];
+			return [homeCrumb, ...newCrumbs.slice(-BREADCRUMBS_MAX_DEPTH)];
 		});
 	}
 
