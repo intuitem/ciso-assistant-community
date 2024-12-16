@@ -13,6 +13,8 @@
 	import { page } from '$app/stores';
 	import { breadcrumbs } from '$lib/utils/breadcrumbs';
 
+	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import commandPaletteOpen from '$lib/components/CommandPalette/CommandPalette.svelte';
 	let sidebarOpen = true;
 
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-7 lg:ml-64' : 'ml-7');
@@ -71,6 +73,7 @@
 		</AppBar>
 	</svelte:fragment>
 	<!-- Router Slot -->
+	<CommandPalette />
 	<slot />
 	<!-- ---- / ---- -->
 </AppShell>

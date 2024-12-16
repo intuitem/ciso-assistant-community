@@ -94,9 +94,9 @@ class RoToReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     feared_events = FieldsRelatedField(["folder", "id"], many=True)
 
-    pertinence = serializers.CharField(source="get_pertinence_display")
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
+    pertinence = serializers.CharField(source="get_pertinence")
 
     class Meta:
         model = RoTo
@@ -157,7 +157,7 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    attack_paths = FieldsRelatedField(many=True)
+    attack_path = FieldsRelatedField()
     threats = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
 

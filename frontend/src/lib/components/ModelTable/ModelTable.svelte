@@ -42,6 +42,7 @@
 	// Props (styles)
 	export let element: CssClasses = 'table';
 	export let text: CssClasses = 'text-xs';
+	export let backgroundColor: CssClasses = 'bg-white';
 	export let color: CssClasses = '';
 	export let regionHead: CssClasses = '';
 	export let regionHeadCell: CssClasses = 'uppercase bg-white text-gray-700';
@@ -97,7 +98,7 @@
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
 
-	$: classesBase = `${classProp || 'bg-white'}`;
+	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
 	import { goto as _goto } from '$app/navigation';
@@ -263,9 +264,12 @@
 		{#if pagination && rowsPerPage}
 			<RowsPerPage {handler} />
 		{/if}
-		{#if canCreateObject}
-			<slot name="addButton" />
-		{/if}
+		<div class="flex space-x-2 items-center">
+			<slot name="optButton" />
+			{#if canCreateObject}
+				<slot name="addButton" />
+			{/if}
+		</div>
 	</header>
 	<!-- Table -->
 	<table

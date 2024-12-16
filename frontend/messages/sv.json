@@ -859,7 +859,7 @@
 	"addTag": "Lägg till etikett",
 	"tagsHelpText": "Etiketter hjälper till att kategorisera och filtrera flera objekt. Du kan hantera dem i menyn Extra.",
 	"existingMeasures": "Befintliga kontroller",
-	"youCanSetPasswordHere": "Du kan ställa in ditt lösenord här",
+	"youCanSetPasswordHere": "Du kan ställa in ditt lösenord här.",
 	"forgotPassword": "Glömt lösenord",
 	"ssoSettingsUpdated": "SSO-inställningar uppdaterade",
 	"scoreSemiColon": "Göra:",

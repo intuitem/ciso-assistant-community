@@ -4,6 +4,8 @@
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { displayOnlyAssessableNodes } from './store';
 
+	import { onMount } from 'svelte';
+
 	import type {
 		ModalComponent,
 		ModalSettings,
@@ -55,6 +57,29 @@
 		user.permissions,
 		`change_${requirementAssessmentModel.name}`
 	);
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.metaKey || event.ctrlKey) return;
+		// Check if the pressed key is 'e' and the edit button should be displayed
+		if (event.key === 'f') {
+			event.preventDefault();
+			goto(`${$page.url.pathname}/flash-mode`);
+		}
+		if (event.key === 't') {
+			event.preventDefault();
+			goto(`${$page.url.pathname}/table-mode`);
+		}
+	}
+
+	onMount(() => {
+		// Add event listener to the document
+		document.addEventListener('keydown', handleKeydown);
+
+		// Cleanup function to remove event listener
+		return () => {
+			document.removeEventListener('keydown', handleKeydown);
+		};
+	});
 
 	const countResults = (
 		node: Node,

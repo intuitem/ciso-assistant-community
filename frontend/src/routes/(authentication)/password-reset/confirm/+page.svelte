@@ -5,6 +5,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import * as m from '$paraglide/messages.js';
 
 	export let data: PageData;
 </script>
@@ -21,7 +22,7 @@
 				<i class="fa-solid fa-key" />
 			</div>
 			<p class="text-gray-600 text-sm text-center">
-				You can reset your password here.<br />
+				{m.resetPasswordHere()}<br />
 			</p>
 			<!-- SuperForm with dataType 'form' -->
 			<div class="flex w-full">
@@ -32,18 +33,18 @@
 					let:form
 					validators={zod(ResetPasswordSchema)}
 				>
-					<TextField type="password" {form} field="new_password" label="New password" />
+					<TextField type="password" {form} field="new_password" label={m.newPassword()} />
 					<TextField
 						type="password"
 						{form}
 						field="confirm_new_password"
-						label="Confirm new password"
+						label={m.confirmNewPassword()}
 					/>
 					<p class="pt-3">
 						<button
 							class="btn variant-filled-primary font-semibold w-full"
 							type="submit"
-							data-testid="set-password-btn">Reset Password</button
+							data-testid="set-password-btn">{m.resetPassword()}</button
 						>
 					</p>
 				</SuperForm>

@@ -58,6 +58,7 @@
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
 	export let duplicate = false;
+	export let customNameDescription = false;
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -163,7 +164,7 @@
 			}}
 		/>
 	{/if}
-	{#if shape.name}
+	{#if shape.name && !customNameDescription}
 		<TextField
 			{form}
 			field="name"
@@ -173,7 +174,7 @@
 			data-focusindex="0"
 		/>
 	{/if}
-	{#if shape.description}
+	{#if shape.description && !customNameDescription}
 		<TextArea
 			{form}
 			field="description"
@@ -266,7 +267,7 @@
 	{:else if URLModel === 'feared-events'}
 		<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'ro-to'}
-		<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'stakeholders'}
 		<StakeholderForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'attack-paths'}

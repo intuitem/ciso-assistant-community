@@ -1,7 +1,8 @@
 import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
-import { setLanguageTag, sourceLanguageTag } from '$paraglide/runtime';
+import { setLanguageTag } from '$paraglide/runtime';
+import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 
@@ -21,6 +22,6 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 			});
 		}
 	}
-	setLanguageTag(cookies.get('ciso_lang') || sourceLanguageTag);
+	setLanguageTag(cookies.get('ciso_lang') || DEFAULT_LANGUAGE);
 	return { user: locals.user, settings: locals.settings };
 }) satisfies LayoutServerLoad;

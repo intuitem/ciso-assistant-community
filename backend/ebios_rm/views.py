@@ -33,6 +33,11 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(EbiosRMStudy.Status.choices))
 
+    @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
+    def risk_matrix(self, request, pk=None):
+        ebios_rm_study = self.get_object()
+        return Response(RiskMatrixReadSerializer(ebios_rm_study.risk_matrix).data)
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get gravity choices")
     def gravity(self, request, pk):
@@ -64,9 +69,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
 
-    filterset_fields = [
-        "ebios_rm_study",
-    ]
+    filterset_fields = ["ebios_rm_study", "ro_to_couples"]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
@@ -106,10 +109,6 @@ class RoToViewSet(BaseModelViewSet):
     @action(detail=False, name="Get resources choices")
     def resources(self, request):
         return Response(dict(RoTo.Resources.choices))
-
-    @action(detail=False, name="Get pertinence choices")
-    def pertinence(self, request):
-        return Response(dict(RoTo.Pertinence.choices))
 
 
 class StakeholderViewSet(BaseModelViewSet):

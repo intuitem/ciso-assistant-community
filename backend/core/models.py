@@ -1552,8 +1552,9 @@ class Asset(
                 if key not in disaster_recovery_objectives:
                     disaster_recovery_objectives[key] = content
                 else:
-                    disaster_recovery_objectives[key] = min(
-                        disaster_recovery_objectives[key], content.get("value", 0)
+                    disaster_recovery_objectives[key]["value"] = min(
+                        disaster_recovery_objectives[key].get("value", 0),
+                        content.get("value", 0),
                     )
 
         return {"objectives": disaster_recovery_objectives}
@@ -1996,6 +1997,14 @@ class RiskAssessment(Assessment):
     )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+    ebios_rm_study = models.ForeignKey(
+        "ebios_rm.EbiosRMStudy",
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="risk_assessments",
     )
 
     class Meta:
@@ -3245,7 +3254,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         applied_controls: list[AppliedControl] = []
         for reference_control in self.requirement.reference_controls.all():
             try:
-                _name = reference_control.name or reference_control.ref_id
+                _name = (
+                    reference_control.get_name_translated or reference_control.ref_id
+                )
                 applied_control, created = AppliedControl.objects.get_or_create(
                     name=_name,
                     folder=self.folder,

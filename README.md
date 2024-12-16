@@ -170,7 +170,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
 62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
 63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
-64. Annex to the Implementing Regulation of NIS 2 on Technical and methodological requirements 🇪🇺
+64. NIS2 technical and methodological requirements 2024/2690 🇪🇺
+65. Guide de sécurité des données (CNIL) 🇫🇷
 
 ### Community contributions
 
@@ -198,6 +199,8 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - NIST 800-82
+- FTC safeguards
+- CNIL checklist
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
@@ -537,3 +540,7 @@ All the files outside the top-level "enterprise" directory are released under th
 See [LICENSE.md](./LICENSE.md) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
 
 Unless otherwise noted, all files are © intuitem.
+
+## Activity 
+
+![Alt](https://repobeats.axiom.co/api/embed/83162c6044da29efd7efa28f746b6bee5a3c6a8a.svg "Repobeats analytics image")

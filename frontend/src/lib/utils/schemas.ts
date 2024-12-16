@@ -96,7 +96,8 @@ export const RiskAssessmentSchema = z.object({
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	ebios_rm_study: z.string().uuid().optional()
 });
 
 export const ThreatSchema = z.object({
@@ -206,7 +207,8 @@ export const AssetSchema = z.object({
 		.optional(),
 	reference_link: z.string().url().optional().or(z.literal('')),
 	owner: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	ebios_rm_studies: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({
@@ -399,7 +401,8 @@ export const ebiosRMSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	assets: z.string().uuid().optional().array().optional(),
-	folder: z.string()
+	folder: z.string(),
+	compliance_assessments: z.string().uuid().optional().array().optional()
 });
 
 export const fearedEventsSchema = z.object({
@@ -415,12 +418,11 @@ export const fearedEventsSchema = z.object({
 
 export const roToSchema = z.object({
 	ebios_rm_study: z.string(),
-	feared_events: z.string().uuid().array(),
+	feared_events: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string(),
 	target_objective: z.string(),
 	motivation: z.number().default(0).optional(),
 	resources: z.number().default(0).optional(),
-	pertinence: z.number().default(0).optional(),
 	activity: z.number().min(0).max(4).optional().default(0),
 	is_selected: z.boolean().optional().default(false),
 	justification: z.string().optional()
@@ -454,7 +456,7 @@ export const AttackPathSchema = z.object({
 
 export const operationalScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
-	attack_paths: z.string().uuid().array(),
+	attack_path: z.string().uuid(),
 	threats: z.string().uuid().optional().array().optional(),
 	description: z.string(),
 	likelihood: z.number().optional().default(-1),
