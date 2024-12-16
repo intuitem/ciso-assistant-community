@@ -9,7 +9,7 @@
 	import type { AnyZodObject } from 'zod';
 
 	import * as m from '$paraglide/messages';
-	import Anchor from '../Anchor/Anchor.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
