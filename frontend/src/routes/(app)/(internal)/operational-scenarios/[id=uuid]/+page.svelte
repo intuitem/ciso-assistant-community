@@ -45,12 +45,12 @@
 		<div class="flex items-center justify-between w-full">
 			<div class="flex font-bold text-2xl space-x-2">
 				<span
-				><a
-					class="text-primary-700 hover:text-primary-500"
-					href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
-					>{operationalScenario.ebios_rm_study.str}</a
-				>
-				- {m.operationalScenarioRefId({ refId: operationalScenario.ref_id })}</span
+					><a
+						class="text-primary-700 hover:text-primary-500"
+						href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
+						>{operationalScenario.ebios_rm_study.str}</a
+					>
+					- {m.operationalScenarioRefId({ refId: operationalScenario.ref_id })}</span
 				>
 				<p class="flex items-center">
 					{#if operationalScenario.is_selected}
