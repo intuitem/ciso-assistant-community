@@ -407,7 +407,7 @@ class AttackPath(AbstractBaseModel, FolderMixin):
 
     @property
     def gravity(self):
-        return self.ro_to_couple.get_gravity
+        return self.ro_to_couple.get_gravity()
 
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):
