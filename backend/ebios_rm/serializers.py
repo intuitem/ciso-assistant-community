@@ -161,6 +161,8 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     threats = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
     gravity = serializers.JSONField(source="get_gravity_display")
+    risk_level = serializers.JSONField(source="get_risk_level_display")
+    ref_id = serializers.CharField()
 
     class Meta:
         model = OperationalScenario

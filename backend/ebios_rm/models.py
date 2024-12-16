@@ -12,6 +12,7 @@ from core.models import (
 )
 from iam.models import FolderMixin, User
 from tprm.models import Entity
+import json
 
 
 class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
@@ -453,6 +454,23 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
+    @property
+    def ref_id(self):
+        sorted_operational_scenarios = list(
+            OperationalScenario.objects.filter(
+                ebios_rm_study=self.ebios_rm_study
+            ).order_by("created_at")
+        )
+        return sorted_operational_scenarios.index(self) + 1
+
+    @property
+    def gravity(self):
+        gravity = -1
+        for attack_path in self.attack_paths.all():
+            if attack_path.gravity > gravity:
+                gravity = attack_path.gravity
+        return gravity
+
     def get_likelihood_display(self):
         if self.likelihood < 0:
             return {
@@ -468,11 +486,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         }
 
     def get_gravity_display(self):
-        gravity = -1
-        for attack_path in self.attack_paths.all():
-            if attack_path.gravity > gravity:
-                gravity = attack_path.gravity
-        if gravity < 0:
+        if self.gravity < 0:
             return {
                 "abbreviation": "--",
                 "name": "--",
@@ -481,6 +495,21 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             }
         risk_matrix = self.parsed_matrix
         return {
-            **risk_matrix["impact"][gravity],
-            "value": gravity,
+            **risk_matrix["impact"][self.gravity],
+            "value": self.gravity,
+        }
+
+    def get_risk_level_display(self):
+        if self.likelihood < 0 or self.gravity < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
+        risk_matrix = self.parsed_matrix
+        risk_index = risk_matrix["grid"][self.likelihood][self.gravity]
+        return {
+            **risk_matrix["risk"][risk_index],
+            "value": risk_index,
         }
