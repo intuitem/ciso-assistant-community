@@ -85,112 +85,117 @@
 	>
 		{m.activityOne()}
 	</p>
-	<span class="flex flex-row space-x-4">
-		<Select
-			{form}
-			options={model.selectOptions['category']}
-			field="category"
-			label={m.category()}
-			cacheLock={cacheLocks['category']}
-			bind:cachedValue={formDataCache['category']}
-		/>
-		<AutocompleteSelect
-			{form}
-			options={getOptions({ objects: model.foreignKeys['entity'] })}
-			field="entity"
-			cacheLock={cacheLocks['entity']}
-			bind:cachedValue={formDataCache['entity']}
-			label={m.entity()}
-			hidden={initialData.entity}
-		/>
-	</span>
-
-	<h4 class="h4 font-semibold self-start">{m.currentAssessment()}</h4>
-	<div class="flex flex-row items-center space-x-4">
-		<div class="flex flex-col space-y-4 w-fit items-center">
-			<span class="flex flex-row items-center space-x-4">
-				<RadioGroupInput
+	<div class="flex flex-wrap items-center gap-4">
+		<div>
+			<span class="flex flex-row space-x-4">
+				<Select
 					{form}
-					options={[
-						{ label: '0', value: 0 },
-						{ label: '1', value: 1 },
-						{ label: '2', value: 2 },
-						{ label: '3', value: 3 },
-						{ label: '4', value: 4 }
-					]}
-					label={m.dependency()}
-					field="current_dependency"
-					cacheLock={cacheLocks['current_dependency']}
-					bind:cachedValue={formDataCache['current_dependency']}
+					options={model.selectOptions['category']}
+					field="category"
+					label={m.category()}
+					cacheLock={cacheLocks['category']}
+					bind:cachedValue={formDataCache['category']}
 				/>
-				<i class="fa-solid fa-times" />
-				<RadioGroupInput
+				<AutocompleteSelect
 					{form}
-					options={[
-						{ label: '0', value: 0 },
-						{ label: '1', value: 1 },
-						{ label: '2', value: 2 },
-						{ label: '3', value: 3 },
-						{ label: '4', value: 4 }
-					]}
-					field="current_penetration"
-					label={m.penetration()}
-					cacheLock={cacheLocks['current_penetration']}
-					bind:cachedValue={formDataCache['current_penetration']}
+					options={getOptions({ objects: model.foreignKeys['entity'] })}
+					field="entity"
+					cacheLock={cacheLocks['entity']}
+					bind:cachedValue={formDataCache['entity']}
+					label={m.entity()}
+					hidden={initialData.entity}
 				/>
 			</span>
 
-			<hr class="!border-t-2 !border-surface-900 self-stretch" />
+			<h4 class="h4 font-semibold self-start">{m.currentAssessment()}</h4>
+			<div class="flex flex-row items-center space-x-4">
+				<div class="flex flex-col space-y-4 w-fit items-center">
+					<span class="flex flex-row items-center space-x-4">
+						<RadioGroupInput
+							{form}
+							options={[
+								{ label: '0', value: 0 },
+								{ label: '1', value: 1 },
+								{ label: '2', value: 2 },
+								{ label: '3', value: 3 },
+								{ label: '4', value: 4 }
+							]}
+							label={m.dependency()}
+							field="current_dependency"
+							cacheLock={cacheLocks['current_dependency']}
+							bind:cachedValue={formDataCache['current_dependency']}
+						/>
+						<i class="fa-solid fa-times" />
+						<RadioGroupInput
+							{form}
+							options={[
+								{ label: '0', value: 0 },
+								{ label: '1', value: 1 },
+								{ label: '2', value: 2 },
+								{ label: '3', value: 3 },
+								{ label: '4', value: 4 }
+							]}
+							field="current_penetration"
+							label={m.penetration()}
+							cacheLock={cacheLocks['current_penetration']}
+							bind:cachedValue={formDataCache['current_penetration']}
+						/>
+					</span>
 
-			<span class="flex flex-row items-center space-x-4">
-				<RadioGroupInput
-					{form}
-					options={[
-						{ label: '1', value: 1 },
-						{ label: '2', value: 2 },
-						{ label: '3', value: 3 },
-						{ label: '4', value: 4 }
-					]}
-					field="current_maturity"
-					label={m.maturity()}
-					cacheLock={cacheLocks['current_maturity']}
-					bind:cachedValue={formDataCache['current_maturity']}
-				/>
-				<i class="fa-solid fa-times" />
-				<RadioGroupInput
-					{form}
-					options={[
-						{ label: '1', value: 1 },
-						{ label: '2', value: 2 },
-						{ label: '3', value: 3 },
-						{ label: '4', value: 4 }
-					]}
-					field="current_trust"
-					label={m.trust()}
-					cacheLock={cacheLocks['current_trust']}
-					bind:cachedValue={formDataCache['current_trust']}
-				/></span
-			>
+					<hr class="!border-t-2 !border-surface-900 self-stretch" />
+
+					<span class="flex flex-row items-center space-x-4">
+						<RadioGroupInput
+							{form}
+							options={[
+								{ label: '1', value: 1 },
+								{ label: '2', value: 2 },
+								{ label: '3', value: 3 },
+								{ label: '4', value: 4 }
+							]}
+							field="current_maturity"
+							label={m.maturity()}
+							cacheLock={cacheLocks['current_maturity']}
+							bind:cachedValue={formDataCache['current_maturity']}
+						/>
+						<i class="fa-solid fa-times" />
+						<RadioGroupInput
+							{form}
+							options={[
+								{ label: '1', value: 1 },
+								{ label: '2', value: 2 },
+								{ label: '3', value: 3 },
+								{ label: '4', value: 4 }
+							]}
+							field="current_trust"
+							label={m.trust()}
+							cacheLock={cacheLocks['current_trust']}
+							bind:cachedValue={formDataCache['current_trust']}
+						/></span
+					>
+				</div>
+				<i class="fa-solid fa-equals" />
+				<div class="flex flex-col mb-5">
+					<label for="current_criticality" class="text-sm font-semibold">
+						{m.criticality()}
+					</label>
+					<span class="chip text-base text-center px-4 py-1 rounded-token variant-filled">
+						{currentCriticality}
+					</span>
+				</div>
+			</div>
 		</div>
-		<i class="fa-solid fa-equals" />
-		<div class="flex flex-col mb-5">
-			<label for="current_criticality" class="text-sm font-semibold">
-				{m.criticality()}
-			</label>
-			<span class="chip text-base text-center px-4 py-1 rounded-token variant-filled">
-				{currentCriticality}
-			</span>
+		<div class="flex flex-col flex-grow">
+			<Checkbox {form} field="is_selected" label={m.selected()} />
+			<TextArea
+				{form}
+				field="justification"
+				label={m.justification()}
+				cacheLock={cacheLocks['justification']}
+				bind:cachedValue={formDataCache['justification']}
+			/>
 		</div>
 	</div>
-
-	<Checkbox {form} field="is_selected" label={m.selected()} />
-	<TextArea
-		{form}
-		field="justification"
-		label={m.justification()}
-		cacheLock={cacheLocks['justification']}
-		bind:cachedValue={formDataCache['justification']}
-	/>
 </div>
 
 {#if context === 'edit'}
