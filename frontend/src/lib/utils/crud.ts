@@ -700,7 +700,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
-			{ field: 'attack_paths', urlModel: 'attack-paths' }
+			{ field: 'attack_path', urlModel: 'attack-paths' }
 		],
 		selectFields: [{ field: 'likelihood', valueType: 'number' }]
 	}
