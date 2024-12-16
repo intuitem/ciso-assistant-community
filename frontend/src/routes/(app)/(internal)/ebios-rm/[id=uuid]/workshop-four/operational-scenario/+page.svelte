@@ -8,6 +8,7 @@
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import { checkConstraints } from '$lib/utils/crud';
 	import * as m from '$paraglide/messages.js';
+	import { page } from '$app/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -20,7 +21,8 @@
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model
+				model: data.model,
+				customNameDescription: true
 			}
 		};
 		let modal: ModalSettings = {
@@ -50,9 +52,25 @@
 		}
 		modalStore.trigger(modal);
 	}
+
+	let activeActivity: string | null = null;
+	$page.url.searchParams.forEach((value, key) => {
+		if (key === 'activity' && value === 'one') {
+			activeActivity = 'one';
+		} else if (key === 'activity' && value === 'two') {
+			activeActivity = 'two';
+		} else if (key === 'activity' && value === 'three') {
+			activeActivity = 'three';
+		}
+	});
 </script>
 
-<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+<ModelTable
+	source={data.table}
+	deleteForm={data.deleteForm}
+	{URLModel}
+	detailQueryParameter={`activity=${activeActivity}`}
+>
 	<div slot="addButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 			<button
