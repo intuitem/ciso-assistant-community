@@ -26,6 +26,9 @@
 	const flash = getFlash(page);
 	const toastStore = getToastStore();
 
+	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import commandPaletteOpen from '$lib/components/CommandPalette/CommandPalette.svelte';
+
 	const toast = (message: string, options: Record<string, string>) => {
 		const t: ToastSettings = {
 			message: message,
@@ -112,6 +115,7 @@
 <ParaglideJsProvider>
 	<Modal components={modalRegistry} />
 	<Toast />
+	<CommandPalette />
 	<slot />
 
 	{#if $flash}

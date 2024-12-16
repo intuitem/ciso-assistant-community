@@ -11,6 +11,8 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { goto } from '$app/navigation';
 
+	import { onMount } from 'svelte';
+
 	export let data: PageData;
 	export let form: ActionData;
 	$: URLModel = data.URLModel;
@@ -45,6 +47,43 @@
 		}
 		modalStore.trigger(modal);
 	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (event.metaKey || event.ctrlKey) return;
+
+		// Check if 'c' is pressed and no input fields are currently focused
+		if (
+			event.key.toLowerCase() === 'c' &&
+			document.activeElement?.tagName !== 'INPUT' &&
+			document.activeElement?.tagName !== 'TEXTAREA'
+		) {
+			// Prevent default 'c' key behavior
+			event.preventDefault();
+
+			// Check if the add button exists and is not in a disabled list
+			if (
+				![
+					'risk-matrices',
+					'frameworks',
+					'requirement-mapping-sets',
+					'user-groups',
+					'role-assignments'
+				].includes(URLModel)
+			) {
+				modalCreateForm();
+			}
+		}
+	}
+
+	onMount(() => {
+		// Add event listener when component mounts
+		window.addEventListener('keydown', handleKeyDown);
+
+		// Cleanup event listener when component is destroyed
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	});
 
 	$: if (form && form.redirect) {
 		goto(getSecureRedirect(form.redirect));

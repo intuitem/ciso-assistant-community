@@ -13,6 +13,7 @@
 
 	const appliedControlsHead = {
 		name: 'name',
+		status: 'status',
 		priority: 'priority',
 		category: 'category',
 		csf_function: 'csfFunction',
@@ -24,6 +25,7 @@
 	};
 	const appliedControlsColums = [
 		'name',
+		'status',
 		'priority',
 		'category',
 		'csf_function',
@@ -34,35 +36,10 @@
 		'requirements_count'
 	];
 
-	const toDoAppliedControls: TableSource = {
+	const AppliedControls: TableSource = {
 		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan.to_do, appliedControlsColums),
-		meta: data.actionPlan.to_do
-	};
-	const inProgressAppliedControls: TableSource = {
-		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan.in_progress, appliedControlsColums),
-		meta: data.actionPlan.in_progress
-	};
-	const onHoldAppliedControls: TableSource = {
-		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan.on_hold, appliedControlsColums),
-		meta: data.actionPlan.on_hold
-	};
-	const activeAppliedControls: TableSource = {
-		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan.active, appliedControlsColums),
-		meta: data.actionPlan.active
-	};
-	const deprecatedAppliedControls: TableSource = {
-		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan.deprecated, appliedControlsColums),
-		meta: data.actionPlan.deprecated
-	};
-	const noneAppliedControls: TableSource = {
-		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan.none, appliedControlsColums),
-		meta: data.actionPlan.none
+		body: tableSourceMapper(data.actionPlan, appliedControlsColums),
+		meta: data.actionPlan
 	};
 </script>
 
@@ -102,113 +79,13 @@
 		</p>
 	</div>
 	<div class="">
-		<TabGroup>
-			<Tab
-				bind:group={tabSet}
-				class="border-x border-t border-gray-300"
-				active="bg-blue-200 border-b-2 border-blue-500"
-				name="to_do"
-				value={0}>{m.toDo()}</Tab
-			>
-			<Tab
-				bind:group={tabSet}
-				class="border-x border-t border-gray-300"
-				active="bg-violet-400 border-b-2 border-blue-500"
-				name="in_progress"
-				value={1}>{m.inProgress()}</Tab
-			>
-			<Tab
-				bind:group={tabSet}
-				class="border-x border-t border-gray-300"
-				active="bg-orange-300 border-b-2 border-blue-500"
-				name="on_hold"
-				value={2}>{m.onHold()}</Tab
-			>
-			<Tab
-				bind:group={tabSet}
-				class="border-x border-t border-gray-300"
-				active="bg-green-200 border-b-2 border-green-500"
-				name="active"
-				value={3}>{m.active()}</Tab
-			>
-			<Tab
-				bind:group={tabSet}
-				class="border-x border-t border-gray-300"
-				active="bg-red-300 border-b-2 border-red-600"
-				name="deprecated"
-				value={4}>{m.deprecated()}</Tab
-			>
-			<Tab
-				bind:group={tabSet}
-				class="border-x border-t border-gray-300"
-				active="bg-gray-300 border-b-2 border-gray-600"
-				name="noStatus"
-				value={5}>{m.noStatus()}</Tab
-			>
-			<svelte:fragment slot="panel">
-				<div class="p-2">
-					{#if tabSet === 0}
-						<ModelTable
-							URLModel="applied-controls"
-							source={toDoAppliedControls}
-							search={true}
-							rowsPerPage={true}
-							orderBy={{ identifier: 'eta', direction: 'desc' }}
-							tags={false}
-						/>
-					{/if}
-					{#if tabSet === 1}
-						<ModelTable
-							URLModel="applied-controls"
-							source={inProgressAppliedControls}
-							search={true}
-							rowsPerPage={true}
-							orderBy={{ identifier: 'eta', direction: 'desc' }}
-							tags={false}
-						/>
-					{/if}
-					{#if tabSet === 2}
-						<ModelTable
-							URLModel="applied-controls"
-							source={onHoldAppliedControls}
-							search={true}
-							rowsPerPage={true}
-							orderBy={{ identifier: 'eta', direction: 'desc' }}
-							tags={false}
-						/>
-					{/if}
-					{#if tabSet === 3}
-						<ModelTable
-							URLModel="applied-controls"
-							source={activeAppliedControls}
-							search={true}
-							rowsPerPage={true}
-							orderBy={{ identifier: 'eta', direction: 'desc' }}
-							tags={false}
-						/>
-					{/if}
-					{#if tabSet === 4}
-						<ModelTable
-							URLModel="applied-controls"
-							source={deprecatedAppliedControls}
-							search={true}
-							rowsPerPage={true}
-							orderBy={{ identifier: 'eta', direction: 'desc' }}
-							tags={false}
-						/>
-					{/if}
-					{#if tabSet === 5}
-						<ModelTable
-							URLModel="applied-controls"
-							source={noneAppliedControls}
-							search={true}
-							rowsPerPage={true}
-							orderBy={{ identifier: 'eta', direction: 'desc' }}
-							tags={false}
-						/>
-					{/if}
-				</div>
-			</svelte:fragment>
-		</TabGroup>
+		<ModelTable
+			URLModel="applied-controls"
+			source={AppliedControls}
+			search={true}
+			rowsPerPage={true}
+			orderBy={{ identifier: 'eta', direction: 'desc' }}
+			tags={false}
+		/>
 	</div>
 </div>
