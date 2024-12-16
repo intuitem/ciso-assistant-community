@@ -91,12 +91,12 @@
 					<span class="text-xs text-gray-500">{m.motivation()}</span>
 					<span class="badge text-sm font-bold">{safeTranslate(roto.motivation)}</span>
 				</p>
-				<span>x</span>
+				<i class="fa-solid fa-xmark"></i>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.resources()}</span>
 					<span class="badge text-sm font-bold">{safeTranslate(roto.resources)}</span>
 				</p>
-				<span>=</span>
+				<i class="fa-solid fa-equals"></i>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.pertinence()}</span>
 					<span class="badge text-sm font-bold {pertinenceColor[roto.pertinence]}"
