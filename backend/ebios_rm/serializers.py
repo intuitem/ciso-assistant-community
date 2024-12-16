@@ -119,6 +119,7 @@ class StakeholderReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
 
+    category = serializers.CharField(source="get_category_display")
     current_criticality = serializers.IntegerField()
     residual_criticality = serializers.IntegerField()
 
@@ -134,7 +135,6 @@ class AttackPathWriteSerializer(BaseModelSerializer):
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
-    str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
