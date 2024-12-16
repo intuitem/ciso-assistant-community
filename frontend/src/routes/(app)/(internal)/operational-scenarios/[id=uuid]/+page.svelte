@@ -83,8 +83,8 @@
 				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
 				{m.edit()}
 			</a>
-			{#if operationalScenario.description}
-				<p class="text-gray-600">{operationalScenario.description}</p>
+			{#if operationalScenario.operating_modes_description}
+				<p class="text-gray-600">{operationalScenario.operating_modes_description}</p>
 			{:else}
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
