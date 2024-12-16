@@ -119,6 +119,7 @@ class AssessmentReadSerializer(BaseModelSerializer):
 class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     json_definition = serializers.JSONField(source="get_json_translated")
+    library = FieldsRelatedField(["name", "id"])
 
     class Meta:
         model = RiskMatrix
