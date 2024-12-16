@@ -46,12 +46,12 @@ export const breadcrumbs = createBreadcrumbs([homeCrumb]);
 
 export function goto(
 	url: string,
-	_opts: { crumbs: typeof breadcrumbs; label: string; breadcrumbAction: 'push' }
+	_opts: { crumbs: typeof breadcrumbs; label: string; breadcrumbAction: 'push' | 'replace' }
 ) {
 	const opts = {
 		crumbs: breadcrumbs,
 		label: '',
-		breadcrumbAction: 'replace',
+		breadcrumbAction: 'push',
 		..._opts
 	};
 
