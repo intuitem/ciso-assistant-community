@@ -469,11 +469,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     @property
     def gravity(self):
-        gravity = -1
-        for attack_path in self.attack_paths.all():
-            if attack_path.gravity > gravity:
-                gravity = attack_path.gravity
-        return gravity
+        return self.attack_path.gravity
 
     def get_likelihood_display(self):
         if self.likelihood < 0:
@@ -482,6 +478,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
                 "name": "--",
                 "description": "not rated",
                 "value": -1,
+                "hexcolor": "#f9fafb"
             }
         risk_matrix = self.parsed_matrix
         return {
