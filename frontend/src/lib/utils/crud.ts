@@ -693,7 +693,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
 			{
-				field: 'attack_paths',
+				field: 'attack_path',
 				urlModel: 'attack-paths',
 				endpointUrl: 'ebios-rm/attack-paths',
 				urlParams: 'ebios_rm_study=',
