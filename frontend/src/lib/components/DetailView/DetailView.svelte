@@ -25,6 +25,9 @@
 	import List from '$lib/components/List/List.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
 
@@ -71,6 +74,26 @@
 			toastStore.trigger(toast);
 		}
 	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.metaKey || event.ctrlKey) return;
+		// Check if the pressed key is 'e' and the edit button should be displayed
+
+		// if (event.key === 'e' && displayEditButton()) {
+		// event.preventDefault();
+		// goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+		//}
+	}
+
+	onMount(() => {
+		// Add event listener to the document
+		document.addEventListener('keydown', handleKeydown);
+
+		// Cleanup function to remove event listener
+		return () => {
+			document.removeEventListener('keydown', handleKeydown);
+		};
+	});
 
 	function modalCreateForm(model: Record<string, any>): void {
 		let modalComponent: ModalComponent = {

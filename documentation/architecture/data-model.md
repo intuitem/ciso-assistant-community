@@ -46,7 +46,8 @@ erDiagram
 erDiagram
 
     ROOT_FOLDER           ||--o{ DOMAIN                      : contains
-    DOMAIN                ||--o{ PROJECT                     : contains
+    DOMAIN                ||--o{ PERIMETER                   : contains
+    DOMAIN                ||--o{ PROJECT_OBJECT              : contains
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
@@ -89,6 +90,25 @@ erDiagram
     LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
 
 ```
+### Project management model
+
+```mermaid
+erDiagram
+
+    PROJECT_OBJECT               |o--o{ COMPLIANCE_ASSESSMENT : contains
+    PROJECT_OBJECT               |o--o{ RISK_ASSESSMENT       : contains
+    PROJECT_OBJECT               |o--o{ PROJECT_OBJECT        : contains
+    USER                         |o--o{ PROJECT_OBJECT        : manages
+
+    PROJECT_OBJECT {
+        string ref_id
+        string name
+        string description
+        string ref_id
+        string status
+        string category
+    }
+```
 
 ### General data model
 
@@ -98,7 +118,6 @@ erDiagram
     COMPLIANCE_ASSESSMENT_REVIEW }o--|| COMPLIANCE_ASSESSMENT : reviews
     REQUIREMENT_NODE             }o--o{ REFERENCE_CONTROL     : leverages
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
-    PROJECT                      |o--o{ COMPLIANCE_ASSESSMENT : contains
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
@@ -108,7 +127,6 @@ erDiagram
     APPLIED_CONTROL              }o--o| REFERENCE_CONTROL     : implements
     REQUIREMENT_NODE             }o--o{ THREAT                : addresses
     RISK_ASSESSMENT              }o--|| RISK_MATRIX           : applies
-    PROJECT                      |o--o{ RISK_ASSESSMENT       : contains
     RISK_ASSESSMENT              ||--o{ RISK_SCENARIO         : contains
     RISK_SCENARIO                }o--o{ APPLIED_CONTROL       : is_mitigated_by
     RISK_SCENARIO                }o--o{ THREAT                : derives_from
@@ -123,14 +141,8 @@ erDiagram
     USER                         }o--o{ ASSET                 : owns
     ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
-
-    PROJECT {
-        string ref_id
-        string name
-        string description
-        string ref_id
-        string status
-    }
+    PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
+    PERIMETER                    |o--o{ RISK_ASSESSMENT       : contains
 
     FRAMEWORK {
         string  urn
@@ -181,6 +193,13 @@ erDiagram
         principal[] reviewer
         string      observation
         boolean     embedded
+    }
+
+    PERIMETER {
+        string ref_id
+        string name
+        string description
+        string status
     }
 
     THREAT {
@@ -238,6 +257,7 @@ erDiagram
         url      link
         string   effort
         float    cost
+        int      progress
     }
 
     VULNERABILITY {
@@ -375,7 +395,6 @@ erDiagram
         json    mapping_rules
     }
 
-
 ```
 
 ### Labels
@@ -404,24 +423,61 @@ All models have the following fields:
 - created_at: the date when the object has been created.
 - modified_at: the date when the object has been lastly modified.
 
-## Projects and domains
+## Project management, perimeters and domains
 
-Projects are fundamental context objects defined by the entity using CISO Assistant. They are grouped in domains.
+### Domains
 
 The domain is the fundamental perimeter for access control. All objects, in particular domains, within a domain, have consistent access rights. If this granularity is not sufficient, the entity shall define new domains.
 
 Note: the IAM model is based on folders. A folder has a type among:
-
 - ROOT: the root folder, which is also called "global domain".
 - DOMAIN: a user-defined domain.
 - ENCLAVE: a invisible folder used to confine the actions of a third party.
 
-Projects have the following fields:
+### Perimeters
+
+Inside a domain, assessments can be grouped in perimeters, with no impact on access control.
+The perimeter has the following fields:
+- ref_id
+- name
+- description
+- status: --/Design/Development/Production/End of life/Dropped
+
+An assessment can only be attached to a perimeter that is in the same domain as the assessment.
+
+Note: perimeters where previously named "projects", but this was misleading.
+
+### Project objects
+
+Project objects are defined by the entity using CISO Assistant. Assessments can be attached to a project object, though this is optional. Project objects are organized hierarchically, each project object can have a parent, but loops are not allowed.
+
+Projects objects have the following fields:
 
 - ref_id (ex internal reference)
 - Name
 - Description
-- Status: --/Design/Development/Production/End of life/Dropped
+- Phase: --/Initiation/Planning/Execution/Monitoring/Closure/Closed/Dropped
+- Category: --/Portfolio/Program/Project/Initiative/Activity
+
+Here is an example of a project management structure:
+
+```mermaid
+flowchart TB
+
+PF1[portfolio 1] --> PF1A[portfolio 1A]
+PF1[portfolio 1] --> PF1B[portfolio 1B]
+PF1[portfolio 1] --> PJ4[Project 4]
+PF2[portfolio 2] --> IN2[Intiative 2]
+PF2[portfolio 2] --> PJ6[Project 6]
+PF1A --> PG1[Program 1]
+PF1A --> PG2[Program 2]
+PF1B --> PJ1[Project 1]
+PG1 --> PJ2[Project 2]
+PG2 --> PJ3[Project 3]
+PG2 --> IN1[Initiative 1]
+PJ4 --> PJ5[Project 5]
+PJ7[Project 7]
+```
 
 ## Qualifications
 
@@ -429,19 +485,19 @@ Qualifications are qualities/objectives that can be used to qualify risk scenari
 
 The following values are preloaded:
 
-abbreviation | q_order | so_order | name             | description | translations | urn
--------------|---------|----------|------------------|-------------|--------------|------------------------------------------------
-C            | 1       | 1        | confidentiality  |             |  ...         | urn:intuitem:risk:qualification:confidentiality
-I            | 2       | 2        | integrity        |             |  ...         | urn:intuitem:risk:qualification:integrity
-A            | 3       | 3        | availability     |             |  ...         | urn:intuitem:risk:qualification:availability
-P            | 4       | 4        | proof            |             |  ...         | urn:intuitem:risk:qualification:proof
-Aut          | 5       | 5        | authenticity     |             |  ...         | urn:intuitem:risk:qualification:authenticity
-Priv         | 6       | 6        | privacy          |             |  ...         | urn:intuitem:risk:qualification:privacy
-Safe         | 7       | 7        | safety           |             |  ...         | urn:intuitem:risk:qualification:safety
-Rep          | 8       |          | reputation       |             |  ...         | urn:intuitem:risk:qualification:safety
-Ope          | 9       |          | operational      |             |  ...         | urn:intuitem:risk:qualification:operational
-Leg          | 10      |          | legal            |             |  ...         | urn:intuitem:risk:qualification:legal
-Fin          | 11      |          | financial        |             |  ...         | urn:intuitem:risk:qualification:financial
+| abbreviation | q_order | so_order | name            | description | translations | urn                                             |
+| ------------ | ------- | -------- | --------------- | ----------- | ------------ | ----------------------------------------------- |
+| C            | 1       | 1        | confidentiality |             | ...          | urn:intuitem:risk:qualification:confidentiality |
+| I            | 2       | 2        | integrity       |             | ...          | urn:intuitem:risk:qualification:integrity       |
+| A            | 3       | 3        | availability    |             | ...          | urn:intuitem:risk:qualification:availability    |
+| P            | 4       | 4        | proof           |             | ...          | urn:intuitem:risk:qualification:proof           |
+| Aut          | 5       | 5        | authenticity    |             | ...          | urn:intuitem:risk:qualification:authenticity    |
+| Priv         | 6       | 6        | privacy         |             | ...          | urn:intuitem:risk:qualification:privacy         |
+| Safe         | 7       | 7        | safety          |             | ...          | urn:intuitem:risk:qualification:safety          |
+| Rep          | 8       |          | reputation      |             | ...          | urn:intuitem:risk:qualification:safety          |
+| Ope          | 9       |          | operational     |             | ...          | urn:intuitem:risk:qualification:operational     |
+| Leg          | 10      |          | legal           |             | ...          | urn:intuitem:risk:qualification:legal           |
+| Fin          | 11      |          | financial       |             | ...          | urn:intuitem:risk:qualification:financial       |
 
 Qualifications that have so_order defined can be used to set security objectives to primary assets.
 
@@ -457,11 +513,11 @@ Assets are of type primary or supporting. A primary asset has no parent, a suppo
 
 The following disaster recovery objectives (measured in seconds) can be defined on assets:
 
- Abbreviation | Name                       | Description
---------------|----------------------------|------------
- RTO          | Recovery Time Objective    | ...         
- RPO          | Recovery Point Objetive    | ...         
- MTD          | Maximum Tolerable Downtime | ...
+ | Abbreviation | Name                       | Description |
+ | ------------ | -------------------------- | ----------- |
+ | RTO          | Recovery Time Objective    | ...         |
+ | RPO          | Recovery Point Objetive    | ...         |
+ | MTD          | Maximum Tolerable Downtime | ...         |
 
 Assets have security objectives. Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its primary assets. They are a subset of qualifications.
 
@@ -472,20 +528,20 @@ Security objectives are measured using a specifc scale. For now, the following s
 
 There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "discrete scales"):
 
-scale    | internal value | scale value
----------|----------------|---------------
-0-3      | 0              | 0
-0-3      | 1              | 1
-0-3      | 2              | 2
-0-3      | 3              | 3
-1-4      | 0              | 1
-1-4      | 1              | 2
-1-4      | 2              | 3
-1-4      | 3              | 4
-FIPS-199 | 0              | low
-FIPS-199 | 1              | moderate
-FIPS-199 | 2              | moderate
-FIPS-199 | 3              | high
+| scale    | internal value | scale value |
+| -------- | -------------- | ----------- |
+| 0-3      | 0              | 0           |
+| 0-3      | 1              | 1           |
+| 0-3      | 2              | 2           |
+| 0-3      | 3              | 3           |
+| 1-4      | 0              | 1           |
+| 1-4      | 1              | 2           |
+| 1-4      | 2              | 3           |
+| 1-4      | 3              | 4           |
+| FIPS-199 | 0              | low         |
+| FIPS-199 | 1              | moderate    |
+| FIPS-199 | 2              | moderate    |
+| FIPS-199 | 3              | high        |
 
 THe scale to use is a global parameter. It has no impact on the encoding in the database, which always uses the internal value.
 
@@ -565,6 +621,7 @@ A applied control has the following specific fields:
 - an effort (--/S/M/L/XL)
 - a cost (--/float value)
 - a url link
+- a progress (between 0 and 100)
 
 When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
 
@@ -896,8 +953,8 @@ To simplify access control, we use a RBAC model.
 | Administrator       | full access (except approval), and specifically management of domains, users and users rights                                     |
 | referential_manager | capacity to manage referentials in the root folder                                                                                |
 | Domain manager      | full access to selected domains (except approval), in particular managing rights for these domains. Read access to global objects |
-| Analyst             | readwrite acces to selected projects/domains. Read access to global and domain objects                                            |
-| Reader              | read access to selected projects/domains                                                                                          |
+| Analyst             | readwrite acces to selected domains. Read access to global and domain objects                                            |
+| Reader              | read access to selected domains                                                                                          |
 | Risk approver       | like reader, but with additional capability to approve risk acceptances                                                           |
 | Reviewer            | like reader, but with additional capability to review assessments.                                                                |
 
@@ -971,7 +1028,8 @@ erDiagram
     ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
     ENTITY_ASSESSMENT     }o--o| EVIDENCE              : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
-    PROJECT               |o--o{ ENTITY_ASSESSMENT     : contains
+    PROJECT_OBJECT        |o--o{ ENTITY_ASSESSMENT     : contains
+    PERIMETER             |o--o{ ENTITY_ASSESSMENT     : contains
 
     ENTITY {
         string  name
@@ -1160,23 +1218,23 @@ Each of these objects will have its specific datamodel. Factoring will be done a
 
 ### Mapping of essential concepts
 
-EBIOS-RM (english)    | EBIOS-RM (french)       |  CISO Assistant
-----------------------|-------------------------|----------------
-Study                 | Etude                   | Study
-Studied object        | Objet de l'étude        | Description of the Study
-Mission               | Mission                 | Mission of the reference entity added to the Study
-Business asset        | Valeurs métier          | Primary asset
-Supporting asset      | Bien support            | Supporting asset
-Feared event          | Evénement redouté       | Risk analysis at asset level
-Impact                | Impact                  | Impact in a risk analysis
-Security baseline     | Socle de sécurité       | Compliance frameworks and audits
-Risk origins          | Sources de risque       | RoTo
-Target objectives     | Objectifs visés         | RoTo
-Ecosystem             | Ecosystème              | Third Party Risk Management
-Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)
-Security controls     | Mesures de sécurité     | Reference/applied controls
-Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability)
-Risk treatment        | Traitement du risque    | Applied controls in a risk analysis
+| EBIOS-RM (english)    | EBIOS-RM (french)       | CISO Assistant                                            |
+| --------------------- | ----------------------- | --------------------------------------------------------- |
+| Study                 | Etude                   | Study                                                     |
+| Studied object        | Objet de l'étude        | Description of the Study                                  |
+| Mission               | Mission                 | Mission of the reference entity added to the Study        |
+| Business asset        | Valeurs métier          | Primary asset                                             |
+| Supporting asset      | Bien support            | Supporting asset                                          |
+| Feared event          | Evénement redouté       | Risk analysis at asset level                              |
+| Impact                | Impact                  | Impact in a risk analysis                                 |
+| Security baseline     | Socle de sécurité       | Compliance frameworks and audits                          |
+| Risk origins          | Sources de risque       | RoTo                                                      |
+| Target objectives     | Objectifs visés         | RoTo                                                      |
+| Ecosystem             | Ecosystème              | Third Party Risk Management                               |
+| Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)        |
+| Security controls     | Mesures de sécurité     | Reference/applied controls                                |
+| Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability) |
+| Risk treatment        | Traitement du risque    | Applied controls in a risk analysis                       |
 
 ### EBIOS-RM study
 
@@ -1210,7 +1268,7 @@ The object risk_origin_target_objective (workshop 2) contains the following fiel
 - target objective (text)
 - motivation (--/1 very low/2 low/3 significant/4 strong) (--/très peu/peu/assez/fortement motivé)
 - resources (--/1 limited/2 significant/3 important/4 unlimited) (--/limitées/significatives/importantes/illimitées)
-- pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
+- pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent) -> calculated
 - activity (--/1/2/3/4)
 - selected
 - justification
@@ -1267,7 +1325,7 @@ The frontend for risk study shall propose the following steps:
 ```mermaid
 erDiagram
     DOMAIN                ||--o{ EBIOS_RM_STUDY       : contains
-    DOMAIN                ||--o{ STAKEHOLDER     : contains
+    DOMAIN                ||--o{ STAKEHOLDER          : contains
     DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
     DOMAIN                ||--o{ FEARED_EVENT         : contains
     DOMAIN                ||--o{ RO_TO                : contains
@@ -1289,14 +1347,16 @@ erDiagram
     EBIOS_RM_STUDY        }o--o| ENTITY               : studies
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
-    EBIOS_RM_STUDY        }o--o{ RISK_ASSESSMENT      : generates
+    EBIOS_RM_STUDY        |o--o{ RISK_ASSESSMENT      : generates
     ATTACK_PATH           }o--|| RO_TO                : derives
     RO_TO                 }o--o{ FEARED_EVENT         : corresponds_to
-    OPERATIONAL_SCENARIO  }o--|{ ATTACK_PATH          : derives
+    OPERATIONAL_SCENARIO  |o--|| ATTACK_PATH          : derives
     OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
     ATTACK_PATH           }o--o{ STAKEHOLDER          : leverages
     STAKEHOLDER           }o--o{ APPLIED_CONTROL      : reinforces
     FEARED_EVENT          }o--o{ QUALIFICATION        : bears
+    PROJECT_OBJECT        |o--o{ EBIOS_RM_STUDY       : contains
+    PERIMETER             |o--o{ EBIOS_RM_STUDY       : contains
 
     EBIOS_RM_STUDY {
         string      ref_id
@@ -1326,7 +1386,6 @@ erDiagram
         string target_objective
         int    motivation
         int    resources
-        int    pertinence
         int    activity
         bool   selected
         string justification
@@ -1347,13 +1406,15 @@ erDiagram
     }
 
     ATTACK_PATH {
+        string ref_id
+        string name
         string description
         bool   selected
         string justification
     }
 
     OPERATIONAL_SCENARIO {
-        string description
+        string operating_modes_description
         int    likelihood
         bool   selected
         string justification
@@ -1366,4 +1427,3 @@ erDiagram
 - EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
 - There is no object for "strategic scenarios", as they result directly from attack paths and corresponding feared event (which is the title of the strategic scenario).
 - the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
-- 
