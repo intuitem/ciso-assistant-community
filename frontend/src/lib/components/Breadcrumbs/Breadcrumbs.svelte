@@ -9,7 +9,7 @@
 		currentPath: string
 	): Promise<Breadcrumb[]> {
 		const idx = breadcrumbs.findIndex((c) => c.href === currentPath);
-		if (idx < breadcrumbs.length - 1) {
+		if (idx >= 0 && idx < breadcrumbs.length - 1) {
 			breadcrumbs = breadcrumbs.slice(0, idx + 1);
 		}
 		return breadcrumbs;
