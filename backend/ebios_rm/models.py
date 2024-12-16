@@ -380,6 +380,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Stakeholders"),
         related_name="attack_paths",
         help_text=_("Stakeholders leveraged by the attack path"),
+        blank=True,
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
