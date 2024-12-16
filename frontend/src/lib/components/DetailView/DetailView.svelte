@@ -205,6 +205,14 @@
 			!data.data.builtin
 		);
 	};
+
+	export let orderRelatedModels = [''];
+	if (data.urlModel === 'projects') {
+		orderRelatedModels = ['risk-assessments', 'entity-assessments', 'compliance-assessments'];
+	}
+	if (data.urlModel === 'entities') {
+		orderRelatedModels = ['solutions', 'representatives', 'entity-assessments'];
+	}
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -398,7 +406,9 @@
 {#if Object.keys(data.relatedModels).length > 0}
 	<div class="card shadow-lg mt-8 bg-white">
 		<TabGroup justify="justify-center">
-			{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
+			{#each Object.entries(data.relatedModels).sort((a, b) => {
+				return orderRelatedModels.indexOf(a[0]) - orderRelatedModels.indexOf(b[0]);
+			}) as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
 					{safeTranslate(model.info.localNamePlural)}
 					{#if model.table.body.length > 0}
