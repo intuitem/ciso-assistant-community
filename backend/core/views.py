@@ -69,9 +69,15 @@ from core.models import (
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
+    RiskAssessment,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
+
+from ebios_rm.models import (
+    EbiosRMStudy,
+    OperationalScenario,
+)
 
 from .models import *
 from .serializers import *
@@ -577,6 +583,31 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         "status",
         "ebios_rm_study",
     ]
+
+    def perform_create(self, serializer):
+        instance: RiskAssessment = serializer.save()
+        if instance.ebios_rm_study:
+            instance.risk_matrix = instance.ebios_rm_study.risk_matrix
+            ebios_rm_study = EbiosRMStudy.objects.get(id=instance.ebios_rm_study.id)
+            for operational_scenario in ebios_rm_study.operational_scenarios.all():
+                risk_scenario = RiskScenario.objects.create(
+                    risk_assessment=instance,
+                    name=operational_scenario.name,
+                    ref_id=operational_scenario.ref_id
+                    if operational_scenario.ref_id
+                    else RiskScenario.get_default_ref_id(instance),
+                    description=operational_scenario.operating_modes_description,
+                    current_proba=operational_scenario.likelihood,
+                    current_impact=operational_scenario.gravity,
+                )
+                risk_scenario.assets.set(operational_scenario.get_assets())
+                risk_scenario.threats.set(operational_scenario.threats.all())
+                risk_scenario.existing_applied_controls.set(
+                    operational_scenario.get_applied_controls()
+                )
+                risk_scenario.save()
+        instance.save()
+        return super().perform_create(serializer)
 
     @action(detail=False, name="Risk assessments per status")
     def per_status(self, request):
