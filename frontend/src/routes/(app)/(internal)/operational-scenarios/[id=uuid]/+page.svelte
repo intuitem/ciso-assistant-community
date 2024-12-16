@@ -91,7 +91,7 @@
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-table text-gray-500 opacity-75"></i>
-					<span>{m.attackPaths()}</span>
+					<span>{m.attackPath()}</span>
 				</h3>
 				<ModelTable
 					backgroundColor="bg-gray-50"
