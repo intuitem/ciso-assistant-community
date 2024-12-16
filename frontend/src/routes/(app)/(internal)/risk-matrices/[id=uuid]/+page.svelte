@@ -38,12 +38,17 @@
 									{/each}
 								</ul>
 							{:else if value.id}
-								{@const itemHref = `/${
-									URL_MODEL_MAP['risk-matrices']['foreignKeyFields']?.find(
-										(item) => item.field === key
-									)?.urlModel
-								}/${value.id}`}
-								<a href={itemHref} class="anchor">{value.str}</a>
+								{#if key === 'library'}
+									{@const itemHref = `/libraries/${value.id}?loaded`}
+									<a href={itemHref} class="anchor">{value.name}</a>
+								{:else}
+									{@const itemHref = `/${
+										URL_MODEL_MAP['risk-matrices']['foreignKeyFields']?.find(
+											(item) => item.field === key
+										)?.urlModel
+									}/${value.id}`}
+									<a href={itemHref} class="anchor">{value.str}</a>
+								{/if}
 							{:else}
 								{value.str ?? value}
 							{/if}
