@@ -7,7 +7,6 @@ from core.models import (
     Asset,
     ComplianceAssessment,
     Qualification,
-    RiskAssessment,
     RiskMatrix,
     Threat,
 )
@@ -48,13 +47,6 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         help_text=_(
             "Compliance assessments established as security baseline during workshop 1.4"
         ),
-    )
-    risk_assessments = models.ManyToManyField(
-        RiskAssessment,
-        blank=True,
-        verbose_name=_("Risk assessments"),
-        related_name="ebios_rm_studies",
-        help_text=_("Risk assessments generated at the end of workshop 4"),
     )
     reference_entity = models.ForeignKey(
         Entity,
@@ -202,7 +194,10 @@ class RoTo(AbstractBaseModel, FolderMixin):
         on_delete=models.CASCADE,
     )
     feared_events = models.ManyToManyField(
-        FearedEvent, verbose_name=_("Feared events"), related_name="ro_to_couples"
+        FearedEvent,
+        verbose_name=_("Feared events"),
+        related_name="ro_to_couples",
+        blank=True,
     )
 
     risk_origin = models.CharField(
@@ -218,11 +213,6 @@ class RoTo(AbstractBaseModel, FolderMixin):
         verbose_name=_("Resources"),
         choices=Resources.choices,
         default=Resources.UNDEFINED,
-    )
-    pertinence = models.PositiveSmallIntegerField(
-        verbose_name=_("Pertinence"),
-        choices=Pertinence.choices,
-        default=Pertinence.UNDEFINED,
     )
     activity = models.PositiveSmallIntegerField(
         verbose_name=_("Activity"), default=0, validators=[MaxValueValidator(4)]
@@ -241,6 +231,20 @@ class RoTo(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+
+    @property
+    def get_pertinence(self):
+        PERTINENCE_MATRIX = [
+            [1, 1, 2, 2],
+            [1, 2, 3, 3],
+            [2, 3, 3, 4],
+            [2, 3, 4, 4],
+        ]
+        if self.motivation == 0 or self.resources == 0:
+            return self.Pertinence(self.Pertinence.UNDEFINED).label
+        return self.Pertinence(
+            PERTINENCE_MATRIX[self.motivation - 1][self.resources - 1]
+        ).label
 
 
 class Stakeholder(AbstractBaseModel, FolderMixin):
@@ -359,7 +363,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         )
 
 
-class AttackPath(AbstractBaseModel, FolderMixin):
+class AttackPath(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -378,7 +382,7 @@ class AttackPath(AbstractBaseModel, FolderMixin):
         help_text=_("Stakeholders leveraged by the attack path"),
     )
 
-    description = models.TextField(verbose_name=_("Description"))
+    ref_id = models.CharField(max_length=100, blank=True)
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
@@ -402,11 +406,12 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         related_name="operational_scenarios",
         on_delete=models.CASCADE,
     )
-    attack_paths = models.ManyToManyField(
+    attack_path = models.OneToOneField(
         AttackPath,
-        verbose_name=_("Attack paths"),
-        related_name="operational_scenarios",
-        help_text=_("Attack paths that are pertinent to the operational scenario"),
+        verbose_name=_("Attack path"),
+        on_delete=models.CASCADE,
+        related_name="operational_scenario",
+        blank=False,
     )
     threats = models.ManyToManyField(
         Threat,
@@ -416,7 +421,10 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         help_text=_("Threats leveraged by the operational scenario"),
     )
 
-    description = models.TextField(verbose_name=_("Description"))
+    operating_modes_description = models.TextField(
+        verbose_name=_("Operating modes description"),
+        help_text=_("Description of the operating modes of the operational scenario"),
+    )
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
