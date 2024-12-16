@@ -14,6 +14,7 @@
 {#each item as item}
 	<Anchor
 		href={item.href}
+		breadcrumbAction="replace"
 		class="unstyled flex whitespace-nowrap items-center py-2 text-sm font-normal rounded-token {classesActive(
 			item.href ?? ''
 		)}"
