@@ -3,12 +3,14 @@
 	import * as m from '$paraglide/messages';
 	import { page } from '$app/stores';
 	import { pageTitle } from '$lib/utils/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
 	export let data: PageData;
 
 	const operationalScenario = data.data;
+
+	pageTitle.set(m.operationalScenarioRefId({ refId: operationalScenario.ref_id }));
 
 	let activeActivity: string | null = null;
 	$page.url.searchParams.forEach((value, key) => {
@@ -21,22 +23,42 @@
 		}
 	});
 
-	const likelihoodChoices = [
-		{ label: m.unlikely(), value: 0 },
-		{ label: m.likely(), value: 1 },
-		{ label: m.veryLikely(), value: 2 },
-		{ label: m.certain(), value: 3 }
-	];
-	const gravityChoices = [
-		{ label: m.minor(), value: 0 },
-		{ label: m.significant(), value: 1 },
-		{ label: m.important(), value: 2 },
-		{ label: m.critical(), value: 3 }
-	];
+	const popupLikelihood: PopupSettings = {
+		event: 'click',
+		target: 'popupLikelihood',
+		placement: 'bottom'
+	};
+	const popupGravity: PopupSettings = {
+		event: 'click',
+		target: 'popupGravity',
+		placement: 'bottom'
+	};
+	const popupRiskLevel: PopupSettings = {
+		event: 'click',
+		target: 'popupRiskLevel',
+		placement: 'bottom'
+	};
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
-	<div class="flex flex-col space-y-4">
+	<div class="flex flex-col space-y-4 items-center">
+		<h1 class="flex font-bold text-2xl space-x-2">
+			<span
+				><a
+					class="text-primary-700 hover:text-primary-500"
+					href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
+					>{operationalScenario.ebios_rm_study.str}</a
+				>
+				- {m.operationalScenarioRefId({ refId: operationalScenario.ref_id })}</span
+			>
+			<p class="flex items-center">
+				{#if operationalScenario.is_selected}
+					<span class="badge bg-green-200 text-green-700">{m.selected()}</span>
+				{:else}
+					<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
+				{/if}
+			</p>
+		</h1>
 		<div
 			id="activityOne"
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center justify-center
@@ -112,63 +134,82 @@
 			>
 				{m.ebiosWs4_2()}
 			</h1>
-			<p>
-				{#if operationalScenario.is_selected}
-					<span class="badge bg-green-200 text-green-700">{m.selected()}</span>
-				{:else}
-					<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
-				{/if}
-			</p>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
-				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-					<i class="fa-solid fa-dice text-black opacity-75"></i>
-					<span>{m.likelihood()}</span>
-				</h3>
-				<div class="grid grid-cols-4 gap-2 p-2">
-					{#each likelihoodChoices as choice}
-						{#if operationalScenario.likelihood.value === choice.value}
-							<div
-								style="background-color: {operationalScenario.likelihood.hexcolor}"
-								class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold"
-							>
-								<span>{choice.label}</span>
-								<span>({choice.value})</span>
-							</div>
-						{:else}
-							<div
-								class="flex flex-col items-center justify-center border rounded-md bg-gray-200 p-4 text-gray-500"
-							>
-								<span>{choice.label}</span>
-								<span>({choice.value})</span>
-							</div>
-						{/if}
-					{/each}
+			<div
+				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-sm space-x-4 justify-between"
+			>
+				<div
+					style="background-color: {operationalScenario.likelihood.hexcolor}"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+				>
+					<div
+						class="card bg-black text-gray-200 p-4 z-20"
+						style="color: {operationalScenario.likelihood.hexcolor}"
+						data-popup={'popupLikelihood'}
+					>
+						<p data-testid="likelihood-description" class="font-semibold">
+							{operationalScenario.likelihood.description}
+						</p>
+						<div class="arrow bg-black" />
+					</div>
+					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+						<i class="fa-solid fa-dice text-black opacity-75"></i>
+						<span>{m.likelihood()}</span>
+					</h3>
+					<span>{operationalScenario.likelihood.name}</span>
+					<i
+						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
+						use:popup={popupLikelihood}
+					></i>
 				</div>
-			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
-				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-					<i class="fa-solid fa-bomb text-black opacity-75"></i>
-					<span>{m.gravity()}</span>
-				</h3>
-				<div class="grid grid-cols-4 gap-2 p-2">
-					{#each gravityChoices as choice}
-						{#if operationalScenario.gravity.value === choice.value}
-							<div
-								style="background-color: {operationalScenario.gravity.hexcolor}"
-								class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold"
-							>
-								<span>{choice.label}</span>
-								<span>({choice.value})</span>
-							</div>
-						{:else}
-							<div
-								class="flex flex-col items-center justify-center border rounded-md bg-gray-200 p-4 text-gray-500"
-							>
-								<span>{choice.label}</span>
-								<span>({choice.value})</span>
-							</div>
-						{/if}
-					{/each}
+				<i class="fa-solid fa-xmark"></i>
+				<div
+					style="background-color: {operationalScenario.gravity.hexcolor}"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+				>
+					<div
+						class="card bg-black text-gray-200 p-4 z-20"
+						style="color: {operationalScenario.gravity.hexcolor}"
+						data-popup={'popupGravity'}
+					>
+						<p data-testid="gravity-description" class="font-semibold">
+							{operationalScenario.gravity.description}
+						</p>
+						<div class="arrow bg-black" />
+					</div>
+					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+						<i class="fa-solid fa-bomb text-black opacity-75"></i>
+						<span>{m.gravity()}</span>
+					</h3>
+					<span>{operationalScenario.gravity.name}</span>
+					<i
+						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
+						use:popup={popupGravity}
+					></i>
+				</div>
+				<i class="fa-solid fa-equals"></i>
+				<div
+					style="background-color: {operationalScenario.risk_level.hexcolor}"
+					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
+				>
+					<div
+						class="card bg-black text-gray-200 p-4 z-20"
+						style="color: {operationalScenario.risk_level.hexcolor}"
+						data-popup={'popupRiskLevel'}
+					>
+						<p data-testid="risk-level-description" class="font-semibold">
+							{operationalScenario.risk_level.description}
+						</p>
+						<div class="arrow bg-black" />
+					</div>
+					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+						<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+						<span>{m.riskLevel()}</span>
+					</h3>
+					<span>{operationalScenario.risk_level.name}</span>
+					<i
+						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
+						use:popup={popupRiskLevel}
+					></i>
 				</div>
 			</div>
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
