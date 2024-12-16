@@ -371,7 +371,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         )
 
 
-class AttackPath(AbstractBaseModel, FolderMixin):
+class AttackPath(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -390,7 +390,7 @@ class AttackPath(AbstractBaseModel, FolderMixin):
         help_text=_("Stakeholders leveraged by the attack path"),
     )
 
-    description = models.TextField(verbose_name=_("Description"))
+    ref_id = models.CharField(max_length=100, blank=True)
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
@@ -418,11 +418,12 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         related_name="operational_scenarios",
         on_delete=models.CASCADE,
     )
-    attack_paths = models.ManyToManyField(
+    attack_path = models.OneToOneField(
         AttackPath,
-        verbose_name=_("Attack paths"),
-        related_name="operational_scenarios",
-        help_text=_("Attack paths that are pertinent to the operational scenario"),
+        verbose_name=_("Attack path"),
+        on_delete=models.CASCADE,
+        related_name="operational_scenario",
+        blank=False,
     )
     threats = models.ManyToManyField(
         Threat,
@@ -432,7 +433,10 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         help_text=_("Threats leveraged by the operational scenario"),
     )
 
-    description = models.TextField(verbose_name=_("Description"))
+    operating_modes_description = models.TextField(
+        verbose_name=_("Operating modes description"),
+        help_text=_("Description of the operating modes of the operational scenario"),
+    )
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
