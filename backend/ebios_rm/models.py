@@ -478,7 +478,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
                 "name": "--",
                 "description": "not rated",
                 "value": -1,
-                "hexcolor": "#f9fafb"
+                "hexcolor": "#f9fafb",
             }
         risk_matrix = self.parsed_matrix
         return {
