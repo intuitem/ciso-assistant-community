@@ -246,8 +246,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
             PERTINENCE_MATRIX[self.motivation - 1][self.resources - 1]
         ).label
 
-    @property
-    def gravity(self):
+    def get_gravity(self):
         gravity = -1
         for feared_event in self.feared_events.all():
             if feared_event.gravity > gravity:
@@ -406,8 +405,9 @@ class AttackPath(AbstractBaseModel, FolderMixin):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 
-    def get_gravity(self):
-        return self.ro_to_couple.gravity
+    @property
+    def gravity(self):
+        return self.ro_to_couple.get_gravity
 
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):
@@ -470,8 +470,8 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def get_gravity_display(self):
         gravity = -1
         for attack_path in self.attack_paths.all():
-            if attack_path.get_gravity() > gravity:
-                gravity = attack_path.get_gravity()
+            if attack_path.gravity > gravity:
+                gravity = attack_path.gravity
         if gravity < 0:
             return {
                 "abbreviation": "--",
