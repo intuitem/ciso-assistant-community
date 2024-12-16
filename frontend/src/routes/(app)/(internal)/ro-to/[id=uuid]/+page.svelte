@@ -5,6 +5,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data: PageData;
 
@@ -61,13 +62,13 @@
 					<span class="font-bold">{roto.target_objective}</span>
 				</p>
 			</div>
-			<a
+			<Anchor
 				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
 				class="btn variant-filled-primary h-fit absolute top-2 right-4"
 			>
 				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
 				{m.edit()}
-			</a>
+			</Anchor>
 		</div>
 		<div
 			id="activityTwo"
