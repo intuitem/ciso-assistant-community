@@ -392,9 +392,6 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("Attack paths")
         ordering = ["created_at"]
 
-    def __str__(self):
-        return f"{self.ro_to_couple} - {self.description}"
-
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)

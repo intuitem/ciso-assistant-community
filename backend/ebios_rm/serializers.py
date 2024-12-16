@@ -135,7 +135,6 @@ class AttackPathWriteSerializer(BaseModelSerializer):
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
-    str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
