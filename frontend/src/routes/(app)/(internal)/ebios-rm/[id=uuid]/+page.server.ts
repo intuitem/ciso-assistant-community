@@ -33,12 +33,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		// const redirectToWrittenObject = Boolean(event.params.model === 'entity-assessments');
 		return defaultWriteFormAction({
 			event,
 			urlModel: 'risk-assessments',
-			action: 'create'
-			// redirectToWrittenObject: redirectToWrittenObject
+			action: 'create',
+			redirectToWrittenObject: true
 		});
 	}
 };
