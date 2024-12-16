@@ -72,16 +72,17 @@
 		bind:cachedValue={formDataCache['threats']}
 		label={m.threats()}
 	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		options={getOptions({
-			objects: model.foreignKeys['attack_paths'],
-			label: 'str'
-		})}
-		field="attack_paths"
-		label={m.attackPaths()}
-	/>
+	{#if context !== 'edit'}
+		<AutocompleteSelect
+			{form}
+			options={getOptions({
+				objects: model.foreignKeys['attack_path'],
+				label: 'str'
+			})}
+			field="attack_path"
+			label={m.attackPath()}
+		/>
+	{/if}
 </div>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'
