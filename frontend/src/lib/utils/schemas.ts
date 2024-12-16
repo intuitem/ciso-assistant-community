@@ -446,10 +446,10 @@ export const StakeholderSchema = z.object({
 });
 
 export const AttackPathSchema = z.object({
+	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
-	description: z.string(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
 });
