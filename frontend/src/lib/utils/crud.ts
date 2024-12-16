@@ -696,7 +696,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'attack_path',
 				urlModel: 'attack-paths',
 				endpointUrl: 'ebios-rm/attack-paths',
-				urlParams: 'ebios_rm_study=',
+				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
 				detail: true
 			}
 		],
