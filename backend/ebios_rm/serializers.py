@@ -158,7 +158,7 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    attack_paths = FieldsRelatedField(many=True)
+    attack_path = FieldsRelatedField()
     threats = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
 
