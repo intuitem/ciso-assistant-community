@@ -42,23 +42,32 @@
 
 <div class="card p-4 bg-white shadow-lg">
 	<div class="flex flex-col space-y-4 items-center">
-		<h1 class="flex font-bold text-2xl space-x-2">
-			<span
+		<div class="flex items-center justify-between w-full">
+			<div class="flex font-bold text-2xl space-x-2">
+				<span
 				><a
 					class="text-primary-700 hover:text-primary-500"
 					href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
 					>{operationalScenario.ebios_rm_study.str}</a
 				>
 				- {m.operationalScenarioRefId({ refId: operationalScenario.ref_id })}</span
+				>
+				<p class="flex items-center">
+					{#if operationalScenario.is_selected}
+						<span class="badge bg-green-200 text-green-700">{m.selected()}</span>
+					{:else}
+						<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
+					{/if}
+				</p>
+			</div>
+			<a
+				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+				class="btn variant-filled-primary h-fit justify-self-end"
 			>
-			<p class="flex items-center">
-				{#if operationalScenario.is_selected}
-					<span class="badge bg-green-200 text-green-700">{m.selected()}</span>
-				{:else}
-					<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
-				{/if}
-			</p>
-		</h1>
+				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+				{m.edit()}
+			</a>
+		</div>
 		<div
 			id="activityOne"
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center justify-center
@@ -76,13 +85,6 @@
 			>
 				{m.ebiosWs4_1()}
 			</h1>
-			<a
-				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-				class="btn variant-filled-primary h-fit absolute top-2 right-4"
-			>
-				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
-				{m.edit()}
-			</a>
 			{#if operationalScenario.operating_modes_description}
 				<p class="text-gray-600">{operationalScenario.operating_modes_description}</p>
 			{:else}
