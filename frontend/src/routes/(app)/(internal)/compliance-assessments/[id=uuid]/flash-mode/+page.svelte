@@ -69,9 +69,9 @@
 		});
 	}
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'ArrowRight' || event.key === 'l') {
+		if (event.key === 'n' || event.key === 'l') {
 			nextItem();
-		} else if (event.key === 'ArrowLeft' || event.key === 'h') {
+		} else if (event.key === 'p' || event.key === 'h') {
 			previousItem();
 		}
 	}
