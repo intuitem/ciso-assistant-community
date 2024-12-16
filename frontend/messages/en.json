@@ -1004,5 +1004,6 @@
 	"veryLikely": "Very likely",
 	"certain": "Certain",
 	"minor": "Minor",
-	"operatingModesDescription": "Operating modes description"
+	"operatingModesDescription": "Operating modes description",
+	"noStakeholders": "No stakeholders"
 }
