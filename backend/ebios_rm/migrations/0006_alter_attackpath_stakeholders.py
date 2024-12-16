@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0005_remove_operationalscenario_attack_paths_and_more'),
+        ("ebios_rm", "0005_remove_operationalscenario_attack_paths_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='attackpath',
-            name='stakeholders',
-            field=models.ManyToManyField(blank=True, help_text='Stakeholders leveraged by the attack path', related_name='attack_paths', to='ebios_rm.stakeholder', verbose_name='Stakeholders'),
+            model_name="attackpath",
+            name="stakeholders",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Stakeholders leveraged by the attack path",
+                related_name="attack_paths",
+                to="ebios_rm.stakeholder",
+                verbose_name="Stakeholders",
+            ),
         ),
     ]
