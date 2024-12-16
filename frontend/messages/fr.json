@@ -708,6 +708,7 @@
 	"dependency": "Dépendance",
 	"trust": "Confiance",
 	"solutions": "Solutions",
+	"tpSolutions": "Solutions tierces",
 	"solution": "Solution",
 	"addSolution": "Ajouter une solution",
 	"providerEntity": "Entité fournisseur",
