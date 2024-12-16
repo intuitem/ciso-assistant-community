@@ -5,46 +5,55 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0004_remove_roto_pertinence_alter_roto_feared_events'),
+        ("ebios_rm", "0004_remove_roto_pertinence_alter_roto_feared_events"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='operationalscenario',
-            name='attack_paths',
+            model_name="operationalscenario",
+            name="attack_paths",
         ),
         migrations.RemoveField(
-            model_name='operationalscenario',
-            name='description',
+            model_name="operationalscenario",
+            name="description",
         ),
         migrations.AddField(
-            model_name='attackpath',
-            name='name',
-            field=models.CharField(default='', max_length=200, verbose_name='Name'),
+            model_name="attackpath",
+            name="name",
+            field=models.CharField(default="", max_length=200, verbose_name="Name"),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='attackpath',
-            name='ref_id',
+            model_name="attackpath",
+            name="ref_id",
             field=models.CharField(blank=True, max_length=100),
         ),
         migrations.AddField(
-            model_name='operationalscenario',
-            name='attack_path',
-            field=models.OneToOneField(default='', on_delete=django.db.models.deletion.CASCADE, related_name='operational_scenario', to='ebios_rm.attackpath', verbose_name='Attack path'),
+            model_name="operationalscenario",
+            name="attack_path",
+            field=models.OneToOneField(
+                default="",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="operational_scenario",
+                to="ebios_rm.attackpath",
+                verbose_name="Attack path",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='operationalscenario',
-            name='operating_modes_description',
-            field=models.TextField(default='', help_text='Description of the operating modes of the operational scenario', verbose_name='Operating modes description'),
+            model_name="operationalscenario",
+            name="operating_modes_description",
+            field=models.TextField(
+                default="",
+                help_text="Description of the operating modes of the operational scenario",
+                verbose_name="Operating modes description",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='attackpath',
-            name='description',
-            field=models.TextField(blank=True, null=True, verbose_name='Description'),
+            model_name="attackpath",
+            name="description",
+            field=models.TextField(blank=True, null=True, verbose_name="Description"),
         ),
     ]
