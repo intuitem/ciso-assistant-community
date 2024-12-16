@@ -1268,6 +1268,8 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "assets",
         "applied_controls",
     ]
+    ordering = ["ref_id"]
+    ordering_fields = ordering
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get("ref_id"):
