@@ -471,6 +471,14 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def gravity(self):
         return self.attack_path.gravity
 
+    @property
+    def stakeholders(self):
+        return self.attack_path.stakeholders.all()
+
+    @property
+    def ro_to(self):
+        return self.attack_path.ro_to_couple
+
     def get_likelihood_display(self):
         if self.likelihood < 0:
             return {

@@ -88,18 +88,49 @@
 			{:else}
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
-				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-					<i class="fa-solid fa-table text-gray-500 opacity-75"></i>
-					<span>{m.attackPath()}</span>
-				</h3>
-				<ModelTable
-					backgroundColor="bg-gray-50"
-					regionBody="bg-gray-50"
-					regionHeadCell="uppercase bg-gray-50 text-gray-700"
-					source={data.table}
-					URLModel="attack-paths"
-				></ModelTable>
+			<div class="flex flex-col space-y-2 items-center">
+				<div class="flex flex-col items-center space-x-2">
+					<span class="font-semibold text-lg text-gray-700"
+						><i class="fa-solid fa-shuffle"></i> {m.attackPath()}</span
+					>
+					<p class="text-gray-600">{operationalScenario.attack_path.name}</p>
+					{#if operationalScenario.attack_path.description}
+						<p class="text-gray-600">{operationalScenario.attack_path.description}</p>
+					{/if}
+				</div>
+				<div class="grid grid-cols-3 gap-12 items-center">
+					<div
+						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-sm text-center"
+					>
+						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
+						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
+						<p class="badge text-white bg-red-500 capitalize">
+							{operationalScenario.ro_to.risk_origin}
+						</p>
+					</div>
+					<div
+						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-sm text-center"
+					>
+						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
+						<i class="fa-solid fa-globe text-3xl"></i>
+						{#each operationalScenario.stakeholders as stakeholder}
+							<p class="badge text-white bg-violet-500">
+								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
+									>{stakeholder.str}</a
+								>
+							</p>
+						{:else}
+							<p class="text-gray-300 italic">{m.noStakeholders()}</p>
+						{/each}
+					</div>
+					<div
+						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-sm text-center"
+					>
+						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
+						<i class="fa-solid fa-bullseye text-3xl"></i>
+						<p class="badge text-white bg-blue-500">{operationalScenario.ro_to.target_objective}</p>
+					</div>
+				</div>
 			</div>
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">

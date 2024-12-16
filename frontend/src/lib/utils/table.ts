@@ -602,6 +602,6 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	'operational-scenarios': {
 		head: ['operatingModesDescription', 'threats', 'likelihood'],
-		body: ['operatoig_modes_descriptionn', 'threats', 'likelihood']
+		body: ['operating_modes_description', 'threats', 'likelihood']
 	}
 };
