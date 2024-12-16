@@ -21,7 +21,7 @@
 	export let suggestions: { [key: string]: any } = {};
 
 	// Base Classes
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	export let debug = false;
 
