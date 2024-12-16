@@ -1,6 +1,23 @@
 <script lang="ts">
-	import { breadcrumbs } from '$lib/utils/breadcrumbs';
+	import { afterNavigate } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { breadcrumbs, type Breadcrumb } from '$lib/utils/breadcrumbs';
 	import { safeTranslate } from '$lib/utils/i18n';
+
+	async function trimBreadcrumbsToCurrentPath(
+		breadcrumbs: Breadcrumb[],
+		currentPath: string
+	): Promise<Breadcrumb[]> {
+		const idx = breadcrumbs.findIndex((c) => c.href === currentPath);
+		if (idx < breadcrumbs.length - 1) {
+			breadcrumbs = breadcrumbs.slice(0, idx + 1);
+		}
+		return breadcrumbs;
+	}
+
+	afterNavigate(async () => {
+		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, $page.url.pathname);
+	});
 </script>
 
 <ol class="breadcrumb-nonresponsive h-6 overflow-hidden whitespace-nowrap">
