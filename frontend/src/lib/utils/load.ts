@@ -88,7 +88,7 @@ export const loadDetail = async ({ event, model, id }) => {
 				if (info.foreignKeyFields) {
 					for (const keyField of info.foreignKeyFields) {
 						let queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-						if (keyField.detail===true){
+						if (keyField.detail === true) {
 							queryParams += `${data.ebios_rm_study.id}`; // used only for ebios for now
 						}
 						const url = `${BASE_API_URL}/${keyField.endpointUrl || keyField.urlModel}/${queryParams}`;
