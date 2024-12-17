@@ -55,6 +55,7 @@ export const URL_MODEL = [
 	'feared-events',
 	'ro-to',
 	'stakeholders',
+	'strategic-scenarios',
 	'attack-paths',
 	'operational-scenarios'
 	// 'ebios-rm',

@@ -70,6 +70,20 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		}
 	}
 
+	const likelihoodChoicesEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/likelihood/`;
+	const likelihoodChoicesResponse = await fetch(likelihoodChoicesEndpoint);
+
+	if (likelihoodChoicesResponse.ok) {
+		selectOptions['likelihood'] = await likelihoodChoicesResponse.json().then((data) =>
+			Object.entries(data).map(([key, value]) => ({
+				label: value,
+				value: parseInt(key)
+			}))
+		);
+	} else {
+		console.error(`Failed to fetch data for likelihood: ${likelihoodChoicesResponse.statusText}`);
+	}
+
 	model['selectOptions'] = selectOptions;
 
 	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);

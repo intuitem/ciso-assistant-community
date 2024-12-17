@@ -1007,5 +1007,7 @@
 	"certain": "Certain",
 	"minor": "Minor",
 	"operatingModesDescription": "Operating modes description",
-	"noStakeholders": "No stakeholders"
+	"noStakeholders": "No stakeholders",
+	"strategicScenario": "Strategic scenario",
+	"strategicScenarios": "Strategic scenarios"
 }
