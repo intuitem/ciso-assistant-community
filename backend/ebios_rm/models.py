@@ -88,7 +88,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         related_name="reviewers",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
-    
+
     fields_to_check = ["name", "version"]
 
     class Meta:
