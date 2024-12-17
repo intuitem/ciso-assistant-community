@@ -682,7 +682,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'ro_to_couple',
 				urlModel: 'ro-to',
 				endpointUrl: 'ebios-rm/ro-to',
-				urlParams: 'ebios_rm_study=',
+				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
 				detail: true
 			},
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
