@@ -682,14 +682,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		]
 	},
-	attack_paths: {
-		endpointUrl: 'ebios-rm/attack-paths',
-		name: 'attackpath',
-		localName: 'attackPath',
-		localNamePlural: 'attackPaths',
-		verboseName: 'Attack path',
-		verboseNamePlural: 'Attack paths'
-	},
 	'operational-scenarios': {
 		endpointUrl: 'ebios-rm/operational-scenarios',
 		name: 'operationalscenario',
@@ -700,9 +692,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
-			{ field: 'attack_path', urlModel: 'attack-paths' }
+			{
+				field: 'attack_path',
+				urlModel: 'attack-paths',
+				endpointUrl: 'ebios-rm/attack-paths',
+				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
+				detail: true
+			}
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number' }]
+		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
 	}
 };
 
