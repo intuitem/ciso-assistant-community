@@ -175,6 +175,15 @@ const GRAVITY_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const LIKELIHOOD_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.likelihood.name),
+	extraProps: {
+		defaultOptionName: 'likelihood'
+	},
+	alwaysDisplay: true
+};
+
 const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.is_selected ? 'true' : 'false'),
@@ -704,7 +713,12 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['is_selected', 'name', 'stakeholders', 'description']
 	},
 	'operational-scenarios': {
-		head: ['operatingModesDescription', 'threats', 'likelihood'],
-		body: ['operating_modes_description', 'threats', 'likelihood']
+		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
+		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
+		filters: {
+			threats: THREAT_FILTER,
+			likelihood: LIKELIHOOD_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
 	}
 };
