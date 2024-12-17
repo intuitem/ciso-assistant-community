@@ -220,11 +220,20 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-const APPLIED_CONTROL_FILTER: ListViewFilterConfig = {
+const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.applied_controls?.length ? row.applied_controls.map((t) => t.str) : null),
+	getColumn: (row) => (console.log(row), row.current_criticality.toString()),
 	extraProps: {
-		defaultOptionName: 'applied_control'
+		defaultOptionName: 'current_criticality'
+	},
+	alwaysDisplay: true
+};
+
+const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (console.log(row), row.residual_criticality.toString()),
+	extraProps: {
+		defaultOptionName: 'residual_criticality'
 	},
 	alwaysDisplay: true
 };
@@ -682,7 +691,8 @@ export const listViewFields: ListViewFieldsConfig = {
 			is_selected: IS_SELECTED_FILTER,
 			entity: ENTITY_FILTER,
 			category: CATEGORY_FILTER,
-			applied_controls: APPLIED_CONTROL_FILTER
+			current_criticality: CURRENT_CRITICALITY_FILTER,
+			residual_criticality: RESIDUAL_CRITICALITY_FILTER
 		}
 	},
 	'strategic-scenarios': {
