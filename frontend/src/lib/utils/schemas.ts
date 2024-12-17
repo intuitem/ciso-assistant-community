@@ -445,10 +445,16 @@ export const StakeholderSchema = z.object({
 	justification: z.string().optional()
 });
 
+export const StrategicScenarioSchema = z.object({
+	...NameDescriptionMixin,
+	ro_to_couple: z.string().uuid(),
+	ref_id: z.string().optional(),
+})
+
 export const AttackPathSchema = z.object({
 	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
-	ro_to_couple: z.string().uuid(),
+	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
@@ -493,6 +499,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
 	stakeholders: StakeholderSchema,
+	'strategic-scenarios': StrategicScenarioSchema,
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema
 };

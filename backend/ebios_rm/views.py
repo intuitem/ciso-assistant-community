@@ -7,6 +7,7 @@ from .models import (
     FearedEvent,
     RoTo,
     Stakeholder,
+    StrategicScenario,
     AttackPath,
     OperationalScenario,
 )
@@ -122,6 +123,14 @@ class StakeholderViewSet(BaseModelViewSet):
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(Stakeholder.Category.choices))
+
+
+class StrategicScenarioViewSet(BaseModelViewSet):
+    model = StrategicScenario
+
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
 
 
 class AttackPathFilter(df.FilterSet):
