@@ -104,8 +104,12 @@ class RoToReadSerializer(BaseModelSerializer):
 
 
 class StakeholderWriteSerializer(BaseModelSerializer):
-    current_criticality = serializers.IntegerField(read_only=True)
-    residual_criticality = serializers.IntegerField(read_only=True)
+    current_criticality = serializers.CharField(
+        source="get_current_criticality_display"
+    )
+    residual_criticality = serializers.CharField(
+        source="get_residual_criticality_display"
+    )
 
     class Meta:
         model = Stakeholder
@@ -119,8 +123,13 @@ class StakeholderReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
 
-    current_criticality = serializers.IntegerField()
-    residual_criticality = serializers.IntegerField()
+    category = serializers.CharField(source="get_category_display")
+    current_criticality = serializers.CharField(
+        source="get_current_criticality_display"
+    )
+    residual_criticality = serializers.CharField(
+        source="get_residual_criticality_display"
+    )
 
     class Meta:
         model = Stakeholder
@@ -134,7 +143,6 @@ class AttackPathWriteSerializer(BaseModelSerializer):
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
-    str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()

@@ -79,10 +79,11 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		// Check if the pressed key is 'e' and the edit button should be displayed
-		if (event.key === 'e' && displayEditButton()) {
-			event.preventDefault();
-			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
-		}
+
+		// if (event.key === 'e' && displayEditButton()) {
+		// event.preventDefault();
+		// goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+		//}
 	}
 
 	onMount(() => {
