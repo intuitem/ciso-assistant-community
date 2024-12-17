@@ -370,6 +370,20 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
             self.residual_trust,
         )
 
+    def get_current_criticality_display(self) -> str:
+        return (
+            f"{self.current_criticality:.2f}".rstrip("0").rstrip(".")
+            if "." in f"{self.current_criticality:.2f}"
+            else f"{self.current_criticality:.2f}"
+        )
+
+    def get_residual_criticality_display(self) -> str:
+        return (
+            f"{self.residual_criticality:.2f}".rstrip("0").rstrip(".")
+            if "." in f"{self.residual_criticality:.2f}"
+            else f"{self.residual_criticality:.2f}"
+        )
+
 
 class AttackPath(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
@@ -388,6 +402,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Stakeholders"),
         related_name="attack_paths",
         help_text=_("Stakeholders leveraged by the attack path"),
+        blank=True,
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
@@ -398,9 +413,6 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         verbose_name = _("Attack path")
         verbose_name_plural = _("Attack paths")
         ordering = ["created_at"]
-
-    def __str__(self):
-        return f"{self.ro_to_couple} - {self.description}"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder

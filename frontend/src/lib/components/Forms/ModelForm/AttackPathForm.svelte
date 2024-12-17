@@ -1,14 +1,11 @@
 <script lang="ts">
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import * as m from '$paraglide/messages.js';
 	import { getOptions } from '$lib/utils/crud';
-	import TextArea from '../TextArea.svelte';
-	import NumberField from '../NumberField.svelte';
+	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import * as m from '$paraglide/messages.js';
+	import type { SuperValidated } from 'sveltekit-superforms';
 	import Checkbox from '../Checkbox.svelte';
+	import TextArea from '../TextArea.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;

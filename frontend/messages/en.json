@@ -569,7 +569,7 @@
 	"noThreatsMapped": "No threats mapped. Consider attaching threats to your risk scenarios for a better overview.",
 	"actionPlan": "Action plan",
 	"noStatus": "No status",
-	"actionPlanHelpText": "Separated by status and sorted by eta",
+	"actionPlanHelpText": "The counter represents the number of associated requirements.",
 	"matchingRequirements": "Matching requirements",
 	"asZIP": "as ZIP",
 	"incoming": "Incoming",
@@ -1005,5 +1005,7 @@
 	"certain": "Certain",
 	"minor": "Minor",
 	"operatingModesDescription": "Operating modes description",
-	"noStakeholders": "No stakeholders"
+	"noStakeholders": "No stakeholders",
+	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
+	"addStakeholder": "Add stakeholder"
 }
