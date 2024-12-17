@@ -14,7 +14,7 @@ import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
-	const URLModel = 'attack-paths';
+	const URLModel = 'strategic-scenarios';
 	const createSchema = modelSchema(URLModel);
 	const initialData = {
 		ebios_rm_study: params.id
@@ -95,12 +95,12 @@ export const actions: Actions = {
 		// const redirectToWrittenObject = Boolean(event.params.model === 'entity-assessments');
 		return defaultWriteFormAction({
 			event,
-			urlModel: 'attack-paths',
+			urlModel: 'strategic-scenarios',
 			action: 'create'
 			// redirectToWrittenObject: redirectToWrittenObject
 		});
 	},
 	delete: async (event) => {
-		return defaultDeleteFormAction({ event, urlModel: 'attack-paths' });
+		return defaultDeleteFormAction({ event, urlModel: 'strategic-scenarios' });
 	}
 };

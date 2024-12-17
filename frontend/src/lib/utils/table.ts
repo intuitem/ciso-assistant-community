@@ -596,9 +596,13 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
 		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
 	},
+	'strategic-scenarios': {
+		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths'],
+		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths']
+	},
 	'attack-paths': {
-		head: ['is_selected', 'name', 'risk_origin', 'target_objective', 'stakeholders', 'attackPath'],
-		body: ['is_selected', 'name', 'risk_origin', 'target_objective', 'stakeholders', 'description']
+		head: ['is_selected', 'name', 'stakeholders', 'description'],
+		body: ['is_selected', 'name', 'stakeholders', 'description']
 	},
 	'operational-scenarios': {
 		head: ['operatingModesDescription', 'threats', 'likelihood'],

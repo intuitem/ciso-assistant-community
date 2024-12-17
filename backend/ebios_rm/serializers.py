@@ -8,6 +8,7 @@ from .models import (
     FearedEvent,
     RoTo,
     Stakeholder,
+    StrategicScenario,
     AttackPath,
     OperationalScenario,
 )
@@ -128,10 +129,26 @@ class StakeholderReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class StrategicScenarioWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = StrategicScenario
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class StrategicScenarioReadSerializer(BaseModelSerializer):
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    ro_to_couple = FieldsRelatedField()
+
+    class Meta:
+        model = StrategicScenario
+        fields = "__all__"
+
+
 class AttackPathWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at", "folder", "ebios_rm_study"]
 
 
 class AttackPathReadSerializer(BaseModelSerializer):

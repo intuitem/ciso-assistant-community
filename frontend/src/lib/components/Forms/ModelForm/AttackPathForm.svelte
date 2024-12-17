@@ -12,17 +12,18 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
-	export let context: 'create' | 'edit' = 'create';
 </script>
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['ro_to_couple'], label: 'str' })}
-	field="ro_to_couple"
-	cacheLock={cacheLocks['ro_to_couple']}
-	bind:cachedValue={formDataCache['ro_to_couple']}
-	label={m.roToCouple()}
-	hidden={initialData.ro_to_couple}
+	options={getOptions({
+		objects: model.foreignKeys['strategic_scenario']
+	})}
+	field="strategic_scenario"
+	cacheLock={cacheLocks['strategic_scenario']}
+	bind:cachedValue={formDataCache['strategic_scenario']}
+	label={m.strategicScenario()}
+	hidden={initialData['strategic_scenario']}
 />
 <AutocompleteSelect
 	{form}

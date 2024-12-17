@@ -374,10 +374,11 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         )
 
 
-class AttackPath(NameDescriptionMixin, FolderMixin):
+class StrategicScenario(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
+        related_name="strategic_scenarios",
         on_delete=models.CASCADE,
     )
     ro_to_couple = models.ForeignKey(
@@ -385,6 +386,31 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         verbose_name=_("RO/TO couple"),
         on_delete=models.CASCADE,
         help_text=_("RO/TO couple from which the attach path is derived"),
+    )
+    ref_id = models.CharField(max_length=100, blank=True)
+    
+    class Meta:
+        verbose_name = _("Strategic Scenario")
+        verbose_name_plural = _("Strategic Scenarios")
+        ordering = ["created_at"]
+        
+    def save(self, *args, **kwargs):
+        self.folder = self.ebios_rm_study.folder
+        super().save(*args, **kwargs)
+
+
+class AttackPath(NameDescriptionMixin, FolderMixin):
+    ebios_rm_study = models.ForeignKey(
+        EbiosRMStudy,
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
+    )
+    strategic_scenario = models.ForeignKey(
+        StrategicScenario,
+        verbose_name=_("Strategic scenario"),
+        on_delete=models.CASCADE,
+        related_name="attack_paths",
+        help_text=_("Strategic scenario from which the attack path is derived"),
     )
     stakeholders = models.ManyToManyField(
         Stakeholder,
@@ -404,8 +430,13 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
+        self.ebios_rm_study = self.strategic_scenario.ebios_rm_study
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+    
+    @property
+    def ro_to_couple(self):
+        return self.strategic_scenario.ro_to_couple
 
     @property
     def gravity(self):
