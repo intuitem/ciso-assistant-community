@@ -703,7 +703,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Attack path',
 		verboseNamePlural: 'Attack paths',
 		foreignKeyFields: [
-			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' },
+			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders', urlParams: 'is_selected=true&ebios_rm_study=', detail: true },
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{

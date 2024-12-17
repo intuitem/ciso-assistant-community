@@ -105,12 +105,8 @@ class RoToReadSerializer(BaseModelSerializer):
 
 
 class StakeholderWriteSerializer(BaseModelSerializer):
-    current_criticality = serializers.CharField(
-        source="get_current_criticality_display"
-    )
-    residual_criticality = serializers.CharField(
-        source="get_residual_criticality_display"
-    )
+    current_criticality = serializers.IntegerField(read_only=True)
+    residual_criticality = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Stakeholder

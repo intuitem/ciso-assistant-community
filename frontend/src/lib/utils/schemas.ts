@@ -437,10 +437,12 @@ export const StakeholderSchema = z.object({
 	current_penetration: z.number().min(0).max(4).default(0).optional(),
 	current_maturity: z.number().min(1).max(4).default(1).optional(),
 	current_trust: z.number().min(1).max(4).default(1).optional(),
+	current_criticality: z.number().min(0).max(4).default(0).optional(),
 	residual_dependency: z.number().min(0).max(4).default(0).optional(),
 	residual_penetration: z.number().min(0).max(4).default(0).optional(),
 	residual_maturity: z.number().min(1).max(4).default(1).optional(),
 	residual_trust: z.number().min(1).max(4).default(1).optional(),
+	residual_criticality: z.number().min(0).max(4).default(0).optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
 });
