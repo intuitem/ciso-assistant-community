@@ -388,12 +388,12 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         help_text=_("RO/TO couple from which the attach path is derived"),
     )
     ref_id = models.CharField(max_length=100, blank=True)
-    
+
     class Meta:
         verbose_name = _("Strategic Scenario")
         verbose_name_plural = _("Strategic Scenarios")
         ordering = ["created_at"]
-        
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
@@ -433,7 +433,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         self.ebios_rm_study = self.strategic_scenario.ebios_rm_study
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
-    
+
     @property
     def ro_to_couple(self):
         return self.strategic_scenario.ro_to_couple

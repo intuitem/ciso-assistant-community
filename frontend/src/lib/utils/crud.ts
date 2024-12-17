@@ -678,10 +678,22 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Strategic scenarios',
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to', urlParams: 'ebios_rm_study=', detail: true },
+			{
+				field: 'ro_to_couple',
+				urlModel: 'ro-to',
+				endpointUrl: 'ebios-rm/ro-to',
+				urlParams: 'ebios_rm_study=',
+				detail: true
+			},
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		],
-		reverseForeignKeyFields: [{ field: 'strategic_scenario', urlModel: 'attack-paths', endpointUrl: 'ebios-rm/attack-paths' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'strategic_scenario',
+				urlModel: 'attack-paths',
+				endpointUrl: 'ebios-rm/attack-paths'
+			}
+		]
 	},
 	'attack-paths': {
 		endpointUrl: 'ebios-rm/attack-paths',
@@ -694,7 +706,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' },
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
-			{ field: 'strategic_scenario', urlModel: 'strategic-scenarios', endpointUrl: 'ebios-rm/strategic-scenarios', urlParams: 'ebios_rm_study=', detail: true }
+			{
+				field: 'strategic_scenario',
+				urlModel: 'strategic-scenarios',
+				endpointUrl: 'ebios-rm/strategic-scenarios',
+				urlParams: 'ebios_rm_study=',
+				detail: true
+			}
 		]
 	},
 	'operational-scenarios': {

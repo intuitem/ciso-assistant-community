@@ -7,41 +7,91 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0006_alter_attackpath_stakeholders'),
-        ('iam', '0010_user_preferences'),
+        ("ebios_rm", "0006_alter_attackpath_stakeholders"),
+        ("iam", "0010_user_preferences"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='attackpath',
-            name='ro_to_couple',
+            model_name="attackpath",
+            name="ro_to_couple",
         ),
         migrations.CreateModel(
-            name='StrategicScenario',
+            name="StrategicScenario",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated at')),
-                ('is_published', models.BooleanField(default=False, verbose_name='published')),
-                ('name', models.CharField(max_length=200, verbose_name='Name')),
-                ('description', models.TextField(blank=True, null=True, verbose_name='Description')),
-                ('ref_id', models.CharField(blank=True, max_length=100)),
-                ('ebios_rm_study', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='strategic_scenarios', to='ebios_rm.ebiosrmstudy', verbose_name='EBIOS RM study')),
-                ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
-                ('ro_to_couple', models.ForeignKey(help_text='RO/TO couple from which the attach path is derived', on_delete=django.db.models.deletion.CASCADE, to='ebios_rm.roto', verbose_name='RO/TO couple')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Name")),
+                (
+                    "description",
+                    models.TextField(blank=True, null=True, verbose_name="Description"),
+                ),
+                ("ref_id", models.CharField(blank=True, max_length=100)),
+                (
+                    "ebios_rm_study",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="strategic_scenarios",
+                        to="ebios_rm.ebiosrmstudy",
+                        verbose_name="EBIOS RM study",
+                    ),
+                ),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
+                (
+                    "ro_to_couple",
+                    models.ForeignKey(
+                        help_text="RO/TO couple from which the attach path is derived",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="ebios_rm.roto",
+                        verbose_name="RO/TO couple",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Strategic Scenario',
-                'verbose_name_plural': 'Strategic Scenarios',
-                'ordering': ['created_at'],
+                "verbose_name": "Strategic Scenario",
+                "verbose_name_plural": "Strategic Scenarios",
+                "ordering": ["created_at"],
             },
         ),
         migrations.AddField(
-            model_name='attackpath',
-            name='strategic_scenario',
-            field=models.ForeignKey(default='', help_text='Strategic scenario from which the attack path is derived', on_delete=django.db.models.deletion.CASCADE, related_name='attack_paths', to='ebios_rm.strategicscenario', verbose_name='Strategic scenario'),
+            model_name="attackpath",
+            name="strategic_scenario",
+            field=models.ForeignKey(
+                default="",
+                help_text="Strategic scenario from which the attack path is derived",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="attack_paths",
+                to="ebios_rm.strategicscenario",
+                verbose_name="Strategic scenario",
+            ),
             preserve_default=False,
         ),
     ]

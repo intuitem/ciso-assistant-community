@@ -448,8 +448,8 @@ export const StakeholderSchema = z.object({
 export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	ro_to_couple: z.string().uuid(),
-	ref_id: z.string().optional(),
-})
+	ref_id: z.string().optional()
+});
 
 export const AttackPathSchema = z.object({
 	...NameDescriptionMixin,
