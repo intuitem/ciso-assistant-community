@@ -310,7 +310,7 @@
 											{:else}
 												--
 											{/if}
-										{:else if value.id}
+										{:else if value.id && !value.hexcolor}
 											{@const itemHref = `/${
 												URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
 													(item) => item.field === key

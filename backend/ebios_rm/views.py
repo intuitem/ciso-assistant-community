@@ -129,6 +129,7 @@ class StakeholderViewSet(BaseModelViewSet):
 
     filterset_fields = [
         "ebios_rm_study",
+        "is_selected",
     ]
 
     @action(detail=False, name="Get category choices")
