@@ -47,7 +47,15 @@ export const load: LayoutServerLoad = async (event) => {
 
 	if (foreignKeyFields) {
 		for (const keyField of foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			let queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			if (keyField.detailUrlParams && Array.isArray(keyField.detailUrlParams)) {
+				keyField.detailUrlParams.forEach(detailParam => {
+					const paramValue = object[detailParam]?.id;
+					if (paramValue) {
+						queryParams += queryParams ? `&${detailParam}=${paramValue}` : `?${detailParam}=${paramValue}`;
+					}
+				});
+			} // To prepare possible fetch for foreign keys with detail in generic views
 			const keyModel = getModelInfo(keyField.urlModel);
 			let url = keyModel.endpointUrl
 				? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
