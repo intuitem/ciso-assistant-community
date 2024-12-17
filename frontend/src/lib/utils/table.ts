@@ -246,6 +246,15 @@ const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const STAKEHOLDER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.stakeholders?.length ? row.stakeholders.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'stakeholder'
+	},
+	alwaysDisplay: true
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.ref_id,
@@ -712,7 +721,11 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	'attack-paths': {
 		head: ['is_selected', 'name', 'stakeholders', 'description'],
-		body: ['is_selected', 'name', 'stakeholders', 'description']
+		body: ['is_selected', 'name', 'stakeholders', 'description'],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			stakeholders: STAKEHOLDER_FILTER
+		}
 	},
 	'operational-scenarios': {
 		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
