@@ -208,10 +208,13 @@
 
 	export let orderRelatedModels = [''];
 	if (data.urlModel === 'projects') {
-		orderRelatedModels = ['risk-assessments', 'entity-assessments', 'compliance-assessments'];
+		orderRelatedModels = ['compliance-assessments', 'risk-assessments', 'entity-assessments'];
 	}
 	if (data.urlModel === 'entities') {
-		orderRelatedModels = ['solutions', 'representatives', 'entity-assessments'];
+		orderRelatedModels = ['entity-assessments', 'representatives', 'solutions'];
+	}
+	if (data.urlModel === 'folders') {
+		orderRelatedModels = ['projects', 'entities'];
 	}
 </script>
 
