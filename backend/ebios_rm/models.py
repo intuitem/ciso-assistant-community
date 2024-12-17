@@ -126,6 +126,8 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
     gravity = models.SmallIntegerField(default=-1, verbose_name=_("Gravity"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    
+    fields_to_check = ["name", "ref_id"]
 
     class Meta:
         verbose_name = _("Feared event")
@@ -223,6 +225,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
     )
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    
+    fields_to_check = ["target_objective", "risk_origin"]
 
     def __str__(self) -> str:
         return f"{self.get_risk_origin_display()} - {self.target_objective}"
@@ -334,11 +338,16 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
 
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    
+    fields_to_check = ["entity", "category"]
 
     class Meta:
         verbose_name = _("Stakeholder")
         verbose_name_plural = _("Stakeholders")
         ordering = ["created_at"]
+    
+    def get_scope(self):
+        return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def __str__(self):
         return f"{self.entity.name} - {self.get_category_display()}"
@@ -388,11 +397,16 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         help_text=_("RO/TO couple from which the attach path is derived"),
     )
     ref_id = models.CharField(max_length=100, blank=True)
+    
+    fields_to_check = ["name", "ref_id"]
 
     class Meta:
         verbose_name = _("Strategic Scenario")
         verbose_name_plural = _("Strategic Scenarios")
         ordering = ["created_at"]
+    
+    def get_scope(self):
+        return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
@@ -423,11 +437,16 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
     ref_id = models.CharField(max_length=100, blank=True)
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    
+    fields_to_check = ["name", "ref_id"]
 
     class Meta:
         verbose_name = _("Attack path")
         verbose_name_plural = _("Attack paths")
         ordering = ["created_at"]
+    
+    def get_scope(self):
+        return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def save(self, *args, **kwargs):
         self.ebios_rm_study = self.strategic_scenario.ebios_rm_study

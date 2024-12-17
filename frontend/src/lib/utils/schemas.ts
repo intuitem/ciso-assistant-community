@@ -447,13 +447,13 @@ export const StakeholderSchema = z.object({
 
 export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
+	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
 	ref_id: z.string().optional()
 });
 
 export const AttackPathSchema = z.object({
 	...NameDescriptionMixin,
-	ebios_rm_study: z.string(),
 	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
 	is_selected: z.boolean().optional(),
