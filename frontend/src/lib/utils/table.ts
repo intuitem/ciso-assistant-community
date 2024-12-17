@@ -167,7 +167,7 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 
 const GRAVITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.gravity.name),
+	getColumn: (row) => row.gravity.name,
 	extraProps: {
 		defaultOptionName: 'gravity'
 	},
@@ -176,7 +176,7 @@ const GRAVITY_FILTER: ListViewFilterConfig = {
 
 const LIKELIHOOD_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.likelihood.name),
+	getColumn: (row) => row.likelihood.name,
 	extraProps: {
 		defaultOptionName: 'likelihood'
 	},
@@ -194,7 +194,7 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 
 const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.risk_origin),
+	getColumn: (row) => row.risk_origin,
 	extraProps: {
 		defaultOptionName: 'risk_origin'
 	},
@@ -212,7 +212,7 @@ const FEARED_EVENT_FILTER: ListViewFilterConfig = {
 
 const PERTINENCE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.pertinence),
+	getColumn: (row) => row.pertinence,
 	extraProps: {
 		defaultOptionName: 'pertinence'
 	},
@@ -221,7 +221,7 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 
 const ENTITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.entity.str),
+	getColumn: (row) => row.entity.str,
 	extraProps: {
 		defaultOptionName: 'entity'
 	},
@@ -680,20 +680,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'ro-to': {
-		head: [
-			'isSelected',
-			'riskOrigin',
-			'targetObjective',
-			'fearedEvents',
-			'pertinence'
-		],
-		body: [
-			'is_selected',
-			'risk_origin',
-			'target_objective',
-			'feared_events',
-			'pertinence'
-		],
+		head: ['isSelected', 'riskOrigin', 'targetObjective', 'fearedEvents', 'pertinence'],
+		body: ['is_selected', 'risk_origin', 'target_objective', 'feared_events', 'pertinence'],
 		filters: {
 			is_selected: IS_SELECTED_FILTER,
 			risk_origin: RISK_ORIGIN_FILTER,
@@ -702,8 +690,22 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	stakeholders: {
-		head: ['is_selected', 'entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
-		body: ['is_selected', 'entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
+		head: [
+			'is_selected',
+			'entity',
+			'category',
+			'current_criticality',
+			'applied_controls',
+			'residual_criticality'
+		],
+		body: [
+			'is_selected',
+			'entity',
+			'category',
+			'current_criticality',
+			'applied_controls',
+			'residual_criticality'
+		],
 		filters: {
 			is_selected: IS_SELECTED_FILTER,
 			entity: ENTITY_FILTER,
