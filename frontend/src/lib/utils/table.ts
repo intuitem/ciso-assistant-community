@@ -156,6 +156,33 @@ const ASSET_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const QUALIFICATION_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.qualifications?.length ? row.qualifications.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'qualification'
+	},
+	alwaysDisplay: true
+};
+
+const GRAVITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.gravity.name),
+	extraProps: {
+		defaultOptionName: 'gravity'
+	},
+	alwaysDisplay: true
+};
+
+const IS_SELECTED_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.is_selected ? 'true' : 'false'),
+	extraProps: {
+		defaultOptionName: 'is_selected'
+	},
+	alwaysDisplay: true
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.ref_id,
@@ -571,8 +598,14 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description']
 	},
 	'feared-events': {
-		head: ['selected', 'name', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
-		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity']
+		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		filters: {
+			assets: ASSET_FILTER,
+			qualifications: QUALIFICATION_FILTER,
+			gravity: GRAVITY_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
 	},
 	'ro-to': {
 		head: [
