@@ -55,7 +55,7 @@
 		trust: number
 	) => {
 		if (maturity === 0 || trust === 0) return 0;
-		return (dependency * penetration) / (maturity * trust);
+		return ((dependency * penetration) / (maturity * trust)).toFixed(2).replace(/\.?0+$/, '');
 	};
 
 	$: currentCriticality = getCriticality(
