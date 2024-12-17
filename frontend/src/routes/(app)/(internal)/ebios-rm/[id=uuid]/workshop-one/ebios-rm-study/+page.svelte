@@ -9,6 +9,7 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { TabGroup, Tab, getModalStore } from '@skeletonlabs/skeleton';
 	import { checkConstraints } from '$lib/utils/crud';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -84,13 +85,13 @@
 					{ebiosRmStudy.status}
 				</span>
 			</div>
-			<a
+			<Anchor
 				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
 				class="btn variant-filled-primary h-fit"
 			>
 				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
 				{m.edit()}
-			</a>
+			</Anchor>
 		</div>
 		<div
 			id="activityOne"
@@ -119,7 +120,7 @@
 				<ul class="list-disc list-inside text-gray-600">
 					{#if ebiosRmStudy.authors?.length}
 						{#each ebiosRmStudy.authors as author}
-							<li><a class="anchor" href="/users/{author.id}">{author.str}</a></li>
+							<li><Anchor class="anchor" href="/users/{author.id}">{author.str}</Anchor></li>
 						{/each}
 					{:else}
 						<li>{m.noAuthor()}</li>
@@ -134,7 +135,7 @@
 				<ul class="list-disc list-inside text-gray-600">
 					{#if ebiosRmStudy.reviewers?.length}
 						{#each ebiosRmStudy.reviewers as reviewer}
-							<li><a class="anchor" href="/users/{reviewer.id}">{reviewer.str}</a></li>
+							<li><Anchor class="anchor" href="/users/{reviewer.id}">{reviewer.str}</Anchor></li>
 						{/each}
 					{:else}
 						<li>{m.noReviewer()}</li>
