@@ -144,6 +144,7 @@ class StrategicScenarioReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
     gravity = serializers.JSONField(source="get_gravity_display")
+    attack_paths = FieldsRelatedField(many=True)
 
     class Meta:
         model = StrategicScenario
