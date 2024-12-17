@@ -571,8 +571,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description']
 	},
 	'feared-events': {
-		head: ['selected', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
-		body: ['is_selected', 'assets', 'description', 'qualifications', 'gravity']
+		head: ['selected', 'name', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
+		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity']
 	},
 	'ro-to': {
 		head: [
@@ -597,8 +597,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
 	},
 	'attack-paths': {
-		head: ['risk_origin', 'target_objective', 'stakeholders', 'attackPath'],
-		body: ['risk_origin', 'target_objective', 'stakeholders', 'description']
+		head: ['is_selected', 'name', 'risk_origin', 'target_objective', 'stakeholders', 'attackPath'],
+		body: ['is_selected', 'name', 'risk_origin', 'target_objective', 'stakeholders', 'description']
 	},
 	'operational-scenarios': {
 		head: ['operatingModesDescription', 'threats', 'likelihood'],
