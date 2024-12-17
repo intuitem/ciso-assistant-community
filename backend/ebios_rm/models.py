@@ -411,6 +411,21 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+    
+    def get_gravity_display(self):
+        if self.ro_to_couple.get_gravity() < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+                "hexcolor": "#f9fafb",
+            }
+        risk_matrix = self.parsed_matrix
+        return {
+            **risk_matrix["impact"][self.ro_to_couple.get_gravity()],
+            "value": self.ro_to_couple.get_gravity(),
+        }
 
 
 class AttackPath(NameDescriptionMixin, FolderMixin):
