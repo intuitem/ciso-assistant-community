@@ -421,7 +421,7 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
                 "value": -1,
                 "hexcolor": "#f9fafb",
             }
-        risk_matrix = self.parsed_matrix
+        risk_matrix = self.ebios_rm_study.parsed_matrix
         return {
             **risk_matrix["impact"][self.ro_to_couple.get_gravity()],
             "value": self.ro_to_couple.get_gravity(),
