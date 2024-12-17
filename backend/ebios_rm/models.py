@@ -382,6 +382,20 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
             self.residual_trust,
         )
 
+    def get_current_criticality_display(self) -> str:
+        return (
+            f"{self.current_criticality:.2f}".rstrip("0").rstrip(".")
+            if "." in f"{self.current_criticality:.2f}"
+            else f"{self.current_criticality:.2f}"
+        )
+
+    def get_residual_criticality_display(self) -> str:
+        return (
+            f"{self.residual_criticality:.2f}".rstrip("0").rstrip(".")
+            if "." in f"{self.residual_criticality:.2f}"
+            else f"{self.residual_criticality:.2f}"
+        )
+
 
 class StrategicScenario(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
