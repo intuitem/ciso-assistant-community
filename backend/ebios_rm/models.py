@@ -411,7 +411,7 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
-    
+
     def get_gravity_display(self):
         if self.ro_to_couple.get_gravity() < 0:
             return {
