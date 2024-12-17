@@ -4,6 +4,7 @@ import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
+import { category, entity } from '$paraglide/messages';
 
 interface ListViewFilterConfig {
 	component: ComponentType;
@@ -206,6 +207,24 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 	getColumn: (row) => (row.pertinence),
 	extraProps: {
 		defaultOptionName: 'pertinence'
+	},
+	alwaysDisplay: true
+};
+
+const ENTITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.entity.str),
+	extraProps: {
+		defaultOptionName: 'entity'
+	},
+	alwaysDisplay: true
+};
+
+const APPLIED_CONTROL_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.applied_controls?.length ? row.applied_controls.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'applied_control'
 	},
 	alwaysDisplay: true
 };
@@ -657,8 +676,14 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	stakeholders: {
-		head: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
-		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
+		head: ['is_selected', 'entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
+		body: ['is_selected', 'entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			entity: ENTITY_FILTER,
+			category: CATEGORY_FILTER,
+			applied_controls: APPLIED_CONTROL_FILTER
+		}
 	},
 	'strategic-scenarios': {
 		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths'],
