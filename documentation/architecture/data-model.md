@@ -1348,7 +1348,8 @@ erDiagram
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
     EBIOS_RM_STUDY        |o--o{ RISK_ASSESSMENT      : generates
-    ATTACK_PATH           }o--|| RO_TO                : derives
+    STRATEGIC_SCENARIO    }o--|| RO_TO                : derives_from
+    ATTACK_PATH           }o--|| STRATEGIC_SCENARIO   : derives
     RO_TO                 }o--o{ FEARED_EVENT         : corresponds_to
     OPERATIONAL_SCENARIO  |o--|| ATTACK_PATH          : derives
     OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
@@ -1403,6 +1404,12 @@ erDiagram
         int    residual_trust
         bool   selected
         string justification
+    }
+
+    STRATEGIC_SCENARIO {
+        string ref_id
+        string name
+        string description
     }
 
     ATTACK_PATH {

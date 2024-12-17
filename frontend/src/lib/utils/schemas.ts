@@ -433,23 +433,23 @@ export const StakeholderSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	category: z.string().optional(),
 	entity: z.string().optional(),
-	current_dependency: z.number().min(0).max(4).optional(),
-	current_penetration: z.number().min(0).max(4).optional(),
-	current_maturity: z.number().min(1).max(4).optional(),
-	current_trust: z.number().min(1).max(4).optional(),
-	residual_dependency: z.number().min(0).max(4).optional(),
-	residual_penetration: z.number().min(0).max(4).optional(),
-	residual_maturity: z.number().min(1).max(4).optional(),
-	residual_trust: z.number().min(1).max(4).optional(),
+	current_dependency: z.number().min(0).max(4).default(0).optional(),
+	current_penetration: z.number().min(0).max(4).default(0).optional(),
+	current_maturity: z.number().min(1).max(4).default(1).optional(),
+	current_trust: z.number().min(1).max(4).default(1).optional(),
+	residual_dependency: z.number().min(0).max(4).default(0).optional(),
+	residual_penetration: z.number().min(0).max(4).default(0).optional(),
+	residual_maturity: z.number().min(1).max(4).default(1).optional(),
+	residual_trust: z.number().min(1).max(4).default(1).optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
 });
 
 export const AttackPathSchema = z.object({
+	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
-	stakeholders: z.string().uuid().array(),
-	description: z.string(),
+	stakeholders: z.string().uuid().optional().array().optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
 });
