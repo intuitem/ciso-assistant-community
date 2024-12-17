@@ -139,6 +139,7 @@ class StrategicScenarioReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
+    gravity = serializers.JSONField(source="get_gravity_display")
 
     class Meta:
         model = StrategicScenario

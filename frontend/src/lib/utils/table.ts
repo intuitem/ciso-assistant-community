@@ -4,7 +4,6 @@ import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
-import { category, entity } from '$paraglide/messages';
 
 interface ListViewFilterConfig {
 	component: ComponentType;
@@ -705,8 +704,11 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'strategic-scenarios': {
-		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths'],
-		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths']
+		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
+		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
+		filters: {
+			gravity: GRAVITY_FILTER
+		}
 	},
 	'attack-paths': {
 		head: ['is_selected', 'name', 'stakeholders', 'description'],
