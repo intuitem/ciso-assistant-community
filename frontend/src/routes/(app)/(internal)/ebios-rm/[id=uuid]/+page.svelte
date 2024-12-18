@@ -23,68 +23,68 @@
 			{
 				title: safeTranslate(m.ebiosWs1_1()),
 				status: data.data.meta.workshops[0].steps[0].status,
-				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?activity=one&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-1/ebios-rm-study?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_2()),
 				status: data.data.meta.workshops[0].steps[1].status,
-				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?activity=two&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-1/ebios-rm-study?activity=two&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_3()),
 				status: data.data.meta.workshops[0].steps[2].status,
-				href: `${$page.url.pathname}/workshop-one/feared-events?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-1/feared-events?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_4()),
 				status: data.data.meta.workshops[0].steps[3].status,
-				href: `${$page.url.pathname}/workshop-one/baseline?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-1/baseline?next=${$page.url.pathname}`
 			}
 		],
 		ws2: [
 			{
 				title: safeTranslate(m.ebiosWs2_1()),
 				status: data.data.meta.workshops[1].steps[0].status,
-				href: `${$page.url.pathname}/workshop-two/ro-to?activity=one&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-2/ro-to?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_2()),
 				status: data.data.meta.workshops[1].steps[1].status,
-				href: `${$page.url.pathname}/workshop-two/ro-to?activity=two&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-2/ro-to?activity=two&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_3()),
 				status: data.data.meta.workshops[1].steps[2].status,
-				href: `${$page.url.pathname}/workshop-two/ro-to?activity=three&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-2/ro-to?activity=three&next=${$page.url.pathname}`
 			}
 		],
 		ws3: [
 			{
 				title: safeTranslate(m.ebiosWs3_1()),
 				status: data.data.meta.workshops[2].steps[0].status,
-				href: `${$page.url.pathname}/workshop-three/ecosystem?activity=one&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-3/ecosystem?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs3_2()),
 				status: data.data.meta.workshops[2].steps[1].status,
-				href: `${$page.url.pathname}/workshop-three/strategic-scenarios?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-3/strategic-scenarios?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs3_3()),
 				status: data.data.meta.workshops[2].steps[2].status,
-				href: `${$page.url.pathname}/workshop-three/ecosystem?activity=three&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-3/ecosystem?activity=three&next=${$page.url.pathname}`
 			}
 		],
 		ws4: [
 			{
 				title: safeTranslate(m.ebiosWs4_1()),
 				status: data.data.meta.workshops[3].steps[0].status,
-				href: `${$page.url.pathname}/workshop-four/operational-scenario?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-4/operational-scenario?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs4_2()),
 				status: data.data.meta.workshops[3].steps[1].status,
-				href: `${$page.url.pathname}/workshop-four/operational-scenario?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-4/operational-scenario?next=${$page.url.pathname}`
 			}
 		],
 		ws5: [
@@ -96,22 +96,22 @@
 			{
 				title: safeTranslate(m.ebiosWs5_2()),
 				status: data.data.meta.workshops[4].steps[1].status,
-				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_3()),
 				status: data.data.meta.workshops[4].steps[2].status,
-				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_4()),
 				status: data.data.meta.workshops[4].steps[3].status,
-				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_5()),
 				status: data.data.meta.workshops[4].steps[4].status,
-				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
 			}
 		]
 	};
@@ -152,11 +152,36 @@
 	<div
 		class="card bg-white shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>
-		<Tile title={m.ebiosWs1()} accent_color="bg-pink-600" status="to_do" meta={dummydata.ws1} />
-		<Tile title={m.ebiosWs2()} accent_color="bg-fuchsia-900" status="to_do" meta={dummydata.ws2} />
-		<Tile title={m.ebiosWs3()} accent_color="bg-teal-500" status="to_do" meta={dummydata.ws3} />
-		<Tile title={m.ebiosWs4()} accent_color="bg-yellow-600" status="to_do" meta={dummydata.ws4} />
 		<Tile
+			workshop={1}
+			title={m.ebiosWs1()}
+			accent_color="bg-pink-600"
+			status="to_do"
+			meta={dummydata.ws1}
+		/>
+		<Tile
+			workshop={2}
+			title={m.ebiosWs2()}
+			accent_color="bg-fuchsia-900"
+			status="to_do"
+			meta={dummydata.ws2}
+		/>
+		<Tile
+			workshop={3}
+			title={m.ebiosWs3()}
+			accent_color="bg-teal-500"
+			status="to_do"
+			meta={dummydata.ws3}
+		/>
+		<Tile
+			workshop={4}
+			title={m.ebiosWs4()}
+			accent_color="bg-yellow-600"
+			status="to_do"
+			meta={dummydata.ws4}
+		/>
+		<Tile
+			workshop={5}
 			title={m.ebiosWs5()}
 			accent_color="bg-red-500"
 			status="to_do"

@@ -1,12 +1,28 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { page } from '$app/stores';
 
 	export let title = 'activity';
 	export let status = '';
 	export let meta = null;
 	export let accent_color = '';
 	export let createRiskAnalysis = false;
+	export let workshop;
+
+	const popupStep: PopupSettings = {
+		event: 'click',
+		target: 'popupStep',
+		placement: 'top'
+	};
+
+	async function switchStepState(workshop: number, step: number) {
+		console.log('switchStepState', workshop, step);
+		await fetch(`/ebios-rm/${$page.params.id}/workshop-${workshop}/step-${step}/switch`, {
+			method: 'POST'
+		});
+	}
 </script>
 
 <div class="p-5 {accent_color}">
@@ -28,39 +44,41 @@
 				<div>
 					<ol class="relative text-gray-500 border-s border-gray-200">
 						{#each meta as step, i}
-							{#if step.status == 'done'}
-								<li class="mb-10 ms-6">
-									{#if createRiskAnalysis && i == 0}
-										<slot name="addRiskAnalysis"></slot>
-									{:else}
-										<a href={step.href} class="hover:text-purple-800">
+							<li class="flex flex-row justify-between mb-10 ms-6">
+								{#if createRiskAnalysis && i == 0}
+									<slot name="addRiskAnalysis"></slot>
+								{:else}
+									<a href={step.href} class="hover:text-purple-800">
+										{#if step.status == 'done'}
 											<span
-												class="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white"
+												class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
 											>
-												<i class="fa-solid fa-check"></i>
+												<i class="fa-solid fa-check" />
 											</span>
-											<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
-											<p class="text-sm">{step.title}</p>
-										</a>
-									{/if}
-								</li>
-							{:else}
-								<li class="mb-10 ms-6">
-									{#if createRiskAnalysis && i == 0}
-										<slot name="addRiskAnalysis"></slot>
-									{:else}
-										<a href={step.href} class="hover:text-purple-800">
+										{:else}
 											<span
-												class="absolute flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full -start-4 ring-4 ring-white"
+												class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
 											>
-												<i class="fa-solid fa-clipboard-check"></i>
+												<i class="fa-solid fa-clipboard-check" />
 											</span>
-											<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
-											<p class="text-sm">{step.title}</p>
-										</a>
-									{/if}
-								</li>
-							{/if}
+										{/if}
+										<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
+										<p class="text-sm">{step.title}</p>
+									</a>
+								{/if}
+								<button class="btn bg-initial" data-testid="sidebar-more-btn" use:popup={popupStep}
+									><i class="fa-solid fa-ellipsis-vertical" /></button
+								>
+								<div
+									class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+									data-testid="sidebar-more-panel"
+									data-popup="popupStep"
+								>
+									<button type="button" on:click={switchStepState(workshop, i + 1)}
+										>lil flipo</button
+									>
+								</div>
+							</li>
 						{/each}
 					</ol>
 				</div>
