@@ -74,11 +74,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     )
     def update_workshop_step_status(self, request, pk, workshop, step):
         ebios_rm_study: EbiosRMStudy = self.get_object()
-        body = request.data
         workshop = int(workshop)
         step = int(step)
-        ebios_rm_study.update_workshop_step_status(
-            workshop, step, body.get("status"))
+        ebios_rm_study.switch_workshop_step_status(workshop, step)
         return Response(EbiosRMStudyReadSerializer(ebios_rm_study).data)
 
 
