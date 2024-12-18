@@ -1,7 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
+
+from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from core.models import (
     AppliedControl,
     Asset,
@@ -10,8 +11,42 @@ from core.models import (
     RiskMatrix,
     Threat,
 )
+from core.validators import (
+    JSONSchemaInstanceValidator,
+)
 from iam.models import FolderMixin, User
 from tprm.models import Entity
+
+INITIAL_META = {
+    "workshops": [
+        {
+            "steps": [
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+            ]
+        },
+        {"steps": [{"status": "to_do"}, {
+            "status": "to_do"}, {"status": "to_do"}]},
+        {"steps": [{"status": "to_do"}, {
+            "status": "to_do"}, {"status": "to_do"}]},
+        {"steps": [{"status": "to_do"}, {"status": "to_do"}]},
+        {
+            "steps": [
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+            ]
+        },
+    ]
+}
+
+
+def get_initial_meta():
+    return INITIAL_META
 
 
 class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
@@ -21,6 +56,43 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         IN_REVIEW = "in_review", _("In review")
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
+
+    META_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://ciso-assistant.com/schemas/ebiosrmstudy/meta.schema.json",
+        "title": "Metadata",
+        "description": "Metadata of the EBIOS RM Study",
+        "type": "object",
+        "properties": {
+            "workshops": {
+                "type": "array",
+                "description": "A list of workshops, each containing steps",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "steps": {
+                            "type": "array",
+                            "description": "The list of steps in the workshop",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "description": "The current status of the step",
+                                        "enum": ["to_do", "in_progress", "done"],
+                                    },
+                                },
+                                "required": ["status"],
+                                "additionalProperties": False,
+                            },
+                        },
+                    },
+                    "required": ["steps"],
+                    "additionalProperties": False,
+                },
+            }
+        },
+    }
 
     risk_matrix = models.ForeignKey(
         RiskMatrix,
@@ -86,7 +158,14 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name=_("Reviewers"),
         related_name="reviewers",
     )
-    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    observation = models.TextField(
+        null=True, blank=True, verbose_name=_("Observation"))
+
+    meta = models.JSONField(
+        default=get_initial_meta,
+        verbose_name=_("Metadata"),
+        validators=[JSONSchemaInstanceValidator(META_JSONSCHEMA)],
+    )
 
     class Meta:
         verbose_name = _("Ebios RM Study")
@@ -96,6 +175,20 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     @property
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
+
+    def update_workshop_step_status(self, workshop: int, step: int, status: str):
+        if workshop < 1 or workshop > 5:
+            raise ValueError("Workshop must be between 1 and 5")
+        if step < 1 or step > len(self.meta["workshops"][workshop - 1]["steps"]):
+            raise ValueError(
+                f"Worshop {workshop} has only {len(self.meta['workshops'][workshop - 1]['steps'])} steps"
+            )
+        if not status in ["to_do", "in_progress", "done"]:
+            raise ValueError(
+                "Status must be one of 'to_do', 'in_progress', 'done'")
+        self.meta["workshops"][workshop -
+                               1]["steps"][step - 1]["status"] = status
+        return self.save()
 
 
 class FearedEvent(NameDescriptionMixin, FolderMixin):
@@ -121,8 +214,10 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
 
     ref_id = models.CharField(max_length=100, blank=True)
     gravity = models.SmallIntegerField(default=-1, verbose_name=_("Gravity"))
-    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    is_selected = models.BooleanField(
+        verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(
+        verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Feared event")
@@ -217,8 +312,10 @@ class RoTo(AbstractBaseModel, FolderMixin):
     activity = models.PositiveSmallIntegerField(
         verbose_name=_("Activity"), default=0, validators=[MaxValueValidator(4)]
     )
-    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    is_selected = models.BooleanField(
+        verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(
+        verbose_name=_("Justification"), blank=True)
 
     def __str__(self) -> str:
         return f"{self.get_risk_origin_display()} - {self.target_objective}"
@@ -321,8 +418,10 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         validators=[MinValueValidator(1), MaxValueValidator(4)],
     )
 
-    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    is_selected = models.BooleanField(
+        verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(
+        verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Stakeholder")
@@ -398,8 +497,10 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
-    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    is_selected = models.BooleanField(
+        verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(
+        verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Attack path")
@@ -435,11 +536,15 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     operating_modes_description = models.TextField(
         verbose_name=_("Operating modes description"),
-        help_text=_("Description of the operating modes of the operational scenario"),
+        help_text=_(
+            "Description of the operating modes of the operational scenario"),
     )
-    likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
-    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(verbose_name=_("Justification"), blank=True)
+    likelihood = models.SmallIntegerField(
+        default=-1, verbose_name=_("Likelihood"))
+    is_selected = models.BooleanField(
+        verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(
+        verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Operational scenario")
