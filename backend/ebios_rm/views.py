@@ -9,6 +9,7 @@ from .models import (
     AttackPath,
     OperationalScenario,
 )
+from .serializers import EbiosRMStudyReadSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -64,6 +65,21 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
         choices = undefined | _choices
         return Response(choices)
+
+    @action(
+        detail=True,
+        methods=["patch"],
+        name="Update workshop step status",
+        url_path="workshop/(?P<workshop>[1-5])/step/(?P<step>[1-5])",
+    )
+    def update_workshop_step_status(self, request, pk, workshop, step):
+        ebios_rm_study: EbiosRMStudy = self.get_object()
+        body = request.data
+        workshop = int(workshop)
+        step = int(step)
+        ebios_rm_study.update_workshop_step_status(
+            workshop, step, body.get("status"))
+        return Response(EbiosRMStudyReadSerializer(ebios_rm_study).data)
 
 
 class FearedEventViewSet(BaseModelViewSet):
