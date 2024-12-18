@@ -22,95 +22,95 @@
 		ws1: [
 			{
 				title: safeTranslate(m.ebiosWs1_1()),
-				status: 'done',
+				status: data.data.meta.workshops[0].steps[0].status,
 				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_2()),
-				status: 'done',
+				status: data.data.meta.workshops[0].steps[1].status,
 				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?activity=two&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_3()),
-				status: 'to_do',
+				status: data.data.meta.workshops[0].steps[2].status,
 				href: `${$page.url.pathname}/workshop-one/feared-events?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_4()),
-				status: 'to_do',
+				status: data.data.meta.workshops[0].steps[3].status,
 				href: `${$page.url.pathname}/workshop-one/baseline?next=${$page.url.pathname}`
 			}
 		],
 		ws2: [
 			{
 				title: safeTranslate(m.ebiosWs2_1()),
-				status: 'to_do',
+				status: data.data.meta.workshops[1].steps[0].status,
 				href: `${$page.url.pathname}/workshop-two/ro-to?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_2()),
-				status: 'to_do',
+				status: data.data.meta.workshops[1].steps[1].status,
 				href: `${$page.url.pathname}/workshop-two/ro-to?activity=two&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_3()),
-				status: 'to_do',
+				status: data.data.meta.workshops[1].steps[2].status,
 				href: `${$page.url.pathname}/workshop-two/ro-to?activity=three&next=${$page.url.pathname}`
 			}
 		],
 		ws3: [
 			{
 				title: safeTranslate(m.ebiosWs3_1()),
-				status: 'to_do',
+				status: data.data.meta.workshops[2].steps[0].status,
 				href: `${$page.url.pathname}/workshop-three/ecosystem?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs3_2()),
-				status: 'to_do',
+				status: data.data.meta.workshops[2].steps[1].status,
 				href: `${$page.url.pathname}/workshop-three/strategic-scenarios?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs3_3()),
-				status: 'done',
+				status: data.data.meta.workshops[2].steps[2].status,
 				href: `${$page.url.pathname}/workshop-three/ecosystem?activity=three&next=${$page.url.pathname}`
 			}
 		],
 		ws4: [
 			{
 				title: safeTranslate(m.ebiosWs4_1()),
-				status: 'to_do',
+				status: data.data.meta.workshops[3].steps[0].status,
 				href: `${$page.url.pathname}/workshop-four/operational-scenario?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs4_2()),
-				status: 'to_do',
+				status: data.data.meta.workshops[3].steps[1].status,
 				href: `${$page.url.pathname}/workshop-four/operational-scenario?next=${$page.url.pathname}`
 			}
 		],
 		ws5: [
 			{
 				title: safeTranslate(m.ebiosWs5_1()),
-				status: riskAnalysisCreated ? 'done' : 'to_do',
+				status: data.data.meta.workshops[4].steps[0].status,
 				href: '#'
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_2()),
-				status: 'done',
+				status: data.data.meta.workshops[4].steps[1].status,
 				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_3()),
-				status: 'to_do',
+				status: data.data.meta.workshops[4].steps[2].status,
 				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_4()),
-				status: 'to_do',
+				status: data.data.meta.workshops[4].steps[3].status,
 				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_5()),
-				status: 'done',
+				status: data.data.meta.workshops[4].steps[4].status,
 				href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}`
 			}
 		]
