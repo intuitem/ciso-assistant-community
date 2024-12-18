@@ -176,16 +176,19 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
-    def update_workshop_step_status(self, workshop: int, step: int, status: str):
+    def switch_workshop_step_status(self, workshop: int, step: int):
         if workshop < 1 or workshop > 5:
             raise ValueError("Workshop must be between 1 and 5")
         if step < 1 or step > len(self.meta["workshops"][workshop - 1]["steps"]):
             raise ValueError(
                 f"Worshop {workshop} has only {len(self.meta['workshops'][workshop - 1]['steps'])} steps"
             )
-        if not status in ["to_do", "in_progress", "done"]:
-            raise ValueError(
-                "Status must be one of 'to_do', 'in_progress', 'done'")
+        status = (
+            "done"
+            if self.meta["workshops"][workshop - 1]["steps"][step - 1]["status"]
+            == "in_progress"
+            else "in_progress"
+        )
         self.meta["workshops"][workshop -
                                1]["steps"][step - 1]["status"] = status
         return self.save()
