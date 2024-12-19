@@ -940,7 +940,7 @@
 	"existingContextHelper": "Description of the existing mitigations (this field will be deprecated soon)",
 	"fearedEvent": "Feared event",
 	"fearedEvents": "Feared events",
-	"isSelected": "Is selected",
+	"isSelected": "Selected",
 	"ebiosRM": "Ebios RM",
 	"riskOrigin": "Risk origin",
 	"targetObjective": "Target objective",
