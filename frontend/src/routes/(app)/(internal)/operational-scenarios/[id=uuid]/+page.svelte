@@ -122,7 +122,7 @@
 								>
 							</p>
 						{:else}
-							<p class="text-gray-300 italic">{m.noStakeholders()}</p>
+							<p class="text-gray-500 italic">{m.noStakeholders()}</p>
 						{/each}
 					</div>
 					<div
