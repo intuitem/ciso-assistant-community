@@ -1,29 +1,33 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import { applyAction, enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import * as m from '$paraglide/messages';
+	import { popup } from '@skeletonlabs/skeleton';
 
 	export let title = 'activity';
-	export let status = '';
-	export let meta = null;
+	export let meta: Record<string, any>[] = [];
 	export let accent_color = '';
 	export let createRiskAnalysis = false;
-	export let workshop: number;
+	export let workshop: number = 0;
+
+	$: workshopStatus = meta.every((step) => step.status === 'done')
+		? 'done'
+		: meta.some((step) => step.status === 'done')
+			? 'in_progress'
+			: 'to_do';
 </script>
 
 <div class="p-5 {accent_color}">
 	<div class="rounded-lg bg-white p-4 flex flex-col justify-between h-full">
 		<div class="flex justify-between mb-2">
 			<div class="font-semibold">{title}</div>
-			<div class="text-xl" title={safeTranslate(status)}>
-				{#if status == 'to_do'}
+			<div class="text-xl" title={safeTranslate(workshopStatus)}>
+				{#if workshopStatus == 'to_do'}
 					<i class="fa-solid fa-exclamation"></i>
-				{:else if status == 'in_progress'}
+				{:else if workshopStatus == 'in_progress'}
 					<i class="fa-solid fa-spinner"></i>
-				{:else if status == 'done'}
+				{:else if workshopStatus == 'done'}
 					<i class="fa-solid fa-check"></i>
 				{/if}
 			</div>
@@ -83,14 +87,10 @@
 										<input type="hidden" name="step" value={i + 1} />
 										{#if step.status === 'done'}
 											<input type="hidden" name="status" value="in_progress" />
-											<button type="submit" class="btn bg-initial"
-												>{m.markAsInProgress()} {workshop} {i + 1}</button
-											>
+											<button type="submit" class="btn bg-initial">{m.markAsInProgress()}</button>
 										{:else}
 											<input type="hidden" name="status" value="done" />
-											<button type="submit" class="btn bg-initial"
-												>{m.markAsDone()} {workshop} {i + 1}</button
-											>
+											<button type="submit" class="btn bg-initial">{m.markAsDone()}</button>
 										{/if}
 									</form>
 								</div>
