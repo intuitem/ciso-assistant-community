@@ -998,5 +998,6 @@
 	"selectAudit": "Select audit",
 	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
 	"addStakeholder": "Add stakeholder",
-	"markAsDone": "Mark as done"
+	"markAsDone": "Mark as done",
+	"markAsInProgress": "Mark as in progress"
 }
