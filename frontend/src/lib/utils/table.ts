@@ -722,8 +722,24 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'attack-paths': {
-		head: ['is_selected', 'ref_id', 'name', 'stakeholders', 'description'],
-		body: ['is_selected', 'ref_id', 'name', 'stakeholders', 'description'],
+		head: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'risk_origin',
+			'target_objective',
+			'stakeholders',
+			'attackPath'
+		],
+		body: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'risk_origin',
+			'target_objective',
+			'stakeholders',
+			'description'
+		],
 		filters: {
 			is_selected: IS_SELECTED_FILTER,
 			stakeholders: STAKEHOLDER_FILTER

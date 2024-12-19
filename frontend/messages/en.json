@@ -1011,5 +1011,7 @@
 	"strategicScenario": "Strategic scenario",
 	"strategicScenarios": "Strategic scenarios",
 	"goBackToEbiosRmStudy": "Go back to Ebios RM study",
-	"addStrategicScenario": "Add strategic scenario"
+	"addStrategicScenario": "Add strategic scenario",
+	"markAsDone": "Mark as done",
+	"markAsInProgress": "Mark as in progress"
 }
