@@ -27,10 +27,8 @@ INITIAL_META = {
                 {"status": "to_do"},
             ]
         },
-        {"steps": [{"status": "to_do"}, {
-            "status": "to_do"}, {"status": "to_do"}]},
-        {"steps": [{"status": "to_do"}, {
-            "status": "to_do"}, {"status": "to_do"}]},
+        {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
+        {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
         {"steps": [{"status": "to_do"}, {"status": "to_do"}]},
         {
             "steps": [
@@ -158,8 +156,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name=_("Reviewers"),
         related_name="reviewers",
     )
-    observation = models.TextField(
-        null=True, blank=True, verbose_name=_("Observation"))
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     meta = models.JSONField(
         default=get_initial_meta,
@@ -184,8 +181,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                 f"Worshop {workshop} has only {len(self.meta['workshops'][workshop - 1]['steps'])} steps"
             )
         status = new_status
-        self.meta["workshops"][workshop -
-                               1]["steps"][step - 1]["status"] = status
+        self.meta["workshops"][workshop - 1]["steps"][step - 1]["status"] = status
         return self.save()
 
 
@@ -212,10 +208,8 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
 
     ref_id = models.CharField(max_length=100, blank=True)
     gravity = models.SmallIntegerField(default=-1, verbose_name=_("Gravity"))
-    is_selected = models.BooleanField(
-        verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(
-        verbose_name=_("Justification"), blank=True)
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Feared event")
@@ -310,10 +304,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
     activity = models.PositiveSmallIntegerField(
         verbose_name=_("Activity"), default=0, validators=[MaxValueValidator(4)]
     )
-    is_selected = models.BooleanField(
-        verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(
-        verbose_name=_("Justification"), blank=True)
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     def __str__(self) -> str:
         return f"{self.get_risk_origin_display()} - {self.target_objective}"
@@ -416,10 +408,8 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         validators=[MinValueValidator(1), MaxValueValidator(4)],
     )
 
-    is_selected = models.BooleanField(
-        verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(
-        verbose_name=_("Justification"), blank=True)
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Stakeholder")
@@ -495,10 +485,8 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
-    is_selected = models.BooleanField(
-        verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(
-        verbose_name=_("Justification"), blank=True)
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Attack path")
@@ -534,15 +522,11 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     operating_modes_description = models.TextField(
         verbose_name=_("Operating modes description"),
-        help_text=_(
-            "Description of the operating modes of the operational scenario"),
+        help_text=_("Description of the operating modes of the operational scenario"),
     )
-    likelihood = models.SmallIntegerField(
-        default=-1, verbose_name=_("Likelihood"))
-    is_selected = models.BooleanField(
-        verbose_name=_("Is selected"), default=False)
-    justification = models.TextField(
-        verbose_name=_("Justification"), blank=True)
+    likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Operational scenario")
