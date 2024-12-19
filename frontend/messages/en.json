@@ -1007,5 +1007,7 @@
 	"certain": "Certain",
 	"minor": "Minor",
 	"operatingModesDescription": "Operating modes description",
-	"noStakeholders": "No stakeholders"
+	"noStakeholders": "No stakeholders",
+	"markAsDone": "Mark as done",
+	"markAsInProgress": "Mark as in progress"
 }
