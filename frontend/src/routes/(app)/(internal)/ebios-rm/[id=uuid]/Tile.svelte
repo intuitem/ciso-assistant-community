@@ -3,26 +3,15 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
+	import { applyAction, enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 
 	export let title = 'activity';
 	export let status = '';
 	export let meta = null;
 	export let accent_color = '';
 	export let createRiskAnalysis = false;
-	export let workshop;
-
-	const popupStep: PopupSettings = {
-		event: 'click',
-		target: 'popupStep',
-		placement: 'top'
-	};
-
-	async function switchStepState(workshop: number, step: number) {
-		console.log('switchStepState', workshop, step);
-		await fetch(`/ebios-rm/${$page.params.id}/workshop-${workshop}/step-${step}/switch`, {
-			method: 'POST'
-		});
-	}
+	export let workshop: number;
 </script>
 
 <div class="p-5 {accent_color}">
@@ -66,17 +55,35 @@
 										<p class="text-sm">{step.title}</p>
 									</a>
 								{/if}
-								<button class="btn bg-initial" data-testid="sidebar-more-btn" use:popup={popupStep}
-									><i class="fa-solid fa-ellipsis-vertical" /></button
+								<button
+									class="btn bg-initial"
+									data-testid="sidebar-more-btn"
+									use:popup={{
+										event: 'click',
+										target: `popupStep-${workshop}.${i + 1}`,
+										placement: 'top'
+									}}><i class="fa-solid fa-ellipsis-vertical" /></button
 								>
 								<div
 									class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
 									data-testid="sidebar-more-panel"
-									data-popup="popupStep"
+									data-popup="popupStep-{workshop}.{i + 1}"
 								>
-									<button type="button" on:click={switchStepState(workshop, i + 1)}
-										>lil flipo</button
+									<form
+										action="/ebios-rm/{$page.params.id}?/changeStepState"
+										method="POST"
+										use:enhance={() => {
+											return async () => {
+												step.status = 'done';
+											};
+										}}
 									>
+										<input type="hidden" name="workshop" value={workshop} />
+										<input type="hidden" name="step" value={i + 1} />
+										<button type="submit" class="btn bg-initial"
+											>{m.markAsDone()} {workshop} {i + 1}</button
+										>
+									</form>
 								</div>
 							</li>
 						{/each}
