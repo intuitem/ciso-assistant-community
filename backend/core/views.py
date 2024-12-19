@@ -589,7 +589,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         if instance.ebios_rm_study:
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
             ebios_rm_study = EbiosRMStudy.objects.get(id=instance.ebios_rm_study.id)
-            for operational_scenario in ebios_rm_study.operational_scenarios.all():
+            for operational_scenario in [
+                operational_scenario
+                for operational_scenario in ebios_rm_study.operational_scenarios.all()
+                if operational_scenario.is_selected
+            ]:
                 risk_scenario = RiskScenario.objects.create(
                     risk_assessment=instance,
                     name=operational_scenario.name,

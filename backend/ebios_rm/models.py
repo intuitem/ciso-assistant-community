@@ -1,7 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
+
+from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from core.models import (
     AppliedControl,
     Asset,
@@ -10,9 +11,40 @@ from core.models import (
     RiskMatrix,
     Threat,
 )
+from core.validators import (
+    JSONSchemaInstanceValidator,
+)
 from iam.models import FolderMixin, User
 from tprm.models import Entity
-import json
+
+INITIAL_META = {
+    "workshops": [
+        {
+            "steps": [
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+            ]
+        },
+        {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
+        {"steps": [{"status": "to_do"}, {"status": "to_do"}, {"status": "to_do"}]},
+        {"steps": [{"status": "to_do"}, {"status": "to_do"}]},
+        {
+            "steps": [
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+                {"status": "to_do"},
+            ]
+        },
+    ]
+}
+
+
+def get_initial_meta():
+    return INITIAL_META
 
 
 class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
@@ -22,6 +54,43 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         IN_REVIEW = "in_review", _("In review")
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
+
+    META_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://ciso-assistant.com/schemas/ebiosrmstudy/meta.schema.json",
+        "title": "Metadata",
+        "description": "Metadata of the EBIOS RM Study",
+        "type": "object",
+        "properties": {
+            "workshops": {
+                "type": "array",
+                "description": "A list of workshops, each containing steps",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "steps": {
+                            "type": "array",
+                            "description": "The list of steps in the workshop",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "description": "The current status of the step",
+                                        "enum": ["to_do", "in_progress", "done"],
+                                    },
+                                },
+                                "required": ["status"],
+                                "additionalProperties": False,
+                            },
+                        },
+                    },
+                    "required": ["steps"],
+                    "additionalProperties": False,
+                },
+            }
+        },
+    }
 
     risk_matrix = models.ForeignKey(
         RiskMatrix,
@@ -88,6 +157,11 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         related_name="reviewers",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    meta = models.JSONField(
+        default=get_initial_meta,
+        verbose_name=_("Metadata"),
+        validators=[JSONSchemaInstanceValidator(META_JSONSCHEMA)],
+    )
 
     fields_to_check = ["name", "version"]
 
@@ -99,6 +173,17 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     @property
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
+
+    def update_workshop_step_status(self, workshop: int, step: int, new_status: str):
+        if workshop < 1 or workshop > 5:
+            raise ValueError("Workshop must be between 1 and 5")
+        if step < 1 or step > len(self.meta["workshops"][workshop - 1]["steps"]):
+            raise ValueError(
+                f"Worshop {workshop} has only {len(self.meta['workshops'][workshop - 1]['steps'])} steps"
+            )
+        status = new_status
+        self.meta["workshops"][workshop - 1]["steps"][step - 1]["status"] = status
+        return self.save()
 
 
 class FearedEvent(NameDescriptionMixin, FolderMixin):
@@ -559,9 +644,14 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         return self.attack_path.ro_to_couple
 
     def get_assets(self):
-        return Asset.objects.filter(
-            feared_events__in=self.attack_path.ro_to_couple.feared_events.all()
+        initial_assets = Asset.objects.filter(
+            feared_events__in=self.ro_to.feared_events.all(), is_selected=True
         )
+        assets = set()
+        for asset in initial_assets:
+            assets.add(asset)
+            assets.update(asset.get_descendants())
+        return Asset.objects.filter(id__in=[asset.id for asset in assets])
 
     def get_applied_controls(self):
         return AppliedControl.objects.filter(stakeholders__in=self.stakeholders.all())
