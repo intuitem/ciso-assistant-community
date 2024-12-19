@@ -626,7 +626,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Feared events',
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'assets', urlModel: 'assets', urlParams: 'ebios_rm_studies=', detail: true },
+			{ field: 'assets', urlModel: 'assets', urlParams: 'type=PR&ebios_rm_studies=', detail: true },
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
 		selectFields: [{ field: 'gravity', valueType: 'number', detail: true }]
