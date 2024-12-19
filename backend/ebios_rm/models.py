@@ -13,6 +13,7 @@ from core.models import (
 from iam.models import FolderMixin, User
 from tprm.models import Entity
 
+
 class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
@@ -493,8 +494,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     def get_assets(self):
         initial_assets = Asset.objects.filter(
-            feared_events__in=self.ro_to.feared_events.all(),
-            is_selected=True
+            feared_events__in=self.ro_to.feared_events.all(), is_selected=True
         )
         assets = set()
         for asset in initial_assets:
