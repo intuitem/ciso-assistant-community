@@ -3,16 +3,20 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Tile from './Tile.svelte';
 	import { page } from '$app/stores';
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import { checkConstraints } from '$lib/utils/crud';
+	import { goto } from '$app/navigation';
+	import { getSecureRedirect } from '$lib/utils/helpers';
+
 	const modalStore: ModalStore = getModalStore();
 
 	export let data: PageData;
+	export let form: ActionData;
 
 	$: breadcrumbObject.set(data.data);
 
@@ -76,13 +80,13 @@
 		ws4: [
 			{
 				title: safeTranslate(m.ebiosWs4_1()),
-				status: data.data.meta.workshops[3].steps[0].status,
-				href: `${$page.url.pathname}/workshop-4/operational-scenario?next=${$page.url.pathname}`
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-four/operational-scenario?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs4_2()),
-				status: data.data.meta.workshops[3].steps[1].status,
-				href: `${$page.url.pathname}/workshop-4/operational-scenario?next=${$page.url.pathname}`
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-four/operational-scenario?activity=two&next=${$page.url.pathname}`
 			}
 		],
 		ws5: [
@@ -143,6 +147,10 @@
 			};
 		}
 		modalStore.trigger(modal);
+	}
+
+	$: if (form && form.redirect) {
+		goto(getSecureRedirect(form.redirect));
 	}
 </script>
 

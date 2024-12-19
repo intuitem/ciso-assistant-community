@@ -601,7 +601,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'risk_origin', 'target_objective', 'stakeholders', 'description']
 	},
 	'operational-scenarios': {
-		head: ['description', 'threats', 'likelihood'],
-		body: ['description', 'threats', 'likelihood']
+		head: ['operatingModesDescription', 'threats', 'likelihood'],
+		body: ['operating_modes_description', 'threats', 'likelihood']
 	}
 };
