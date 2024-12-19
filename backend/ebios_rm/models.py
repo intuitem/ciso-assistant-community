@@ -89,6 +89,8 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    fields_to_check = ["name", "version"]
+
     class Meta:
         verbose_name = _("Ebios RM Study")
         verbose_name_plural = _("Ebios RM Studies")
@@ -125,6 +127,8 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
+    fields_to_check = ["name", "ref_id"]
+
     class Meta:
         verbose_name = _("Feared event")
         verbose_name_plural = _("Feared events")
@@ -149,6 +153,7 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
                 "name": "--",
                 "description": "not rated",
                 "value": -1,
+                "hexcolor": "#f9fafb",
             }
         risk_matrix = self.parsed_matrix
         return {
@@ -220,6 +225,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
     )
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
+
+    fields_to_check = ["target_objective", "risk_origin"]
 
     def __str__(self) -> str:
         return f"{self.get_risk_origin_display()} - {self.target_objective}"
@@ -332,10 +339,15 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
+    fields_to_check = ["entity", "category"]
+
     class Meta:
         verbose_name = _("Stakeholder")
         verbose_name_plural = _("Stakeholders")
         ordering = ["created_at"]
+
+    def get_scope(self):
+        return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def __str__(self):
         return f"{self.entity.name} - {self.get_category_display()}"
@@ -385,10 +397,11 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         )
 
 
-class AttackPath(NameDescriptionMixin, FolderMixin):
+class StrategicScenario(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
+        related_name="strategic_scenarios",
         on_delete=models.CASCADE,
     )
     ro_to_couple = models.ForeignKey(
@@ -396,6 +409,51 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         verbose_name=_("RO/TO couple"),
         on_delete=models.CASCADE,
         help_text=_("RO/TO couple from which the attach path is derived"),
+    )
+    ref_id = models.CharField(max_length=100, blank=True)
+
+    fields_to_check = ["name", "ref_id"]
+
+    class Meta:
+        verbose_name = _("Strategic Scenario")
+        verbose_name_plural = _("Strategic Scenarios")
+        ordering = ["created_at"]
+
+    def get_scope(self):
+        return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
+
+    def save(self, *args, **kwargs):
+        self.folder = self.ebios_rm_study.folder
+        super().save(*args, **kwargs)
+
+    def get_gravity_display(self):
+        if self.ro_to_couple.get_gravity() < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+                "hexcolor": "#f9fafb",
+            }
+        risk_matrix = self.ebios_rm_study.parsed_matrix
+        return {
+            **risk_matrix["impact"][self.ro_to_couple.get_gravity()],
+            "value": self.ro_to_couple.get_gravity(),
+        }
+
+
+class AttackPath(NameDescriptionMixin, FolderMixin):
+    ebios_rm_study = models.ForeignKey(
+        EbiosRMStudy,
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
+    )
+    strategic_scenario = models.ForeignKey(
+        StrategicScenario,
+        verbose_name=_("Strategic scenario"),
+        on_delete=models.CASCADE,
+        related_name="attack_paths",
+        help_text=_("Strategic scenario from which the attack path is derived"),
     )
     stakeholders = models.ManyToManyField(
         Stakeholder,
@@ -409,14 +467,24 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
+    fields_to_check = ["name", "ref_id"]
+
     class Meta:
         verbose_name = _("Attack path")
         verbose_name_plural = _("Attack paths")
         ordering = ["created_at"]
 
+    def get_scope(self):
+        return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
+
     def save(self, *args, **kwargs):
+        self.ebios_rm_study = self.strategic_scenario.ebios_rm_study
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+
+    @property
+    def ro_to_couple(self):
+        return self.strategic_scenario.ro_to_couple
 
     @property
     def gravity(self):
@@ -472,12 +540,11 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     @property
     def ref_id(self):
-        sorted_operational_scenarios = list(
-            OperationalScenario.objects.filter(
-                ebios_rm_study=self.ebios_rm_study
-            ).order_by("created_at")
-        )
-        return sorted_operational_scenarios.index(self) + 1
+        return self.attack_path.ref_id
+
+    @property
+    def name(self):
+        return self.attack_path.name
 
     @property
     def gravity(self):
@@ -490,6 +557,14 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     @property
     def ro_to(self):
         return self.attack_path.ro_to_couple
+
+    def get_assets(self):
+        return Asset.objects.filter(
+            feared_events__in=self.attack_path.ro_to_couple.feared_events.all()
+        )
+
+    def get_applied_controls(self):
+        return AppliedControl.objects.filter(stakeholders__in=self.stakeholders.all())
 
     def get_likelihood_display(self):
         if self.likelihood < 0:
@@ -513,6 +588,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
                 "name": "--",
                 "description": "not rated",
                 "value": -1,
+                "hexcolor": "#f9fafb",
             }
         risk_matrix = self.parsed_matrix
         return {

@@ -76,8 +76,7 @@
 		<AutocompleteSelect
 			{form}
 			options={getOptions({
-				objects: model.foreignKeys['attack_path'],
-				label: 'str'
+				objects: model.foreignKeys['attack_path']
 			})}
 			field="attack_path"
 			label={m.attackPath()}
@@ -104,7 +103,6 @@
 		cacheLock={cacheLocks['likelihood']}
 		bind:cachedValue={formDataCache['likelihood']}
 	/>
-	<Checkbox {form} field="is_selected" label={m.isSelected()} />
 	<TextArea
 		{form}
 		field="justification"
@@ -113,3 +111,4 @@
 		bind:cachedValue={formDataCache['justification']}
 	/>
 </div>
+<Checkbox {form} field="is_selected" label={m.isSelected()} />

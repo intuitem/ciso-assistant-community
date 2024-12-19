@@ -437,18 +437,26 @@ export const StakeholderSchema = z.object({
 	current_penetration: z.number().min(0).max(4).default(0).optional(),
 	current_maturity: z.number().min(1).max(4).default(1).optional(),
 	current_trust: z.number().min(1).max(4).default(1).optional(),
+	current_criticality: z.number().min(0).max(4).default(0).optional(),
 	residual_dependency: z.number().min(0).max(4).default(0).optional(),
 	residual_penetration: z.number().min(0).max(4).default(0).optional(),
 	residual_maturity: z.number().min(1).max(4).default(1).optional(),
 	residual_trust: z.number().min(1).max(4).default(1).optional(),
+	residual_criticality: z.number().min(0).max(4).default(0).optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
 });
 
-export const AttackPathSchema = z.object({
+export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
+	ref_id: z.string().optional()
+});
+
+export const AttackPathSchema = z.object({
+	...NameDescriptionMixin,
+	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
@@ -493,6 +501,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
 	stakeholders: StakeholderSchema,
+	'strategic-scenarios': StrategicScenarioSchema,
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema
 };
