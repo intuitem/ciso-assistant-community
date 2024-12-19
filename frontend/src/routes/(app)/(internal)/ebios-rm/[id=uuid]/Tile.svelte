@@ -82,12 +82,12 @@
 										<input type="hidden" name="workshop" value={workshop} />
 										<input type="hidden" name="step" value={i + 1} />
 										{#if step.status === 'done'}
-											<input type="hidden" name="new_status" value="in_progress" />
+											<input type="hidden" name="status" value="in_progress" />
 											<button type="submit" class="btn bg-initial"
 												>{m.markAsInProgress()} {workshop} {i + 1}</button
 											>
 										{:else}
-											<input type="hidden" name="new_status" value="done" />
+											<input type="hidden" name="status" value="done" />
 											<button type="submit" class="btn bg-initial"
 												>{m.markAsDone()} {workshop} {i + 1}</button
 											>
