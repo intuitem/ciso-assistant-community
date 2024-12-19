@@ -16,9 +16,7 @@
 
 	$: breadcrumbObject.set(data.data);
 
-	const riskAnalysisCreated: boolean = data.data.risk_assessments.length > 0;
-
-	const dummydata = {
+	const workshopsData = {
 		ws1: [
 			{
 				title: safeTranslate(m.ebiosWs1_1()),
@@ -152,40 +150,20 @@
 	<div
 		class="card bg-white shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>
-		<Tile
-			workshop={1}
-			title={m.ebiosWs1()}
-			accent_color="bg-pink-600"
-			status="to_do"
-			meta={dummydata.ws1}
-		/>
+		<Tile workshop={1} title={m.ebiosWs1()} accent_color="bg-pink-600" meta={workshopsData.ws1} />
 		<Tile
 			workshop={2}
 			title={m.ebiosWs2()}
 			accent_color="bg-fuchsia-900"
-			status="to_do"
-			meta={dummydata.ws2}
+			meta={workshopsData.ws2}
 		/>
-		<Tile
-			workshop={3}
-			title={m.ebiosWs3()}
-			accent_color="bg-teal-500"
-			status="to_do"
-			meta={dummydata.ws3}
-		/>
-		<Tile
-			workshop={4}
-			title={m.ebiosWs4()}
-			accent_color="bg-yellow-600"
-			status="to_do"
-			meta={dummydata.ws4}
-		/>
+		<Tile workshop={3} title={m.ebiosWs3()} accent_color="bg-teal-500" meta={workshopsData.ws3} />
+		<Tile workshop={4} title={m.ebiosWs4()} accent_color="bg-yellow-600" meta={workshopsData.ws4} />
 		<Tile
 			workshop={5}
 			title={m.ebiosWs5()}
 			accent_color="bg-red-500"
-			status="to_do"
-			meta={dummydata.ws5}
+			meta={workshopsData.ws5}
 			createRiskAnalysis={true}
 		>
 			<div slot="addRiskAnalysis">
@@ -200,6 +178,6 @@
 				</button>
 			</div>
 		</Tile>
-		<Tile title={m.summary()} accent_color="bg-purple-800" status="to_do" />
+		<Tile title={m.summary()} accent_color="bg-purple-800" />
 	</div>
 </div>
