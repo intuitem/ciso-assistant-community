@@ -51,7 +51,7 @@ export const actions: Actions = {
 		const schema = z.object({
 			workshop: z.number(),
 			step: z.number(),
-			new_status: z.string()
+			status: z.string()
 		});
 
 		const form = await superValidate(formData, zod(schema));
