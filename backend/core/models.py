@@ -1493,10 +1493,10 @@ class Asset(
         for x in self.parent_assets.all():
             result.update(x.ancestors_plus_self())
         return set(result)
-    
+
     def get_children(self):
         return Asset.objects.filter(parent_assets=self)
-    
+
     def get_descendants(self) -> set[Self]:
         children = self.get_children()
         sub_children = set()
