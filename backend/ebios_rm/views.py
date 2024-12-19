@@ -76,7 +76,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ebios_rm_study: EbiosRMStudy = self.get_object()
         workshop = int(workshop)
         step = int(step)
-        ebios_rm_study.switch_workshop_step_status(workshop, step)
+        # NOTE: For now, just set it as done. Will allow undoing this later.
+        ebios_rm_study.update_workshop_step_status(
+            workshop, step, new_status="done")
         return Response(EbiosRMStudyReadSerializer(ebios_rm_study).data)
 
 
