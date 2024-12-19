@@ -4,9 +4,10 @@ import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms';
+import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
+import { z } from 'zod';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'ebios-rm';
@@ -39,5 +40,38 @@ export const actions: Actions = {
 			action: 'create',
 			redirectToWrittenObject: true
 		});
+	},
+	changeStepState: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = z.object({
+			workshop: z.number(),
+			step: z.number(),
+			status: z.string()
+		});
+
+		const form = await superValidate(formData, zod(schema));
+
+		const workshop = formData.get('workshop');
+		const step = formData.get('step');
+
+		const requestInitOptions: RequestInit = {
+			method: 'PATCH',
+			body: JSON.stringify(form.data)
+		};
+
+		const endpoint = `${BASE_API_URL}/ebios-rm/studies/${event.params.id}/workshop/${workshop}/step/${step}/`;
+		const res = await event.fetch(endpoint, requestInitOptions);
+
+		if (!res.ok) {
+			const response = await res.text();
+			console.error(response);
+			return fail(400, { form });
+		}
+
+		return { success: true, form };
 	}
 };

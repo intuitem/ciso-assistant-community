@@ -1007,5 +1007,7 @@
 	"operatingModesDescription": "Operating modes description",
 	"noStakeholders": "No stakeholders",
 	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
-	"addStakeholder": "Add stakeholder"
+	"addStakeholder": "Add stakeholder",
+	"markAsDone": "Mark as done",
+	"markAsInProgress": "Mark as in progress"
 }
