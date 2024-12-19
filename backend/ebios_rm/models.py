@@ -12,8 +12,6 @@ from core.models import (
 )
 from iam.models import FolderMixin, User
 from tprm.models import Entity
-import json
-
 
 class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Status(models.TextChoices):
@@ -494,9 +492,15 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         return self.attack_path.ro_to_couple
 
     def get_assets(self):
-        return Asset.objects.filter(
-            feared_events__in=self.attack_path.ro_to_couple.feared_events.all()
+        initial_assets = Asset.objects.filter(
+            feared_events__in=self.ro_to.feared_events.all(),
+            is_selected=True
         )
+        assets = set()
+        for asset in initial_assets:
+            assets.add(asset)
+            assets.update(asset.get_descendants())
+        return Asset.objects.filter(id__in=[asset.id for asset in assets])
 
     def get_applied_controls(self):
         return AppliedControl.objects.filter(stakeholders__in=self.stakeholders.all())
