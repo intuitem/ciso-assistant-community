@@ -996,5 +996,7 @@
 	"noAuthor": "No author assigned",
 	"noReviewer": "No reviewer assigned",
 	"selectAudit": "Select audit",
-	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles."
+	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
+	"markAsValid": "Mark as valid",
+	"markAsNotValid": "Mark as not valid"
 }
