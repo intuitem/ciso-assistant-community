@@ -1493,6 +1493,17 @@ class Asset(
         for x in self.parent_assets.all():
             result.update(x.ancestors_plus_self())
         return set(result)
+    
+    def get_children(self):
+        return Asset.objects.filter(parent_assets=self)
+    
+    def get_descendants(self) -> set[Self]:
+        children = self.get_children()
+        sub_children = set()
+        for child in children:
+            sub_children.append(child)
+            sub_children.update(child.get_descendants())
+        return sub_children
 
     def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
