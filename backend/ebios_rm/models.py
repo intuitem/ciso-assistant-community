@@ -16,6 +16,7 @@ from core.validators import (
 )
 from iam.models import FolderMixin, User
 from tprm.models import Entity
+import json
 
 INITIAL_META = {
     "workshops": [
@@ -333,6 +334,13 @@ class RoTo(AbstractBaseModel, FolderMixin):
             PERTINENCE_MATRIX[self.motivation - 1][self.resources - 1]
         ).label
 
+    def get_gravity(self):
+        gravity = -1
+        for feared_event in self.feared_events.all():
+            if feared_event.gravity > gravity:
+                gravity = feared_event.gravity
+        return gravity
+
 
 class Stakeholder(AbstractBaseModel, FolderMixin):
     class Category(models.TextChoices):
@@ -497,6 +505,10 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 
+    @property
+    def gravity(self):
+        return self.ro_to_couple.get_gravity()
+
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):
     ebios_rm_study = models.ForeignKey(
@@ -545,8 +557,44 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
+    @property
+    def ref_id(self):
+        sorted_operational_scenarios = list(
+            OperationalScenario.objects.filter(
+                ebios_rm_study=self.ebios_rm_study
+            ).order_by("created_at")
+        )
+        return sorted_operational_scenarios.index(self) + 1
+
+    @property
+    def gravity(self):
+        return self.attack_path.gravity
+
+    @property
+    def stakeholders(self):
+        return self.attack_path.stakeholders.all()
+
+    @property
+    def ro_to(self):
+        return self.attack_path.ro_to_couple
+
     def get_likelihood_display(self):
         if self.likelihood < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+                "hexcolor": "#f9fafb",
+            }
+        risk_matrix = self.parsed_matrix
+        return {
+            **risk_matrix["probability"][self.likelihood],
+            "value": self.likelihood,
+        }
+
+    def get_gravity_display(self):
+        if self.gravity < 0:
             return {
                 "abbreviation": "--",
                 "name": "--",
@@ -555,6 +603,21 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             }
         risk_matrix = self.parsed_matrix
         return {
-            **risk_matrix["probability"][self.likelihood],
-            "value": self.likelihood,
+            **risk_matrix["impact"][self.gravity],
+            "value": self.gravity,
+        }
+
+    def get_risk_level_display(self):
+        if self.likelihood < 0 or self.gravity < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
+        risk_matrix = self.parsed_matrix
+        risk_index = risk_matrix["grid"][self.likelihood][self.gravity]
+        return {
+            **risk_matrix["risk"][risk_index],
+            "value": risk_index,
         }
