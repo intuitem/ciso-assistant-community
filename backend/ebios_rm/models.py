@@ -257,7 +257,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
     def get_gravity(self):
         gravity = -1
         for feared_event in self.feared_events.all():
-            if feared_event.gravity > gravity:
+            if feared_event.gravity > gravity and feared_event.is_selected:
                 gravity = feared_event.gravity
         return gravity
 
