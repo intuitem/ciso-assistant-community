@@ -50,7 +50,8 @@ export const actions: Actions = {
 
 		const schema = z.object({
 			workshop: z.number(),
-			step: z.number()
+			step: z.number(),
+			new_status: z.string()
 		});
 
 		const form = await superValidate(formData, zod(schema));
@@ -59,7 +60,8 @@ export const actions: Actions = {
 		const step = formData.get('step');
 
 		const requestInitOptions: RequestInit = {
-			method: 'PATCH'
+			method: 'PATCH',
+			body: JSON.stringify(form.data)
 		};
 
 		const endpoint = `${BASE_API_URL}/ebios-rm/studies/${event.params.id}/workshop/${workshop}/step/${step}/`;

@@ -78,7 +78,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         step = int(step)
         # NOTE: For now, just set it as done. Will allow undoing this later.
         ebios_rm_study.update_workshop_step_status(
-            workshop, step, new_status="done")
+            workshop, step, new_status=request.data.get("status", "in_progress")
+        )
         return Response(EbiosRMStudyReadSerializer(ebios_rm_study).data)
 
 

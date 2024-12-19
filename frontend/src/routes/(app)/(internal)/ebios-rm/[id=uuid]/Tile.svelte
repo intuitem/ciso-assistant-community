@@ -74,15 +74,24 @@
 										method="POST"
 										use:enhance={() => {
 											return async () => {
-												step.status = 'done';
+												if (step.status !== 'done') step.status = 'done';
+												else step.status = 'in_progress';
 											};
 										}}
 									>
 										<input type="hidden" name="workshop" value={workshop} />
 										<input type="hidden" name="step" value={i + 1} />
-										<button type="submit" class="btn bg-initial"
-											>{m.markAsDone()} {workshop} {i + 1}</button
-										>
+										{#if step.status === 'done'}
+											<input type="hidden" name="new_status" value="in_progress" />
+											<button type="submit" class="btn bg-initial"
+												>{m.markAsInProgress()} {workshop} {i + 1}</button
+											>
+										{:else}
+											<input type="hidden" name="new_status" value="done" />
+											<button type="submit" class="btn bg-initial"
+												>{m.markAsDone()} {workshop} {i + 1}</button
+											>
+										{/if}
 									</form>
 								</div>
 							</li>
