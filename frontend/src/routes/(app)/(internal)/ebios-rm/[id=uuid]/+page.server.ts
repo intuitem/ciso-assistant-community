@@ -1,6 +1,10 @@
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
+import {
+	getModelInfo,
+	urlParamModelForeignKeyFields,
+	urlParamModelSelectFields
+} from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
@@ -28,8 +32,51 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const createRiskAnalysisForm = await superValidate(initialData, zod(createSchema), {
 		errors: false
 	});
+	const riskModel = getModelInfo('risk-assessments');
+	const foreignKeyFields = urlParamModelForeignKeyFields(riskModel.urlModel);
+	const selectFields = urlParamModelSelectFields(riskModel.urlModel);
 
-	return { createRiskAnalysisForm, model: getModelInfo('risk-assessments') };
+	const foreignKeys: Record<string, any> = {};
+
+	for (const keyField of foreignKeyFields) {
+		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+		const keyModel = getModelInfo(keyField.urlModel);
+		const url = keyModel.endpointUrl
+			? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
+			: `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+		const response = await fetch(url);
+		if (response.ok) {
+			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
+		} else {
+			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+		}
+	}
+
+	riskModel['foreignKeys'] = foreignKeys;
+
+	const selectOptions: Record<string, any> = {};
+
+	for (const selectField of selectFields) {
+		if (selectField.detail) continue;
+		const url = riskModel.endpointUrl
+			? `${BASE_API_URL}/${riskModel.endpointUrl}/${selectField.field}/`
+			: `${BASE_API_URL}/${riskModel.urlModel}/${selectField.field}/`;
+		const response = await fetch(url);
+		if (response.ok) {
+			selectOptions[selectField.field] = await response.json().then((data) =>
+				Object.entries(data).map(([key, value]) => ({
+					label: value,
+					value: selectField.valueType === 'number' ? parseInt(key) : key
+				}))
+			);
+		} else {
+			console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+		}
+	}
+
+	riskModel['selectOptions'] = selectOptions;
+
+	return { createRiskAnalysisForm, riskModel };
 };
 
 export const actions: Actions = {
