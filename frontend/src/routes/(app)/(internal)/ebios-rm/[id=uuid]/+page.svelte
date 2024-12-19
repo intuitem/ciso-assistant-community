@@ -123,17 +123,18 @@
 			ref: CreateModal,
 			props: {
 				form: data.createRiskAnalysisForm,
-				model: data.model
+				model: data.riskModel
 			}
 		};
 		let modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add-' + data.model.localName)
+			title: safeTranslate('add-' + data.riskModel.localName)
 		};
 		if (
-			checkConstraints(data.createRiskAnalysisForm.constraints, data.model.foreignKeys).length > 0
+			checkConstraints(data.createRiskAnalysisForm.constraints, data.riskModel.foreignKeys).length >
+			0
 		) {
 			modalComponent = {
 				ref: MissingConstraintsModal
@@ -142,8 +143,8 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
-				value: checkConstraints(data.createRiskAnalysisForm.constraints, data.model.foreignKeys)
+				body: safeTranslate('add-' + data.riskModel.localName).toLowerCase(),
+				value: checkConstraints(data.createRiskAnalysisForm.constraints, data.riskModel.foreignKeys)
 			};
 		}
 		modalStore.trigger(modal);
