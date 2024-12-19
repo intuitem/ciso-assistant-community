@@ -165,9 +165,14 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    attack_path = FieldsRelatedField()
+    attack_path = FieldsRelatedField(["id", "name", "description"])
+    stakeholders = FieldsRelatedField(many=True)
+    ro_to = FieldsRelatedField(["risk_origin", "target_objective"])
     threats = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
+    gravity = serializers.JSONField(source="get_gravity_display")
+    risk_level = serializers.JSONField(source="get_risk_level_display")
+    ref_id = serializers.CharField()
 
     class Meta:
         model = OperationalScenario
