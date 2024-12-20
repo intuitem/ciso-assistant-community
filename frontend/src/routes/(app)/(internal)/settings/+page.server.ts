@@ -69,7 +69,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		ssoModel,
 		generalSettings,
 		generalSettingForm,
-		generalSettingModel
+		generalSettingModel,
+		title: m.settings()
 	};
 };
 

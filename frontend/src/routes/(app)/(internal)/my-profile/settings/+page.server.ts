@@ -39,7 +39,7 @@ export const load: PageServerLoad = async (event) => {
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
 
-	return { authenticators, totp, activateTOTPForm, recoveryCodes };
+	return { authenticators, totp, activateTOTPForm, recoveryCodes, title: m.settings() };
 };
 
 export const actions: Actions = {
