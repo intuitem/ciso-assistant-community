@@ -48,6 +48,7 @@
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
+	import { goto } from '$lib/utils/breadcrumbs';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -70,7 +71,7 @@
 			var currentUrl = window.location.href;
 			var url = new URL(currentUrl);
 			var nextValue = getSecureRedirect(url.searchParams.get('next'));
-			if (nextValue) window.location.href = nextValue;
+			if (nextValue) goto(nextValue);
 		}
 	}
 	$: shape = schema.shape || schema._def.schema.shape;
