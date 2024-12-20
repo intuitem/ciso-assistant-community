@@ -8,6 +8,7 @@
 	import { getOptions } from '$lib/utils/crud';
 	import * as m from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let composerForm: SuperValidated<Record<string, any>>;
 
@@ -41,9 +42,10 @@
 				{options}
 			/>
 			{#if data.risk_assessment && data.risk_assessment.length > 0}
-				<a
+				<Anchor
 					href={`/analytics/composer/?risk_assessment=${data.risk_assessment}`}
-					class="btn variant-filled-primary">{m.processButton()}</a
+					label={m.composer()}
+					class="btn variant-filled-primary">{m.processButton()}</Anchor
 				>
 			{:else}
 				<p class="btn-base rounded-token select-none variant-filled-surface opacity-30">

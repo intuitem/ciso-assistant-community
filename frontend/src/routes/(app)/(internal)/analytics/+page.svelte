@@ -20,6 +20,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	interface Counters {
 		domains: number;
@@ -576,11 +577,17 @@
 									</div>
 									<div class="lg:absolute lg:top-2 lg:right-4 mt-2 space-x-1">
 										<div class="flex flex-row lg:flex-col space-x-1 lg:space-x-0 lg:space-y-1">
-											<a
+											<Anchor
 												href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=3"
+												prefixCrumbs={[
+													{
+														label: compliance_assessment.name,
+														href: `/compliance-assessments/${compliance_assessment.id}`
+													}
+												]}
 												class="btn variant-filled-primary w-1/2 lg:w-full"
 												><i class="fa-solid fa-edit mr-2" /> {m.edit()}
-											</a>
+											</Anchor>
 											<a
 												href="/compliance-assessments/{compliance_assessment.id}/export"
 												class="btn variant-filled-primary w-1/2 lg:w-full"

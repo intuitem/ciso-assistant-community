@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+
 	export let count: string = '0';
 	export let label: string;
 	export let href: string = '#';
@@ -13,8 +15,9 @@
 	export let customClass: string = '';
 </script>
 
-<a
+<Anchor
 	{href}
+	{label}
 	class="flex flex-col shadow-lg text-purple-800 p-2 h-28 bg-white hover:bg-violet-50 {cEmphasis} {customClass}"
 >
 	<div class="text-xs">
@@ -25,7 +28,7 @@
 		<p class="text-4xl font-bold text-left">{count}</p>
 		<div class="text-sm">{label}</div>
 	</div>
-</a>
+</Anchor>
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
