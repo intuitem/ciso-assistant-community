@@ -62,6 +62,15 @@
 	/>
 	<AutocompleteSelect
 		{form}
+		options={getOptions({ objects: model.foreignKeys['reference_entity'] })}
+		field="reference_entity"
+		cacheLock={cacheLocks['reference_entity']}
+		bind:cachedValue={formDataCache['reference_entity']}
+		label={m.referenceEntity()}
+		hidden={initialData.reference_entity}
+	/>
+	<AutocompleteSelect
+		{form}
 		options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
@@ -104,6 +113,15 @@
 			label={m.refId()}
 			cacheLock={cacheLocks['ref_id']}
 			bind:cachedValue={formDataCache['ref_id']}
+		/>
+		<AutocompleteSelect
+		{form}
+			options={getOptions({ objects: model.foreignKeys['reference_entity'] })}
+			field="reference_entity"
+			cacheLock={cacheLocks['reference_entity']}
+			bind:cachedValue={formDataCache['reference_entity']}
+			label={m.referenceEntity()}
+			hidden={initialData.reference_entity}
 		/>
 		<AutocompleteSelect
 			multiple

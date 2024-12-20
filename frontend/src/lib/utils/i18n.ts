@@ -14,6 +14,9 @@ export function unsafeTranslate(key: string, params = {}, options = {}): string 
 	if (Object.hasOwn(m, toCamelCase(key))) {
 		return m[toCamelCase(key)](params, options);
 	}
+	if (typeof key === 'boolean') {
+		return key ? '✅' : '❌';
+	}
 }
 
 /**

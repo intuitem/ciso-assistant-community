@@ -1013,5 +1013,13 @@
 	"goBackToEbiosRmStudy": "Go back to Ebios RM study",
 	"addStrategicScenario": "Add strategic scenario",
 	"markAsDone": "Mark as done",
-	"markAsInProgress": "Mark as in progress"
+	"markAsInProgress": "Mark as in progress",
+	"ebiosRmRiskMatrix": "4x4 risk matrix from EBIOS-RM",
+	"riskAnalyses": "Risk analyses",
+	"client": "Client",
+	"partner": "Partner",
+	"supplier": "Supplier",
+	"referenceEntity": "Reference entity",
+	"referenceEntitySemiColon": "Reference entity:",
+	"moderate": "Moderate"
 }

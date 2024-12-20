@@ -96,16 +96,9 @@
 		cacheLock={cacheLocks['resources']}
 		bind:cachedValue={formDataCache['resources']}
 	/>
-	<!-- <Select
+	<Select
 		{form}
-		options={model.selectOptions['pertinence']}
-		field="pertinence"
-		label={m.pertinence()}
-		cacheLock={cacheLocks['pertinence']}
-		bind:cachedValue={formDataCache['pertinence']}
-	/> -->
-	<NumberField
-		{form}
+		options={model.selectOptions['activity']}
 		field="activity"
 		label={m.activity()}
 		cacheLock={cacheLocks['activity']}

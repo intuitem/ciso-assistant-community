@@ -70,13 +70,20 @@
 <div class="card p-4 bg-white shadow-lg">
 	<div class="flex flex-col space-y-4">
 		<div class="flex flex-row justify-between items-center w-full">
-			{#if ebiosRmStudy.ref_id}
-				<span class="badge bg-pink-200 text-pink-800 font-medium">
-					{m.refIdSemiColon()}
-					{ebiosRmStudy.ref_id}
-				</span>
-			{/if}
+			<a
+				href="/ebios-rm/{ebiosRmStudy.id}"
+				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+			>
+				<i class="fa-solid fa-arrow-left" />
+				<p class="">{m.goBackToEbiosRmStudy()}</p>
+			</a>
 			<div class="flex items-center space-x-2">
+				{#if ebiosRmStudy.ref_id}
+					<span class="badge bg-pink-200 text-pink-800 font-medium">
+						{m.refIdSemiColon()}
+						{ebiosRmStudy.ref_id}
+					</span>
+				{/if}
 				<span class="text-2xl font-bold">
 					{ebiosRmStudy.name} - v{ebiosRmStudy.version}
 				</span>
@@ -91,6 +98,14 @@
 				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
 				{m.edit()}
 			</a>
+		</div>
+		<div class="flex justify-center items-center w-full">
+			<span class="text-sm text-gray-500"
+				>{m.referenceEntitySemiColon()}
+				<a class="anchor" href="/entities/{ebiosRmStudy.reference_entity.id}"
+					>{ebiosRmStudy.reference_entity.str}</a
+				>
+			</span>
 		</div>
 		<div
 			id="activityOne"
