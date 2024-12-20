@@ -34,6 +34,22 @@
 
 <div class="card p-4 bg-white shadow-lg">
 	<div class="flex flex-col space-y-4">
+		<div class="flex justify-between">
+			<a
+				href="/ebios-rm/{roto.ebios_rm_study.id}"
+				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+			>
+				<i class="fa-solid fa-arrow-left" />
+				<p class="">{m.goBackToEbiosRmStudy()}</p>
+			</a>
+			<a
+				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+				class="btn variant-filled-primary h-fit"
+			>
+				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+				{m.edit()}
+			</a>
+		</div>
 		<div
 			id="activityOne"
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center justify-center
@@ -61,13 +77,6 @@
 					<span class="font-bold">{roto.target_objective}</span>
 				</p>
 			</div>
-			<a
-				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-				class="btn variant-filled-primary h-fit absolute top-2 right-4"
-			>
-				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
-				{m.edit()}
-			</a>
 		</div>
 		<div
 			id="activityTwo"
