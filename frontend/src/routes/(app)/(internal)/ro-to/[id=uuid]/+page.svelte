@@ -36,13 +36,14 @@
 <div class="card p-4 bg-white shadow-lg">
 	<div class="flex flex-col space-y-4">
 		<div class="flex justify-between">
-			<a
+			<Anchor
 				href="/ebios-rm/{roto.ebios_rm_study.id}"
+				label={roto.ebios_rm_study.str}
 				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
 				<i class="fa-solid fa-arrow-left" />
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
-			</a>
+			</Anchor>
 			<Anchor
 				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
 				class="btn variant-filled-primary h-fit"
