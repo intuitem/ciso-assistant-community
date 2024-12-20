@@ -200,7 +200,7 @@
 				</div>
 				<br />
 				<div class="text-sm">
-					<span class="font-semibold" data-testid="risk-matrix-field-title"
+					<span class="font-semibold" data-testid="ebios-rm-field-title"
 						>{m.ebiosRmStudy()}:</span
 					>
 					<a
