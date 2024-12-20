@@ -45,7 +45,7 @@
 			</a>
 			<Anchor
 				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-				class="btn variant-filled-primary h-fit absolute top-2 right-4"
+				class="btn variant-filled-primary h-fit"
 			>
 				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
 				{m.edit()}
