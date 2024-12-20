@@ -4,7 +4,7 @@ import * as m from '$paraglide/messages';
 
 export interface Breadcrumb {
 	label: string;
-	href: string;
+	href?: string;
 	icon?: string;
 }
 
