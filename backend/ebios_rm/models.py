@@ -655,7 +655,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     def get_assets(self):
         initial_assets = Asset.objects.filter(
-            feared_events__in=self.ro_to.feared_events.all(), is_selected=True
+            feared_events__in=self.ro_to.feared_events.filter(is_selected=True)
         )
         assets = set()
         for asset in initial_assets:

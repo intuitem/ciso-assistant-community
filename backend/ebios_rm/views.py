@@ -139,7 +139,7 @@ class RoToViewSet(BaseModelViewSet):
     @action(detail=False, name="Get resources choices")
     def resources(self, request):
         return Response(dict(RoTo.Resources.choices))
-    
+
     @action(detail=False, name="Get activity choices")
     def activity(self, request):
         return Response(dict(RoTo.Activity.choices))
