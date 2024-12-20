@@ -19,10 +19,10 @@
 
 	function getPageTitle(): string {
 		return safeTranslate(
-			$page.data.title || $page.data.str || $page.data.name || $breadcrumbs.length > 1
-				? $breadcrumbs[$breadcrumbs.length - 1]?.label
-				: (URL_MODEL_MAP[$page.url.pathname.split('/').pop() as string]?.verboseNamePlural ??
-						$page.url.pathname.split('/').pop())
+			$page.data.title ??
+				($page.data.str || $page.data.name || $breadcrumbs.length > 1
+					? $breadcrumbs[$breadcrumbs.length - 1]?.label
+					: URL_MODEL_MAP[$page.url.pathname.split('/').pop() as string]?.verboseNamePlural)
 		);
 	}
 
