@@ -7,14 +7,14 @@ metadata:
     {{- include "common.labels" . | nindent 4 }}
 spec:
   ports:
-  - name: http
-    port: 80
+  - name: backend
+    port: 8000
     protocol: TCP
-    targetPort: 80
-  - name: https
-    port: 443
+    targetPort: 8000
+  - name: frontend
+    port: 3000
     protocol: TCP
-    targetPort: 443
+    targetPort: 3000
   selector:
     app: ciso-assistant
     client: {{ .Values.clientName }}

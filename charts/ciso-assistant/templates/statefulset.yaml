@@ -1,3 +1,4 @@
+{{ $scheme := ternary "https" "http" .Values.ingress.tls -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -26,7 +27,7 @@ spec:
         - name: CISO_ASSISTANT_SUPERUSER_EMAIL
           value: {{ .Values.emailAdmin }}
         - name: CISO_ASSISTANT_URL
-          value: https://{{ .Values.clientName }}.{{ .Values.clusterDomain }}
+          value: {{ $scheme }}://{{ .Values.clientName }}.{{ .Values.clusterDomain }}
         - name: ALLOWED_HOSTS
           value: localhost,127.0.0.1,{{ .Values.clientName }}.{{ .Values.clusterDomain }}
         - name: EMAIL_HOST_PASSWORD
@@ -53,9 +54,13 @@ spec:
       - name: ciso-assistant-frontend
         env:
         - name: ORIGIN
-          value: "{{ .Values.frontendOrigin | default (printf "https://%s.%s" .Values.clientName .Values.clusterDomain) }}"
+          value: "{{ .Values.frontendOrigin | default (printf "%s://%s.%s" $scheme .Values.clientName .Values.clusterDomain) }}"
+        - name: PROTOCOL_HEADER
+          value: x-forwarded-proto
+        - name: HOST_HEADER
+          value: x-forwarded-host
         - name: PUBLIC_BACKEND_API_EXPOSED_URL
-          value: https://{{ .Values.clientName }}.{{ .Values.clusterDomain }}/api
+          value: {{ $scheme }}://{{ .Values.clientName }}.{{ .Values.clusterDomain }}/api
         envFrom:
         - configMapRef:
             name: ciso-assistant-config
@@ -64,32 +69,6 @@ spec:
         ports:
         - containerPort: 3000
           protocol: TCP
-      - name: caddy
-        command:
-        - sh
-        - '-c'
-        - |
-          echo {{ .Values.clientName }}.{{ .Values.clusterDomain }} "{" > Caddyfile
-          echo "reverse_proxy /api/iam/sso/redirect/ localhost:8000" >> Caddyfile
-          echo "reverse_proxy /api/accounts/saml/0/acs/ localhost:8000" >> Caddyfile
-          echo "reverse_proxy /api/accounts/saml/0/acs/finish/ localhost:8000" >> Caddyfile
-          echo "reverse_proxy /* localhost:3000" >> Caddyfile
-          echo "}" >> Caddyfile
-          exec caddy run
-        env:
-        - name: CISO_ASSISTANT_URL
-          value: https://{{ .Values.clientName }}.{{ .Values.clusterDomain }}
-        image: "{{ .Values.image.caddy.repository }}:{{ .Values.image.caddy.tag }}"
-        imagePullPolicy: {{ .Values.image.caddy.pullPolicy }}
-        ports:
-        - containerPort: 80
-          protocol: TCP
-        - containerPort: 443
-          protocol: TCP
-        volumeMounts:
-        - mountPath: /data
-          name: db-data
-          subPath: caddy
       enableServiceLinks: false
       imagePullSecrets:
       - name: registry-secret
