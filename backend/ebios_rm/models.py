@@ -272,6 +272,13 @@ class RoTo(AbstractBaseModel, FolderMixin):
         IMPORTANT = 3, "important"
         UNLIMITED = 4, "unlimited"
 
+    class Activity(models.IntegerChoices):
+        UNDEFINED = 0, "undefined"
+        VERY_LOW = 1, "very_low"
+        LOW = 2, "low"
+        MODERATE = 3, "moderate"
+        IMPORTANT = 4, "important"
+
     class Pertinence(models.IntegerChoices):
         UNDEFINED = 0, "undefined"
         IRRELAVANT = 1, "irrelevant"
@@ -306,7 +313,10 @@ class RoTo(AbstractBaseModel, FolderMixin):
         default=Resources.UNDEFINED,
     )
     activity = models.PositiveSmallIntegerField(
-        verbose_name=_("Activity"), default=0, validators=[MaxValueValidator(4)]
+        verbose_name=_("Activity"),
+        choices=Activity.choices,
+        default=Activity.UNDEFINED,
+        validators=[MaxValueValidator(4)],
     )
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)

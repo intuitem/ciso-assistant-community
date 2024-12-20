@@ -97,6 +97,7 @@ class RoToReadSerializer(BaseModelSerializer):
 
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
+    activity = serializers.CharField(source="get_activity_display")
     pertinence = serializers.CharField(source="get_pertinence")
 
     class Meta:
