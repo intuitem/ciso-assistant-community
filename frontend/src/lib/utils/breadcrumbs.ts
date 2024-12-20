@@ -15,16 +15,27 @@ const homeCrumb: Breadcrumb = { label: m.home(), href: '/', icon: 'fa-regular fa
 const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 	const breadcrumbs = writable<Breadcrumb[]>(initialValue);
 
+	function mergeCrumbs(crumbs: Breadcrumb[]) {
+		const mergedCrumbs: Breadcrumb[] = [];
+		for (const crumb of crumbs) {
+			const lastCrumb = mergedCrumbs[mergedCrumbs.length - 1];
+			if (lastCrumb?.href !== crumb.href) {
+				mergedCrumbs.push(crumb);
+			}
+		}
+		return mergedCrumbs;
+	}
+
 	function push(crumb: Breadcrumb[]) {
 		breadcrumbs.update((value) => {
-			const newCrumbs = [...value.slice(1, value.length), ...crumb];
+			const newCrumbs = mergeCrumbs([...value.slice(1, value.length), ...crumb]);
 			return [homeCrumb, ...newCrumbs.slice(-BREADCRUMBS_MAX_DEPTH)];
 		});
 	}
 
 	function replace(crumb: Breadcrumb[]) {
 		breadcrumbs.update(() => {
-			return [homeCrumb, ...crumb];
+			return mergeCrumbs([homeCrumb, ...crumb]);
 		});
 	}
 
