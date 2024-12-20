@@ -645,7 +645,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'feared_events',
 				urlModel: 'feared-events',
 				endpointUrl: 'ebios-rm/feared-events',
-				urlParams: 'ebios_rm_study=',
+				urlParams: 'is_selected=true&ebios_rm_study=',
 				detail: true
 			}
 		],
