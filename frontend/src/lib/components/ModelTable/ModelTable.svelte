@@ -326,7 +326,7 @@
 																on:click={(e) => e.stopPropagation()}>{val.str}</a
 															>
 														{:else if val.str}
-															{val.str}
+															{safeTranslate(val.str)}
 														{:else if unsafeTranslate(val.split(':')[0])}
 															<span class="text"
 																>{unsafeTranslate(val.split(':')[0] + 'Colon')}
