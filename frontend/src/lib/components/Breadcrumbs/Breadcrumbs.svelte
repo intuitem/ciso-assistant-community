@@ -2,6 +2,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { breadcrumbs, type Breadcrumb } from '$lib/utils/breadcrumbs';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { pageTitle } from '$lib/utils/stores';
 
@@ -20,7 +21,8 @@
 		return safeTranslate(
 			$page.data.title || $page.data.str || $page.data.name || $breadcrumbs.length > 1
 				? $breadcrumbs[$breadcrumbs.length - 1]?.label
-				: $page.url.pathname.split('/').pop()
+				: (URL_MODEL_MAP[$page.url.pathname.split('/').pop() as string]?.verboseNamePlural ??
+						$page.url.pathname.split('/').pop())
 		);
 	}
 
