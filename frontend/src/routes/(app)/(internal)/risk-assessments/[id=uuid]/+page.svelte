@@ -200,6 +200,17 @@
 				</div>
 				<br />
 				<div class="text-sm">
+					<span class="font-semibold" data-testid="risk-matrix-field-title"
+						>{m.ebiosRmStudy()}:</span
+					>
+					<a
+						href="/ebios-rm/{risk_assessment.ebios_rm_study.id}"
+						class="anchor"
+						data-testid="ebios-rm-field-value">{risk_assessment.ebios_rm_study.name}</a
+					>
+				</div>
+				<br />
+				<div class="text-sm">
 					<span class="font-semibold" data-testid="description-field-title">{m.description()}:</span
 					>
 				</div>

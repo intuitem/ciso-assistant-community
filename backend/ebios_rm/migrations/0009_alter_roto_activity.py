@@ -5,15 +5,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0008_remove_attackpath_ro_to_couple_strategicscenario_and_more'),
+        ("ebios_rm", "0008_remove_attackpath_ro_to_couple_strategicscenario_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='roto',
-            name='activity',
-            field=models.PositiveSmallIntegerField(choices=[(0, 'undefined'), (1, 'very_low'), (2, 'low'), (3, 'moderate'), (4, 'important')], default=0, validators=[django.core.validators.MaxValueValidator(4)], verbose_name='Activity'),
+            model_name="roto",
+            name="activity",
+            field=models.PositiveSmallIntegerField(
+                choices=[
+                    (0, "undefined"),
+                    (1, "very_low"),
+                    (2, "low"),
+                    (3, "moderate"),
+                    (4, "important"),
+                ],
+                default=0,
+                validators=[django.core.validators.MaxValueValidator(4)],
+                verbose_name="Activity",
+            ),
         ),
     ]
