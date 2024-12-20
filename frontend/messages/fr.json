@@ -1014,5 +1014,7 @@
 	"addStrategicScenario": "Ajouter un scénario stratégique",
 	"client": "Client",
 	"partner": "Partenaire",
-	"supplier": "Fournisseur"
+	"supplier": "Fournisseur",
+	"referenceEntity": "Entité de référence",
+	"referenceEntitySemiColon": "Entité de référence :"
 }
