@@ -33,5 +33,5 @@ export const load: PageServerLoad = async (event) => {
 		meta: revData
 	};
 
-	return { data, table };
+	return { data, table, title: data.name };
 };

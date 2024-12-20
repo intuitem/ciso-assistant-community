@@ -194,7 +194,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		strengthOfKnowledgeChoices: strengthOfKnowledgeChoices,
 		tables,
 		measureModel,
-		measureCreateForm
+		measureCreateForm,
+		title: m.edit()
 	};
 };
 

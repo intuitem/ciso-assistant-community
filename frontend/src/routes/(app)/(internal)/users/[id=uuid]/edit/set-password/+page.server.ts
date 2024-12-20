@@ -10,7 +10,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 export const load: PageServerLoad = async (event) => {
 	const form = await superValidate(event.request, zod(SetPasswordSchema));
 
-	return { form };
+	return { form, title: m.setPassword() };
 };
 
 export const actions: Actions = {

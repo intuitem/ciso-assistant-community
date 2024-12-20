@@ -143,7 +143,8 @@ export const load: LayoutServerLoad = async (event) => {
 		selectOptions,
 		URLModel,
 		measureCreateForm,
-		measureModel
+		measureModel,
+		title: m.edit()
 	};
 };
 

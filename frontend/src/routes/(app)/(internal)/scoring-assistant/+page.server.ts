@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { RiskMatrix, RiskMatrixJsonDefinition } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const req = await fetch(`${BASE_API_URL}/risk-matrices/`);
@@ -15,6 +15,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	);
 
 	return {
-		risk_matrices
+		risk_matrices,
+		title: m.scoringAssistant()
 	};
 };
