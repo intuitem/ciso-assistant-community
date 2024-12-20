@@ -1011,5 +1011,8 @@
 	"strategicScenario": "Scénario stratégique",
 	"strategicScenarios": "Scénarios stratégiques",
 	"goBackToEbiosRmStudy": "Retour à l'étude",
-	"addStrategicScenario": "Ajouter un scénario stratégique"
+	"addStrategicScenario": "Ajouter un scénario stratégique",
+	"client": "Client",
+	"partner": "Partenaire",
+	"supplier": "Fournisseur"
 }
