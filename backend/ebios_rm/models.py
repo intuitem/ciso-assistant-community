@@ -16,7 +16,6 @@ from core.validators import (
 )
 from iam.models import FolderMixin, User
 from tprm.models import Entity
-import json
 
 INITIAL_META = {
     "workshops": [
@@ -158,12 +157,13 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         related_name="reviewers",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
-
     meta = models.JSONField(
         default=get_initial_meta,
         verbose_name=_("Metadata"),
         validators=[JSONSchemaInstanceValidator(META_JSONSCHEMA)],
     )
+
+    fields_to_check = ["name", "version"]
 
     class Meta:
         verbose_name = _("Ebios RM Study")
@@ -236,6 +236,7 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
                 "name": "--",
                 "description": "not rated",
                 "value": -1,
+                "hexcolor": "#f9fafb",
             }
         risk_matrix = self.parsed_matrix
         return {
@@ -559,12 +560,11 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     @property
     def ref_id(self):
-        sorted_operational_scenarios = list(
-            OperationalScenario.objects.filter(
-                ebios_rm_study=self.ebios_rm_study
-            ).order_by("created_at")
-        )
-        return sorted_operational_scenarios.index(self) + 1
+        return self.attack_path.ref_id
+
+    @property
+    def name(self):
+        return self.attack_path.name
 
     @property
     def gravity(self):
@@ -577,6 +577,19 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     @property
     def ro_to(self):
         return self.attack_path.ro_to_couple
+
+    def get_assets(self):
+        initial_assets = Asset.objects.filter(
+            feared_events__in=self.ro_to.feared_events.all(), is_selected=True
+        )
+        assets = set()
+        for asset in initial_assets:
+            assets.add(asset)
+            assets.update(asset.get_descendants())
+        return Asset.objects.filter(id__in=[asset.id for asset in assets])
+
+    def get_applied_controls(self):
+        return AppliedControl.objects.filter(stakeholders__in=self.stakeholders.all())
 
     def get_likelihood_display(self):
         if self.likelihood < 0:
@@ -600,6 +613,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
                 "name": "--",
                 "description": "not rated",
                 "value": -1,
+                "hexcolor": "#f9fafb",
             }
         risk_matrix = self.parsed_matrix
         return {
