@@ -8,6 +8,7 @@ from .models import (
     FearedEvent,
     RoTo,
     Stakeholder,
+    StrategicScenario,
     AttackPath,
     OperationalScenario,
 )
@@ -104,12 +105,8 @@ class RoToReadSerializer(BaseModelSerializer):
 
 
 class StakeholderWriteSerializer(BaseModelSerializer):
-    current_criticality = serializers.CharField(
-        source="get_current_criticality_display"
-    )
-    residual_criticality = serializers.CharField(
-        source="get_residual_criticality_display"
-    )
+    current_criticality = serializers.IntegerField(read_only=True)
+    residual_criticality = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Stakeholder
@@ -136,10 +133,28 @@ class StakeholderReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class StrategicScenarioWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = StrategicScenario
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class StrategicScenarioReadSerializer(BaseModelSerializer):
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    ro_to_couple = FieldsRelatedField()
+    gravity = serializers.JSONField(source="get_gravity_display")
+    attack_paths = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = StrategicScenario
+        fields = "__all__"
+
+
 class AttackPathWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at", "folder", "ebios_rm_study"]
 
 
 class AttackPathReadSerializer(BaseModelSerializer):

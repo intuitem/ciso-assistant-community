@@ -7,6 +7,7 @@ from .models import (
     FearedEvent,
     RoTo,
     Stakeholder,
+    StrategicScenario,
     AttackPath,
     OperationalScenario,
 )
@@ -109,12 +110,23 @@ class FearedEventViewSet(BaseModelViewSet):
         return Response(choices)
 
 
+class RoToFilter(df.FilterSet):
+    used = df.BooleanFilter(method="is_used", label="Used")
+
+    def is_used(self, queryset, name, value):
+        if value:
+            return queryset.filter(strategicscenario__isnull=False)
+        return queryset.filter(strategicscenario__isnull=True)
+
+    class Meta:
+        model = RoTo
+        fields = ["ebios_rm_study", "is_selected", "used"]
+
+
 class RoToViewSet(BaseModelViewSet):
     model = RoTo
 
-    filterset_fields = [
-        "ebios_rm_study",
-    ]
+    filterset_class = RoToFilter
 
     @action(detail=False, name="Get risk origin choices", url_path="risk-origin")
     def risk_origin(self, request):
@@ -134,11 +146,20 @@ class StakeholderViewSet(BaseModelViewSet):
 
     filterset_fields = [
         "ebios_rm_study",
+        "is_selected",
     ]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(Stakeholder.Category.choices))
+
+
+class StrategicScenarioViewSet(BaseModelViewSet):
+    model = StrategicScenario
+
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
 
 
 class AttackPathFilter(df.FilterSet):
