@@ -653,7 +653,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk-origin' },
 			{ field: 'motivation', valueType: 'number' },
 			{ field: 'resources', valueType: 'number' },
-			{ field: 'activity', valueType: 'number' },
+			{ field: 'activity', valueType: 'number' }
 		]
 	},
 	stakeholders: {

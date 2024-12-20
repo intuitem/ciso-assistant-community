@@ -9,13 +9,7 @@
 
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
 
-	const disableWorkhopLink = [
-		'workshop1',
-		'workshop2',
-		'workshop3',
-		'workshop4',
-		'workshop5',
-	] // Disable workshops links in breadcrumb
+	const disableWorkhopLink = ['workshop1', 'workshop2', 'workshop3', 'workshop4', 'workshop5']; // Disable workshops links in breadcrumb
 
 	$: {
 		// Remove zero-length tokens.
