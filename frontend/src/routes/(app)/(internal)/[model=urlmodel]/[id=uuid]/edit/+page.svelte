@@ -1,13 +1,10 @@
 <script lang="ts">
-	import type { PageData } from './$types';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { breadcrumbObject } from '$lib/utils/stores';
+	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	const customNameDescription = ['operational-scenarios'].includes(data.model.urlModel);
-
-	breadcrumbObject.set(data.object);
 </script>
 
 <ModelForm

@@ -1,20 +1,16 @@
 <script lang="ts">
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import { page } from '$app/stores';
-	import type { PageData } from './$types';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import type { PageData } from './$types';
 
+	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { toCamelCase } from '$lib/utils/locales';
-	import { safeTranslate } from '$lib/utils/i18n';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { isDark } from '$lib/utils/helpers';
 
 	export let data: PageData;
-
-	$: breadcrumbObject.set(data.scenario);
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];

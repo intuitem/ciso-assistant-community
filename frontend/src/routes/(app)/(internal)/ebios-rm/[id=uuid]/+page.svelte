@@ -1,24 +1,21 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import Tile from './Tile.svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import type { PageData, ActionData } from './$types';
-	import { breadcrumbObject } from '$lib/utils/stores';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import { checkConstraints } from '$lib/utils/crud';
-	import { goto } from '$app/navigation';
 	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import * as m from '$paraglide/messages';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ActionData, PageData } from './$types';
+	import Tile from './Tile.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
 	export let data: PageData;
 	export let form: ActionData;
-
-	$: breadcrumbObject.set(data.data);
 
 	const workshopsData = {
 		ws1: [

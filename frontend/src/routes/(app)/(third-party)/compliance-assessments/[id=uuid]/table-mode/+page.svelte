@@ -1,5 +1,13 @@
 <script lang="ts">
-	import type { PageData, Actions } from '../../table-mode/$types';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import {
+		complianceResultTailwindColorMap,
+		complianceStatusTailwindColorMap
+	} from '$lib/utils/constants';
+	import { getModelInfo } from '$lib/utils/crud';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import * as m from '$paraglide/messages';
 	import {
 		Accordion,
 		AccordionItem,
@@ -11,16 +19,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '@skeletonlabs/skeleton';
-	import * as m from '$paraglide/messages';
-	import { breadcrumbObject } from '$lib/utils/stores';
-	import {
-		complianceResultTailwindColorMap,
-		complianceStatusTailwindColorMap
-	} from '$lib/utils/constants';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { getModelInfo } from '$lib/utils/crud';
+	import type { Actions, PageData } from '../../table-mode/$types';
 
 	export let data: PageData;
 	export let form: Actions;
@@ -32,8 +31,6 @@
 	export let questionnaireOnly: boolean = false;
 	export let assessmentOnly: boolean = false;
 	export let invalidateAll: boolean = true;
-
-	if (!shallow) breadcrumbObject.set(data.compliance_assessment);
 
 	const result_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },

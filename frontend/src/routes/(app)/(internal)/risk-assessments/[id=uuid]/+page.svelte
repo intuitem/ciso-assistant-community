@@ -4,7 +4,6 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud.js';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import type {
 		ModalComponent,
@@ -17,15 +16,13 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import { safeTranslate } from '$lib/utils/i18n.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { safeTranslate } from '$lib/utils/i18n.js';
 
 	export let data;
 	const showRisks = true;
 	const risk_assessment = data.risk_assessment;
-
-	breadcrumbObject.set(risk_assessment);
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();

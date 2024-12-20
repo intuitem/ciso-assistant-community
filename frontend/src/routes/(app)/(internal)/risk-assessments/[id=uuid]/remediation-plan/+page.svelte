@@ -1,14 +1,11 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages.js';
-	import { breadcrumbObject } from '$lib/utils/stores';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { safeTranslate } from '$lib/utils/i18n.js';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	export let data;
-
-	breadcrumbObject.set(data.risk_assessment);
 
 	const scenarioTreatmentColorMap = (status: string) => {
 		const map: Record<string, string> = {

@@ -26,7 +26,6 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
 		ProgressRadial,
 		Tab,
@@ -45,10 +44,10 @@
 	import * as m from '$paraglide/messages';
 
 	import Question from '$lib/components/Forms/Question.svelte';
+	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import List from '$lib/components/List/List.svelte';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -60,11 +59,6 @@
 	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
 		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
 		: getRequirementTitle(data.parent.ref_id, data.parent.name);
-	breadcrumbObject.set({
-		id: data.requirementAssessment.id,
-		name: title ?? 'Requirement assessment',
-		email: ''
-	});
 
 	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
 	const schema = RequirementAssessmentSchema;

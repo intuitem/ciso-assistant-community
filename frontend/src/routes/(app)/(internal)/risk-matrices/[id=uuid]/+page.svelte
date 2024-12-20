@@ -1,13 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { breadcrumbObject } from '$lib/utils/stores';
-
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud.js';
 	const showRisks = true;
 	export let data;
 	const riskMatrix = data.data;
-	breadcrumbObject.set(riskMatrix);
 </script>
 
 <div class="flex flex-row justify-between">

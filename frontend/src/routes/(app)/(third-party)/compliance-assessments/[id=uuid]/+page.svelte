@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import { displayOnlyAssessableNodes } from './store';
 
 	import { onMount } from 'svelte';
@@ -11,14 +10,13 @@
 		ModalSettings,
 		ModalStore,
 		PopupSettings,
-		ToastStore,
 		TreeViewNode
 	} from '@skeletonlabs/skeleton';
 
-	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { goto } from '$app/navigation';
+	import { getSecureRedirect } from '$lib/utils/helpers';
 
-	import { getModalStore, getToastStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
+	import { getModalStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
@@ -38,13 +36,12 @@
 	export let data: PageData;
 	export let form: ActionData;
 
+	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
-	import List from '$lib/components/List/List.svelte';
 
-	$: breadcrumbObject.set(data.compliance_assessment);
 	$: tree = data.tree;
 
 	$: compliance_assessment_donut_values = data.compliance_assessment_donut_values;
