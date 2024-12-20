@@ -42,7 +42,11 @@
 								{#if createRiskAnalysis && i == 0}
 									<slot name="addRiskAnalysis"></slot>
 								{:else}
-									<Anchor href={step.href} class="hover:text-purple-800">
+									<Anchor
+										href={step.href}
+										prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
+										class="hover:text-purple-800"
+									>
 										{#if step.status == 'done'}
 											<span
 												class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
