@@ -1020,5 +1020,6 @@
 	"partner": "Partner",
 	"supplier": "Supplier",
 	"referenceEntity": "Reference entity",
-	"referenceEntitySemiColon": "Reference entity:"
+	"referenceEntitySemiColon": "Reference entity:",
+	"moderate": "Moderate"
 }
