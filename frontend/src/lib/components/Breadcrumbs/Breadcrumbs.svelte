@@ -18,12 +18,24 @@
 	}
 
 	function getPageTitle(): string {
-		return safeTranslate(
+		// Check each source in priority order
+		const title =
 			$page.data.title ??
-				($page.data.str || $page.data.name || $breadcrumbs.length > 1
-					? $breadcrumbs[$breadcrumbs.length - 1]?.label
-					: URL_MODEL_MAP[$page.url.pathname.split('/').pop() as string]?.verboseNamePlural)
-		);
+			$page.data.str ??
+			$page.data.name ??
+			getBreadcrumbTitle() ??
+			getUrlModelTitle();
+
+		return safeTranslate(title);
+	}
+
+	function getBreadcrumbTitle(): string | undefined {
+		return $breadcrumbs.length > 1 ? $breadcrumbs[$breadcrumbs.length - 1]?.label : undefined;
+	}
+
+	function getUrlModelTitle(): string | undefined {
+		const lastPathSegment = $page.url.pathname.split('/').pop() as string;
+		return URL_MODEL_MAP[lastPathSegment]?.localNamePlural;
 	}
 
 	afterNavigate(async () => {
