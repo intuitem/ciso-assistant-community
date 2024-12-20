@@ -156,6 +156,105 @@ const ASSET_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const QUALIFICATION_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.qualifications?.length ? row.qualifications.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'qualification'
+	},
+	alwaysDisplay: true
+};
+
+const GRAVITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.gravity.name,
+	extraProps: {
+		defaultOptionName: 'gravity'
+	},
+	alwaysDisplay: true
+};
+
+const LIKELIHOOD_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.likelihood.name,
+	extraProps: {
+		defaultOptionName: 'likelihood'
+	},
+	alwaysDisplay: true
+};
+
+const IS_SELECTED_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.is_selected ? 'true' : 'false'),
+	extraProps: {
+		defaultOptionName: 'is_selected'
+	},
+	alwaysDisplay: true
+};
+
+const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.risk_origin,
+	extraProps: {
+		defaultOptionName: 'risk_origin'
+	},
+	alwaysDisplay: true
+};
+
+const FEARED_EVENT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.feared_events?.length ? row.feared_events.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'feared_event'
+	},
+	alwaysDisplay: true
+};
+
+const PERTINENCE_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.pertinence,
+	extraProps: {
+		defaultOptionName: 'pertinence'
+	},
+	alwaysDisplay: true
+};
+
+const ENTITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.entity.str,
+	extraProps: {
+		defaultOptionName: 'entity'
+	},
+	alwaysDisplay: true
+};
+
+const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (console.log(row), row.current_criticality.toString()),
+	extraProps: {
+		defaultOptionName: 'current_criticality'
+	},
+	alwaysDisplay: true
+};
+
+const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (console.log(row), row.residual_criticality.toString()),
+	extraProps: {
+		defaultOptionName: 'residual_criticality'
+	},
+	alwaysDisplay: true
+};
+
+const STAKEHOLDER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.stakeholders?.length ? row.stakeholders.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'stakeholder'
+	},
+	alwaysDisplay: true
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.ref_id,
@@ -571,30 +670,56 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description']
 	},
 	'feared-events': {
-		head: ['selected', 'name', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
-		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity']
+		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		filters: {
+			assets: ASSET_FILTER,
+			qualifications: QUALIFICATION_FILTER,
+			gravity: GRAVITY_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
 	},
 	'ro-to': {
+		head: ['isSelected', 'riskOrigin', 'targetObjective', 'fearedEvents', 'pertinence'],
+		body: ['is_selected', 'risk_origin', 'target_objective', 'feared_events', 'pertinence'],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			risk_origin: RISK_ORIGIN_FILTER,
+			feared_events: FEARED_EVENT_FILTER,
+			pertinence: PERTINENCE_FILTER
+		}
+	},
+	stakeholders: {
 		head: [
-			'isSelected',
-			'riskOrigin',
-			'targetObjective',
-			'motivation',
-			'fearedEvents',
-			'pertinence'
+			'is_selected',
+			'entity',
+			'category',
+			'current_criticality',
+			'applied_controls',
+			'residual_criticality'
 		],
 		body: [
 			'is_selected',
-			'risk_origin',
-			'target_objective',
-			'motivation',
-			'feared_events',
-			'pertinence'
-		]
+			'entity',
+			'category',
+			'current_criticality',
+			'applied_controls',
+			'residual_criticality'
+		],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			entity: ENTITY_FILTER,
+			category: CATEGORY_FILTER,
+			current_criticality: CURRENT_CRITICALITY_FILTER,
+			residual_criticality: RESIDUAL_CRITICALITY_FILTER
+		}
 	},
-	stakeholders: {
-		head: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
-		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
+	'strategic-scenarios': {
+		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
+		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
+		filters: {
+			gravity: GRAVITY_FILTER
+		}
 	},
 	'attack-paths': {
 		head: [
@@ -614,10 +739,19 @@ export const listViewFields: ListViewFieldsConfig = {
 			'target_objective',
 			'stakeholders',
 			'description'
-		]
+		],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			stakeholders: STAKEHOLDER_FILTER
+		}
 	},
 	'operational-scenarios': {
-		head: ['operatingModesDescription', 'threats', 'likelihood'],
-		body: ['operating_modes_description', 'threats', 'likelihood']
+		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
+		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
+		filters: {
+			threats: THREAT_FILTER,
+			likelihood: LIKELIHOOD_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
 	}
 };

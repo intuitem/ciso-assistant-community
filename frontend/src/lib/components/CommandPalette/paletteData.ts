@@ -35,6 +35,10 @@ export const navigationLinks: NavigationLink[] = [
 		href: '/risk-scenarios'
 	},
 	{
+		label: 'ebiosRM',
+		href: '/ebios-rm'
+	},
+	{
 		label: 'actionPlan',
 		href: '/applied-controls'
 	},
