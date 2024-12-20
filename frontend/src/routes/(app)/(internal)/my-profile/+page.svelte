@@ -4,6 +4,7 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { languageTag } from '$paraglide/runtime';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	function filterUserData() {
 		const filtered = {};
@@ -30,18 +31,18 @@
 	<div class="flex flex-row items-center justify-between">
 		<h1 class="text-xl font-semibold">{$page.data.user.first_name} {$page.data.user.last_name}</h1>
 		<div>
-			<a href="my-profile/change-password" class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-key mr-2" />{m.changePassword()}</a
+			<Anchor href="my-profile/change-password" class="btn variant-filled-primary h-fit"
+				><i class="fa-solid fa-key mr-2" />{m.changePassword()}</Anchor
 			>
 			{#if canEditObject}
-				<a
+				<Anchor
 					href="/users/{$page.data.user.id}/edit?next=/my-profile"
 					class="btn variant-filled-primary h-fit"
-					><i class="fa-solid fa-pen-to-square mr-2" />{m.edit()}</a
+					><i class="fa-solid fa-pen-to-square mr-2" />{m.edit()}</Anchor
 				>
 			{/if}
-			<a href="my-profile/settings" class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-sliders mr-2" />{m.settings()}</a
+			<Anchor href="my-profile/settings" class="btn variant-filled-primary h-fit"
+				><i class="fa-solid fa-sliders mr-2" />{m.settings()}</Anchor
 			>
 		</div>
 	</div>
