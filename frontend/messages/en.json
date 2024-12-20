@@ -1015,5 +1015,8 @@
 	"markAsDone": "Mark as done",
 	"markAsInProgress": "Mark as in progress",
 	"ebiosRmRiskMatrix": "4x4 risk matrix from EBIOS-RM",
-	"riskAnalyses": "Risk analyses"
+	"riskAnalyses": "Risk analyses",
+	"client": "Client",
+	"partner": "Partner",
+	"supplier": "Supplier"
 }
