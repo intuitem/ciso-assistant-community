@@ -315,7 +315,9 @@
 										<svelte:component this={component} {meta} cell={value} />
 									</div>
 								{:else}
-									<span class="flex font-token whitespace-pre-line break-words justify-center items-center">
+									<span
+										class="flex font-token whitespace-pre-line break-words justify-center items-center"
+									>
 										{#if Array.isArray(value)}
 											<ul class="list-disc pl-4 whitespace-normal">
 												{#each value as val}
