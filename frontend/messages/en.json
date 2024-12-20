@@ -1013,5 +1013,6 @@
 	"goBackToEbiosRmStudy": "Go back to Ebios RM study",
 	"addStrategicScenario": "Add strategic scenario",
 	"markAsDone": "Mark as done",
-	"markAsInProgress": "Mark as in progress"
+	"markAsInProgress": "Mark as in progress",
+	"ebiosRmRiskMatrix": "4x4 risk matrix from EBIOS-RM"
 }
