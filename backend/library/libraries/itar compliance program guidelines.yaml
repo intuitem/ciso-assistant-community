@@ -29,6 +29,13 @@ objects:
       \ as amended, and the International Traffic in Arms Regulations (ITAR), Title\
       \ 22 of the Code of Federal Regulations in parts 120-130, both of which are\
       \ authoritative on defense trade controls. \nversion 09/15/2023\nLink : https://www.pmddtc.state.gov/ddtc_public/ddtc_public?id=ddtc_kb_article_page&sys_id=4f06583fdb78d300d0a370131f961913 "
+    implementation_groups_definition:
+    - ref_id: DDTC
+      name: DDTC  Suggestions
+      description: DDTC  Suggestions
+    - ref_id: 7C
+      name: Sample Audit Checklists
+      description: Sample Audit Checklists
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-1
       assessable: false
@@ -387,7 +394,7 @@ objects:
       ref_id: ELEMENT 2A
       name: Registration
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:1
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a
       description: The ICP should include information on registration requirements
@@ -398,7 +405,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a
       name: Who Needs to Register?
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:2:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:2
       description: "The organization\u2019s ICP should explain who is required to\
@@ -409,7 +416,7 @@ objects:
         \ 126.17(k) regarding requirements for intermediate consignees under the Australia\
         \ and UK treaties, respectively."
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:2:2
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:2
       description: The ITAR requires that, subject to certain exemptions, any person
@@ -418,7 +425,7 @@ objects:
         defense services, must register with DDTC. Manufacturers who do not engage
         in exporting must nevertheless register.
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:2:3
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:2
       description: The ITAR also requires that, subject to certain exemptions, persons
@@ -468,7 +475,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a
       name: Submitting Registration Applications and Renewals
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:4:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:4
       description: "A prospective registrant must electronically submit a Statement\
@@ -535,18 +542,24 @@ objects:
         \ changes required under the ITAR. To reduce the risk of these types of ITAR\
         \ violations from occurring, DDTC recommends that organizations take the following\
         \ actions:"
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:6:1:1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:6:1
       description: Understand which activities require an organization to register
         with DDTC and determine whether the organization is required to do so.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:6:1:2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:6:1
       description: Assign a senior officer to oversee the registration process and
         to sign the required notifications.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:6:1:3
       assessable: true
       depth: 5
@@ -557,12 +570,16 @@ objects:
         that export compliance personnel are informed in advance of changes in senior
         officers and mergers and acquisitions to ensure timely updates to the registration
         statement.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:6:1:4
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2a:6:1
       description: ' Protect registration codes, which are specific to the registrant
         and should not be made available publicly.'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b
       assessable: false
       depth: 2
@@ -619,24 +636,32 @@ objects:
         from improper jurisdiction and classification. To reduce the risk of these
         types of ITAR violations from occurring, DDTC recommends that organizations
         take the following actions:'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1
       description: If any doubt exists regarding the proper jurisdiction or classification,
         err on the side of caution, and submit a CJ request to DDTC.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1
       description: Understand the form and fit of the articles, as well as the function
         and performance capability of the articles.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:3
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1
       description: Document the design and development process for new products and
         monitor and document modifications to existing products.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:4
       assessable: true
       depth: 5
@@ -644,12 +669,16 @@ objects:
       description: Designate employees with the necessary technical expertise, e.g.,
         engineers or program managers, and export controls personnel to perform jurisdiction
         and classification review functions.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:5
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1
       description: Establish formal written policies and procedures for reviewing
         and documenting jurisdiction and classification decisions.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:6
       assessable: true
       depth: 5
@@ -657,6 +686,8 @@ objects:
       description: "Develop a system of tracking and marking jurisdiction and classification\
         \ determinations at the time \u2013 or as soon as possible after \u2013 commodities\
         \ are manufactured."
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:7
       assessable: true
       depth: 5
@@ -664,12 +695,16 @@ objects:
       description: DDTC routinely updates USML categories, so organizations should
         consistently monitor these updates and adjust their internal jurisdiction
         and classification determinations accordingly.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:8
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1
       description: If a CJ request is pending, DDTC recommends treating the commodity
         as defense article or a defense service until DDTC issues the CJ determination.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2b:3:1:9
       assessable: true
       depth: 5
@@ -677,6 +712,8 @@ objects:
       description: Keep records of all jurisdiction and classification decisions in
         a central location that can easily be accessed, reviewed, referred to, and
         updated.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c
       assessable: false
       depth: 2
@@ -802,30 +839,40 @@ objects:
       description: 'To reduce the risk of ITAR violations related to obtaining and
         using licenses, agreements, and exemptions, DDTC recommends that organizations
         establish policies and procedures for the following:'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: Incorporating licensing and other authorization considerations
         in all appropriate organization processes.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: Anticipating, to the extent possible, the need for licenses in
         advance of proposed export activities.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:3
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: Ensuring that business development, sales, and marketing personnel
         understand timelines for obtaining licenses.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:4
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: Ensuring ample time to draft, submit, and receive approval for
         agreements.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:5
       assessable: true
       depth: 5
@@ -833,6 +880,8 @@ objects:
       description: Ensuring all parties understand appropriate terms, conditions,
         and provisos of the agreement, and conducting periodic audits of export activities
         under the agreement.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:6
       assessable: true
       depth: 5
@@ -841,18 +890,24 @@ objects:
         license applications and anticipating changes that may occur while a license
         is valid, e.g., change in freight forwarder, potential U.S. or foreign subcontractors
         involved in the transaction, or changes in the end use or end user.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:7
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: Reviewing for restrictions on parties to the transaction, including
         by screening through the Consolidated Screening List.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:8
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: ' Creating, submitting, tracking and disposition of licenses and
         other authorizations.'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:9
       assessable: true
       depth: 5
@@ -860,6 +915,8 @@ objects:
       description: Successfully implementing agreements (e.g., internal controls,
         technology control plans, identifying foreign person status, and employment
         status of meeting attendees).
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:10
       assessable: true
       depth: 5
@@ -867,6 +924,8 @@ objects:
       description: Communicating with all foreign parties to determine who will be
         involved in the transaction and their roles, e.g., recipients of services,
         providers, subcontractors.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:11
       assessable: true
       depth: 5
@@ -874,6 +933,8 @@ objects:
       description: ' Working with foreign parties to understand if there will be dual
         or third- country national employees working on the proposed activities and
         how the foreign party will screen those individuals.'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:12
       assessable: true
       depth: 5
@@ -881,24 +942,32 @@ objects:
       description: Ensuring foreign parties have compliance safeguards in place to
         protect any technical data transferred under the agreements from unauthorized
         access.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:13
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: Protecting against unauthorized release of technical data to foreign
         entities and foreign employees.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:14
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: Assessing all conditions that must be satisfied to qualify for
         use of any license exemption.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1:15
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:4:1
       description: Reviewing and approving use of license exemptions by appropriate
         compliance personnel.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5
       assessable: false
       depth: 3
@@ -913,24 +982,32 @@ objects:
       description: 'To reduce the risk of ITAR violations related to the reexport
         or retransfer of defense articles from occurring, DDTC recommends that organizations
         take the following actions:'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5:1:1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5:1
       description: Establish policies and procedures for reviewing and obtaining authorization
         for reexports and retransfers.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5:1:2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5:1
       description: Establish policies and procedures for tracking and keeping records
         regarding export authorizations for reexports or retransfers.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5:1:3
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5:1
       description: Ensure understanding of the difference between requesting an initial
         export authorization and a subsequent reexport or retransfer approval.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5:1:4
       assessable: true
       depth: 5
@@ -938,6 +1015,8 @@ objects:
       description: Gather all relevant information about the transaction prior to
         requesting written approval to ensure the request is not returned without
         action by DDTC due to lack of information.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2c:5:1:5
       assessable: true
       depth: 5
@@ -946,6 +1025,8 @@ objects:
         and other ITAR requirements. For example, foreign recipients should understand
         that destruction is considered a change in end use, and they must request
         approval from DDTC in advance of destruction or demilitarization.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d
       assessable: false
       depth: 2
@@ -995,6 +1076,8 @@ objects:
       description: 'To ensure effective screening and reduction of the risk of ITAR
         violations involving restricted parties and proscribed countries, DDTC recommends
         that organizations take the following actions:'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1:1
       assessable: true
       depth: 5
@@ -1004,12 +1087,16 @@ objects:
         \ for screening prior to each of the following activities: entering substantive\
         \ business discussions, signing contracts or other agreements, submitting\
         \ license applications, and exporting."
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1:2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1
       description: Establishing policies and procedures for resolving positive hits
         and reviewing questionable transactions.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1:3
       assessable: true
       depth: 5
@@ -1018,21 +1105,29 @@ objects:
         customers, suppliers, or other entities engaged in on-going transactions.
         Frequency may differ depending on risk related to jurisdiction, industry,
         entity, etc.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1:4
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1
       description: Maintain detailed screening record results.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1:5
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1
       description: Dedicate adequate resources for screening.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1:6
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1
       description: Monitor updates to U.S. Government lists.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2d:3:1:7
       assessable: true
       depth: 5
@@ -1040,6 +1135,8 @@ objects:
       description: "Ensure that all relevant employees understand which destinations\
         \ are proscribed under ITAR \xA7 126.1 and the potential consequences of exporting\
         \ without authorization to one of those destinations."
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2e
       assessable: false
       depth: 2
@@ -1153,6 +1250,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2e:6
       description: 'To reduce the risk of brokering-related ITAR violations, DDTC
         recommends that brokers take the following actions:'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2e:6:1:1
       assessable: true
       depth: 5
@@ -1160,6 +1259,8 @@ objects:
       description: Establish policies and procedures for obtaining prior authorization
         for brokering activities, reporting brokering activities, and maintaining
         records regarding brokering activities.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2e:6:1:2
       assessable: true
       depth: 5
@@ -1167,17 +1268,23 @@ objects:
       description: Understand which activities constitute brokering activities under
         the ITAR and identify whether and to what extent the broker is engaged in
         such activities.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2e:6:1:3
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2e:6:1
       description: Review and understand the available exemptions to the brokering
         authorization requirements.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2e:6:1:4
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2e:6:1
       description: Submit annual brokering reports to DDTC on time.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f
       assessable: false
       depth: 2
@@ -1202,14 +1309,14 @@ objects:
         or indirectly, whether in cash or in kind, and whether pursuant to a written
         contract, that is:'
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:2:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:2
       description: To or at the direction of any person, irrespective of nationality,
         whether employed by or affiliated with an applicant, a supplier, or a vendor;
         and
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:2:2
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:2
       description: For the solicitation or promotion or otherwise to secure the conclusion
@@ -1221,26 +1328,26 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f
       description: 'The phrase fee or commission does not include:'
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:3:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:3
       description: "A political contribution or a payment excluded by ITAR \xA7 130.6\
         \ from the definition of political contribution;"
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:3:2
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:3
       description: A normal salary (excluding contingent compensation) established
         at an annual rate and paid to a regular employee of an applicant, supplier,
         or vendor;
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:3:3
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:3
       description: General advertising or promotional expenses not directed to any
         sale or purchaser; or
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:3:4
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:3
       description: "Payments made, or offered or agreed to be made, solely for the\
@@ -1311,7 +1418,7 @@ objects:
         \ If so, the applicant must furnish to DDTC the information specified in ITAR\
         \ \xA7 130.10."
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:5:2:3
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:5:2
       description: "Any payments or offers or agreements to make payments of political\
@@ -1338,24 +1445,32 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:6
       description: 'To reduce the risk of ITAR part 130-related violations, DDTC recommends
         that organizations take the following actions:'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:6:1:1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:6:1
       description: Understand whether you or your vendors are involved in paying political
         contributions, fees, or commissions.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:6:1:2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:6:1
       description: Understand what information needs to be asked of and received from
         your vendors.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:6:1:3
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2f:6:1
       description: Establish policies and procedures for accurate and accessible recordkeeping
         of such political contributions, fees, or commissions.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g
       assessable: false
       depth: 2
@@ -1375,7 +1490,7 @@ objects:
         and theft and consider carefully what cyber security solutions work most effectively
         for them.
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:2
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g
       description: Having specific policies, procedures, and tools for the encryption
@@ -1401,18 +1516,24 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4
       description: 'To reduce the risk of ITAR violations and improve cyber security
         measures, DDTC recommends that organizations take the following actions:'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:1
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: Establish policies and procedures for recurring training on travel
         with mobile devices for new and existing employees.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: Ensure foreign person employees do not receive unauthorized access
         to technical data.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:3
       assessable: true
       depth: 5
@@ -1420,46 +1541,62 @@ objects:
       description: "Ensure technical data is not backed up to servers in foreign locations,\
         \ unless it meets the criteria set out in ITAR \xA7 120.54(a)(5) regarding\
         \ storage of unclassified technical data secured using end-to-end encryption."
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:4
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: ' Coordinate with IT to implement intrusion detection systems.'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:5
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: Educate employees about phishing, malware, and other cyber threats.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:6
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: Review electronic storage options, such as cloud storage services,
         and understand how service providers protect ITAR-controlled technical data.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:7
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: Establish security policies for file sharing and collaboration
         tools.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:8
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: Establish measures for encryption of data on mobile devices, such
         as laptops and cell phones.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:9
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: Establish policies and procedures for the review and approval of
         employee travel with mobile devices.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1:10
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-2g:4:1
       description: Ensure that IT logs and controls access to company networks that
         contain ITAR-controlled technical data by authorized personnel.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3
       assessable: false
       depth: 1
@@ -1772,7 +1909,7 @@ objects:
       description: A summary of the visit, including any issues or circumstances of
         note.
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3c:4
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3c
       description: In addition to documenting these interactions with foreign persons,
@@ -1816,6 +1953,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2
       description: 'DDTC recommends that organizations identify and implement best
         practices for recordkeeping including, but not limited to, the following:'
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:1
       assessable: true
       depth: 5
@@ -1823,12 +1962,16 @@ objects:
       description: In the event records include copies of exported technical data,
         ensuring the records are properly secured, including through encryption for
         digital records, to prevent unauthorized access.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:2
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1
       description: Before employees depart an organization, ensuring any records subject
         to ITAR recordkeeping requirements they possess are identified and preserved.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:3
       assessable: true
       depth: 5
@@ -1836,6 +1979,8 @@ objects:
       description: Evaluating the physical storage site and control procedures for
         disposal of records to minimize the risk of losing records or failing to properly
         secure technical data.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:4
       assessable: true
       depth: 5
@@ -1843,12 +1988,16 @@ objects:
       description: Implementing a backup system for electronic storage and implementing
         measures that will assist in the recovery of information and other electronic
         communications on computer systems if the primary computer system fails.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:5
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1
       description: Maintaining thorough records of non-disclosure agreements and screenings
         involving dual and third-country national employees, as appropriate
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:6
       assessable: true
       depth: 5
@@ -1857,29 +2006,39 @@ objects:
         \ organization\u2019s IT systems, such as copies of shipping records from\
         \ freight forwarders, disclosures submitted by outside counsel, or licensing\
         \ information."
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:7
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1
       description: Acquiring or developing a central IT storage system or database
         for relevant records.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:8
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1
       description: For offsite record storage and destruction, reviewing the contractual
         terms to ensure that ITAR-controlled technical data is protected.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:9
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1
       description: Periodically reevaluating the efficacy of recordkeeping policies
         and procedures.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:10
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1
       description: Retaining records of any disclosures and any supporting documentation.
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-3d:2:1:11
       assessable: true
       depth: 5
@@ -1888,6 +2047,8 @@ objects:
         \ with DDTC officials, including through outside counsel, involving ITAR-related\
         \ matters, which may help ensure continuity and consistency in an organization\u2019\
         s export compliance functions."
+      implementation_groups:
+      - DDTC
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-4
       assessable: false
       depth: 1
@@ -2211,7 +2372,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-5a
       name: ITAR Training Programs Basics
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-5a:1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-5a:1
       description: ITAR training programs should be tailored, dynamic, up-to-date,
@@ -2335,7 +2496,7 @@ objects:
       ref_id: Tier 1
       name: General ITAR Training for All Personnel
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:tier-1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:tier-1
       description: "For the first and bottom tier \u2013 all personnel \u2013 training\
@@ -2713,7 +2874,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-6a
       name: Basics of ITAR Risk Assessments
     - urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-6a:1:1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-6a:1
       description: Risk assessments are essential tools for building an effective
@@ -3224,6 +3385,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: &id001
@@ -3240,6 +3403,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3252,6 +3417,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3262,6 +3429,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3273,6 +3442,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3285,6 +3456,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3296,6 +3469,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3308,6 +3483,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3319,6 +3496,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:2
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3330,6 +3509,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:2
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3341,6 +3522,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:2
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3353,6 +3536,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3364,6 +3549,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3374,6 +3561,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3385,6 +3574,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3395,6 +3586,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:3
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3405,6 +3598,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:2:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3420,6 +3615,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3430,6 +3627,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3441,6 +3640,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3452,6 +3653,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3464,6 +3667,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3475,6 +3680,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3485,6 +3692,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3496,6 +3705,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:4
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3507,6 +3718,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3520,6 +3733,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3530,6 +3745,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3541,6 +3758,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3551,6 +3770,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:7
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3562,6 +3783,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3573,6 +3796,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3585,6 +3810,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3596,6 +3823,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:7
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3607,6 +3836,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3618,6 +3849,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3628,6 +3861,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3638,6 +3873,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3648,6 +3885,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3658,6 +3897,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3669,6 +3910,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3683,6 +3926,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3695,6 +3940,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3707,6 +3954,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3720,6 +3969,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3732,6 +3983,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3744,6 +3997,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3756,6 +4011,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:9
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3766,6 +4023,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3778,6 +4037,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:9
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3788,6 +4049,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3803,6 +4066,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:9
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3814,6 +4079,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3826,6 +4093,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3838,6 +4107,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:11
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3849,6 +4120,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3860,6 +4133,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:12
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3871,6 +4146,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:12
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3882,6 +4159,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:12
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3894,6 +4173,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:3:12
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3911,6 +4192,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3922,6 +4205,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -3933,6 +4218,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3943,6 +4230,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3954,6 +4243,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3966,6 +4257,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3977,6 +4270,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3988,6 +4283,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -3999,6 +4296,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4010,6 +4309,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4020,6 +4321,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4031,6 +4334,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4042,6 +4347,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:4
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4057,6 +4364,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4067,6 +4376,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4079,6 +4390,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4090,6 +4403,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4102,6 +4417,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4112,6 +4429,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4123,6 +4442,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4133,6 +4454,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4144,6 +4467,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4155,6 +4480,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4166,6 +4493,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4177,6 +4506,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4190,6 +4521,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4202,6 +4535,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:5
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4218,6 +4553,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4230,6 +4567,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4241,6 +4580,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4252,6 +4593,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4263,6 +4606,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:1
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4274,6 +4619,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4286,6 +4633,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4297,6 +4646,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:1
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4309,6 +4660,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4320,6 +4673,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:2
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4331,6 +4686,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:2
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4342,6 +4699,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4354,6 +4713,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4365,6 +4726,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4377,6 +4740,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:2
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4388,6 +4753,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4399,6 +4766,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4411,6 +4780,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4422,6 +4793,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4433,6 +4806,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4443,6 +4818,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:7
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4454,6 +4831,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:7
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4466,6 +4845,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:7
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4477,6 +4858,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:6:7
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4493,6 +4876,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4506,6 +4891,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4517,6 +4904,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:7
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4528,6 +4917,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4540,6 +4931,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4552,6 +4945,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4562,6 +4957,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4575,6 +4972,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:7
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4593,6 +4992,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4607,6 +5008,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:8
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4618,6 +5021,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:8
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4629,6 +5034,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4645,6 +5052,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:8
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4656,6 +5065,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:8:5
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4667,6 +5078,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:8:5
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4678,6 +5091,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:8:5
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4693,6 +5108,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4704,6 +5121,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4714,6 +5133,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4725,6 +5146,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4736,6 +5159,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4746,6 +5171,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4757,6 +5184,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4768,6 +5197,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4781,6 +5212,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4793,6 +5226,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4804,6 +5239,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:9
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4820,6 +5257,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4831,6 +5270,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4842,6 +5283,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4853,6 +5296,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4864,6 +5309,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4874,6 +5321,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4885,6 +5334,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4896,6 +5347,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4907,6 +5360,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4918,6 +5373,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4929,6 +5386,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4941,6 +5400,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4952,6 +5413,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4963,6 +5426,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4974,6 +5439,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -4985,6 +5452,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10:15
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -4996,6 +5465,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10:15
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -5007,6 +5478,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -5018,6 +5491,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10:16
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -5029,6 +5504,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10:16
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -5039,6 +5516,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10:16
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -5053,6 +5532,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10:16
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -5065,6 +5546,8 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10:16
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -5075,6 +5558,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:10
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -5093,6 +5578,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:11
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -5103,6 +5590,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:11
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -5114,6 +5603,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:11
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -5125,6 +5616,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:11
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
@@ -5136,6 +5629,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:11
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -5146,6 +5641,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:11
+      implementation_groups:
+      - 7C
       question:
         question_type: unique_choice
         question_choices: *id001
@@ -5157,6 +5654,8 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:itar-compliance-program-guidelines:element-7c:11
+      implementation_groups:
+      - 7C
       question:
         question_type: text
         question_choices: null
