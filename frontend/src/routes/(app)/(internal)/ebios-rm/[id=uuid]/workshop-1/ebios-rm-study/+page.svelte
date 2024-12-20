@@ -99,6 +99,16 @@
 				{m.edit()}
 			</a>
 		</div>
+		{#if ebiosRmStudy.reference_entity}
+			<div class="flex justify-center items-center w-full">
+				<span class="text-sm text-gray-500"
+					>{m.referenceEntitySemiColon()}
+					<a class="anchor" href="/entities/{ebiosRmStudy.reference_entity.id}"
+						>{ebiosRmStudy.reference_entity.str}</a
+					>
+				</span>
+			</div>
+		{/if}
 		<div
 			id="activityOne"
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center

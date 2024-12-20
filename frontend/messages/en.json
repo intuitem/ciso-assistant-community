@@ -1018,5 +1018,7 @@
 	"riskAnalyses": "Risk analyses",
 	"client": "Client",
 	"partner": "Partner",
-	"supplier": "Supplier"
+	"supplier": "Supplier",
+	"referenceEntity": "Reference entity",
+	"referenceEntitySemiColon": "Reference entity:"
 }

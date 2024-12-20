@@ -402,7 +402,8 @@ export const ebiosRMSchema = z.object({
 	observation: z.string().optional().nullable(),
 	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string(),
-	compliance_assessments: z.string().uuid().optional().array().optional()
+	compliance_assessments: z.string().uuid().optional().array().optional(),
+	reference_entity: z.string().optional()
 });
 
 export const fearedEventsSchema = z.object({
