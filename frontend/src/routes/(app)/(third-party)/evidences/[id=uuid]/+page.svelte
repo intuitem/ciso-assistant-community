@@ -12,6 +12,7 @@
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data: PageData;
 
@@ -90,7 +91,7 @@
 																(item) => item.field === key
 															)?.urlModel
 														}/${val.id}`}
-														<a href={itemHref} class="anchor">{val.str}</a>
+														<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 													{:else}
 														{value}
 													{/if}
@@ -106,9 +107,9 @@
 											(item) => item.field === key
 										)?.urlModel
 									}/${value.id}`}
-									<a href={itemHref} class="anchor">{value.str}</a>
+									<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 								{:else if isURL(value)}
-									<a href={value} target="_blank" class="anchor">{value}</a>
+									<Anchor href={value} target="_blank" class="anchor">{value}</Anchor>
 								{:else}
 									{value.str ?? value}
 								{/if}
@@ -122,10 +123,10 @@
 		</div>
 		<span>
 			{#if canEditObject}
-				<a
+				<Anchor
 					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 					class="btn variant-filled-primary h-fit"
-					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
+					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
 				>
 			{/if}
 		</span>
@@ -158,11 +159,11 @@
 					{data.evidence.attachment}
 				</h4>
 				<div class="space-x-2">
-					<a
+					<Anchor
 						href={`./${data.evidence.id}/attachment`}
 						class="btn variant-filled-primary h-fit"
 						data-testid="attachment-download-button"
-						><i class="fa-solid fa-download mr-2" /> {m.download()}</a
+						><i class="fa-solid fa-download mr-2" /> {m.download()}</Anchor
 					>
 					<button
 						on:click={(_) => {
