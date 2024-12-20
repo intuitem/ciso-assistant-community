@@ -179,249 +179,243 @@
 		{#each data.requirement_assessments as requirementAssessment}
 			<div class="w-2"></div>
 
-			{#if !requirementAssessment.assessable}
-				<span class="relative flex justify-center py-4">
-					<div
-						class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-gradient-to-r from-transparent via-gray-500 to-transparent opacity-75"
-					></div>
-
-					<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl"
-						>{title(requirementAssessment)}</span
-					>
-				</span>
-			{:else}
-				<div class="h-2"></div>
+			<span class="relative flex justify-center py-4">
 				<div
-					class="flex flex-col items-center justify-center border px-4 py-2 shadow rounded-xl space-y-2"
+					class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-gradient-to-r from-transparent via-gray-500 to-transparent opacity-75"
+				></div>
+
+				<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl"
+					>{title(requirementAssessment)}</span
 				>
-					{#if requirementAssessment.description}
-						<div class="flex w-full font-semibold">
-							{requirementAssessment.description}
-						</div>
-					{/if}
-					{#if requirementAssessment.assessable}
-						<form
-							class="flex flex-col space-y-2 items-center justify-evenly w-full"
-							id="tableModeForm-{requirementAssessment.id}"
-							action="{actionPath}?/updateRequirementAssessment"
-							method="post"
-						>
-							{#if !questionnaireMode}
-								<div class="flex flex-row w-full space-x-2 my-4">
-									<div class="flex flex-col items-center w-1/2">
-										<p class="flex items-center font-semibold text-blue-600 italic">{m.status()}</p>
-										<RadioGroup class="w-full flex-wrap items-center">
-											{#each status_options as option}
-												<RadioItem
-													class="h-full"
-													id={option.id}
-													active={addColor(
-														requirementAssessment.status,
-														complianceStatusTailwindColorMap
-													)}
-													value={option.id}
-													bind:group={requirementAssessment.status}
-													name="status"
-													on:click={() => {
-														const newStatus =
-															requirementAssessment.status === option.id ? 'to_do' : option.id;
-														requirementAssessment.status = newStatus;
-														update(requirementAssessment, 'status', newStatus);
-													}}>{option.label}</RadioItem
-												>
-											{/each}
-										</RadioGroup>
-									</div>
-									<div class="flex flex-col items-center w-1/2">
-										<p class="flex items-center font-semibold text-purple-600 italic">
-											{m.result()}
-										</p>
-										<RadioGroup class="w-full flex-wrap items-center">
-											{#each result_options as option}
-												<RadioItem
-													class="h-full"
-													active={addColor(
-														requirementAssessment.result,
-														complianceResultTailwindColorMap
-													)}
-													id={option.id}
-													value={option.id}
-													bind:group={requirementAssessment.result}
-													name="result"
-													on:click={() => {
-														const newResult =
-															requirementAssessment.result === option.id
-																? 'not_assessed'
-																: option.id;
-														requirementAssessment.result = newResult;
-														update(requirementAssessment, 'result', newResult); // Update result for both select and deselect
-													}}
-													>{option.label}
-												</RadioItem>
-											{/each}
-										</RadioGroup>
-									</div>
+			</span>
+			<div class="h-2"></div>
+			<div
+				class="flex flex-col items-center justify-center border px-4 py-2 shadow rounded-xl space-y-2"
+			>
+				{#if requirementAssessment.description}
+					<div class="flex w-full font-semibold">
+						{requirementAssessment.description}
+					</div>
+				{/if}
+				{#if requirementAssessment.assessable}
+					<form
+						class="flex flex-col space-y-2 items-center justify-evenly w-full"
+						id="tableModeForm-{requirementAssessment.id}"
+						action="{actionPath}?/updateRequirementAssessment"
+						method="post"
+					>
+						{#if !questionnaireMode}
+							<div class="flex flex-row w-full space-x-2 my-4">
+								<div class="flex flex-col items-center w-1/2">
+									<p class="flex items-center font-semibold text-blue-600 italic">{m.status()}</p>
+									<RadioGroup class="w-full flex-wrap items-center">
+										{#each status_options as option}
+											<RadioItem
+												class="h-full"
+												id={option.id}
+												active={addColor(
+													requirementAssessment.status,
+													complianceStatusTailwindColorMap
+												)}
+												value={option.id}
+												bind:group={requirementAssessment.status}
+												name="status"
+												on:click={() => {
+													const newStatus =
+														requirementAssessment.status === option.id ? 'to_do' : option.id;
+													requirementAssessment.status = newStatus;
+													update(requirementAssessment, 'status', newStatus);
+												}}>{option.label}</RadioItem
+											>
+										{/each}
+									</RadioGroup>
 								</div>
-							{/if}
-							{#if requirementAssessment.answer != null && Object.keys(requirementAssessment.answer).length !== 0}
-								<div class="flex flex-col w-full space-y-2">
-									{#each requirementAssessment.answer.questions as question}
-										<li class="flex flex-col space-y-2 rounded-xl">
-											<p>{question.text}</p>
+								<div class="flex flex-col items-center w-1/2">
+									<p class="flex items-center font-semibold text-purple-600 italic">
+										{m.result()}
+									</p>
+									<RadioGroup class="w-full flex-wrap items-center">
+										{#each result_options as option}
+											<RadioItem
+												class="h-full"
+												active={addColor(
+													requirementAssessment.result,
+													complianceResultTailwindColorMap
+												)}
+												id={option.id}
+												value={option.id}
+												bind:group={requirementAssessment.result}
+												name="result"
+												on:click={() => {
+													const newResult =
+														requirementAssessment.result === option.id ? 'not_assessed' : option.id;
+													requirementAssessment.result = newResult;
+													update(requirementAssessment, 'result', newResult); // Update result for both select and deselect
+												}}
+												>{option.label}
+											</RadioItem>
+										{/each}
+									</RadioGroup>
+								</div>
+							</div>
+						{/if}
+						{#if requirementAssessment.answer != null && Object.keys(requirementAssessment.answer).length !== 0}
+							<div class="flex flex-col w-full space-y-2">
+								{#each requirementAssessment.answer.questions as question}
+									<li class="flex flex-col space-y-2 rounded-xl">
+										<p>{question.text}</p>
+										{#if shallow}
+											{#if question.answer}
+												<p class="text-primary-500 font-semibold">{question.answer}</p>
+											{:else}
+												<p class="text-gray-400 italic">{m.noAnswer()}</p>
+											{/if}
+										{:else if question.type === 'unique_choice'}
+											<RadioGroup
+												class="flex-col"
+												active="variant-filled-primary"
+												hover="hover:variant-soft-primary"
+											>
+												{#each question.options as option}
+													<RadioItem
+														class="shadow-md"
+														bind:group={question.answer}
+														name="question"
+														value={option}
+														on:click={() => {
+															const newAnswer = question.answer === option ? null : option;
+															question.answer = newAnswer;
+															update(requirementAssessment, 'answer', newAnswer, question);
+														}}
+														>{option}
+													</RadioItem>
+												{/each}
+											</RadioGroup>
+										{:else if question.type === 'date'}
+											<input
+												type="date"
+												placeholder=""
+												class="input w-fit"
+												bind:value={question.answer}
+												on:change={() =>
+													update(requirementAssessment, 'answer', question.answer, question)}
+												{...$$restProps}
+											/>
+										{:else}
+											<textarea
+												placeholder=""
+												class="input w-full"
+												bind:value={question.answer}
+												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
+												on:change={() =>
+													update(requirementAssessment, 'answer', question.answer, question)}
+												{...$$restProps}
+											/>
+										{/if}
+									</li>
+								{/each}
+							</div>
+						{/if}
+						<div class="flex flex-col w-full place-items-center">
+							<Accordion regionCaret="flex">
+								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
+									<svelte:fragment slot="summary"
+										><p class="flex">{m.observation()}</p></svelte:fragment
+									>
+									<svelte:fragment slot="content">
+										<div>
 											{#if shallow}
-												{#if question.answer}
-													<p class="text-primary-500 font-semibold">{question.answer}</p>
+												{#if requirementAssessment.observation}
+													<p class="text-primary-500">{requirementAssessment.observation}</p>
 												{:else}
-													<p class="text-gray-400 italic">{m.noAnswer()}</p>
+													<p class="text-gray-400 italic">{m.noObservation()}</p>
 												{/if}
-											{:else if question.type === 'unique_choice'}
-												<RadioGroup
-													class="flex-col"
-													active="variant-filled-primary"
-													hover="hover:variant-soft-primary"
-												>
-													{#each question.options as option}
-														<RadioItem
-															class="shadow-md"
-															bind:group={question.answer}
-															name="question"
-															value={option}
-															on:click={() => {
-																const newAnswer = question.answer === option ? null : option;
-																question.answer = newAnswer;
-																update(requirementAssessment, 'answer', newAnswer, question);
-															}}
-															>{option}
-														</RadioItem>
-													{/each}
-												</RadioGroup>
-											{:else if question.type === 'date'}
-												<input
-													type="date"
-													placeholder=""
-													class="input w-fit"
-													bind:value={question.answer}
-													on:change={() =>
-														update(requirementAssessment, 'answer', question.answer, question)}
-													{...$$restProps}
-												/>
 											{:else}
 												<textarea
 													placeholder=""
 													class="input w-full"
-													bind:value={question.answer}
+													bind:value={requirementAssessment.observation}
 													on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-													on:change={() =>
-														update(requirementAssessment, 'answer', question.answer, question)}
-													{...$$restProps}
 												/>
-											{/if}
-										</li>
-									{/each}
-								</div>
-							{/if}
-							<div class="flex flex-col w-full place-items-center">
-								<Accordion regionCaret="flex">
-									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
-										<svelte:fragment slot="summary"
-											><p class="flex">{m.observation()}</p></svelte:fragment
-										>
-										<svelte:fragment slot="content">
-											<div>
-												{#if shallow}
-													{#if requirementAssessment.observation}
-														<p class="text-primary-500">{requirementAssessment.observation}</p>
-													{:else}
-														<p class="text-gray-400 italic">{m.noObservation()}</p>
-													{/if}
-												{:else}
-													<textarea
-														placeholder=""
-														class="input w-full"
-														bind:value={requirementAssessment.observation}
-														on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-													/>
-													{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
-														<button
-															class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
-															on:click={() => {
-																update(
-																	requirementAssessment,
-																	'observation',
-																	requirementAssessment.observation
-																);
-																requirementAssessment.observationBuffer =
-																	requirementAssessment.observation;
-															}}
-															type="button"
-														>
-															<i class="fa-solid fa-check opacity-70"></i>
-														</button>
-														<button
-															class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
-															on:click={() =>
-																(requirementAssessment.observation =
-																	requirementAssessment.observationBuffer)}
-															type="button"
-														>
-															<i class="fa-solid fa-xmark opacity-70"></i>
-														</button>
-													{/if}
-												{/if}
-											</div>
-										</svelte:fragment>
-									</AccordionItem>
-									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
-										<svelte:fragment slot="summary"
-											><p class="flex items-center space-x-2">
-												<span>{m.evidence()}</span>
-												{#key addedEvidence}
-													{#if requirementAssessment.evidences != null}
-														<span class="badge variant-soft-primary"
-															>{requirementAssessment.evidences.length}</span
-														>
-													{/if}
-												{/key}
-											</p></svelte:fragment
-										>
-										<svelte:fragment slot="content">
-											<div class="flex flex-row space-x-2 items-center">
-												{#if !shallow}
+												{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
 													<button
-														class="btn variant-filled-primary self-start"
-														on:click={() =>
-															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+														class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
+														on:click={() => {
+															update(
+																requirementAssessment,
+																'observation',
+																requirementAssessment.observation
+															);
+															requirementAssessment.observationBuffer =
+																requirementAssessment.observation;
+														}}
 														type="button"
-														><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
+													>
+														<i class="fa-solid fa-check opacity-70"></i>
+													</button>
+													<button
+														class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
+														on:click={() =>
+															(requirementAssessment.observation =
+																requirementAssessment.observationBuffer)}
+														type="button"
+													>
+														<i class="fa-solid fa-xmark opacity-70"></i>
+													</button>
+												{/if}
+											{/if}
+										</div>
+									</svelte:fragment>
+								</AccordionItem>
+								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
+									<svelte:fragment slot="summary"
+										><p class="flex items-center space-x-2">
+											<span>{m.evidence()}</span>
+											{#key addedEvidence}
+												{#if requirementAssessment.evidences != null}
+													<span class="badge variant-soft-primary"
+														>{requirementAssessment.evidences.length}</span
 													>
 												{/if}
-												{#key addedEvidence}
-													{#each requirementAssessment.evidences as evidence}
-														<p class="card p-2">
-															<a class="hover:text-primary-500" href="/evidences/{evidence.id}"
-																><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
+											{/key}
+										</p></svelte:fragment
+									>
+									<svelte:fragment slot="content">
+										<div class="flex flex-row space-x-2 items-center">
+											{#if !shallow}
+												<button
+													class="btn variant-filled-primary self-start"
+													on:click={() =>
+														modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+													type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
+												>
+											{/if}
+											{#key addedEvidence}
+												{#each requirementAssessment.evidences as evidence}
+													<p class="card p-2">
+														<a class="hover:text-primary-500" href="/evidences/{evidence.id}"
+															><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
+														>
+														{#if !shallow}
+															<button
+																class="cursor-pointer"
+																on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
+																type="button"
 															>
-															{#if !shallow}
-																<button
-																	class="cursor-pointer"
-																	on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
-																	type="button"
-																>
-																	<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
-																</button>
-															{/if}
-														</p>
-													{/each}
-												{/key}
-											</div>
-										</svelte:fragment>
-									</AccordionItem>
-								</Accordion>
-							</div>
-						</form>
-					{/if}
-				</div>
-			{/if}
+																<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
+															</button>
+														{/if}
+													</p>
+												{/each}
+											{/key}
+										</div>
+									</svelte:fragment>
+								</AccordionItem>
+							</Accordion>
+						</div>
+					</form>
+				{/if}
+			</div>
 		{/each}
 	</div>
 </div>
