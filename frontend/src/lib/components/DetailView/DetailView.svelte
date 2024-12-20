@@ -347,7 +347,7 @@
 											>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
-										{:else if m[toCamelCase((value.str || value.name) ?? value)]}
+										{:else if m[toCamelCase(value.str || value.name)]}
 											{safeTranslate((value.str || value.name) ?? value)}
 										{:else}
 											{(value.str || value.name) ?? value}
