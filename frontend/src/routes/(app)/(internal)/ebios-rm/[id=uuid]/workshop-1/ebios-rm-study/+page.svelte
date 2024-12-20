@@ -82,7 +82,7 @@
 					{ebiosRmStudy.name} - v{ebiosRmStudy.version}
 				</span>
 				<span class="badge text-xs {statusMap[ebiosRmStudy.status]}">
-					{ebiosRmStudy.status}
+					{safeTranslate(ebiosRmStudy.status)}
 				</span>
 			</div>
 			<Anchor

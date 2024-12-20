@@ -35,6 +35,22 @@
 
 <div class="card p-4 bg-white shadow-lg">
 	<div class="flex flex-col space-y-4">
+		<div class="flex justify-between">
+			<a
+				href="/ebios-rm/{roto.ebios_rm_study.id}"
+				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+			>
+				<i class="fa-solid fa-arrow-left" />
+				<p class="">{m.goBackToEbiosRmStudy()}</p>
+			</a>
+			<Anchor
+				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+				class="btn variant-filled-primary h-fit absolute top-2 right-4"
+			>
+				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+				{m.edit()}
+			</Anchor>
+		</div>
 		<div
 			id="activityOne"
 			class="relative p-4 space-y-4 rounded-md w-full flex flex-col items-center justify-center
@@ -50,7 +66,7 @@
 			<h1
 				class="font-bold text-xl {activeActivity === 'one' ? 'text-primary-500' : 'text-gray-500'}"
 			>
-				{m.identifyRoTo()}
+				{m.ebiosWs2_1()}
 			</h1>
 			<div class="flex flex-row space-x-1">
 				<p class="flex flex-col items-center">
@@ -62,13 +78,6 @@
 					<span class="font-bold">{roto.target_objective}</span>
 				</p>
 			</div>
-			<Anchor
-				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-				class="btn variant-filled-primary h-fit absolute top-2 right-4"
-			>
-				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
-				{m.edit()}
-			</Anchor>
 		</div>
 		<div
 			id="activityTwo"
@@ -85,19 +94,19 @@
 			<h1
 				class="font-bold text-xl {activeActivity === 'two' ? 'text-primary-500' : 'text-gray-500'}"
 			>
-				{m.evaluateRoTo()}
+				{m.ebiosWs2_2()}
 			</h1>
 			<div class="flex space-x-6">
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.motivation()}</span>
 					<span class="badge text-sm font-bold">{safeTranslate(roto.motivation)}</span>
 				</p>
-				<span>x</span>
+				<i class="fa-solid fa-xmark"></i>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.resources()}</span>
 					<span class="badge text-sm font-bold">{safeTranslate(roto.resources)}</span>
 				</p>
-				<span>=</span>
+				<i class="fa-solid fa-equals"></i>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.pertinence()}</span>
 					<span class="badge text-sm font-bold {pertinenceColor[roto.pertinence]}"
@@ -128,7 +137,7 @@
 					? 'text-primary-500'
 					: 'text-gray-500'}"
 			>
-				{m.selectRoTo()}
+				{m.ebiosWs2_3()}
 			</h1>
 			<p>
 				{#if roto.is_selected}

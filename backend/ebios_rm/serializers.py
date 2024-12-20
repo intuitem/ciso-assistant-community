@@ -8,6 +8,7 @@ from .models import (
     FearedEvent,
     RoTo,
     Stakeholder,
+    StrategicScenario,
     AttackPath,
     OperationalScenario,
 )
@@ -120,18 +121,40 @@ class StakeholderReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
 
     category = serializers.CharField(source="get_category_display")
-    current_criticality = serializers.IntegerField()
-    residual_criticality = serializers.IntegerField()
+    current_criticality = serializers.CharField(
+        source="get_current_criticality_display"
+    )
+    residual_criticality = serializers.CharField(
+        source="get_residual_criticality_display"
+    )
 
     class Meta:
         model = Stakeholder
         fields = "__all__"
 
 
+class StrategicScenarioWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = StrategicScenario
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class StrategicScenarioReadSerializer(BaseModelSerializer):
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    ro_to_couple = FieldsRelatedField()
+    gravity = serializers.JSONField(source="get_gravity_display")
+    attack_paths = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = StrategicScenario
+        fields = "__all__"
+
+
 class AttackPathWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at", "folder", "ebios_rm_study"]
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
@@ -157,9 +180,14 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    attack_path = FieldsRelatedField()
+    attack_path = FieldsRelatedField(["id", "name", "description"])
+    stakeholders = FieldsRelatedField(many=True)
+    ro_to = FieldsRelatedField(["risk_origin", "target_objective"])
     threats = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
+    gravity = serializers.JSONField(source="get_gravity_display")
+    risk_level = serializers.JSONField(source="get_risk_level_display")
+    ref_id = serializers.CharField()
 
     class Meta:
         model = OperationalScenario
