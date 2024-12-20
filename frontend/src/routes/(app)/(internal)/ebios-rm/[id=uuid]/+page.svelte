@@ -80,12 +80,12 @@
 		ws4: [
 			{
 				title: safeTranslate(m.ebiosWs4_1()),
-				status: 'to_do',
+				status: data.data.meta.workshops[3].steps[0].status,
 				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=one&next=${$page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs4_2()),
-				status: 'to_do',
+				status: data.data.meta.workshops[3].steps[1].status,
 				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=two&next=${$page.url.pathname}`
 			}
 		],
@@ -177,11 +177,19 @@
 		>
 			<div slot="addRiskAnalysis">
 				<button class="flex flex-col text-left hover:text-purple-800" on:click={modalCreateForm}>
-					<span
-						class="absolute flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full -start-4 ring-4 ring-white"
-					>
-						<i class="fa-solid fa-clipboard-check"></i>
-					</span>
+						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
+							<span
+								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
+							>
+								<i class="fa-solid fa-check" />
+							</span>
+						{:else}
+							<span
+								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+							>
+								<i class="fa-solid fa-clipboard-check" />
+							</span>
+						{/if}
 					<h3 class="font-medium leading-tight">{m.activity()} 1</h3>
 					<p class="text-sm">{safeTranslate(m.ebiosWs5_1())}</p>
 				</button>
