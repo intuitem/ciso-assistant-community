@@ -177,19 +177,19 @@
 		>
 			<div slot="addRiskAnalysis">
 				<button class="flex flex-col text-left hover:text-purple-800" on:click={modalCreateForm}>
-						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
-							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
-							>
-								<i class="fa-solid fa-check" />
-							</span>
-						{:else}
-							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
-							>
-								<i class="fa-solid fa-clipboard-check" />
-							</span>
-						{/if}
+					{#if data.data.meta.workshops[4].steps[0].status == 'done'}
+						<span
+							class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
+						>
+							<i class="fa-solid fa-check" />
+						</span>
+					{:else}
+						<span
+							class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+						>
+							<i class="fa-solid fa-clipboard-check" />
+						</span>
+					{/if}
 					<h3 class="font-medium leading-tight">{m.activity()} 1</h3>
 					<p class="text-sm">{safeTranslate(m.ebiosWs5_1())}</p>
 				</button>
