@@ -47,6 +47,7 @@
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
+	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -270,10 +271,12 @@
 		<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'stakeholders'}
 		<StakeholderForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'strategic-scenarios'}
+		<StrategicScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'attack-paths'}
 		<AttackPathForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'operational-scenarios'}
-		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
