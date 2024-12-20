@@ -329,7 +329,7 @@
 																>{val.str}</Anchor
 															>
 														{:else if val.str}
-															{val.str}
+															{safeTranslate(val.str)}
 														{:else if unsafeTranslate(val.split(':')[0])}
 															<span class="text"
 																>{unsafeTranslate(val.split(':')[0] + 'Colon')}
@@ -361,6 +361,8 @@
 											</p>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
+										{:else if [true, false].includes(value)}
+											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
 										{:else}
 											{safeTranslate(value ?? '-')}
 										{/if}

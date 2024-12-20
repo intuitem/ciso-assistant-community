@@ -72,7 +72,7 @@
 			<div class="flex flex-row space-x-1">
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.riskOrigin()}</span>
-					<span class="font-bold">{roto.risk_origin} /</span>
+					<span class="font-bold">{safeTranslate(roto.risk_origin)} /</span>
 				</p>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.targetObjective()}</span>
@@ -118,7 +118,7 @@
 			<p>
 				<span class="badge bg-violet-200 text-violet-700">{m.activity()}</span>
 				<span>=</span>
-				<span class="font-bold">{roto.activity}</span>
+				<span class="font-bold">{safeTranslate(roto.activity)}</span>
 			</p>
 		</div>
 		<div
