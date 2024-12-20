@@ -9,6 +9,14 @@
 
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
 
+	const disableWorkhopLink = [
+		'workshop1',
+		'workshop2',
+		'workshop3',
+		'workshop4',
+		'workshop5',
+	] // Disable workshops links in breadcrumb
+
 	$: {
 		// Remove zero-length tokens.
 		const tokens = $page.url.pathname.split('/').filter((t) => t !== '');
@@ -35,7 +43,8 @@
 				label: $page.data.label || t,
 				href:
 					Object.keys(listViewFields).includes(tokens[0]) &&
-					!listViewFields[tokens[0]].breadcrumb_link_disabled
+					!listViewFields[tokens[0]].breadcrumb_link_disabled &&
+					!disableWorkhopLink.includes(t) // Disable workshops links in breadcrumb
 						? tokenPath
 						: null
 			};
