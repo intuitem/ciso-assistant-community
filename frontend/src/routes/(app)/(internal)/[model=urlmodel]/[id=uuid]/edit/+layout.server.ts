@@ -99,5 +99,5 @@ export const load: LayoutServerLoad = async (event) => {
 	}
 	model.foreignKeys = foreignKeys;
 	model.selectOptions = selectOptions;
-	return { form, model, object, foreignKeys, selectOptions, URLModel };
+	return { form, model, object, foreignKeys, selectOptions, URLModel, title: m.edit() };
 };
