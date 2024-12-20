@@ -76,8 +76,7 @@
 		<AutocompleteSelect
 			{form}
 			options={getOptions({
-				objects: model.foreignKeys['attack_path'],
-				label: 'str'
+				objects: model.foreignKeys['attack_path']
 			})}
 			field="attack_path"
 			label={m.attackPath()}
