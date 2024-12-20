@@ -358,6 +358,8 @@
 											</p>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
+										{:else if [true, false].includes(value)}
+											<span class="ml-5">{safeTranslate(value ?? '-')}</span>
 										{:else}
 											{safeTranslate(value ?? '-')}
 										{/if}
