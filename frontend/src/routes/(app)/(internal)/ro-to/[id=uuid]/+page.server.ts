@@ -3,6 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { listViewFields } from '$lib/utils/table';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { getModelInfo } from '$lib/utils/crud';
+import { safeTranslate } from '$lib/utils/i18n';
 
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'ro-to';
@@ -33,5 +34,5 @@ export const load: PageServerLoad = async (event) => {
 		meta: revData
 	};
 
-	return { data, table };
+	return { data, table, title: `${safeTranslate(data.risk_origin)} / ${data.target_objective}` };
 };
