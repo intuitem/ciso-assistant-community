@@ -178,7 +178,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Risk matrix',
 		verboseNamePlural: 'Risk matrices',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'libraries' }
 		]
 	},
 	'risk-assessments': {
