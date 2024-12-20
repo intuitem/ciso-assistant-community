@@ -47,7 +47,7 @@
 	export let regionHead: CssClasses = '';
 	export let regionHeadCell: CssClasses = 'uppercase bg-white text-gray-700';
 	export let regionBody: CssClasses = 'bg-white';
-	export let regionCell: CssClasses = 'text-center';
+	export let regionCell: CssClasses = '';
 	export let regionFoot: CssClasses = '';
 	export let regionFootCell: CssClasses = '';
 
@@ -311,13 +311,9 @@
 							{@const component = field_component_map[key]}
 							<td class={regionCell} role="gridcell">
 								{#if component}
-									<div class="flex justify-center items-center">
-										<svelte:component this={component} {meta} cell={value} />
-									</div>
+									<svelte:component this={component} {meta} cell={value} />
 								{:else}
-									<span
-										class="flex font-token whitespace-pre-line break-words justify-center items-center"
-									>
+									<span class="font-token whitespace-pre-line break-words">
 										{#if Array.isArray(value)}
 											<ul class="list-disc pl-4 whitespace-normal">
 												{#each value as val}
