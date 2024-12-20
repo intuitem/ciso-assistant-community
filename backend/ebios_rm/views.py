@@ -176,7 +176,7 @@ class AttackPathFilter(df.FilterSet):
 
     class Meta:
         model = AttackPath
-        fields = ["ebios_rm_study", "is_selected", "used"]
+        fields = ["ebios_rm_study", "is_selected", "used", "strategic_scenario"]
 
 
 class AttackPathViewSet(BaseModelViewSet):
