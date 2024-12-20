@@ -1,23 +1,19 @@
 <script lang="ts">
-	import type { PageData } from './$types';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import { breadcrumbObject } from '$lib/utils/stores';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore, TabGroup, Tab, getToastStore } from '@skeletonlabs/skeleton';
-	import { isURL } from '$lib/utils/helpers';
-	import { getModelInfo } from '$lib/utils/crud.js';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { getModelInfo } from '$lib/utils/crud.js';
+	import { isURL } from '$lib/utils/helpers';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore, Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
 
-	import * as m from '$paraglide/messages';
-	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
-	breadcrumbObject.set(data.evidence);
 
 	interface Attachment {
 		type: string;

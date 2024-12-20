@@ -1,13 +1,10 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import * as m from '$paraglide/messages';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
+	import * as m from '$paraglide/messages';
+	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import type { PageData } from './$types';
 
 	export let data: PageData;
-
-	breadcrumbObject.set(data.compliance_assessment);
 
 	const possible_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },

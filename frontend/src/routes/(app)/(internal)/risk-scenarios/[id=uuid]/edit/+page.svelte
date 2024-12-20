@@ -5,10 +5,10 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getOptions } from '$lib/utils/crud';
-	import { modelSchema } from '$lib/utils/schemas';
 	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { modelSchema } from '$lib/utils/schemas';
+	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 	import {
 		getModalStore,
 		getToastStore,
@@ -18,22 +18,17 @@
 		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
-	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 	import RiskLevel from './RiskLevel.svelte';
 
 	import { browser } from '$app/environment';
-	import { breadcrumbObject } from '$lib/utils/stores';
-	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
+	import { superForm } from 'sveltekit-superforms';
 
-	import * as m from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
-
-	breadcrumbObject.set(data.scenario);
 
 	const schema = modelSchema(data.model.urlModel!);
 
