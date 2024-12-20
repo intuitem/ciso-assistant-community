@@ -204,6 +204,17 @@
 			!data.data.builtin
 		);
 	};
+
+	export let orderRelatedModels = [''];
+	if (data.urlModel === 'projects') {
+		orderRelatedModels = ['compliance-assessments', 'risk-assessments', 'entity-assessments'];
+	}
+	if (data.urlModel === 'entities') {
+		orderRelatedModels = ['entity-assessments', 'representatives', 'solutions'];
+	}
+	if (data.urlModel === 'folders') {
+		orderRelatedModels = ['projects', 'entities'];
+	}
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -313,7 +324,7 @@
 											{:else}
 												--
 											{/if}
-										{:else if value.id}
+										{:else if value.id && !value.hexcolor}
 											{@const itemHref = `/${
 												URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
 													(item) => item.field === key
@@ -409,7 +420,9 @@
 {#if Object.keys(data.relatedModels).length > 0}
 	<div class="card shadow-lg mt-8 bg-white">
 		<TabGroup justify="justify-center">
-			{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
+			{#each Object.entries(data.relatedModels).sort((a, b) => {
+				return orderRelatedModels.indexOf(a[0]) - orderRelatedModels.indexOf(b[0]);
+			}) as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
 					{safeTranslate(model.info.localNamePlural)}
 					{#if model.table.body.length > 0}
