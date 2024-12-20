@@ -17,16 +17,18 @@
 	import commandPaletteOpen from '$lib/components/CommandPalette/CommandPalette.svelte';
 	let sidebarOpen = true;
 
+	function getPageTitle(): string {
+		return safeTranslate(
+			$page.data.title || $page.data.str || $page.data.name || $breadcrumbs.length > 1
+				? $breadcrumbs[$breadcrumbs.length - 1]?.label
+				: $page.url.pathname.split('/').pop()
+		);
+	}
+
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-7 lg:ml-64' : 'ml-7');
 
 	$: {
-		$pageTitle = safeTranslate(
-			$page.data.title ||
-				$page.data.str ||
-				$page.data.name ||
-				$breadcrumbs[1]?.label ||
-				$page.url.pathname.split('/').pop()
-		);
+		$pageTitle = getPageTitle();
 		if ($breadcrumbs.length < 2)
 			breadcrumbs.push([{ label: $pageTitle, href: $page.url.pathname }]);
 	}
