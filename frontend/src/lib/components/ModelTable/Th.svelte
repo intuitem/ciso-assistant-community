@@ -14,7 +14,7 @@
 	class={_class}
 	data-testid="tableheader"
 >
-	<div class="flex items-center h-full">
+	<div class="flex items-center h-full justify-center">
 		<slot />
 		<span
 			class="pl-2"
