@@ -201,8 +201,7 @@
 				<br />
 				{#if risk_assessment.ebios_rm_study}
 					<div class="text-sm">
-						<span class="font-semibold" data-testid="ebios-rm-field-title"
-							>{m.ebiosRmStudy()}:</span
+						<span class="font-semibold" data-testid="ebios-rm-field-title">{m.ebiosRmStudy()}:</span
 						>
 						<a
 							href="/ebios-rm/{risk_assessment.ebios_rm_study.id}"
