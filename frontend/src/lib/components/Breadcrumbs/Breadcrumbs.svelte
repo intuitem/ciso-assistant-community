@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { breadcrumbs, type Breadcrumb } from '$lib/utils/breadcrumbs';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { pageTitle } from '$lib/utils/stores';
 
 	async function trimBreadcrumbsToCurrentPath(
 		breadcrumbs: Breadcrumb[],
@@ -15,9 +16,23 @@
 		return breadcrumbs;
 	}
 
+	function getPageTitle(): string {
+		return safeTranslate(
+			$page.data.title || $page.data.str || $page.data.name || $breadcrumbs.length > 1
+				? $breadcrumbs[$breadcrumbs.length - 1]?.label
+				: $page.url.pathname.split('/').pop()
+		);
+	}
+
 	afterNavigate(async () => {
 		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, $page.url.pathname);
 	});
+
+	$: {
+		$pageTitle = getPageTitle();
+		if ($breadcrumbs.length < 2)
+			breadcrumbs.push([{ label: $pageTitle, href: $page.url.pathname }]);
+	}
 </script>
 
 <ol class="breadcrumb-nonresponsive h-6 overflow-hidden whitespace-nowrap">
