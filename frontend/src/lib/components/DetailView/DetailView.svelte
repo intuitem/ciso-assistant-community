@@ -389,6 +389,7 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+						label={m.edit()}
 						class="btn variant-filled-primary h-fit"
 						><i
 							class="fa-solid fa-pen-to-square mr-2"
