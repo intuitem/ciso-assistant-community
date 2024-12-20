@@ -116,7 +116,7 @@
 			<p>
 				<span class="badge bg-violet-200 text-violet-700">{m.activity()}</span>
 				<span>=</span>
-				<span class="font-bold">{roto.activity}</span>
+				<span class="font-bold">{safeTranslate(roto.activity)}</span>
 			</p>
 		</div>
 		<div
