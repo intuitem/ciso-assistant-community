@@ -1501,7 +1501,7 @@ class Asset(
         children = self.get_children()
         sub_children = set()
         for child in children:
-            sub_children.append(child)
+            sub_children.add(child)
             sub_children.update(child.get_descendants())
         return sub_children
 

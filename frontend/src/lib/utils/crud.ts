@@ -614,7 +614,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
-			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' }
+			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
+			{ field: 'reference_entity', urlModel: 'entities' }
 		],
 		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }]
 	},
@@ -645,14 +646,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'feared_events',
 				urlModel: 'feared-events',
 				endpointUrl: 'ebios-rm/feared-events',
-				urlParams: 'ebios_rm_study=',
+				urlParams: 'is_selected=true&ebios_rm_study=',
 				detail: true
 			}
 		],
 		selectFields: [
 			{ field: 'risk-origin' },
 			{ field: 'motivation', valueType: 'number' },
-			{ field: 'resources', valueType: 'number' }
+			{ field: 'resources', valueType: 'number' },
+			{ field: 'activity', valueType: 'number' }
 		]
 	},
 	stakeholders: {
