@@ -52,7 +52,15 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		zod(attachmentDeleteSchema)
 	);
 
-	return { URLModel, evidence, object, tables, deleteForm, attachmentDeleteForm };
+	return {
+		URLModel,
+		evidence,
+		object,
+		tables,
+		deleteForm,
+		attachmentDeleteForm,
+		title: evidence.name
+	};
 };
 
 export const actions: Actions = {
