@@ -27,6 +27,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data: PageData;
 
@@ -132,16 +133,16 @@
 				<div class="flex justify-between p-2">
 					<div>
 						<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-						<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
-							>{data.scenario.project.str}</a
+						<Anchor class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
+							>{data.scenario.project.str}</Anchor
 						>
 					</div>
 					<div>
 						<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
-						<a
+						<Anchor
 							class="anchor text-sm font-semibold"
 							href="/risk-assessments/{data.scenario.risk_assessment.id}"
-							>{data.scenario.risk_assessment.name} {data.scenario.version}</a
+							>{data.scenario.risk_assessment.name} {data.scenario.version}</Anchor
 						>
 					</div>
 				</div>

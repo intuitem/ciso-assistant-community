@@ -252,7 +252,7 @@
 														)?.urlModel
 													}/${val.id}`}
 													{#if !$page.data.user.is_third_party}
-														<a href={itemHref} class="anchor">{val.str}</a>
+														<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 													{:else}
 														{val.str}
 													{/if}
@@ -269,7 +269,7 @@
 										)?.urlModel
 									}/${value.id}`}
 									{#if !$page.data.user.is_third_party}
-										<a href={itemHref} class="anchor">{value.str}</a>
+										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 									{:else}
 										{value.str}
 									{/if}

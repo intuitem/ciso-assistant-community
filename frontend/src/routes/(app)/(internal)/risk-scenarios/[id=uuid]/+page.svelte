@@ -9,6 +9,7 @@
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { isDark } from '$lib/utils/helpers';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data: PageData;
 
@@ -50,10 +51,10 @@
 			</div>
 		</div>
 		{#if canEditObject}
-			<a
+			<Anchor
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit mt-1"
-				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
+				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
 			>
 		{/if}
 	</div>
@@ -64,16 +65,16 @@
 			<div class="flex flex-row justify-between">
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-					<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
-						>{data.scenario.project.str}</a
+					<Anchor class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
+						>{data.scenario.project.str}</Anchor
 					>
 				</span>
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
-					<a
+					<Anchor
 						class="anchor text-sm font-semibold"
 						href="/risk-assessments/{data.scenario.risk_assessment.id}"
-						>{data.scenario.risk_assessment.str}</a
+						>{data.scenario.risk_assessment.str}</Anchor
 					>
 				</span>
 				<span>

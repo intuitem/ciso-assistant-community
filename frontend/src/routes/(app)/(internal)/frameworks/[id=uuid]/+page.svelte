@@ -6,6 +6,7 @@
 	import type { TreeViewNode } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data: PageData;
 
@@ -55,7 +56,7 @@
 							{#if value}
 								{#if key === 'library'}
 									{@const itemHref = `/libraries/${value.id}?loaded`}
-									<a href={itemHref} class="anchor">{value.str}</a>
+									<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 								{:else if key === 'scores_definition'}
 									{#each Object.entries(value) as [key, definition]}
 										<div>
@@ -83,7 +84,7 @@
 															(item) => item.field === key
 														)?.urlModel
 													}/${val.id}`}
-													<a href={itemHref} class="anchor">{val.str}</a>
+													<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 												{:else}
 													{value}
 												{/if}
@@ -96,7 +97,7 @@
 											(item) => item.field === key
 										)?.urlModel
 									}/${value.id}`}
-									<a href={itemHref} class="anchor">{value.str}</a>
+									<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 								{:else}
 									{value.str ?? value}
 								{/if}
