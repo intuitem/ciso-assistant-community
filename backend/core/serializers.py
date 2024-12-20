@@ -210,10 +210,11 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     risk_scenarios = FieldsRelatedField(many=True)
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
+    ebios_rm_study = FieldsRelatedField(["id", "name"])
 
     class Meta:
         model = RiskAssessment
-        exclude = ["ebios_rm_study"]
+        exclude = []
 
 
 class AssetWriteSerializer(BaseModelSerializer):

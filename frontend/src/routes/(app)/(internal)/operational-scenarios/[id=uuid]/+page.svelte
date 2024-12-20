@@ -43,6 +43,13 @@
 <div class="card p-4 bg-white shadow-lg">
 	<div class="flex flex-col space-y-4 items-center">
 		<div class="flex items-center justify-between w-full">
+			<a
+				href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
+				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+			>
+				<i class="fa-solid fa-arrow-left" />
+				<p class="">{m.goBackToEbiosRmStudy()}</p>
+			</a>
 			<div class="flex font-bold text-2xl space-x-2">
 				<span
 					><a
