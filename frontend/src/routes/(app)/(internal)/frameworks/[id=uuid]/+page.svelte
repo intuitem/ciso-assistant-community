@@ -1,16 +1,14 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import TreeViewItemContent from './TreeViewItemContent.svelte';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import * as m from '$paraglide/messages';
-	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import * as m from '$paraglide/messages';
+	import type { TreeViewNode } from '@skeletonlabs/skeleton';
+	import type { PageData } from './$types';
+	import TreeViewItemContent from './TreeViewItemContent.svelte';
 
 	export let data: PageData;
-	breadcrumbObject.set(data.framework);
+
 	const tree = data.tree;
 
 	function transformToTreeView(nodes) {

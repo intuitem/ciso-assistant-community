@@ -5,13 +5,10 @@
 	import * as m from '$paraglide/messages';
 	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
 	import AuditTableMode from '../../../(third-party)/compliance-assessments/[id=uuid]/table-mode/+page.svelte';
-	import type { PageData, Actions } from './$types';
+	import type { Actions, PageData } from './$types';
 
 	export let data: PageData;
 	export let form: Actions;
-
-	import { breadcrumbObject } from '$lib/utils/stores';
-	breadcrumbObject.set(data.data);
 
 	const mailing =
 		Boolean(data.data.compliance_assessment) && Boolean(data.data.representatives.length);

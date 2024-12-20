@@ -1,32 +1,29 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { URL_MODEL_MAP, checkConstraints } from '$lib/utils/crud';
+	import { getModelInfo } from '$lib/utils/crud.js';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { isURL } from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { toCamelCase } from '$lib/utils/locales.js';
+	import * as m from '$paraglide/messages.js';
+	import { languageTag } from '$paraglide/runtime.js';
 	import type {
 		ModalComponent,
 		ModalSettings,
 		ModalStore,
 		ToastStore
 	} from '@skeletonlabs/skeleton';
-	import { TabGroup, Tab, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import { breadcrumbObject } from '$lib/utils/stores';
-	import { getModelInfo } from '$lib/utils/crud.js';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import { isURL } from '$lib/utils/helpers';
-	import { toCamelCase } from '$lib/utils/locales.js';
-	import { checkConstraints } from '$lib/utils/crud';
-	import { languageTag } from '$paraglide/runtime.js';
-	import * as m from '$paraglide/messages.js';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import List from '$lib/components/List/List.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { Tab, TabGroup, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -49,8 +46,6 @@
 			)
 		);
 	}
-
-	$: breadcrumbObject.set(data.data);
 
 	let tabSet = 0;
 
