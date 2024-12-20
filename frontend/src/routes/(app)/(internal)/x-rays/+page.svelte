@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	export let data: PageData;
 
 	const aggregateQualityChecks = (item: any) => {
@@ -48,12 +49,12 @@
 		{@const risk_assessments = Object.values(project.risk_assessments.objects)}
 		<div>
 			<span class="text-2xl">&#128161;</span>
-			<a
+			<Anchor
 				class="text-2xl font-bold mb-1 hover:underline text-blue-600"
 				href="/projects/{project.project.id}"
 			>
 				{project.project.folder.str}/{project.project.name}
-			</a>
+			</Anchor>
 			<TabGroup>
 				<Tab bind:group={project.tabSet} name="compliance_assessments_tab" value={0}
 					>{m.complianceAssessments()}
@@ -92,9 +93,10 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each compliance_assessments as compliance_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									<a
+									<Anchor
 										href="/compliance-assessments/{compliance_assessment.object.id}"
-										class="hover:underline text-blue-600">{compliance_assessment.object.name}</a
+										class="hover:underline text-blue-600"
+										>{compliance_assessment.object.name}</Anchor
 									>
 								</li>
 								{@const quality_check = compliance_assessment.quality_check}
@@ -114,8 +116,8 @@
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
 													<li>
-														{#if error.object.name}<a class="anchor" href={error.link}
-																>{error.object.name}</a
+														{#if error.object.name}<Anchor class="anchor" href={error.link}
+																>{error.object.name}</Anchor
 															>:{/if}
 														{safeTranslate(error.msgid)}
 													</li>
@@ -139,7 +141,9 @@
 												{#each quality_check.warnings as warning}
 													<li>
 														{#if warning.object.name}
-															<a class="anchor" href={warning.link}>{warning.object.name}</a>:
+															<Anchor class="anchor" href={warning.link}
+																>{warning.object.name}</Anchor
+															>:
 														{/if}
 														{safeTranslate(warning.msgid)}
 													</li>
@@ -162,8 +166,8 @@
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
 													<li>
-														{#if info.object.name}<a class="anchor" href={info.link}
-																>{info.object.name}</a
+														{#if info.object.name}<Anchor class="anchor" href={info.link}
+																>{info.object.name}</Anchor
 															>:{/if}
 														{safeTranslate(info.msgid)}
 													</li>
@@ -182,9 +186,9 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each risk_assessments as risk_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									<a
+									<Anchor
 										href="/risk-assessments/{risk_assessment.object.id}"
-										class="hover:underline text-blue-600">{risk_assessment.object.name}</a
+										class="hover:underline text-blue-600">{risk_assessment.object.name}</Anchor
 									>
 								</li>
 								{@const quality_check = risk_assessment.quality_check}
@@ -204,8 +208,8 @@
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
 													<li>
-														{#if error.object.name}<a class="anchor" href={error.link}
-																>{error.object.name}</a
+														{#if error.object.name}<Anchor class="anchor" href={error.link}
+																>{error.object.name}</Anchor
 															>:{/if}
 														{safeTranslate(error.msgid)}
 													</li>
@@ -228,8 +232,8 @@
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
 													<li>
-														{#if warning.object.name}<a class="anchor" href={warning.link}
-																>{warning.object.name}</a
+														{#if warning.object.name}<Anchor class="anchor" href={warning.link}
+																>{warning.object.name}</Anchor
 															>:{/if}
 														{safeTranslate(warning.msgid)}
 													</li>
@@ -252,8 +256,8 @@
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
 													<li>
-														{#if info.object.name}<a class="anchor" href={info.link}
-																>{info.object.name}</a
+														{#if info.object.name}<Anchor class="anchor" href={info.link}
+																>{info.object.name}</Anchor
 															>:{/if}
 														{safeTranslate(info.msgid)}
 													</li>
