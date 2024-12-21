@@ -146,6 +146,6 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		scenarioCreateForm,
 		riskAssessmentDuplicateForm,
 		riskAssessmentModel,
-		title: risk_assessment.name
+		title: risk_assessment.str
 	};
 };
