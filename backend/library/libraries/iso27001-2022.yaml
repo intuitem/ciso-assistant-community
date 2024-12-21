@@ -1524,7 +1524,7 @@ objects:
           name: Planification
           description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6
       ref_id: '6.1'
