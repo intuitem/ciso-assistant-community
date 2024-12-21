@@ -1,0 +1,22 @@
+{{- if .Values.backend.persistence.enabled }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "ciso-assistant.fullname" . }}-backend
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.backend.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" . "component" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
+spec:
+  accessModes: 
+    - {{ .Values.backend.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.backend.persistence.size }}
+  {{- if .Values.backend.persistence.storageClass }}
+  storageClassName: {{ .Values.backend.persistence.storageClass }}
+  {{- end }}
+{{- end }}
