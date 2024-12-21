@@ -58,7 +58,9 @@ for (const key of testPages) {
 
 				await pages[key].waitUntilLoaded();
 				await pages[key].viewItemDetail(items[key].build.name || items[key].build.email);
-				await pages[key].itemDetail.hasTitle(items[key].build.str || items[key].build.name || items[key].build.email);
+				await pages[key].itemDetail.hasTitle(
+					items[key].build.str || items[key].build.name || items[key].build.email
+				);
 				await pages[key].itemDetail.hasBreadcrumbPath([
 					items[key].displayName,
 					items[key].build.name || items[key].build.email
