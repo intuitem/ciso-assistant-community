@@ -63,7 +63,7 @@ for (const key of testPages) {
 				);
 				await pages[key].itemDetail.hasBreadcrumbPath([
 					items[key].displayName,
-					items[key].build.name || items[key].build.email
+					items[key].build.str || items[key].build.name || items[key].build.email
 				]);
 				//wait fore the file to load to prevent crashing
 				page.url().includes('evidences')
