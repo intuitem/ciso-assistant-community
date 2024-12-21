@@ -172,6 +172,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
 64. NIS2 technical and methodological requirements 2024/2690 🇪🇺
 65. Guide de sécurité des données (CNIL) 🇫🇷
+66. International Traffic in Arms Regulations (ITAR) 🇺🇸
 
 ### Community contributions
 
