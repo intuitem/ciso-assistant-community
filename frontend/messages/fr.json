@@ -924,7 +924,7 @@
 	"ebiosWs5_4": "Évaluer et documenter les risques résiduels",
 	"ebiosWs5_5": "Mettre en place le cadre de suivi des risques",
 	"activity": "Activité",
-	"ebiosRmMatrixHelpText": "Matrice de risque utilisée pour l'étude. La valeur par défaut est `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`",
+	"ebiosRmMatrixHelpText": "Matrice de risque utilisée pour l'étude.",
 	"activityOne": "Activité 1",
 	"activityTwo": "Activité 2",
 	"activityThree": "Activité 3",
