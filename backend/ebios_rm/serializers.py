@@ -88,6 +88,14 @@ class StakeholderWriteSerializer(BaseModelSerializer):
     current_criticality = serializers.IntegerField(read_only=True)
     residual_criticality = serializers.IntegerField(read_only=True)
 
+
+    def create(self, validated_data):
+        validated_data["residual_dependency"] = validated_data["current_dependency"]
+        validated_data["residual_penetration"] = validated_data["current_penetration"]
+        validated_data["residual_maturity"] = validated_data["current_maturity"]
+        validated_data["residual_trust"] = validated_data["current_trust"]
+        return super().create(validated_data)
+
     class Meta:
         model = Stakeholder
         exclude = ["created_at", "updated_at", "folder"]
