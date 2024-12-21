@@ -63,7 +63,7 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
-			label: rowMetaData.str ?? rowMetaData.name ?? rowMetaData[identifierField],
+			label: rowMetaData.str ?? rowMetaData.name ?? rowMetaData.email ?? rowMetaData[identifierField],
 			breadcrumbAction: 'push'
 		});
 	}
