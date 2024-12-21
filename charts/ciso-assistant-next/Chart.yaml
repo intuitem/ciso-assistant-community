@@ -1,0 +1,13 @@
+apiVersion: v2
+name: ciso-assistant
+description: A Helm chart for CISO Assistant k8s's deployment
+type: application
+version: 0.1.0
+appVersion: "v1.9.3"
+icon: https://intuitem.com/ciso-assistant.svg
+sources:
+  - https://github.com/intuitem/ciso-assistant-community
+#dependencies:
+#  - name: postgresql
+#    version: "16.3.3"
+#    repository: "oci://registry-1.docker.io/bitnamicharts"
