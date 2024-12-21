@@ -69,7 +69,8 @@ export const load = (async ({ fetch, params }) => {
 		requirement_assessments,
 		requirements,
 		evidenceModel,
-		deleteForm
+		deleteForm,
+		title: m.tableMode()
 	};
 }) satisfies PageServerLoad;
 

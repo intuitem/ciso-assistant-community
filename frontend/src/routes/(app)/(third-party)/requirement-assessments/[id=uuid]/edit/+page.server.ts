@@ -191,6 +191,7 @@ export const load = (async ({ fetch, params }) => {
 
 	return {
 		URLModel,
+		title: requirementAssessment.name,
 		requirementAssessment,
 		compliance_assessment_score,
 		requirement,

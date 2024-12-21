@@ -1,33 +1,29 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { URL_MODEL_MAP, checkConstraints } from '$lib/utils/crud';
+	import { getModelInfo } from '$lib/utils/crud.js';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { isURL } from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { toCamelCase } from '$lib/utils/locales.js';
+	import * as m from '$paraglide/messages.js';
+	import { languageTag } from '$paraglide/runtime.js';
 	import type {
 		ModalComponent,
 		ModalSettings,
 		ModalStore,
 		ToastStore
 	} from '@skeletonlabs/skeleton';
-	import { TabGroup, Tab, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import { breadcrumbObject } from '$lib/utils/stores';
-	import { superForm } from 'sveltekit-superforms';
-	import { getModelInfo } from '$lib/utils/crud.js';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import { isURL } from '$lib/utils/helpers';
-	import { toCamelCase } from '$lib/utils/locales.js';
-	import { checkConstraints } from '$lib/utils/crud';
-	import { languageTag } from '$paraglide/runtime.js';
-	import * as m from '$paraglide/messages.js';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import List from '$lib/components/List/List.svelte';
-	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { Tab, TabGroup, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -50,8 +46,6 @@
 			)
 		);
 	}
-
-	$: breadcrumbObject.set(data.data);
 
 	let tabSet = 0;
 
@@ -288,7 +282,9 @@
 									{#if value !== null && value !== undefined && value !== ''}
 										{#if key === 'library'}
 											{@const itemHref = `/libraries/${value.id}?loaded`}
-											<a href={itemHref} class="anchor">{value.name}</a>
+											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+												>{value.name}</Anchor
+											>
 										{:else if key === 'severity'}
 											<!-- We must add translations for the following severity levels -->
 											<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
@@ -309,7 +305,9 @@
 																		(item) => item.field === key
 																	)?.urlModel
 																}/${val.id}`}
-																<a href={itemHref} class="anchor">{val.str}</a>
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	>{val.str}</Anchor
+																>
 															{:else if val.str}
 																{val.str}
 															{:else}
@@ -327,7 +325,9 @@
 													(item) => item.field === key
 												)?.urlModel
 											}/${value.id}`}
-											<a href={itemHref} class="anchor">{value.str}</a>
+											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+												>{value.str}</Anchor
+											>
 											<!-- Shortcut before DetailView refactoring -->
 										{:else if value === 'P1'}
 											<li class="fa-solid fa-flag text-red-500"></li>
@@ -342,7 +342,9 @@
 											<li class="fa-solid fa-flag text-gray-500"></li>
 											{m.p4()}
 										{:else if isURL(value) && !value.startsWith('urn')}
-											<a href={value} target="_blank" class="anchor">{value}</a>
+											<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
+												>{value}</Anchor
+											>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else if m[toCamelCase(value.str || value.name)]}
@@ -384,10 +386,15 @@
 			{/if}
 			{#if displayEditButton()}
 				<div class="flex flex-col space-y-2 ml-4">
-					<a
+					<Anchor
+						breadcrumbAction="push"
 						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+						label={m.edit()}
 						class="btn variant-filled-primary h-fit"
-						><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
+						><i
+							class="fa-solid fa-pen-to-square mr-2"
+							data-testid="edit-button"
+						/>{m.edit()}</Anchor
 					>
 					{#if data.urlModel === 'applied-controls'}
 						<span class="pt-4 font-light text-sm">Power-ups:</span>

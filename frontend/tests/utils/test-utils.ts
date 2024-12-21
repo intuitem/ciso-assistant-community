@@ -525,6 +525,7 @@ export class TestContent {
 				displayName: 'Risk assessments',
 				dependency: vars.matrix,
 				build: {
+					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					name: vars.riskAssessmentName,
 					description: vars.description,
 					project: vars.folderName + '/' + vars.projectName,

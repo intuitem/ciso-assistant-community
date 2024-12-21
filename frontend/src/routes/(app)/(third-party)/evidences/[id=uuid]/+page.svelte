@@ -1,23 +1,20 @@
 <script lang="ts">
-	import type { PageData } from './$types';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import { breadcrumbObject } from '$lib/utils/stores';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore, TabGroup, Tab, getToastStore } from '@skeletonlabs/skeleton';
-	import { isURL } from '$lib/utils/helpers';
-	import { getModelInfo } from '$lib/utils/crud.js';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { getModelInfo } from '$lib/utils/crud.js';
+	import { isURL } from '$lib/utils/helpers';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore, Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
 
-	import * as m from '$paraglide/messages';
-	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data: PageData;
-	breadcrumbObject.set(data.evidence);
 
 	interface Attachment {
 		type: string;
@@ -94,7 +91,7 @@
 																(item) => item.field === key
 															)?.urlModel
 														}/${val.id}`}
-														<a href={itemHref} class="anchor">{val.str}</a>
+														<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 													{:else}
 														{value}
 													{/if}
@@ -110,9 +107,9 @@
 											(item) => item.field === key
 										)?.urlModel
 									}/${value.id}`}
-									<a href={itemHref} class="anchor">{value.str}</a>
+									<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 								{:else if isURL(value)}
-									<a href={value} target="_blank" class="anchor">{value}</a>
+									<Anchor href={value} target="_blank" class="anchor">{value}</Anchor>
 								{:else}
 									{value.str ?? value}
 								{/if}
@@ -126,10 +123,10 @@
 		</div>
 		<span>
 			{#if canEditObject}
-				<a
+				<Anchor
 					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 					class="btn variant-filled-primary h-fit"
-					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
+					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
 				>
 			{/if}
 		</span>
@@ -162,11 +159,11 @@
 					{data.evidence.attachment}
 				</h4>
 				<div class="space-x-2">
-					<a
+					<Anchor
 						href={`./${data.evidence.id}/attachment`}
 						class="btn variant-filled-primary h-fit"
 						data-testid="attachment-download-button"
-						><i class="fa-solid fa-download mr-2" /> {m.download()}</a
+						><i class="fa-solid fa-download mr-2" /> {m.download()}</Anchor
 					>
 					<button
 						on:click={(_) => {
