@@ -907,6 +907,6 @@
 	"existingContextHelper": "Description des mesures existantes (ce champ sera bientôt obsolète)",
 	"resetPasswordHere": "Vous pouvez réinitialiser votre mot de passe ici.",
 	"resetPassword": "Réinitialiser le mot de passe",
-	"markAsValid": "Marqué comme valide",
-	"markAsNotValid": "Marqué comme non valide"
+	"markAsValid": "marquée terminée",
+	"markAsNotValid": "marquer en cours"
 }
