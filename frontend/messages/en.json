@@ -1020,5 +1020,6 @@
 	"supplier": "Supplier",
 	"referenceEntity": "Reference entity",
 	"referenceEntitySemiColon": "Reference entity:",
-	"moderate": "Moderate"
+	"moderate": "Moderate",
+	"associatedAttackPaths": "Associated Attack Paths"
 }

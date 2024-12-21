@@ -15,10 +15,7 @@
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<DetailView
-		{data}
-		{mailing}
-	/>
+	<DetailView {data} {mailing} />
 	{#if data.data.compliance_assessment}
 		<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 			<TreeView>
