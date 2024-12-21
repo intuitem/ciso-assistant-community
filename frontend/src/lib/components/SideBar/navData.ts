@@ -159,6 +159,11 @@ export const navData = {
 					href: '/risk-assessments'
 				},
 				{
+					name: 'ebiosRM',
+					fa_icon: 'fa-solid fa-gopuram',
+					href: '/ebios-rm'
+				},
+				{
 					name: 'riskScenarios',
 					fa_icon: 'fa-solid fa-clone',
 					href: '/risk-scenarios'
