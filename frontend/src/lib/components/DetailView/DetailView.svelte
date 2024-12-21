@@ -427,7 +427,9 @@
 				</Tab>
 			{/each}
 			<svelte:fragment slot="panel">
-				{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
+				{#each Object.entries(data.relatedModels).sort((a, b) => {
+					return orderRelatedModels.indexOf(a[0]) - orderRelatedModels.indexOf(b[0]);
+				}) as [urlmodel, model], index}
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
