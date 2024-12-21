@@ -396,7 +396,7 @@ export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	ref_id: z.string().optional().default(''),
-	risk_matrix: z.string().optional(),
+	risk_matrix: z.string(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
