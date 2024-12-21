@@ -5,6 +5,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import type { Project } from '$lib/utils/types';
 import { TODAY } from '$lib/utils/constants';
+import * as m from '$paraglide/messages';
 
 const REQUIREMENT_ASSESSMENT_STATUS = [
 	'compliant',
@@ -235,6 +236,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		applied_control_status: applied_control_status.results,
 		projects,
 		user: locals.user,
-		metrics: metrics.results
+		metrics: metrics.results,
+		title: m.analytics()
 	};
 };

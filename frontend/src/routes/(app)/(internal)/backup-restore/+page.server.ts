@@ -3,6 +3,11 @@ import type { Actions } from '@sveltejs/kit';
 import { fail } from 'assert';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async (event) => {
+	return { title: m.backupRestore() };
+};
 
 export const actions: Actions = {
 	default: async (event) => {

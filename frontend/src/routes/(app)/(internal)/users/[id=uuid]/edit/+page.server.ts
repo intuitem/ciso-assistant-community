@@ -36,7 +36,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model.foreignKeys = foreignKeys;
 
-	return { form, model, object };
+	return { form, model, object, title: m.edit() };
 };
 
 export const actions: Actions = {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto } from '$lib/utils/breadcrumbs';
 
 	export let count = 0;
 	export let label: string;
@@ -9,7 +9,7 @@
 
 	const clickHandler = () => {
 		if (href) {
-			goto(href);
+			goto(href, { breadcrumbAction: 'push', label });
 		}
 	};
 

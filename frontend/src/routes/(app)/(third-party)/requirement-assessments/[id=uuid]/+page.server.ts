@@ -36,5 +36,12 @@ export const load = (async ({ fetch, params }) => {
 		}
 	}
 
-	return { requirementAssessment, complianceAssessmentScore, requirement, parent, tables };
+	return {
+		requirementAssessment,
+		complianceAssessmentScore,
+		requirement,
+		parent,
+		tables,
+		title: requirementAssessment.name
+	};
 }) satisfies PageServerLoad;

@@ -4,7 +4,6 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud.js';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import type {
 		ModalComponent,
@@ -17,15 +16,14 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import { safeTranslate } from '$lib/utils/i18n.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { safeTranslate } from '$lib/utils/i18n.js';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data;
 	const showRisks = true;
 	const risk_assessment = data.risk_assessment;
-
-	breadcrumbObject.set(risk_assessment);
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -192,10 +190,10 @@
 			<div class="container w-2/3">
 				<div class="text-sm">
 					<span class="font-semibold" data-testid="risk-matrix-field-title">{m.riskMatrix()}:</span>
-					<a
+					<Anchor
 						href="/risk-matrices/{risk_assessment.risk_matrix.id}"
 						class="anchor"
-						data-testid="risk-matrix-field-value">{risk_assessment.risk_matrix.name}</a
+						data-testid="risk-matrix-field-value">{risk_assessment.risk_matrix.name}</Anchor
 					>
 				</div>
 				<br />
@@ -203,10 +201,10 @@
 					<div class="text-sm">
 						<span class="font-semibold" data-testid="ebios-rm-field-title">{m.ebiosRmStudy()}:</span
 						>
-						<a
+						<Anchor
 							href="/ebios-rm/{risk_assessment.ebios_rm_study.id}"
 							class="anchor"
-							data-testid="ebios-rm-field-value">{risk_assessment.ebios_rm_study.name}</a
+							data-testid="ebios-rm-field-value">{risk_assessment.ebios_rm_study.name}</Anchor
 						>
 					</div>
 					<br />
@@ -250,20 +248,22 @@
 						>
 					</div>
 					{#if canEditObject}
-						<a
+						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
+							label={m.edit()}
 							class="btn variant-filled-primary"
 							data-testid="edit-button"
 						>
 							<i class="fa-solid fa-edit mr-2" />
-							{m.edit()}</a
+							{m.edit()}</Anchor
 						>
 					{/if}
 				</div>
-				<a
+				<Anchor
+					label={m.remediationPlan()}
 					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
 					class="btn variant-filled-primary"
-					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</a
+					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">Power-ups:</span>
 				<button

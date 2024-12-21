@@ -1,15 +1,10 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages.js';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { breadcrumbObject } from '$lib/utils/stores';
+	import type { TableSource } from '$lib/components/ModelTable/types';
+	import * as m from '$paraglide/messages.js';
+	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 
 	export let data;
-
-	breadcrumbObject.set(data.compliance_assessment);
-
-	let tabSet = 0;
 
 	const appliedControlsHead = {
 		name: 'name',

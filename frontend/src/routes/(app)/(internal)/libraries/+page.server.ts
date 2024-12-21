@@ -70,7 +70,7 @@ export const load = (async ({ fetch }) => {
 	const schema = z.object({ id: z.string() });
 	const deleteForm = await superValidate(zod(schema));
 
-	return { storedLibrariesTable, loadedLibrariesTable, deleteForm };
+	return { storedLibrariesTable, loadedLibrariesTable, deleteForm, title: m.libraries() };
 }) satisfies PageServerLoad;
 
 // ----------------------------------------------------------- //

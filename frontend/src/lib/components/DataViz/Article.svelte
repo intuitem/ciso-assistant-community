@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+
 	export let title;
 	export let desc;
 	export let link;
@@ -11,11 +13,11 @@
 	<div class="rounded-[10px] bg-white p-4 !pt-20 sm:p-6 h-full">
 		<div class="block text-xs text-gray-500 min-h-[2.5rem] flex items-end">{desc}</div>
 
-		<a href={link}>
+		<Anchor href={link}>
 			<h3 class="mt-0.5 text-lg font-medium text-gray-900">
 				{title}
 			</h3>
-		</a>
+		</Anchor>
 
 		<div class="mt-4 flex flex-wrap gap-1">
 			{#each tags as tag}

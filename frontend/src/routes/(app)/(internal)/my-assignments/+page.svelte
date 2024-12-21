@@ -7,6 +7,7 @@
 	import * as m from '$paraglide/messages';
 	import AuditCard from './AuditCard.svelte';
 	import ActivityTracker from './ActivityTracker.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const eta_span_class = { true: 'bg-orange-400 text-white' };
 	const status_span_class = {
@@ -42,7 +43,9 @@
 								scope="row"
 								class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
 							>
-								<a href="/applied-controls/{ac.id}" class="hover:text-violet-400">{ac.name}</a>
+								<Anchor href="/applied-controls/{ac.id}" class="hover:text-violet-400"
+									>{ac.name}</Anchor
+								>
 							</th>
 							<td class="px-6 py-4"> {ac.csf_function ?? '-'} </td>
 							<td class="px-6 py-4"
@@ -100,7 +103,9 @@
 									scope="row"
 									class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
 								>
-									<a href="/risk-assessments/{ra.id}" class="hover:text-violet-400">{ra.name}</a>
+									<Anchor href="/risk-assessments/{ra.id}" class="hover:text-violet-400"
+										>{ra.name}</Anchor
+									>
 								</th>
 								<td class="px-6 py-4"> {safeTranslate(ra.status) ?? '-'} </td>
 								<td class="px-6 py-4"> {formatDateOrDateTime(ra.eta, languageTag()) ?? '-'} </td>
@@ -136,7 +141,9 @@
 									scope="row"
 									class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
 								>
-									<a href="/risk-scenarios/{rs.id}" class="hover:text-violet-400">{rs.name}</a>
+									<Anchor href="/risk-scenarios/{rs.id}" class="hover:text-violet-400"
+										>{rs.name}</Anchor
+									>
 								</th>
 								<td class="px-6 py-4"> {safeTranslate(rs.treatment) ?? '-'} </td>
 								<td class="px-6 py-4"> {safeTranslate(rs.current_level.name) ?? '-'}</td>

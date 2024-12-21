@@ -65,5 +65,5 @@ export const load = (async ({ fetch, params }) => {
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
-	return { scenario, tables, riskMatrix };
+	return { scenario, tables, riskMatrix, title: scenario.name };
 }) satisfies PageServerLoad;

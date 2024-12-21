@@ -1,15 +1,19 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
-	import type { PageData } from '../[id=uuid]/$types';
-	import { getRequirementTitle } from '$lib/utils/helpers';
-	import { hideSuggestions, breadcrumbObject } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
-	import { toCamelCase } from '$lib/utils/locales';
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
-	import { displayScoreColor, formatScoreValue, getSecureRedirect } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import {
+		displayScoreColor,
+		formatScoreValue,
+		getRequirementTitle,
+		getSecureRedirect
+	} from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { hideSuggestions } from '$lib/utils/stores';
+	import * as m from '$paraglide/messages';
+	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import type { PageData } from '../[id=uuid]/$types';
 
 	export let data: PageData;
 	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
@@ -31,11 +35,6 @@
 	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
 		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
 		: getRequirementTitle(data.parent.ref_id, data.parent.name);
-	breadcrumbObject.set({
-		id: data.requirementAssessment.id,
-		name: title ?? 'Requirement assessment',
-		email: ''
-	});
 
 	let requirementAssessmentsList: string[] = $hideSuggestions;
 

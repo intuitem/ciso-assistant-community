@@ -605,7 +605,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',
 		localName: 'ebiosRMstudy',
-		localNamePlural: 'ebiosRMstudy',
+		localNamePlural: 'ebiosRmStudies',
 		verboseName: 'Ebios RMstudy',
 		verboseNamePlural: 'Ebios RMstudy',
 		foreignKeyFields: [

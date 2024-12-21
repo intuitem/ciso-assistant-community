@@ -25,7 +25,6 @@ export class PageDetail extends BasePage {
 
 	async editItem(buildParams: { [k: string]: string }, editParams: { [k: string]: string }) {
 		await this.editButton.click();
-		await this.hasTitle('Edit ' + this.item);
 		await this.hasBreadcrumbPath(['Edit'], false);
 
 		const editedValues: { [k: string]: string } = {};
