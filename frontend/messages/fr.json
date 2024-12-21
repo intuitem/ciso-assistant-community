@@ -1012,6 +1012,8 @@
 	"strategicScenarios": "Scénarios stratégiques",
 	"goBackToEbiosRmStudy": "Retour à l'étude",
 	"addStrategicScenario": "Ajouter un scénario stratégique",
+	"markAsDone": "C'est fait",
+	"markAsInProgress": "Reprendre",
 	"client": "Client",
 	"partner": "Partenaire",
 	"supplier": "Fournisseur",
