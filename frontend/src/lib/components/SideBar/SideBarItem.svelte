@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let item: any; // TODO: type this
 
@@ -11,8 +12,9 @@
 </script>
 
 {#each item as item}
-	<a
+	<Anchor
 		href={item.href}
+		breadcrumbAction="replace"
 		class="unstyled flex whitespace-nowrap items-center py-2 text-sm font-normal rounded-token {classesActive(
 			item.href ?? ''
 		)}"
@@ -21,6 +23,6 @@
 		<span class="px-4 flex items-center w-full space-x-2 text-xs">
 			<i class="{item.fa_icon} w-1/12" />
 			<span class="text-sm tracking-wide truncate">{safeTranslate(item.name)}</span>
-		</span></a
-	>
+		</span>
+	</Anchor>
 {/each}

@@ -93,7 +93,8 @@ export const load = (async ({ fetch, params }) => {
 		tree,
 		compliance_assessment_donut_values,
 		global_score,
-		form
+		form,
+		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;
 

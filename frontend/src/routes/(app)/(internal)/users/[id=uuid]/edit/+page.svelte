@@ -2,13 +2,11 @@
 	import { page } from '$app/stores';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { UserEditSchema } from '$lib/utils/schemas';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import type { PageData } from './$types';
 
 	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
-	breadcrumbObject.set(data.object);
 </script>
 
 <div class="card bg-white shadow p-4">

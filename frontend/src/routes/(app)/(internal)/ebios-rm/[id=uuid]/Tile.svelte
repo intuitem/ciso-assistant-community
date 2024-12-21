@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import * as m from '$paraglide/messages';
 	import { popup } from '@skeletonlabs/skeleton';
 
@@ -41,7 +42,11 @@
 								{#if createRiskAnalysis && i == 0}
 									<slot name="addRiskAnalysis"></slot>
 								{:else}
-									<a href={step.href} class="hover:text-purple-800">
+									<Anchor
+										href={step.href}
+										prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
+										class="hover:text-purple-800"
+									>
 										{#if step.status == 'done'}
 											<span
 												class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
@@ -57,7 +62,7 @@
 										{/if}
 										<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
 										<p class="text-sm">{step.title}</p>
-									</a>
+									</Anchor>
 								{/if}
 								<button
 									class="btn bg-initial"

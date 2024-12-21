@@ -9,6 +9,7 @@
 	import type { z } from 'zod';
 	import * as m from '$paraglide/messages';
 	import { displayOnlyAssessableNodes } from './store';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let ref_id: string;
 	export let name: string;
@@ -111,23 +112,29 @@
 					{#if assessable}
 						<span class="w-full h-full flex rounded-token hover:text-primary-500">
 							{#if canEditRequirementAssessment}
-								<a href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}">
+								<Anchor
+									breadcrumbAction="push"
+									href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}"
+								>
 									{#if title}
 										<span style="font-weight: 600;">{title}</span>
 									{/if}
 									{#if description}
 										<p>{description}</p>
 									{/if}
-								</a>
+								</Anchor>
 							{:else}
-								<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
+								<Anchor
+									breadcrumbAction="push"
+									href="/requirement-assessments/{ra_id}?next={$page.url.pathname}"
+								>
 									{#if title}
 										<span style="font-weight: 600;">{title}</span>
 									{/if}
 									{#if description}
 										<p>{description}</p>
 									{/if}
-								</a>
+								</Anchor>
 							{/if}
 						</span>
 					{:else}
