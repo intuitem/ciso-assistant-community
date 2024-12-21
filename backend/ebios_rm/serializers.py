@@ -88,7 +88,6 @@ class StakeholderWriteSerializer(BaseModelSerializer):
     current_criticality = serializers.IntegerField(read_only=True)
     residual_criticality = serializers.IntegerField(read_only=True)
 
-
     def create(self, validated_data):
         validated_data["residual_dependency"] = validated_data["current_dependency"]
         validated_data["residual_penetration"] = validated_data["current_penetration"]
