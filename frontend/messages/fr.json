@@ -1017,5 +1017,6 @@
 	"supplier": "Fournisseur",
 	"referenceEntity": "Entité de référence",
 	"referenceEntitySemiColon": "Entité de référence :",
-	"moderate": "Modérée"
+	"moderate": "Modérée",
+	"nothingToShowYet": "Rien à montrer pour l'instant. Les graphiques seront mis à jour une fois que vous aurez commencé vos audits."
 }
