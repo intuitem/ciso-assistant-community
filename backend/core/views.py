@@ -1267,6 +1267,12 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         return Response(my_map)
 
+    @action(detail=False, name="Generate data for applied controls impact graph")
+    def impact_graph(self, request):
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+
 
 class PolicyViewSet(AppliedControlViewSet):
     model = Policy
