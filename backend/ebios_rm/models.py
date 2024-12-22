@@ -97,9 +97,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         on_delete=models.PROTECT,
         verbose_name=_("Risk matrix"),
         related_name="ebios_rm_studies",
-        help_text=_(
-            "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`"
-        ),
+        help_text=_("Risk matrix used as a reference for the study"),
         blank=True,
     )
     assets = models.ManyToManyField(
