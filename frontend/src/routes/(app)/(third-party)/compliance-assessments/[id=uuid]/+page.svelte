@@ -375,7 +375,7 @@
 					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
 				>
 			{/if}
-			<span class="pt-4 font-light text-sm">Power-ups:</span>
+			<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 			{#if !$page.data.user.is_third_party}
 				<Anchor
 					breadcrumbAction="push"
