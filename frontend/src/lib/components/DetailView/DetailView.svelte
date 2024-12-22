@@ -397,7 +397,7 @@
 						/>{m.edit()}</Anchor
 					>
 					{#if data.urlModel === 'applied-controls'}
-						<span class="pt-4 font-light text-sm">Power-ups:</span>
+						<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 						<button
 							class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
 							on:click={(_) => modalAppliedControlDuplicateForm()}

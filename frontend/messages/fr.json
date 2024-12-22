@@ -1020,5 +1020,7 @@
 	"referenceEntity": "Entité de référence",
 	"referenceEntitySemiColon": "Entité de référence :",
 	"moderate": "Modérée",
-	"associatedAttackPaths": "Chemins d'attaque associés"
+	"associatedAttackPaths": "Chemins d'attaque associés",
+	"powerUps": "Accélérateurs",
+	"nothingToShowYet": "Rien à montrer pour l'instant. Les graphiques seront mis à jour une fois que vous aurez commencé vos audits."
 }

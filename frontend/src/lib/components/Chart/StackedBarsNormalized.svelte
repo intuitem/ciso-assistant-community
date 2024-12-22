@@ -6,6 +6,7 @@
 	export let data;
 	export let names;
 	export let uuids;
+	import * as m from '$paraglide/messages';
 
 	const chart_id = `stacked_div`;
 	onMount(async () => {
@@ -91,7 +92,7 @@
 {:else}
 	<div class="flex justify-center items-center h-full">
 		<div class="font-semibold">
-			Nothing to show yet. Charts will be updated once you've started your audits.
+			{m.nothingToShowYet()}
 		</div>
 	</div>
 {/if}
