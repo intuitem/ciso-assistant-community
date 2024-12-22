@@ -21,28 +21,6 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
         queryset=RiskMatrix.objects.all(), required=False
     )
 
-    def create(self, validated_data):
-        if not validated_data.get("risk_matrix"):
-            try:
-                ebios_matrix = RiskMatrix.objects.filter(
-                    urn="urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm"
-                ).first()
-                if not ebios_matrix:
-                    ebios_matrix_library = StoredLibrary.objects.get(
-                        urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
-                    )
-                    ebios_matrix_library.load()
-                    ebios_matrix = RiskMatrix.objects.get(
-                        urn="urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm"
-                    )
-                validated_data["risk_matrix"] = ebios_matrix
-            except (StoredLibrary.DoesNotExist, RiskMatrix.DoesNotExist) as e:
-                logging.error(f"Error loading risk matrix: {str(e)}")
-                raise serializers.ValidationError(
-                    "An error occurred while loading the risk matrix."
-                )
-        return super().create(validated_data)
-
     class Meta:
         model = EbiosRMStudy
         exclude = ["created_at", "updated_at"]
@@ -109,6 +87,13 @@ class RoToReadSerializer(BaseModelSerializer):
 class StakeholderWriteSerializer(BaseModelSerializer):
     current_criticality = serializers.IntegerField(read_only=True)
     residual_criticality = serializers.IntegerField(read_only=True)
+
+    def create(self, validated_data):
+        validated_data["residual_dependency"] = validated_data["current_dependency"]
+        validated_data["residual_penetration"] = validated_data["current_penetration"]
+        validated_data["residual_maturity"] = validated_data["current_maturity"]
+        validated_data["residual_trust"] = validated_data["current_trust"]
+        return super().create(validated_data)
 
     class Meta:
         model = Stakeholder

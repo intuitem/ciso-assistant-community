@@ -309,7 +309,7 @@
 																	>{val.str}</Anchor
 																>
 															{:else if val.str}
-																{val.str}
+																{safeTranslate(val.str)}
 															{:else}
 																{value}
 															{/if}

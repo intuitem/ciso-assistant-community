@@ -5,6 +5,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let data: PageData;
 
@@ -114,7 +115,7 @@
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
 						<p class="badge text-white bg-red-500 capitalize">
-							{operationalScenario.ro_to.risk_origin}
+							{safeTranslate(operationalScenario.ro_to.risk_origin)}
 						</p>
 					</div>
 					<div
