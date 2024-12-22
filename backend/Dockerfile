@@ -30,6 +30,9 @@ RUN pip install --upgrade pip && \
 RUN poetry install
 RUN rm -rf $POETRY_CACHE_DIR
 
+RUN addgroup -g 1001 -S backend && adduser -u 1001 -S -G backend backend
+RUN chown -R backend:backend /code/db
+USER backend
 
 ENTRYPOINT ["poetry", "run",  "bash", "startup.sh"]
 EXPOSE 8000

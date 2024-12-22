@@ -21,4 +21,8 @@ COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
 ENV BODY_SIZE_LIMIT=20000000
+
+RUN addgroup -g 1002 -S frontend && adduser -u 1002 -S -G frontend frontend
+USER frontend
+
 CMD [ "node", "server" ]
