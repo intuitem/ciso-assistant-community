@@ -1021,5 +1021,7 @@
 	"referenceEntity": "Reference entity",
 	"referenceEntitySemiColon": "Reference entity:",
 	"moderate": "Moderate",
-	"associatedAttackPaths": "Associated Attack Paths"
+	"associatedAttackPaths": "Associated Attack Paths",
+	"powerUps": "Power-ups",
+	"nothingToShowYet": "Nothing to show yet. Charts will be updated once you've started your audits."
 }
