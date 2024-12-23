@@ -125,7 +125,7 @@
 		dataType="json"
 		let:form
 		validators={zod(schema)}
-		action="?/updateRiskScenario={next}"
+		action="?/updateRiskScenario&next={next}"
 		{...$$restProps}
 	>
 		<div class="flex flex-row space-x-2">
