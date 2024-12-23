@@ -5,6 +5,8 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import * as m from '$paraglide/messages';
 	import { popup } from '@skeletonlabs/skeleton';
+	import { invalidateAll } from '$app/navigation';
+	import { browser } from '$app/environment';
 
 	export let title = 'activity';
 	export let meta: Record<string, any>[] = [];
@@ -12,11 +14,16 @@
 	export let createRiskAnalysis = false;
 	export let workshop: number = 0;
 
-	$: workshopStatus = meta.every((step) => step.status === 'done')
-		? 'done'
-		: meta.some((step) => step.status === 'done')
-			? 'in_progress'
-			: 'to_do';
+	let workshopStatus = 'to_do';
+
+	$: {
+		workshopStatus = meta.every((step) => step.status === 'done')
+			? 'done'
+			: meta.some((step) => step.status === 'done')
+				? 'in_progress'
+				: 'to_do';
+		if (browser) invalidateAll();
+	}
 </script>
 
 <div class="p-5 {accent_color}">
