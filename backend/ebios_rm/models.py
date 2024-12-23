@@ -188,6 +188,10 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     def operational_scenario_count(self):
         return self.operational_scenarios.count()
 
+    @property
+    def applied_control_count(self):
+        return AppliedControl.objects.filter(stakeholders__ebios_rm_study=self).count()
+
     def update_workshop_step_status(self, workshop: int, step: int, new_status: str):
         if workshop < 1 or workshop > 5:
             raise ValueError("Workshop must be between 1 and 5")
