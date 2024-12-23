@@ -44,7 +44,7 @@
 			<div>
 				<p class="text-sm font-semibold text-gray-400">{m.description()}</p>
 				{#if data.scenario.description}
-					<p>{data.scenario.description}</p>
+					<p class="whitespace-pre-line">{data.scenario.description}</p>
 				{:else}
 					<p class="text-gray-400 italic text-sm">{m.noDescription()}</p>
 				{/if}

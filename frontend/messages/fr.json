@@ -1022,5 +1022,11 @@
 	"moderate": "Modérée",
 	"associatedAttackPaths": "Chemins d'attaque associés",
 	"powerUps": "Accélérateurs",
-	"nothingToShowYet": "Rien à montrer pour l'instant. Les graphiques seront mis à jour une fois que vous aurez commencé vos audits."
+	"nothingToShowYet": "Rien à montrer pour l'instant. Les graphiques seront mis à jour une fois que vous aurez commencé vos audits.",
+	"ebiosWs2_2_tooltip": "Vous avez besoin d'au moins un couple SR/OV pour l'évaluer",
+	"ebiosWs2_3_tooltip": "Vous avez besoin d'au moins un couple SR/OV pour le sélectionner",
+	"ebiosWs3_2_tooltip": "Vous avez besoin d'au moins un couple SR/OV sélectionné pour élaborer un scénario stratégique",
+	"ebiosWs3_3_tooltip": "Vous avez besoin d'au moins une Partie Prenante pour définir les mesures de sécurité associées",
+	"ebiosWs4_1_tooltip": "Vous avez besoin d'au moins un Chemin d'Attaque sélectionné à partir d'un Scénario Stratégique pour élaborer un scénario opérationnel",
+	"ebiosWs4_2_tooltip": "Vous avez besoin d'au moins un Scénario Opérationnel pour évaluer sa probabilité"
 }

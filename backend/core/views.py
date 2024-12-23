@@ -600,7 +600,16 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     ref_id=operational_scenario.ref_id
                     if operational_scenario.ref_id
                     else RiskScenario.get_default_ref_id(instance),
-                    description=operational_scenario.operating_modes_description,
+                    description="\n\n".join(
+                        filter(
+                            None,
+                            [
+                                operational_scenario.attack_path.strategic_scenario.description,
+                                operational_scenario.attack_path.description,
+                                operational_scenario.operating_modes_description,
+                            ],
+                        )
+                    ),
                     current_proba=operational_scenario.likelihood,
                     current_impact=operational_scenario.gravity,
                 )
@@ -1307,7 +1316,9 @@ class RiskScenarioViewSet(BaseModelViewSet):
     ordering_fields = ordering
 
     def _perform_write(self, serializer):
-        if not serializer.validated_data.get("ref_id"):
+        if not serializer.validated_data.get(
+            "ref_id"
+        ) and serializer.validated_data.get("risk_assessment"):
             risk_assessment = serializer.validated_data["risk_assessment"]
             ref_id = RiskScenario.get_default_ref_id(risk_assessment)
             serializer.validated_data["ref_id"] = ref_id
