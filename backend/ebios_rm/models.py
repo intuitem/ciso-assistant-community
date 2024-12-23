@@ -653,7 +653,11 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
 
     @property
     def name(self):
-        return self.attack_path.name
+        return (
+            self.attack_path.strategic_scenario.name[:95]
+            + " - "
+            + self.attack_path.name[:95]
+        )
 
     @property
     def gravity(self):

@@ -600,7 +600,16 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     ref_id=operational_scenario.ref_id
                     if operational_scenario.ref_id
                     else RiskScenario.get_default_ref_id(instance),
-                    description=operational_scenario.operating_modes_description,
+                    description="\n\n".join(
+                        filter(
+                            None,
+                            [
+                                operational_scenario.attack_path.strategic_scenario.description.strip(),
+                                operational_scenario.attack_path.description.strip(),
+                                operational_scenario.operating_modes_description.strip(),
+                            ],
+                        )
+                    ),
                     current_proba=operational_scenario.likelihood,
                     current_impact=operational_scenario.gravity,
                 )
