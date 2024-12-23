@@ -49,12 +49,16 @@
 			{
 				title: safeTranslate(m.ebiosWs2_2()),
 				status: data.data.meta.workshops[1].steps[1].status,
-				href: `${$page.url.pathname}/workshop-2/ro-to?activity=two&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-2/ro-to?activity=two&next=${$page.url.pathname}`,
+				disabled: data.data.roto_count < 1,
+				tooltip: safeTranslate(m.ebiosWs2_2_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_3()),
 				status: data.data.meta.workshops[1].steps[2].status,
-				href: `${$page.url.pathname}/workshop-2/ro-to?activity=three&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-2/ro-to?activity=three&next=${$page.url.pathname}`,
+				disabled: data.data.roto_count < 1,
+				tooltip: safeTranslate(m.ebiosWs2_3_tooltip())
 			}
 		],
 		ws3: [
@@ -66,7 +70,9 @@
 			{
 				title: safeTranslate(m.ebiosWs3_2()),
 				status: data.data.meta.workshops[2].steps[1].status,
-				href: `${$page.url.pathname}/workshop-3/strategic-scenarios?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-3/strategic-scenarios?next=${$page.url.pathname}`,
+				disabled: data.data.roto_count < 1,
+				tooltip: safeTranslate(m.ebiosWs3_2_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs3_3()),
@@ -78,12 +84,16 @@
 			{
 				title: safeTranslate(m.ebiosWs4_1()),
 				status: data.data.meta.workshops[3].steps[0].status,
-				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=one&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=one&next=${$page.url.pathname}`,
+				disabled: data.data.attack_path_count < 1,
+				tooltip: safeTranslate(m.ebiosWs4_1_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs4_2()),
 				status: data.data.meta.workshops[3].steps[1].status,
-				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=two&next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=two&next=${$page.url.pathname}`,
+				disabled: data.data.operational_scenario_count < 1,
+				tooltip: safeTranslate(m.ebiosWs4_2_tooltip())
 			}
 		],
 		ws5: [
