@@ -604,9 +604,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                         filter(
                             None,
                             [
-                                operational_scenario.attack_path.strategic_scenario.description.strip(),
-                                operational_scenario.attack_path.description.strip(),
-                                operational_scenario.operating_modes_description.strip(),
+                                operational_scenario.attack_path.strategic_scenario.description,
+                                operational_scenario.attack_path.description,
+                                operational_scenario.operating_modes_description,
                             ],
                         )
                     ),
