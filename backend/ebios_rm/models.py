@@ -172,6 +172,22 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
+    @property
+    def roto_count(self):
+        return self.roto_set.count()
+
+    @property
+    def selected_roto_count(self):
+        return self.roto_set.filter(is_selected=True).count()
+
+    @property
+    def selected_attack_path_count(self):
+        return self.attackpath_set.filter(is_selected=True).count()
+
+    @property
+    def operational_scenario_count(self):
+        return self.operational_scenarios.count()
+
     def update_workshop_step_status(self, workshop: int, step: int, new_status: str):
         if workshop < 1 or workshop > 5:
             raise ValueError("Workshop must be between 1 and 5")
