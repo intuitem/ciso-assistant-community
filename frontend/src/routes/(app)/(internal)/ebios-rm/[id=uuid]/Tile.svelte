@@ -55,6 +55,7 @@
 									<Anchor
 										href={step.href}
 										prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
+										label={safeTranslate(`ebiosWs${workshop}_${i + 1}`)}
 										class="hover:text-purple-800"
 									>
 										{#if step.status == 'done'}
