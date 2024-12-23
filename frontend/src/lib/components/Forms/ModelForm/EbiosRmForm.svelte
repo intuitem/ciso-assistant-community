@@ -67,7 +67,6 @@
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}
 		label={m.riskMatrix()}
-		placeholder={m.ebiosRmRiskMatrix()}
 		helpText={m.ebiosRmMatrixHelpText()}
 	/>
 {:else if context === 'ebiosRmStudy'}
