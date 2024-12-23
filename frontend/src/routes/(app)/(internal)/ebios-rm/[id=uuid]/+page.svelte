@@ -228,35 +228,30 @@
 				<Card
 					count={data.data.roto_count}
 					label={m.roToCouples()}
-					icon="fa-solid fa-shield-halved"
 					section={''}
 					customClass="col-span-3 lg:col-span-1"
 				/>
 				<Card
 					count={data.data.selected_roto_count}
 					label={m.selectedRoToCouples()}
-					icon="fa-solid fa-shield-halved"
 					section={''}
 					customClass="col-span-3 lg:col-span-1"
 				/>
 				<Card
 					count={data.data.selected_attack_path_count}
 					label={m.selectedAttackPaths()}
-					icon="fa-solid fa-shield-halved"
 					section={''}
 					customClass="col-span-3 lg:col-span-1"
 				/>
 				<Card
 					count={data.data.operational_scenario_count}
 					label={m.operationalScenarios()}
-					icon="fa-solid fa-shield-halved"
 					section={''}
 					customClass="col-span-3 lg:col-span-1"
 				/>
 				<Card
 					count={data.data.applied_control_count}
 					label={m.appliedControls()}
-					icon="fa-solid fa-shield-halved"
 					section={''}
 					customClass="col-span-3 lg:col-span-1"
 				/>
