@@ -1307,7 +1307,9 @@ class RiskScenarioViewSet(BaseModelViewSet):
     ordering_fields = ordering
 
     def _perform_write(self, serializer):
-        if not serializer.validated_data.get("ref_id"):
+        if not serializer.validated_data.get(
+            "ref_id"
+        ) and serializer.validated_data.get("risk_assessment"):
             risk_assessment = serializer.validated_data["risk_assessment"]
             ref_id = RiskScenario.get_default_ref_id(risk_assessment)
             serializer.validated_data["ref_id"] = ref_id
