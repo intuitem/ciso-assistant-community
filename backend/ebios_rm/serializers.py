@@ -42,6 +42,7 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     selected_roto_count = serializers.IntegerField()
     selected_attack_path_count = serializers.IntegerField()
     operational_scenario_count = serializers.IntegerField()
+    applied_control_count = serializers.IntegerField()
 
     class Meta:
         model = EbiosRMStudy

@@ -11,6 +11,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
 	import Tile from './Tile.svelte';
+	import Card from '$lib/components/DataViz/Card.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -222,6 +223,39 @@
 				</button>
 			</div>
 		</Tile>
-		<Tile title={m.summary()} accent_color="bg-purple-800" />
+		<Tile title={m.summary()} accent_color="bg-purple-800">
+			<div slot="content">
+				<Card
+					count={data.data.roto_count}
+					label={m.roToCouples()}
+					section={''}
+					customClass="col-span-3 lg:col-span-1"
+				/>
+				<Card
+					count={data.data.selected_roto_count}
+					label={m.selectedRoToCouples()}
+					section={''}
+					customClass="col-span-3 lg:col-span-1"
+				/>
+				<Card
+					count={data.data.selected_attack_path_count}
+					label={m.selectedAttackPaths()}
+					section={''}
+					customClass="col-span-3 lg:col-span-1"
+				/>
+				<Card
+					count={data.data.operational_scenario_count}
+					label={m.operationalScenarios()}
+					section={''}
+					customClass="col-span-3 lg:col-span-1"
+				/>
+				<Card
+					count={data.data.applied_control_count}
+					label={m.appliedControls()}
+					section={''}
+					customClass="col-span-3 lg:col-span-1"
+				/>
+			</div>
+		</Tile>
 	</div>
 </div>
