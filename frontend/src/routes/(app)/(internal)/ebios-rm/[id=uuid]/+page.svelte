@@ -71,7 +71,7 @@
 				title: safeTranslate(m.ebiosWs3_2()),
 				status: data.data.meta.workshops[2].steps[1].status,
 				href: `${$page.url.pathname}/workshop-3/strategic-scenarios?next=${$page.url.pathname}`,
-				disabled: data.data.roto_count < 1,
+				disabled: data.data.selected_roto_count < 1,
 				tooltip: safeTranslate(m.ebiosWs3_2_tooltip())
 			},
 			{
@@ -85,7 +85,7 @@
 				title: safeTranslate(m.ebiosWs4_1()),
 				status: data.data.meta.workshops[3].steps[0].status,
 				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=one&next=${$page.url.pathname}`,
-				disabled: data.data.attack_path_count < 1,
+				disabled: data.data.selected_attack_path_count < 1,
 				tooltip: safeTranslate(m.ebiosWs4_1_tooltip())
 			},
 			{
@@ -166,19 +166,39 @@
 	<div
 		class="card bg-white shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>
-		<Tile workshop={1} title={m.ebiosWs1()} accent_color="bg-pink-600" meta={workshopsData.ws1} />
+		<Tile
+			workshop={1}
+			title={m.ebiosWs1()}
+			accent_color="bg-pink-600"
+			borderColor="border-pink-600"
+			meta={workshopsData.ws1}
+		/>
 		<Tile
 			workshop={2}
 			title={m.ebiosWs2()}
 			accent_color="bg-fuchsia-900"
+			borderColor="border-fuchsia-900"
 			meta={workshopsData.ws2}
 		/>
-		<Tile workshop={3} title={m.ebiosWs3()} accent_color="bg-teal-500" meta={workshopsData.ws3} />
-		<Tile workshop={4} title={m.ebiosWs4()} accent_color="bg-yellow-600" meta={workshopsData.ws4} />
+		<Tile
+			workshop={3}
+			title={m.ebiosWs3()}
+			accent_color="bg-teal-500"
+			borderColor="border-teal-500"
+			meta={workshopsData.ws3}
+		/>
+		<Tile
+			workshop={4}
+			title={m.ebiosWs4()}
+			accent_color="bg-yellow-600"
+			borderColor="border-yellow-600"
+			meta={workshopsData.ws4}
+		/>
 		<Tile
 			workshop={5}
 			title={m.ebiosWs5()}
 			accent_color="bg-red-500"
+			borderColor="border-red-500"
 			meta={workshopsData.ws5}
 			createRiskAnalysis={true}
 		>

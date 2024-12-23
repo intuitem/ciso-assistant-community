@@ -9,6 +9,7 @@
 	export let title = 'activity';
 	export let meta: Record<string, any>[] = [];
 	export let accent_color = '';
+	export let borderColor = '';
 	export let createRiskAnalysis = false;
 	export let workshop: number = 0;
 
@@ -75,11 +76,16 @@
 								{:else}
 									<div class="text-gray-300 [&>*]:pointer-events-none" use:popup={popupHover[i]}>
 										<div
-											class="transition card bg-black p-4 z-20 duration-300"
+											class="transition card bg-white shadow-lg p-4 z-20 duration-300"
 											data-popup={'popup' + workshop + i}
 										>
-											<p data-testid="activity-tooltip" class="">{step.tooltip}</p>
-											<div class="arrow bg-black" />
+											<p
+												data-testid="activity-tooltip"
+												class="border-l-4 {borderColor} text-gray-500 p-2"
+											>
+												{step.tooltip}
+											</p>
+											<div class="arrow bg-white" />
 										</div>
 										<span
 											class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"

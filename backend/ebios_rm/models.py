@@ -177,8 +177,12 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         return self.roto_set.count()
 
     @property
-    def attack_path_count(self):
-        return self.attackpath_set.count()
+    def selected_roto_count(self):
+        return self.roto_set.filter(is_selected=True).count()
+
+    @property
+    def selected_attack_path_count(self):
+        return self.attackpath_set.filter(is_selected=True).count()
 
     @property
     def operational_scenario_count(self):
