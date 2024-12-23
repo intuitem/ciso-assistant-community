@@ -6,7 +6,7 @@
 	import { writable } from 'svelte/store';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { navigationLinks } from './paletteData.ts';
-	import { goto } from '$app/navigation';
+	import { goto } from '$lib/utils/breadcrumbs';
 
 	// Create a store for command palette visibility
 	export const commandPaletteOpen = writable(false);
@@ -30,7 +30,7 @@
 		value: link.href,
 		onSelect: () => {
 			commandPaletteOpen.set(false);
-			goto(link.href);
+			goto(link.href, { label: link.label, breadcrumbAction: 'replace' });
 		}
 	}));
 
