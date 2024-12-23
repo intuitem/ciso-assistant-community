@@ -315,6 +315,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "restore",
     "view_globalsettings",
     "change_globalsettings",
+    "view_ssosettings",
+    "change_ssosettings",
     "view_requirementmappingset",
     "add_requirementmappingset",
     "delete_requirementmappingset",
