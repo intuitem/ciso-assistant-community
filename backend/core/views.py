@@ -1272,6 +1272,89 @@ class AppliedControlViewSet(BaseModelViewSet):
         (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, AppliedControl
         )
+        csf_functions_map = dict()
+        categories = [{"name": "--"}]
+        for i, option in enumerate(ReferenceControl.CSF_FUNCTION, 1):
+            csf_functions_map[option[0]] = i
+            categories.append({"name": option[1]})
+        categories.append({"name": "requirements"})  # 7
+        categories.append({"name": "scenarios"})  # 9
+        categories.append({"name": "audits"})  # 8
+        categories.append({"name": "risk assessments"})
+
+        nodes = list()
+        links = list()
+        indexes = dict()
+        idx_cnt = 0
+        for ac in AppliedControl.objects.filter(id__in=viewable_controls_ids):
+            nodes.append(
+                {
+                    "name": ac.name,
+                    "value": ac.name,
+                    "category": csf_functions_map.get(ac.csf_function, 0),
+                }
+            )
+            indexes[ac.id] = idx_cnt
+            idx_cnt += 1
+            # attached requirement_assessments
+            for req in RequirementAssessment.objects.filter(applied_controls__id=ac.id):
+                nodes.append(
+                    {
+                        "name": req.requirement.ref_id,
+                        "value": req.requirement.description,
+                        "category": 7,
+                        "symbol": "triangle",
+                    }
+                )
+                indexes[req.id] = (
+                    idx_cnt  # not good - even if the probability of collision is low
+                )
+                idx_cnt += 1
+
+                audit = req.compliance_assessment
+                if indexes.get(audit.id) is None:
+                    nodes.append(
+                        {
+                            "name": audit.name,
+                            "value": audit.framework.name,
+                            "category": 9,
+                            "symbol": "rect",
+                        }
+                    )
+                    indexes[audit.id] = idx_cnt
+                    idx_cnt += 1
+                links.append({"source": indexes[audit.id], "target": indexes[req.id]})
+
+                links.append({"source": indexes[ac.id], "target": indexes[req.id]})
+            for sc in RiskScenario.objects.filter(applied_controls__id=ac.id):
+                nodes.append(
+                    {
+                        "name": sc.ref_id,
+                        "value": sc.name,
+                        "category": 8,
+                        "symbol": "diamond",
+                    }
+                )
+                indexes[sc.id] = idx_cnt
+                idx_cnt += 1
+
+                ra = sc.risk_assessment
+                if indexes.get(ra.id) is None:
+                    nodes.append(
+                        {
+                            "name": ra.name,
+                            "value": ra.name,
+                            "category": 10,
+                            "symbol": "rect",
+                        }
+                    )
+                    indexes[ra.id] = idx_cnt
+                    idx_cnt += 1
+                links.append({"source": indexes[ra.id], "target": indexes[sc.id]})
+
+                links.append({"source": indexes[ac.id], "target": indexes[sc.id]})
+
+        return Response({"nodes": nodes, "categories": categories, "links": links})
 
 
 class PolicyViewSet(AppliedControlViewSet):

@@ -8,6 +8,7 @@
 	export let classesContainer = '';
 	export let title = '';
 	export let layout = 'force';
+	export let initLayout = 'circular';
 	export let edgeLength = 50;
 	export let name = 'graph';
 
@@ -81,7 +82,7 @@
 					gravity: 0.05,
 					layoutAnimation: true,
 					friction: 0.1,
-					initLayout: 'circular'
+					initLayout: initLayout
 				},
 				labelLayout: {
 					hideOverlap: true
