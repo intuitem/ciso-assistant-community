@@ -157,6 +157,18 @@ class StakeholderViewSet(BaseModelViewSet):
     def category(self, request):
         return Response(dict(Stakeholder.Category.choices))
 
+    @action(detail=False, name="Get chart data")
+    def chart_data(self, request):
+        data = {
+            "f1": [[5, 45, 5, "cool"], [4, 45, 10, "stuff"]],
+            "f2": [[1, 180, 15], [1, 180 + 45, 10]],
+            "f3": [[2, 270, 5], [1, 180 + 90, 12]],
+            "f4": [[1, 300, 6], [1, 315, 20]],
+        }
+
+        output = data
+        return Response(output)
+
 
 class StrategicScenarioViewSet(BaseModelViewSet):
     model = StrategicScenario

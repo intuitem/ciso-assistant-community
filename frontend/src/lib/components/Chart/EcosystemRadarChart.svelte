@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { show } from '$paraglide/messages/pt';
-	import { axis } from '@unovis/ts/components/axis/style';
-	import { color } from 'echarts/core';
 
 	// export let name: string;
 	export let s_label = '';
@@ -13,40 +10,15 @@
 	export let classesContainer = '';
 	export let title = '';
 	export let name = '';
+	export let data;
 
-	export let values: any[]; // Set the types for these variables later on
-	export let labels: any[];
-
-	const data = {
-		f1: [
-			[5, 45, 5],
-			[4, 45, 10]
-		],
-		f2: [
-			[1, 180, 15],
-			[1, 180 + 45, 10]
-		],
-		f3: [
-			[2, 270, 5],
-			[1, 180 + 90, 12]
-		],
-		f4: [
-			[1, 300, 6],
-			[1, 315, 20]
-		]
-	};
 	// data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
 	// x,y, z
 	// x: criticité calculée avec cap à 5,5
-	// y: the angle (output of dict to make sure they end up on the right quadrant, min: 45, max:-45)
-	// z: the size of item (exposition = dependence x penetration) based on a dict
+	// y: the angle (output of dict to make sure they end up on the right quadrant, min: 45, max:-45) -> done on BE
+	// z: the size of item (exposition = dependence x penetration) based on a dict, -> done on BE
+	// label: name of the 3rd party entity
 	//
-
-	for (const index in values) {
-		if (values[index].localName) {
-			values[index].name = safeTranslate(values[index].localName);
-		}
-	}
 
 	const chart_id = `${name}_div`;
 	onMount(async () => {
@@ -103,12 +75,12 @@
 			],
 			legend: {
 				data: ['<4', '4-5', '6-7', '>7'],
-				left: 'right'
+        top: 'bottom'
 			},
 			polar: {},
 			tooltip: {
 				formatter: function (params) {
-					return params.value[2] + ' commits in ';
+					return params.value[3];
 				}
 			},
 			angleAxis: {
