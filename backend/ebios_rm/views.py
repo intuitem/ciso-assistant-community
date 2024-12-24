@@ -193,7 +193,7 @@ class StakeholderViewSet(BaseModelViewSet):
         Angles start at 56,25 (45+45/4) and end at -45-45/4 = 303,75
         """
         data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
-        angle_offsets = {"client": 135, "partner": 180, "supplier": 45}
+        angle_offsets = {"client": 135, "partner": 225, "supplier": 45}
         for sh in Stakeholder.objects.all():
             if sh.current_criticality:
                 c_reliability = sh.current_maturity * sh.current_trust
@@ -201,16 +201,17 @@ class StakeholderViewSet(BaseModelViewSet):
                 print(c_exposure)
                 print(get_exposure_segment_id(c_exposure))
 
-                c_exposure_val = get_exposure_segment_id(c_exposure) * 5
+                c_exposure_val = get_exposure_segment_id(c_exposure) * 4
 
                 c_criticality = (
                     math.floor(sh.current_criticality * 100) / 100.0
                     if sh.current_criticality <= 5
                     else 5.25
                 )
-                angle = angle_offsets[sh.category] + get_exposure_segment_id(
-                    c_exposure
-                ) * (45 / 4)
+
+                angle = angle_offsets[sh.category] + (
+                    get_exposure_segment_id(c_exposure) * (45 / 4)
+                )
 
                 vector = [c_criticality, angle, c_exposure_val, sh.entity.name]
                 cluser_id = get_reliability_cluster(c_reliability)
