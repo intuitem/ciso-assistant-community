@@ -14,6 +14,7 @@
 	export let context: string;
 </script>
 
+<p class="text-sm text-gray-500">{m.strategicScenarioHelpText()}</p>
 {#if context !== 'edit'}
 	<AutocompleteSelect
 		{form}

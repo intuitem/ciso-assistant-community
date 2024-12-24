@@ -58,6 +58,7 @@
 		cacheLock={cacheLocks['operating_modes_description']}
 		bind:cachedValue={formDataCache['operating_modes_description']}
 		data-focusindex="1"
+		helpText={m.operatingModesDescriptionHelpText()}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -71,6 +72,7 @@
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}
 		label={m.threats()}
+		helpText={m.operationalScenarioThreatsHelpText()}
 	/>
 	{#if context !== 'edit'}
 		<AutocompleteSelect
@@ -102,6 +104,7 @@
 		label={m.likelihood()}
 		cacheLock={cacheLocks['likelihood']}
 		bind:cachedValue={formDataCache['likelihood']}
+		helpText={m.likelihoodHelpText()}
 	/>
 	<TextArea
 		{form}
@@ -111,4 +114,9 @@
 		bind:cachedValue={formDataCache['justification']}
 	/>
 </div>
-<Checkbox {form} field="is_selected" label={m.isSelected()} />
+<Checkbox
+	{form}
+	field="is_selected"
+	label={m.isSelected()}
+	helpText={m.operationalScenarioIsSelectedHelpText()}
+/>
