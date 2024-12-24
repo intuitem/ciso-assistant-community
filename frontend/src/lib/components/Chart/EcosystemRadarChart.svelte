@@ -121,7 +121,7 @@
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.f1,
+					data: data.clst1,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
@@ -134,7 +134,7 @@
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.f2,
+					data: data.clst2,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
@@ -147,7 +147,7 @@
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.f3,
+					data: data.clst3,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
@@ -160,7 +160,7 @@
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.f4,
+					data: data.clst4,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
@@ -176,7 +176,7 @@
 					}),
 					lineStyle: {
 						color: '#E73E51',
-						width: 4
+						width: 5
 					},
 					// If you don't want this to show up in the legend:
 					showInLegend: false,
@@ -193,7 +193,7 @@
 					}),
 					lineStyle: {
 						color: '#00ADA8',
-						width: 4
+						width: 5
 					},
 					// If you don't want this to show up in the legend:
 					showInLegend: false,
@@ -210,7 +210,7 @@
 					}),
 					lineStyle: {
 						color: '#F8EA47',
-						width: 4
+						width: 5
 					},
 					// If you don't want this to show up in the legend:
 					showInLegend: false,

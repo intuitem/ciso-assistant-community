@@ -19,6 +19,8 @@ from rest_framework.response import Response
 
 LONG_CACHE_TTL = 60  # mn
 
+import math
+
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "ebios_rm.serializers"
@@ -159,12 +161,62 @@ class StakeholderViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get chart data")
     def chart_data(self, request):
-        data = {
-            "f1": [[5, 45, 5, "cool"], [4, 45, 10, "stuff"]],
-            "f2": [[1, 180, 15], [1, 180 + 45, 10]],
-            "f3": [[2, 270, 5], [1, 180 + 90, 12]],
-            "f4": [[1, 300, 6], [1, 315, 20]],
-        }
+        def get_exposure_segment_id(value):
+            if value < 3:
+                return 1
+            if value >= 3 and value < 7:
+                return 2
+            if value >= 7 and value <= 9:
+                return 3
+            if value > 9:
+                return 4
+            return 0
+
+        def get_reliability_cluster(value):
+            if value < 4:
+                return "clst1"
+            if value >= 4 and value < 6:
+                return "clst2"
+            if value >= 6 and value <= 7:
+                return "clst3"
+            if value > 7:
+                return "clst4"
+            return 1
+
+        """
+        // data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
+        // x,y, z
+        // x: criticité calculée avec cap à 5,5
+        // y: the angle (output of dict to make sure they end up on the right quadrant, min: 45, max:-45) -> done on BE
+        // z: the size of item (exposition = dependence x penetration) based on a dict, -> done on BE
+        // label: name of the 3rd party entity
+        Angles start at 56,25 (45+45/4) and end at -45-45/4 = 303,75
+        """
+        data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
+        angle_offsets = {"client": 135, "partner": 180, "supplier": 45}
+        for sh in Stakeholder.objects.all():
+            if sh.current_criticality:
+                c_reliability = sh.current_maturity * sh.current_trust
+                c_exposure = sh.current_dependency * sh.current_penetration
+                print(c_exposure)
+                print(get_exposure_segment_id(c_exposure))
+
+                c_exposure_val = get_exposure_segment_id(c_exposure) * 5
+
+                c_criticality = (
+                    math.floor(sh.current_criticality * 100) / 100.0
+                    if sh.current_criticality <= 5
+                    else 5.25
+                )
+                angle = angle_offsets[sh.category] + get_exposure_segment_id(
+                    c_exposure
+                ) * (45 / 4)
+
+                vector = [c_criticality, angle, c_exposure_val, sh.entity.name]
+                cluser_id = get_reliability_cluster(c_reliability)
+
+                data[cluser_id].append(vector)
+                print(vector)
 
         output = data
         return Response(output)
