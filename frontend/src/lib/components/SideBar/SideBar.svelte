@@ -6,7 +6,7 @@
 
 	export let open: boolean;
 
-	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem]');
+	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
 </script>
 
 <aside
