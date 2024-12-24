@@ -3,6 +3,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { show } from '$paraglide/messages/pt';
 	import { axis } from '@unovis/ts/components/axis/style';
+	import { color } from 'echarts/core';
 
 	// export let name: string;
 	export let s_label = '';
@@ -16,7 +17,30 @@
 	export let values: any[]; // Set the types for these variables later on
 	export let labels: any[];
 
-	const axisVal = 16;
+	const data = {
+		f1: [
+			[5, 45, 5],
+			[4, 45, 10]
+		],
+		f2: [
+			[1, 180, 15],
+			[1, 180 + 45, 10]
+		],
+		f3: [
+			[2, 270, 5],
+			[1, 180 + 90, 12]
+		],
+		f4: [
+			[1, 300, 6],
+			[1, 315, 20]
+		]
+	};
+	// data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
+	// x,y, z
+	// x: criticité calculée avec cap à 5,5
+	// y: the angle (output of dict to make sure they end up on the right quadrant, min: 45, max:-45)
+	// z: the size of item (exposition = dependence x penetration) based on a dict
+	//
 
 	for (const index in values) {
 		if (values[index].localName) {
@@ -32,24 +56,6 @@
 		// specify chart configuration item and data
 		// prettier-ignore
 		//14 segments
-		const data = {
-      "s1": [
-        [5, 45, 5],
-        [4, 45, 10]
-      ],
-      "s2": [
-			[1, 180, 15],
-			[1, 180 + 45, 10]
-      ],
-      "s3": [
-			[2, 270, 5],
-			[1, 180 + 90, 12]
-      ],
-      "s4": [
-			[1, 300, 6],
-			[1, 315, 20]
-      ],
-    };
 		const option = {
 			title: {
 				text: 'Ecosystem'
@@ -137,48 +143,52 @@
 			series: [
 				{
 					name: '<4',
+					color: '#E73E51',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.s1,
+					data: data.f1,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
 				},
 				{
 					name: '4-5',
+					color: '#DE8898',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.s2,
+					data: data.f2,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
 				},
 				{
 					name: '6-7',
+					color: '#BAD9EA',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.s3,
+					data: data.f3,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
 				},
 				{
 					name: '>7',
+					color: '#8A8B8A',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.s4,
+					data: data.f4,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
