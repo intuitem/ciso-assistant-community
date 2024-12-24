@@ -1,0 +1,248 @@
+## CISO Assistant configuration
+## Ref: https://github.com/intuitem/ciso-assistant-community  
+##
+
+# -- Provide a name in place of `ciso-assistant`
+nameOverride: ciso-assistant
+# -- String to fully override `"ciso-assistant.fullname"`
+fullnameOverride: ""
+
+## Globally shared configuration
+global:
+  # -- Default domain used by all components
+  ## Used for ingresses, certificates, environnement vars, etc.
+  domain: octopus.foo.bar
+
+  # Default image used by all components
+  image:
+    # -- If defined, a registry applied to all CISO Assistant deployments
+    registry: ghcr.io
+    # -- Overrides the global CISO Assistant image tag whose default is the chart appVersion
+    tag: ""
+    # -- If defined, a imagePullPolicy applied to all CISO Assistant deployments
+    imagePullPolicy: IfNotPresent
+
+  # -- Secrets with credentials to pull images from a private registry
+  imagePullSecrets: []
+
+  # -- Labels to add to all deployed objects
+  commonLabels: {}
+
+  # -- Kubernetes cluster domain name
+  clusterDomain: cluster.local
+
+  # -- Toggle and define pod-level security context
+  securityContext: {}
+   # fsGroupChangePolicy: Always
+   # sysctls: []
+   # supplementalGroups: []
+   # fsGroup: 1001
+
+  # -- Default node selector for all components
+  nodeSelector: {}
+
+  # -- Default tolerations for all components
+  tolerations: []
+
+## CISO Assistant backend
+backend:
+  # -- Backend name
+  name: backend
+
+  # -- The number of backend pods to run
+  replicas: 1
+
+  ## Backend specific config
+  config:
+    # -- Email admin for initial configuration
+    emailAdmin: admin@example.net
+  
+    # -- SMTP configuration
+    smtp:
+      defaultFrom: no-reply@ciso-assistant.net
+      debug: false
+      primary:
+        host: primary.cool-mailer.net
+        port: 587
+        username: apikey
+        password: "primary_password_here"
+        useTls: true
+      rescue:
+        host: smtp.secondary.mailer.cloud
+        port: 587
+        username: username
+        password: "rescue_password_here"
+        useTls: true
+
+    # -- Set the database type (sqlite or pgsql)
+    databaseType: sqlite
+
+    # -- Enable Django debug mode
+    djangoDebug: false
+
+  # -- Backend persistence configuration (used for sqlitedb and proofs storage)
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+    accessMode: ReadWriteOnce
+
+  ## Backend image
+  image:
+    # -- Registry to use for the backend
+    # @default -- `""` (defaults to global.image.registry)
+    registry: ""
+    # -- Repository to use for the backend
+    repository: intuitem/ciso-assistant-community/backend
+    # -- Tag to use for the backend
+    # @default -- `""` (defaults to global.image.tag)
+    tag: ""
+    # -- Image pull policy for the backend
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Secrets with credentials to pull images from a private registry
+  # @default -- `[]` (defaults to global.imagePullSecrets)
+  imagePullSecrets: []
+
+  # -- Resources for the backend
+  resources: {}
+    #   requests:
+    #     cpu: 100m
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 256m
+    #     memory: 1024Mi
+
+  # -- Environment variables to pass to backend
+  env: []
+
+  # -- Toggle and define container-level security context
+  containerSecurityContext:
+   # seLinuxOptions: {}
+   # runAsUser: 1001
+   # runAsGroup: 1001
+   # runAsNonRoot: true
+   # privileged: false
+   # readOnlyRootFilesystem: true
+   # allowPrivilegeEscalation: false
+   # capabilities:
+   #   drop: ["ALL"]
+   # seccompProfile:
+   #   type: "RuntimeDefault"
+
+  ## Backend service configuration
+  service:
+    # -- Backend service annotations
+    annotations: {}
+    # -- Backend service labels
+    labels: {}
+    # -- Backend service http port
+    port: 80
+    # -- Backend service port name
+    portName: http
+
+
+## CISO Assistant frontend
+frontend:
+  # -- Frontend name
+  name: frontend
+
+  # -- The number of frontend pods to run
+  replicas: 1
+
+  ## Frontend specific config
+  config:
+    # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
+    bodySizeLimit: "50M"
+  
+  ## Frontend image
+  image:
+    # -- Registry to use for the frontend
+    # @default -- `""` (defaults to global.image.registry)
+    registry: ""
+    # -- Repository to use for the frontend
+    repository: intuitem/ciso-assistant-community/frontend
+    # -- Tag to use for the frontend
+    # @default -- `""` (defaults to global.image.tag)
+    tag: ""
+    # -- Image pull policy for the frontend
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Secrets with credentials to pull images from a private registry
+  # @default -- `[]` (defaults to global.imagePullSecrets)
+  imagePullSecrets: []
+
+  # -- Resources for the frontend
+  resources: {}
+    #   requests:
+    #     cpu: 100m
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 256m
+    #     memory: 1024Mi
+
+  # -- Environment variables to pass to frontend
+  env: []
+
+  # -- Toggle and define container-level security context
+  containerSecurityContext:
+   # seLinuxOptions: {}
+   # runAsUser: 1001
+   # runAsGroup: 1001
+   # runAsNonRoot: true
+   # privileged: false
+   # readOnlyRootFilesystem: true
+   # allowPrivilegeEscalation: false
+   # capabilities:
+   #   drop: ["ALL"]
+   # seccompProfile:
+   #   type: "RuntimeDefault"
+
+  ## Frontend service configuration
+  service:
+    # -- Frontend service annotations
+    annotations: {}
+    # -- Frontend service labels
+    labels: {}
+    # -- Frontend service http port
+    port: 80
+    # -- Frontend service port name
+    portName: http
+
+# CISO Assistant ingress configuration
+ingress:
+  # -- Enable an ingress resource for the CISO Assistant
+  enabled: true
+  # -- Additional ingress labels
+  labels: {}
+  # -- Additional ingress annotations
+  annotations: {}
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # cert-manager.io/cluster-issuer: letsencrypt
+  # -- Defines which ingress controller will implement the resource
+  ingressClassName: ""
+  # -- CISO Assistant hostname
+  # @default -- `""` (defaults to global.domain)
+  hostname: ""
+  # -- The path to CISO Assistant
+  path: /
+  # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
+  pathType: Prefix
+
+  # -- Enable TLS configuration for the hostname defined at `ingress.hostname`
+  ## TLS certificate will be retrieved from a TLS secret `{{ ciso-assistant.fullname }}-tls`
+  ## You can create this secret manually via `certificateSecret` option
+  tls: false
+  # -- Custom TLS certificate as secret
+  ## Note: 'key' and 'certificate' are expected in PEM format
+  certificateSecret: {}
+    # key: |-
+    #   -----BEGIN RSA PRIVATE KEY-----
+    #   ...
+    #   -----END RSA PRIVATE KEY-----
+    # certificate: |-
+    #   -----BEGIN CERTIFICATE-----
+    #   ...
+    #   -----END CERTIFICATE-----
