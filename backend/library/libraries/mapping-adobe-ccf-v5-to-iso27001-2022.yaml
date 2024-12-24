@@ -1,0 +1,1621 @@
+urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-to-iso27001-2022
+locale: en
+ref_id: mapping-adobe-ccf-v5-to-iso27001-2022
+name: adobe-ccf-v5 -> ISO/IEC 27001:2022
+description: Mapping from Adobe CCF v5 to International standard ISO/IEC 27001:2022
+copyright: intuitem
+version: 1
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:adobe-ccf-v5
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:adobe-ccf-v5
+    ref_id: mapping-adobe-ccf-v5-to-iso27001-2022
+    name: adobe-ccf-v5 -> ISO/IEC 27001:2022
+    description: Mapping from Adobe CCF v5 to International standard ISO/IEC 27001:2022
+    source_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.11
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-19
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-21
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-19
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-21
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-24
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-26
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-27
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-28
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-31
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-32
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-33
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-34
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-35
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-36
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-37
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-39
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
+      relationship: equal
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:priv-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ps-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: null
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+      relationship: equal
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-19
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-21
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-23
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-24
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-27
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-28
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-30
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-32
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-17
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-18
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-19
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-21
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-23
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
