@@ -30,31 +30,210 @@
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
 		// specify chart configuration item and data
-		let option = {
-			xAxis: {
-				min: -axisVal,
-				max: axisVal,
-				type: 'value',
-				axisLabel: { show: false },
-				axisTick: { show: false }
+		// prettier-ignore
+		//14 segments
+		const data = {
+      "s1": [
+        [5, 45, 5],
+        [4, 45, 10]
+      ],
+      "s2": [
+			[1, 180, 15],
+			[1, 180 + 45, 10]
+      ],
+      "s3": [
+			[2, 270, 5],
+			[1, 180 + 90, 12]
+      ],
+      "s4": [
+			[1, 300, 6],
+			[1, 315, 20]
+      ],
+    };
+		const option = {
+			title: {
+				text: 'Ecosystem'
 			},
-			yAxis: {
-				min: -axisVal,
-				max: axisVal,
+			graphic: [
+				{
+					type: 'text',
+					position: [chart.getWidth() / 4, (3 * chart.getHeight()) / 4],
+					rotation: 0,
+					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
+					style: {
+						text: 'Prestataires',
+						font: '18px Arial',
+						fill: '#666',
+						textAlign: 'center',
+						textVerticalAlign: 'middle'
+					}
+				},
+				{
+					type: 'text',
+					position: [(3 * chart.getWidth()) / 4, chart.getHeight() / 4],
+					rotation: 0,
+					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
+					style: {
+						text: 'Partenaires',
+						font: '18px Arial',
+						fill: '#666',
+						textAlign: 'center',
+						textVerticalAlign: 'middle'
+					}
+				},
+				{
+					type: 'text',
+					position: [chart.getWidth() / 4, chart.getHeight() / 4],
+					rotation: 0,
+					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
+					style: {
+						text: 'Clients',
+						font: '18px Arial',
+						fill: '#666',
+						textAlign: 'center',
+						textVerticalAlign: 'middle'
+					}
+				}
+			],
+			legend: {
+				data: ['<4', '4-5', '6-7', '>7'],
+				left: 'right'
+			},
+			polar: {},
+			tooltip: {
+				formatter: function (params) {
+					return params.value[2] + ' commits in ';
+				}
+			},
+			angleAxis: {
 				type: 'value',
+				startAngle: 315,
+				boundaryGap: true,
+				interval: 45,
 				axisLabel: { show: false },
-				axisTick: { show: false }
+				splitLine: {
+					show: true
+				},
+				axisLine: {
+					show: false
+				},
+				axisTick: {
+					show: false
+				},
+				alignTick: true
+			},
+			radiusAxis: {
+				type: 'value',
+				max: 6,
+				inverse: true,
+				axisLabel: { show: true },
+				axisLine: {
+					show: false
+				},
+				axisTick: {
+					show: false
+				}
 			},
 			series: [
 				{
-					symbolSize: 20,
-					data: [
-						[3, 4],
-						[-3, 2],
-						[-3, -4],
-						[-2, 4]
-					],
-					type: 'scatter'
+					name: '<4',
+					type: 'scatter',
+					coordinateSystem: 'polar',
+					symbolSize: function (val) {
+						return val[2] * 2;
+					},
+					data: data.s1,
+					animationDelay: function (idx) {
+						return idx * 5;
+					}
+				},
+				{
+					name: '4-5',
+					type: 'scatter',
+					coordinateSystem: 'polar',
+					symbolSize: function (val) {
+						return val[2] * 2;
+					},
+					data: data.s2,
+					animationDelay: function (idx) {
+						return idx * 5;
+					}
+				},
+				{
+					name: '6-7',
+					type: 'scatter',
+					coordinateSystem: 'polar',
+					symbolSize: function (val) {
+						return val[2] * 2;
+					},
+					data: data.s3,
+					animationDelay: function (idx) {
+						return idx * 5;
+					}
+				},
+				{
+					name: '>7',
+					type: 'scatter',
+					coordinateSystem: 'polar',
+					symbolSize: function (val) {
+						return val[2] * 2;
+					},
+					data: data.s4,
+					animationDelay: function (idx) {
+						return idx * 5;
+					}
+				},
+				{
+					name: 'Circle',
+					type: 'line',
+					coordinateSystem: 'polar',
+					itemStyle: { borderJoin: 'round' },
+					symbol: 'none',
+					data: new Array(360).fill(0).map((_, index) => {
+						return [2.5, index];
+					}),
+					lineStyle: {
+						color: '#E73E51',
+						width: 4
+					},
+					// If you don't want this to show up in the legend:
+					showInLegend: false,
+					silent: true,
+					zlevel: -1
+				},
+				{
+					name: 'Circle',
+					type: 'line',
+					coordinateSystem: 'polar',
+					symbol: 'none',
+					data: new Array(360).fill(0).map((_, index) => {
+						return [0.2, index];
+					}),
+					lineStyle: {
+						color: '#00ADA8',
+						width: 4
+					},
+					// If you don't want this to show up in the legend:
+					showInLegend: false,
+					silent: true,
+					zlevel: -1
+				},
+				{
+					name: 'Circle',
+					type: 'line',
+					coordinateSystem: 'polar',
+					symbol: 'none',
+					data: new Array(360).fill(0).map((_, index) => {
+						return [0.9, index];
+					}),
+					lineStyle: {
+						color: '#F8EA47',
+						width: 4
+					},
+					// If you don't want this to show up in the legend:
+					showInLegend: false,
+					silent: true,
+					zlevel: -1
 				}
 			]
 		};
