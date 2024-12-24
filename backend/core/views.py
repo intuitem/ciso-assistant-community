@@ -833,7 +833,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             risk_assessment = self.get_object()
             context = RiskScenario.objects.filter(
                 risk_assessment=risk_assessment
-            ).order_by("created_at")
+            ).order_by("ref_id")
             data = {
                 "context": context,
                 "risk_assessment": risk_assessment,
@@ -1978,7 +1978,8 @@ def get_composer_data(request):
     risk_assessments = risk_assessments.split(",")
     if not all(
         re.fullmatch(
-            r"([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})",  # UUID REGEX
+            # UUID REGEX
+            r"([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})",
             risk_assessment,
         )
         for risk_assessment in risk_assessments
