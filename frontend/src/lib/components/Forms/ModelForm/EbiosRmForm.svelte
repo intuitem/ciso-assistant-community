@@ -145,6 +145,7 @@
 			})}
 			field="assets"
 			label={m.assets()}
+			helpText={m.studyAssetHelpText()}
 		/>
 	</div>
 	<TextArea
