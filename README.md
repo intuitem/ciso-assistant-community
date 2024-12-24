@@ -171,8 +171,10 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
 63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
 64. NIS2 technical and methodological requirements 2024/2690 🇪🇺
-65. Guide de sécurité des données (CNIL) 🇫🇷
-66. International Traffic in Arms Regulations (ITAR) 🇺🇸
+65. Saudi Arabian Monetary Authority (SAMA) Cybersecurity Framework 🇸🇦 
+66. Guide de sécurité des données (CNIL) 🇫🇷
+67. International Traffic in Arms Regulations (ITAR) 🇺🇸
+68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
 
 ### Community contributions
 

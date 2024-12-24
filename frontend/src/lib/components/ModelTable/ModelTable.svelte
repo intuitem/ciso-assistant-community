@@ -364,6 +364,15 @@
 											{formatDateOrDateTime(value, languageTag())}
 										{:else if [true, false].includes(value)}
 											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+										{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+											<div class="flex items-center space-x-2">
+												<span>{safeTranslate(value ?? '-')}</span>
+												<span
+													class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-200 dark:text-green-900"
+												>
+													{m.accept()}
+												</span>
+											</div>
 										{:else}
 											{safeTranslate(value ?? '-')}
 										{/if}

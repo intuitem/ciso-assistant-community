@@ -958,6 +958,8 @@
 	"highlyRelevant": "Highly relevant",
 	"roTo": "RO/TO",
 	"roToCouple": "RO/TO couple",
+	"roToCouples": "RO/TO couples",
+	"selectedRoToCouples": "Selected RO/TO couples",
 	"addRoto": "Add RO/TO couple",
 	"organizedCrime": "Organized crime",
 	"terrorist": "Terrorist",
@@ -980,6 +982,7 @@
 	"addAttackPath": "Add attack path",
 	"attackPath": "Attack path",
 	"attackPaths": "Attack paths",
+	"selectedAttackPaths": "Selected attack paths",
 	"currentCriticality": "Current criticality",
 	"residualCriticality": "Residual criticality",
 	"notSelected": "Not selected",
@@ -1023,5 +1026,11 @@
 	"moderate": "Moderate",
 	"associatedAttackPaths": "Associated Attack Paths",
 	"powerUps": "Power-ups",
-	"nothingToShowYet": "Nothing to show yet. Charts will be updated once you've started your audits."
+	"nothingToShowYet": "Nothing to show yet. Charts will be updated once you've started your audits.",
+	"ebiosWs2_2_tooltip": "You need at least one RO/TO couple to evaluate it",
+	"ebiosWs2_3_tooltip": "You need at least one RO/TO couple to select it",
+	"ebiosWs3_2_tooltip": "You need at least one selected RO/TO couple to elaborate a strategic scenario",
+	"ebiosWs3_3_tooltip": "You need at least one Stakeholder to define associated security measures",
+	"ebiosWs4_1_tooltip": "You need at least one selected Attack Path from a Strategic Scenario to elaborate an operational scenario",
+	"ebiosWs4_2_tooltip": "You need at least one Operational Scenario to evaluate its likelihood"
 }
