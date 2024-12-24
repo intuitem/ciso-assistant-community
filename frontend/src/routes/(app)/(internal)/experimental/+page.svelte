@@ -33,4 +33,10 @@
 		link="insights/controls-impact"
 		tags={['analysis', 'controls']}
 	/>
+	<Article
+		title="Ecosystem radar"
+		desc="Visualize the stakeholders radar"
+		link="experimental/ecosystem"
+		tags={['analysis', 'tprm']}
+	/>
 </div>
