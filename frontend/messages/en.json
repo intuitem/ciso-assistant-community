@@ -1047,5 +1047,17 @@
 	"activityHelpText": "What is the activity of the source of risk within the scope of the study? ",
 	"pertinenceHelpText": "The relevance of the source of risk to the target objective",
 	"roToIsSelectedHelpText": "Selection of the RO/TO couple for the study",
-	"roToFearedEventHelpText": "Confronting the most serious feared events"
+	"roToFearedEventHelpText": "Confronting the most serious feared events",
+	"stakeholderEntityHelpText": "Stakeholders in the ecosystem",
+	"stakeholderCategoryHelpText": "Relationship with the stakeholder",
+	"dependencyHelpText": "Is the relationship with this stakeholder vital to my business?",
+	"penetrationHelpText": "To what extent does the stakeholder have access to my internal resources?",
+	"maturityHelpText": "What are the stakeholder's safety capabilities?",
+	"trustHelpText": "Could the stakeholder's intentions or interests be contrary to my own?",
+	"stakeholderIsSelectedHelpText": "Selection of the stakeholder for the study",
+	"streategicScenarioHelpText": "Sets of attack paths from a source of risk to an intended target",
+	"operatingModesDescriptionHelpText": "A series of basic actions that the source of risk is likely to have to carry out in order to achieve its objective",
+	"operationalScenarioThreatsHelpText": "Unitary action carried out by a risk source on a critical support asset as part of an operational scenario",
+	"operationalScenarioIsSelectedHelpText": "Selection of the operational scenario for the study"
+
 }
