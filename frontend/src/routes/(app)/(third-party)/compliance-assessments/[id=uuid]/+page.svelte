@@ -57,7 +57,7 @@
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
-		// Check if the pressed key is 'e' and the edit button should be displayed
+		if (document.activeElement?.tagName !== 'BODY') return; // otherwise it will interfere with input fields
 		if (event.key === 'f') {
 			event.preventDefault();
 			goto(`${$page.url.pathname}/flash-mode`);
