@@ -59,6 +59,7 @@
 		label={m.riskOrigin()}
 		cacheLock={cacheLocks['risk_origin']}
 		bind:cachedValue={formDataCache['risk_origin']}
+		helpText={m.riskOriginHelpText()}
 	/>
 	<TextArea
 		{form}
@@ -66,6 +67,7 @@
 		label={m.targetObjective()}
 		cacheLock={cacheLocks['target_objective']}
 		bind:cachedValue={formDataCache['target_objective']}
+		helpText={m.targetObjectiveHelpText()}
 	/>
 </div>
 <div
@@ -87,6 +89,7 @@
 		label={m.motivation()}
 		cacheLock={cacheLocks['motivation']}
 		bind:cachedValue={formDataCache['motivation']}
+		helpText={m.motivationHelpText()}
 	/>
 	<Select
 		{form}
@@ -95,6 +98,7 @@
 		label={m.resources()}
 		cacheLock={cacheLocks['resources']}
 		bind:cachedValue={formDataCache['resources']}
+		helpText={m.resourcesHelpText()}
 	/>
 	<Select
 		{form}
@@ -103,6 +107,7 @@
 		label={m.activity()}
 		cacheLock={cacheLocks['activity']}
 		bind:cachedValue={formDataCache['activity']}
+		helpText={m.activityHelpText()}
 	/>
 </div>
 <div
@@ -117,7 +122,12 @@
 	>
 		{m.activityThree()}
 	</p>
-	<Checkbox {form} field="is_selected" label={m.isSelected()} />
+	<Checkbox
+		{form}
+		field="is_selected"
+		label={m.isSelected()}
+		helpText={m.roToIsSelectedHelpText()}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}
@@ -128,6 +138,7 @@
 		})}
 		field="feared_events"
 		label={m.fearedEvents()}
+		helpText={m.roToFearedEventHelpText()}
 	/>
 	<TextArea
 		{form}
