@@ -36,9 +36,15 @@
 	cacheLock={cacheLocks['stakeholders']}
 	bind:cachedValue={formDataCache['stakeholders']}
 	label={m.stakeholders()}
+	helpText={m.attackPathStakeholdersHelpText()}
 />
 
-<Checkbox {form} field="is_selected" label={m.selected()} />
+<Checkbox
+	{form}
+	field="is_selected"
+	label={m.selected()}
+	helpText={m.attackPathIsSelectedHelpText()}
+/>
 <TextArea
 	{form}
 	field="justification"
