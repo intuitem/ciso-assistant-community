@@ -67,23 +67,11 @@
                         {{ scenario.get_current_risk.name }}
                     </p>
                 </td>
-                {% if scenario.get_current_risk.name == '--' %}
-                            <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: #808080">
-                                {{ scenario.get_residual_risk.name }}
-                            </p>
-                        </td>
-                {% endif %}
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
                     <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: {{ scenario.get_residual_risk.hexcolor }}">
                         {{ scenario.get_residual_risk.name }}
                     </p>
                 </td>
-                {% if scenario.get_residual_risk.name == '--' %}
-                            <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: #808080">
-                                {{ scenario.get_residual_risk.name }}
-                            </p>
-                        </td>
-                {% endif %}
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
                     {{ scenario.get_treatment_display }}
                 </td>
