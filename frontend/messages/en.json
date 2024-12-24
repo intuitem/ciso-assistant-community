@@ -1032,5 +1032,20 @@
 	"ebiosWs3_2_tooltip": "You need at least one selected RO/TO couple to elaborate a strategic scenario",
 	"ebiosWs3_3_tooltip": "You need at least one Stakeholder to define associated security measures",
 	"ebiosWs4_1_tooltip": "You need at least one selected Attack Path from a Strategic Scenario to elaborate an operational scenario",
-	"ebiosWs4_2_tooltip": "You need at least one Operational Scenario to evaluate its likelihood"
+	"ebiosWs4_2_tooltip": "You need at least one Operational Scenario to evaluate its likelihood",
+	"gravityHelpText": "Estimating the level and intensity of the effects of a risk",
+	"likelihoodHelpText": "Estimate of the feasibility or probability of a risk occurring",
+	"studyAssetHelpTect": "Primary (business asset) and supporting assets relating to the object under study",
+	"fearedEventHelpText": "The feared events must express/translate the fears of the business",
+	"fearedEventAssetHelpText": "Primary asset (business value) affected by the feared event",
+	"fearedEventQualificationHelpText": "Impact categories",
+	"fearedEventIsSelectedHelpText": "Selection of the feared event for the study",
+	"riskOriginHelpText": "Element, person, group of persons or organisation likely to generate a risk",
+	"targetObjectiveHelpText": "Purpose of a source of risk, depending on its motivations",
+	"resourcesHelpText": "Including financial resources, level of cyber skills, tools, time available to the attacker to carry out the attack, etc.",
+	"motivationHelpText": "Interests, factors that drive the source of risk to achieve its objective",
+	"activityHelpText": "What is the activity of the source of risk within the scope of the study? ",
+	"pertinenceHelpText": "The relevance of the source of risk to the target objective",
+	"roToIsSelectedHelpText": "Selection of the RO/TO couple for the study",
+	"roToFearedEventHelpText": "Confronting the most serious feared events"
 }
