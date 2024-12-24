@@ -27,4 +27,10 @@
 		link="assets/graph"
 		tags={['analysis', 'assets']}
 	/>
+	<Article
+		title="Impact Analysis"
+		desc="Visualize the impact of your applied controls"
+		link="insights/controls-impact"
+		tags={['analysis', 'controls']}
+	/>
 </div>
