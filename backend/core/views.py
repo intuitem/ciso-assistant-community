@@ -23,6 +23,9 @@ from wsgiref.util import FileWrapper
 
 import io
 
+import random
+from icecream import ic
+
 from docxtpl import DocxTemplate
 from .generators import gen_audit_context
 
@@ -1168,6 +1171,58 @@ class AppliedControlViewSet(BaseModelViewSet):
                 "links": links,
             }
         )
+
+    @action(detail=False, name="Get priority chart data")
+    def priority_chart_data(self, request):
+        qs = AppliedControl.objects.exclude(status="active")
+
+        data = {
+            "--": [],
+            "govern": [],
+            "identify": [],
+            "protect": [],
+            "detect": [],
+            "respond": [],
+            "recover": [],
+        }
+        angle_offsets = {"4": 0, "3": 90, "1": 180, "2": 270}
+        status_offset = {
+            "--": 10,
+            "deprecated": 20,
+            "in_progress": 30,
+            "on_hold": 40,
+            "to_do": 45,
+        }
+
+        not_displayed_cnt = 0
+        for ac in qs:
+            ic(ac)
+            ic(ac.status)
+            ic(ac.priority)
+            ic(ac.csf_function)
+            if ac.priority:
+                if ac.eta:
+                    days_countdown = random.randint(1, 90)
+                else:
+                    days_countdown = 100
+                impact_factor = 10
+                angle = angle_offsets[str(ac.priority)] + status_offset[ac.status]
+
+                vector = [
+                    days_countdown,
+                    angle,
+                    impact_factor,
+                    f"[{ac.priority}] {str(ac)}",
+                ]
+
+                data[ac.csf_function].append(vector)
+            else:
+                print("priority unset - add it to triage lot")
+                not_displayed_cnt += 1
+
+        data.update({"not_displayed": not_displayed_cnt})
+
+        return Response(data)
 
     @action(detail=False, methods=["get"])
     def get_timeline_info(self, request):
