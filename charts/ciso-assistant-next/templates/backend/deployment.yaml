@@ -4,7 +4,7 @@ metadata:
   name: {{ template "ciso-assistant.fullname" . }}-backend
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "ciso-assistant.labels" (dict "context" . "component" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
+    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
 spec:
   replicas: {{ .Values.backend.replicas }}
   selector:
@@ -15,7 +15,7 @@ spec:
       annotations:
         checksum/secret-backend: {{ include (print $.Template.BasePath "/backend/secret.yaml") . | sha256sum }}
       labels:
-        {{- include "ciso-assistant.labels" (dict "context" . "component" .Values.backend.name "component" .Values.backend.name) | nindent 8 }}
+        {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 8 }}
     spec:
       {{- with .Values.backend.imagePullSecrets | default .Values.global.imagePullSecrets }}
       imagePullSecrets:

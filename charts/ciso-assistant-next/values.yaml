@@ -32,11 +32,11 @@ global:
   clusterDomain: cluster.local
 
   # -- Toggle and define pod-level security context
-  securityContext: {}
-   # fsGroupChangePolicy: Always
-   # sysctls: []
-   # supplementalGroups: []
-   # fsGroup: 1001
+  securityContext:
+    fsGroupChangePolicy: Always
+    sysctls: []
+    supplementalGroups: []
+    fsGroup: 1001
 
   # -- Default node selector for all components
   nodeSelector: {}
@@ -82,7 +82,7 @@ backend:
     djangoDebug: false
 
   # -- Backend persistence configuration (used for sqlitedb and local storage)
-  ## Note: SQLite PVC will not be created if `backend.config.databaseType` is not with `sqlite` value
+  ## Note: SQLite PVC will be created only `backend.config.databaseType` use `sqlite` value
   persistence:
     sqlite:
       enabled: true
@@ -127,17 +127,17 @@ backend:
 
   # -- Toggle and define container-level security context
   containerSecurityContext:
-   # seLinuxOptions: {}
-   # runAsUser: 1001
-   # runAsGroup: 1001
-   # runAsNonRoot: true
-   # privileged: false
-   # readOnlyRootFilesystem: true
-   # allowPrivilegeEscalation: false
-   # capabilities:
-   #   drop: ["ALL"]
-   # seccompProfile:
-   #   type: "RuntimeDefault"
+    seLinuxOptions: {}
+    runAsUser: 1001
+    runAsGroup: 1001
+    runAsNonRoot: true
+    privileged: false
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: "RuntimeDefault"
 
   ## Backend service configuration
   service:
@@ -196,17 +196,17 @@ frontend:
 
   # -- Toggle and define container-level security context
   containerSecurityContext:
-   # seLinuxOptions: {}
-   # runAsUser: 1001
-   # runAsGroup: 1001
-   # runAsNonRoot: true
-   # privileged: false
-   # readOnlyRootFilesystem: true
-   # allowPrivilegeEscalation: false
-   # capabilities:
-   #   drop: ["ALL"]
-   # seccompProfile:
-   #   type: "RuntimeDefault"
+    seLinuxOptions: {}
+    runAsUser: 1001
+    runAsGroup: 1001
+    runAsNonRoot: true
+    privileged: false
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: "RuntimeDefault"
 
   ## Frontend service configuration
   service:
