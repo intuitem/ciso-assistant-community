@@ -24,16 +24,8 @@
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
-
-		// specify chart configuration item and data
-		// prettier-ignore
-		//14 segments
-		const mainAngles = [45, 135, 225, 315];
-		const option = {
-			title: {
-				text: title
-			},
-			graphic: [
+		const getGraphicElements = (chart) => {
+			return [
 				{
 					type: 'text',
 					position: [chart.getWidth() / 4, (3 * chart.getHeight()) / 4],
@@ -41,7 +33,7 @@
 					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
 					style: {
 						text: 'Prestataires',
-						font: '18px Arial',
+						font: '14px',
 						fill: '#666',
 						textAlign: 'center',
 						textVerticalAlign: 'middle'
@@ -54,7 +46,7 @@
 					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
 					style: {
 						text: 'Partenaires',
-						font: '18px Arial',
+						font: '14px',
 						fill: '#666',
 						textAlign: 'center',
 						textVerticalAlign: 'middle'
@@ -67,13 +59,20 @@
 					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
 					style: {
 						text: 'Clients',
-						font: '18px Arial',
+						font: '14px',
 						fill: '#666',
 						textAlign: 'center',
 						textVerticalAlign: 'middle'
 					}
 				}
-			],
+			];
+		};
+		const mainAngles = [45, 135, 225, 315];
+		const option = {
+			title: {
+				text: title
+			},
+			graphic: getGraphicElements(chart),
 			legend: {
 				data: ['<4', '4-5', '6-7', '>7'],
 				top: 'top'
@@ -257,9 +256,24 @@
 
 		chart.setOption(option);
 
+		// Handle resize
 		window.addEventListener('resize', function () {
 			chart.resize();
+			// Update the graphic elements positions after resize
+			chart.setOption({
+				graphic: getGraphicElements(chart)
+			});
 		});
+
+		// Clean up event listener on component unmount
+		return () => {
+			window.removeEventListener('resize', function () {
+				chart.resize();
+				chart.setOption({
+					graphic: getGraphicElements(chart)
+				});
+			});
+		};
 	});
 </script>
 
