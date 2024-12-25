@@ -50,6 +50,7 @@
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
+		if (document.activeElement?.tagName !== 'BODY') return;
 
 		// Check if 'c' is pressed and no input fields are currently focused
 		if (
