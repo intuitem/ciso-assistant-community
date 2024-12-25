@@ -28,6 +28,7 @@
 		// specify chart configuration item and data
 		// prettier-ignore
 		//14 segments
+		const mainAngles = [45, 135, 225, 315];
 		const option = {
 			title: {
 				text: title
@@ -75,7 +76,7 @@
 			],
 			legend: {
 				data: ['<4', '4-5', '6-7', '>7'],
-        top: 'top'
+				top: 'top'
 			},
 			polar: {},
 			tooltip: {
@@ -90,7 +91,7 @@
 				interval: 45,
 				axisLabel: { show: false },
 				splitLine: {
-					show: true
+					show: false
 				},
 				axisLine: {
 					show: false
@@ -106,8 +107,9 @@
 				inverse: true,
 				axisLabel: { show: true },
 				axisLine: {
-					show: true,symbol:['arrow','none'],
-          lineStyle:{width:2, },
+					show: true,
+					symbol: ['arrow', 'none'],
+					lineStyle: { width: 2 }
 				},
 				axisTick: {
 					show: false
@@ -217,13 +219,42 @@
 					showInLegend: false,
 					silent: true,
 					zlevel: -1
+				},
+				// Center blue dot
+				{
+					name: 'CenterDot',
+					type: 'scatter',
+					coordinateSystem: 'polar',
+					symbol: 'circle',
+					symbolSize: 30,
+					itemStyle: {
+						color: '#007FB9',
+						borderWidth: 1
+					},
+					data: [[5.999, 0]],
+					silent: true,
+					zlevel: -1,
+					showInLegend: false
+				},
+				{
+					name: 'MinorSplitLines',
+					type: 'line',
+					coordinateSystem: 'polar',
+					symbol: 'none',
+					silent: true,
+					lineStyle: {
+						color: '#1C263B',
+						width: 1
+					},
+					data: mainAngles.flatMap((angle) => [
+						[0, angle],
+						[6, angle],
+						[NaN, NaN]
+					])
 				}
 			]
 		};
 
-		// console.debug(option);
-
-		// use configuration item and data specified to show chart
 		chart.setOption(option);
 
 		window.addEventListener('resize', function () {
