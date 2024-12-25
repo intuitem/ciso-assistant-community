@@ -40,13 +40,10 @@
 
 	afterNavigate(async () => {
 		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, $page.url.pathname);
-	});
-
-	$: {
-		$pageTitle = getPageTitle();
 		if ($breadcrumbs.length < 2)
 			breadcrumbs.push([{ label: $pageTitle, href: $page.url.pathname }]);
-	}
+		$pageTitle = getPageTitle();
+	});
 </script>
 
 <ol class="breadcrumb-nonresponsive h-6 overflow-hidden whitespace-nowrap">
