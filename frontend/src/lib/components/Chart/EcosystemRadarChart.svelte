@@ -2,12 +2,13 @@
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { symbol } from 'zod';
+	import { grid } from '@unovis/ts/components/axis/style';
 
 	// export let name: string;
 
 	export let width = 'w-auto';
 	export let height = 'h-full';
-	export let classesContainer = '';
+	export let classesContainer = 'border';
 	export let title = '';
 	export let name = '';
 	export let data;
@@ -25,15 +26,20 @@
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 		const getGraphicElements = (chart) => {
+			const chartWidth = chart.getWidth();
+			const chartHeight = chart.getHeight();
+			const centerX = chartWidth / 2;
+			const centerY = chartHeight / 2;
+
 			return [
+				// Existing text elements
 				{
 					type: 'text',
-					position: [chart.getWidth() / 4, (3 * chart.getHeight()) / 4],
-					rotation: 0,
-					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
+					position: [chartWidth / 4, (3 * chartHeight) / 4],
+					silent: true,
 					style: {
 						text: 'Prestataires',
-						font: '14px',
+						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
 						textVerticalAlign: 'middle'
@@ -41,12 +47,11 @@
 				},
 				{
 					type: 'text',
-					position: [(3 * chart.getWidth()) / 4, chart.getHeight() / 4],
-					rotation: 0,
-					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
+					position: [(3 * chartWidth) / 4, chartHeight / 4],
+					silent: true,
 					style: {
 						text: 'Partenaires',
-						font: '14px',
+						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
 						textVerticalAlign: 'middle'
@@ -54,12 +59,11 @@
 				},
 				{
 					type: 'text',
-					position: [chart.getWidth() / 4, chart.getHeight() / 4],
-					rotation: 0,
-					origin: [chart.getWidth() / 2, chart.getWidth() / 2],
+					position: [chartWidth / 4, chartHeight / 4],
+					silent: true,
 					style: {
 						text: 'Clients',
-						font: '14px',
+						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
 						textVerticalAlign: 'middle'
@@ -75,12 +79,12 @@
 			graphic: getGraphicElements(chart),
 			legend: {
 				data: ['<4', '4-5', '6-7', '>7'],
-				top: 'top'
+				top: 60
 			},
 			polar: {},
 			tooltip: {
 				formatter: function (params) {
-					return params.value[3];
+					return params.value[3] + '<br/>Criticality: ' + params.value[0];
 				}
 			},
 			angleAxis: {
