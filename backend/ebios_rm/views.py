@@ -192,35 +192,58 @@ class StakeholderViewSet(BaseModelViewSet):
         // label: name of the 3rd party entity
         Angles start at 56,25 (45+45/4) and end at -45-45/4 = 303,75
         """
-        data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
+
+        # we can add a filter on the Stakeholder concerned by the ebios study here
+        qs = Stakeholder.objects.all()
+
+        c_data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
+        r_data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
         angle_offsets = {"client": 135, "partner": 225, "supplier": 45}
-        for sh in Stakeholder.objects.all():
-            if sh.current_criticality:
-                c_reliability = sh.current_maturity * sh.current_trust
-                c_exposure = sh.current_dependency * sh.current_penetration
-                print(c_exposure)
-                print(get_exposure_segment_id(c_exposure))
 
-                c_exposure_val = get_exposure_segment_id(c_exposure) * 4
+        cnt_c_not_displayed = 0
+        cnt_r_not_displayed = 0
+        for sh in qs:
+            # current
+            c_reliability = sh.current_maturity * sh.current_trust
+            c_exposure = sh.current_dependency * sh.current_penetration
+            c_exposure_val = get_exposure_segment_id(c_exposure) * 4
 
-                c_criticality = (
-                    math.floor(sh.current_criticality * 100) / 100.0
-                    if sh.current_criticality <= 5
-                    else 5.25
-                )
+            c_criticality = (
+                math.floor(sh.current_criticality * 100) / 100.0
+                if sh.current_criticality <= 5
+                else 5.25
+            )
 
-                angle = angle_offsets[sh.category] + (
-                    get_exposure_segment_id(c_exposure) * (45 / 4)
-                )
+            angle = angle_offsets[sh.category] + (
+                get_exposure_segment_id(c_exposure) * (45 / 4)
+            )
 
-                vector = [c_criticality, angle, c_exposure_val, sh.entity.name]
-                cluser_id = get_reliability_cluster(c_reliability)
+            vector = [c_criticality, angle, c_exposure_val, str(sh)]
 
-                data[cluser_id].append(vector)
-                print(vector)
+            cluser_id = get_reliability_cluster(c_reliability)
+            c_data[cluser_id].append(vector)
 
-        output = data
-        return Response(output)
+            # residual
+            r_reliability = sh.residual_maturity * sh.residual_trust
+            r_exposure = sh.residual_dependency * sh.residual_penetration
+            r_exposure_val = get_exposure_segment_id(r_exposure) * 4
+
+            r_criticality = (
+                math.floor(sh.residual_criticality * 100) / 100.0
+                if sh.residual_criticality <= 5
+                else 5.25
+            )
+
+            angle = angle_offsets[sh.category] + (
+                get_exposure_segment_id(r_exposure) * (45 / 4)
+            )
+
+            vector = [r_criticality, angle, r_exposure_val, str(sh)]
+
+            cluser_id = get_reliability_cluster(r_reliability)
+            r_data[cluser_id].append(vector)
+
+        return Response({"current": c_data, "residual": r_data})
 
 
 class StrategicScenarioViewSet(BaseModelViewSet):

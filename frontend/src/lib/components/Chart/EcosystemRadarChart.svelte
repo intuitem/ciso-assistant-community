@@ -3,7 +3,6 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	// export let name: string;
-	export let s_label = '';
 
 	export let width = 'w-auto';
 	export let height = 'h-full';
@@ -30,7 +29,7 @@
 		//14 segments
 		const option = {
 			title: {
-				text: 'Ecosystem'
+				text: title
 			},
 			graphic: [
 				{
@@ -75,7 +74,7 @@
 			],
 			legend: {
 				data: ['<4', '4-5', '6-7', '>7'],
-        top: 'bottom'
+        top: 'top'
 			},
 			polar: {},
 			tooltip: {
@@ -232,3 +231,8 @@
 </script>
 
 <div id={chart_id} class="{width} {height} {classesContainer}" />
+{#if data.not_displayed > 0}
+	<div class="text-center">
+		⚠️ {data.not_displayed} items are not displayed as they are lacking data.
+	</div>
+{/if}
