@@ -54,25 +54,35 @@ backend:
 
   ## Backend specific config
   config:
-    # -- Email admin for initial configuration
+    # -- Admin email for initial configuration
     emailAdmin: admin@example.net
   
-    # -- SMTP configuration
+    ## SMTP configuration
     smtp:
+      # -- Default from email address
       defaultFrom: no-reply@ciso-assistant.net
-      debug: false
       primary:
+        # -- Primary SMTP hostname
         host: primary.cool-mailer.net
+        # -- Primary SMTP post
         port: 587
+        # -- Enable TLS for primary SMTP
+        useTls: true
+        # -- Primary SMTP username
         username: apikey
+        # -- Primary SMTP password
         password: "primary_password_here"
-        useTls: true
       rescue:
+        # -- Rescue SMTP hostname
         host: smtp.secondary.mailer.cloud
+        # -- Rescue SMTP hostname
         port: 587
-        username: username
-        password: "rescue_password_here"
+        # -- Enable TLS for rescue SMTP
         useTls: true
+        # -- Rescue SMTP hostname
+        username: username
+        # -- Rescue SMTP hostname
+        password: "rescue_password_here"
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
     ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
@@ -81,18 +91,26 @@ backend:
     # -- Enable Django debug mode
     djangoDebug: false
 
-  # -- Backend persistence configuration (used for sqlitedb and local storage)
-  ## Note: SQLite PVC will be created only `backend.config.databaseType` use `sqlite` value
+  ## Backend persistence configuration (used for sqlitedb and local storage)
   persistence:
     sqlite:
+      # -- Enable SQLite persistence
+      # Note: only when `backend.config.databaseType` use `sqlite` value
       enabled: true
+      # -- SQLite persistant volume size
       size: 5Gi
+      # -- SQLite persistant volume storageClass
       storageClass: ""
+      # -- SQLite persistant volume accessMode
       accessMode: ReadWriteOnce
     localStorage:
+      # -- Enable Local Storage persistence
       enabled: true
+      # -- Local Storage persistant volume size
       size: 5Gi
+      # -- Local Storage persistant volume storageClass
       storageClass: ""
+      # -- Local Storage persistant volume accessMode
       accessMode: ReadWriteOnce
 
   ## Backend image
@@ -259,40 +277,39 @@ ingress:
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
 ## Note: Don't enable if you use SQLite mode or external PgSQL database
 postgresql:
+  # -- Enable to deploy PostgreSQL.
   enabled: false
-  # -- Customize auth to create ciso-assistant user.
-  ## Can be used to define static passwords.
   global:
     postgresql:
       auth:
-       # postgresPassword: ""
+        # -- Super-user postgres account password
+        ## Note: if not set, it will be dynamically generated
+        postgresPassword: ""
+        # -- Database name
         database: ciso-assistant
+        # -- Database username
         username: ciso-assistant
-       # password: ""
-  # -- PostgreSQL persistant volume size (default 8Gi).
+        # -- Database user account password
+        ## Note: if not set, it will be dynamically generated
+        password: ""
   primary:
     persistence:
+      # -- PostgreSQL persistant volume size (default 8Gi).
       size: 5Gi
 
 ## External PostgreSQL database configuration
 ## Note: All of these values are only used when backend.config.databaseType is set to externalPgsql
 externalPgsql:
   # -- Host of an external PostgreSQL instance to connect
-  ##
   host: ""
   # -- User of an external PostgreSQL instance to connect
-  ##
   user: ciso-assistant
   # -- Password of an external PostgreSQL instance to connect
-  ##
   password: ""
   # -- Secret containing the password of an external PostgreSQL instance to connect
   ## Name of an existing secret resource containing the DB password in a 'password' key
-  ##
   existingSecret: ""
   # -- Database inside an external PostgreSQL to connect
-  ##
   database: ciso-assistant
   # -- Port of an external PostgreSQL to connect
-  ##
   port: 5432
