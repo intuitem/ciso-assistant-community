@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { symbol } from 'zod';
 
 	// export let name: string;
 
@@ -105,7 +106,8 @@
 				inverse: true,
 				axisLabel: { show: true },
 				axisLine: {
-					show: false
+					show: true,symbol:['arrow','none'],
+          lineStyle:{width:2, },
 				},
 				axisTick: {
 					show: false
