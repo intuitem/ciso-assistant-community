@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { symbol } from 'zod';
-	import { grid } from '@unovis/ts/components/axis/style';
 
+	import { goto } from '$app/navigation';
 	// export let name: string;
 
 	export let width = 'w-auto';
@@ -13,14 +11,6 @@
 	export let name = '';
 	export let data;
 
-	// data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
-	// x,y, z
-	// x: criticité calculée avec cap à 5,5
-	// y: the angle (output of dict to make sure they end up on the right quadrant, min: 45, max:-45) -> done on BE
-	// z: the size of item (exposition = dependence x penetration) based on a dict, -> done on BE
-	// label: name of the 3rd party entity
-	//
-
 	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -28,17 +18,27 @@
 		const getGraphicElements = (chart) => {
 			const chartWidth = chart.getWidth();
 			const chartHeight = chart.getHeight();
-			const centerX = chartWidth / 2;
-			const centerY = chartHeight / 2;
 
 			return [
 				// Existing text elements
 				{
 					type: 'text',
+					position: [(3 * chartWidth) / 4, (3 * chartHeight) / 4],
+					silent: true,
+					style: {
+						text: 'P4 (' + data.priority_cnt.p4 + ')',
+						font: '18px Arial',
+						fill: '#666',
+						textAlign: 'center',
+						textVerticalAlign: 'middle'
+					}
+				},
+				{
+					type: 'text',
 					position: [chartWidth / 4, (3 * chartHeight) / 4],
 					silent: true,
 					style: {
-						text: 'P3',
+						text: 'P3 (' + data.priority_cnt.p3 + ')',
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -50,7 +50,7 @@
 					position: [(3 * chartWidth) / 4, chartHeight / 4],
 					silent: true,
 					style: {
-						text: 'P2',
+						text: 'P2 (' + data.priority_cnt.p2 + ')',
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -62,7 +62,7 @@
 					position: [chartWidth / 4, chartHeight / 4],
 					silent: true,
 					style: {
-						text: 'P1',
+						text: 'P1 (' + data.priority_cnt.p1 + ')',
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -71,28 +71,43 @@
 				}
 			];
 		};
-		const mainAngles = [45, 135, 225, 315];
+		//TODO use the safetranslate on formatter
 		const option = {
-			title: {},
+			title: {
+				text: 'Displaying prioritized non-active controls',
+				subtext: 'Click here to review the non-prioritized ones',
+				sublink: '/applied-controls?priority=null'
+			},
 			graphic: getGraphicElements(chart),
 			legend: {
-				data: ['--', 'Govern', 'Identify', 'Protect', 'Detect', 'Respond', 'Recover'],
+				data: ['--', 'To do', 'In progress', 'On hold', 'Deprecated'],
 				top: 60
 			},
 			polar: {},
 			tooltip: {
 				formatter: function (params) {
-					return params.value[3] + '<br/>Criticality: ' + params.value[0];
+					if (params.value[0] >= 100) {
+						return (
+							params.value[3] + '<br/><i>ETA not set or beyond 100 days</i><br/>' + params.value[4]
+						);
+					}
+					return (
+						params.value[3] + '<br/>ETA in: ' + params.value[0] + ' days<br/>' + params.value[4]
+					);
 				}
 			},
 			angleAxis: {
 				type: 'value',
-				startAngle: 315,
+				startAngle: 0,
 				boundaryGap: true,
-				interval: 45,
+				interval: 90,
 				axisLabel: { show: false },
 				splitLine: {
-					show: false
+					show: true,
+					lineStyle: {
+						color: '#0f0f0f',
+						width: 1
+					}
 				},
 				axisLine: {
 					show: false
@@ -104,8 +119,9 @@
 			},
 			radiusAxis: {
 				type: 'value',
+				min: -10,
 				max: 100,
-				axisLabel: { show: false },
+				axisLabel: { show: true },
 				axisLine: {
 					show: false,
 					symbol: ['arrow', 'none'],
@@ -118,65 +134,61 @@
 			series: [
 				{
 					name: '--',
-					color: '#F0F0F0',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.unclassified,
+					data: data['--'],
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
 				},
 				{
-					name: 'Govern',
-					color: '#F9F49D',
+					name: 'To do',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.govern,
+					data: data.to_do,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
 				},
 				{
-					name: 'Identify',
-					color: '#4CB2E0',
+					name: 'In progress',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.identify,
+					data: data.in_progress,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
 				},
 				{
-					name: 'Protect',
-					color: '#9292EA',
+					name: 'On hold',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.protect,
+					data: data.on_hold,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
 				},
 				{
-					name: 'Detect',
+					name: 'Deprecated',
 					color: '#FAB746',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
-					data: data.protect,
+					data: data.deprecated,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
@@ -258,25 +270,14 @@
 					showInLegend: false,
 					silent: true,
 					zlevel: -1
-				},
-				{
-					name: 'MinorSplitLines',
-					type: 'line',
-					coordinateSystem: 'polar',
-					symbol: 'none',
-					silent: true,
-					lineStyle: {
-						color: '#1C263B',
-						width: 1
-					},
-					data: mainAngles.flatMap((angle) => [
-						[0, angle],
-						[100, angle],
-						[NaN, NaN]
-					])
 				}
 			]
 		};
+		chart.on('click', function (params) {
+			if (params.value && params.value[5]) {
+				goto(`/applied-controls/${params.value[5]}`);
+			}
+		});
 
 		chart.setOption(option);
 

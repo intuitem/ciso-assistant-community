@@ -24,7 +24,6 @@ from wsgiref.util import FileWrapper
 import io
 
 import random
-from icecream import ic
 
 from docxtpl import DocxTemplate
 from .generators import gen_audit_context
@@ -1178,49 +1177,63 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         data = {
             "--": [],
-            "govern": [],
-            "identify": [],
-            "protect": [],
-            "detect": [],
-            "respond": [],
-            "recover": [],
+            "to_do": [],
+            "in_progress": [],
+            "on_hold": [],
+            "deprecated": [],
         }
         angle_offsets = {"4": 0, "3": 90, "1": 180, "2": 270}
         status_offset = {
-            "--": 10,
-            "deprecated": 20,
-            "in_progress": 30,
-            "on_hold": 40,
-            "to_do": 45,
+            "--": 4,
+            "to_do": 12,
+            "in_progress": 20,
+            "on_hold": 28,
+            "deprecated": 36,
         }
 
         not_displayed_cnt = 0
+
+        p_dict = qs.aggregate(
+            p1=Count("priority", filter=Q(priority=1)),
+            p2=Count("priority", filter=Q(priority=2)),
+            p3=Count("priority", filter=Q(priority=3)),
+            p4=Count("priority", filter=Q(priority=4)),
+        )
         for ac in qs:
-            ic(ac)
-            ic(ac.status)
-            ic(ac.priority)
-            ic(ac.csf_function)
             if ac.priority:
                 if ac.eta:
-                    days_countdown = random.randint(1, 90)
+                    days_countdown = min(100, ac.days_until_eta)
+                    # how many days until the ETA
                 else:
                     days_countdown = 100
                 impact_factor = 10
-                angle = angle_offsets[str(ac.priority)] + status_offset[ac.status]
+
+                # angle = angle_offsets[str(ac.priority)]+ (next(offsets) % 80) + random.randint(1,4)
+                angle = (
+                    angle_offsets[str(ac.priority)]
+                    + status_offset[ac.status]
+                    + random.randint(1, 40)
+                )
+                # angle = angle_offsets[str(ac.priority)] + next(offsets)
 
                 vector = [
                     days_countdown,
                     angle,
                     impact_factor,
                     f"[{ac.priority}] {str(ac)}",
+                    ac.status,
+                    ac.id,
                 ]
-
-                data[ac.csf_function].append(vector)
+                if ac.status:
+                    data[ac.status].append(vector)
+                else:
+                    data["unclassified"].append(vector)
             else:
                 print("priority unset - add it to triage lot")
                 not_displayed_cnt += 1
 
-        data.update({"not_displayed": not_displayed_cnt})
+        data["not_displayed"] = not_displayed_cnt
+        data["priority_cnt"] = p_dict
 
         return Response(data)
 

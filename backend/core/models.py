@@ -1859,6 +1859,14 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             self.eta < date.today() and self.status != "active" if self.eta else False
         )
 
+    @property
+    def days_until_eta(self):
+        if not self.eta:
+            return None
+        days_remaining = (self.eta - date.today()).days
+
+        return max(-1, days_remaining)
+
 
 class PolicyManager(models.Manager):
     def get_queryset(self):
