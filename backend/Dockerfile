@@ -30,6 +30,8 @@ RUN pip install --upgrade pip && \
 RUN poetry install
 RUN rm -rf $POETRY_CACHE_DIR
 
+RUN addgroup -g 1001 -S app && adduser -u 1001 -S -G app app
+USER app
 
 ENTRYPOINT ["poetry", "run",  "bash", "startup.sh"]
 EXPOSE 8000
