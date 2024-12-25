@@ -74,18 +74,26 @@ backend:
         password: "rescue_password_here"
         useTls: true
 
-    # -- Set the database type (sqlite or pgsql)
+    # -- Set the database type (sqlite, pgsql or externalPgsql)
+    ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
     databaseType: sqlite
 
     # -- Enable Django debug mode
     djangoDebug: false
 
-  # -- Backend persistence configuration (used for sqlitedb and proofs storage)
+  # -- Backend persistence configuration (used for sqlitedb and local storage)
+  ## Note: SQLite PVC will not be created if `backend.config.databaseType` is not with `sqlite` value
   persistence:
-    enabled: true
-    size: 5Gi
-    storageClass: ""
-    accessMode: ReadWriteOnce
+    sqlite:
+      enabled: true
+      size: 5Gi
+      storageClass: ""
+      accessMode: ReadWriteOnce
+    localStorage:
+      enabled: true
+      size: 5Gi
+      storageClass: ""
+      accessMode: ReadWriteOnce
 
   ## Backend image
   image:
@@ -246,3 +254,45 @@ ingress:
     #   -----BEGIN CERTIFICATE-----
     #   ...
     #   -----END CERTIFICATE-----
+
+## Bundeled PostgreSQL database configuration (Bitnami chart)
+## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
+## Note: Don't enable if you use SQLite mode or external PgSQL database
+postgresql:
+  enabled: false
+  # -- Customize auth to create ciso-assistant user.
+  ## Can be used to define static passwords.
+  global:
+    postgresql:
+      auth:
+       # postgresPassword: ""
+        database: ciso-assistant
+        username: ciso-assistant
+       # password: ""
+  # -- PostgreSQL persistant volume size (default 8Gi).
+  primary:
+    persistence:
+      size: 5Gi
+
+## External PostgreSQL database configuration
+## Note: All of these values are only used when backend.config.databaseType is set to externalPgsql
+externalPgsql:
+  # -- Host of an external PostgreSQL instance to connect
+  ##
+  host: ""
+  # -- User of an external PostgreSQL instance to connect
+  ##
+  user: ciso-assistant
+  # -- Password of an external PostgreSQL instance to connect
+  ##
+  password: ""
+  # -- Secret containing the password of an external PostgreSQL instance to connect
+  ## Name of an existing secret resource containing the DB password in a 'password' key
+  ##
+  existingSecret: ""
+  # -- Database inside an external PostgreSQL to connect
+  ##
+  database: ciso-assistant
+  # -- Port of an external PostgreSQL to connect
+  ##
+  port: 5432

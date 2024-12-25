@@ -33,6 +33,47 @@ spec:
           {{- with .Values.backend.env }}
             {{- toYaml . | nindent 10 }}
           {{- end }}
+          {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
+          - name: SQLITE_FILE
+            value: /ciso/db/ciso-assistant.sqlite3
+          {{- else if eq .Values.backend.config.databaseType "pgsql" }}
+          - name: DB_HOST
+            value: {{ template "ciso-assistant.fullname" . }}-postgresql
+          - name: DB_PORT
+            value: 5432
+          - name: POSTGRES_NAME
+            value: {{ .Values.postgresql.global.postgresql.auth.database | quote }}
+          - name: POSTGRES_USER
+            value: {{ .Values.postgresql.global.postgresql.auth.username }}
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                  name: {{ include "ciso-assistant.fullname" . }}-postgresql
+                  key: password
+          {{- else if eq .Values.backend.config.databaseType "externalPgsql" }}
+          - name: DB_HOST
+            value: {{ .Values.externalPgsql.host | quote }}
+          - name: DB_PORT
+            value: {{ .Values.externalPgsql.port | quote }}
+          - name: POSTGRES_NAME
+            value: {{ .Values.externalPgsql.database | quote }}
+          - name: POSTGRES_USER
+            value: {{ .Values.externalPgsql.user | quote }}
+          {{- if .Values.externalPgsql.existingSecret }}
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                  name: {{ .Values.externalPgsql.existingSecret }}
+                  key: password
+          {{- else }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.externalPgsql.password | quote }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.backend.persistence.localStorage.enabled }}
+          - name: LOCAL_STORAGE_DIRECTORY
+            value: /ciso/localStorage
+          {{- end }}
           - name: DJANGO_DEBUG
             value: {{ ternary "True" "False" .Values.backend.config.djangoDebug | quote }}
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
@@ -77,10 +118,16 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-rescue-password
           {{- end }}
-        {{- if .Values.backend.persistence.enabled }}
+        {{- if or (and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled) .Values.backend.persistence.localStorage.enabled }}
         volumeMounts:
-        - name: backend-data
-          mountPath: /code/db
+        {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
+        - name: sqlite-data
+          mountPath: /ciso/db
+        {{- end }}
+        {{- if .Values.backend.persistence.localStorage.enabled }}
+        - name: localstorage-data
+          mountPath: /ciso/localStorage
+        {{- end }}
         {{- end }}
         ports:
         - name: http
@@ -102,9 +149,16 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.backend.persistence.enabled }}
+      {{- if or (and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled) .Values.backend.persistence.localStorage.enabled }}
       volumes:
-      - name: backend-data
+      {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
+      - name: sqlite-data
         persistentVolumeClaim:
-          claimName: {{ include "ciso-assistant.fullname" . }}-backend
+          claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
+      {{- end }}
+      {{- if .Values.backend.persistence.localStorage.enabled }}
+      - name: localstorage-data
+        persistentVolumeClaim:
+          claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+      {{- end }}
       {{- end }}
