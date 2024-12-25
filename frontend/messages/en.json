@@ -1038,7 +1038,7 @@
 	"protect": "Protect",
 	"detect": "Detect",
 	"respond": "Respond",
-	"recover": "Recover",	
+	"recover": "Recover",
 	"gravityHelpText": "Estimating the level and intensity of the effects of a risk",
 	"likelihoodHelpText": "Estimate of the feasibility or probability of a risk occurring",
 	"studyAssetHelpText": "Primary (business asset) and supporting assets relating to the object under study",
