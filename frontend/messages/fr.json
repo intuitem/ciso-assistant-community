@@ -1019,8 +1019,11 @@
 	"markAsInProgress": "Reprendre",
 	"riskAnalyses": "Analyses de risques",
 	"client": "Client",
+	"clients": "Clients",
 	"partner": "Partenaire",
+	"partners": "Partenaires",
 	"supplier": "Fournisseur",
+	"suppliers": "Fournisseurs",
 	"referenceEntity": "Entité de référence",
 	"referenceEntitySemiColon": "Entité de référence :",
 	"moderate": "Modérée",
@@ -1067,5 +1070,8 @@
 	"operationalScenarioThreatsHelpText": "Actions élémentaires réalisées par une source de risque sur un bien support critique dans le cadre d'un scénario opérationnel",
 	"operationalScenarioIsSelectedHelpText": "Sélection du scénario opérationnel pour l'étude",
 	"attackPathStakeholdersHelpText": "Parties prenantes impactées par le chemin d'attaque",
-	"attackPathIsSelectedHelpText": "Sélection du chemin d'attaque pour l'étude"
+	"attackPathIsSelectedHelpText": "Sélection du chemin d'attaque pour l'étude",
+	"ecosystemRadar": "Radar de l'écosystème",
+	"criticalitySemiColon": "Criticité :",
+	"cyberFiability": "Fiabilité cyber"
 }

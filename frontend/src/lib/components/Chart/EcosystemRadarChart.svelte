@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { symbol } from 'zod';
-	import { grid } from '@unovis/ts/components/axis/style';
+	import * as m from '$paraglide/messages.js';
 
 	// export let name: string;
 
@@ -35,10 +34,21 @@
 				// Existing text elements
 				{
 					type: 'text',
+					left: 'center',
+					top: 40,
+					style: {
+						text: m.cyberFiability(),
+						font: 'bold 16px Arial',
+						fill: '#333',
+						textAlign: 'center'
+					}
+				},
+				{
+					type: 'text',
 					position: [chartWidth / 4, (3 * chartHeight) / 4],
 					silent: true,
 					style: {
-						text: 'Prestataires',
+						text: m.suppliers(),
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -50,7 +60,7 @@
 					position: [(3 * chartWidth) / 4, chartHeight / 4],
 					silent: true,
 					style: {
-						text: 'Partenaires',
+						text: m.partners(),
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -62,7 +72,7 @@
 					position: [chartWidth / 4, chartHeight / 4],
 					silent: true,
 					style: {
-						text: 'Clients',
+						text: m.clients(),
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -84,7 +94,13 @@
 			polar: {},
 			tooltip: {
 				formatter: function (params) {
-					return params.value[3] + '<br/>Criticality: ' + params.value[0];
+					return (
+						params.value[3].split('-')[0] +
+						' - ' +
+						safeTranslate(params.value[3].split('-')[1]) +
+						`<br/>${m.criticalitySemiColon()} ` +
+						params.value[0]
+					);
 				}
 			},
 			angleAxis: {
