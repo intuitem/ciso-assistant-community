@@ -85,7 +85,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: data // metaData
 	};
 
-	return { createForm, deleteForm, model, URLModel, table };
+	const radarEndpoint = `${BASE_API_URL}/ebios-rm/stakeholders/chart_data/`;
+
+	const radarRes = await fetch(radarEndpoint);
+	const radar = await radarRes.json();
+
+	return { createForm, deleteForm, model, URLModel, table, radar };
 };
 
 export const actions: Actions = {

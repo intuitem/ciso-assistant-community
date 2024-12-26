@@ -1066,5 +1066,6 @@
 	"operationalScenarioThreatsHelpText": "Unitary actions carried out by a risk source on a critical support asset as part of an operational scenario",
 	"operationalScenarioIsSelectedHelpText": "Selection of the operational scenario for the study",
 	"attackPathStakeholdersHelpText": "Stakeholders involved in the attack path",
-	"attackPathIsSelectedHelpText": "Selection of the attack path for the study"
+	"attackPathIsSelectedHelpText": "Selection of the attack path for the study",
+	"ecosystemRadar": "Ecosystem radar"
 }
