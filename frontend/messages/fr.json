@@ -1071,7 +1071,9 @@
 	"operationalScenarioIsSelectedHelpText": "Sélection du scénario opérationnel pour l'étude",
 	"attackPathStakeholdersHelpText": "Parties prenantes impactées par le chemin d'attaque",
 	"attackPathIsSelectedHelpText": "Sélection du chemin d'attaque pour l'étude",
+	"percentageDisplay": "{number} %",
+	"reviewProgress": "Avancement de la revue",
 	"ecosystemRadar": "Radar de l'écosystème",
 	"criticalitySemiColon": "Criticité :",
-	"cyberFiability": "Fiabilité cyber"
+	"cyberReliability": "Fiabilité cyber"
 }

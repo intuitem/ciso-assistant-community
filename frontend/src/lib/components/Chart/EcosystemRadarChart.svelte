@@ -37,7 +37,7 @@
 					left: 'center',
 					top: 40,
 					style: {
-						text: m.cyberFiability(),
+						text: m.cyberReliability(),
 						font: 'bold 16px Arial',
 						fill: '#333',
 						textAlign: 'center'
