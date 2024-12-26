@@ -1,6 +1,7 @@
 from django.db.models.query import QuerySet
 import math
 
+
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     qs = stakeholders_queryset
 
