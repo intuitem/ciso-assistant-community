@@ -10,6 +10,7 @@ from core.models import (
     Qualification,
     RiskMatrix,
     Threat,
+    RiskAssessment,
 )
 from core.validators import (
     JSONSchemaInstanceValidator,
@@ -191,6 +192,19 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     @property
     def applied_control_count(self):
         return AppliedControl.objects.filter(stakeholders__ebios_rm_study=self).count()
+
+    @property
+    def last_risk_assessment(self):
+        """Get the latest risk assessment for the study
+        Returns:
+            RiskAssessment: The latest risk assessment for the study
+        """
+        try:
+            return RiskAssessment.objects.filter(ebios_rm_study=self).latest(
+                "created_at"
+            )
+        except RiskAssessment.DoesNotExist:
+            return None
 
     def update_workshop_step_status(self, workshop: int, step: int, new_status: str):
         if workshop < 1 or workshop > 5:
