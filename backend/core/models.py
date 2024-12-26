@@ -1851,6 +1851,19 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             requirementassessment__applied_controls=self
         ).count()
 
+    @property
+    def links_count(self):
+        reqs = 0  # compliance requirements
+        scenarios = 0  # risk scenarios
+        sh_actions = 0  # stakeholder tprm actions
+
+        reqs = RequirementNode.objects.filter(
+            requirementassessment__applied_controls=self
+        ).count()
+        scenarios = RiskScenario.objects.filter(applied_controls=self).count()
+
+        return reqs + scenarios + sh_actions
+
     def has_evidences(self):
         return self.evidences.count() > 0
 

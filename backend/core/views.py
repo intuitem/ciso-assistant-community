@@ -1206,7 +1206,7 @@ class AppliedControlViewSet(BaseModelViewSet):
                     # how many days until the ETA
                 else:
                     days_countdown = 100
-                impact_factor = 10
+                impact_factor = 5 + ac.links_count
 
                 # angle = angle_offsets[str(ac.priority)]+ (next(offsets) % 80) + random.randint(1,4)
                 angle = (

@@ -78,6 +78,7 @@
 				subtext: 'Click here to review the non-prioritized ones',
 				sublink: '/applied-controls?priority=null'
 			},
+			color: ['#4D4870', '#74C0DE', '#FAB746', '#8B5DF6', '#f87171'],
 			graphic: getGraphicElements(chart),
 			legend: {
 				data: ['--', 'To do', 'In progress', 'On hold', 'Deprecated'],
@@ -88,11 +89,17 @@
 				formatter: function (params) {
 					if (params.value[0] >= 100) {
 						return (
-							params.value[3] + '<br/><i>ETA not set or beyond 100 days</i><br/>' + params.value[4]
+							params.value[3] +
+							'<br/>Links: <br/><i>ETA not set or beyond 100 days</i><br/>' +
+							params.value[4]
 						);
 					}
 					return (
-						params.value[3] + '<br/>ETA in: ' + params.value[0] + ' days<br/>' + params.value[4]
+						params.value[3] +
+						'<br/>Links: <br/>ETA in: ' +
+						params.value[0] +
+						' days<br/>' +
+						params.value[4]
 					);
 				}
 			},
@@ -182,39 +189,12 @@
 				},
 				{
 					name: 'Deprecated',
-					color: '#FAB746',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
 						return val[2] * 2;
 					},
 					data: data.deprecated,
-					animationDelay: function (idx) {
-						return idx * 5;
-					}
-				},
-				{
-					name: 'Respond',
-					color: '#F97367',
-					type: 'scatter',
-					coordinateSystem: 'polar',
-					symbolSize: function (val) {
-						return val[2] * 2;
-					},
-					data: data.protect,
-					animationDelay: function (idx) {
-						return idx * 5;
-					}
-				},
-				{
-					name: 'Recover',
-					color: '#7DF49F',
-					type: 'scatter',
-					coordinateSystem: 'polar',
-					symbolSize: function (val) {
-						return val[2] * 2;
-					},
-					data: data.protect,
 					animationDelay: function (idx) {
 						return idx * 5;
 					}
@@ -243,10 +223,10 @@
 					coordinateSystem: 'polar',
 					symbol: 'none',
 					data: new Array(361).fill(0).map((_, index) => {
-						return [90, index];
+						return [60, index];
 					}),
 					lineStyle: {
-						color: '#00ADA8',
+						color: '#F8EA47',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
@@ -260,10 +240,10 @@
 					coordinateSystem: 'polar',
 					symbol: 'none',
 					data: new Array(361).fill(0).map((_, index) => {
-						return [60, index];
+						return [90, index];
 					}),
 					lineStyle: {
-						color: '#F8EA47',
+						color: '#00ADA8',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
