@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
   frontend-directory: ./frontend
@@ -110,10 +111,12 @@ jobs:
         run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
           CI: true
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: functional-tests-report-${{ matrix.playwright-browser }}
+          name: ${{ env.BRANCH_NAME }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.frontend-directory }}/tests/results/
@@ -212,10 +215,12 @@ jobs:
         run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
           CI: true
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: enterprise-functional-tests-report-${{ matrix.playwright-browser }}
+          name: ${{ env.BRANCH_NAME }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/results/
