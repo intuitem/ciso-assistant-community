@@ -55,7 +55,7 @@
 </script>
 
 <div class="space-y-2">
-	<Accordion class="bg-white rounded-md border hover:text-primary-700" hover="bg-white">
+	<Accordion class="bg-white rounded-md border hover:text-primary-700 text-gray-800" hover="bg-white">
 		<AccordionItem>
 			<svelte:fragment slot="lead"><i class="fa-solid fa-bullseye"></i></svelte:fragment>
 			<svelte:fragment slot="summary">{m.ecosystemRadar()}</svelte:fragment>

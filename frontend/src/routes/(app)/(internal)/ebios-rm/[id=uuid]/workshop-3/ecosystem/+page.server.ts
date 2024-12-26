@@ -85,7 +85,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: data // metaData
 	};
 
-	const radarEndpoint = `${BASE_API_URL}/ebios-rm/stakeholders/chart_data/`;
+	const radarEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/ecosystem_chart_data/`;
 
 	const radarRes = await fetch(radarEndpoint);
 	const radar = await radarRes.json();
