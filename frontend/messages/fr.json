@@ -1067,5 +1067,6 @@
 	"operationalScenarioThreatsHelpText": "Actions élémentaires réalisées par une source de risque sur un bien support critique dans le cadre d'un scénario opérationnel",
 	"operationalScenarioIsSelectedHelpText": "Sélection du scénario opérationnel pour l'étude",
 	"attackPathStakeholdersHelpText": "Parties prenantes impactées par le chemin d'attaque",
-	"attackPathIsSelectedHelpText": "Sélection du chemin d'attaque pour l'étude"
+	"attackPathIsSelectedHelpText": "Sélection du chemin d'attaque pour l'étude",
+	"ecosystemRadar": "Radar de l'écosystème"
 }
