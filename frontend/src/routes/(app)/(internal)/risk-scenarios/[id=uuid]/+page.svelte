@@ -11,6 +11,9 @@
 	import { isDark } from '$lib/utils/helpers';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
+	import { goto } from '$app/navigation';
+
+	import { onMount } from 'svelte';
 	export let data: PageData;
 
 	const user = $page.data.user;
@@ -26,6 +29,25 @@
 	$: classesCellText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
 	};
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.metaKey || event.ctrlKey) return;
+		if (document.activeElement?.tagName !== 'BODY') return;
+		// Check if the pressed key is 'e' and the edit button should be displayed
+
+		if (event.key === 'e' && canEditObject) {
+			event.preventDefault();
+			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+		}
+	}
+	onMount(() => {
+		// Add event listener when component mounts
+		window.addEventListener('keydown', handleKeydown);
+
+		// Cleanup event listener when component is destroyed
+		return () => {
+			window.removeEventListener('keydown', handleKeydown);
+		};
+	});
 </script>
 
 <div class="flex flex-col space-y-3">
