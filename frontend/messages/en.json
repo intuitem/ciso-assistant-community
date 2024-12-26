@@ -1067,5 +1067,6 @@
 	"operationalScenarioIsSelectedHelpText": "Selection of the operational scenario for the study",
 	"attackPathStakeholdersHelpText": "Stakeholders involved in the attack path",
 	"attackPathIsSelectedHelpText": "Selection of the attack path for the study",
-	"pourcentageDisplay": "{number}%"
+	"percentageDisplay": "{number}%",
+	"reviewProgress": "Review progress"
 }

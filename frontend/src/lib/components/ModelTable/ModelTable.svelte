@@ -366,7 +366,7 @@
 											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
 										{:else if key === 'progress'}
 											<span class="ml-9"
-												>{safeTranslate('pourcentageDisplay', { number: value })}</span
+												>{safeTranslate('percentageDisplay', { number: value })}</span
 											>
 										{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
 											<div class="flex items-center space-x-2">

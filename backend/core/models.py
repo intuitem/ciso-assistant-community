@@ -3137,11 +3137,7 @@ class ComplianceAssessment(Assessment):
             compliance_assessment=self, requirement__assessable=True
         )
         total_cnt = requirements_all.count()
-        set_cnt = (
-            requirements_all.filter(status="done")
-            .exclude(result="not_assessed")
-            .count()
-        )
+        set_cnt = requirements_all.exclude(result="not_assessed").count()
         value = int((set_cnt / total_cnt) * 100) if total_cnt > 0 else 0
         return value
 
