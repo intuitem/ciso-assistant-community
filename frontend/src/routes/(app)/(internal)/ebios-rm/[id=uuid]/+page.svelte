@@ -106,22 +106,30 @@
 			{
 				title: safeTranslate(m.ebiosWs5_2()),
 				status: data.data.meta.workshops[4].steps[1].status,
-				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=two&next=${$page.url.pathname}`,
+				disabled: data.data.last_risk_assessment == null,
+				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_3()),
 				status: data.data.meta.workshops[4].steps[2].status,
-				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=three&next=${$page.url.pathname}`,
+				disabled: data.data.last_risk_assessment == null,
+				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_4()),
 				status: data.data.meta.workshops[4].steps[3].status,
-				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=four&next=${$page.url.pathname}`,
+				disabled: data.data.last_risk_assessment == null,
+				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_5()),
 				status: data.data.meta.workshops[4].steps[4].status,
-				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/remediation-plan?next=${$page.url.pathname}`,
+				disabled: data.data.last_risk_assessment == null,
+				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			}
 		]
 	};

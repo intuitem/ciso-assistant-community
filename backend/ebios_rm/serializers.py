@@ -2,7 +2,7 @@ from core.serializers import (
     BaseModelSerializer,
     FieldsRelatedField,
 )
-from core.models import StoredLibrary, RiskMatrix
+from core.models import RiskMatrix
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -13,7 +13,6 @@ from .models import (
     OperationalScenario,
 )
 from rest_framework import serializers
-import logging
 
 
 class EbiosRMStudyWriteSerializer(BaseModelSerializer):
@@ -43,6 +42,7 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     selected_attack_path_count = serializers.IntegerField()
     operational_scenario_count = serializers.IntegerField()
     applied_control_count = serializers.IntegerField()
+    last_risk_assessment = FieldsRelatedField()
 
     class Meta:
         model = EbiosRMStudy
