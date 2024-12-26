@@ -1019,8 +1019,11 @@
 	"markAsInProgress": "Mark as in progress",
 	"riskAnalyses": "Risk analyses",
 	"client": "Client",
+	"clients": "Clients",
 	"partner": "Partner",
+	"partners": "Partners",
 	"supplier": "Supplier",
+	"suppliers": "Suppliers",
 	"referenceEntity": "Reference entity",
 	"referenceEntitySemiColon": "Reference entity:",
 	"moderate": "Moderate",
@@ -1067,5 +1070,7 @@
 	"operationalScenarioIsSelectedHelpText": "Selection of the operational scenario for the study",
 	"attackPathStakeholdersHelpText": "Stakeholders involved in the attack path",
 	"attackPathIsSelectedHelpText": "Selection of the attack path for the study",
-	"ecosystemRadar": "Ecosystem radar"
+	"ecosystemRadar": "Ecosystem radar",
+	"criticalitySemiColon": "Criticality:",
+	"cyberFiability": "Cyber fiability"
 }
