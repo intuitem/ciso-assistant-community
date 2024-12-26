@@ -137,7 +137,7 @@
 			series: [
 				{
 					name: '<4',
-					color: '#b91c1c',
+					color: '#E73E51',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -150,7 +150,7 @@
 				},
 				{
 					name: '4-5',
-					color: '#eab308',
+					color: '#DE8898',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -163,7 +163,7 @@
 				},
 				{
 					name: '6-7',
-					color: '#3b82f6',
+					color: '#BAD9EA',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -176,7 +176,7 @@
 				},
 				{
 					name: '>7',
-					color: '#16a34a',
+					color: '#8A8B8A',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -197,7 +197,7 @@
 						return [2.5, index];
 					}),
 					lineStyle: {
-						color: '#ef4444',
+						color: '#E73E51',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
@@ -214,7 +214,7 @@
 						return [0.2, index];
 					}),
 					lineStyle: {
-						color: '#84cc16',
+						color: '#00ADA8',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
@@ -231,7 +231,7 @@
 						return [0.9, index];
 					}),
 					lineStyle: {
-						color: '#f97316',
+						color: '#F8EA47',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
