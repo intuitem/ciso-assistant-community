@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { symbol } from 'zod';
-	import { grid } from '@unovis/ts/components/axis/style';
+	import * as m from '$paraglide/messages.js';
 
 	// export let name: string;
 
@@ -35,10 +34,21 @@
 				// Existing text elements
 				{
 					type: 'text',
+					left: 'center',
+					top: 40,
+					style: {
+						text: m.cyberFiability(),
+						font: 'bold 16px Arial',
+						fill: '#333',
+						textAlign: 'center'
+					}
+				},
+				{
+					type: 'text',
 					position: [chartWidth / 4, (3 * chartHeight) / 4],
 					silent: true,
 					style: {
-						text: 'Prestataires',
+						text: m.suppliers(),
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -50,7 +60,7 @@
 					position: [(3 * chartWidth) / 4, chartHeight / 4],
 					silent: true,
 					style: {
-						text: 'Partenaires',
+						text: m.partners(),
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -62,7 +72,7 @@
 					position: [chartWidth / 4, chartHeight / 4],
 					silent: true,
 					style: {
-						text: 'Clients',
+						text: m.clients(),
 						font: '18px Arial',
 						fill: '#666',
 						textAlign: 'center',
@@ -84,7 +94,13 @@
 			polar: {},
 			tooltip: {
 				formatter: function (params) {
-					return params.value[3] + '<br/>Criticality: ' + params.value[0];
+					return (
+						params.value[3].split('-')[0] +
+						' - ' +
+						safeTranslate(params.value[3].split('-')[1]) +
+						`<br/>${m.criticalitySemiColon()} ` +
+						params.value[0]
+					);
 				}
 			},
 			angleAxis: {
@@ -121,7 +137,7 @@
 			series: [
 				{
 					name: '<4',
-					color: '#E73E51',
+					color: '#b91c1c',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -134,7 +150,7 @@
 				},
 				{
 					name: '4-5',
-					color: '#DE8898',
+					color: '#eab308',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -147,7 +163,7 @@
 				},
 				{
 					name: '6-7',
-					color: '#BAD9EA',
+					color: '#3b82f6',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -160,7 +176,7 @@
 				},
 				{
 					name: '>7',
-					color: '#8A8B8A',
+					color: '#16a34a',
 					type: 'scatter',
 					coordinateSystem: 'polar',
 					symbolSize: function (val) {
@@ -181,7 +197,7 @@
 						return [2.5, index];
 					}),
 					lineStyle: {
-						color: '#E73E51',
+						color: '#ef4444',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
@@ -198,7 +214,7 @@
 						return [0.2, index];
 					}),
 					lineStyle: {
-						color: '#00ADA8',
+						color: '#84cc16',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
@@ -215,7 +231,7 @@
 						return [0.9, index];
 					}),
 					lineStyle: {
-						color: '#F8EA47',
+						color: '#f97316',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
