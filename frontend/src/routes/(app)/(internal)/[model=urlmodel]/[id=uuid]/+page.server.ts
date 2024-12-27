@@ -20,7 +20,7 @@ import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	const modelInfo = getModelInfo(event.params.model + '_duplicate');
+	const modelInfo = getModelInfo(event.params.model);
 	const foreignKeys: Record<string, any> = {};
 
 	if (modelInfo.foreignKeyFields) {
