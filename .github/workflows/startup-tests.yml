@@ -111,7 +111,7 @@ jobs:
           retention-days: 5
 
   startup-docker-compose-test:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.UBUNTU_VERSION }}
     env:
       COMPOSE_TEST: True
     steps:
@@ -158,11 +158,11 @@ jobs:
           fi
 
   enterprise-startup-functional-test:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.UBUNTU_VERSION }}
 
     services:
       postgres:
-        image: postgres:16
+        image: postgres:${{ env.POSTGRES_VERSION }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -173,7 +173,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.12"]
+        python-version: ["${{ env.PYTHON_VERSION }}"]
 
     steps:
       - uses: actions/checkout@v4
@@ -249,7 +249,7 @@ jobs:
           retention-days: 5
 
   enterprise-startup-docker-compose-test:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ env.UBUNTU_VERSION }}
     env:
       COMPOSE_TEST: True
     steps:
