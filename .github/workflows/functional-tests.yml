@@ -22,11 +22,11 @@ env:
 
 jobs:
   functional-tests:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:${{ env.POSTGRES_VERSION }}
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -40,7 +40,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["${{ env.PYTHON_VERSION }}"]
+        python-version: ["3.12"]
         playwright-browser: ["chromium"]
 
     steps:
@@ -127,11 +127,11 @@ jobs:
           retention-days: 5
 
   enterprise-functional-tests:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:${{ env.POSTGRES_VERSION }}
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -145,7 +145,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["${{ env.PYTHON_VERSION }}"]
+        python-version: ["3.12"]
         playwright-browser: ["chromium"]
 
     steps:
