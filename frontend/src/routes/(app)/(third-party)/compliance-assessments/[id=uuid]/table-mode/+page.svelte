@@ -20,6 +20,7 @@
 		type ModalStore
 	} from '@skeletonlabs/skeleton';
 	import type { Actions, PageData } from '../../table-mode/$types';
+	import { page } from '$app/stores';
 
 	export let data: PageData;
 	export let form: Actions;
@@ -82,7 +83,13 @@
 		return map[result];
 	}
 
-	let questionnaireMode = questionnaireOnly ? true : assessmentOnly ? false : true;
+	let questionnaireMode = questionnaireOnly
+		? true
+		: assessmentOnly
+			? false
+			: $page.data.user.is_third_party
+				? true
+				: false;
 
 	const modalStore: ModalStore = getModalStore();
 
