@@ -1075,5 +1075,9 @@
 	"reviewProgress": "Review progress",
 	"ecosystemRadar": "Ecosystem radar",
 	"criticalitySemiColon": "Criticality:",
-	"cyberReliability": "Cyber reliability"
+	"cyberReliability": "Cyber reliability",
+  "insights": "Insights",
+  "impactAnalysis": "Impact analysis",
+  "priorityReview": "Priority review",
+  "timelineView": "Timeline view"
 }
