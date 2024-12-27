@@ -236,11 +236,13 @@ export const actions: Actions = {
 		const scenarioEndpoint = `${BASE_API_URL}/risk-scenarios/${event.params.id}/`;
 		const scenario = await event.fetch(`${scenarioEndpoint}object`).then((res) => res.json());
 
-		const measures = [...scenario.applied_controls, measure.id];
+		const field: string = event.url.searchParams.get('field') || 'applied_controls';
+
+		const measures = [...scenario[field], measure.id];
 
 		const patchRequestInitOptions: RequestInit = {
 			method: 'PATCH',
-			body: JSON.stringify({ applied_controls: measures })
+			body: JSON.stringify({ [field]: measures })
 		};
 
 		const patchRes = await event.fetch(scenarioEndpoint, patchRequestInitOptions);
