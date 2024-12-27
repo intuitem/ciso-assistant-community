@@ -273,6 +273,8 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
                 "hexcolor": "#f9fafb",
             }
         risk_matrix = self.parsed_matrix
+        if not risk_matrix["impact"][self.gravity].get("hexcolor"):
+            risk_matrix["impact"][self.gravity]["hexcolor"] = "#f9fafb"
         return {
             **risk_matrix["impact"][self.gravity],
             "value": self.gravity,
