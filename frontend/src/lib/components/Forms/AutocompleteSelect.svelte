@@ -62,9 +62,20 @@
 
 	const default_value = nullable ? null : selectedValues[0];
 
+	function arraysEqual(arr1: (string|undefined)[], arr2: (string|undefined)[]) {
+		if (arr1.length !== arr2.length) return false;
+
+		const sortedArr1 = [...arr1].sort();
+		const sortedArr2 = [...arr2].sort();
+
+		return sortedArr1.every((value, index) => value === sortedArr2[index]);
+	}
+
 	$: {
-		$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
-		handleSelectChange();
+		if (!arraysEqual(selectedValues, $value)) {
+			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
+			handleSelectChange();
+		}
 	}
 
 	$: disabled = selected.length && options.length === 1 && $constraints?.required;
