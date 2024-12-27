@@ -7,17 +7,19 @@ on:
 
 env:
   GITHUB_WORKFLOW: github_actions
+  UBUNTU_VERSION: "ubuntu-24.04"
+  NODE_VERSION: "22"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       working-directory: ./frontend
 
     strategy:
       max-parallel: 4
       matrix:
-        node-version: ["20"]
+        node-version: ["22"]
 
     steps:
       - uses: actions/checkout@v3

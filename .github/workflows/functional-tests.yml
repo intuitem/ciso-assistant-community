@@ -14,14 +14,17 @@ env:
   enterprise-frontend-build-directory: ./enterprise/frontend/.build/frontend
   enterprise-backend-settings-module: enterprise_core.settings
   DEBUG: pw:webserver
+  POSTGRES_VERSION: "16"
+  UBUNTU_VERSION: "ubuntu-24.04"
+  PYTHON_VERSION: "3.12"
 
 jobs:
   functional-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:14.1
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -35,7 +38,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
         playwright-browser: ["chromium"]
 
     steps:
@@ -124,11 +127,11 @@ jobs:
           retention-days: 5
 
   enterprise-functional-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:14.12
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -142,7 +145,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
         playwright-browser: ["chromium"]
 
     steps:
