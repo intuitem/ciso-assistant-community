@@ -35,7 +35,7 @@ export const navData = {
 				{
 					name: 'impactAnalysis',
 					fa_icon: 'fa-solid fa-hexagon-nodes',
-					href: '/insights/impact-analysis/',
+					href: '/insights/impact-analysis',
 					permissions: [
 						'view_project',
 						'view_riskscenario',
@@ -47,7 +47,7 @@ export const navData = {
 				{
 					name: 'priorityReview',
 					fa_icon: 'fa-solid fa-ranking-star',
-					href: '/insights/priority-review/',
+					href: '/insights/priority-review',
 					permissions: [
 						'view_project',
 						'view_riskscenario',
@@ -59,7 +59,7 @@ export const navData = {
 				{
 					name: 'timelineView',
 					fa_icon: 'fa-solid fa-table-columns',
-					href: '/insights/timeline-view/',
+					href: '/insights/timeline-view',
 					permissions: [
 						'view_project',
 						'view_riskscenario',
