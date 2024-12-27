@@ -42,4 +42,10 @@
 		link="experimental/ecosystem"
 		tags={['analysis', 'tprm']}
 	/>
+	<Article
+		title="Priority review"
+		desc="Visualize the controls priority radar"
+		link="experimental/priority"
+		tags={['analysis', 'tprm']}
+	/>
 </div>

@@ -230,7 +230,7 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (console.log(row), row.current_criticality.toString()),
+	getColumn: (row) => row.current_criticality.toString(),
 	extraProps: {
 		defaultOptionName: 'current_criticality'
 	},
@@ -239,7 +239,7 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 
 const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (console.log(row), row.residual_criticality.toString()),
+	getColumn: (row) => row.residual_criticality.toString(),
 	extraProps: {
 		defaultOptionName: 'residual_criticality'
 	},
@@ -586,8 +586,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'description', 'project'],
-		body: ['ref_id', 'name', 'framework', 'description', 'project'],
+		head: ['ref_id', 'name', 'framework', 'description', 'project', 'reviewProgress'],
+		body: ['ref_id', 'name', 'framework', 'description', 'project', 'progress'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,
