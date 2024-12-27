@@ -62,7 +62,7 @@
 
 	const default_value = nullable ? null : selectedValues[0];
 
-	function arraysEqual(arr1: (string|undefined)[], arr2: (string|undefined)[]) {
+	function arraysEqual(arr1: (string | undefined)[], arr2: (string | undefined)[]) {
 		if (arr1.length !== arr2.length) return false;
 
 		const sortedArr1 = [...arr1].sort();
