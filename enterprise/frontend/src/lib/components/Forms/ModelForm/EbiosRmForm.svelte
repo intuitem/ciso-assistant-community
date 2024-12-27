@@ -115,7 +115,7 @@
 			bind:cachedValue={formDataCache['ref_id']}
 		/>
 		<AutocompleteSelect
-		{form}
+			{form}
 			options={getOptions({ objects: model.foreignKeys['reference_entity'] })}
 			field="reference_entity"
 			cacheLock={cacheLocks['reference_entity']}

@@ -23,11 +23,11 @@
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-			_form: data.attachmentDeleteForm,
-			id: id,
-			debug: false,
-			URLModel: "settings",
-			formAction: action
+				_form: data.attachmentDeleteForm,
+				id: id,
+				debug: false,
+				URLModel: 'settings',
+				formAction: action
 			}
 		};
 		const modal: ModalSettings = {
@@ -39,8 +39,6 @@
 		};
 		modalStore.trigger(modal);
 	}
-
-
 </script>
 
 {#if data && Object.hasOwn(data, 'form')}
@@ -68,12 +66,18 @@
 				/>
 			</div>
 			{#if data.settings.logo != null}
-			<button
-				class="btn variant-filled-tertiary h-full" type="button"
-				on:click={(_) => modalConfirm(data.settings.id, data.settings.logo, 'settings/client-settings?/deleteLogo')}
+				<button
+					class="btn variant-filled-tertiary h-full"
+					type="button"
+					on:click={(_) =>
+						modalConfirm(
+							data.settings.id,
+							data.settings.logo,
+							'settings/client-settings?/deleteLogo'
+						)}
 				>
-				<i class="fa-solid fa-trash" />
-			</button>
+					<i class="fa-solid fa-trash" />
+				</button>
 			{/if}
 		</div>
 		<div class="flex items-center space-x-1">
@@ -90,14 +94,20 @@
 			</div>
 		</div>
 		{#if data.settings.favicon != null}
-		<button
-			class="btn variant-filled-tertiary h-full" type="button"
-			on:click={(_) => modalConfirm(data.settings.id, data.settings.favicon, 'settings/client-settings?/deleteFavicon')}
+			<button
+				class="btn variant-filled-tertiary h-full"
+				type="button"
+				on:click={(_) =>
+					modalConfirm(
+						data.settings.id,
+						data.settings.favicon,
+						'settings/client-settings?/deleteFavicon'
+					)}
 			>
-			<i class="fa-solid fa-trash" />
-		</button>
+				<i class="fa-solid fa-trash" />
+			</button>
 		{/if}
-		<Checkbox	
+		<Checkbox
 			{form}
 			field="show_images_unauthenticated"
 			label={m.showImagesUnauthenticated()}

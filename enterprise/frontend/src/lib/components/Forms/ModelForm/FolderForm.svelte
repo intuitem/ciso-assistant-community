@@ -12,7 +12,6 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
-
 <AutocompleteSelect
 	{form}
 	options={getOptions({ objects: model.foreignKeys['parent_folder'] })}
