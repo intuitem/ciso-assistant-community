@@ -11,7 +11,7 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
