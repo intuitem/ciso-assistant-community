@@ -83,7 +83,13 @@
 		return map[result];
 	}
 
-	let questionnaireMode = questionnaireOnly ? true : assessmentOnly ? false : $page.data.user.is_third_party ? true : false;
+	let questionnaireMode = questionnaireOnly
+		? true
+		: assessmentOnly
+			? false
+			: $page.data.user.is_third_party
+				? true
+				: false;
 
 	const modalStore: ModalStore = getModalStore();
 
