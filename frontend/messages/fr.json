@@ -1079,5 +1079,9 @@
 	"insights": "Analyses avancées",
 	"impactAnalysis": "Analyse d'impact",
 	"priorityReview": "Revue des priorités",
-	"timelineView": "Vue planning"
+	"timelineView": "Vue planning",
+	"missionsAndOrganizationalServices": "Missions et service de l'organisation",
+	"human": "Humain",
+	"material": "Matériel",
+	"environmental": "Environnemental"
 }
