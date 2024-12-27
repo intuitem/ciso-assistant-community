@@ -1,6 +1,7 @@
 *.DS_Store
 *~$*
 .env
+venv
 **/node_modules/
 .vscode
 *.sqlite3
@@ -11,3 +12,6 @@ db/
 /backend/profiles
 ./backend/ciso_assistant/.meta
 caddy_data/
+**/dist/
+**/.meta
+charts/custom-values.yaml

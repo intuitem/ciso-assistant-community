@@ -11,8 +11,13 @@ export interface User {
 	date_joined: string;
 }
 
+export interface GlobalSettings {
+	name: string;
+	settings: Record<string, any>;
+}
+
 export interface LoginRequestBody {
-	username: string;
+	email: string;
 	password: string;
 }
 
@@ -21,7 +26,6 @@ export const URL_MODEL = [
 	'projects',
 	'risk-matrices',
 	'risk-assessments',
-	'risk-assessment-duplicate',
 	'threats',
 	'risk-scenarios',
 	'applied-controls',
@@ -40,10 +44,28 @@ export const URL_MODEL = [
 	'requirement-assessments',
 	'libraries',
 	'sso-settings',
-	'requirement-mapping-sets'
+	'general-settings',
+	'requirement-mapping-sets',
+	'entities',
+	'entity-assessments',
+	'solutions',
+	'representatives',
+	'vulnerabilities',
+	'filtering-labels',
+	'feared-events',
+	'ro-to',
+	'stakeholders',
+	'strategic-scenarios',
+	'attack-paths',
+	'operational-scenarios'
+	// 'ebios-rm',
 ] as const;
 
+export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
+
 export type urlModel = (typeof URL_MODEL)[number];
+
+export type thirdPartyUrlModel = (typeof THIRD_PARTY_URL_MODEL)[number];
 
 export type ModelInfo = ModelMapEntry;
 
@@ -83,7 +105,7 @@ export interface Project {
 	is_published: boolean;
 	name: string;
 	description?: string;
-	internal_reference?: string;
+	ref_id?: string;
 	compliance_assessments: Record<string, any>[];
 }
 

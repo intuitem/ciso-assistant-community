@@ -1,11 +1,13 @@
 from pathlib import Path
 
-import structlog
+import structlog, signal
 from ciso_assistant.settings import LIBRARIES_PATH
 from core.models import StoredLibrary
 from django.core.management.base import BaseCommand
 
 logger = structlog.getLogger(__name__)
+
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
 class Command(BaseCommand):
@@ -18,9 +20,9 @@ class Command(BaseCommand):
         StoredLibrary.__init_class__()
         path = Path(options.get("path") or LIBRARIES_PATH)
         if path.is_dir():
-            library_files = [
+            library_files = sorted(
                 f for f in path.iterdir() if f.is_file and f.suffix == ".yaml"
-            ]
+            )
         else:
             library_files = [path]
         for fname in library_files:

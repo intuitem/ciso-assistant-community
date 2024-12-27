@@ -7,7 +7,7 @@
             {% with row_index=forloop.revcounter0 %}
                 <tr class="w-full">
                     <td class="w-1/6 text-right pr-2 border-4 border-white">
-                        {% with impact=matrix.parse_json.impact|index:row_index %}
+                        {% with impact=matrix.parse_json_translated.impact|index:row_index %}
                         {{ impact.name }}
                         {% endwith %}
                     </td>
@@ -21,14 +21,14 @@
         {% endfor %}
         <tr>
             <td></td>
-            {% for probability in risk_matrix.parse_json.probability %}
+            {% for probability in risk_matrix.parse_json_translated.probability %}
                 <td class="w-1/6 h-16 text-center border-4 border-white">
                     {{ probability.name }}
                 </td>
             {% endfor %}
             <tr>
                 <td></td>
-                {% for probability in matrix.parse_json.probability %}
+                {% for probability in matrix.parse_json_translated.probability %}
                     <td class="w-1/6 h-16 text-center border-4 border-white">
                         {{ probability.name }}
                     </td>
@@ -50,7 +50,7 @@
                     {% with row_index=forloop.revcounter0 %}
                         <tr>
                             <td class="w-1/6 text-center text-black bg-gray-200 border-4 border-white pr-2">
-                                {% with probability=risk_matrix.parse_json.probability|index:row_index %}
+                                {% with probability=risk_matrix.parse_json_translated.probability|index:row_index %}
                                 {{ probability.name }}:
                                 {{ probability.description|linebreaksbr }}
                                 {% endwith %}
@@ -73,7 +73,7 @@
                 {% endfor %}
                 <tr>
                     <td></td>
-                    {% for impact in risk_matrix.parse_json.impact %}
+                    {% for impact in risk_matrix.parse_json_translated.impact %}
                         <td class="w-1/6 h-16 text-center text-black bg-gray-200 border-4 border-white">
                             {{ impact.name }}:
                             {{ impact.description|linebreaksbr }}

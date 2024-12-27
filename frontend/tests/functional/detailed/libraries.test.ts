@@ -7,7 +7,7 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
 
-	const libraries: Locator[] = await page.locator('tbody tr td:nth-child(1)').all();
+	const libraries: Locator[] = await page.locator('tbody tr td:nth-child(2)').all();
 	const libraryNames: string[] = await Promise.all(
 		libraries.map(async (library) => await library.innerText())
 	);

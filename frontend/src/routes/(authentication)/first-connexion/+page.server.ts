@@ -1,11 +1,12 @@
-import { fail, redirect, type Actions } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
-import { ResetPasswordSchema } from '$lib/utils/schemas';
-import { setError, superValidate } from 'sveltekit-superforms';
-import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { safeTranslate } from '$lib/utils/i18n';
+import { ResetPasswordSchema } from '$lib/utils/schemas';
 import * as m from '$paraglide/messages';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const form = await superValidate(event.request, zod(ResetPasswordSchema));
@@ -40,7 +41,7 @@ export const actions: Actions = {
 				setError(form, 'confirm_new_password', response.confirm_new_password);
 			}
 			if (response.error) {
-				setFlash({ type: 'error', message: response.error }, event);
+				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
 				redirect(302, '/login');
 			}
 			return fail(400, { form });

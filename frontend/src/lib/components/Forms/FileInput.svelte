@@ -9,6 +9,7 @@
 	export let helpText: string | undefined = undefined;
 	export let form;
 	export let allowPaste: boolean = false;
+	export let resetSignal: boolean = false; // Reset the form value if set to true
 	// allowPaste should be set to false when we have multiple FileField at the same time (the ideal implementation would be to deduce to which FileInput the paste operation must be forwarded depending on the targetElement of the "paste" event)
 
 	const { errors, constraints } = formFieldProxy(form, field);
@@ -17,7 +18,7 @@
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 
-	const allowedExtensions = new Set(['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'bmp', 'tiff']);
+	export let allowedExtensions: string[] | '*';
 
 	function getShortenPreciseType(preciseType: string): string {
 		const shortPreciseTypeResult = /^[a-z0-9]+/.exec(preciseType);
@@ -29,7 +30,11 @@
 		const [mainType, preciseType] = mimeType.toLocaleLowerCase().split('/');
 		const shortPreciseType = getShortenPreciseType(preciseType);
 
-		if (mainType === 'image' && allowedExtensions.has(shortPreciseType)) return shortPreciseType;
+		if (
+			mainType === 'image' &&
+			(allowedExtensions === '*' || allowedExtensions.includes(shortPreciseType))
+		)
+			return shortPreciseType;
 		return null;
 	}
 
@@ -69,6 +74,11 @@
 			}
 		}
 	}
+
+	$: if (resetSignal) {
+		const dataTransfer = new DataTransfer();
+		$value = dataTransfer.files; // Empty FileList
+	}
 </script>
 
 <svelte:document on:paste={onPaste} />
@@ -100,6 +110,11 @@
 			placeholder=""
 			bind:files={$value}
 			bind:this={fileInput}
+			accept={allowedExtensions === '*'
+				? null
+				: Array.from(allowedExtensions)
+						.map((ext) => '.' + ext)
+						.join(',')}
 			{...$constraints}
 			{...$$restProps}
 		/>

@@ -1,5 +1,11 @@
 """
 simple script to transform an Excel file to a yaml library for CISO assistant
+Usage: python convert_library [--compat] your_excel_file
+
+The compat flag is recommended only to maintain libraries that have been generated prior or up to release 1.9.20.
+Without the compat flag, URNs generated for nodes without ref_id are constructed using the parent_urn.
+This generated urns that are much simpler to understand and maintain if required.
+
 Conventions:
     | means a cell separation, <> means empty cell
     The first tab shall be named "library_content" and contain the description of the library in the other tabs
@@ -40,9 +46,10 @@ Conventions:
         tab                             | <tab_name> | implementation_groups
         tab                             | <tab_name> | risk_matrix
         tab                             | <tab_name> | mappings
+        tab                             | <tab_name> | answers
 
         variables can also have a translation in the form "variable[locale]"
-        
+
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
         The first line is a header, with the following possible fields (* for required):
@@ -56,6 +63,8 @@ Conventions:
             - reference_controls
             - annotation
             - typical_evidence
+            - questions
+            - answer
             - skip_count: trick for fixing a referential without changing the urns (advanced users)
         The normal tree order shall be respected
         If multiple threats or reference_control are given for a requirements, they shall be separated by blank or comma.
@@ -65,8 +74,8 @@ Conventions:
             - ref_id(*)
             - name
             - description
-            - category (policy/process/techncial/physical).
-            - csf_function (govern/identitfy/protect/detect/respond/recover).
+            - category (policy/process/technical/physical).
+            - csf_function (govern/identify/protect/detect/respond/recover).
             - annotation
     For risk matrices:
         The first line is a header, with the following mandatory fields:
@@ -86,6 +95,11 @@ Conventions:
             - relationship(*)
             - rationale
             - stregth_of_relationship
+    For Answers:
+        The first line is a header, with the following possible fields (* for required):
+            - id(*)
+            - question_type(*)
+            - question_choices(*)
     A library has a single locale, which is the reference language. Translations are given in columns with header like "name[fr]"
     Dependencies are given as a comma or blank separated list of urns.
 """
@@ -143,6 +157,7 @@ parser = argparse.ArgumentParser(
     description="convert an Excel file in a library for CISO Assistant",
 )
 parser.add_argument("input_file_name")
+parser.add_argument("--compat", action='store_true')
 args = parser.parse_args()
 
 ref_name = re.sub(r"\.\w+$", "", args.input_file_name).lower()
@@ -158,8 +173,10 @@ reference_controls = []
 threat_definitions = []
 scores_definition = []
 implementation_groups_definition = []
+questions = []
 risk_matrix = {}
 requirement_mappings = []
+
 
 def error(message):
     print("Error:", message)
@@ -176,7 +193,7 @@ def read_header(row):
     grid_count = 0
     for v in row:
         v = str(v.value).lower()
-        if v == 'grid':
+        if v == "grid":
             v = f"{v}{grid_count}"
             grid_count += 1
         header[v] = i
@@ -195,6 +212,7 @@ def get_translations(header, row):
                 result[lang] = {}
             result[lang][v] = row[i].value
     return result
+
 
 def get_translations_content(library_vars, prefix):
     """read available translations in library_vars"""
@@ -317,11 +335,55 @@ def get_color(wb, cell):
     return "#" + color
 
 
+def get_question(tab):
+    print("processing answers")
+    found_answers = {}
+    is_header = True
+    for row in tab:
+        if is_header:
+            header = read_header(row)
+            is_header = False
+            assert "id" in header
+        if any(c.value for c in row):
+            row_id = (
+                str(row[header["id"]].value).strip()
+                if row[header["id"]].value
+                else None
+            )
+            question_type = (
+                row[header.get("question_type")].value
+                if "question_type" in header
+                else None
+            )
+            question_choices = (
+                row[header.get("question_choices")].value.split("\n")
+                if "question_choices" in header
+                and row[header["question_choices"]].value
+                else None
+            )
+            found_answers[row_id] = {
+                "question_type": question_type,
+                "question_choices": question_choices,
+            }
+
+    return found_answers
+
+
 ################################################################
+def build_ids_set(tab_name):
+    output = set()
+    raw = dataframe[tab_name]["A"]
+    output = {cell.value for cell in raw if cell.value is not None}
+    return output
+
 
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
+    try:
+        answers = get_question(dataframe["answers"])
+    except KeyError:
+        answers = {}
     if title.lower() == "library_content":
         print("processing library content")
         for row in tab:
@@ -346,11 +408,13 @@ for tab in dataframe:
         current_depth = 0
         parent_urn = None
         parent_for_depth = {}
+        count_for_depth = {}
         section = library_vars_dict_arg["tab"][title]
         if section:
             section_id = section.lower().replace(" ", "-")
             current_node_urn = f"{root_nodes_urn}:{section_id}"
             parent_for_depth[1] = current_node_urn
+            count_for_depth[1] = 1
             requirement_nodes.append(
                 {"urn": current_node_urn, "name": section, "assessable": False}
             )
@@ -396,31 +460,41 @@ for tab in dataframe:
                     else None
                 )
                 translations = get_translations(header, row)
-                skip_count = "skip_count" in header and bool(
-                    row[header["skip_count"]].value
-                )
-                if skip_count:
-                    counter_fix += 1
-                    ref_id_urn = f"node{counter-counter_fix}-{counter_fix}"
-                else:
-                    ref_id_urn = (
-                        ref_id.lower().replace(" ", "-")
-                        if ref_id
-                        else f"node{counter-counter_fix}"
-                    )
-                urn = f"{root_nodes_urn}:{ref_id_urn}"
-                if urn in urn_unicity_checker:
-                    print("URN duplicate:", urn)
-                    exit(1)
-                urn_unicity_checker.add(urn)
-                assert type(depth) == int, f"incorrect depth for {row}"
                 if depth == current_depth + 1:
                     parent_for_depth[depth] = current_node_urn
+                    count_for_depth[depth] = 1
                     parent_urn = parent_for_depth[depth]
                 elif depth <= current_depth:
                     pass
                 else:
                     error(f"wrong depth in requirement (tab {title}) {urn}")
+                if args.compat:
+                    skip_count = "skip_count" in header and bool(
+                        row[header["skip_count"]].value
+                    )
+                    if skip_count:
+                        counter_fix += 1
+                        ref_id_urn = f"node{counter-counter_fix}-{counter_fix}"
+                    else:
+                        ref_id_urn = (
+                            ref_id.lower().replace(" ", "-")
+                            if ref_id
+                            else f"node{counter-counter_fix}"
+                        )
+                    urn = f"{root_nodes_urn}:{ref_id_urn}"
+                else:
+                    if ref_id:
+                        urn = f"{root_nodes_urn}:{ref_id.lower().replace(' ', '-')}" 
+                    else:
+                        p = parent_for_depth[depth]
+                        c = count_for_depth[depth]
+                        urn =f"{p}:{c}"
+                        count_for_depth[depth] += 1
+                if urn in urn_unicity_checker:
+                    print("URN duplicate:", urn)
+                    exit(1)
+                urn_unicity_checker.add(urn)
+                assert isinstance(depth, int), f"incorrect depth for {row}"
                 current_node_urn = urn
                 parent_urn = parent_for_depth[depth]
                 current_depth = depth
@@ -445,6 +519,16 @@ for tab in dataframe:
                     if "reference_controls" in header
                     else None
                 )
+                questions = (
+                    (
+                        row[header["questions"]].value.split("\n")
+                        if row[header["questions"]].value
+                        else [""]
+                    )
+                    if "questions" in header
+                    else None
+                )
+                answer = row[header["answer"]].value if "answer" in header else None
                 threat_urns = []
                 function_urns = []
                 if threats:
@@ -453,19 +537,30 @@ for tab in dataframe:
                         prefix = parts.pop(0)
                         part_name = ":".join(parts)
                         part_name = part_name.lower().replace(" ", "-")
-                        urn_prefix = library_vars_dict_reverse[
-                            "threat_base_urn"
-                        ][prefix]
+                        urn_prefix = library_vars_dict_reverse["threat_base_urn"][
+                            prefix
+                        ]
                         threat_urns.append(f"{urn_prefix}:{part_name}")
                 if req_reference_controls:
                     for element in re.split(r"[\s,]+", req_reference_controls):
                         parts = re.split(r":", element)
                         prefix = parts.pop(0)
-                        part_name = ":".join(parts)
+                        part_name = ":".join(parts).lower()
                         urn_prefix = library_vars_dict_reverse[
                             "reference_control_base_urn"
                         ][prefix]
                         function_urns.append(f"{urn_prefix}:{part_name}")
+                if answer and questions:
+                    question = {
+                        "questions": [
+                            {
+                                "urn": f"{req_node['urn']}:question:{i + 1}",
+                                "text": question,
+                            }
+                            for i, question in enumerate(questions)
+                        ]
+                    }
+                    req_node["question"] = {**answers[answer], **question}
                 if threat_urns:
                     req_node["threats"] = threat_urns
                 if function_urns:
@@ -502,7 +597,9 @@ for tab in dataframe:
                     row[header["category"]].value if "category" in header else None
                 )
                 csf_function = (
-                    row[header["csf_function"]].value if "csf_function" in header else None
+                    row[header["csf_function"]].value
+                    if "csf_function" in header
+                    else None
                 )
                 annotation = (
                     row[header["annotation"]].value if "annotation" in header else None
@@ -580,7 +677,11 @@ for tab in dataframe:
                 name = row[header["name"]].value
                 description = row[header["description"]].value
                 translations = get_translations(header, row)
-                current_score = {"score": score, "name": name, "description": description}
+                current_score = {
+                    "score": score,
+                    "name": name,
+                    "description": description,
+                }
                 if translations:
                     current_score["translations"] = translations
                 scores_definition.append(current_score)
@@ -599,7 +700,11 @@ for tab in dataframe:
                 name = row[header["name"]].value
                 description = row[header["description"]].value
                 translations = get_translations(header, row)
-                current_def = {"ref_id": ref_id, "name": name, "description": description}
+                current_def = {
+                    "ref_id": ref_id,
+                    "name": name,
+                    "description": description,
+                }
                 if translations:
                     current_def["translations"] = translations
                 implementation_groups_definition.append(current_def)
@@ -649,7 +754,7 @@ for tab in dataframe:
                     object["hexcolor"] = color
                 risk_matrix[ctype].append(object)
                 if ctype == "probability":
-                    grid[id] = [c.value for c in row[6:6+size_grid]]
+                    grid[id] = [c.value for c in row[6 : 6 + size_grid]]
                     grid_color[id] = [get_color(dataframe, c) for c in row[6:]]
         risk_matrix["grid"] = [grid[id] for id in sorted(grid)]
         for id in grid:
@@ -667,8 +772,8 @@ for tab in dataframe:
     elif library_vars_dict["tab"][title] == "mappings":
         print("processing mappings")
         is_header = True
-        source_prefix=library_vars["mapping_source_node_base_urn"]
-        target_prefix=library_vars["mapping_target_node_base_urn"]
+        source_prefix = library_vars["mapping_source_node_base_urn"]
+        target_prefix = library_vars["mapping_target_node_base_urn"]
         for row in tab:
             if is_header:
                 header = read_header(row)
@@ -677,18 +782,39 @@ for tab in dataframe:
                 assert "target_node_id" in header
                 assert "relationship" in header
             elif any([c.value for c in row]):
-                source_requirement_urn = source_prefix + ":" + row[header["source_node_id"]].value
-                target_requirement_urn = target_prefix + ":" + row[header["target_node_id"]].value
+                # check if source_node_id and target_node_id exist in the supported values
+                src_ids_set = build_ids_set("source")
+                tgt_ids_set = build_ids_set("target")
+                src_node_id = row[header["source_node_id"]].value
+                tgt_node_id = row[header["target_node_id"]].value
+                if src_node_id not in src_ids_set:
+                    print(
+                        f"WARNING: this source node id: {src_node_id} is not recognized. Fix it and try again before uploading your file."
+                    )
+
+                if tgt_node_id not in tgt_ids_set:
+                    print(
+                        f"WARNING: this target node id: {tgt_node_id} is not recognized. Fix it and try again before uploading your file."
+                    )
+                source_requirement_urn = source_prefix + ":" + src_node_id
+                target_requirement_urn = target_prefix + ":" + tgt_node_id
                 relationship = row[header["relationship"]].value
-                rationale = row[header["rationale"]].value if "rationale" in header else None
-                stregth_of_relationship = row[header["stregth_of_relationship"]].value if "stregth_of_relationship" in header else None
+                rationale = (
+                    row[header["rationale"]].value if "rationale" in header else None
+                )
+                stregth_of_relationship = (
+                    row[header["stregth_of_relationship"]].value
+                    if "stregth_of_relationship" in header
+                    else None
+                )
                 requirement_mappings.append(
-                    {"source_requirement_urn": source_requirement_urn, 
-                     "target_requirement_urn": target_requirement_urn, 
-                     "relationship": relationship,
-                     "rationale": rationale,
-                     "stregth_of_relationship": stregth_of_relationship,
-                     }
+                    {
+                        "source_requirement_urn": source_requirement_urn,
+                        "target_requirement_urn": target_requirement_urn,
+                        "relationship": relationship,
+                        "rationale": rationale,
+                        "stregth_of_relationship": stregth_of_relationship,
+                    }
                 )
 
 has_framework = "requirements" in [
@@ -745,7 +871,9 @@ if has_mappings:
     translations = get_translations_content(library_vars, "mapping")
     if translations:
         library["objects"]["requirement_mapping_set"]["translations"] = translations
-    library["objects"]["requirement_mapping_set"]["requirement_mappings"] = requirement_mappings
+    library["objects"]["requirement_mapping_set"]["requirement_mappings"] = (
+        requirement_mappings
+    )
 
 
 if has_framework:

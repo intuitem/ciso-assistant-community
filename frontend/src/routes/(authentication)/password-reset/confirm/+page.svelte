@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import CisoLogo from '$lib/assets/ciso.svg';
+	import Logo from '$lib/components/Logo/Logo.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import * as m from '$paraglide/messages.js';
 
 	export let data: PageData;
 </script>
@@ -12,7 +13,7 @@
 <div class="flex mx-auto justify-center items-center h-screen w-screen bg-slate-200">
 	<div class="absolute top-5 left-5">
 		<div class="flex flex-row w-full space-x-4 pb-3">
-			<img class="c" height="200" width="200" src={CisoLogo} alt="Ciso-assistant icon" />
+			<Logo />
 		</div>
 	</div>
 	<div class="flex w-full items-center justify-center">
@@ -21,7 +22,7 @@
 				<i class="fa-solid fa-key" />
 			</div>
 			<p class="text-gray-600 text-sm text-center">
-				You can reset your password here.<br />
+				{m.resetPasswordHere()}<br />
 			</p>
 			<!-- SuperForm with dataType 'form' -->
 			<div class="flex w-full">
@@ -32,18 +33,18 @@
 					let:form
 					validators={zod(ResetPasswordSchema)}
 				>
-					<TextField type="password" {form} field="new_password" label="New password" />
+					<TextField type="password" {form} field="new_password" label={m.newPassword()} />
 					<TextField
 						type="password"
 						{form}
 						field="confirm_new_password"
-						label="Confirm new password"
+						label={m.confirmNewPassword()}
 					/>
 					<p class="pt-3">
 						<button
 							class="btn variant-filled-primary font-semibold w-full"
 							type="submit"
-							data-testid="set-password-btn">Reset Password</button
+							data-testid="set-password-btn">{m.resetPassword()}</button
 						>
 					</p>
 				</SuperForm>

@@ -3,6 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
 	import * as m from '$paraglide/messages';
+	import { page } from '$app/stores';
 
 	export let meta: any;
 	export let actionsURLModel: string;
@@ -46,11 +47,11 @@
 				/>
 			</svg>
 		</div>
-	{:else}
+	{:else if $page.data.user.is_admin}
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.urn}?/load"
+				action="/libraries/{library.id}?/load"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
@@ -99,7 +100,7 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.urn}?/update"
+				action="/libraries/{library.id}?/update"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;

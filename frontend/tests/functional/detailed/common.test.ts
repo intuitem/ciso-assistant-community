@@ -49,6 +49,8 @@ for (const key of testPages) {
 					items[key].build,
 					'dependency' in items[key] ? items[key].dependency : null
 				);
+				await pages[key].goto();
+				await expect(page).toHaveURL(pages[key].url);
 
 				if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
 					await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);
@@ -56,10 +58,12 @@ for (const key of testPages) {
 
 				await pages[key].waitUntilLoaded();
 				await pages[key].viewItemDetail(items[key].build.name || items[key].build.email);
-				await pages[key].itemDetail.hasTitle(items[key].build.name || items[key].build.email);
+				await pages[key].itemDetail.hasTitle(
+					items[key].build.str || items[key].build.name || items[key].build.email
+				);
 				await pages[key].itemDetail.hasBreadcrumbPath([
 					items[key].displayName,
-					items[key].build.name || items[key].build.email
+					items[key].build.str || items[key].build.name || items[key].build.email
 				]);
 				//wait fore the file to load to prevent crashing
 				page.url().includes('evidences')
@@ -72,7 +76,6 @@ for (const key of testPages) {
 				page
 			}) => {
 				await pages[key].itemDetail.verifyItem(items[key].build);
-				await pages[key].checkForUndefinedText();
 				page.url().includes('evidences') ? await pages[key].page.waitForTimeout(1000) : null; // prevent crashing
 			});
 

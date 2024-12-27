@@ -2,8 +2,9 @@
 Inspired from Azure IAM model"""
 
 from collections import defaultdict
-from typing import Any, List, Self, Tuple
+from typing import Any, List, Self, Tuple, Generator
 import uuid
+from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -37,6 +38,7 @@ from ciso_assistant.settings import (
 )
 
 import structlog
+from django.utils import translation
 
 logger = structlog.get_logger(__name__)
 
@@ -61,15 +63,25 @@ class Folder(NameDescriptionMixin):
         """class function for general use"""
         return _get_root_folder()
 
+    @staticmethod
+    def get_root_folder_id() -> uuid.UUID:
+        """class function for general use"""
+        try:
+            return _get_root_folder().id
+        except:
+            return _get_root_folder()
+
     class ContentType(models.TextChoices):
         """content type for a folder"""
 
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
+        ENCLAVE = "EN", _("ENCLAVE")
 
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
     )
+
     parent_folder = models.ForeignKey(
         "self",
         null=True,
@@ -90,24 +102,22 @@ class Folder(NameDescriptionMixin):
     def __str__(self) -> str:
         return self.name.__str__()
 
-    def sub_folders(self) -> List[Self]:
+    def get_sub_folders(self) -> Generator[Self, None, None]:
         """Return the list of subfolders"""
 
-        def sub_folders_in(f, sub_folder_list):
-            for sub_folder in f.folder_set.all():
-                sub_folder_list.append(sub_folder)
-                sub_folders_in(sub_folder, sub_folder_list)
-            return sub_folder_list
+        def sub_folders_in(folder):
+            for sub_folder in folder.folder_set.all():
+                yield sub_folder
+                yield from sub_folders_in(sub_folder)
 
-        return sub_folders_in(self, [])
+        yield from sub_folders_in(self)
 
-    def get_parent_folders(self) -> List[Self]:
+    # Should we update data-model.md now that this method is a generator ?
+    def get_parent_folders(self) -> Generator[Self, None, None]:
         """Return the list of parent folders"""
-        return (
-            [self.parent_folder] + Folder.get_parent_folders(self.parent_folder)
-            if self.parent_folder
-            else []
-        )
+        current_folder = self
+        while (current_folder := current_folder.parent_folder) is not None:
+            yield current_folder
 
     @staticmethod
     def _navigate_structure(start, path):
@@ -149,6 +159,9 @@ class Folder(NameDescriptionMixin):
             ["folder"],
             ["parent_folder"],
             ["project", "folder"],
+            ["entity", "folder"],
+            ["provider_entity", "folder"],
+            ["solution", "provider_entity", "folder"],
             ["risk_assessment", "project", "folder"],
             ["risk_scenario", "risk_assessment", "project", "folder"],
             ["compliance_assessment", "project", "folder"],
@@ -173,7 +186,7 @@ class FolderMixin(models.Model):
         Folder,
         on_delete=models.CASCADE,
         related_name="%(class)s_folder",
-        default=Folder.get_root_folder,
+        default=Folder.get_root_folder_id,
     )
 
     class Meta:
@@ -223,13 +236,28 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
         }
 
+    @property
+    def permissions(self):
+        return RoleAssignment.get_permissions(self)
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email, password, mailing=True, **extra_fields):
+    def _create_user(
+        self,
+        email: str,
+        password: str,
+        mailing: bool,
+        initial_group: UserGroup,
+        **extra_fields,
+    ):
         """
         Create and save a user with the given email, and password.
+        If mailing is set, send a welcome mail
+        If initial_group is given, put the new user in this group
+        On mail error, raise a corresponding exception, but the user is properly created
+        TODO: find a better way to manage mailing error
         """
 
         validate_email(email)
@@ -245,6 +273,17 @@ class UserManager(BaseUserManager):
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
         user.save(using=self._db)
+        if initial_group:
+            initial_group.user_set.add(user)
+
+        # create an EmailAddress object for the newly created user
+        # this is required by allauth
+        EmailAddress.objects.create(
+            user=user,
+            email=user.email,
+            verified=True,
+            primary=True,
+        )
 
         logger.info("user created sucessfully", user=user)
 
@@ -259,23 +298,31 @@ class UserManager(BaseUserManager):
                 raise exception
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email: str, password: str = None, **extra_fields):
+        """create a normal user following Django convention"""
         logger.info("creating user", email=email)
         extra_fields.setdefault("is_superuser", False)
-        if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
-            extra_fields.setdefault("mailing", False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(
+            email=email,
+            password=password,
+            mailing=(EMAIL_HOST or EMAIL_HOST_RESCUE),
+            initial_group=None,
+            **extra_fields,
+        )
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email: str, password: str = None, **extra_fields):
+        """create a superuser following Django convention"""
         logger.info("creating superuser", email=email)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        extra_fields.setdefault(
-            "mailing", not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)
+        superuser = self._create_user(
+            email=email,
+            password=password,
+            mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
+            initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
+            **extra_fields,
         )
-        superuser = self._create_user(email, password, **extra_fields)
-        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
 
 
@@ -295,7 +342,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
+    preferences = models.JSONField(default=dict)
     is_sso = models.BooleanField(default=False)
+    is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -362,12 +411,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def get_short_name(self) -> str:
         """get user's short name (i.e. first_name or email before @))"""
-        try:
-            return self.first_name if self.first_name else self.email.split("@")[0]
-        except:
-            return ""
+        return self.first_name if self.first_name else self.email.split("@")[0]
 
-    def mailing(self, email_template_name, subject, pk=False):
+    def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
         Sending a mail to a user for password resetting or creation
         """
@@ -379,6 +425,8 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "token": default_token_generator.make_token(self),
             "protocol": "https",
             "pk": str(pk) if pk else None,
+            "object": object,
+            "object_id": object_id,
         }
         email = render_to_string(email_template_name, header)
         try:
@@ -438,6 +486,14 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """get the list of user groups containing the user in the form (group_name, builtin)"""
         return [(x.__str__(), x.builtin) for x in self.user_groups.all()]
 
+    def get_roles(self):
+        """get the list of roles attached to the user"""
+        return list(
+            self.user_groups.all()
+            .values_list("roleassignment__role__name", flat=True)
+            .distinct()
+        )
+
     @property
     def has_backup_permission(self) -> bool:
         return RoleAssignment.is_access_allowed(
@@ -469,6 +525,23 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
+
+    @property
+    def is_editor(self) -> bool:
+        permissions = RoleAssignment.get_permissions(self)
+        editor_prefixes = {"add_", "change_", "delete_"}
+        return any(
+            any(perm.startswith(prefix) for prefix in editor_prefixes)
+            for perm in permissions
+        )
+
+    @classmethod
+    def get_editors(cls) -> List[Self]:
+        return [
+            user
+            for user in cls.objects.all()
+            if user.is_editor and not user.is_third_party
+        ]
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -523,7 +596,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Determines if a user has specified permission on a specified folder
         """
+        add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
+            if (
+                (perm == add_tag_permission) and perm in ra.role.permissions.all()
+            ):  # Allow any user to add tags if he has the permission
+                return True
             f = folder
             while f is not None:
                 if (
@@ -578,11 +656,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         ]:
             for f in ra.perimeter_folders.all():
                 folders_set.add(f)
-                folders_set.update(f.sub_folders())
+                folders_set.update(f.get_sub_folders())
         # calculate perimeter
         perimeter = set()
         perimeter.add(folder)
-        perimeter.update(folder.sub_folders())
+        perimeter.update(folder.get_sub_folders())
         # return filtered result
         return [
             x.id
@@ -619,7 +697,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         folder_for_object = {x: Folder.get_folder(x) for x in all_objects}
         perimeter = set()
         perimeter.add(folder)
-        perimeter.update(folder.sub_folders())
+        perimeter.update(folder.get_sub_folders())
         for ra in [
             x
             for x in RoleAssignment.get_role_assignments(user)
@@ -628,7 +706,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             ra_permissions = ra.role.permissions.all()
             for my_folder in perimeter & set(ra.perimeter_folders.all()):
                 target_folders = (
-                    [my_folder] + my_folder.sub_folders()
+                    [my_folder, *my_folder.get_sub_folders()]
                     if ra.is_recursive
                     else [my_folder]
                 )
@@ -648,18 +726,19 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if hasattr(object_type, "is_published"):
             for my_folder in folders_with_local_view:
-                target_folders = []
-                my_folder2 = my_folder
-                while my_folder2:
-                    if my_folder2 != my_folder:
-                        target_folders.append(my_folder2)
-                    my_folder2 = my_folder2.parent_folder
-                for object in [
-                    x
-                    for x in all_objects
-                    if folder_for_object[x] in target_folders and x.is_published
-                ]:
-                    permissions_per_object_id[object.id].add(permissions[0])
+                if my_folder.content_type != Folder.ContentType.ENCLAVE:
+                    target_folders = []
+                    my_folder2 = my_folder
+                    while my_folder2:
+                        if my_folder2 != my_folder:
+                            target_folders.append(my_folder2)
+                        my_folder2 = my_folder2.parent_folder
+                    for object in [
+                        x
+                        for x in all_objects
+                        if folder_for_object[x] in target_folders and x.is_published
+                    ]:
+                        permissions_per_object_id[object.id].add(permissions[0])
 
         return (
             [
@@ -686,18 +765,20 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
     @staticmethod
-    def get_role_assignments(user):
+    def get_role_assignments(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all role assignments attached to a user directly or indirectly"""
-        assignments = list(user.roleassignment_set.all())
-        for user_group in user.user_groups.all():
-            assignments += list(user_group.roleassignment_set.all())
+        assignments = list(principal.roleassignment_set.all())
+        if hasattr(principal, "user_groups"):
+            for user_group in principal.user_groups.all():
+                assignments += list(user_group.roleassignment_set.all())
+        assignments += list(principal.roleassignment_set.all())
         return assignments
 
     @staticmethod
-    def get_permissions(user: AbstractBaseUser | AnonymousUser):
+    def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all permissions attached to a user directly or indirectly"""
         permissions = {}
-        for ra in RoleAssignment.get_role_assignments(user):
+        for ra in RoleAssignment.get_role_assignments(principal):
             for p in ra.role.permissions.all():
                 permission_dict = {p.codename: {"str": str(p)}}
                 permissions.update(permission_dict)

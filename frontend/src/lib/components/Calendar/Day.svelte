@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let day: number;
 	export let month: number;
@@ -34,15 +35,15 @@
 				<div class="flex flex-col justify-center h-full">
 					{#each displayInfo(day, month, year) as eta}
 						<li class="unstyled hover:underline">
-							<a href={eta[1]}>
+							<Anchor href={eta[1]}>
 								{eta[0]}
-							</a>
+							</Anchor>
 						</li>
 					{/each}
 				</div>
 			{/if}
 		</div>
-	{:else if (day < today.getDate() && month == today.getMonth() + 1) || (month < today.getMonth() + 1 && year == today.getFullYear()) || year < today.getFullYear()}
+	{:else if (day < today.getDate() && month == today.getMonth() + 1 && year == today.getFullYear()) || (month < today.getMonth() + 1 && year == today.getFullYear()) || year < today.getFullYear()}
 		<div
 			in:fly={{ delay: 100, duration: 300 }}
 			class="flex flex-col border p-2 bg-gray-300 text-gray-500 rounded-lg text-sm"
@@ -52,9 +53,9 @@
 				<div class="flex flex-col justify-center h-full">
 					{#each displayInfo(day, month, year) as eta}
 						<li class="unstyled hover:underline text-red-500">
-							<a href={eta[1]}>
+							<Anchor href={eta[1]}>
 								{eta[0]}
-							</a>
+							</Anchor>
 						</li>
 					{/each}
 				</div>
@@ -70,9 +71,9 @@
 				<div class="flex flex-col justify-center h-full">
 					{#each displayInfo(day, month, year) as eta}
 						<li class="unstyled hover:underline text-primary-500">
-							<a href={eta[1]}>
+							<Anchor href={eta[1]}>
 								{eta[0]}
-							</a>
+							</Anchor>
 						</li>
 					{/each}
 				</div>

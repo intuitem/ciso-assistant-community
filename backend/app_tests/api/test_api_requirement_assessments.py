@@ -124,7 +124,47 @@ class TestRequirementAssessmentsAuthenticated:
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                 },
-                "requirement": str(RequirementNode.objects.all()[0].id),
+                "requirement": {
+                    "id": str(RequirementNode.objects.all()[0].id),
+                    "urn": RequirementNode.objects.all()[0].urn,
+                    "annotation": RequirementNode.objects.all()[0].annotation,
+                    "name": RequirementNode.objects.all()[0].name,
+                    "description": RequirementNode.objects.all()[0].description,
+                    "typical_evidence": RequirementNode.objects.all()[
+                        0
+                    ].typical_evidence,
+                    "ref_id": RequirementNode.objects.all()[0].ref_id,
+                    "associated_reference_controls": RequirementNode.objects.all()[
+                        0
+                    ].associated_reference_controls,
+                    "associated_threats": RequirementNode.objects.all()[
+                        0
+                    ].associated_threats,
+                    "parent_requirement": {
+                        "str": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "str"
+                        ),
+                        "urn": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "urn"
+                        ),
+                        "id": str(
+                            RequirementNode.objects.all()[0].parent_requirement.get(
+                                "id"
+                            )
+                        ),
+                        "ref_id": RequirementNode.objects.all()[
+                            0
+                        ].parent_requirement.get("ref_id"),
+                        "name": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "name"
+                        ),
+                        "description": RequirementNode.objects.all()[
+                            0
+                        ].parent_requirement.get("description"),
+                    }
+                    if RequirementNode.objects.all()[0].parent_requirement
+                    else None,
+                },
             },
             base_count=-1,
             user_group=test.user_group,
@@ -210,7 +250,47 @@ class TestRequirementAssessmentsAuthenticated:
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                 },
-                "requirement": str(RequirementNode.objects.all()[0].id),
+                "requirement": {
+                    "id": str(RequirementNode.objects.all()[0].id),
+                    "urn": RequirementNode.objects.all()[0].urn,
+                    "annotation": RequirementNode.objects.all()[0].annotation,
+                    "name": RequirementNode.objects.all()[0].name,
+                    "description": RequirementNode.objects.all()[0].description,
+                    "typical_evidence": RequirementNode.objects.all()[
+                        0
+                    ].typical_evidence,
+                    "ref_id": RequirementNode.objects.all()[0].ref_id,
+                    "associated_reference_controls": RequirementNode.objects.all()[
+                        0
+                    ].associated_reference_controls,
+                    "associated_threats": RequirementNode.objects.all()[
+                        0
+                    ].associated_threats,
+                    "parent_requirement": {
+                        "str": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "str"
+                        ),
+                        "urn": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "urn"
+                        ),
+                        "id": str(
+                            RequirementNode.objects.all()[0].parent_requirement.get(
+                                "id"
+                            )
+                        ),
+                        "ref_id": RequirementNode.objects.all()[
+                            0
+                        ].parent_requirement.get("ref_id"),
+                        "name": RequirementNode.objects.all()[0].parent_requirement.get(
+                            "name"
+                        ),
+                        "description": RequirementNode.objects.all()[
+                            0
+                        ].parent_requirement.get("description"),
+                    }
+                    if RequirementNode.objects.all()[0].parent_requirement
+                    else None,
+                },
             },
             user_group=test.user_group,
         )

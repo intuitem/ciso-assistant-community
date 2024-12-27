@@ -2,24 +2,24 @@
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import {
+		CUSTOM_ACTIONS_COMPONENT,
 		FIELD_COLORED_TAG_MAP,
-		FIELD_COMPONENT_MAP,
-		CUSTOM_ACTIONS_COMPONENT
+		FIELD_COMPONENT_MAP
 	} from '$lib/utils/crud';
-	import { createEventDispatcher, onMount } from 'svelte';
 	import { stringify } from '$lib/utils/helpers';
+	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
+	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
 	// Types
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import type { urlModel } from '$lib/utils/types.js';
+	import * as m from '$paraglide/messages';
+	import { languageTag } from '$paraglide/runtime';
 	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
-	import * as m from '$paraglide/messages';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	// Event Dispatcher
 	type TableEvent = {
 		selected: string[];
@@ -27,12 +27,7 @@
 	const dispatch = createEventDispatcher<TableEvent>();
 
 	// Props
-	/**
-	 * Provide the full set of table source data.
-	 * @type {TableSource}
-	 */
 	export let source: TableSource;
-	/** Enables row hover style and `on:selected` event when rows are clicked. */
 	export let interactive = true;
 
 	export let search = true;
@@ -41,28 +36,19 @@
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
 	export let thFiler = false;
-	export let tags = true;
 
 	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
 	// Props (styles)
-	/** Override the Tailwind Element class. Replace this for a headless UI. */
 	export let element: CssClasses = 'table';
-	/** Provide classes to set the table text size. */
 	export let text: CssClasses = 'text-xs';
-	/** Provide classes to set the table text color. */
+	export let backgroundColor: CssClasses = 'bg-white';
 	export let color: CssClasses = '';
-	/** Provide arbitrary classes for the table head. */
 	export let regionHead: CssClasses = '';
-	/** Provide arbitrary classes for the table head cells. */
 	export let regionHeadCell: CssClasses = 'uppercase bg-white text-gray-700';
-	/** Provide arbitrary classes for the table body. */
 	export let regionBody: CssClasses = 'bg-white';
-	/** Provide arbitrary classes for the table cells. */
 	export let regionCell: CssClasses = '';
-	/** Provide arbitrary classes for the table foot. */
 	export let regionFoot: CssClasses = '';
-	/** Provide arbitrary classes for the table foot cells. */
 	export let regionFootCell: CssClasses = '';
 
 	export let displayActions = true;
@@ -74,14 +60,15 @@
 		if (!interactive) return;
 		event.preventDefault();
 		event.stopPropagation();
-		// Prefer meta row info if available, else fallback to body row info
 		const rowMetaData = $rows[rowIndex].meta;
-		/** @event {rowMetaData} selected - Fires when a table row is clicked. */
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`);
+		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
+			label:
+				rowMetaData.str ?? rowMetaData.name ?? rowMetaData.email ?? rowMetaData[identifierField],
+			breadcrumbAction: 'push'
+		});
 	}
 
-	// Row Keydown Handler
 	function onRowKeydown(
 		event: SvelteEvent<KeyboardEvent, HTMLTableRowElement>,
 		rowIndex: number
@@ -92,7 +79,7 @@
 	export let identifierField = 'id';
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
-	export let detailQueryParameter: string | undefined;
+	export let detailQueryParameter: string | undefined = undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	export let hideFilters = false;
@@ -104,16 +91,20 @@
 
 	const user = $page.data.user;
 
-	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
+	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
 
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { listViewFields } from '$lib/utils/table';
 
-	// Reactive
-	$: classesBase = `${$$props.class || 'bg-white'}`;
+	// Replace $$props.class with classProp for compatibility
+	let classProp = ''; // Replacing $$props.class
+
+	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
-	import { goto } from '$app/navigation';
+	import { goto as _goto } from '$app/navigation';
+	import { goto } from '$lib/utils/breadcrumbs';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { DataHandler } from '@vincjo/datatables';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
@@ -121,7 +112,6 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
 
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
@@ -132,7 +122,6 @@
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
 	$: hasRows = data.length > 0;
-	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
 	const filters =
 		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
@@ -158,6 +147,10 @@
 		return value.includes(stringify(entry));
 	}
 
+	// Initialize filter values from URL search params
+	for (const field of filteredFields)
+		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
+
 	$: {
 		for (const field of filteredFields) {
 			handler.filter(
@@ -169,18 +162,24 @@
 					? filters[field].filter
 					: defaultFilterFunction
 			);
+			$page.url.searchParams.delete(field);
+			if (filterValues[field] && filterValues[field].length > 0) {
+				for (const value of filterValues[field]) {
+					$page.url.searchParams.append(field, value.value);
+				}
+			}
 		}
+		if (browser) _goto($page.url);
 	}
 
-	let allowOptionsUpdate = true;
-	allRows.subscribe((rows) => {
-		if (!allowOptionsUpdate) return;
+	$: {
 		for (const key of filteredFields) {
-			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(rows, key);
+			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(
+				Object.values(source.meta),
+				key
+			);
 		}
-		if (rows.length > 0) allowOptionsUpdate = false;
-	});
-
+	}
 	const rows = handler.getRows();
 	const _filters = handler.getFilters();
 
@@ -217,9 +216,11 @@
 		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 
-	import { popup } from '@skeletonlabs/skeleton';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { isDark } from '$lib/utils/helpers';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { popup } from '@skeletonlabs/skeleton';
+	import { browser } from '$app/environment';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const popupFilter: PopupSettings = {
 		event: 'click',
@@ -265,177 +266,170 @@
 		{#if pagination && rowsPerPage}
 			<RowsPerPage {handler} />
 		{/if}
-		{#if canCreateObject}
-			<slot name="addButton" />
-		{/if}
+		<div class="flex space-x-2 items-center">
+			<slot name="optButton" />
+			{#if canCreateObject}
+				<slot name="addButton" />
+			{/if}
+		</div>
 	</header>
 	<!-- Table -->
-	<!-- prettier-ignore -->
 	<table
 		class="w-full {classesTable}"
 		class:table-interactive={interactive}
 		role="grid"
 		use:tableA11y
 	>
-		<!-- Head -->
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{m[heading]() ?? heading}</Th>
+					<Th {handler} orderBy={key} class={regionHeadCell}>{safeTranslate(heading)}</Th>
 				{/each}
-        {#if displayActions}
-        <th class="{regionHeadCell} select-none text-end"></th>
-        {/if}
+				{#if displayActions}
+					<th class="{regionHeadCell} select-none text-end"></th>
+				{/if}
 			</tr>
-      {#if thFiler}
-        <tr>
-        {#each Object.keys(source.head) as key}
-            <ThFilter class="{regionHeadCell}" {handler} filterBy={key} />
-        {/each}
-          {#if displayActions}
-          <th class="{regionHeadCell} select-none"></th>
-          {/if}
-        </tr>
-      {/if}
+			{#if thFiler}
+				<tr>
+					{#each Object.keys(source.head) as key}
+						<ThFilter class={regionHeadCell} {handler} filterBy={key} />
+					{/each}
+					{#if displayActions}
+						<th class="{regionHeadCell} select-none"></th>
+					{/if}
+				</tr>
+			{/if}
 		</thead>
-		<!-- Body -->
 		<tbody class="table-body {regionBody}">
 			{#each $rows as row, rowIndex}
 				{@const meta = row.meta ? row.meta : row}
-				<!-- Row -->
-				<!-- prettier-ignore -->
 				<tr
-					on:click={(e) => { onRowClick(e, rowIndex); }}
-					on:keydown={(e) => { onRowKeydown(e, rowIndex); }}
+					on:click={(e) => {
+						onRowClick(e, rowIndex);
+					}}
+					on:keydown={(e) => {
+						onRowKeydown(e, rowIndex);
+					}}
 					aria-rowindex={rowIndex + 1}
 				>
-				{#each Object.entries(row) as [key, value]}
-            		{#if key !== 'meta'}
-						{@const component = field_component_map[key]}
-						<!-- Cell -->
-						<!-- prettier-ignore -->
-						<td
-							class="{regionCell}"
-							role="gridcell"
-						>
-							{#if taggedKeys.has(key)}
-								{@const _tagList = tagMap[key]}
-								{@const tagList = Array.isArray(_tagList) ? _tagList : [_tagList]}
-								{#each tagList as tag}
-									{@const tagData = tag.values[meta[tag.key]]}
-									{#if tagData && tags}
-										{@const {text, cssClasses} = tagData}
-										<span class={cssClasses}>
-                    {#if Object.hasOwn(m, text)}
-                      {m[text]()}
-                    {:else}
-                      {text}
-                    {/if}
-										</span>
-									{/if}
-								{/each}
-							{/if}
-							{#if component}
-								<svelte:component this={component} meta={row.meta ?? {}} cell={value}/>
-							{:else}
-                <span class="font-token whitespace-pre-line break-words">
-                {#if Array.isArray(value)}
-                  <ul class="list-disc pl-4 whitespace-normal">
-                    {#each value as val}
-                      <li>
-                        {#if val.str && val.id}
-                          {@const itemHref = `/${
-                            URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find(
-                              (item) => item.field === key
-                            )?.urlModel
-                          }/${val.id}`}
-                          <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
-                        {:else if m[toCamelCase(val.split(':')[0])]()}
-                        	<span class="text">{m[toCamelCase(val.split(':')[0]+"Colon")]()} {val.split(':')[1]}</span>
-						{:else}
-						  {val ?? '-'}
-                        {/if}
-                      </li>
-                    {/each}
-                  </ul>
-                {:else if value && value.str}
-                  {#if value.id}
-                    {@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find(
-                      (item) => item.field === key
-                    )?.urlModel}/${value.id}`}
-                    <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{value.str ?? '-'}</a>
-                  {:else}
-                    {value.str ?? '-'}
-                  {/if}
-                {:else if value && value.hexcolor}
-                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(value.hexcolor)}" style="background-color: {value.hexcolor}">
-                    {#if localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
-                      {localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
-                    {:else}
-                      {value.name ?? value.str ?? '-'}
-                    {/if}
-                  </p>
-				{:else if ISO_8601_REGEX.test(value)}
-									{formatDateOrDateTime(value, languageTag())}
-                {:else}
-					{#if localItems()[toCamelCase(value)]}
-						{localItems()[toCamelCase(value)]}
-					{:else}
-						{value ?? '-'}
-					{/if}
-                {/if}
-                </span>
-							{/if}
-						</td>
-            {/if}
+					{#each Object.entries(row) as [key, value]}
+						{#if key !== 'meta'}
+							{@const component = field_component_map[key]}
+							<td class={regionCell} role="gridcell">
+								{#if component}
+									<svelte:component this={component} {meta} cell={value} />
+								{:else}
+									<span class="font-token whitespace-pre-line break-words">
+										{#if Array.isArray(value)}
+											<ul class="list-disc pl-4 whitespace-normal">
+												{#each value as val}
+													<li>
+														{#if val.str && val.id}
+															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${val.id}`}
+															<Anchor href={itemHref} class="anchor" stopPropagation
+																>{val.str}</Anchor
+															>
+														{:else if val.str}
+															{safeTranslate(val.str)}
+														{:else if unsafeTranslate(val.split(':')[0])}
+															<span class="text"
+																>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																{val.split(':')[1]}</span
+															>
+														{:else}
+															{val ?? '-'}
+														{/if}
+													</li>
+												{/each}
+											</ul>
+										{:else if value && value.str}
+											{#if value.id}
+												{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+												<Anchor href={itemHref} class="anchor" stopPropagation
+													>{value.str ?? '-'}</Anchor
+												>
+											{:else}
+												{value.str ?? '-'}
+											{/if}
+										{:else if value && value.hexcolor}
+											<p
+												class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
+													value.hexcolor
+												)}"
+												style="background-color: {value.hexcolor}"
+											>
+												{safeTranslate(value.name ?? value.str) ?? '-'}
+											</p>
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
+											{formatDateOrDateTime(value, languageTag())}
+										{:else if [true, false].includes(value)}
+											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+										{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+											<div class="flex items-center space-x-2">
+												<span>{safeTranslate(value ?? '-')}</span>
+												<span
+													class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-200 dark:text-green-900"
+												>
+													{m.accept()}
+												</span>
+											</div>
+										{:else}
+											{safeTranslate(value ?? '-')}
+										{/if}
+									</span>
+								{/if}
+							</td>
+						{/if}
 					{/each}
-        {#if displayActions}
-						<td
-							class="text-end {regionCell}"
-							role="gridcell"
-						>
-            <slot name="actions" meta={row.meta}>
-            {#if row.meta[identifierField]}
-              {@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
-              {@const actionsURLModel = source.meta.urlmodel ?? URLModel}
-              <TableRowActions
-                deleteForm={deleteForm}
-                {model}
-                URLModel={actionsURLModel}
-                detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-                editURL={!(row.meta.builtin || row.meta.urn) ? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
-                {row}
-                hasBody={$$slots.actionsBody}
-                {identifierField}
-                preventDelete={preventDelete(row)}
-              >
-                <svelte:fragment slot="head">
-                  {#if $$slots.actionsHead}
-                    <slot name="actionsHead" />
-                  {/if}
-                </svelte:fragment>
-                <svelte:fragment slot="body">
-                  {#if $$slots.actionsBody}
-                    <slot name="actionsBody" />
-                  {/if}
-                </svelte:fragment>
-                <svelte:fragment slot="tail">
-                  <svelte:component this={actionsComponent} meta={row.meta ?? {}} {actionsURLModel}/>
-                </svelte:fragment>
-              </TableRowActions>
-            {/if}
-            </slot>
-            </td>
-            {/if}
+					{#if displayActions}
+						<td class="text-end {regionCell}" role="gridcell">
+							<slot name="actions" meta={row.meta}>
+								{#if row.meta[identifierField]}
+									{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
+									{@const actionsURLModel = source.meta.urlmodel ?? URLModel}
+									<TableRowActions
+										{deleteForm}
+										{model}
+										URLModel={actionsURLModel}
+										detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
+										editURL={!(row.meta.builtin || row.meta.urn)
+											? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}`
+											: undefined}
+										{row}
+										hasBody={$$slots.actionsBody}
+										{identifierField}
+										preventDelete={preventDelete(row)}
+									>
+										<svelte:fragment slot="head">
+											{#if $$slots.actionsHead}
+												<slot name="actionsHead" />
+											{/if}
+										</svelte:fragment>
+										<svelte:fragment slot="body">
+											{#if $$slots.actionsBody}
+												<slot name="actionsBody" />
+											{/if}
+										</svelte:fragment>
+										<svelte:fragment slot="tail">
+											<svelte:component
+												this={actionsComponent}
+												meta={row.meta ?? {}}
+												{actionsURLModel}
+											/>
+										</svelte:fragment>
+									</TableRowActions>
+								{/if}
+							</slot>
+						</td>
+					{/if}
 				</tr>
 			{/each}
 		</tbody>
-		<!-- Foot -->
 		{#if source.foot}
 			<tfoot class="table-foot {regionFoot}">
 				<tr>
-					{#each source.foot as cell }
-						<td class="{regionFootCell}">{cell}</td>
+					{#each source.foot as cell}
+						<td class={regionFootCell}>{cell}</td>
 					{/each}
 				</tr>
 			</tfoot>

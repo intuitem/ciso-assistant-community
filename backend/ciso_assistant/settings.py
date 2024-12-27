@@ -26,6 +26,7 @@ BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
+LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 
@@ -59,6 +60,15 @@ LOGGING = {
     },
 }
 
+if LOG_OUTFILE:
+    LOGGING["handlers"]["file"] = {
+        "level": LOG_LEVEL,
+        "class": "logging.handlers.WatchedFileHandler",
+        "filename": "ciso-assistant.log",
+        "formatter": "json",
+    }
+    LOGGING["loggers"][""]["handlers"].append("file")
+
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
@@ -81,6 +91,11 @@ structlog.configure(
 logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
+FEATURE_FLAGS = {}
+MODULE_PATHS = {}
+ROUTES = {}
+MODULES = {}
+
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
 logger.info("BUILD: %s", BUILD)
@@ -94,7 +109,7 @@ logger.info("BUILD: %s", BUILD)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG") == "True"
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
@@ -109,7 +124,7 @@ ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
 MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
 MEDIA_URL = ""
 
-PAGINATE_BY = os.environ.get("PAGINATE_BY", default=500)
+PAGINATE_BY = os.environ.get("PAGINATE_BY", default=5000)
 
 # Application definition
 
@@ -123,10 +138,11 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
+    "ebios_rm",
+    "tprm",
     "core",
     "cal",
     "django_filters",
-    # "debug_toolbar",
     "library",
     "serdes",
     "rest_framework",
@@ -137,6 +153,8 @@ INSTALLED_APPS = [
     "allauth.headless",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
+    "allauth.mfa",
+    # "huey.contrib.djhuey",
 ]
 
 MIDDLEWARE = [
@@ -200,13 +218,14 @@ REST_FRAMEWORK = {
 }
 
 REST_KNOX = {
-    "SECURE_HASH_ALGORITHM": "cryptography.hazmat.primitives.hashes.SHA512",
+    "SECURE_HASH_ALGORITHM": "hashlib.sha512",
     "AUTH_TOKEN_CHARACTER_LENGTH": 64,
     "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
     "TOKEN_LIMIT_PER_USER": None,
     "AUTO_REFRESH": AUTH_TOKEN_AUTO_REFRESH,
     "MIN_REFRESH_INTERVAL": 60,
 }
+
 
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
@@ -287,9 +306,15 @@ LANGUAGES = [
     ("es", "Spanish"),
     ("de", "German"),
     ("it", "Italian"),
-    ("nd", "Dutch"),
+    ("nl", "Dutch"),
     ("pl", "Polish"),
     ("pt", "Portuguese"),
+    ("ar", "Arabic"),
+    ("ro", "Romanian"),
+    ("hi", "Hindi"),
+    ("ur", "Urdu"),
+    ("cz", "Czech"),
+    ("sv", "Swedish"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -350,12 +375,26 @@ SPECTACULAR_SETTINGS = {
     # OTHER SETTINGS
 }
 
+HUEY = {
+    "huey_class": "huey.SqliteHuey",  # Huey implementation to use.
+    "name": "huey-ciso-assistant",  # Use db name for huey.
+    "results": True,  # Store return values of tasks.
+    "store_none": False,  # If a task returns None, do not save to results.
+    "immediate": DEBUG,  # If DEBUG=True, run synchronously.
+    "utc": True,  # Use UTC for all times internally.
+    "filename": "db/huey.sqlite3",
+}
+
 # SSO with allauth
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "email"
+
+# NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
+# It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
+ACCOUNT_REAUTHENTICATION_TIMEOUT = 24 * 60 * 60  # 24 hours
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -366,6 +405,8 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 HEADLESS_ONLY = True
+
+HEADLESS_TOKEN_STRATEGY = "iam.utils.KnoxTokenStrategy"
 
 HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",

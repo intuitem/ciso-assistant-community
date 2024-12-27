@@ -41,6 +41,9 @@ def preview_library(framework: dict) -> dict[str, list]:
     if framework.get("requirement_nodes"):
         index = 0
         for requirement_node in framework["requirement_nodes"]:
+            parent_urn = requirement_node.get("parent_urn")
+            if parent_urn:
+                parent_urn = parent_urn.lower()
             index += 1
             requirement_nodes_list.append(
                 RequirementNode(
@@ -49,8 +52,8 @@ def preview_library(framework: dict) -> dict[str, list]:
                     ),
                     ref_id=requirement_node.get("ref_id"),
                     name=get_referential_translation(requirement_node, "name"),
-                    urn=requirement_node["urn"],
-                    parent_urn=requirement_node.get("parent_urn"),
+                    urn=requirement_node["urn"].lower(),
+                    parent_urn=parent_urn,
                     order_id=index,
                 )
             )
@@ -70,12 +73,15 @@ class RequirementNodeImporter:
             return "Missing the following fields : {}".format(", ".join(missing_fields))
 
     def import_requirement_node(self, framework_object: Framework):
+        parent_urn = self.requirement_data.get("parent_urn")
+        if parent_urn:
+            parent_urn = parent_urn.lower()
         requirement_node = RequirementNode.objects.create(
             # Should i just inherit the folder from Framework or this is useless ?
             folder=Folder.get_root_folder(),
             framework=framework_object,
-            urn=self.requirement_data["urn"],
-            parent_urn=self.requirement_data.get("parent_urn"),
+            urn=self.requirement_data["urn"].lower(),
+            parent_urn=parent_urn,
             assessable=self.requirement_data.get("assessable"),
             ref_id=self.requirement_data.get("ref_id"),
             annotation=self.requirement_data.get("annotation"),
@@ -89,8 +95,8 @@ class RequirementNodeImporter:
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
             is_published=True,
+            question=self.requirement_data.get("question"),
         )
-
         for threat in self.requirement_data.get("threats", []):
             requirement_node.threats.add(
                 Threat.objects.get(urn=threat.lower())
@@ -125,7 +131,7 @@ class RequirementMappingImporter:
     ):
         try:
             target_requirement = RequirementNode.objects.get(
-                urn=self.data["target_requirement_urn"], default_locale=True
+                urn=self.data["target_requirement_urn"].lower(), default_locale=True
             )
         except RequirementNode.DoesNotExist:
             err_msg = f"ERROR: target requirement with URN {self.data['target_requirement_urn']} does not exist"
@@ -133,7 +139,7 @@ class RequirementMappingImporter:
             raise Http404(err_msg)
         try:
             source_requirement = RequirementNode.objects.get(
-                urn=self.data["source_requirement_urn"], default_locale=True
+                urn=self.data["source_requirement_urn"].lower(), default_locale=True
             )
         except RequirementNode.DoesNotExist:
             err_msg = f"ERROR: source requirement with URN {self.data['source_requirement_urn']} does not exist"
@@ -178,14 +184,14 @@ class RequirementMappingSetImporter:
     ):
         self.init_requirement_mappings(self.data["requirement_mappings"])
         _target_framework = Framework.objects.get(
-            urn=self.data["target_framework_urn"], default_locale=True
+            urn=self.data["target_framework_urn"].lower(), default_locale=True
         )
         _source_framework = Framework.objects.get(
-            urn=self.data["source_framework_urn"], default_locale=True
+            urn=self.data["source_framework_urn"].lower(), default_locale=True
         )
         mapping_set = RequirementMappingSet.objects.create(
             name=self.data["name"],
-            urn=self.data["urn"],
+            urn=self.data["urn"].lower(),
             target_framework=_target_framework,
             source_framework=_source_framework,
             library=library_object,
@@ -283,7 +289,7 @@ class FrameworkImporter:
         framework_object = Framework.objects.create(
             folder=Folder.get_root_folder(),
             library=library_object,
-            urn=self.framework_data["urn"],
+            urn=self.framework_data["urn"].lower(),
             ref_id=self.framework_data["ref_id"],
             name=self.framework_data.get("name"),
             description=self.framework_data.get("description"),
@@ -317,7 +323,7 @@ class ThreatImporter:
     def import_threat(self, library_object: LoadedLibrary):
         Threat.objects.create(
             library=library_object,
-            urn=self.threat_data.get("urn"),
+            urn=self.threat_data["urn"].lower(),
             ref_id=self.threat_data["ref_id"],
             name=self.threat_data.get("name"),
             description=self.threat_data.get("description"),
@@ -363,7 +369,7 @@ class ReferenceControlImporter:
     def import_reference_control(self, library_object: LoadedLibrary):
         ReferenceControl.objects.create(
             library=library_object,
-            urn=self.reference_control_data.get("urn"),
+            urn=self.reference_control_data["urn"].lower(),
             ref_id=self.reference_control_data["ref_id"],
             name=self.reference_control_data.get("name"),
             description=self.reference_control_data.get("description"),
@@ -409,7 +415,7 @@ class RiskMatrixImporter:
             folder=Folder.get_root_folder(),
             name=self.risk_matrix_data.get("name"),
             description=self.risk_matrix_data.get("description"),
-            urn=self.risk_matrix_data.get("urn"),
+            urn=self.risk_matrix_data["urn"].lower(),
             provider=library_object.provider,
             ref_id=self.risk_matrix_data.get("ref_id"),
             json_definition=json.dumps(matrix_data),
@@ -586,6 +592,11 @@ class LibraryImporter:
                 error_msg = dependency.load()
                 if error_msg is not None:
                     return error_msg
+            else:
+                # try to update the dependency, because we might need the last version for the main library
+                dependency = LoadedLibrary.objects.get(urn=dependency_urn)
+                if (err_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
+                    return err_msg
 
     def create_or_update_library(self):
         """Create or update the library object."""
@@ -630,6 +641,7 @@ class LibraryImporter:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
+            print(reference_control)
             reference_control.import_reference_control(library_object)
 
         for risk_matrix in self._risk_matrices:

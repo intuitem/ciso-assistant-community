@@ -1,4 +1,5 @@
-FROM node:21-alpine AS builder
+FROM node:22-alpine AS builder
+ENV NODE_OPTIONS="--max-old-space-size=8192"
 WORKDIR /app
 
 ENV PUBLIC_BACKEND_API_URL=foo
@@ -10,7 +11,8 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 RUN pnpm prune
 
-FROM node:21-alpine
+FROM node:22-alpine
+ENV NODE_OPTIONS="--max-old-space-size=8192"
 WORKDIR /app
 COPY --from=builder /app/build build/
 COPY --from=builder /app/server server/

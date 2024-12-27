@@ -1,13 +1,9 @@
 // description of the columns for each ListView
 
 import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
-import CheckboxFilter from '$lib/components/Filters/CheckboxFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
-import * as m from '$paraglide/messages';
-
-type JSONObject = { [key: string]: JSONObject } | JSONObject[] | string | number | boolean | null;
 
 interface ListViewFilterConfig {
 	component: ComponentType;
@@ -34,7 +30,7 @@ interface ListViewFieldsConfig {
 
 const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.lc_status,
+	getColumn: (row) => row.lc_status,
 	extraProps: {
 		defaultOptionName: 'status'
 	},
@@ -43,39 +39,51 @@ const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.folder.str,
+	getColumn: (row) => row.folder?.str,
 	alwaysDefined: true,
 	extraProps: {
 		defaultOptionName: 'domain'
 	}
 };
 
-const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
-	...DOMAIN_FILTER,
-	getColumn: (row) => row.meta.folder.str
+const LABELS_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		return row.filtering_labels && row.filtering_labels.length > 0
+			? row.filtering_labels?.map((filtering_label) => filtering_label.str)
+			: [''];
+	},
+	alwaysDefined: true,
+	extraProps: {
+		defaultOptionName: 'filtering_labels'
+	}
 };
 
-const DOMAIN_FILTER_FROM_META_PROJECT: ListViewFilterConfig = {
+const PRIORITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.priority,
+	alwaysDisplay: true,
+	extraProps: {
+		defaultOptionName: 'priority'
+	}
+};
+
+const DOMAIN_FILTER_FROM_PROJECT: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.meta.project.folder.str
+	getColumn: (row) => row.project?.folder.str
 };
 
 const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.project.str,
+	getColumn: (row) => row.project?.str,
 	extraProps: {
 		defaultOptionName: 'project' // Make translations
 	}
 };
 
-const PROJECT_FILTER_FROM_META: ListViewFilterConfig = {
-	...PROJECT_FILTER,
-	getColumn: (row) => row.meta.project.str
-};
-
 const STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.status,
+	getColumn: (row) => row.status,
 	extraProps: {
 		defaultOptionName: 'status'
 	},
@@ -85,7 +93,7 @@ const STATUS_FILTER: ListViewFilterConfig = {
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	// I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
-	getColumn: (row) => row.meta.treatment,
+	getColumn: (row) => row.treatment,
 	extraProps: {
 		defaultOptionName: 'treatment'
 	}
@@ -94,7 +102,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 const STATE_FILTER: ListViewFilterConfig = {
 	// I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
-	getColumn: (row) => row.meta.state,
+	getColumn: (row) => row.state,
 	extraProps: {
 		defaultOptionName: 'state'
 	}
@@ -106,7 +114,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 		if (row.first_name && row.last_name) {
 			return `${row.first_name} ${row.last_name}`;
 		}
-		return row.meta.approver.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
+		return row.approver?.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
 	},
 	extraProps: {
 		defaultOptionName: 'approver'
@@ -115,7 +123,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 
 const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.risk_assessment.name,
+	getColumn: (row) => row.risk_assessment?.name,
 	extraProps: {
 		defaultOptionName: 'riskAssessment'
 	}
@@ -131,17 +139,9 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PROVIDER_FILTER_FOR_LIBRARIES: ListViewFilterConfig = {
-	...PROVIDER_FILTER,
-	getColumn: (row) => {
-		return row.meta.provider;
-	},
-	alwaysDisplay: true
-};
-
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.meta.threats.length ? row.meta.threats.map((t) => t.str) : null),
+	getColumn: (row) => (row.threats?.length ? row.threats.map((t) => t.str) : null),
 	extraProps: {
 		defaultOptionName: 'threat'
 	}
@@ -149,16 +149,115 @@ const THREAT_FILTER: ListViewFilterConfig = {
 
 const ASSET_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.meta.assets.length ? row.meta.assets.map((t) => t.str) : null),
+	getColumn: (row) => (row.assets?.length ? row.assets.map((t) => t.str) : null),
 	extraProps: {
 		defaultOptionName: 'asset'
 	},
 	alwaysDisplay: true
 };
 
+const QUALIFICATION_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.qualifications?.length ? row.qualifications.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'qualification'
+	},
+	alwaysDisplay: true
+};
+
+const GRAVITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.gravity.name,
+	extraProps: {
+		defaultOptionName: 'gravity'
+	},
+	alwaysDisplay: true
+};
+
+const LIKELIHOOD_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.likelihood.name,
+	extraProps: {
+		defaultOptionName: 'likelihood'
+	},
+	alwaysDisplay: true
+};
+
+const IS_SELECTED_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.is_selected ? 'true' : 'false'),
+	extraProps: {
+		defaultOptionName: 'is_selected'
+	},
+	alwaysDisplay: true
+};
+
+const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.risk_origin,
+	extraProps: {
+		defaultOptionName: 'risk_origin'
+	},
+	alwaysDisplay: true
+};
+
+const FEARED_EVENT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.feared_events?.length ? row.feared_events.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'feared_event'
+	},
+	alwaysDisplay: true
+};
+
+const PERTINENCE_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.pertinence,
+	extraProps: {
+		defaultOptionName: 'pertinence'
+	},
+	alwaysDisplay: true
+};
+
+const ENTITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.entity.str,
+	extraProps: {
+		defaultOptionName: 'entity'
+	},
+	alwaysDisplay: true
+};
+
+const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (console.log(row), row.current_criticality.toString()),
+	extraProps: {
+		defaultOptionName: 'current_criticality'
+	},
+	alwaysDisplay: true
+};
+
+const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (console.log(row), row.residual_criticality.toString()),
+	extraProps: {
+		defaultOptionName: 'residual_criticality'
+	},
+	alwaysDisplay: true
+};
+
+const STAKEHOLDER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.stakeholders?.length ? row.stakeholders.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'stakeholder'
+	},
+	alwaysDisplay: true
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.framework.ref_id,
+	getColumn: (row) => row.framework?.ref_id,
 	extraProps: {
 		defaultOptionName: 'framework' // Make translations
 	}
@@ -175,7 +274,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 
 const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.type,
+	getColumn: (row) => row.type,
 	extraProps: {
 		defaultOptionName: 'type' // Make translations
 	},
@@ -184,7 +283,7 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 
 const CATEGORY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.category,
+	getColumn: (row) => row.category,
 	extraProps: {
 		defaultOptionName: 'category' // Make translations
 	},
@@ -193,28 +292,59 @@ const CATEGORY_FILTER: ListViewFilterConfig = {
 
 const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.csf_function,
+	getColumn: (row) => row.csf_function,
 	extraProps: {
 		defaultOptionName: 'csfFunction' // Make translations
 	},
 	alwaysDisplay: true
 };
 
-/* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
-	component: CheckboxFilter,
-	getColumn: row => {
-		return !row.meta.overview.some(
-			line => line.startsWith("risk_matrix")
-		); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
-	},
-	filterProps: (rows: any[],field: string) => new Object(),
-	filter: (builtin: boolean, value: boolean): boolean => {
-		return value ? !builtin : true;
+const OWNER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		const owner = row?.meta?.owner;
+		return owner && owner.length ? owner.map((o) => o.str) : null;
 	},
 	extraProps: {
-		title: "Only display matrix libraries" // Make translations
-	}
+		defaultOptionName: 'owner'
+	},
+	alwaysDisplay: true
+};
+/* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
+  component: CheckboxFilter,
+  getColumn: row => {
+    return !row.overview.some(
+      line => line.startsWith("risk_matrix")
+    ); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
+  },
+  filterProps: (rows: any[],field: string) => new Object(),
+  filter: (builtin: boolean, value: boolean): boolean => {
+    return value ? !builtin : true;
+  },
+  extraProps: {
+    title: "Only display matrix libraries" // Make translations
+  }
 }; */
+
+const LIBRARY_TYPE_FILTER = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		const overviewKeys = new Set(row.overview?.map((overviewRow) => overviewRow.split(':')[0]));
+		const libraryDatatypeSet = new Set([
+			'framework',
+			'risk_matrix',
+			'threats',
+			'requirement_mapping_set',
+			'reference_controls'
+		]);
+		const datatypes = [...libraryDatatypeSet].filter((datatype) => overviewKeys.has(datatype));
+		return datatypes;
+	},
+	extraProps: {
+		defaultOptionName: 'objectType'
+	},
+	alwaysDisplay: true
+};
 
 export const listViewFields: ListViewFieldsConfig = {
 	folders: {
@@ -222,12 +352,16 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description', 'parent_folder']
 	},
 	projects: {
-		head: ['name', 'description', 'domain'],
-		body: ['name', 'description', 'folder'],
+		head: ['ref_id', 'name', 'description', 'domain'],
+		body: ['ref_id', 'name', 'description', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PROJECT_STATUS_FILTER
 		}
+	},
+	'filtering-labels': {
+		head: ['label'],
+		body: ['label']
 	},
 	'risk-matrices': {
 		head: ['name', 'description', 'provider', 'domain'],
@@ -237,36 +371,76 @@ export const listViewFields: ListViewFieldsConfig = {
 			folder: DOMAIN_FILTER
 		}
 	},
-	'risk-assessments': {
-		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
-		body: ['str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
+	vulnerabilities: {
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'severity',
+			'applied_controls',
+			'folder',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'severity',
+			'applied_controls',
+			'folder',
+			'filtering_labels'
+		],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'risk-assessments': {
+		head: ['ref_id', 'name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
+		body: ['ref_id', 'str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
+		filters: {
+			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
 			project: PROJECT_FILTER,
 			status: { ...STATUS_FILTER, alwaysDisplay: true }
 		}
 	},
 	threats: {
-		head: ['ref', 'name', 'description', 'provider', 'domain'],
+		head: ['ref_id', 'name', 'description', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			provider: PROVIDER_FILTER
 		}
 	},
 	'risk-scenarios': {
-		head: ['name', 'threats', 'riskAssessment', 'appliedControls', 'currentLevel', 'residualLevel'],
-		body: [
-			'name',
+		head: [
+			'ref_id',
 			'threats',
-			'risk_assessment',
-			'applied_controls',
+			'name',
+			'existingAppliedControls',
+			'currentLevel',
+			'extraAppliedControls',
+			'residualLevel',
+			'treatment',
+			'riskAssessment'
+		],
+		body: [
+			'ref_id',
+			'threats',
+			'name',
+			'existing_applied_controls',
 			'current_level',
-			'residual_level'
+			'applied_controls',
+			'residual_level',
+			'treatment',
+			'risk_assessment'
 		],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
-			project: { ...PROJECT_FILTER_FROM_META, alwaysDisplay: true },
+			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
+			project: { ...PROJECT_FILTER, alwaysDisplay: true },
 			treatment: { ...TREATMENT_FILTER, alwaysDisplay: true },
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
@@ -277,49 +451,117 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'description', 'riskScenarios'],
 		body: ['name', 'description', 'risk_scenarios'],
 		filters: {
-			folder: DOMAIN_FILTER_FROM_META,
+			folder: DOMAIN_FILTER,
 			state: STATE_FILTER,
 			approver: APPROVER_FILTER
 		}
 	},
 	'applied-controls': {
-		head: ['name', 'description', 'category', 'csfFunction', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'category', 'csf_function', 'eta', 'folder', 'reference_control'],
+		head: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'category',
+			'csfFunction',
+			'eta',
+			'owner',
+			'domain',
+			'referenceControl'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'category',
+			'csf_function',
+			'eta',
+			'owner',
+			'folder',
+			'reference_control'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: STATUS_FILTER,
 			category: CATEGORY_FILTER,
-			csf_function: CSF_FUNCTION_FILTER
+			csf_function: CSF_FUNCTION_FILTER,
+			owner: OWNER_FILTER,
+			priority: PRIORITY_FILTER
 		}
 	},
 	policies: {
-		head: ['name', 'description', 'csfFunction', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'csf_function', 'eta', 'folder', 'reference_control'],
+		head: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'csfFunction',
+			'eta',
+			'owner',
+			'domain',
+			'referenceControl'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'csf_function',
+			'eta',
+			'owner',
+			'folder',
+			'reference_control'
+		],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: STATUS_FILTER,
+			csf_function: CSF_FUNCTION_FILTER,
+			owner: OWNER_FILTER,
+			priority: PRIORITY_FILTER
 		}
 	},
 	'reference-controls': {
-		head: ['ref', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
+		head: ['ref_id', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
 			category: CATEGORY_FILTER,
+			provider: PROVIDER_FILTER,
 			csf_function: CSF_FUNCTION_FILTER
 		}
 	},
 	assets: {
-		head: ['name', 'description', 'businessValue', 'domain'],
-		body: ['name', 'description', 'business_value', 'folder'],
+		head: [
+			'name',
+			'type',
+			'description',
+			'securityObjectives',
+			'disasterRecoveryObjectives',
+			'owner',
+			'domain',
+			'labels'
+		],
+		body: [
+			'name',
+			'type',
+			'description',
+			'security_objectives',
+			'disaster_recovery_objectives',
+			'owner',
+			'folder',
+			'filtering_labels'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			type: ASSET_TYPE_FILTER
+			type: ASSET_TYPE_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName'],
-		body: ['email', 'first_name', 'last_name']
+		head: ['email', 'firstName', 'lastName', 'is_sso'],
+		body: ['email', 'first_name', 'last_name', 'is_sso']
 	},
 	'user-groups': {
 		head: ['name'],
@@ -344,10 +586,10 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['name', 'framework', 'description', 'project'],
-		body: ['name', 'framework', 'description', 'project'],
+		head: ['ref_id', 'name', 'framework', 'description', 'project'],
+		body: ['ref_id', 'name', 'framework', 'description', 'project'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
+			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: STATUS_FILTER
@@ -362,33 +604,34 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'file', 'size', 'description'],
 		body: ['name', 'attachment', 'size', 'description'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_META, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
+			folder: { ...DOMAIN_FILTER, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
 		}
 	},
 	requirements: {
-		head: ['ref', 'name', 'description', 'framework'],
+		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],
 		meta: ['id', 'urn']
 	},
 	libraries: {
-		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locales', 'overview']
+		head: ['provider', 'name', 'description', 'language', 'overview'],
+		body: ['provider', 'name', 'description', 'locales', 'overview']
 	},
 	'stored-libraries': {
-		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
+		head: ['provider', 'name', 'description', 'language', 'overview'],
+		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
-			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
+			provider: PROVIDER_FILTER,
+			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
 	'loaded-libraries': {
-		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
+		head: ['provider', 'name', 'description', 'language', 'overview'],
+		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
+			provider: PROVIDER_FILTER,
+			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
 	'sso-settings': {
@@ -398,5 +641,117 @@ export const listViewFields: ListViewFieldsConfig = {
 	'requirement-mapping-sets': {
 		head: ['sourceFramework', 'targetFramework'],
 		body: ['source_framework', 'target_framework']
+	},
+	entities: {
+		head: ['name', 'description', 'domain', 'ownedFolders'],
+		body: ['name', 'description', 'folder', 'owned_folders'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
+	'entity-assessments': {
+		head: ['name', 'description', 'project', 'entity'],
+		body: ['name', 'description', 'project', 'entity'],
+		filters: {
+			project: PROJECT_FILTER,
+			status: STATUS_FILTER
+		}
+	},
+	solutions: {
+		head: ['name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
+		body: ['name', 'description', 'provider_entity', 'recipient_entity', 'criticality']
+	},
+	representatives: {
+		head: ['email', 'entity', 'role'],
+		body: ['email', 'entity', 'role']
+	},
+	'ebios-rm': {
+		head: ['name', 'description'],
+		body: ['name', 'description']
+	},
+	'feared-events': {
+		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		filters: {
+			assets: ASSET_FILTER,
+			qualifications: QUALIFICATION_FILTER,
+			gravity: GRAVITY_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
+	},
+	'ro-to': {
+		head: ['isSelected', 'riskOrigin', 'targetObjective', 'fearedEvents', 'pertinence'],
+		body: ['is_selected', 'risk_origin', 'target_objective', 'feared_events', 'pertinence'],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			risk_origin: RISK_ORIGIN_FILTER,
+			feared_events: FEARED_EVENT_FILTER,
+			pertinence: PERTINENCE_FILTER
+		}
+	},
+	stakeholders: {
+		head: [
+			'is_selected',
+			'entity',
+			'category',
+			'current_criticality',
+			'applied_controls',
+			'residual_criticality'
+		],
+		body: [
+			'is_selected',
+			'entity',
+			'category',
+			'current_criticality',
+			'applied_controls',
+			'residual_criticality'
+		],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			entity: ENTITY_FILTER,
+			category: CATEGORY_FILTER,
+			current_criticality: CURRENT_CRITICALITY_FILTER,
+			residual_criticality: RESIDUAL_CRITICALITY_FILTER
+		}
+	},
+	'strategic-scenarios': {
+		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
+		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
+		filters: {
+			gravity: GRAVITY_FILTER
+		}
+	},
+	'attack-paths': {
+		head: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'risk_origin',
+			'target_objective',
+			'stakeholders',
+			'attackPath'
+		],
+		body: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'risk_origin',
+			'target_objective',
+			'stakeholders',
+			'description'
+		],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			stakeholders: STAKEHOLDER_FILTER
+		}
+	},
+	'operational-scenarios': {
+		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
+		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
+		filters: {
+			threats: THREAT_FILTER,
+			likelihood: LIKELIHOOD_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
 	}
 };

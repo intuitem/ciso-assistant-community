@@ -1,9 +1,11 @@
+import importlib
 from typing import Any
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 
 from core.models import *
 from iam.models import *
+from ebios_rm.models import EbiosRMStudy
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -16,6 +18,40 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
+
+
+class SerializerFactory:
+    """Factory to get a serializer class from a list of modules.
+
+    Attributes:
+    modules (list): List of module names to search for the serializer.
+    """
+
+    def __init__(self, *modules: str):
+        self.modules = list(reversed(modules))  # Reverse to prioritize later modules
+
+    def get_serializer(self, base_name: str, action: str):
+        if action in ["list", "retrieve"]:
+            serializer_name = f"{base_name}ReadSerializer"
+        elif action in ["create", "update", "partial_update"]:
+            serializer_name = f"{base_name}WriteSerializer"
+        else:
+            return None
+
+        return self._get_serializer_class(serializer_name)
+
+    def _get_serializer_class(self, serializer_name: str):
+        for module_name in self.modules:
+            try:
+                serializer_module = importlib.import_module(module_name)
+                serializer_class = getattr(serializer_module, serializer_name)
+                return serializer_class
+            except (ModuleNotFoundError, AttributeError):
+                continue
+
+        raise ValueError(
+            f"Serializer {serializer_name} not found in any provided modules"
+        )
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
@@ -49,7 +85,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
         try:
             object_created = super().create(validated_data)
             return object_created
-        except Exception as e:
+        except ValidationError as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
 
@@ -83,6 +119,7 @@ class AssessmentReadSerializer(BaseModelSerializer):
 class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     json_definition = serializers.JSONField(source="get_json_translated")
+    library = FieldsRelatedField(["name", "id"])
 
     class Meta:
         model = RiskMatrix
@@ -91,6 +128,22 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
     pass
+
+
+class VulnerabilityReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    applied_controls = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
+
+    class Meta:
+        model = Vulnerability
+        exclude = ["created_at", "updated_at", "is_published"]
+
+
+class VulnerabilityWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Vulnerability
+        exclude = ["created_at", "updated_at", "is_published"]
 
 
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
@@ -153,25 +206,56 @@ class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     project = FieldsRelatedField(["id", "folder"])
+    folder = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
+    ebios_rm_study = FieldsRelatedField(["id", "name"])
 
     class Meta:
         model = RiskAssessment
-        fields = "__all__"
+        exclude = []
 
 
 class AssetWriteSerializer(BaseModelSerializer):
+    ebios_rm_studies = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=EbiosRMStudy.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+
     class Meta:
         model = Asset
         fields = "__all__"
+
+    def validate_parent_assets(self, parent_assets):
+        """
+        Check that the assets graph will not contain cycles
+        """
+        if not self.instance:
+            return parent_assets
+        if parent_assets:
+            for asset in parent_assets:
+                if self.instance in asset.ancestors_plus_self():
+                    raise serializers.ValidationError(
+                        "errorAssetGraphMustNotContainCycles"
+                    )
+        return parent_assets
 
 
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
-
+    owner = FieldsRelatedField(many=True)
+    security_objectives = serializers.JSONField(
+        source="get_security_objectives_display"
+    )
+    disaster_recovery_objectives = serializers.JSONField(
+        source="get_disaster_recovery_objectives_display"
+    )
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
 
 
@@ -183,7 +267,7 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 
 class ReferenceControlReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "urn"])
+    library = FieldsRelatedField(["name", "id"])
 
     class Meta:
         model = ReferenceControl
@@ -213,7 +297,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
 
 class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "urn"])
+    library = FieldsRelatedField(["name", "id"])
 
     class Meta:
         model = Threat
@@ -240,7 +324,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
 
-    treatment = serializers.CharField(source="get_treatment_display")
+    treatment = serializers.CharField()
 
     current_proba = serializers.JSONField(source="get_current_proba")
     current_impact = serializers.JSONField(source="get_current_impact")
@@ -252,7 +336,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
 
     applied_controls = FieldsRelatedField(many=True)
-    rid = serializers.CharField()
+    existing_applied_controls = FieldsRelatedField(many=True)
 
     owner = FieldsRelatedField(many=True)
 
@@ -266,18 +350,28 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
-
+    priority = serializers.CharField(source="get_priority_display")
     category = serializers.CharField(
         source="get_category_display"
     )  # type : get_type_display
     csf_function = serializers.CharField(
         source="get_csf_function_display"
     )  # type : get_type_display
-    status = serializers.CharField(source="get_status_display")
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
+    cost = serializers.FloatField()
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
+    owner = FieldsRelatedField(many=True)
+    # These properties shouldn't be displayed in the frontend detail view as they are simple derivations from fields already displayed in the detail view.
+    # has_evidences = serializers.BooleanField()
+    # eta_missed = serializers.BooleanField()
+
+
+class AppliedControlDuplicateSerializer(BaseModelSerializer):
+    class Meta:
+        model = AppliedControl
+        fields = ["name", "description", "folder"]
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
@@ -306,6 +400,7 @@ class UserReadSerializer(BaseModelSerializer):
             "date_joined",
             "user_groups",
             "is_sso",
+            "is_third_party",
         ]
 
 
@@ -320,6 +415,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "is_third_party",
         ]
 
     def validate_email(self, email):
@@ -431,7 +527,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Folder
-        exclude = []
+        fields = "__all__"
 
 
 # Compliance Assessment
@@ -439,7 +535,8 @@ class FolderReadSerializer(BaseModelSerializer):
 
 class FrameworkReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "urn"])
+    library = FieldsRelatedField(["name", "id"])
+    reference_controls = FieldsRelatedField(many=True)
 
     class Meta:
         model = Framework
@@ -500,12 +597,21 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     project = FieldsRelatedField(["id", "folder"])
+    folder = FieldsRelatedField()
     framework = FieldsRelatedField(
-        ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
+        [
+            "id",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "ref_id",
+            "reference_controls",
+        ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
+    progress = serializers.ReadOnlyField()
 
     class Meta:
         model = ComplianceAssessment
@@ -519,6 +625,16 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         required=False,
         allow_null=True,
     )
+    ebios_rm_studies = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=EbiosRMStudy.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+    create_applied_controls_from_suggestions = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
 
     def create(self, validated_data: Any):
         return super().create(validated_data)
@@ -529,10 +645,29 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
+    class FilteredNodeSerializer(RequirementNodeReadSerializer):
+        class Meta:
+            model = RequirementNode
+            fields = [
+                "id",
+                "urn",
+                "annotation",
+                "name",
+                "description",
+                "typical_evidence",
+                "ref_id",
+                "associated_reference_controls",
+                "associated_threats",
+                "parent_requirement",
+            ]
+
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
+    evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assessable = serializers.BooleanField(source="requirement.assessable")
+    requirement = FilteredNodeSerializer()
 
     class Meta:
         model = RequirementAssessment
@@ -579,7 +714,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 class RequirementMappingSetReadSerializer(BaseModelSerializer):
     source_framework = FieldsRelatedField()
     target_framework = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "urn"])
+    library = FieldsRelatedField(["name", "id"])
     folder = FieldsRelatedField()
 
     class Meta:
@@ -598,3 +733,27 @@ class ComputeMappingSerializer(serializers.Serializer):
     source_assessment = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all()
     )
+
+
+class FilteringLabelReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = FilteringLabel
+        fields = "__all__"
+
+
+class FilteringLabelWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = FilteringLabel
+        exclude = ["folder", "is_published"]
+
+
+class QualificationReadSerializer(ReferentialSerializer):
+    class Meta:
+        model = Qualification
+        exclude = ["translations"]
+
+
+class QualificationWriteSerializer(QualificationReadSerializer):
+    pass

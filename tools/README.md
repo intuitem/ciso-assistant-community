@@ -6,13 +6,17 @@ Have a look to the given examples.
 
 ## Usage
 
+Usage: python convert_library [--compat] your_library_file.xlsx
+
 To launch it, open a shell in a command line, and type:
 
 ```bash
-python convert-library.py your_library_file.xlsx
+python convert_library.py your_library_file.xlsx
 ```
 
 This will produce a file name your_library_file.yaml
+
+The compat flag is recommended only to maintain libraries that have been generated prior or up to release 1.9.20. Without the compat flag, URNs generated for nodes without ref_id are constructed using the parent_urn. These generated URNs are much simpler to understand and maintain if required, compared to the previus system using "nodeXXX" suffix.
 
 ## Format of Excel files
 
@@ -57,6 +61,9 @@ Conventions:
         tab                             | <tab_name> | implementation_groups
         tab                             | <tab_name> | risk_matrix
         tab                             | <tab_name> | mappings
+        tab                             | <tab_name> | answers
+
+        variables can also have a translation in the form "variable[locale]"
 
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
@@ -71,6 +78,8 @@ Conventions:
             - reference_controls
             - annotation
             - typical_evidence
+            - questions
+            - answer
             - skip_count: trick for fixing a referential without changing the urns (advanced users)
         The normal tree order shall be respected
         If multiple threats or reference_control are given for a requirements, they shall be separated by blank or comma.
@@ -80,7 +89,7 @@ Conventions:
             - ref_id(*)
             - name
             - description
-            - category (policy/process/techncial/physical).
+            - category (policy/process/technical/physical).
             - csf_function (govern/identify/protect/detect/respond/recover).
             - annotation
     For risk matrices:
@@ -101,11 +110,34 @@ Conventions:
             - relationship(*)
             - rationale
             - stregth_of_relationship
-    A library has a single locale. Translated libraries have the same urns, they are merged during import.
+    For Answers:
+        The first line is a header, with the following possible fields (* for required):
+            - id(*)
+            - question_type(*)
+            - question_choices(*)
+    A library has a single locale, which is the reference language. Translations are given in columns with header like "name[fr]"
     Dependencies are given as a comma or blank separated list of urns.
+
 ```
 
 ## Mappings
 
 The `prepare_mapping.py` script can be used to create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
 
+## Considerations for URN selection
+
+The recommended format for URNs is: urn:\<packager\>:risk:\<object\>:\<refid\>
+
+Object can be:
+- library
+- framework
+- threat
+- reference_control
+- matrix
+- req_mapping_set
+- req_node
+
+For the selection of refid, here are a few considerations:
+- It makes sense to have a version of the source document in refid.
+- However, this version should be generic enough to allow library updates.
+- For example, if the version is v2.0.4, it is probably wise to select v2.0 or even v2. Thus if v2.1.0 is published and it is possible to make a smooth upgrade from v2.0.4, the urn will remain meaningful.

@@ -63,7 +63,7 @@ for tab in dataframe:
             (ref_id, description, evidence, _, _, _, domain_id) = (
                 r.value for r in row[0:7]
             )
-            if ref_id and re.match("SO\d+-\d+", ref_id):
+            if ref_id and re.match(r"SO\d+-\d+", ref_id):
                 if domain_id != current_domain_id:
                     current_domain_id = domain_id
                     output_table.append(
@@ -95,16 +95,15 @@ for tab in dataframe:
                     if measures[measure_id][0] == objective_id
                 ]
                 output_table.append(
-                    ("x", 3, ref_id, "", description, ",".join(req_measures))
+                    ("x", 3, ref_id, "", description, ",".join(req_measures), evidence)
                 )
-                output_table.append(("", 4, "", "Evidence", evidence, ""))
 
 print("generating", output_file_name)
 wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
 ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:enisa-5g-scm-v1.3"])
-ws.append(["library_version", "1"])
+ws.append(["library_version", "2"])
 ws.append(["library_locale", "en"])
 ws.append(["library_ref_id", "ENISA 5G SCM v1.3"])
 ws.append(["library_name", "ENISA 5G Security Control Matrix v1.3"])

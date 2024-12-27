@@ -5,11 +5,11 @@ test('startup tests', async ({ loginPage, analyticsPage, page }) => {
 		await page.goto('/');
 		await loginPage.hasUrl(1);
 		await loginPage.login();
-		await analyticsPage.hasUrl();
+		await analyticsPage.hasUrl(false);
 	});
 
 	await test.step('proper redirection to the analytics page after login', async () => {
-		await analyticsPage.hasUrl();
+		await analyticsPage.hasUrl(false);
 		await analyticsPage.hasTitle();
 	});
 });

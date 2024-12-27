@@ -51,7 +51,7 @@ for tab in dataframe:
             if v1:
                 if ":" in v1:
                     print(v1)
-                    q = re.match("(\w+) \((\w+)\): (.*)", v1)
+                    q = re.match(r"(\w+) \((\w+)\): (.*)", v1)
                     function_name = q.group(1)
                     function_id = q.group(2)
                     function_description = q.group(3)
@@ -61,7 +61,7 @@ for tab in dataframe:
                     ws.cell(row=line, column=5, value=function_description)
                     line += 1
             elif v2:
-                q = re.match("([\w\s,]+) \((\w+.\w+)\): (.*)", v2)
+                q = re.match(r"([\w\s,]+) \((\w+.\w+)\): (.*)", v2)
                 category_name = q.group(1)
                 category_id = q.group(2)
                 category_description = q.group(3)
@@ -71,7 +71,7 @@ for tab in dataframe:
                 ws.cell(row=line, column=5, value=category_description)
                 line += 1
             elif v3:
-                q = re.match("(\w+.\w+-\d+): (.*)", v3)
+                q = re.match(r"(\w+.\w+-\d+): (.*)", v3)
                 subcategory_id = q.group(1)
                 subcategory_description = q.group(2)
                 ws.cell(row=line, column=1, value="x")

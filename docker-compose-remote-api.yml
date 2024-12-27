@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     container_name: backend
@@ -12,6 +10,21 @@ services:
       - AUTH_TOKEN_TTL=7200
     volumes:
       - ./db:/code/db
+
+  # huey:
+  # container_name: huey
+  # image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+  # restart: always
+  # environment:
+  #   - ALLOWED_HOSTS=backend,localhost
+  #   - DJANGO_DEBUG=False
+  # volumes:
+  #   - ./db:/code/db
+  # entrypoint:
+  #   - /bin/sh
+  #   - -c
+  # - |
+  #   poetry run python manage.py run_huey
 
   frontend:
     container_name: frontend
@@ -26,7 +39,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.7.6
+    image: caddy:2.8.4
     restart: unless-stopped
     ports:
       - 8443:8443

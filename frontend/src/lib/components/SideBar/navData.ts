@@ -27,102 +27,16 @@ export const navData = {
 					]
 				},
 				{
-					name: 'calendar',
-					fa_icon: 'fa-solid fa-calendar-days',
-					href: '/calendar',
+					name: 'myAssignments',
+					fa_icon: 'fa-solid fa-list-check',
+					href: '/my-assignments',
 					permissions: [
-						'view_appliedcontrol',
-						'view_riskacceptance',
-						'view_riskassessment',
-						'view_complianceassessment'
+						'view_project',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_assessment',
+						'view_riskassessment'
 					]
-				}
-			]
-		},
-		{
-			name: 'context',
-			items: [
-				{
-					name: 'threats',
-					fa_icon: 'fa-solid fa-biohazard',
-					href: '/threats'
-				},
-				{
-					name: 'referenceControls',
-					fa_icon: 'fa-solid fa-gears',
-					href: '/reference-controls'
-				},
-				{
-					name: 'appliedControls',
-					fa_icon: 'fa-solid fa-fire-extinguisher',
-					href: '/applied-controls'
-				},
-				{
-					name: 'assets',
-					fa_icon: 'fa-solid fa-gem',
-					href: '/assets'
-				}
-			]
-		},
-		{
-			name: 'governance',
-			items: [
-				{
-					name: 'policies',
-					fa_icon: 'fa-solid fa-user',
-					href: '/policies',
-					permissions: ['view_appliedcontrol']
-				},
-				{
-					name: 'riskMatrices',
-					fa_icon: 'fa-solid fa-table-cells-large',
-					href: '/risk-matrices'
-				}
-			]
-		},
-		{
-			name: 'risk',
-			items: [
-				{
-					name: 'riskAssessments',
-					fa_icon: 'fa-solid fa-magnifying-glass-chart',
-					href: '/risk-assessments'
-				},
-				{
-					name: 'riskScenarios',
-					fa_icon: 'fa-solid fa-clone',
-					href: '/risk-scenarios'
-				},
-				{
-					name: 'riskAcceptances',
-					fa_icon: 'fa-solid fa-user-tie',
-					href: '/risk-acceptances'
-				}
-			]
-		},
-
-		{
-			name: 'compliance',
-			items: [
-				{
-					name: 'complianceAssessments',
-					fa_icon: 'fa-solid fa-arrows-to-eye',
-					href: '/compliance-assessments'
-				},
-				{
-					name: 'evidences',
-					fa_icon: 'fa-solid fa-file',
-					href: '/evidences'
-				},
-				{
-					name: 'frameworks',
-					fa_icon: 'fa-solid fa-folder',
-					href: '/frameworks'
-				},
-				{
-					name: 'requirementMappingSets',
-					fa_icon: 'fa-solid fa-diagram-project',
-					href: '/requirement-mapping-sets'
 				}
 			]
 		},
@@ -132,7 +46,8 @@ export const navData = {
 				{
 					name: 'domains',
 					fa_icon: 'fa-solid fa-sitemap',
-					href: '/folders'
+					href: '/folders',
+					exclude: ['BI-RL-TPR']
 				},
 				{
 					name: 'projects',
@@ -153,18 +68,105 @@ export const navData = {
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
+				},
+				{
+					name: 'assets',
+					fa_icon: 'fa-solid fa-gem',
+					href: '/assets'
 				}
 			]
 		},
-
 		{
-			name: 'extra',
+			name: 'catalog',
 			items: [
+				{
+					name: 'frameworks',
+					fa_icon: 'fa-solid fa-book',
+					href: '/frameworks'
+				},
+				{
+					name: 'threats',
+					fa_icon: 'fa-solid fa-biohazard',
+					href: '/threats'
+				},
+				{
+					name: 'referenceControls',
+					fa_icon: 'fa-solid fa-gears',
+					href: '/reference-controls'
+				},
+				{
+					name: 'requirementMappingSets',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/requirement-mapping-sets'
+				},
+				{
+					name: 'riskMatrices',
+					fa_icon: 'fa-solid fa-table-cells-large',
+					href: '/risk-matrices'
+				}
+			]
+		},
+		{
+			name: 'operations',
+			items: [
+				{
+					name: 'appliedControls',
+					fa_icon: 'fa-solid fa-fire-extinguisher',
+					href: '/applied-controls'
+				},
+				{
+					name: 'calendar',
+					fa_icon: 'fa-solid fa-calendar-days',
+					href: '/calendar',
+					permissions: ['view_appliedcontrol', 'view_riskacceptance', 'view_riskassessment']
+				},
 				{
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
 					permissions: ['view_riskassessment', 'view_assessment']
+				}
+			]
+		},
+		{
+			name: 'governance',
+			items: [
+				{
+					name: 'libraries',
+					fa_icon: 'fa-solid fa-folder-plus',
+					href: '/libraries',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
+				},
+				{
+					name: 'policies',
+					fa_icon: 'fa-solid fa-book',
+					href: '/policies',
+					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'riskAcceptances',
+					fa_icon: 'fa-solid fa-signature',
+					href: '/risk-acceptances'
+				}
+			]
+		},
+		{
+			name: 'risk',
+			items: [
+				{
+					name: 'riskAssessments',
+					fa_icon: 'fa-solid fa-magnifying-glass-chart',
+					href: '/risk-assessments'
+				},
+				{
+					name: 'ebiosRM',
+					fa_icon: 'fa-solid fa-gopuram',
+					href: '/ebios-rm'
+				},
+				{
+					name: 'riskScenarios',
+					fa_icon: 'fa-solid fa-clone',
+					href: '/risk-scenarios'
 				},
 				{
 					name: 'scoringAssistant',
@@ -173,10 +175,69 @@ export const navData = {
 					permissions: ['view_riskmatrix']
 				},
 				{
-					name: 'libraries',
-					fa_icon: 'fa-solid fa-folder-plus',
-					href: '/libraries',
-					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
+					name: 'vulnerabilities',
+					// What is the best icon between "fa-triangle-exclamation" and "fa-skull-crossbones" for a vulnerability ?
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/vulnerabilities'
+				}
+			]
+		},
+
+		{
+			name: 'compliance',
+			items: [
+				{
+					name: 'complianceAssessments',
+					fa_icon: 'fa-solid fa-certificate',
+					href: '/compliance-assessments'
+				},
+				{
+					name: 'evidences',
+					fa_icon: 'fa-solid fa-receipt',
+					href: '/evidences'
+				}
+			]
+		},
+
+		{
+			name: 'thirdPartyCategory',
+			items: [
+				{
+					name: 'entities',
+					fa_icon: 'fa-solid fa-building',
+					href: '/entities'
+				},
+				{
+					name: 'entityAssessments',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/entity-assessments'
+				},
+				{
+					name: 'representatives',
+					fa_icon: 'fa-solid fa-user-tie',
+					href: '/representatives'
+				},
+				{
+					name: 'solutions',
+					fa_icon: 'fa-solid fa-box',
+					href: '/solutions'
+				}
+			]
+		},
+		{
+			name: 'extra',
+			items: [
+				{
+					name: 'labels',
+					fa_icon: 'fa-solid fa-tag',
+					href: '/filtering-labels',
+					permissions: ['view_filteringlabel']
+				},
+				{
+					name: 'settings',
+					fa_icon: 'fa-solid fa-cog',
+					href: '/settings',
+					permissions: ['change_globalsettings']
 				},
 				{
 					name: 'backupRestore',
@@ -185,9 +246,9 @@ export const navData = {
 					permissions: ['backup']
 				},
 				{
-					name: 'settings',
-					fa_icon: 'fa-solid fa-cog',
-					href: '/settings',
+					name: 'Experimental',
+					fa_icon: 'fa-solid fa-flask',
+					href: '/experimental',
 					permissions: ['change_globalsettings']
 				}
 			]

@@ -9,6 +9,7 @@
 	import type { AnyZodObject } from 'zod';
 
 	import * as m from '$paraglide/messages';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -28,7 +29,10 @@
 		event.stopPropagation();
 	}
 
-	function modalConfirmDelete(id: string, name: string): void {
+	function modalConfirmDelete(
+		id: string,
+		row: { [key: string]: string | number | boolean | null }
+	): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,
 			props: {
@@ -38,12 +42,20 @@
 				URLModel: URLModel
 			}
 		};
+		const name =
+			URLModel === 'users' && row.first_name
+				? `${row.first_name} ${row.last_name} (${row.email})`
+				: (row.name ?? Object.values(row)[0]);
+		const body =
+			URLModel === 'users'
+				? m.deleteUserMessage({ name: name })
+				: m.deleteModalMessage({ name: name });
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
 			// Data
 			title: m.deleteModalTitle(),
-			body: `${m.deleteModalMessage()}: ${name}?`
+			body: body
 		};
 		modalStore.trigger(modal);
 	}
@@ -65,27 +77,30 @@
 	<slot name="body" />
 	{#if !hasBody}
 		{#if displayDetail}
-			<a
+			<Anchor
+				breadcrumbAction="push"
 				href={detailURL}
 				class="unstyled cursor-pointer hover:text-primary-500"
-				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye" /></a
+				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye" /></Anchor
 			>
 		{/if}
 		{#if displayEdit}
-			<a
+			<Anchor
+				breadcrumbAction="push"
+				label={m.edit()}
 				href={editURL}
-				on:click={stopPropagation}
+				stopPropagation
 				class="unstyled cursor-pointer hover:text-primary-500"
-				data-testid="tablerow-edit-button"><i class="fa-solid fa-pen-to-square" /></a
+				data-testid="tablerow-edit-button"><i class="fa-solid fa-pen-to-square" /></Anchor
 			>
 		{/if}
 		{#if displayDelete}
 			<button
 				on:click={(_) => {
-					modalConfirmDelete(row.meta[identifierField], row.name ?? Object.values(row)[0]);
+					modalConfirmDelete(row.meta[identifierField], row);
 					stopPropagation(_);
 				}}
-				on:keydown={(_) => modalConfirmDelete(row.meta.id, row.name ?? Object.values(row)[0])}
+				on:keydown={() => modalConfirmDelete(row.meta.id, row)}
 				class="cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
 			>

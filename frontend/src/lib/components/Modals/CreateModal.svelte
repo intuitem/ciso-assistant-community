@@ -11,15 +11,17 @@
 	const modalStore: ModalStore = getModalStore();
 
 	export let form: SuperValidated<AnyZodObject>;
+	export let customNameDescription = false;
 	export let model: ModelInfo;
-	export let riskAssessmentDuplication = false;
-	export let formAction = 'create';
-	export let context = 'default';
+	export let duplicate = false;
+	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
+	export let formAction = '?/create';
+	export let context = 'create';
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
 
 	// Base Classes
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	export let debug = false;
 
@@ -46,14 +48,16 @@
 		</div>
 		<ModelForm
 			{form}
+			{customNameDescription}
 			{suggestions}
 			{parent}
+			{invalidateAll}
 			{model}
 			{closeModal}
 			{context}
-			{riskAssessmentDuplication}
+			{duplicate}
 			caching={true}
-			action="?/{formAction}"
+			action={formAction}
 			{debug}
 		/>
 	</div>

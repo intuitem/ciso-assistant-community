@@ -1,0 +1,976 @@
+urn: urn:intuitem:risk:library:rts-dora-OVS-conduct
+locale: en
+ref_id: RTS-DORA-OVS-conduct
+name: RTS DORA on harmonisation of conditions enabling the conduct of the oversight
+  activities
+description: 'One of the objectives of Regulation (EU) 2022/2554 on digital operational
+  resilience for the financial sector (DORA) is to harmonise the conditions enabling
+  the oversight activities and create a new oversight framework for the oversight
+  of critical third party service providers in Europe.
+
+
+  Here is the link of the Second batch of policy products under DORA:
+
+  https://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en
+
+
+  Here is the link of the document :
+
+  https://www.eiopa.europa.eu/document/download/78a87a7b-bdd1-40bc-8bd3-a8d78a83bb25_en?filename=JC%202024-35%20-%20Final%20report%20on%20RTS%20on%20harmonisation%20of%20conditions%20for%20OVS%20conduct.pdf'
+copyright: ESA
+version: 1
+provider: ESA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:rts-dora-OVS-conduct
+    ref_id: RTS-DORA-OVS-conduct
+    name: RTS DORA on harmonisation of conditions enabling the conduct of the oversight
+      activities
+    description: 'One of the objectives of Regulation (EU) 2022/2554 on digital operational
+      resilience for the financial sector (DORA) is to harmonise the conditions enabling
+      the oversight activities and create a new oversight framework for the oversight
+      of critical third party service providers in Europe.
+
+
+      Here is the link of the Second batch of policy products under DORA:
+
+      https://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en
+
+
+      Here is the link of the document :
+
+      https://www.eiopa.europa.eu/document/download/78a87a7b-bdd1-40bc-8bd3-a8d78a83bb25_en?filename=JC%202024-35%20-%20Final%20report%20on%20RTS%20on%20harmonisation%20of%20conditions%20for%20OVS%20conduct.pdf'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      assessable: false
+      depth: 1
+      ref_id: Recital
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 1
+      description: The framework on digital operational resilience for the financial
+        sector established by Regulation (EU) 2022/2554 introduces a Union oversight
+        framework for the information and communication technology (ICT) third-party
+        service providers to the financial sector designated as critical in accordance
+        with Article 31 of that Regulation.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 2
+      description: Considering that Article 31(11) of Regulation (EU) 2022/2554 grants
+        a limited time period of 6 months from the receipt of the application, it
+        is crucial that the European Banking Authority, European Insurance and Occupational
+        Pensions Authority, and European Securities and Markets Authority (collectively
+        European Supervisory Authorities or ESAs), receive a voluntary request to
+        be designated as critical from a ICT third-party service provider, that is
+        complete. In case the application submitted is not complete, the relevant
+        ESA should reject the application and request the missing information.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 3
+      description: Regulation (EU) 2022/2554 mandates the Lead Overseer to carry out
+        a comprehensive assessment of the ICT risks that ICT third party service providers
+        pose to financial entities. In order to carry out this assessment, Regulation
+        (EU) 2022/2554 equips the Lead Overseer with power to request information
+        covering areas directly or indirectly related to the ICT services the critical
+        ICT third-party service providers provide to the financial entities.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 4
+      description: The request to critical ICT third-party service providers to transmit
+        to the Lead Overseer information that is necessary to carry out its duties,
+        including the one on subcontracting arrangements, should be done considering
+        the second subparagraph of Article 33(2) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 5
+      description: The legal identification of ICT third-party service providers within
+        the scope of this Regulatory Technical Standards should be aligned with the
+        identification code set out in Commission Implementing Regulation adopted
+        in accordance with Article 28(9) from Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 6
+      description: "As a follow-up to the recommendations issued by the Lead Overseer\
+        \ to critical ICT third-party providers, the Lead Overseer should monitor\
+        \ critical ICT third party service providers\u2019 compliance with the recommendations.\
+        \ With a view to ensure a level playing field and an efficient and effective\
+        \ monitoring of the actions that have been taken or the remedies that have\
+        \ been implemented by the critical ICT third-party service providers in relation\
+        \ to these recommendations, the Lead Overseer should be able to require the\
+        \ reports referred to in Article 35(1), point (c), of Regulation (EU) 2022/2554,\
+        \ which should be intended as interim progress reports and final reports."
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 7
+      description: ' Also for the purpose of assessment specified in Article 42(2)
+        of Regulation (EU) 2022/2554, according to which Lead Overseer is obliged
+        to evaluate whether explanation provided by critical ICT third-party provider
+        is sufficient, the notification to the Lead Overseer by the critical ICT third-party
+        service provider of its intention to follow the recommendations received should
+        be complemented by such explanation in the form of a remediation plan. In
+        such remediation plan the critical ICT third-party service provider describes
+        the actions and the measures planned to mitigate the risks of the recommendations,
+        along with their respective timelines.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 8
+      description: As the information submitted to the Lead Overseer by critical ICT
+        third-party service providers may be of confidential nature, the Lead Overseer
+        should provide the critical ICT third-party service provider with secure electronic
+        channels for information submission.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 9
+      description: The critical ICT third-party service provider should always provide
+        information in a clear, concise and complete manner. Considering the unified
+        nature of the European oversight framework, information should be submitted,
+        disclosed or reported by the ICT third-party service providers pursuant to
+        Article 35(1) in English.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 10
+      description: As the Lead Overseer is expected to assess the subcontracting arrangements
+        of the critical ICT third-party service provider, a template needs to be developed
+        for providing information on those arrangements. The template should take
+        into account the fact that the critical ICT third-party service providers
+        have different structures than financial entities. The templates should therefore
+        not fully mirror the templates of the register of information referred to
+        in Article 28(3) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 11
+      description: Once the recommendations to a critical ICT third-party service
+        provider are issued by the Lead Overseer, and competent authorities have informed
+        the relevant financial entities of the risks identified in that recommendations,
+        the Lead Overseer should monitor and assess the implementation by the critical
+        ICT third-party service provider of the actions and remedies to comply with
+        the recommendations. Competent authorities should monitor and assess the extent
+        to which the financial entities are exposed to the risks identified in these
+        recommendations. With a view to maintain a level playing field while carrying
+        out their respective tasks, particularly when the risks identified in the
+        recommendations are severe and shared among a large number of financial entities
+        in multiple Member States, both the competent authorities and the Lead Overseer
+        should share among each other relevant findings which are necessary for them
+        to carry out their respective tasks. The objective of the information sharing
+        is to ensure that the feedback of the Lead Overseer to the critical ICT third-party
+        provider in relation to the actions and remedies the latter is implementing
+        takes into account the impact on the risks of the financial entities, and
+        that the supervisory activities performed by the competent authorities are
+        informed by the assessment carried out by the Lead Overseer.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 12
+      description: To allow for an efficient and effective sharing of information,
+        the competent authorities should assess, as part of their supervisory activities,
+        the extent to which the financial entities supervised by them are exposed
+        to the risks identified in the recommendations. This assessment should be
+        carried out in a proportionate and risk-based manner. Lead Overseer should
+        request the competent authorities to share the results of this assessment
+        in the specific cases when the risks associated with the recommendations are
+        severe and shared among a large number of financial entities in multiple Member
+        States. To make the best use of the resources of the competent authorities,
+        when asking to provide the results of this assessment, the Lead Overseer should
+        always take into account that the objective of these requests is to evaluate
+        the actions and remedies of the critical ICT third-party providers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 13
+      description: This Regulation is based on the draft regulatory technical standards
+        submitted to the Commission by the European Supervisory Authorities.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital-14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:recital
+      ref_id: Recital 14
+      description: The Joint Committee of the European Supervisory Authorities has
+        conducted open public consultations on the draft regulatory technical standards
+        on which this Regulation is based, analysed the potential related costs and
+        benefits and requested the advice of the Banking Stakeholder Group established
+        in accordance with Article 37 of Regulation (EU) No 1093/2010 of the European
+        Parliament and of the Council2, the Insurance and Reinsurance Stakeholder
+        Group and the Occupational Pensions Stakeholder Group established in accordance
+        with Article 37 of Regulation (EU) No 1094/2010 of the European Parliament
+        and of the Council3, and the Securities and Markets Stakeholder Group established
+        in accordance with Article 37 of Regulation (EU) No 1095/2010 of the European
+        Parliament and of the Council4 .
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-i
+      assessable: false
+      depth: 1
+      ref_id: CHAPTER I
+      description: INFORMATION TO BE PROVIDED BY ICT THIRD-PARTY SERVICE PROVIDERS
+        IN THE APPLICATION FOR A VOLUNTARY REQUEST TO BE DESIGNATED AS CRITICAL
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-i
+      ref_id: Article 1
+      description: Information to be provided by ICT third-party service provider
+        in the application for a voluntary request to be designated as critical
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-1
+      ref_id: '1.1'
+      description: 'For the purpose of Article 31(11) of Regulation (EU) 2022/2554,
+        the information to be provided by an ICT third-party service provider in the
+        reasoned application for a voluntary request to be designated as critical
+        in accordance with Article 31(1), point (a), of Regulation (EU) 2022/2554
+        shall include all of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.a
+      description: name of the legal entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.b
+      description: legal entity identification code;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.c
+      description: country where the legal entity has registered office;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.d
+      description: description of the corporate structure including at least the following
+        information on its parent company and other related undertakings to the applicant
+        ICT third- party service providers providing ICT services to Union financial
+        entities, where applicable;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.d.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.d
+      ref_id: 1.1.d.i
+      description: name of the legal entities;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.d.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.d
+      ref_id: 1.1.d.ii
+      description: legal entity identification code,;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.d.iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.d
+      ref_id: 1.1.d.iii
+      description: country where the legal entity has registered office;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.e
+      description: an estimation of the market share of the ICT third-party service
+        provider in the Union financial sector and estimation of market share per
+        type of financial entity as referred to in Article 2(1) of Regulation (EU)
+        2022/2554 as of the year of application and the year before application;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.f
+      description: 'a clear description of each ICT service provided by the ICT third-party
+        service provider to Union financial entities including:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.f.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.f
+      ref_id: 1.1.f.i
+      description: a description of the nature of business and the type of ICT services
+        provided to financial entities;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.f.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.f
+      ref_id: 1.1.f.ii
+      description: a list of the functions of financial entities supported by the
+        ICT services provided, where available;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.f.iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.f
+      ref_id: 1.1.f.iii
+      description: ' information whether the ICT services provided to financial entities
+        support critical or important functions, where available;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.g
+      description: 'a list of financial entities that make use of the ICT services
+        provided by the ICT third-party service provider, including the following
+        information for each of the financial entity serviced, where available:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g
+      ref_id: 1.1.g.i
+      description: ' name of the legal entity;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g
+      ref_id: 1.1.g.ii
+      description: legal entity identification code, where known to the ICT third-party
+        service provider;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g.iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g
+      ref_id: 1.1.g.iii
+      description: type of financial entity as specified in Article 2(1) of Regulation
+        2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g.iv
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.g
+      ref_id: 1.1.g.iv
+      description: the geographic location of the legal entity, from which ICT services
+        are provided, where available;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.h
+      description: a list of the critical ICT third-party service providers included
+        in the latest available list of such providers published by the ESAs pursuant
+        to Article 31(9) of Regulation (EU) 2022/2554 that rely on the services provided
+        by the applicant ICT third-party service provider, where available;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.i
+      description: 'a self-assessment by the ICT third-party service provider including
+        the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i
+      ref_id: 1.1.i.i
+      description: 'the degree of substitutability for each ICT service provided by
+        the ICT third- party service provider considering:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i.i.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i.i
+      ref_id: 1.1.i.i.1
+      description: the market share of the ICT third-party service provider in the
+        Union financial sector;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i.i.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i.i
+      ref_id: 1.1.i.i.2
+      description: the number of known relevant competitors per type of ICT services,
+        or group of ICT services;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i.i.3
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i.i
+      ref_id: 1.1.i.i.3
+      description: "description of specificities relating to the ICT services offered,\
+        \ including in relation to any proprietary technology, or the specific features\
+        \ of the ICT third-party service provider\u2019s organisation or activity;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.i
+      ref_id: 1.1.i.ii
+      description: knowledge about the availability of the alternative ICT third-party
+        service providers to provide the same ICT services as the ICT third-party
+        service provider submitting the application;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.j
+      description: information on future strategy and investment plans in relation
+        to the provision of ICT services and infrastructure to financial entities
+        in the Union, including any planned changes in the group or management structure,
+        entry into new markets or activities;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.k
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.k
+      description: information on subcontractors which have been designated as critical
+        ICT third- party service providers pursuant to Article 31(1), point (a), of
+        Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1.l
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.1
+      ref_id: 1.1.l
+      description: "other reasons relevant for the ICT third-party service provider\u2019\
+        s application to be designated as critical."
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-1
+      ref_id: '1.2'
+      description: Where the ICT third-party service provider belongs to a group,
+        the information referred to in paragraph 1 shall be provided in relation to
+        the ICT services provided by the group as a whole.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-1
+      ref_id: '1.3'
+      description: As part of their review of the application received from the ICT
+        third-party service provider, the ESAs may request clarifications of the information
+        submitted.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-i
+      ref_id: Article 2
+      description: Assessment of completeness of application
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-2
+      ref_id: '2.1'
+      description: The ICT third-party service provider shall submit its complete
+        reasoned application, which contains all information necessary for the purpose
+        of designation as critical in Article 1 of this Regulation, to the relevant
+        ESA, via means determined by the ESAs.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-2
+      ref_id: '2.2'
+      description: Where the relevant ESA considers that information provided in the
+        application is incomplete, it shall reject the application and request the
+        missing information.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-ii
+      assessable: false
+      depth: 1
+      ref_id: CHAPTER II
+      description: INFORMATION FROM CRITICAL ICT THIRD-PARTY SERVICE PROVIDERS TO
+        THE LEAD OVERSEER
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-ii
+      ref_id: Article 3
+      description: Content of information provided by critical ICT third-party service
+        providers
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-3
+      ref_id: '3.1'
+      description: Critical ICT third-party service providers shall provide to the
+        Lead Overseer, upon its request, any information deemed necessary by the Lead
+        Overseer to carry out its oversight duties in accordance with the requirements
+        of Regulation (EU) 2022/2554. Critical ICT third-party service providers shall
+        transmit this information according to the structure and format described
+        in Article 5 of this Regulation, within the time limits and with the frequency
+        set by the Lead Overseer.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-3
+      ref_id: '3.2'
+      description: 'Without prejudice to paragraph 1, upon Lead Overseer request,
+        the critical ICT third- party service provider shall submit all of the following
+        information:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.a
+      description: 'information about the arrangements, and copies of contractual
+        documents, between:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.a.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.a
+      ref_id: 3.2.a.i
+      description: the critical ICT third-party service provider and the financial
+        entities referred to in Article 2(1) of Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.a.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.a
+      ref_id: 3.2.a.ii
+      description: the critical ICT third-party service provider and its subcontractors
+        with a view to capture the technological value chain that effectively underpins
+        the ICT services provided to the financial entities in the Union
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.b
+      description: information about the organisational and group structure of the
+        critical ICT third-party service provider, including identification of all
+        entities belonging to the same group that directly or indirectly provide ICT
+        services to financial entities in the Union;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.c
+      description: 'information about the major shareholders, including their structure
+        and geographical spread, of the entities that:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.c.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.c
+      ref_id: 3.2.c.i
+      description: without prejudice to Article 3(2), point (b), of this Regulation,
+        hold, solely or jointly with their linked entities, 25% or more of the capital
+        or voting rights of the critical ICT third-party service provider;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.c.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.c
+      ref_id: 3.2.c.ii
+      description: hold the right to appoint or remove a majority of the members of
+        the administrative, management, or supervisory body of the critical ICT third-party
+        service provider; or
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.c.iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.c
+      ref_id: 3.2.c.iii
+      description: "control, pursuant to an agreement, a majority of shareholders\u2019\
+        \ or members\u2019 voting rights in the critical ICT third-party service provider;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.d
+      description: " information about the critical ICT third-party service provider\u2019\
+        s own estimation of its market share, per type of services, in the relevant\
+        \ markets where it operates;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.e
+      description: ' information about the internal governance arrangements of the
+        critical ICT third- party service provider, including the structure with lines
+        of governance responsibility and accountability rules;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.f
+      description: "the meeting minutes of the critical ICT third-party service provider\u2019\
+        s management body and any other internal relevant committees, which relate\
+        \ in any way to activities and risks concerning ICT third-party services supporting\
+        \ functions of financial entities within the Union;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.g
+      description: information about the ICT security and data protection frameworks,
+        including personal and non-personal data, of the critical ICT third party
+        service provider, including relevant strategies, objectives, policies, procedures,
+        protocols, processes, control measures to protect sensitive data, access controls,
+        encryption practices, incident response plans, and compliance with all relevant
+        regulations and national and international standards where applicable;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.h
+      description: information about the mechanisms the critical ICT third-party service
+        provider offers to the Union financial entities for data portability, application
+        portability and interoperability;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.i
+      description: information about the exact location of the data centres and ICT
+        production centres used in any way for the purposes of providing services
+        to the financial entities, including a list of all relevant premises and facilities
+        of the critical ICT third-party service provider, including outside the Union;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.j
+      description: information about provision of services by the critical ICT third-party
+        service provider from third countries, including information on relevant legal
+        provisions applicable to personal and non-personal data processed by the ICT
+        third-party provider in different jurisdictions;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.k
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.k
+      description: information about measures taken to address risks arising from
+        the provision of ICT services by the critical ICT third-party service provider
+        and their subcontractors from third-countries;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.l
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.l
+      description: information about the risk management framework and the incident
+        management framework, including policies, procedures, tools, mechanisms, and
+        governance arrangements of the critical ICT third-party service provider and
+        of its subcontractors. Information shall also include list and description
+        of major incidents with direct or indirect impact on financial entities within
+        the Union, including relevant details to determine the significance of the
+        incident on financial entities and assess possible cross-border impacts. Information
+        about the change management framework, including policies, procedures, and
+        controls of the critical ICT third-party service provider and its subcontractors
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.m
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.m
+      description: information about the overall response and recovery framework of
+        the critical ICT third-party service provider, including business continuity
+        plans and related arrangements and procedures, software development lifecycle
+        policy, response and recovery plans and related arrangements and procedures,
+        backup policies arrangements and procedures;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.n
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.n
+      description: information about performance monitoring, security monitoring,
+        and incident tracking as well as information about reporting mechanisms related
+        to service performance, incidents, and compliance with agreed-upon service
+        level agreements (SLAs) and service level objectives (SLOs) or similar arrangements
+        between critical ICT third-party service providers and financial entities
+        in the Union;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.o
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.o
+      description: information about the ICT third-party management framework of the
+        critical ICT third-party service provider, including strategies, policies,
+        procedures, processes, and controls including details on the due diligence
+        and risk assessment performed by the critical ICT third-party service provider
+        on its subcontractors before entering into an agreement with them and to monitor
+        the relationship covering all relevant ICT and counterparty risks;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.p
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.p
+      description: extractions from the monitoring and scanning systems of the critical
+        ICT third- party service provider and of its subcontractors, covering but
+        not limited to network monitoring, server monitoring, application monitoring,
+        security monitoring, vulnerability scanning, log management, performance monitoring,incident
+        management and measurements against reliability goals, such as Service Level
+        Objectives;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.q
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.q
+      description: extractions from any production, pre-production and test system
+        or application used by the critical ICT third-party service provider and its
+        subcontractors, to provide directly or indirectly services to financial entities
+        in the Union;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.r
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.r
+      description: compliance and audit reports as well as any relevant audit findings,
+        including audits performed by national authorities in the Union and outside
+        the Union where cooperation agreements with the relevant authorities provide
+        for such information exchange, or certifications achieved by the critical
+        ICT third-party service provider or its subcontractors, including reports
+        from internal and external auditors, certifications, or compliance assessments
+        with industry- specific standards. This includes information about any type
+        of independent testing of the resilience of the ICT systems of the critical
+        ICT third-party service provider, including any type of threat led penetration
+        testing carried out by the ICT third-party service provider;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.s
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.s
+      description: information about any assessments carried out by the critical ICT
+        third-party service provider upon its request or on its behalf evaluating
+        the suitability and integrity of individuals holding key positions within
+        the critical ICT third-party service provider;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.t
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.t
+      description: information about the remediation plan to address recommendations
+        according to Article 4 of this Regulation, and relevant related information
+        to confirm remedies have been implemented;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.u
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.u
+      description: ' information about employee training schemes and security awareness
+        programs, which shall include information about the investments, resources
+        and methods of the critical ICT third-party service provider in training its
+        staff to handle sensitive financial data and maintain high levels of security;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2.v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:3.2
+      ref_id: 3.2.v
+      description: information about the activities of the critical ICT third-party
+        service provider and financial statements, including information on the budget
+        and resources related to ICT and security.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-ii
+      ref_id: Article 4
+      description: Information from critical ICT third-party providers after the issuance
+        of recommendations
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-4
+      ref_id: '4.1'
+      description: ' In accordance with Article 35(1), point (c), of Regulation (EU)
+        2022/2554 and as part of the notification to the Lead Overseer of its intention
+        to comply with the recommendations pursuant to Article 42(1) of that Regulation,
+        the critical ICT third- 16 party service provider shall provide to the Lead
+        Overseer a remediation plan outlining the actions and remedies that the critical
+        ICT third-party service provider plans to implement in order to mitigate the
+        risks identified in the recommendations. The remediation plan shall be consistent
+        with the timeline set by the Lead Overseer for each recommendation.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-4
+      ref_id: '4.2'
+      description: 'To enable the monitoring of the implementation of the actions
+        that have been taken or the remedies that have been implemented by the critical
+        ICT third-party service provider in relation to the recommendations received,
+        the critical ICT third-party service provider shall share with the Lead Overseer
+        upon request:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:4.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:4.2
+      ref_id: 4.2.a
+      description: interim progress reports and related supporting documents specifying
+        the progress of the implementation of the actions and measures set out in
+        the remediation plan provided by the critical ICT third party provider to
+        the Lead Overseer within the timeline defined by the Lead Overseer;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:4.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:4.2
+      ref_id: 4.2.b
+      description: final reports and related supporting documents specifying the actions
+        that have been taken or the remedies that have been implemented by the critical
+        ICT third-party service provider in order to mitigate the risks identified
+        in the recommendations received.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-ii
+      ref_id: Article 5
+      description: Structure and format of information provided by critical ICT third-party
+        service providers
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-5
+      ref_id: '5.1'
+      description: The critical ICT third-party service provider shall provide the
+        requested information to the Lead Overseer through the dedicated secure electronic
+        channels indicated by the Lead Overseer in its request.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-5
+      ref_id: '5.2'
+      description: 'When providing information to the Lead Overseer, the critical
+        ICT third-party providers shall:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:5.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:5.2
+      ref_id: 5.2.a
+      description: follow the structure indicated by the Lead Overseer in its information
+        request;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:5.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:5.2
+      ref_id: 5.2.b
+      description: clearly locate the relevant piece of information in the submitted
+        documentation.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-5
+      ref_id: '5.3'
+      description: Information submitted, disclosed or reported to the Lead Overseer
+        by the critical ICT third-party service provider shall be in English.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-ii
+      ref_id: Article 6
+      description: Information on subcontracting arrangements provided by critical
+        ICT third-party service providers
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:node95
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-6
+      description: A critical ICT third-party service provider which is required to
+        share information on subcontracting arrangements shall provide the information
+        according to the structure and the template set out in Annex I of this Regulation.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-iii
+      assessable: false
+      depth: 1
+      ref_id: CHAPTER III
+      description: "COMPETENT AUTHORITIES\u2019 ASSESSMENT OF THE MEASURES TAKEN BY\
+        \ CRITICAL ICT THIRD-PARTY SERVICE PROVIDERS BASED ON RECOMMENDATIONS OF THE\
+        \ LEAD OVERSEER"
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-iii
+      ref_id: Article 7
+      description: "Competent authorities\u2019 assessment of the risks addressed\
+        \ in the recommendations of the Lead Overseer"
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-7
+      ref_id: '7.1'
+      description: As part of their supervision of financial entities, competent authorities
+        shall assess the impact on the financial entities of the measures taken by
+        critical ICT third-party service providers based on the recommendations of
+        the Lead Overseer. This assessment shall reflect a risk-based approach and
+        the principle of proportionality.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-7
+      ref_id: '7.2'
+      description: 'When conducting the assessment referred to in paragraph 1, competent
+        authorities shall take into account all of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2
+      ref_id: 7.2.a
+      description: ' the adequacy and the coherence of the corrective and remedial
+        measures implemented by the financial entities under their remit to mitigate
+        those risks, if any;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2
+      ref_id: 7.2.b
+      description: the assessment made by the Lead Overseer of the compliance with
+        the measures and actions included in the remediation plan by the critical
+        ICT third-party service provider where it has impacts on the exposure of the
+        financial entities under their remit to the risks identified in the recommendations;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2
+      ref_id: 7.2.c
+      description: the view of competent authorities designated or established in
+        accordance with Directive (EU) 2022/2555, where those competent authorities
+        have been consulted in accordance with Article 42(5) of Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.2
+      ref_id: 7.2.d
+      description: whether the Lead Overseer has considered the actions and remedies
+        implemented by the critical ICT third-party service provider as adequate to
+        mitigate the exposure of the financial entities under their remit to the risks
+        identified in the in recommendations.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-7
+      ref_id: '7.3'
+      description: Upon request from the Lead Overseer, the competent authority shall
+        provide in reasonable time the results of the assessment set out in paragraph
+        1. When requesting the results of this assessment, the Lead Overseer shall
+        consider the principle of proportionality and the magnitude of risks associated
+        with the recommendation, including the cross-border impacts of these risks
+        when impacting financial entities operating in more than one Member State.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-7
+      ref_id: '7.4'
+      description: Where relevant, competent authorities shall request to financial
+        entities any information necessary to carry out the assessment specified in
+        paragraph 1.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-iv
+      assessable: false
+      depth: 1
+      ref_id: CHAPTER IV
+      description: FINAL PROVISIONS
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:chapter-iv
+      ref_id: Article 8
+      description: Entry into force
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:8.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-8
+      ref_id: '8.1'
+      description: This Regulation shall enter into force on the twentieth day following
+        that of its publication in the Official Journal of the European Union.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:8.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:article-8
+      ref_id: '8.2'
+      description: It shall apply from 17 January 2025. This Regulation shall be binding
+        in its entirety and directly applicable in all Member States.
+    - urn: urn:intuitem:risk:req_node:rts-dora-OVS-conduct:annex
+      assessable: false
+      depth: 1
+      ref_id: ANNEX
+      description: Template for sharing information on subcontracting arrangements

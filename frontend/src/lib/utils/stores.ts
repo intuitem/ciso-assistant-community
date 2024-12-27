@@ -10,8 +10,8 @@ showNotification.subscribe((val) => {
 	if (browser) return (localStorage.showNotification = val);
 });
 
-export const breadcrumbObject = writable({ id: '', name: '', email: '' });
 export const pageTitle = writable('');
+export const clientSideToast = writable(undefined);
 
 const requirementAssessmentsList: string[] = [];
 

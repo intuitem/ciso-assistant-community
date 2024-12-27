@@ -1,9 +1,9 @@
 *.pyc
 *.DS_Store
 *~$*
-**/*.mo
 .git*
 .pytest*
 .idea*
 venv/
 env/
+**/node_modules/

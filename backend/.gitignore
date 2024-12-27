@@ -17,3 +17,5 @@ db/pg_password.txt
 ./db/
 .coverage
 pytest-report.html
+enterprise/
+*.log

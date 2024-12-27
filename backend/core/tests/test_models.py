@@ -18,7 +18,6 @@ from core.models import (
     Evidence,
     RiskAcceptance,
     Asset,
-    StoredLibrary,
     Threat,
     RiskMatrix,
     LoadedLibrary,
@@ -28,41 +27,12 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from iam.models import Folder
 
+from .fixtures import *
+
+
 User = get_user_model()
 
 SAMPLE_640x480_JPG = BASE_DIR / "app_tests" / "sample_640x480.jpg"
-
-
-@pytest.fixture
-def domain_project_fixture():
-    folder = Folder.objects.create(
-        name="test folder", description="test folder description"
-    )
-    project = Project.objects.create(name="test project", folder=folder)
-    return project
-
-
-@pytest.fixture
-def risk_matrix_fixture():
-    library = StoredLibrary.objects.filter(
-        urn="urn:intuitem:risk:library:critical_risk_matrix_5x5"
-    ).last()
-    assert library is not None
-    library.load()
-
-
-@pytest.fixture
-def iso27001_csf1_1_frameworks_fixture():
-    iso27001_library = StoredLibrary.objects.get(
-        urn="urn:intuitem:risk:library:iso27001-2022", locale="en"
-    )
-    assert iso27001_library is not None
-    iso27001_library.load()
-    csf_1_1_library = StoredLibrary.objects.get(
-        urn="urn:intuitem:risk:library:nist-csf-1.1", locale="en"
-    )
-    assert csf_1_1_library is not None
-    csf_1_1_library.load()
 
 
 @pytest.mark.django_db
@@ -615,22 +585,25 @@ class TestRiskScenario:
         scenario = RiskScenario.objects.create(
             name="test scenario",
             description="test scenario description",
+            ref_id="R.1",
             risk_assessment=risk_assessment,
         )
         scenario2 = RiskScenario.objects.create(
             name="test scenario 2",
             description="test scenario description",
+            ref_id="R.2",
             risk_assessment=risk_assessment,
         )
         scenario3 = RiskScenario.objects.create(
             name="test scenario 3",
             description="test scenario description",
+            ref_id="R.3",
             risk_assessment=risk_assessment,
         )
 
-        assert scenario.rid == "R.1"
-        assert scenario2.rid == "R.2"
-        assert scenario3.rid == "R.3"
+        assert scenario.ref_id == "R.1"
+        assert scenario2.ref_id == "R.2"
+        assert scenario3.ref_id == "R.3"
 
 
 @pytest.mark.django_db
@@ -878,6 +851,71 @@ class TestAsset:
         assert asset2.type == Asset.Type.SUPPORT
         assert asset1.folder == root_folder
         assert asset2.folder == folder
+
+    def test_asset_creation_valid_security_objectives(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        security_objectives = {
+            "objectives": {
+                "confidentiality": {
+                    "value": 1,
+                    "is_enabled": True,
+                },
+                "integrity": {
+                    "value": 0,
+                    "is_enabled": False,
+                },
+                "availability": {
+                    "value": 2,
+                    "is_enabled": True,
+                },
+                "proof": {
+                    "value": 0,
+                    "is_enabled": True,
+                },
+            }
+        }
+
+        asset = Asset.objects.create(
+            name="Asset",
+            description="Asset description",
+            folder=root_folder,
+            security_objectives=security_objectives,
+        )
+
+        assert asset.security_objectives == security_objectives
+
+    def test_asset_creation_invalid_security_objectives(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        security_objectives = {
+            "objectives": {
+                "confidentiality": {
+                    "value": "toto",
+                    "is_enabled": True,
+                },
+                "integrity": {
+                    "value": 0,
+                    "is_enabled": False,
+                },
+                "availability": {
+                    "value": 2,
+                    "is_enabled": True,
+                },
+                "proof": {
+                    "value": 0,
+                    "is_enabled": True,
+                },
+            }
+        }
+
+        with pytest.raises(ValidationError):
+            Asset.objects.create(
+                name="Asset",
+                description="Asset description",
+                folder=root_folder,
+                security_objectives=security_objectives,
+            )
 
 
 @pytest.mark.django_db

@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     container_name: backend
@@ -14,6 +12,23 @@ services:
     volumes:
       - ./db:/code/db
 
+  # huey:
+  #   container_name: huey
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   environment:
+  #     - ALLOWED_HOSTS=backend,localhost
+  #     - DJANGO_DEBUG=False
+  #   volumes:
+  #     - ./db:/code/db
+  #   entrypoint:
+  #     - /bin/sh
+  #     - -c
+  #     - |
+  #       poetry run python manage.py run_huey
+
   frontend:
     container_name: frontend
     environment:
@@ -22,13 +37,15 @@ services:
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
 
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     depends_on:
       - backend
 
   caddy:
     container_name: caddy
-    image: caddy:2.7.6
+    image: caddy:2.8.4
     environment:
       - CISO_ASSISTANT_URL=https://localhost:8443
     restart: unless-stopped
@@ -38,8 +55,6 @@ services:
       - ./db:/data
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
-      reverse_proxy /api/iam/sso/redirect/ backend:8000
-      reverse_proxy /api/accounts/saml/0/acs/ backend:8000
-      reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
+      reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
       }" > Caddyfile && caddy run'
