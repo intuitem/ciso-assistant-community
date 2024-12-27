@@ -97,7 +97,7 @@
 				<div class="flex flex-col items-center text-center justify-center">
 					<p class="font-semibold">{title}</p>
 				</div>
-				<div class="flex flex-col items-center justify-center">
+				<div class="flex flex-col items-center justify-center whitespace-pre-wrap leading-relaxed">
 					{#if currentRequirementAssessment.description}
 						{currentRequirementAssessment.description}
 					{/if}
