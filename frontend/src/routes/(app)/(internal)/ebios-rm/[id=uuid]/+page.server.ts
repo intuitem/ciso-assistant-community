@@ -81,6 +81,23 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
+		const requestInitOptions: RequestInit = {
+			method: 'PATCH',
+			body: JSON.stringify({
+				status: 'done',
+				step: 1,
+				workshop: 5
+			})
+		};
+
+		const endpoint = `${BASE_API_URL}/ebios-rm/studies/${event.params.id}/workshop/5/step/1/`;
+		const res = await event.fetch(endpoint, requestInitOptions);
+
+		if (!res.ok) {
+			const response = await res.text();
+			console.error(response);
+		}
+
 		return defaultWriteFormAction({
 			event,
 			urlModel: 'risk-assessments',
