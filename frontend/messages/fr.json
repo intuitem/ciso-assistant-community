@@ -1075,5 +1075,9 @@
 	"reviewProgress": "Avancement de la revue",
 	"ecosystemRadar": "Radar de l'écosystème",
 	"criticalitySemiColon": "Criticité :",
-	"cyberReliability": "Fiabilité cyber"
+	"cyberReliability": "Fiabilité cyber",
+  "insights": "Analyses avancées",
+  "impactAnalysis": "Analyse d'impact",
+  "priorityReview": "Revue des priorités",
+  "timelineView": "Vue planning"
 }
