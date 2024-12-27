@@ -53,13 +53,15 @@
 		<SideBar bind:open={sidebarOpen} />
 	</svelte:fragment>
 	<svelte:fragment slot="pageHeader">
-		<aside class="variant-soft-warning text-center w-full items-center py-2">
-			{#if data.licenseStatus.status === 'expired'}
+		{#if data.licenseStatus.status === 'expired'}
+			<aside class="variant-soft-warning text-center w-full items-center py-2">
 				{m.licenseExpiredMessage()}
-			{:else if licenseAboutToExpire}
+			</aside>
+		{:else if licenseAboutToExpire}
+			<aside class="variant-soft-warning text-center w-full items-center py-2">
 				{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
-			{/if}
-		</aside>
+			</aside>
+		{/if}
 		<AppBar background="bg-white" padding="py-2 px-4">
 			<span
 				class="text-2xl font-bold pb-1 bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
