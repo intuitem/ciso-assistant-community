@@ -1,3 +1,3 @@
 export function loadFeatureFlags() {
-  return {};
+	return {};
 }
