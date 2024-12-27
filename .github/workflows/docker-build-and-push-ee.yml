@@ -6,9 +6,12 @@ on:
       - "v*"
   workflow_dispatch:
 
+env:
+  UBUNTU_VERSION: "ubuntu-24.04"
+
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write

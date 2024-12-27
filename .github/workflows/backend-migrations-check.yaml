@@ -11,15 +11,17 @@ env:
   backend-directory: ./backend
   enterprise-backend-directory: ./enterprise/backend
   enterprise-backend-settings-module: enterprise_core.settings
+  UBUNTU_VERSION: "ubuntu-24.04"
+  PYTHON_VERSION: "3.12"
 
 jobs:
   migrations-check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -58,12 +60,12 @@ jobs:
           poetry run python manage.py makemigrations --check --dry-run --verbosity=3
 
   enterprise-migrations-check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4

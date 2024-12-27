@@ -8,16 +8,19 @@ on:
 
 env:
   GITHUB_WORKFLOW: github_actions
+  POSTGRES_VERSION: "16"
+  UBUNTU_VERSION: "ubuntu-24.04"
+  PYTHON_VERSION: "3.12"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       backend-directory: ./backend
 
     services:
       postgres:
-        image: postgres:14.1
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -28,7 +31,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v3
