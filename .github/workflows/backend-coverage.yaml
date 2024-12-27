@@ -14,13 +14,13 @@ env:
 
 jobs:
   build:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
     env:
       backend-directory: ./backend
 
     services:
       postgres:
-        image: postgres:${{ env.POSTGRES_VERSION }}
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -31,7 +31,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["${{ env.PYTHON_VERSION }}"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v3

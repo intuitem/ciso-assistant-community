@@ -16,12 +16,12 @@ env:
 
 jobs:
   migrations-check:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
 
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["${{ env.PYTHON_VERSION }}"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -60,12 +60,12 @@ jobs:
           poetry run python manage.py makemigrations --check --dry-run --verbosity=3
 
   enterprise-migrations-check:
-    runs-on: ${{ env.UBUNTU_VERSION }}
+    runs-on: ubuntu-24.04
 
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["${{ env.PYTHON_VERSION }}"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
