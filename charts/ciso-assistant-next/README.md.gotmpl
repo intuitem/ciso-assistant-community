@@ -1,0 +1,30 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+## Installing the chart
+
+To install the chart, firt get the values.yaml file and customize values.
+
+```
+helm show values oci://ghcr.io/intuitem/ciso-assistant > custom.yaml
+```
+To deploy the release :
+```
+helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f custom.yaml
+```
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
