@@ -65,10 +65,16 @@
 	function arraysEqual(arr1: (string | undefined)[], arr2: (string | undefined)[]) {
 		if (arr1?.length !== arr2?.length) return false;
 
-		const sortedArr1 = [...arr1].sort();
-		const sortedArr2 = [...arr2].sort();
+		const set1 = new Set(arr1);
+		const set2 = new Set(arr2);
 
-		return sortedArr1.every((value, index) => value === sortedArr2[index]);
+		if (set1.size !== set2.size) return false;
+
+		for (const value of set1) {
+			if (!set2.has(value)) return false;
+		}
+
+		return true;
 	}
 
 	$: {
