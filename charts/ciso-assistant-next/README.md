@@ -16,6 +16,18 @@ A Helm chart for CISO Assistant k8s's deployment
 |------------|------|---------|
 | oci://registry-1.docker.io/bitnamicharts | postgresql | 16.3.4 |
 
+## Installing the chart
+
+To install the chart, firt get the values.yaml file and customize values.
+
+```
+helm show values oci://ghcr.io/intuitem/ciso-assistant > custom.yaml
+```
+To deploy the release :
+```
+helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f custom.yaml
+```
+
 ## Values
 
 | Key | Type | Default | Description |

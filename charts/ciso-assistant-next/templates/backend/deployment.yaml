@@ -97,7 +97,7 @@ spec:
           {{- if .Values.backend.config.smtp.primary.password }}
           - name: EMAIL_HOST_PASSWORD
             valueFrom:
-            secretKeyRef:
+              secretKeyRef:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-primary-password
           {{- end }}
@@ -114,7 +114,7 @@ spec:
           {{- if .Values.backend.config.smtp.rescue.password }}
           - name: EMAIL_HOST_PASSWORD_RESCUE
             valueFrom:
-            secretKeyRef:
+              secretKeyRef:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-rescue-password
           {{- end }}
