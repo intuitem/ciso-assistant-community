@@ -622,6 +622,7 @@ class LibraryImporter:
                 "version": self._library.version,
                 "provider": self._library.provider,
                 "packager": self._library.packager,
+                "publication_date": self._library.publication_date,
                 "copyright": self._library.copyright,
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
                 "is_published": True,
