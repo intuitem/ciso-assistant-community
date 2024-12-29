@@ -40,7 +40,7 @@ docker compose up -d
 
 # Wait for the database to be ready
 echo "Giving some time for the database to be ready, please wait ..."
-sleep 30
+sleep 50
 
 # Apply migrations
 BACKEND_CONTAINER=$(docker ps --filter "ancestor=$BACKEND_IMAGE" --format "{{.Names}}")
