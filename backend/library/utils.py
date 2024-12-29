@@ -678,7 +678,7 @@ class LibraryImporter:
                 break
             except OperationalError as e:
                 if e.args and e.args[0] == "database is locked":
-                    time.sleep(1)
+                    time.sleep(3)
                 else:
                     raise e
             except Exception as e:
