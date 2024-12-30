@@ -900,6 +900,14 @@ Example:
 }
 ```
 
+## Internationalization approach
+
+The general approach is to translate everything in the frontend. We use paraglide to faciliate this process.
+
+The only exception is that referential objects are translated by the backend. The ACCEPT_LANGUAGE header in the request is used to indicate which language is used on the frontend side. The backend selects the most appropriate language to use (either the requested language, or the default language of the library).
+
+Note: generated documents (pdf, excel, word) are currently translated in the backend, but this should be migrated in the frontend.
+
 ## Access control model
 
 All objects in CISO Assistant follow a simple and consistent RBAC IAM model, including IAM objects themselves.
