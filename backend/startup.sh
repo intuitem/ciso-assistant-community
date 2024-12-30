@@ -7,7 +7,7 @@ fi
 
 if [ ! -n "$DJANGO_SECRET_KEY" ]; then
   if [ ! -f db/django_secret_key ]; then
-    install -m 600 <(cat /proc/sys/kernel/random/uuid) db/django_secret_key
+    cat /proc/sys/kernel/random/uuid >db/django_secret_key
     echo "generating initial Django secret key"
   fi
   export DJANGO_SECRET_KEY=$(<db/django_secret_key)
