@@ -287,7 +287,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
         ORGANIZED_CRIME = "organized_crime", _("Organized crime")
         TERRORIST = "terrorist", _("Terrorist")
         ACTIVIST = "activist", _("Activist")
-        PROFESSIONAL = "professional", _("Professional")
+        COMPETITOR = "competitor", _("Competitor")
         AMATEUR = "amateur", _("Amateur")
         AVENGER = "avenger", _("Avenger")
         PATHOLOGICAL = "pathological", _("Pathological")
