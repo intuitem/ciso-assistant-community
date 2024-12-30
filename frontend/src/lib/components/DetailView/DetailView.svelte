@@ -329,7 +329,9 @@
 											}/${value.id}`}
 											{#if key === 'ro_to_couple'}
 												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-													>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split('-')[1]}</Anchor
+													>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+														'-'
+													)[1]}</Anchor
 												>
 											{:else}
 												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
