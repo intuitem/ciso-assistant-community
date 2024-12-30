@@ -327,9 +327,17 @@
 													(item) => item.field === key
 												)?.urlModel
 											}/${value.id}`}
-											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-												>{value.str}</Anchor
-											>
+											{#if key === 'ro_to_couple'}
+												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+													>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+														'-'
+													)[1]}</Anchor
+												>
+											{:else}
+												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+													>{value.str}</Anchor
+												>
+											{/if}
 											<!-- Shortcut before DetailView refactoring -->
 										{:else if value === 'P1'}
 											<li class="fa-solid fa-flag text-red-500"></li>
