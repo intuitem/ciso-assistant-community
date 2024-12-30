@@ -215,12 +215,12 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === 'Created'}
+	{#if data.data.state === m.created()}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
 		>
 			<div class="text-yellow-900">
-				{'Remember to review approver before submitting'}
+				{m.riskAcceptanceSubmittingReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
 				<button
@@ -230,7 +230,7 @@
 					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
 					class="btn variant-filled-secondary"
 				>
-					<i class="fas fa-paper-plane mr-2" /> {'Submit'}</button
+					<i class="fas fa-paper-plane mr-2" /> {m.submit()}</button
 				>
 			</div>
 		</div>
@@ -239,7 +239,7 @@
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
 		>
 			<div class="text-yellow-900">
-				{m.riskAcceptanceReviewMessage()}
+				{m.riskAcceptanceValidatingReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
 				<button

@@ -454,7 +454,7 @@
 	"enterYourEmail": "Inserisci il tuo indirizzo email per ricevere le istruzioni per impostare una nuova password",
 	"send": "Invia",
 	"goBackToLogin": "Torna al login",
-	"riskAcceptanceReviewMessage": "L'accettazione di questo rischio è in valutazione. Ricordati di revisionarla con attenzione prima di convalidarla o/o rifiutarla. Dopo l'accettazione o il rigiuto non sarà possibile tornare indietro.",
+	"riskAcceptanceValidatingReviewMessage": "L'accettazione di questo rischio è in valutazione. Ricordati di revisionarla con attenzione prima di convalidarla o/o rifiutarla. Dopo l'accettazione o il rigiuto non sarà possibile tornare indietro.",
 	"validate": "Convalida",
 	"reject": "Rifiuta",
 	"revoke": "Revoca",
