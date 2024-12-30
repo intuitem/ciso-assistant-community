@@ -6,6 +6,7 @@ description: "CNIL : GUIDE PRATIQUE RGPD POUR LA S\xC9CURIT\xC9 DES DONN\xC9ES P
 copyright: "CNIL (Commission nationale de l\u2019informatique et des libert\xE9s)\
   \ - CC BY ND"
 version: 1
+publication_date: 2024-12-14
 provider: CNIL
 packager: intuitem
 objects:

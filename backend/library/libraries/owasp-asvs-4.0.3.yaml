@@ -5,6 +5,7 @@ name: OWASP ASVS 4.0.3
 description: OWASP Application Security Verification Standard. https://owasp.org/www-project-application-security-verification-standard/
 copyright: CC BY-SA 3.0 - The OWASP Foundation
 version: 2
+publication_date: 2024-04-07
 provider: OWASP
 packager: intuitem
 objects:

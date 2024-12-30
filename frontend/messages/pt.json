@@ -865,5 +865,6 @@
 	"scoreSemiColon": "Pontuação:",
 	"mappingInferenceHelpText": "Essas variáveis são fixas e não mudarão dependendo da fonte.",
 	"bringTheEvidences": "Traga as evidências",
-	"bringTheEvidencesHelpText": "Se desabilitado, o objeto será duplicado sem suas evidências"
+	"bringTheEvidencesHelpText": "Se desabilitado, o objeto será duplicado sem suas evidências",
+	"publicationDate": "Data de publicação"
 }

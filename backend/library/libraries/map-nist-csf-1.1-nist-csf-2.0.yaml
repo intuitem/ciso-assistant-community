@@ -4,6 +4,7 @@ ref_id: map-nist-csf-1.1-nist-csf-2.0
 name: Mapping from nist-csf-1.1 to nist-csf-2.0
 description: Mapping from nist-csf-1.1 to nist-csf-2.0
 version: 1
+publication_date: 2024-06-29
 copyright: NIST
 provider: NIST
 packager: intuitem

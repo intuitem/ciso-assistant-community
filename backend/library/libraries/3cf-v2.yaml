@@ -8,6 +8,7 @@ description: "Ce document, \xE9tabli par la direction de la s\xE9curit\xE9 de l'
 copyright: "Ce document peut \xEAtre utilis\xE9 librement, sous r\xE9serve de mentionner\
   \ sa paternit\xE9."
 version: 2
+publication_date: 2024-05-11
 provider: "Direction de la s\xE9curit\xE9 de l'aviation civile"
 packager: intuitem
 objects:

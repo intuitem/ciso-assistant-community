@@ -8,6 +8,7 @@ description: "Das IT-Grundschutz-Kompendium ist die grundlegende Ver\xF6ffentlic
   r alle, die sich umfassend mit dem Thema Informationssicherheit befassen m\xF6chten."
 copyright: Deutschland BSI
 version: 1
+publication_date: 2024-05-18
 provider: BSI
 packager: intuitem
 objects:

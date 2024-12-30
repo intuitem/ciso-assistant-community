@@ -865,5 +865,6 @@
 	"scoreSemiColon": "Scor:",
 	"mappingInferenceHelpText": "Aceste variabile sunt fixe și nu se vor modifica în funcție de sursă.",
 	"bringTheEvidences": "Aduceți dovezile",
-	"bringTheEvidencesHelpText": "Dacă este dezactivat, obiectul va fi duplicat fără dovezile sale"
+	"bringTheEvidencesHelpText": "Dacă este dezactivat, obiectul va fi duplicat fără dovezile sale",
+	"publicationDate": "Data publicării"
 }

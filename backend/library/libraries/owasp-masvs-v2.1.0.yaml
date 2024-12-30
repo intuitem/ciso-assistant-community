@@ -5,6 +5,7 @@ name: OWASP MASVS 2.1.0
 description: OWASP Mobile Application Security Verification Standard v2.1.0
 copyright: CC BY-SA 3.0 - The OWASP Foundation
 version: 1
+publication_date: 2024-05-25
 provider: OWASP
 packager: intuitem
 objects:

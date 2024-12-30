@@ -866,5 +866,6 @@
 	"scoreSemiColon": "نتيجة:",
 	"mappingInferenceHelpText": "هذه المتغيرات ثابتة ولن تتغير اعتمادًا على المصدر.",
 	"bringTheEvidences": "أحضر الأدلة",
-	"bringTheEvidencesHelpText": "في حالة التعطيل، سيتم تكرار الكائن بدون أدلته"
+	"bringTheEvidencesHelpText": "في حالة التعطيل، سيتم تكرار الكائن بدون أدلته",
+	"publicationDate": "تاريخ النشر"
 }
