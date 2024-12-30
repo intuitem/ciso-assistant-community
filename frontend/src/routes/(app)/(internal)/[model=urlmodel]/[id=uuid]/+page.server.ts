@@ -150,6 +150,41 @@ export const actions: Actions = {
 			})
 		);
 	},
+	submit: async ({ request, fetch, params }) => {
+		const formData = await request.formData();
+		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+		const submitForm = await superValidate(formData, zod(schema));
+
+		const urlmodel = submitForm.data.urlmodel;
+		const id = submitForm.data.id;
+		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/submit/`;
+
+		if (!submitForm.valid) {
+			return fail(400, { form: submitForm });
+		}
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST'
+		};
+		const res = await fetch(endpoint, requestInitOptions);
+		if (!res.ok) {
+			const response = await res.json();
+			if (response.non_field_errors) {
+				setError(submitForm, 'non_field_errors', response.non_field_errors);
+			}
+			return fail(400, { form: submitForm });
+		}
+		const model: string = urlParamModelVerboseName(params.model!);
+		// TODO: reference object by name instead of id
+		return message(
+			submitForm,
+			m.successfullyValidatedObject({
+				object: safeTranslate(model).toLowerCase(),
+				id: id
+			})
+		);
+	},
+
 	accept: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });

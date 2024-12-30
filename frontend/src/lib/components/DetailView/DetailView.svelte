@@ -215,7 +215,26 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === m.submitted() && $page.data.user.id === data.data.approver.id}
+	{#if data.data.state === 'Created'}
+		<div
+			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
+		>
+			<div class="text-yellow-900">
+				{'Remember to review approver before submitting'}
+			</div>
+			<div class="flex space-x-2">
+				<button
+					on:click={(_) => {
+						modalConfirm(data.data.id, data.data.name, '?/submit');
+					}}
+					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
+					class="btn variant-filled-secondary"
+				>
+					<i class="fas fa-paper-plane mr-2" /> {'Submit'}</button
+				>
+			</div>
+		</div>
+	{:else if data.data.state === m.submitted() && $page.data.user.id === data.data.approver.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
 		>
