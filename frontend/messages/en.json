@@ -964,7 +964,7 @@
 	"organizedCrime": "Organized crime",
 	"terrorist": "Terrorist",
 	"activist": "Activist",
-	"professional": "Competitor",
+	"competitor": "Competitor",
 	"amateur": "Amateur",
 	"avenger": "Avenger",
 	"pathological": "Pathological",
@@ -1075,5 +1075,13 @@
 	"reviewProgress": "Review progress",
 	"ecosystemRadar": "Ecosystem radar",
 	"criticalitySemiColon": "Criticality:",
-	"cyberReliability": "Cyber reliability"
+	"cyberReliability": "Cyber reliability",
+	"insights": "Insights",
+	"impactAnalysis": "Impact analysis",
+	"priorityReview": "Priority review",
+	"timelineView": "Timeline view",
+	"missionsAndOrganizationalServices": "Missions and organizational services",
+	"human": "Human",
+	"material": "Material",
+	"environmental": "Environmental"
 }

@@ -1267,6 +1267,48 @@ class Qualification(ReferentialObjectMixin, I18nObjectMixin):
             "name": "Financial",
             "urn": "urn:intuitem:risk:qualification:financial",
         },
+        {
+            "abbreviation": "Gov",
+            "qualification_ordering": 12,
+            "name": "Governance",
+            "urn": "urn:intuitem:risk:qualification:governance",
+        },
+        {
+            "abbreviation": "Mis",
+            "qualification_ordering": 13,
+            "name": "Missions and Organizational Services",
+            "urn": "urn:intuitem:risk:qualification:missions",
+        },
+        {
+            "abbreviation": "Hum",
+            "qualification_ordering": 14,
+            "name": "Human",
+            "urn": "urn:intuitem:risk:qualification:human",
+        },
+        {
+            "abbreviation": "Mat",
+            "qualification_ordering": 15,
+            "name": "Material",
+            "urn": "urn:intuitem:risk:qualification:material",
+        },
+        {
+            "abbreviation": "Env",
+            "qualification_ordering": 16,
+            "name": "Environmental",
+            "urn": "urn:intuitem:risk:qualification:environmental",
+        },
+        {
+            "abbreviation": "Img",
+            "qualification_ordering": 17,
+            "name": "Image",
+            "urn": "urn:intuitem:risk:qualification:image",
+        },
+        {
+            "abbreviation": "Tru",
+            "qualification_ordering": 18,
+            "name": "Trust",
+            "urn": "urn:intuitem:risk:qualification:trust",
+        },
     ]
 
     abbreviation = models.CharField(

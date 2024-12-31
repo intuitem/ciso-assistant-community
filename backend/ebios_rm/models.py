@@ -273,6 +273,8 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
                 "hexcolor": "#f9fafb",
             }
         risk_matrix = self.parsed_matrix
+        if not risk_matrix["impact"][self.gravity].get("hexcolor"):
+            risk_matrix["impact"][self.gravity]["hexcolor"] = "#f9fafb"
         return {
             **risk_matrix["impact"][self.gravity],
             "value": self.gravity,
@@ -285,7 +287,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
         ORGANIZED_CRIME = "organized_crime", _("Organized crime")
         TERRORIST = "terrorist", _("Terrorist")
         ACTIVIST = "activist", _("Activist")
-        PROFESSIONAL = "professional", _("Professional")
+        COMPETITOR = "competitor", _("Competitor")
         AMATEUR = "amateur", _("Amateur")
         AVENGER = "avenger", _("Avenger")
         PATHOLOGICAL = "pathological", _("Pathological")
