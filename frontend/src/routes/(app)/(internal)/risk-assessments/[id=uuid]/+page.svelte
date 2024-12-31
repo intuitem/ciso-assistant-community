@@ -9,49 +9,25 @@
 		ModalComponent,
 		ModalSettings,
 		ModalStore,
-		PopupSettings,
-		ToastStore
+		PopupSettings
 	} from '@skeletonlabs/skeleton';
-	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms';
+	import { getModalStore, popup } from '@skeletonlabs/skeleton';
 
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data;
 	const showRisks = true;
 	const risk_assessment = data.risk_assessment;
 
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
 	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
-
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
 
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
