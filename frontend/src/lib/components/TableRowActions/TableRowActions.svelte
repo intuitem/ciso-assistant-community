@@ -66,7 +66,10 @@
 
 	$: displayDetail = detailURL;
 	$: displayEdit =
-		canEditObject && URLModel && !['frameworks', 'risk-matrices'].includes(URLModel) && editURL;
+		canEditObject &&
+		URLModel &&
+		!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel) &&
+		editURL;
 	$: displayDelete = canDeleteObject && deleteForm !== undefined;
 </script>
 
