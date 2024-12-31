@@ -162,34 +162,6 @@
 
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 
-	let { form: measureCreateForm, message: measureCreateMessage } = {
-		form: {},
-		message: {}
-	};
-	let { form: evidenceCreateForm, message: evidenceCreateMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: measureCreateForm, message: measureCreateMessage } = superForm(
-			data.measureCreateForm,
-			{
-				onUpdated: ({ form }) =>
-					handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-			}
-		));
-		({ form: evidenceCreateForm, message: evidenceCreateMessage } = superForm(
-			data.evidenceCreateForm,
-			{
-				onUpdated: ({ form }) =>
-					handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-			}
-		));
-	}
-
 	$: mappingInference = {
 		sourceRequirementAssessment:
 			data.requirementAssessment.mapping_inference.source_requirement_assessment,
