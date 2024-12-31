@@ -94,22 +94,6 @@
 		}
 	}
 
-	let { form: measureCreateForm, message: measureCreateMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: measureCreateForm, message: measureCreateMessage } = superForm(
-			data.measureCreateForm,
-			{
-				onUpdated: ({ form }) =>
-					handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-			}
-		));
-	}
 	const next = getSecureRedirect($page.url.searchParams.get('next'));
 
 	const probabilityColorMap = data.riskMatrix.probability.map(

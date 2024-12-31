@@ -53,29 +53,6 @@
 		}
 	}
 
-	let { form: deleteForm, message: deleteMessage } = {
-		form: {},
-		message: {}
-	};
-
-	let { form: createForm, message: createMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: createForm, message: createMessage } = superForm(data.scenarioCreateForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-		({ form: deleteForm, message: deleteMessage } = superForm(data.scenarioDeleteForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-	}
-
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
