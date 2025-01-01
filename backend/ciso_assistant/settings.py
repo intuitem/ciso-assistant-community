@@ -313,7 +313,7 @@ LANGUAGES = [
     ("ro", "Romanian"),
     ("hi", "Hindi"),
     ("ur", "Urdu"),
-    ("cz", "Czech"),
+    ("cs", "Czech"),
     ("sv", "Swedish"),
     ("id", "Indonesian"),
 ]
