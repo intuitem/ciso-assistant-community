@@ -43,7 +43,7 @@
 		ur: 'اردو',
 		cs: 'Český',
 		sv: 'Svenska',
-		id: 'Indonesian'
+		id: 'Bahasa Indonesia'
 	};
 
 	let value = languageTag();
