@@ -201,9 +201,11 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
+- Idonesia PDP
+- COBAC R-2024/01
+- ICO Data protection self-assessment 
 - NIST 800-82
-- FTC safeguards
-- CNIL checklist
+
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
@@ -506,8 +508,9 @@ Set DJANGO_DEBUG=False for security reason.
 - RO: Romanian
 - HI: Hindi
 - UR: Urdu
-- CZ: Czech
+- CS: Czech
 - SV: Swedish
+- ID: Indonesian
 
 ## Contributors 🤝
 
