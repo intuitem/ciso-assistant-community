@@ -1622,6 +1622,12 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 {"error": "Missing 'approver' field"}, status=status.HTTP_403_FORBIDDEN
             )
 
+    # This set back risk acceptance to "Created"
+    @action(detail=True, methods=["post"], name="Draft risk acceptance")
+    def draft(self, request, pk):
+        self.get_object().set_state("created")
+        return Response({"results": "state updated to submitted"})
+
     @action(detail=True, methods=["post"], name="Accept risk acceptance")
     def accept(self, request, pk):
         if request.user == self.get_object().approver:

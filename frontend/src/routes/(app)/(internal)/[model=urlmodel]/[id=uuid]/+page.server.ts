@@ -185,6 +185,40 @@ export const actions: Actions = {
 		);
 	},
 
+	draft: async ({ request, fetch, params }) => {
+		const formData = await request.formData();
+		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+		const draftForm = await superValidate(formData, zod(schema));
+
+		const urlmodel = draftForm.data.urlmodel;
+		const id = draftForm.data.id;
+		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/draft/`;
+
+		if (!draftForm.valid) {
+			return fail(400, { form: draftForm });
+		}
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST'
+		};
+		const res = await fetch(endpoint, requestInitOptions);
+		if (!res.ok) {
+			const response = await res.json();
+			if (response.non_field_errors) {
+				setError(draftForm, 'non_field_errors', response.non_field_errors);
+			}
+			return fail(400, { form: draftForm });
+		}
+		const model: string = urlParamModelVerboseName(params.model!);
+		// TODO: reference object by name instead of id
+		return message(
+			draftForm,
+			m.successfullyValidatedObject({
+				object: safeTranslate(model).toLowerCase(),
+				id: id
+			})
+		);
+	},
 	accept: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });

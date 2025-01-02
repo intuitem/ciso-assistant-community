@@ -196,7 +196,7 @@
 	$: displayEditButton = function () {
 		return (
 			canEditObject &&
-			!['Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
+			!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
 			!data.data.urn &&
 			!data.data.builtin
 		);
@@ -215,28 +215,9 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === m.created()}
+	{#if data.data.state === m.submitted() && $page.data.user.id === data.data.approver.id}
 		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
-		>
-			<div class="text-yellow-900">
-				{m.riskAcceptanceSubmittingReviewMessage()}
-			</div>
-			<div class="flex space-x-2">
-				<button
-					on:click={(_) => {
-						modalConfirm(data.data.id, data.data.name, '?/submit');
-					}}
-					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
-					class="btn variant-filled-secondary"
-				>
-					<i class="fas fa-paper-plane mr-2" /> {m.submit()}</button
-				>
-			</div>
-		</div>
-	{:else if data.data.state === m.submitted() && $page.data.user.id === data.data.approver.id}
-		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
+			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 justify-between"
 		>
 			<div class="text-yellow-900">
 				{m.riskAcceptanceValidatingReviewMessage()}
@@ -405,6 +386,42 @@
 					{m.sendQuestionnaire()}
 				</button>
 			{/if}
+			{#if data.data.state === m.created()}
+				<div class="flex flex-col space-y-2 ml-4 {data.data.approver ? '' : 'mb-4'}">
+					<button
+						on:click={(_) => {
+							modalConfirm(data.data.id, data.data.name, '?/submit');
+						}}
+						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
+						class="btn variant-filled-primary"
+						disabled={!data.data.approver}
+					>
+						<i class="fas fa-paper-plane mr-2" />
+						{m.submit()}
+					</button>
+					{#if !data.data.approver}
+						<span class="text-sm font-semibold"
+							>{m.riskAcceptanceMissingApproverMessage()} <span class="text-red-500">*</span></span
+						>
+					{/if}
+				</div>
+			{/if}
+
+			{#if data.data.state === m.submitted()}
+				<div class="flex flex-col space-y-2 ml-4">
+					<button
+						on:click={(_) => {
+							modalConfirm(data.data.id, data.data.name, '?/draft');
+						}}
+						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/draft')}
+						class="btn variant-filled-primary"
+						disabled={!data.data.approver}
+					>
+						<i class="fas fa-arrow-alt-circle-left mr-2" /> {m.draft()}</button
+					>
+				</div>
+			{/if}
+
 			{#if displayEditButton()}
 				<div class="flex flex-col space-y-2 ml-4">
 					<Anchor
