@@ -1,6 +1,5 @@
 *.DS_Store
 *~$*
-.env
 venv
 **/node_modules/
 .vscode
