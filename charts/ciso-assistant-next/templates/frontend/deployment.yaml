@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "ciso-assistant.fullname" . }}-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.frontend.name "component" .Values.frontend.name) | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      {{- include "ciso-assistant.selectorLabels" (dict "context" . "component" .Values.frontend.name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.frontend.name "component" .Values.frontend.name) | nindent 8 }}
+    spec:
+      {{- with .Values.frontend.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Values.frontend.name }}
+        image: {{ default .Values.global.image.registry .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.frontend.image.tag }}
+        imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.frontend.image.imagePullPolicy }}
+        env:
+          {{- with .Values.frontend.env }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+          - name: ORIGIN
+            value: {{ template "ciso-assistant.url" . }}
+          - name: PROTOCOL_HEADER
+            value: x-forwarded-proto
+          - name: HOST_HEADER
+            value: x-forwarded-host
+          - name: PUBLIC_BACKEND_API_URL
+            value: http://{{ include "ciso-assistant.fullname" . }}-backend/api
+          - name: PUBLIC_BACKEND_API_EXPOSED_URL
+            value: {{ template "ciso-assistant.url" . }}/api
+          - name: BODY_SIZE_LIMIT
+            value: {{ .Values.frontend.config.bodySizeLimit | quote }}
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        {{- if .Values.frontend.resources }}
+        resources:
+          {{ toYaml .Values.frontend.resources | indent 10 }}
+        {{- end }}
+        {{- with .Values.frontend.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.global.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
