@@ -1,5 +1,8 @@
 <script lang="ts">
 	import Article from '$lib/components/DataViz/Article.svelte';
+	import { pageTitle } from '$lib/utils/stores';
+
+	$pageTitle = 'Experimental';
 </script>
 
 <div class="bg-white grid grid-cols-2 p-4 gap-4">
