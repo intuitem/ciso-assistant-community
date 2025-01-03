@@ -34,11 +34,16 @@ image:
     repository: ghcr.io/intuitem/ciso-assistant-community/frontend
     tag: "{{ default .Chart.AppVersion .Values.global.appVersion }}"
     pullPolicy: Always
-  caddy:
-    repository: caddy
-    tag: "2.7.6"
-    pullPolicy: IfNotPresent
 
 persistence:
   size: 5Gi
   accessMode: ReadWriteOnce
+
+ingress:
+  enabled: true
+  annotations: {}
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # cert-manager.io/cluster-issuer: letsencrypt
+  ingressClassName: nginx
+
+  tls: false
