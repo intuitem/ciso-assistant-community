@@ -245,7 +245,8 @@ class StoredLibrary(LibraryMixin):
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
-    HASH_CHECKSUM_SET = set()  # For now a library isn't updated if its SHA256 checksum has already been registered in the database.
+    # For now a library isn't updated if its SHA256 checksum has already been registered in the database.
+    HASH_CHECKSUM_SET = set()
 
     @classmethod
     def __init_class__(cls):
@@ -259,7 +260,8 @@ class StoredLibrary(LibraryMixin):
     ) -> "StoredLibrary | None":
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
-            return None  # We do not store the library if its hash checksum is in the database.
+            # We do not store the library if its hash checksum is in the database.
+            return None
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
@@ -322,7 +324,8 @@ class StoredLibrary(LibraryMixin):
             objects_meta=objects_meta,
             dependencies=dependencies,
             is_loaded=is_loaded,
-            builtin=builtin,  # We have to add a "builtin: true" line to every builtin library file.
+            # We have to add a "builtin: true" line to every builtin library file.
+            builtin=builtin,
             hash_checksum=hash_checksum,
             content=library_objects,
         )
@@ -439,7 +442,8 @@ class LibraryUpdater:
                 "packager",
                 self.new_library.packager,
             ),  # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
-            ("ref_id", self.new_library.ref_id),  # Should we even update the ref_id ?
+            # Should we even update the ref_id ?
+            ("ref_id", self.new_library.ref_id),
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
             ("translations", self.new_library.translations),
@@ -932,7 +936,8 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_json_translated(self):
-        return update_translations_as_string(self.json_definition, "fr")  # Why "fr" ?
+        # Why "fr" ?
+        return update_translations_as_string(self.json_definition, "fr")
 
     def __str__(self) -> str:
         return self.get_name_translated
@@ -1629,7 +1634,10 @@ class Asset(
             {
                 "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
             }
-            for key, content in security_objectives.get("objectives", {}).items()
+            for key, content in sorted(
+                security_objectives.get("objectives", {}).items(),
+                key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
+            )
             if content.get("is_enabled", False)
             and content.get("value", -1) in range(0, 5)
         ]
@@ -1657,9 +1665,10 @@ class Asset(
         disaster_recovery_objectives = self.get_disaster_recovery_objectives()
         return [
             {"str": f"{key}: {format_seconds(content.get('value', 0))}"}
-            for key, content in disaster_recovery_objectives.get(
-                "objectives", {}
-            ).items()
+            for key, content in sorted(
+                disaster_recovery_objectives.get("objectives", {}).items(),
+                key=lambda x: self.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0]),
+            )
             if content.get("value", 0)
         ]
 
@@ -1979,7 +1988,7 @@ class Vulnerability(
     fields_to_check = ["name"]
 
 
-## historical data
+# historical data
 class HistoricalMetric(models.Model):
     date = models.DateField(verbose_name=_("Date"), db_index=True)
     data = models.JSONField(verbose_name=_("Historical Data"))
