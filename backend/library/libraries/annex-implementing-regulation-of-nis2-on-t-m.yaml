@@ -1890,7 +1890,7 @@ objects:
           description: "la aplicaci\xF3n de medidas adecuadas para garantizar el mantenimiento\
             \ de la seguridad de los sistemas de redes y de informaci\xF3n en situaciones\
             \ de crisis."
-    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3.2:1
+    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:node141
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:4.3.2
@@ -2305,7 +2305,7 @@ objects:
         es:
           name: Directorio de proveedores y prestadores de servicios
           description: null
-    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2:1
+    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:node170
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2
@@ -2320,7 +2320,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2.a
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2:1
+      parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:node170
       ref_id: 5.2.a
       description: contact points for each direct supplier and service provider;
       translations:
@@ -2331,7 +2331,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2.b
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:5.2:1
+      parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:node170
       ref_id: 5.2.b
       description: a list of ICT products, ICT services, and ICT processes provided
         by the direct supplier or service provider to the relevant entities.
@@ -5509,7 +5509,7 @@ objects:
           name: "Dep\xF3sito, devoluci\xF3n o supresi\xF3n de activos al t\xE9rmino\
             \ de la relaci\xF3n laboral"
           description: null
-    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5:1
+    - urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:node414
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:annex-technical-and-methodological-requirements-nis2:12.5
