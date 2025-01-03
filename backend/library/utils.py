@@ -586,15 +586,12 @@ class LibraryImporter:
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
-                try:
-                    dependency = StoredLibrary.objects.get(urn=dependency_urn)
-                    error_msg = dependency.load()
-                    if error_msg is not None:
-                        return error_msg
-                except StoredLibrary.DoesNotExist:
-                    err_msg = f"ERROR: Stored Library with URN {dependency_urn} does not exist"
-                    print(err_msg)
-                    raise Http404(err_msg)
+                dependency = StoredLibrary.objects.get(
+                    urn=dependency_urn
+                )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
+                error_msg = dependency.load()
+                if error_msg is not None:
+                    return error_msg
             else:
                 # try to update the dependency, because we might need the last version for the main library
                 dependency = LoadedLibrary.objects.get(urn=dependency_urn)
