@@ -15,19 +15,13 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import * as m from '$paraglide/messages.js';
 	import { languageTag } from '$paraglide/runtime.js';
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-		ToastStore
-	} from '@skeletonlabs/skeleton';
-	import { Tab, TabGroup, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
+	import { Tab, TabGroup, getModalStore } from '@skeletonlabs/skeleton';
 
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
 
@@ -49,27 +43,6 @@
 	}
 
 	let tabSet = 0;
-
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
