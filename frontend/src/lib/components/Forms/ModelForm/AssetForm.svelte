@@ -106,6 +106,7 @@
 />
 <AutocompleteSelect
 	disabled={data.type === 'PR'}
+	hidden={data.type === 'PR'}
 	multiple
 	{form}
 	options={getOptions({ objects: model.foreignKeys['parent_assets'], self: object })}
