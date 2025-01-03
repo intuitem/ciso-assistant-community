@@ -11,23 +11,20 @@
 	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 	import {
 		getModalStore,
-		getToastStore,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore,
-		type ToastStore
+		type ModalStore
 	} from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
 
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { superForm } from 'sveltekit-superforms';
 
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let data: PageData;
 
@@ -43,7 +40,6 @@
 		.sort((a, b) => a.value - b.value);
 
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	function cancel(): void {
 		if (browser) {
@@ -73,43 +69,6 @@
 		modalStore.trigger(modal);
 	}
 
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
-	let { form: measureCreateForm, message: measureCreateMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: measureCreateForm, message: measureCreateMessage } = superForm(
-			data.measureCreateForm,
-			{
-				onUpdated: ({ form }) =>
-					handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-			}
-		));
-	}
 	const next = getSecureRedirect($page.url.searchParams.get('next'));
 
 	const probabilityColorMap = data.riskMatrix.probability.map(

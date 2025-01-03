@@ -31,13 +31,10 @@
 		Tab,
 		TabGroup,
 		getModalStore,
-		getToastStore,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore,
-		type ToastStore
+		type ModalStore
 	} from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -46,7 +43,6 @@
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
 
 	function cancel(): void {
@@ -56,15 +52,10 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
-		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
-		: getRequirementTitle(data.parent.ref_id, data.parent.name);
-
 	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
 	const schema = RequirementAssessmentSchema;
 
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	function modalMeasureCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -105,27 +96,6 @@
 		modalStore.trigger(modal);
 	}
 
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
 	let createAppliedControlsLoading = false;
 
 	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
@@ -161,34 +131,6 @@
 	}
 
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
-
-	let { form: measureCreateForm, message: measureCreateMessage } = {
-		form: {},
-		message: {}
-	};
-	let { form: evidenceCreateForm, message: evidenceCreateMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: measureCreateForm, message: measureCreateMessage } = superForm(
-			data.measureCreateForm,
-			{
-				onUpdated: ({ form }) =>
-					handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-			}
-		));
-		({ form: evidenceCreateForm, message: evidenceCreateMessage } = superForm(
-			data.evidenceCreateForm,
-			{
-				onUpdated: ({ form }) =>
-					handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-			}
-		));
-	}
 
 	$: mappingInference = {
 		sourceRequirementAssessment:
