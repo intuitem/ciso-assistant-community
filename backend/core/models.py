@@ -2787,6 +2787,9 @@ class ComplianceAssessment(Assessment):
                 requirement_assessment.is_scored = (
                     baseline_requirement_assessment.is_scored
                 )
+                requirement_assessment.observation = (
+                    baseline_requirement_assessment.observation
+                )
                 requirement_assessment.evidences.set(
                     baseline_requirement_assessment.evidences.all()
                 )
