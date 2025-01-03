@@ -270,7 +270,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' }
 		],
-		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
+		reverseForeignKeyFields: [
+			{ field: 'applied_controls', urlModel: 'evidences' },
+			{ field: 'applied_controls', urlModel: 'requirement-assessments' },
+			{ field: 'applied_controls', urlModel: 'vulnerabilities' },
+			{ field: 'applied_controls', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' }
+		],
 		selectFields: [
 			{ field: 'status' },
 			{ field: 'category' },
