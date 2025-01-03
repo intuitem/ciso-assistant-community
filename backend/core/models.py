@@ -368,7 +368,6 @@ class LibraryUpdater:
         self.new_matrices = new_library_content.get("risk_matrix")
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
-        # Is self.new_objects even used ?
         self.new_objects = {obj["urn"].lower(): obj for obj in self.threats}
         self.new_objects.update(
             {obj["urn"].lower(): obj for obj in self.reference_controls}
