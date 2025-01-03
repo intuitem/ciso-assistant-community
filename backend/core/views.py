@@ -2476,13 +2476,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         instance: ComplianceAssessment = serializer.save()
         instance.create_requirement_assessments(baseline)
-        target_framework = serializer.validated_data["framework"]
-        source_framework = baseline.framework
-        same_minmax_score = (
-            target_framework.min_score == source_framework.min_score
-            and target_framework.max_score == source_framework.max_score
-        )
         if baseline and baseline.framework != instance.framework:
+            target_framework = serializer.validated_data["framework"]
+            source_framework = baseline.framework
+            same_minmax_score = (
+                target_framework.min_score == source_framework.min_score
+                and target_framework.max_score == source_framework.max_score
+            )
             mapping_set = RequirementMappingSet.objects.get(
                 target_framework=target_framework,
                 source_framework=baseline.framework,
@@ -2497,7 +2497,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "source_requirement_assessment"
                     ]["id"]
                 )
-                if same_minmax_score:
+                if same_minmax_score and target_framework == source_framework:
                     requirement_assessment.is_scored = (
                         baseline_requirement_assessment.is_scored
                     )
