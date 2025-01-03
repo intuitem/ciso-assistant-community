@@ -202,7 +202,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- Idonesia PDP
+- Indonesia PDP
 - COBAC R-2024/01
 - ICO Data protection self-assessment 
 - NIST 800-82
