@@ -116,11 +116,16 @@
 									breadcrumbAction="push"
 									href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}"
 								>
-									{#if title}
-										<span style="font-weight: 600;">{title}</span>
-									{/if}
-									{#if description}
-										<p>{description}</p>
+									{#if title || description}
+										{#if title}
+											<span style="font-weight: 600;">{title}</span>
+										{/if}
+										{#if description}
+											<p>{description}</p>
+										{/if}
+									{:else if node.question.questions && node.question.questions[0]}
+										<!-- This only displays the first question -->
+										{node.question.questions[0].text}
 									{/if}
 								</Anchor>
 							{:else}
