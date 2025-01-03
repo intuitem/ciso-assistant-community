@@ -215,7 +215,7 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === m.submitted() && $page.data.user.id === data.data.approver.id}
+	{#if data.data.state === 'Submitted' && $page.data.user.id === data.data.approver.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 justify-between"
 		>
@@ -243,7 +243,7 @@
 				>
 			</div>
 		</div>
-	{:else if data.data.state === m.accept()}
+	{:else if data.data.state === 'Accepted'}
 		<div
 			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container-token shadow-lg px-6 py-2 mt-2 justify-between"
 		>
@@ -386,7 +386,7 @@
 					{m.sendQuestionnaire()}
 				</button>
 			{/if}
-			{#if data.data.state === m.created()}
+			{#if data.data.state === 'Created'}
 				<div class="flex flex-col space-y-2 ml-4 {data.data.approver ? '' : 'mb-4'}">
 					<button
 						on:click={(_) => {
@@ -407,7 +407,7 @@
 				</div>
 			{/if}
 
-			{#if data.data.state === m.submitted()}
+			{#if data.data.state === 'Submitted'}
 				<div class="flex flex-col space-y-2 ml-4">
 					<button
 						on:click={(_) => {
