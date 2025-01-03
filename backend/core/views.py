@@ -382,6 +382,18 @@ class AssetViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "business_value"]
 
+    def _perform_write(self, serializer):
+        type = serializer.validated_data.get("type")
+        if type == Asset.Type.PRIMARY:
+            serializer.validated_data["parent_assets"] = []
+        serializer.save()
+
+    def perform_create(self, serializer):
+        return self._perform_write(serializer)
+
+    def perform_update(self, serializer):
+        return self._perform_write(serializer)
+
     @action(detail=False, name="Get type choices")
     def type(self, request):
         return Response(dict(Asset.Type.choices))
