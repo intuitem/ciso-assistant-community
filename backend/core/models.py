@@ -360,14 +360,15 @@ class LibraryUpdater:
             *old_library.risk_matrices.all(),
         ]
         self.new_library = new_library
-        library_content = json.loads(self.new_library.content)
+        new_library_content = json.loads(self.new_library.content)
         self.dependencies = self.new_library.dependencies
         if self.dependencies is None:
             self.dependencies = []
-        self.new_framework = library_content.get("framework")
-        self.new_matrices = library_content.get("risk_matrix")
-        self.threats = library_content.get("threats", [])
-        self.reference_controls = library_content.get("reference_controls", [])
+        self.new_framework = new_library_content.get("framework")
+        self.new_matrices = new_library_content.get("risk_matrix")
+        self.threats = new_library_content.get("threats", [])
+        self.reference_controls = new_library_content.get("reference_controls", [])
+        # Is self.new_objects even used ?
         self.new_objects = {obj["urn"].lower(): obj for obj in self.threats}
         self.new_objects.update(
             {obj["urn"].lower(): obj for obj in self.reference_controls}
