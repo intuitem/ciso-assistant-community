@@ -610,7 +610,6 @@ def startup(sender: AppConfig, **kwargs):
             logger.error("Error creating superuser", exc_info=e)
 
 
-
 class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "core"
