@@ -589,6 +589,14 @@ def startup(sender: AppConfig, **kwargs):
     )
     third_party_respondent.permissions.set(third_party_respondent_permissions)
 
+    # Create default Qualifications
+    try:
+        Qualification.create_default_qualifications()
+    except Exception as e:
+        logger.error("Error creating default qualifications", exc_info=e)
+
+    call_command("storelibraries")
+
     # if superuser defined and does not exist, then create it
     if (
         CISO_ASSISTANT_SUPERUSER_EMAIL
@@ -600,14 +608,6 @@ def startup(sender: AppConfig, **kwargs):
             )
         except Exception as e:
             logger.error("Error creating superuser", exc_info=e)
-
-    # Create default Qualifications
-    try:
-        Qualification.create_default_qualifications()
-    except Exception as e:
-        logger.error("Error creating default qualifications", exc_info=e)
-
-    call_command("storelibraries")
 
 
 class CoreConfig(AppConfig):
