@@ -46,6 +46,7 @@ READER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_qualification",
+    "view_globalsettings",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -81,6 +82,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_qualification",
+    "view_globalsettings",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -187,6 +189,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_qualification",
+    "view_globalsettings",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -301,6 +304,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_qualification",
+    "view_globalsettings",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [

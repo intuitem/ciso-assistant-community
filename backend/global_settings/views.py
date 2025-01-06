@@ -53,6 +53,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj = self.model.objects.get(name="general")
+        obj.is_published = True # we could do that at creation, but it's ok here
         self.check_object_permissions(self.request, obj)
         return obj
 
