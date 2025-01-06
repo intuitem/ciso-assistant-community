@@ -1214,7 +1214,6 @@ The objects manipulated by the third party (compliance assessment and evidences)
 ## Near-term evolutions
 
 We need to add in the near term the follwoing objects:
-- EBIOS-RM study
 - Audit campaign
 - Third-party campaign
 - Pentest follow-up
@@ -1440,5 +1439,4 @@ erDiagram
 ### Implementation
 
 - EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
-- There is no object for "strategic scenarios", as they result directly from attack paths and corresponding feared event (which is the title of the strategic scenario).
 - the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
