@@ -2698,7 +2698,12 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
-    filterset_fields = ["folder", "evidences", "compliance_assessment"]
+    filterset_fields = [
+        "folder",
+        "evidences",
+        "compliance_assessment",
+        "applied_controls",
+    ]
     search_fields = ["name", "description"]
 
     def update(self, request, *args, **kwargs):
