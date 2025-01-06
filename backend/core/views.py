@@ -443,8 +443,7 @@ class AssetViewSet(BaseModelViewSet):
             )
             nodes_idx[asset.name] = N
             links.append(
-                {"source": nodes_idx[asset.folder.name],
-                    "target": N, "value": "scope"}
+                {"source": nodes_idx[asset.folder.name], "target": N, "value": "scope"}
             )
             N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
@@ -609,8 +608,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         instance: RiskAssessment = serializer.save()
         if instance.ebios_rm_study:
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
-            ebios_rm_study = EbiosRMStudy.objects.get(
-                id=instance.ebios_rm_study.id)
+            ebios_rm_study = EbiosRMStudy.objects.get(id=instance.ebios_rm_study.id)
             for operational_scenario in [
                 operational_scenario
                 for operational_scenario in ebios_rm_study.operational_scenarios.all()
@@ -664,8 +662,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             user=request.user,
             object_type=RiskAssessment,
         )
-        risk_assessments = RiskAssessment.objects.filter(
-            id__in=viewable_objects)
+        risk_assessments = RiskAssessment.objects.filter(id__in=viewable_objects)
         res = [
             {"id": a.id, "name": a.name, "quality_check": a.quality_check()}
             for a in risk_assessments
@@ -698,8 +695,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         if UUID(pk) in viewable_objects:
             risk_assessment_object = self.get_object()
             risk_scenarios_objects = risk_assessment_object.risk_scenarios.all()
-            risk_assessment = RiskAssessmentReadSerializer(
-                risk_assessment_object).data
+            risk_assessment = RiskAssessmentReadSerializer(risk_assessment_object).data
             risk_scenarios = RiskScenarioReadSerializer(
                 risk_scenarios_objects, many=True
             ).data
@@ -915,10 +911,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 status=risk_assessment.status,
             )
 
-            duplicate_risk_assessment.authors.set(
-                risk_assessment.authors.all())
-            duplicate_risk_assessment.reviewers.set(
-                risk_assessment.reviewers.all())
+            duplicate_risk_assessment.authors.set(risk_assessment.authors.all())
+            duplicate_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
 
             for scenario in risk_assessment.risk_scenarios.all():
                 duplicate_scenario = RiskScenario.objects.create(
@@ -988,8 +982,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "requirement_assessments",
         "evidences",
     ]
-    search_fields = ["name", "description",
-                     "risk_scenarios", "requirement_assessments"]
+    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1058,8 +1051,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             for key in ["created_at","updated_at","eta"] :
                 measures[i][key] = str(measures[i][key])"""
 
-        ranking_scores = {str(mtg.id): mtg.get_ranking_score()
-                          for mtg in measures}
+        ranking_scores = {str(mtg.id): mtg.get_ranking_score() for mtg in measures}
 
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
@@ -1135,8 +1127,7 @@ class AppliedControlViewSet(BaseModelViewSet):
                 requirement_assessments__applied_controls=ac
             ).distinct():
                 audit_coverage = (
-                    RequirementAssessment.objects.filter(
-                        compliance_assessment=ca)
+                    RequirementAssessment.objects.filter(compliance_assessment=ca)
                     .filter(applied_controls=ac)
                     .count()
                 )
@@ -1352,8 +1343,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             duplicate_applied_control.save()
 
         return Response(
-            {"results": AppliedControlReadSerializer(
-                duplicate_applied_control).data}
+            {"results": AppliedControlReadSerializer(duplicate_applied_control).data}
         )
 
     @action(detail=False, methods=["get"])
@@ -1428,11 +1418,9 @@ class AppliedControlViewSet(BaseModelViewSet):
                     )
                     indexes[audit.id] = idx_cnt
                     idx_cnt += 1
-                links.append(
-                    {"source": indexes[audit.id], "target": indexes[req.id]})
+                links.append({"source": indexes[audit.id], "target": indexes[req.id]})
 
-                links.append(
-                    {"source": indexes[ac.id], "target": indexes[req.id]})
+                links.append({"source": indexes[ac.id], "target": indexes[req.id]})
             for sc in RiskScenario.objects.filter(applied_controls__id=ac.id):
                 nodes.append(
                     {
@@ -1457,11 +1445,9 @@ class AppliedControlViewSet(BaseModelViewSet):
                     )
                     indexes[ra.id] = idx_cnt
                     idx_cnt += 1
-                links.append(
-                    {"source": indexes[ra.id], "target": indexes[sc.id]})
+                links.append({"source": indexes[ra.id], "target": indexes[sc.id]})
 
-                links.append(
-                    {"source": indexes[ac.id], "target": indexes[sc.id]})
+                links.append({"source": indexes[ac.id], "target": indexes[sc.id]})
 
         return Response({"nodes": nodes, "categories": categories, "links": links})
 
@@ -1478,8 +1464,7 @@ class PolicyViewSet(AppliedControlViewSet):
         "requirement_assessments",
         "evidences",
     ]
-    search_fields = ["name", "description",
-                     "risk_scenarios", "requirement_assessments"]
+    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
@@ -1895,8 +1880,7 @@ class FolderViewSet(BaseModelViewSet):
             .filter(id__in=viewable_objects, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
-            entry = {"name": folder.name,
-                     "children": get_folder_content(folder)}
+            entry = {"name": folder.name, "children": get_folder_content(folder)}
             folders_list.append(entry)
         tree.update({"children": folders_list})
 
@@ -1943,8 +1927,7 @@ class FolderViewSet(BaseModelViewSet):
             .distinct()
         )
         non_active_controls = controls.exclude(status="active")
-        risk_scenarios = RiskScenario.objects.filter(
-            owner=request.user).distinct()
+        risk_scenarios = RiskScenario.objects.filter(owner=request.user).distinct()
         controls_progress = 0
         evidences_progress = 0
         tot_ac = controls.count()
@@ -1958,15 +1941,12 @@ class FolderViewSet(BaseModelViewSet):
 
             evidences_progress = int((with_evidences / tot_ac) * 100)
 
-        RA_serializer = RiskAssessmentReadSerializer(
-            risk_assessments[:10], many=True)
-        CA_serializer = ComplianceAssessmentReadSerializer(
-            audits[:6], many=True)
+        RA_serializer = RiskAssessmentReadSerializer(risk_assessments[:10], many=True)
+        CA_serializer = ComplianceAssessmentReadSerializer(audits[:6], many=True)
         AC_serializer = AppliedControlReadSerializer(
             non_active_controls[:10], many=True
         )
-        RS_serializer = RiskScenarioReadSerializer(
-            risk_scenarios[:10], many=True)
+        RS_serializer = RiskScenarioReadSerializer(risk_scenarios[:10], many=True)
 
         return Response(
             {
@@ -2040,8 +2020,7 @@ def get_agg_data(request):
         Folder.get_root_folder(), request.user, RiskAssessment
     )[0]
     data = risk_status(
-        request.user, RiskAssessment.objects.filter(
-            id__in=viewable_risk_assessments)
+        request.user, RiskAssessment.objects.filter(id__in=viewable_risk_assessments)
     )
 
     return Response({"results": data})
@@ -2095,8 +2074,7 @@ def get_composer_data(request):
 
     data = compile_risk_assessment_for_composer(request.user, risk_assessments)
     for _data in data["risk_assessment_objects"]:
-        quality_check = serialize_nested(
-            _data["risk_assessment"].quality_check())
+        quality_check = serialize_nested(_data["risk_assessment"].quality_check())
         _data["risk_assessment"] = RiskAssessmentReadSerializer(
             _data["risk_assessment"]
         ).data
@@ -2167,8 +2145,7 @@ class FrameworkViewSet(BaseModelViewSet):
         used_frameworks = _used_frameworks.values("id", "name")
         for i in range(len(used_frameworks)):
             used_frameworks[i]["compliance_assessments_count"] = (
-                ComplianceAssessment.objects.filter(
-                    framework=_used_frameworks[i].id)
+                ComplianceAssessment.objects.filter(framework=_used_frameworks[i].id)
                 .filter(id__in=viewable_assessments)
                 .count()
             )
@@ -2178,11 +2155,9 @@ class FrameworkViewSet(BaseModelViewSet):
     def mappings(self, request, pk):
         framework = self.get_object()
         available_target_frameworks_objects = [framework]
-        mappings = RequirementMappingSet.objects.filter(
-            source_framework=framework)
+        mappings = RequirementMappingSet.objects.filter(source_framework=framework)
         for mapping in mappings:
-            available_target_frameworks_objects.append(
-                mapping.target_framework)
+            available_target_frameworks_objects.append(mapping.target_framework)
         available_target_frameworks = FrameworkReadSerializer(
             available_target_frameworks_objects, many=True
         ).data
@@ -2221,8 +2196,7 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = ["folder", "applied_controls",
-                        "requirement_assessments", "name"]
+    filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
     search_fields = ["name"]
     ordering_fields = ["name", "description"]
 
@@ -2656,16 +2630,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         with tempfile.NamedTemporaryFile(delete=True) as tmp:
                             # Download the attachment to the temporary file
                             if default_storage.exists(evidence.attachment.name):
-                                file = default_storage.open(
-                                    evidence.attachment.name)
+                                file = default_storage.open(evidence.attachment.name)
                                 tmp.write(file.read())
                                 tmp.flush()
                                 zipf.write(
                                     tmp.name,
                                     os.path.join(
                                         "evidences",
-                                        os.path.basename(
-                                            evidence.attachment.name),
+                                        os.path.basename(evidence.attachment.name),
                                     ),
                                 )
                 zipf.writestr("index.html", index_content)
@@ -2786,8 +2758,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             for key in ["created_at","updated_at","eta"] :
                 measures[i][key] = str(measures[i][key])"""
 
-        ranking_scores = {str(mtg.id): mtg.get_ranking_score()
-                          for mtg in measures}
+        ranking_scores = {str(mtg.id): mtg.get_ranking_score() for mtg in measures}
 
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
@@ -2844,8 +2815,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
         mapping_set_id = pk
-        mapping_set = get_object_or_404(
-            RequirementMappingSet, id=mapping_set_id)
+        mapping_set = get_object_or_404(RequirementMappingSet, id=mapping_set_id)
 
         nodes = []
         links = []
@@ -2885,8 +2855,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             )
             tnodes_idx[req.ref_id] = N
             N += 1
-        req_mappings = RequirementMapping.objects.filter(
-            mapping_set=mapping_set_id)
+        req_mappings = RequirementMapping.objects.filter(mapping_set=mapping_set_id)
         for item in req_mappings:
             if (
                 item.source_requirement.assessable
@@ -2984,10 +2953,8 @@ def generate_html(
     graph = filter_graph_by_implementation_groups(graph, implementation_groups)
     flattened_graph = flatten_dict(graph)
 
-    requirement_nodes = requirement_nodes.filter(
-        urn__in=flattened_graph.values())
-    assessments = assessments.filter(
-        requirement__urn__in=flattened_graph.values())
+    requirement_nodes = requirement_nodes.filter(urn__in=flattened_graph.values())
+    assessments = assessments.filter(requirement__urn__in=flattened_graph.values())
 
     node_per_urn = {r.urn: r for r in requirement_nodes}
     ancestors = {}
@@ -3029,10 +2996,8 @@ def generate_html(
                 node_data["assessments"] = assessment
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
-                node_data["result_color_class"] = color_css_class(
-                    assessment.result)
-                node_data["status_color_class"] = color_css_class(
-                    assessment.status)
+                node_data["result_color_class"] = color_css_class(assessment.result)
+                node_data["status_color_class"] = color_css_class(assessment.status)
                 direct_evidences = assessment.evidences.all()
                 if direct_evidences:
                     selected_evidences += direct_evidences

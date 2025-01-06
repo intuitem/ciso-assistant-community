@@ -80,16 +80,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         step = int(step)
         # NOTE: For now, just set it as done. Will allow undoing this later.
         ebios_rm_study.update_workshop_step_status(
-            workshop, step, new_status=request.data.get(
-                "status", "in_progress")
+            workshop, step, new_status=request.data.get("status", "in_progress")
         )
         return Response(EbiosRMStudyReadSerializer(ebios_rm_study).data)
 
     @action(detail=True, name="Get ecosystem radar chart data")
     def ecosystem_chart_data(self, request, pk):
         return Response(
-            ecosystem_radar_chart_data(
-                Stakeholder.objects.filter(ebios_rm_study=pk))
+            ecosystem_radar_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
         )
 
 
@@ -185,8 +183,7 @@ class AttackPathFilter(df.FilterSet):
 
     class Meta:
         model = AttackPath
-        fields = ["ebios_rm_study", "is_selected",
-                  "used", "strategic_scenario"]
+        fields = ["ebios_rm_study", "is_selected", "used", "strategic_scenario"]
 
 
 class AttackPathViewSet(BaseModelViewSet):
