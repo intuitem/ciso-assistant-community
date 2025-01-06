@@ -563,7 +563,13 @@ class VulnerabilityViewSet(BaseModelViewSet):
     """
 
     model = Vulnerability
-    filterset_fields = ["folder", "status", "severity", "risk_scenarios"]
+    filterset_fields = [
+        "folder",
+        "status",
+        "severity",
+        "risk_scenarios",
+        "applied_controls",
+    ]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -2698,7 +2704,12 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
-    filterset_fields = ["folder", "evidences", "compliance_assessment"]
+    filterset_fields = [
+        "folder",
+        "evidences",
+        "compliance_assessment",
+        "applied_controls",
+    ]
     search_fields = ["name", "description"]
 
     def update(self, request, *args, **kwargs):

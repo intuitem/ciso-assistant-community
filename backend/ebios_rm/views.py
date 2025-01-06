@@ -154,10 +154,7 @@ class RoToViewSet(BaseModelViewSet):
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
 
-    filterset_fields = [
-        "ebios_rm_study",
-        "is_selected",
-    ]
+    filterset_fields = ["ebios_rm_study", "is_selected", "applied_controls"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
