@@ -8,6 +8,7 @@
 	} from '$lib/utils/crud';
 	import { stringify } from '$lib/utils/helpers';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
+	import { toCamelCase } from '$lib/utils/locales.js';
 	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
@@ -223,10 +224,10 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const popupFilter: PopupSettings = {
-		event: 'click',
+		event: 'focus-click',
 		target: 'popupFilter',
 		placement: 'bottom-start',
-		closeQuery: 'a[href]'
+		closeQuery: 'li'
 	};
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
@@ -345,9 +346,17 @@
 										{:else if value && value.str}
 											{#if value.id}
 												{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-												<Anchor href={itemHref} class="anchor" stopPropagation
-													>{value.str ?? '-'}</Anchor
-												>
+												{#if key === 'ro_to_couple'}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+															'-'
+														)[1]}</Anchor
+													>
+												{:else}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{value.str}</Anchor
+													>
+												{/if}
 											{:else}
 												{value.str ?? '-'}
 											{/if}

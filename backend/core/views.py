@@ -382,6 +382,18 @@ class AssetViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "business_value"]
 
+    def _perform_write(self, serializer):
+        type = serializer.validated_data.get("type")
+        if type == Asset.Type.PRIMARY:
+            serializer.validated_data["parent_assets"] = []
+        serializer.save()
+
+    def perform_create(self, serializer):
+        return self._perform_write(serializer)
+
+    def perform_update(self, serializer):
+        return self._perform_write(serializer)
+
     @action(detail=False, name="Get type choices")
     def type(self, request):
         return Response(dict(Asset.Type.choices))
@@ -551,7 +563,13 @@ class VulnerabilityViewSet(BaseModelViewSet):
     """
 
     model = Vulnerability
-    filterset_fields = ["folder", "status", "severity", "risk_scenarios"]
+    filterset_fields = [
+        "folder",
+        "status",
+        "severity",
+        "risk_scenarios",
+        "applied_controls",
+    ]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -2686,7 +2704,12 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
-    filterset_fields = ["folder", "evidences", "compliance_assessment"]
+    filterset_fields = [
+        "folder",
+        "evidences",
+        "compliance_assessment",
+        "applied_controls",
+    ]
     search_fields = ["name", "description"]
 
     def update(self, request, *args, **kwargs):

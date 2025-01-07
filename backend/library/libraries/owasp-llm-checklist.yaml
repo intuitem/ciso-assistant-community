@@ -1,0 +1,773 @@
+urn: urn:intuitem:risk:library:owasp-llm-checklist
+locale: en
+ref_id: owasp-llm-checklist
+name: LLM AI Cybersecurity & Governance Checklist
+description: This checklist is intended to help technology and business leaders quickly
+  understand the risks and bene ts of using LLM, allowing them to focus on developing
+  a comprehensive list of critical areas and tasks needed to defend and protect the
+  organization as they develop a Large Language Model strategy.
+copyright: OWASP - Creative Commons Attribution-ShareAlike 4.0
+version: 1
+provider: OWASP
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:owasp-llm-checklist
+    ref_id: owasp-llm-checklist
+    name: LLM AI Cybersecurity & Governance Checklist
+    description: This checklist is intended to help technology and business leaders
+      quickly understand the risks and bene ts of using LLM, allowing them to focus
+      on developing a comprehensive list of critical areas and tasks needed to defend
+      and protect the organization as they develop a Large Language Model strategy.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Adversarial Risk
+      description: Adversarial Risk includes competitors and attackers.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:1
+      ref_id: '1.1'
+      description: 'Scrutinize how competitors are investing in artificial intelligence.
+        Although there are risks in AI
+
+        adoption, there are also business benefits that may impact future market positions.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:1
+      ref_id: '1.2'
+      description: 'Investigate the impact of current controls, such as password resets,
+        which use voice
+
+        recognition which may no longer provide the appropriate defensive security
+        from new GenAI
+
+        enhanced attacks.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:1
+      ref_id: '1.3'
+      description: 'Update the Incident Response Plan and playbooks for GenAI enhanced
+        attacks and AIML
+
+        specific incidents.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Threat Modeling
+      description: 'Threat modeling is highly recommended to identify threats and
+        examine processes and security
+
+        defenses. Threat modeling is a set of systematic, repeatable processes that
+        enable making
+
+        reasonable security decisions for applications, software, and systems. Threat
+        modeling for GenAI
+
+        accelerated attacks and before deploying LLMs is the most cost effective way
+        to Identify and mitigate
+
+        risks, protect data, protect privacy, and ensure a secure, compliant integration
+        within the business.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2
+      ref_id: '2.1'
+      description: 'How will attackers accelerate exploit attacks against the organization,
+        employees, executives,
+
+        or users? Organizations should anticipate "hyper-personalized" attacks at
+        scale using
+
+        Generative AI. LLM-assisted Spear Phishing attacks are now exponentially more
+        effective,
+
+        targeted, and weaponized for an attack.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2
+      ref_id: '2.2'
+      description: How could GenAI be used for attacks on the business's customers
+        or clients through spoofing or GenAI generated content?
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2
+      ref_id: '2.3'
+      description: Can the business detect and neutralize harmful or malicious inputs
+        or queries to LLM solutions?
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2
+      ref_id: '2.4'
+      description: Can the business safeguard connections with existing systems and
+        databases with secure integrations at all LLM trust boundaries?
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2
+      ref_id: '2.5'
+      description: Does the business have insider threat mitigation to prevent misuse
+        by authorized users?
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2
+      ref_id: '2.6'
+      description: Can the business prevent unauthorized access to proprietary models
+        or data to protect Intellectual Property?
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:2
+      ref_id: '2.7'
+      description: Can the business prevent the generation of harmful or inappropriate
+        content with automated content filtering?
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: AI Asset Inventory
+      description: An AI asset inventory should apply to both internally developed
+        and external or third-party solutions.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3
+      ref_id: '3.1'
+      description: Catalog existing AI services, tools, and owners. Designate a tag
+        in asset management for specific inventory.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3
+      ref_id: '3.2'
+      description: Include AI components in the Software Bill of Material (SBOM),
+        a comprehensive list of all the software components, dependencies, and metadata
+        associated with applications.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3
+      ref_id: '3.3'
+      description: Catalog AI data sources and the sensitivity of the data (protected,
+        confidential, public)
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3
+      ref_id: '3.4'
+      description: Establish if pen testing or red teaming of deployed AI solutions
+        is required to determine the current attack surface risk.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3
+      ref_id: '3.5'
+      description: Create an AI solution onboarding process.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:3
+      ref_id: '3.6'
+      description: Ensure skilled IT admin staff is available either internally or
+        externally, following SBoM requirements.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: AI Security and Privacy Training
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4
+      ref_id: '4.1'
+      description: Actively engage with employees to understand and address concerns
+        with planned LLM initiatives.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4
+      ref_id: '4.2'
+      description: Establish a culture of open, and transparent communication on the
+        organization's use of predictive or generative AI within the organization
+        process, systems, employee management and support, and customer engagements
+        and how its use is governed, managed, and risks addressed.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4
+      ref_id: '4.3'
+      description: Train all users on ethics, responsibility, and legal issues such
+        as warranty, license, and copyright.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4
+      ref_id: '4.4'
+      description: Update security awareness training to include GenAI related threats.
+        Voice cloning and image cloning, as well as in anticipation of increased spear
+        phishing attacks
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:4
+      ref_id: '4.5'
+      description: Any adopted GenAI solutions should include training for both DevOps
+        and cybersecurity for the deployment pipeline to ensure AI safety and security
+        assurances.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:5
+      assessable: true
+      depth: 1
+      ref_id: '5'
+      name: Establish Business Cases
+      description: Solid business cases are essential to determining the business
+        value of any proposed AI solution, balancing risk and bene fits, and evaluating
+        and testing return on investment. There are an enormous number of potential
+        use cases; a few examples are provided.
+      annotation: '* Enhance customer experience
+
+        * Better knowledge management
+
+        * Better operational ef ficiency
+
+        * Enhanced innovation
+
+        * Document creation, translation, summarization, and analysis
+
+        * Market Research and Competitor Analysis'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Governance
+      description: Corporate governance in LLM is needed to provide organizations
+        with transparency and accountability. Identifying AI platform or process owners
+        who are potentially familiar with the technology or the selected use cases
+        for the business is not only advised but also necessary to ensure adequate
+        reaction speed that prevents collateral damages to well established enterprise
+        digital processes.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6
+      ref_id: '6.1'
+      description: Establish the organization's AI RACI chart (who is responsible,
+        who is accountable, who should be consulted, and who should be informed)
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6
+      ref_id: '6.2'
+      description: Document and assign AI risk, risk assessments, and governance responsibility
+        within the organization.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6
+      ref_id: '6.3'
+      description: Establish data management policies, including technical enforcement,
+        regarding data classification and usage limitations. Models should only leverage
+        data classified for the minimum access level of any user of the system. For
+        example, update the data protection policy to emphasize not to input protected
+        or confidential data into non business-managed tools.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6
+      ref_id: '6.4'
+      description: Create an AI Policy supported by established policy (e.g., standard
+        of good conduct, data protection, software use)
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6
+      ref_id: '6.5'
+      description: Publish an acceptable use matrix for various generative AI tools
+        for employees to use.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:6
+      ref_id: '6.6'
+      description: Document the sources and management of any data that the organization
+        uses from the generative LLM models.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Legal
+      description: Many of the legal implications of AI are unde fined and potentially
+        very costly. An IT, security, and legal partnership is critical to identifying
+        gaps and addressing obscure decisions.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.1'
+      description: Confirm product warranties are clear in the product development
+        stream to assign who is responsible for product warranties with AI.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.2'
+      description: Review and update existing terms and conditions for any GenAI considerations.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.3'
+      description: Review AI EULA agreements. End-user license agreements for GenAI
+        platforms are very different in how they handle user prompts, output rights
+        and ownership, data privacy, compliance, liability, privacy, and limits on
+        how output can be used.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.4'
+      description: Organizations EULA for customers, Modify end-user agreements to
+        prevent the organization from incurring liabilities related to plagiarism,
+        bias propagation, or intellectual property infringement through AI-generated
+        content.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.5'
+      description: Review existing AI-assisted tools used for code development. A
+        chatbot's ability to write code can threaten a company's ownership rights
+        to its product if a chatbot is used to generate code for the product. For
+        example, it could call into question the status and protection of the generated
+        content and who holds the right to use the generated content.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.6'
+      description: Review any risks to intellectual property. Intellectual property
+        generated by a chatbot could be in jeopardy if improperly obtained data was
+        used during the generative process, which is subject to copyright, trademark,
+        or patent protection. If AI products use infringing material, it creates a
+        risk for the outputs of the AI, which may result in intellectual property
+        infringement.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.7'
+      description: Review any contracts with indemni fication provisions. Indemni
+        fication clauses try to put the responsibility for an event that leads to
+        liability on the person who was more at fault for it or who had the best chance
+        of stopping it. Establish guardrails to determine whether the provider of
+        the AI or its user caused the event, giving rise to liability.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.8'
+      description: Review liability for potential injury and property damage caused
+        by AI systems.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.9'
+      description: Review insurance coverage. Traditional (D&O) liability and commercial
+        general liability insurance policies are likely insufficient to fully protect
+        AI use.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.10'
+      description: Identify any copyright issues. Human authorship is required for
+        copyright. An organization may also be liable for plagiarism, propagation
+        of bias, or intellectual property infringement if LLM tools are misused.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.11'
+      description: Ensure agreements are in place for contractors and appropriate
+        use of AI for any development or provided services.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.12'
+      description: Restrict or prohibit the use of generative AI tools for employees
+        or contractors where enforceable rights may be an issue or where there are
+        IP infringement concerns.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.13'
+      description: Assess and AI solutions used for employee management or hiring
+        could result in disparate treatment claims or disparate impact claims.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:7
+      ref_id: '7.14'
+      description: Make sure the AI solutions do not collect or share sensitive information
+        without proper consent or authorization.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Regulatory
+      description: "The EU AI Act is anticipated to be the first comprehensive AI\
+        \ law but will apply in  2025 at the earliest. The EU\u2019s General Data\
+        \ Protection Regulation (GDPR) does not speci cally address AI but includes\
+        \ rules for data collection, data security, fairness and transparency, accuracy\
+        \ and reliability, and accountability, which can impact GenAI use. In the\
+        \ United States, AI regulation is included within broader consumer privacy\
+        \ laws. Ten US states have passed laws or have laws that will go into effect\
+        \ by the end of  2023. Canada has so far only published a Voluntary Code of\
+        \ Conduct on the Responsible Development and Management of Advanced Generative\
+        \ AI Systems, however, the Artificial Intelligence and Data Act (AIDA) will\
+        \ have stronger requirements. Federal organizations such as the US Equal Employment\
+        \ Opportunity Commission (EEOC), the Consumer Financial Protection Bureau\
+        \ (CFPB), the Federal Trade Commission (FTC), and the US Department of Justice's\
+        \ Civil Rights Division (DOJ) are closely monitoring hiring fairness."
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.1'
+      description: ' Determine Country, State, or other Government specific AI compliance
+        requirements.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.2'
+      description: ' Determine compliance requirements for restricting electronic
+        monitoring of employees and employment-related automated decision systems
+        (Vermont, California, Maryland, New York, New Jersey)'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.3'
+      description: ' Determine compliance requirements for consent for facial recognition
+        and the AI video analysis required (Illinois, Maryland, Washington, Vermont)'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.4'
+      description: ' Confirm the vendor''s compliance with applicable AI laws and
+        best practices.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.5'
+      description: ' Review any AI tools in use or being considered for employee hiring
+        or management.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.6'
+      description: ' Ask and document any products using AI during the hiring process.
+        Ask how the model was trained, and how it is monitored, and track any corrections
+        made to avoid discrimination and bias.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.7'
+      description: ' Ask and document what accommodation options are included.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.8'
+      description: ' Ask how the vendor or tool stores and deletes data and regulates
+        the use of facial recognition and video analysis tools during pre-employment.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.9'
+      description: ' Ask and document whether the vendor collects confidential data.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:8
+      ref_id: '8.10'
+      description: ' Review other organization-specific regulatory requirements with
+        AI that may raise compliance issues. The Employee Retirement Income Security
+        Act of 1974, for instance, has fiduciary duty requirements for retirement
+        plans that a chatbot might not be able to meet.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Using or Implementing Large Language Model Solutions
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.1'
+      description: Threat Model LLM components and architecture trust boundaries.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.2'
+      description: Data Security, verify how data is classi fied and protected based
+        on sensitivity, including personal and proprietary business data. (How are
+        user permissions managed, and what safeguards are in place?)
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.3'
+      description: Access Control, implement least privilege access controls and implement
+        defense-in-depth measures
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.4'
+      description: Training Pipeline Security, require rigorous control around training
+        data governance, pipelines, models, and algorithms.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.5'
+      description: Input and Output Security, evaluate input validation methods, as
+        well as how outputs are filtered, sanitized, and approved.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.6'
+      description: Monitoring and Response, map workflows, monitoring, and responses
+        to understand automation, logging, and auditing. Con firm audit records are
+        secure.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.7'
+      description: Include application testing, source code review, vulnerability
+        assessments, and red teaming in the production release process.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.8'
+      description: Check for existing vulnerabilities in the LLM model or supply chain.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.9'
+      description: Look into the effects of threats and attacks on LLM solutions,
+        such as prompt injection, the release of sensitive information, and process
+        manipulation.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.10'
+      description: Investigate the impact of attacks and threats to LLM models, including
+        model poisoning, improper data handling, supply chain attacks, and model theft.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.11'
+      description: Supply Chain Security, request third-party audits, penetration
+        testing, and code reviews for third-party providers. (both initially and on
+        an ongoing basis)
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.12'
+      description: Infrastructure Security, ask how often a vendor performs resilience
+        testing? What are their SLAs in terms of availability, scalability, and performance?
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.13'
+      description: Update incident response playbooks and include an LLM incident
+        in tabletop exercises.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:9
+      ref_id: '9.14'
+      description: Identify or expand metrics to benchmark generative cybersecurity
+        AI against other approaches to measure expected productivity improvements.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Testing, Evaluation, Veri fication, and Validation (TEVV)
+      description: NIST AI Framework recommends a continuous TEVV process throughout
+        the AI lifecycle which includes the AI system operators, domain experts, AI
+        designers, users, product developers, evaluators, and auditors. TEVV includes
+        a range of tasks such as system validation, integration, testing, recalibration,
+        and ongoing monitoring for periodic updates to navigate the risks and changes
+        of the AI system.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:10
+      ref_id: '10.1'
+      description: Establish continuous testing, evaluation, verification, and validation
+        throughout the AI model lifecycle.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:10
+      ref_id: '10.2'
+      description: Provide regular executive metrics and updates on AI Model functionality,
+        security, reliability, and robustness.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: Model Cards and Risk Cards
+      description: Model cards and risk cards are foundational elements for increasing
+        the transparency, accountability, and ethical deployment of Large Language
+        Models (LLMs). Model cards help users understand and trust AI systems by providing
+        standardized documentation on their design, capabilities, and constraints,
+        leading them to make educated and safe applications. Risk cards supplement
+        this by openly addressing potential negative consequences, such as biases,
+        privacy problems, and security vulnerabilities, which encourages a proactive
+        approach to harm prevention. These documents are critical for developers,
+        users, regulators, and ethicists equally since they establish a collaborative
+        atmosphere in which AI's social implications are carefully addressed and handled.
+        These cards, developed and maintained by the organizations that created the
+        models, play an important role in ensuring that AI technologies ful fill ethical
+        standards and legal requirements, allowing for responsible research and deployment
+        in the AI ecosystem.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.1'
+      description: 'Model details : Basic information about the model, i.e., name,
+        version, and type ( neural network, decision tree, etc.), and the intended
+        use case.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.2'
+      description: 'Model architecture : Includes a description of the structure of
+        the model, such as the number and type of layers, activation functions, and
+        other key architectural choices.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.3'
+      description: 'Training data and methodology : Information about the data used
+        to train the model, such as the size of the dataset, the data sources, and
+        any preprocessing or data augmentation techniques used. It also includes details
+        about the training methodology, such as the optimizer used, the loss function,
+        and any hyperparameters that were tuned.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.4'
+      description: 'Performance metrics : Information about the model''s performance
+        on various metrics, such as accuracy, precision, recall, and F /one.pnum score.
+        It may also include information about how the model performs on different
+        subsets of the data.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.5'
+      description: 'Potential biases and limitations : Lists potential biases or limitations
+        of the model, such as imbalanced training data, over fitting, or biases in
+        the model''s predictions. It may also include information about the model''s
+        limitations, such as its ability to generalize to new data or its suitability
+        for certain use cases.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.6'
+      description: 'Responsible AI considerations : Any ethical or responsible AI
+        considerations related to the model, such as privacy concerns, fairness, and
+        transparency, or potential societal impacts of the model''s use. It may also
+        include recommendations for further testing, validation, or monitoring of
+        the model.'
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.7'
+      description: Review a model's model card
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.8'
+      description: Review risk card if available
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:11
+      ref_id: '11.9'
+      description: Establish a process to track and maintain model cards for any deployed
+        model including models used through a third party.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:12
+      assessable: true
+      depth: 1
+      ref_id: '12'
+      name: 'RAG: Large Language Model Optimization'
+      description: Retrieval-Augmented Generation RAG has evolved as a more effective
+        way of optimizing and augmenting the capabilities of large language models
+        by retrieving pertinent data from up to date available knowledge sources.
+        RAG can be customized for speci fic domains, optimizing the retrieval of domain-speci
+        fic information and tailoring the generation process to the nuances of specialized
+        fields. RAG is seen as a more ef ficient and transparent method for LLM optimization,
+        particularly for problems where labeled data is limited or expensive to collect.
+        One of the primary advantages of RAG is its support for continuous learning
+        since new information can be continually updated at the retrieval stage.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: AI Red Teaming
+      description: AI Red Teaming is an adversarial attack test simulation of the
+        AI System to validate there aren't any existing vulnerabilities which can
+        be exploited by an attacker. It is a recommended practice by many regulatory
+        and AI governing bodies including the Biden administration. Red-teaming alone
+        is not a comprehensive solution to validate all real-world harms associated
+        with AI systems and should be included with other forms of testing, evaluation,
+        veri fication, and validation such as algorithmic impact assessments and external
+        audits.
+    - urn: urn:intuitem:risk:req_node:owasp-llm-checklist:13.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-llm-checklist:13
+      ref_id: '13.1'
+      description: Incorporate Red Team testing as a standard practice for AI Models
+        and applications.

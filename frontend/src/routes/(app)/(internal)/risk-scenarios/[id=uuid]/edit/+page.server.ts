@@ -2,16 +2,17 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
-import type { StrengthOfKnowledgeEntry, urlModel } from '$lib/utils/types';
+import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
-import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import { zod } from 'sveltekit-superforms/adapters';
 import { defaultWriteFormAction } from '$lib/utils/actions';
+import { safeTranslate } from '$lib/utils/i18n';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'risk-scenarios';
@@ -223,12 +224,15 @@ export const actions: Actions = {
 		const res = await event.fetch(endpoint, requestInitOptions);
 
 		if (!res.ok) {
-			const response = await res.json();
+			const response: Record<string, any> = await res.json();
 			console.error('server response:', response);
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}
-			return fail(400, { form: form });
+			Object.entries(response).forEach(([key, value]) => {
+				setError(form, key, safeTranslate(value));
+			});
+			return fail(400, { form });
 		}
 
 		const measure = await res.json();
@@ -252,7 +256,7 @@ export const actions: Actions = {
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}
-			return fail(400, { form: form });
+			return fail(400, { form });
 		}
 		setFlash(
 			{
