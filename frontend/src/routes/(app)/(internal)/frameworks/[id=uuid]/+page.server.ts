@@ -9,5 +9,5 @@ export const load = (async ({ fetch, params }) => {
 		fetch(endpoint).then((res) => res.json()),
 		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree`).then((res) => res.json())
 	]);
-	return { URLModel, framework, tree };
+	return { URLModel, framework, tree, title: framework.name };
 }) satisfies PageServerLoad;
