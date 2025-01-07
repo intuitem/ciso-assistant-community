@@ -17,16 +17,19 @@
 			showProgress: true,
 			steps: [
 				{
-					element: '#overview',
-					popover: { title: "Let's start!", description: 'Click here to see the subsections' }
-				},
-				{
-					element: '#myAssignments',
-					popover: { title: 'Your assignments', description: 'Description' }
+					element: 'none',
+					popover: {
+						title: 'Welcome !',
+						description:
+							'The quick guided tour will help setup the main parts to get started with CISO Assistant.'
+					}
 				},
 				{
 					element: '#organization',
-					popover: { title: 'Title', description: 'Click here to see the subsections' }
+					popover: {
+						title: 'Click to unfold',
+						description: 'This section will help you define the scopes of your work.'
+					}
 				},
 				{
 					element: '#domains',
@@ -43,10 +46,22 @@
 					}
 				},
 				{
+					element: 'none',
+					popover: {
+						title: 'The catalog',
+						description:
+							'The library of CISO Assistant is quite comprehensive and contain multiple objects: frameworks, threats, matrices.'
+					}
+				},
+				{
 					element: '#catalog',
-					popover: { title: 'Click to open', description: 'Description' }
+					popover: { title: 'Click to unfold' }
 				},
 				{ element: '#frameworks', popover: { title: 'Title', description: 'Description' } },
+				{
+					element: '#add-button',
+					popover: { title: 'Click to import one', description: 'Description' }
+				},
 				{
 					element: '#riskMatrices',
 					popover: {
