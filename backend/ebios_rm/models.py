@@ -263,8 +263,9 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
-    def get_gravity_display(self):
-        if self.gravity < 0:
+    @staticmethod
+    def format_gravity(gravity: int, parsed_matrix: dict):
+        if gravity < 0:
             return {
                 "abbreviation": "--",
                 "name": "--",
@@ -272,13 +273,16 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
                 "value": -1,
                 "hexcolor": "#f9fafb",
             }
-        risk_matrix = self.parsed_matrix
-        if not risk_matrix["impact"][self.gravity].get("hexcolor"):
-            risk_matrix["impact"][self.gravity]["hexcolor"] = "#f9fafb"
+        risk_matrix = parsed_matrix
+        if not risk_matrix["impact"][gravity].get("hexcolor"):
+            risk_matrix["impact"][gravity]["hexcolor"] = "#f9fafb"
         return {
-            **risk_matrix["impact"][self.gravity],
-            "value": self.gravity,
+            **risk_matrix["impact"][gravity],
+            "value": gravity,
         }
+
+    def get_gravity_display(self):
+        return FearedEvent.format_gravity(self.gravity, self.parsed_matrix)
 
 
 class RoTo(AbstractBaseModel, FolderMixin):
@@ -556,19 +560,9 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         super().save(*args, **kwargs)
 
     def get_gravity_display(self):
-        if self.ro_to_couple.get_gravity() < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-                "hexcolor": "#f9fafb",
-            }
-        risk_matrix = self.ebios_rm_study.parsed_matrix
-        return {
-            **risk_matrix["impact"][self.ro_to_couple.get_gravity()],
-            "value": self.ro_to_couple.get_gravity(),
-        }
+        return FearedEvent.format_gravity(
+            self.ro_to_couple.get_gravity(), self.ebios_rm_study.parsed_matrix
+        )
 
 
 class AttackPath(NameDescriptionMixin, FolderMixin):
@@ -704,8 +698,9 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def get_applied_controls(self):
         return AppliedControl.objects.filter(stakeholders__in=self.stakeholders.all())
 
-    def get_likelihood_display(self):
-        if self.likelihood < 0:
+    @staticmethod
+    def format_likelihood(likelihood: int, parsed_matrix: dict):
+        if likelihood < 0:
             return {
                 "abbreviation": "--",
                 "name": "--",
@@ -713,26 +708,23 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
                 "value": -1,
                 "hexcolor": "#f9fafb",
             }
-        risk_matrix = self.parsed_matrix
+        risk_matrix = parsed_matrix
+        if not risk_matrix["probability"][likelihood].get("hexcolor"):
+            risk_matrix["probability"][likelihood]["hexcolor"] = "#f9fafb"
         return {
-            **risk_matrix["probability"][self.likelihood],
-            "value": self.likelihood,
+            **risk_matrix["probability"][likelihood],
+            "value": likelihood,
         }
 
+    def get_likelihood_display(self):
+        return OperationalScenario.format_likelihood(
+            self.likelihood, self.parsed_matrix
+        )
+
     def get_gravity_display(self):
-        if self.gravity < 0:
-            return {
-                "abbreviation": "--",
-                "name": "--",
-                "description": "not rated",
-                "value": -1,
-                "hexcolor": "#f9fafb",
-            }
-        risk_matrix = self.parsed_matrix
-        return {
-            **risk_matrix["impact"][self.gravity],
-            "value": self.gravity,
-        }
+        return FearedEvent.format_gravity(
+            self.gravity, self.ebios_rm_study.parsed_matrix
+        )
 
     def get_risk_level_display(self):
         if self.likelihood < 0 or self.gravity < 0:
