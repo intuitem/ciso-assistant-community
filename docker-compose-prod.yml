@@ -6,25 +6,9 @@ services:
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
-      - DJANGO_DEBUG=True
       - AUTH_TOKEN_TTL=7200
     volumes:
       - ./db:/code/db
-
-  # huey:
-  #   container_name: huey
-  #   image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
-  #   restart: always
-  #   environment:
-  #     - ALLOWED_HOSTS=backend,localhost
-  #     - DJANGO_DEBUG=False
-  #   volumes:
-  #     - ./db:/code/db
-  #   entrypoint:
-  #     - /bin/sh
-  #     - -c
-  #     - |
-  #       poetry run python manage.py run_huey
 
   frontend:
     container_name: frontend
@@ -52,8 +36,6 @@ services:
       - ./caddy_data:/data
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
-      reverse_proxy /api/iam/sso/redirect/ backend:8000
-      reverse_proxy /api/accounts/saml/0/acs/ backend:8000
-      reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
+      reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
       }" > Caddyfile && caddy run'
