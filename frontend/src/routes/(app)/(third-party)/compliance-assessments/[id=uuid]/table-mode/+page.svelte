@@ -196,10 +196,17 @@
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div
-		class="card px-6 py-4 bg-white flex flex-col justify-between shadow-lg w-full h-full space-y-2"
+		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
 		{#if !(questionnaireOnly ? !assessmentOnly : assessmentOnly)}
-			<div class="sticky top-0 p-2 z-10 card bg-white">
+			<div class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full">
+				<a
+					href="/compliance-assessments/{data.compliance_assessment.id}"
+					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+				>
+					<i class="fa-solid fa-arrow-left" />
+					<p class="">{m.goBackToAudit()} {data.compliance_assessment.name}</p>
+				</a>
 				<div class="flex items-center justify-center space-x-4">
 					{#if questionnaireMode}
 						<p class="font-bold text-sm">{m.assessmentMode()}</p>
@@ -361,19 +368,19 @@
 								{/each}
 							</div>
 						{/if}
-						<Score
-							form={superForm(requirementAssessment.scoreForm)}
-							min_score={data.compliance_assessment.min_score}
-							max_score={data.compliance_assessment.max_score}
-							scores_definition={data.compliance_assessment.scores_definition}
-							field="score"
-							label="Score"
-							styles="self-start w-full"
-							bind:score={requirementAssessment.score}
-							bind:is_scored={requirementAssessment.is_scored}
-							on:change={() => updateScore(requirementAssessment)}
-						/>
 						<div class="flex flex-col w-full place-items-center">
+							<Score
+								form={superForm(requirementAssessment.scoreForm)}
+								min_score={data.compliance_assessment.min_score}
+								max_score={data.compliance_assessment.max_score}
+								scores_definition={data.compliance_assessment.scores_definition}
+								field="score"
+								label=""
+								styles="w-full p-1"
+								bind:score={requirementAssessment.score}
+								bind:is_scored={requirementAssessment.is_scored}
+								on:change={() => updateScore(requirementAssessment)}
+							/>
 							<Accordion regionCaret="flex">
 								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
 									<svelte:fragment slot="summary"
