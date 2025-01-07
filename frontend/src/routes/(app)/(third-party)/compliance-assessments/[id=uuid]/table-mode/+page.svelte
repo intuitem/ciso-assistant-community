@@ -368,7 +368,7 @@
 							scores_definition={data.compliance_assessment.scores_definition}
 							field="score"
 							label="Score"
-							styles="self-start"
+							styles="self-start w-full"
 							bind:score={requirementAssessment.score}
 							bind:is_scored={requirementAssessment.is_scored}
 							on:change={() => updateScore(requirementAssessment)}
