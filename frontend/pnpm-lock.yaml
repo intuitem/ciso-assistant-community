@@ -35,6 +35,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
+      driver.js:
+        specifier: ^1.3.1
+        version: 1.3.1
       echarts:
         specifier: ^5.5.1
         version: 5.5.1
@@ -2331,6 +2334,9 @@ packages:
   dotenv@16.4.7:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
+
+  driver.js@1.3.1:
+    resolution: {integrity: sha512-MvUdXbqSgEsgS/H9KyWb5Rxy0aE6BhOVT4cssi2x2XjmXea6qQfgdx32XKVLLSqTaIw7q/uxU5Xl3NV7+cN6FQ==}
 
   dunder-proto@1.0.0:
     resolution: {integrity: sha512-9+Sj30DIu+4KvHqMfLUGLFYL2PkURSYMVXJyXe92nFRvlYq5hBjLEhblKB+vkd/WVlUYMWigiY07T91Fkk0+4A==}
@@ -6639,6 +6645,8 @@ snapshots:
       domhandler: 4.3.1
 
   dotenv@16.4.7: {}
+
+  driver.js@1.3.1: {}
 
   dunder-proto@1.0.0:
     dependencies:

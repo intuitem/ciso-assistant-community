@@ -61,6 +61,7 @@
 							<button
 								class="inline-block border-e p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 								data-testid="add-button"
+								id="add-button"
 								title={safeTranslate('add-' + data.model.localName)}
 								on:click={modalCreateForm}
 								><i class="fa-solid fa-file-circle-plus"></i>

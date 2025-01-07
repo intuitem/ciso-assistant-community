@@ -3,10 +3,69 @@
 	import SideBarHeader from './SideBarHeader.svelte';
 	import SideBarNavigation from './SideBarNavigation.svelte';
 	import SideBarToggle from './SideBarToggle.svelte';
-
+	import { onMount } from 'svelte';
 	export let open: boolean;
 
 	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
+
+	import { driver } from 'driver.js';
+	import 'driver.js/dist/driver.css';
+
+	const driverObj = driver();
+	onMount(() => {
+		const driverObj = driver({
+			showProgress: true,
+			steps: [
+				{
+					element: '#overview',
+					popover: { title: "Let's start!", description: 'Click here to see the subsections' }
+				},
+				{
+					element: '#myAssignments',
+					popover: { title: 'Your assignments', description: 'Description' }
+				},
+				{
+					element: '#organization',
+					popover: { title: 'Title', description: 'Click here to see the subsections' }
+				},
+				{
+					element: '#domains',
+					popover: {
+						title: 'Click here',
+						description: 'You will need to create a first domain to get started'
+					}
+				},
+				{
+					element: '#add-button',
+					popover: {
+						title: 'Click here',
+						description: 'You will need to create a first domain to get started'
+					}
+				},
+				{
+					element: '#catalog',
+					popover: { title: 'Click to open', description: 'Description' }
+				},
+				{ element: '#frameworks', popover: { title: 'Title', description: 'Description' } },
+				{
+					element: '#riskMatrices',
+					popover: {
+						title: 'Title',
+						description: 'You need a framework and a matrix to get  started'
+					}
+				},
+				{ element: '#compliance', popover: { title: 'Title', description: 'Description' } },
+				{
+					element: '#complianceAssessments',
+					popover: { title: 'Title', description: 'Description' }
+				},
+				{ element: '#risk', popover: { title: 'Title', description: 'Description' } },
+				{ element: '#riskAssessments', popover: { title: 'Title', description: 'Description' } }
+			]
+		});
+
+		driverObj.drive();
+	});
 </script>
 
 <aside
