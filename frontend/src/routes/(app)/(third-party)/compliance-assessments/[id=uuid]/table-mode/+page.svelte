@@ -21,6 +21,8 @@
 	} from '@skeletonlabs/skeleton';
 	import type { Actions, PageData } from '../../table-mode/$types';
 	import { page } from '$app/stores';
+	import Score from '$lib/components/Forms/Score.svelte';
+	import { superForm } from 'sveltekit-superforms';
 
 	export let data: PageData;
 	export let form: Actions;
@@ -59,23 +61,40 @@
 		return requirement.display_short ? requirement.display_short : (requirement.name ?? '');
 	}
 
-	// Function to update requirement assessments
-	function update(requirementAssessment, field: string, value: string, question: string = '') {
-		if (question) {
-			const questionIndex = requirementAssessment.answer.questions.findIndex(
-				(q) => q.urn === question.urn
-			);
-			requirementAssessment.answer.questions[questionIndex].answer = value;
-			value = requirementAssessment.answer;
-		}
+	// Function to update requirement assessments, the data argument contain fields as keys and the associated values as values.
+	function updateBulk(
+		requirementAssessment,
+		data: { [key: string]: string | number | boolean | null }
+	) {
 		const form = document.getElementById(`tableModeForm-${requirementAssessment.id}`);
 		const formData = {
-			id: requirementAssessment.id,
-			[field]: value
+			...data,
+			id: requirementAssessment.id
 		};
 		fetch(form.action, {
 			method: 'POST',
 			body: JSON.stringify(formData)
+		});
+	}
+
+	// Function to update requirement assessments
+	function update(
+		requirementAssessment,
+		field: string,
+		question: {
+			urn: string;
+			answer: string;
+		} | null = null
+	) {
+		if (question) {
+			const questionIndex = requirementAssessment.answer.questions.findIndex(
+				(q) => q.urn === question.urn
+			);
+			requirementAssessment.answer.questions[questionIndex].answer = question.answer;
+		}
+		const value = question ? requirementAssessment.answer : requirementAssessment[field];
+		updateBulk(requirementAssessment, {
+			[field]: value
 		});
 	}
 
@@ -152,14 +171,44 @@
 			);
 		});
 	}
+
+	const requirementAssessmentScores = Object.fromEntries(
+		data.requirement_assessments.map((requirement) => {
+			return [requirement.id, [requirement.is_scored, requirement.score]];
+		})
+	);
+
+	function updateScore(requirementAssessment) {
+		const isScored = requirementAssessment.is_scored;
+		const score = requirementAssessment.score;
+		requirementAssessmentScores[requirementAssessment.id] = [isScored, score];
+		setTimeout(() => {
+			const currentScoreValue = requirementAssessmentScores[requirementAssessment.id];
+			if (isScored === currentScoreValue[0] && score === currentScoreValue[1]) {
+				updateBulk(requirementAssessment, {
+					is_scored: isScored,
+					score: score
+				});
+			}
+		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div
-		class="card px-6 py-4 bg-white flex flex-col justify-between shadow-lg w-full h-full space-y-2"
+		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
 		{#if !(questionnaireOnly ? !assessmentOnly : assessmentOnly)}
-			<div class="sticky top-0 p-2 z-10 card bg-white">
+			<div
+				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
+			>
+				<a
+					href="/compliance-assessments/{data.compliance_assessment.id}"
+					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+				>
+					<i class="fa-solid fa-arrow-left" />
+					<p class="">{m.goBackToAudit()} {data.compliance_assessment.name}</p>
+				</a>
 				<div class="flex items-center justify-center space-x-4">
 					{#if questionnaireMode}
 						<p class="font-bold text-sm">{m.assessmentMode()}</p>
@@ -231,7 +280,7 @@
 													const newStatus =
 														requirementAssessment.status === option.id ? 'to_do' : option.id;
 													requirementAssessment.status = newStatus;
-													update(requirementAssessment, 'status', newStatus);
+													update(requirementAssessment, 'status');
 												}}>{option.label}</RadioItem
 											>
 										{/each}
@@ -257,7 +306,7 @@
 													const newResult =
 														requirementAssessment.result === option.id ? 'not_assessed' : option.id;
 													requirementAssessment.result = newResult;
-													update(requirementAssessment, 'result', newResult); // Update result for both select and deselect
+													update(requirementAssessment, 'result'); // Update result for both select and deselect
 												}}
 												>{option.label}
 											</RadioItem>
@@ -292,7 +341,7 @@
 														on:click={() => {
 															const newAnswer = question.answer === option ? null : option;
 															question.answer = newAnswer;
-															update(requirementAssessment, 'answer', newAnswer, question);
+															update(requirementAssessment, 'answer', question);
 														}}
 														>{option}
 													</RadioItem>
@@ -304,8 +353,7 @@
 												placeholder=""
 												class="input w-fit"
 												bind:value={question.answer}
-												on:change={() =>
-													update(requirementAssessment, 'answer', question.answer, question)}
+												on:change={() => update(requirementAssessment, 'answer', question)}
 												{...$$restProps}
 											/>
 										{:else}
@@ -314,8 +362,7 @@
 												class="input w-full"
 												bind:value={question.answer}
 												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-												on:change={() =>
-													update(requirementAssessment, 'answer', question.answer, question)}
+												on:change={() => update(requirementAssessment, 'answer', question)}
 												{...$$restProps}
 											/>
 										{/if}
@@ -324,6 +371,18 @@
 							</div>
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
+							<Score
+								form={superForm(requirementAssessment.scoreForm)}
+								min_score={data.compliance_assessment.min_score}
+								max_score={data.compliance_assessment.max_score}
+								scores_definition={data.compliance_assessment.scores_definition}
+								field="score"
+								label=""
+								styles="w-full p-1"
+								bind:score={requirementAssessment.score}
+								bind:is_scored={requirementAssessment.is_scored}
+								on:change={() => updateScore(requirementAssessment)}
+							/>
 							<Accordion regionCaret="flex">
 								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
 									<svelte:fragment slot="summary"
@@ -348,11 +407,7 @@
 													<button
 														class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
 														on:click={() => {
-															update(
-																requirementAssessment,
-																'observation',
-																requirementAssessment.observation
-															);
+															update(requirementAssessment, 'observation');
 															requirementAssessment.observationBuffer =
 																requirementAssessment.observation;
 														}}
