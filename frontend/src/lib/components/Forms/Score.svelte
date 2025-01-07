@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { ProgressRadial, RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
-	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { createEventDispatcher } from 'svelte';
 
 	function securityObjectiveDisplay(level: number) {
 		return SECURITY_OBJECTIVE_SCALE_MAP[$page.data.settings.security_objective_scale][level];
@@ -15,6 +16,7 @@
 	export let fullDonut: boolean = false;
 	export let inversedColors: boolean = false;
 	export let security_objective: boolean = false;
+	export let styles: string = '';
 
 	export let min_score = 0;
 	export let max_score = 100;
@@ -41,13 +43,27 @@
 		$isScored = true;
 	}
 
+	export let is_scored = $isScored;
+	export let score = $value;
+	$: is_scored = $isScored;
+	$: score = $value;
+
+	const dispatch = createEventDispatcher();
+	let previous = [$isScored, $value];
+	$: {
+		if ((previous[0] !== $isScored || previous[1] !== $value) && previous[0] !== undefined) {
+			dispatch('change', { isScored: $isScored, score: $value });
+		}
+		previous = [$isScored, $value];
+	}
+
 	$: if (max_score === 100) score_step = 5;
 
 	const result = formFieldProxy(form, 'result')['value'];
 	$: isApplicable = $result === 'not_applicable' ? false : true;
 </script>
 
-<div>
+<div class={styles}>
 	{#if label !== undefined}
 		<div>
 			{#if $constraints?.required}
