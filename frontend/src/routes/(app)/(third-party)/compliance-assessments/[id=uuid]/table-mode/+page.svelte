@@ -199,7 +199,9 @@
 		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
 		{#if !(questionnaireOnly ? !assessmentOnly : assessmentOnly)}
-			<div class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full">
+			<div
+				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
+			>
 				<a
 					href="/compliance-assessments/{data.compliance_assessment.id}"
 					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
