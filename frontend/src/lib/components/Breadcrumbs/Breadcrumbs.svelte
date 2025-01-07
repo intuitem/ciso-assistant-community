@@ -10,8 +10,9 @@
 		breadcrumbs: Breadcrumb[],
 		currentPath: string
 	): Promise<Breadcrumb[]> {
-		const idx = breadcrumbs.findIndex((c) => c.href === currentPath);
-		if (idx >= 0 && idx < breadcrumbs.length - 1) {
+		const idx = breadcrumbs.findIndex((c) => c.href?.startsWith(currentPath));
+		// First breadcrumb is home, its href is always '/'
+		if (idx > 0 && idx < breadcrumbs.length - 1) {
 			breadcrumbs = breadcrumbs.slice(0, idx + 1);
 		}
 		return breadcrumbs;
