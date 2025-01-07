@@ -123,7 +123,7 @@
 										{#if description}
 											<p>{description}</p>
 										{/if}
-									{:else if node.question.questions && node.question.questions[0]}
+									{:else if node.question && node.question.questions && node.question.questions[0]}
 										<!-- This only displays the first question -->
 										{node.question.questions[0].text}
 									{/if}
