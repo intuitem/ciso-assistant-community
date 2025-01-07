@@ -49,18 +49,16 @@
 <div>
 	<span class="whitespace-pre-line" style="font-weight: 300;">
 		<p class="max-w-[80ch]">
-			{#if title}
-				<span style="font-weight: 600;">
-					{title}
-				</span>
-				{#if assessableNodes.length > 1 || (!assessable && assessableNodes.length > 0)}
-					<span class="badge variant-soft-primary">
-						{assessableNodes.length}
-					</span>
+			{#if title || description}
+				{#if title}
+					<span style="font-weight: 600;">{title}</span>
 				{/if}
-			{/if}
-			{#if description}
-				{description}
+				{#if description}
+					<p>{description}</p>
+				{/if}
+			{:else if node.question && node.question.questions && node.question.questions[0]}
+				<!-- This only displays the first question -->
+				{node.question.questions[0].text}
 			{/if}
 		</p>
 	</span>
