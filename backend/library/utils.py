@@ -38,9 +38,9 @@ def preview_library(framework: dict) -> dict[str, list]:
     """
     preview = {}
     requirement_nodes_list = []
-    if framework.get("requirement_nodes"):
+    if (requirement_nodes := framework.get("requirement_nodes")) is not None:
         index = 0
-        for requirement_node in framework["requirement_nodes"]:
+        for requirement_node in requirement_nodes:
             parent_urn = requirement_node.get("parent_urn")
             if parent_urn:
                 parent_urn = parent_urn.lower()
@@ -55,6 +55,7 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
+                    question=requirement_node.get("question"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
