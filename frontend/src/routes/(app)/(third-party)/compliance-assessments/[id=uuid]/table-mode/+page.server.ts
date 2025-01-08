@@ -24,7 +24,8 @@ export const load = (async ({ fetch, params }) => {
 	const evidenceCreateSchema = modelSchema('evidences');
 	const scoreSchema = z.object({
 		is_scored: z.boolean().optional(),
-		score: z.number().optional().nullable()
+		score: z.number().optional().nullable(),
+		documentation_score: z.number().optional().nullable()
 	});
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
@@ -43,7 +44,8 @@ export const load = (async ({ fetch, params }) => {
 			const scoreForm = await superValidate(
 				{
 					is_scored: requirementAssessment.is_scored,
-					score: requirementAssessment.score
+					score: requirementAssessment.score,
+					documentation_score: requirementAssessment.documentation_score
 				},
 				zod(scoreSchema)
 			);

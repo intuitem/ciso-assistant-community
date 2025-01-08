@@ -441,6 +441,7 @@
 					min_score={data.compliance_assessment_score.min_score}
 					max_score={data.compliance_assessment_score.max_score}
 					scores_definition={data.compliance_assessment_score.scores_definition}
+					show_documentation_score={data.compliance_assessment_score.show_documentation_score}
 					field="score"
 					label="Score"
 				/>

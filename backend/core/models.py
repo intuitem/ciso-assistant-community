@@ -2728,6 +2728,7 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
+    show_documentation_score = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Compliance assessment")
@@ -2801,7 +2802,8 @@ class ComplianceAssessment(Assessment):
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            .exclude(score=None)
+            # ----- REMOVE THIS COMMENT AFTER REVIEW ----- #
+            # .exclude(score=None) # If is_scored is True we must consider the score in the global score right ?
             .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
@@ -2813,12 +2815,18 @@ class ComplianceAssessment(Assessment):
         )
         score = 0
         n = 0
+
         for ras in requirement_assessments_scored:
             if not (ig) or (ig & set(ras.requirement.implementation_groups)):
-                score += ras.score
+                score += ras.score or 0
                 n += 1
+                if self.show_documentation_score:
+                    score += ras.documentation_score or 0
+                    n += 1
         if n > 0:
-            return round(score / n, 1)
+            global_score = score / n
+            # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
+            return int(global_score * 10) / 10
         else:
             return -1
 
@@ -3241,14 +3249,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         verbose_name=_("Result"),
         default=Result.NOT_ASSESSED,
     )
+    is_scored = models.BooleanField(
+        default=False,
+        verbose_name=_("Is scored"),
+    )
     score = models.IntegerField(
         blank=True,
         null=True,
         verbose_name=_("Score"),
     )
-    is_scored = models.BooleanField(
-        default=False,
-        verbose_name=_("Is scored"),
+    documentation_score = models.IntegerField(
+        blank=True, null=True, verbose_name=_("Documentation Score")
     )
     evidences = models.ManyToManyField(
         Evidence,

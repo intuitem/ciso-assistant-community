@@ -555,6 +555,7 @@
 	"youCanSetNewPassword": "Zde si můžete nastavit nové heslo",
 	"userWillBeDisconnected": "Uživatel bude odpojen a bude se muset znovu přihlásit",
 	"scoresDefinition": "Definice skóre",
+	"score": "Skóre",
 	"selectedImplementationGroups": "Vybrané implementační skupiny",
 	"implementationGroupsDefinition": "Definice implementačních skupin",
 	"threatRadarChart": "Radarový graf hrozeb",
@@ -854,5 +855,8 @@
 	"addTag": "Přidat štítek",
 	"tagsHelpText": "Štítky pomáhají kategorizovat a filtrovat více objektů. Můžete je spravovat v menu Extra.",
 	"bringTheEvidences": "Přineste důkazy",
-	"bringTheEvidencesHelpText": "Pokud je zakázáno, objekt bude duplikován bez jeho důkazů"
+	"bringTheEvidencesHelpText": "Pokud je zakázáno, objekt bude duplikován bez jeho důkazů",
+	"documentationScore": "Skóre dokumentace",
+	"useDocumentationScore": "Použití skóre dokumentace",
+	"useDocumentationScoreHelpText": "Pro posouzení požadavků bude k dispozici druhé bodové skóre (skóre dokumentace)."
 }

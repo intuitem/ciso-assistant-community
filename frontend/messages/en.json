@@ -893,7 +893,7 @@
 	"youCanSetPasswordHere": "You can set your password here",
 	"forgotPassword": "Forgot password",
 	"ssoSettingsUpdated": "SSO settings updated",
-	"scoreSemiColon": "Score:",
+	"score": "Score",
 	"mappingInferenceHelpText": "These variables are fixed and will not change depending on the source.",
 	"priority": "Priority",
 	"p1": "P1",
@@ -1082,5 +1082,8 @@
 	"missionsAndOrganizationalServices": "Missions and organizational services",
 	"human": "Human",
 	"material": "Material",
-	"environmental": "Environmental"
+	"environmental": "Environmental",
+	"documentationScore": "Documentation score",
+	"useDocumentationScore": "Use documentation score",
+	"useDocumentationScoreHelpText": "A second score (the documentation score) will be available for scoring the requirements."
 }

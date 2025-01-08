@@ -181,13 +181,19 @@
 	function updateScore(requirementAssessment) {
 		const isScored = requirementAssessment.is_scored;
 		const score = requirementAssessment.score;
-		requirementAssessmentScores[requirementAssessment.id] = [isScored, score];
+		const documentationScore = requirementAssessment.documentation_score;
+		requirementAssessmentScores[requirementAssessment.id] = [isScored, score, documentationScore];
 		setTimeout(() => {
 			const currentScoreValue = requirementAssessmentScores[requirementAssessment.id];
-			if (isScored === currentScoreValue[0] && score === currentScoreValue[1]) {
+			if (
+				isScored === currentScoreValue[0] &&
+				score === currentScoreValue[1] &&
+				documentationScore === currentScoreValue[2]
+			) {
 				updateBulk(requirementAssessment, {
 					is_scored: isScored,
-					score: score
+					score: score,
+					documentation_score: documentationScore
 				});
 			}
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
@@ -372,15 +378,17 @@
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
 							<Score
-								form={superForm(requirementAssessment.scoreForm)}
+								form={superForm(requirementAssessment.scoreForm, { id: requirementAssessment.id })}
 								min_score={data.compliance_assessment.min_score}
 								max_score={data.compliance_assessment.max_score}
 								scores_definition={data.compliance_assessment.scores_definition}
+								show_documentation_score={data.compliance_assessment.show_documentation_score}
 								field="score"
 								label=""
 								styles="w-full p-1"
-								bind:score={requirementAssessment.score}
 								bind:is_scored={requirementAssessment.is_scored}
+								bind:score={requirementAssessment.score}
+								bind:documentation_score={requirementAssessment.documentation_score}
 								on:change={() => updateScore(requirementAssessment)}
 							/>
 							<Accordion regionCaret="flex">
