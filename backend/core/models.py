@@ -1583,7 +1583,8 @@ class Asset(
                     security_objectives[key] = content
                 else:
                     security_objectives[key]["value"] = max(
-                        security_objectives[key]["value"], content.get("value", 0)
+                        security_objectives[key].get("value", 0),
+                        content.get("value", 0),
                     )
         return {"objectives": security_objectives}
 
