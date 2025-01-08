@@ -531,7 +531,19 @@ for tab in dataframe:
                     if "questions" in header
                     else None
                 )
-                answer = row[header["answer"]].value if "answer" in header else None
+                answer = (
+                    (
+                        row[header["answer"]].value.split("\n")
+                        if row[header["answer"]].value
+                        else [""]
+                    )
+                    if "answer" in header
+                    else None
+                )
+                if len(answer) != 1 and len(answer) != len(questions):
+                    print("error: answer and questions mismatch on requirement", urn)
+                    print("hint: please check at least one answer is defined for all questions or each question has an answer")
+                    exit(1)
                 threat_urns = []
                 function_urns = []
                 if threats:
@@ -554,16 +566,14 @@ for tab in dataframe:
                         ][prefix]
                         function_urns.append(f"{urn_prefix}:{part_name}")
                 if answer and questions:
-                    question = {
-                        "questions": [
-                            {
-                                "urn": f"{req_node['urn']}:question:{i + 1}",
-                                "text": question,
-                            }
-                            for i, question in enumerate(questions)
-                        ]
+                    req_node["questions"] = {
+                        f"{req_node['urn']}:question:{i + 1}": {
+                            "question_type": answers[answer[i]]["question_type"] if len(answer) > 1 else answers[answer[0]]["question_type"],
+                            "question_choices": answers[answer[i] or answer[0]]["question_choices"] if len(answer) > 1 else answers[answer[0]]["question_choices"],
+                            "text": question,
+                        }
+                        for i, question in enumerate(questions)
                     }
-                    req_node["question"] = {**answers[answer], **question}
                 if threat_urns:
                     req_node["threats"] = threat_urns
                 if function_urns:
