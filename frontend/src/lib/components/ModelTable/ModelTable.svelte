@@ -406,7 +406,7 @@
 										URLModel={actionsURLModel}
 										detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
 										editURL={!(row.meta.builtin || row.meta.urn)
-											? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}`
+											? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`
 											: undefined}
 										{row}
 										hasBody={$$slots.actionsBody}

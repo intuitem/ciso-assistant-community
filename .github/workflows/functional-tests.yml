@@ -52,7 +52,7 @@ jobs:
           cache: "pip"
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: lts/*
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:

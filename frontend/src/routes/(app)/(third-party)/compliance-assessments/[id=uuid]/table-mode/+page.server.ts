@@ -8,7 +8,6 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import { z } from 'zod';
-import { safeTranslate } from '$lib/utils/i18n';
 import { nestedWriteFormAction } from '$lib/utils/actions';
 
 export const load = (async ({ fetch, params }) => {
@@ -23,6 +22,10 @@ export const load = (async ({ fetch, params }) => {
 
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
+	const scoreSchema = z.object({
+		is_scored: z.boolean().optional(),
+		score: z.number().optional().nullable()
+	});
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
 			const evidenceInitialData = {
@@ -37,10 +40,18 @@ export const load = (async ({ fetch, params }) => {
 				}
 			);
 			const observationBuffer = requirementAssessment.observation;
+			const scoreForm = await superValidate(
+				{
+					is_scored: requirementAssessment.is_scored,
+					score: requirementAssessment.score
+				},
+				zod(scoreSchema)
+			);
 			return {
 				...requirementAssessment,
 				evidenceCreateForm,
-				observationBuffer
+				observationBuffer,
+				scoreForm
 			};
 		})
 	);
