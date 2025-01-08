@@ -132,7 +132,7 @@
 							{/if}
 						{:else if URLModel === 'risk-matrices'}
 							<a
-								href="/libraries?objectType=risk_matrix"
+								href="/libraries"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"
@@ -143,12 +143,11 @@
 								href="/libraries"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
-								id="add-button"
 								title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2" /></a
 							>
 						{:else if URLModel === 'requirement-mapping-sets'}
 							<a
-								href="/libraries?objectType=requirement_mapping_set"
+								href="/libraries"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								title={m.importMappings()}><i class="fa-solid fa-file-import mr-2" /></a
