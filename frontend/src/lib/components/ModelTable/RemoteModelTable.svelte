@@ -6,10 +6,9 @@
 		FIELD_COLORED_TAG_MAP,
 		FIELD_COMPONENT_MAP
 	} from '$lib/utils/crud';
-	import { stringify } from '$lib/utils/helpers';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	import { tableA11y } from './actions';
 	// Types
@@ -83,13 +82,6 @@
 	export let detailQueryParameter: string | undefined = undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
-	export let hideFilters = false;
-	$: hideFilters =
-		hideFilters ||
-		!Object.entries(filters).some(([key, filter]) => {
-			if (!filter.hide) return true;
-		});
-
 	const user = $page.data.user;
 
 	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
@@ -103,10 +95,9 @@
 	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
-	import { goto as _goto } from '$app/navigation';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { DataHandler } from '@vincjo/datatables';
+	import { DataHandler, type Row, type State } from '@vincjo/datatables/remote';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
@@ -114,95 +105,14 @@
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
 
-	$: data = source.body.map((item: Record<string, any>, index: number) => {
+	const data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
-	const columnFields = new Set(source.body.length === 0 ? [] : Object.keys(source.body[0]));
 
-	const handler = new DataHandler(data, {
-		rowsPerPage: pagination ? numberRowsPerPage : undefined
-	});
-	$: hasRows = data.length > 0;
-	const tableURLModel = source.meta?.urlmodel ?? URLModel;
-	const filters =
-		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
-			? listViewFields[tableURLModel].filters
-			: {};
-	const filteredFields = Object.keys(filters).filter(
-		(key) => columnFields.has(key) || filters[key].alwaysDisplay
-	);
-	const filterValues: { [key: string]: any } = {};
-	const filterProps: {
-		[key: string]: { [key: string]: any };
-	} = {};
-
-	function defaultFilterProps(rows, field: string) {
-		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
-		const options = [...new Set(rows.map(getColumn))].sort();
-		return { options };
-	}
-
-	function defaultFilterFunction(entry: any, value: any[]): boolean {
-		if (!value || value.length < 1) return true;
-		value = value.map((v) => stringify(v));
-		return value.includes(stringify(entry));
-	}
-
-	// Initialize filter values from URL search params
-	for (const field of filteredFields)
-		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
-
-	$: {
-		for (const field of filteredFields) {
-			handler.filter(
-				filterValues[field] ? filterValues[field].map((v) => v.value) : [],
-				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'getColumn')
-					? filters[field].getColumn
-					: field,
-				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'filter')
-					? filters[field].filter
-					: defaultFilterFunction
-			);
-			$page.url.searchParams.delete(field);
-			if (filterValues[field] && filterValues[field].length > 0) {
-				for (const value of filterValues[field]) {
-					$page.url.searchParams.append(field, value.value);
-				}
-			}
-		}
-		if (browser) _goto($page.url);
-	}
-
-	$: {
-		for (const key of filteredFields) {
-			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(
-				Object.values(source.meta),
-				key
-			);
-		}
-	}
+	const handler = new DataHandler(data, { rowsPerPage: 10 });
 	const rows = handler.getRows();
 
-	const _filters = handler.getFilters();
-
-	function getFilterCount(filters: typeof $_filters): number {
-		return Object.values(filters).reduce((acc, filter) => {
-			if (Array.isArray(filter.value) && filter.value.length > 0) {
-				return acc + 1;
-			}
-			return acc;
-		}, 0);
-	}
-
-	$: filterCount = getFilterCount($_filters);
-
-	onMount(() => {
-		if (orderBy) {
-			orderBy.direction === 'asc'
-				? handler.sortAsc(orderBy.identifier)
-				: handler.sortDesc(orderBy.identifier);
-		}
-	});
+	handler.onChange((state: State) => loadTableData(state, 'threats', '/threats') as Promise<Row[]>);
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 
@@ -210,7 +120,6 @@
 	const taggedKeys = new Set(Object.keys(tagMap));
 
 	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
-	$: source, handler.setRows(data);
 
 	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
 	const preventDelete = (row: TableSource) =>
@@ -218,18 +127,9 @@
 		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 
-	import { isDark } from '$lib/utils/helpers';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
-	import { popup } from '@skeletonlabs/skeleton';
-	import { browser } from '$app/environment';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-
-	const popupFilter: PopupSettings = {
-		event: 'focus-click',
-		target: 'popupFilter',
-		placement: 'bottom-start',
-		closeQuery: 'li'
-	};
+	import { isDark } from '$lib/utils/helpers';
+	import { loadTableData } from './handler';
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
@@ -238,30 +138,6 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if filteredFields.length > 0 && hasRows && !hideFilters}
-			<button use:popup={popupFilter} class="btn variant-filled-primary self-end relative">
-				<i class="fa-solid fa-filter mr-2" />
-				{m.filters()}
-				{#if filterCount}
-					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
-				{/if}
-			</button>
-			<div
-				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
-				data-popup="popupFilter"
-			>
-				{#each filteredFields as field}
-					<svelte:component
-						this={filters[field].component}
-						bind:value={filterValues[field]}
-						bind:hide={filters[field].hide}
-						{field}
-						{...filterProps[field]}
-						{...filters[field].extraProps}
-					/>
-				{/each}
-			</div>
-		{/if}
 		{#if search}
 			<Search {handler} />
 		{/if}

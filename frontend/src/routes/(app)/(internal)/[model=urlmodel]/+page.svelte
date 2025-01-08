@@ -2,7 +2,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import ModelTable from '$lib/components/ModelTable/RemoteModelTable.svelte';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';

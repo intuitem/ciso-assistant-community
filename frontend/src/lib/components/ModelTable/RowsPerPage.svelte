@@ -6,9 +6,9 @@
 	const rowCount = handler.getRowCount();
 	const options = [5, 10, 20, 50, 100];
 
-	$: if ($rowCount.start >= $rowCount.total && $rowsPerPage) {
-		handler.setPage(Math.ceil($rowCount.total / $rowsPerPage));
-	}
+	// $: if ($rowCount.start >= $rowCount.total && $rowsPerPage) {
+	// 	handler.setPage(Math.ceil($rowCount.total / $rowsPerPage));
+	// }
 </script>
 
 <aside class="flex items-center">

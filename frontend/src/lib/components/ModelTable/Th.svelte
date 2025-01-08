@@ -5,12 +5,17 @@
 	export let _class = `${$$restProps.class} cursor-pointer select-none`;
 
 	const identifier = orderBy?.toString();
-	const sorted = handler.getSort();
+
+	const sort = handler.getSort();
+	const update = () => {
+		handler.sort(orderBy);
+		handler.invalidate();
+	};
 </script>
 
 <th
-	on:click={() => handler.sort(orderBy)}
-	class:active={$sorted.identifier === identifier}
+	on:click={update}
+	class:active={$sort?.identifier === identifier}
 	class={_class}
 	data-testid="tableheader"
 >
@@ -18,8 +23,8 @@
 		<slot />
 		<span
 			class="pl-2"
-			class:asc={$sorted.direction === 'asc'}
-			class:desc={$sorted.direction === 'desc'}
+			class:asc={$sort?.direction === 'asc'}
+			class:desc={$sort?.direction === 'desc'}
 		/>
 	</div>
 </th>
