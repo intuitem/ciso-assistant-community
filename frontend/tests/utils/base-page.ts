@@ -46,7 +46,7 @@ export abstract class BasePage {
 	 * Otherwise, it checks if the browser's URL starts with `this.url`.
 	 * @returns {void}
 	 */
-	async hasUrl(url: string = this.url, strict: boolean = true) {
+	async hasUrl(strict: boolean = true, url: string = this.url) {
 		const URLPattern = strict ? url : new RegExp(escapeRegex(url) + '.*');
 		await expect(this.page).toHaveURL(URLPattern);
 	}
