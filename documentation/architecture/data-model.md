@@ -1063,7 +1063,7 @@ The following approach has been retained:
 - This compliance assessment is reviewed by the client, requirement by requirement.
 - An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
 - Review features are added to compliance assessment to enable this workflow in a generic way.
-- A requirement node can include a question (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
+- A requirement node can include questions (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
 
 ### Entity-relationship diagram
 
@@ -1206,7 +1206,7 @@ There is no link between representatives (modeling of the ecosystem) and users o
 #### Requirement assessment
 
 - add the following fields:
-  - answer: a json corresponding to the optional question of the requirement node.
+  - answer: a json corresponding to the optional questions of the requirement node.
 
 #### Compliance assessment
 
@@ -1216,7 +1216,7 @@ There is no link between representatives (modeling of the ecosystem) and users o
 #### Requirement node
 
 - Add the following fields:
-  - question: a json field describing a form.
+  - questions: a json field describing a form.
 
 #### Applied control
 
@@ -1231,13 +1231,21 @@ Note: in the future, we will use the same approach for policies.
 
 The format for question and answer json fields will evolve over time. The initial format is the following:
 
-- question:
+- questions:
 
 ```json
 {
-    "question": {
-        "version": 1
-        "schema": {...}
+    "urn:intuitem:risk:req_node:example:a.1:question:1": {
+        "question_type": "unique_choice",
+        "question_choices": [
+            "yes",
+            "no",
+            "n/a"
+        ],
+        "text": "",
+    },
+    "urn:intuitem:risk:req_node:example:a.1:question:2": {
+    ...
     }
 }
 ```
