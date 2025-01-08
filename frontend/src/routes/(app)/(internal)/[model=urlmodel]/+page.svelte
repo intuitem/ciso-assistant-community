@@ -132,7 +132,7 @@
 							{/if}
 						{:else if URLModel === 'risk-matrices'}
 							<a
-								href="/libraries"
+								href="/libraries?objectType=risk_matrix"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"
@@ -148,7 +148,7 @@
 							>
 						{:else if URLModel === 'requirement-mapping-sets'}
 							<a
-								href="/libraries"
+								href="/libraries?objectType=requirement_mapping_set"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"
