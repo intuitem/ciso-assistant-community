@@ -103,8 +103,11 @@
 				</span>
 			{/if}
 		</div>
-		<button class="btn bg-initial" data-testid="sidebar-more-btn" use:popup={popupUser}
-			><i class="fa-solid fa-ellipsis-vertical" /></button
+		<button
+			class="btn bg-initial"
+			data-testid="sidebar-more-btn"
+			id="sidebar-more-btn"
+			use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical" /></button
 		>
 		<div
 			class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
