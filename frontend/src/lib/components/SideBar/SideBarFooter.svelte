@@ -8,6 +8,9 @@
 	import * as m from '$paraglide/messages';
 	import { setCookie } from '$lib/utils/cookies';
 
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
+
 	const language: any = {
 		french: m.french(),
 		english: m.english(),
@@ -129,9 +132,10 @@
 				{/each}
 			</select>
 			<button
-				on:click={modalBuildInfo}
+				on:click={() => dispatch('triggerGT')}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="about-button"><i class="fa-solid fa-circle-info mr-2" />Guided tour</button
+				data-testid="gt-button"
+				><i class="fa-solid fa-wand-magic-sparkles mr-2" />{m.guidedTour()}</button
 			>
 			<button
 				on:click={modalBuildInfo}

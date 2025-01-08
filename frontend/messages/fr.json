@@ -1082,5 +1082,6 @@
 	"missionsAndOrganizationalServices": "Missions et service de l'organisation",
 	"human": "Humain",
 	"material": "Matériel",
-	"environmental": "Environnemental"
+	"environmental": "Environnemental",
+  "guidedTour": "Visite guidée"
 }

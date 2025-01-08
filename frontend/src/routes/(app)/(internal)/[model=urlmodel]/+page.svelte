@@ -143,6 +143,7 @@
 								href="/libraries"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
+								id="add-button"
 								title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2" /></a
 							>
 						{:else if URLModel === 'requirement-mapping-sets'}
@@ -150,6 +151,7 @@
 								href="/libraries"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
+								id="add-button"
 								title={m.importMappings()}><i class="fa-solid fa-file-import mr-2" /></a
 							>
 						{/if}
