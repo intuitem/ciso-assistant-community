@@ -12,7 +12,7 @@ def populate_default_ref_ids(apps, schema_editor):
             x.ref_id for x in risk_assessment.risk_scenarios.all() if x.ref_id
         ]
         nb_scenarios = len(scenarios_ref_ids) + 1
-        candidates = [f"R.{i+1}" for i in range(nb_scenarios)]
+        candidates = [f"R.{i + 1}" for i in range(nb_scenarios)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
     for risk_assessment in RiskAssessment.objects.all():
