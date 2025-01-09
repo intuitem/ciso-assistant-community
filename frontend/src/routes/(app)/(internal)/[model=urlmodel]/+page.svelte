@@ -10,6 +10,7 @@
 	import { checkConstraints } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { goto } from '$app/navigation';
+	import { driverInstance } from '$lib/utils/stores';
 
 	import { onMount } from 'svelte';
 
@@ -76,6 +77,11 @@
 		}
 	}
 
+	function handleClickForGT() {
+		setTimeout(() => {
+			$driverInstance?.moveNext();
+		}, 300);
+	}
 	onMount(() => {
 		// Add event listener when component mounts
 		window.addEventListener('keydown', handleKeyDown);
@@ -133,6 +139,7 @@
 						{:else if URLModel === 'risk-matrices'}
 							<a
 								href="/libraries?objectType=risk_matrix"
+								on:click={handleClickForGT}
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"
@@ -141,6 +148,7 @@
 						{:else if URLModel === 'frameworks'}
 							<a
 								href="/libraries"
+								on:click={handleClickForGT}
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"

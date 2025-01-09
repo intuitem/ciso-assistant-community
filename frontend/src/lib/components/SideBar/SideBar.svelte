@@ -7,7 +7,7 @@
 	export let open: boolean;
 	import { steps } from './guidedTourData.js';
 	export let firstTime = false; // this needs to come from the db ; we also need to make room for variable about the specialized guided tours
-
+	import { driverInstance } from '$lib/utils/stores';
 	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
 
 	import { driver } from 'driver.js';
@@ -18,6 +18,7 @@
 			showProgress: true,
 			steps: steps
 		});
+		$driverInstance = driverObj;
 		driverObj.drive();
 	}
 	onMount(() => {
