@@ -1431,6 +1431,7 @@ class Asset(
                             "value": {
                                 "type": "integer",
                                 "minimum": 0,
+                                "maximum": 3,
                             },
                             "is_enabled": {
                                 "type": "boolean",
