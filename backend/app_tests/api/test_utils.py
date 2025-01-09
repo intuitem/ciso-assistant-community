@@ -138,9 +138,9 @@ class EndpointTestsQueries:
         # Uses the API endpoint to assert that objects are not accessible
         response = client.get(url)
 
-        assert (
-            response.status_code == status.HTTP_401_UNAUTHORIZED
-        ), f"{verbose_name} are accessible without authentication"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+            f"{verbose_name} are accessible without authentication"
+        )
         assert response.json() == {
             "detail": "Authentication credentials were not provided."
         }, f"{verbose_name} are accessible without authentication"
@@ -170,9 +170,9 @@ class EndpointTestsQueries:
         # Uses the API endpoint to assert that the test object is not accessible
         response = client.get(url)
 
-        assert (
-            response.status_code == status.HTTP_401_UNAUTHORIZED
-        ), f"{verbose_name} are accessible without authentication"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+            f"{verbose_name} are accessible without authentication"
+        )
         assert response.json() == {
             "detail": "Authentication credentials were not provided."
         }, f"{verbose_name} are accessible without authentication"
@@ -196,17 +196,17 @@ class EndpointTestsQueries:
         response = client.post(url, test_params, format="json")
 
         # Asserts that the user was not created
-        assert (
-            response.status_code == status.HTTP_401_UNAUTHORIZED
-        ), f"{verbose_name} can be created without authentication"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+            f"{verbose_name} can be created without authentication"
+        )
         assert response.json() == {
             "detail": "Authentication credentials were not provided."
         }, f"{verbose_name} can be created without authentication"
 
         # Checks that the object was not created in the database
-        assert (
-            count == object.objects.all().count()
-        ), f"{verbose_name} created with the API without authentication are still saved in the database"
+        assert count == object.objects.all().count(), (
+            f"{verbose_name} created with the API without authentication are still saved in the database"
+        )
 
     def update_object(
         client,
@@ -252,18 +252,18 @@ class EndpointTestsQueries:
         response = client.patch(url, update_params, format="json")
 
         # Asserts that the user was not updated
-        assert (
-            response.status_code == status.HTTP_401_UNAUTHORIZED
-        ), f"{verbose_name} can be updated without authentication"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+            f"{verbose_name} can be updated without authentication"
+        )
         assert response.json() == {
             "detail": "Authentication credentials were not provided."
         }, f"{verbose_name} can be updated without authentication"
 
         # Checks that the object was not updated in the database
         field = list(update_params.items())[0]
-        assert (
-            build_params[field[0]] == getattr(test_object, field[0]) != field[1]
-        ), f"{verbose_name} updated with the API without authentication are still saved in the database"
+        assert build_params[field[0]] == getattr(test_object, field[0]) != field[1], (
+            f"{verbose_name} updated with the API without authentication are still saved in the database"
+        )
 
     def delete_object(
         client, verbose_name: str, object, build_params: dict = {}, endpoint: str = None
@@ -304,17 +304,17 @@ class EndpointTestsQueries:
         response = client.delete(url)
 
         # Asserts that the user was not deleted
-        assert (
-            response.status_code == status.HTTP_401_UNAUTHORIZED
-        ), f"{verbose_name} can be deleted without authentication"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+            f"{verbose_name} can be deleted without authentication"
+        )
         assert response.json() == {
             "detail": "Authentication credentials were not provided."
         }, f"{verbose_name} can be deleted without authentication"
 
         # Checks that the object was not deleted in the database
-        assert object.objects.filter(
-            id=id
-        ).exists(), f"{verbose_name} deleted with the API without authentication are not saved in the database"
+        assert object.objects.filter(id=id).exists(), (
+            f"{verbose_name} deleted with the API without authentication are not saved in the database"
+        )
 
     def import_object(client, verbose_name: str, urn: str = None):
         """Imports object with the API without authentication
@@ -330,9 +330,9 @@ class EndpointTestsQueries:
         response = client.get(url + "import/")
 
         # Asserts that the object was imported successfully
-        assert (
-            response.status_code == status.HTTP_401_UNAUTHORIZED
-        ), f"{verbose_name} can be imported without authentication"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+            f"{verbose_name} can be imported without authentication"
+        )
         assert response.json() == {
             "detail": "Authentication credentials were not provided."
         }, f"{verbose_name} can be imported without authentication"
@@ -403,17 +403,17 @@ class EndpointTestsQueries:
                 if not (object and build_params) and test_params:
                     if base_count == 0:
                         # perfom a test with an externally created object
-                        assert (
-                            response.json()["count"] == base_count + 1
-                        ), f"{verbose_name} are not accessible with authentication"
+                        assert response.json()["count"] == base_count + 1, (
+                            f"{verbose_name} are not accessible with authentication"
+                        )
                     elif base_count < 0:
-                        assert (
-                            len(response.json()["results"]) != 0
-                        ), f"{verbose_name} are not accessible with authentication"
+                        assert len(response.json()["results"]) != 0, (
+                            f"{verbose_name} are not accessible with authentication"
+                        )
                 elif base_count > 0:
-                    assert (
-                        response.json()["count"] == base_count
-                    ), f"{verbose_name} are not accessible with authentication"
+                    assert response.json()["count"] == base_count, (
+                        f"{verbose_name} are not accessible with authentication"
+                    )
 
             # Creates a test object from the model
             if build_params and object:
@@ -461,18 +461,18 @@ class EndpointTestsQueries:
                 if not (fails or user_perm_fails):
                     if user_perm_reason == "outside_scope":
                         if not base_count < 0:
-                            assert (
-                                response.json()["count"] == 0
-                            ), f"{verbose_name} are accessible outside the domain"
+                            assert response.json()["count"] == 0, (
+                                f"{verbose_name} are accessible outside the domain"
+                            )
                     else:
                         if base_count < 0:
-                            assert (
-                                len(response.json()["results"]) != 0
-                            ), f"{verbose_name} are not accessible with authentication"
+                            assert len(response.json()["results"]) != 0, (
+                                f"{verbose_name} are not accessible with authentication"
+                            )
                         else:
-                            assert (
-                                response.json()["count"] == base_count + 1
-                            ), f"{verbose_name} are not accessible with authentication"
+                            assert response.json()["count"] == base_count + 1, (
+                                f"{verbose_name} are not accessible with authentication"
+                            )
 
             if (
                 not (fails or user_perm_fails)
@@ -490,13 +490,13 @@ class EndpointTestsQueries:
                     response_item = response.json()["results"][-1]
                 for key, value in params.items():
                     if type(value) == dict and type(response_item[key]) == str:
-                        assert (
-                            json.loads(response_item[key]) == value
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        assert json.loads(response_item[key]) == value, (
+                            f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        )
                     else:
-                        assert (
-                            response_item[key] == value
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        assert response_item[key] == value, (
+                            f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        )
 
         def get_object_options(
             authenticated_client,
@@ -550,12 +550,12 @@ class EndpointTestsQueries:
 
             if not (fails or user_perm_fails):
                 for choice in choices:
-                    assert (
-                        choice[0] in response.json()
-                    ), f"{verbose_name} {choice} choice is not accessible from the API"
-                    assert (
-                        str(choice[1]) in response.json()[choice[0]]
-                    ), f"{verbose_name} {choice} choice is not associated to the value {choice[1]} in the API"
+                    assert choice[0] in response.json(), (
+                        f"{verbose_name} {choice} choice is not accessible from the API"
+                    )
+                    assert str(choice[1]) in response.json()[choice[0]], (
+                        f"{verbose_name} {choice} choice is not associated to the value {choice[1]} in the API"
+                    )
 
         def create_object(
             authenticated_client,
@@ -604,9 +604,9 @@ class EndpointTestsQueries:
 
             if fails:
                 # Asserts that the object was not created
-                assert (
-                    response.status_code == expected_status
-                ), f"{verbose_name} can not be created with authentication"
+                assert response.status_code == expected_status, (
+                    f"{verbose_name} can not be created with authentication"
+                )
                 return
 
             # Asserts that the object was created successfully
@@ -645,23 +645,25 @@ class EndpointTestsQueries:
                             assert (
                                 value.name.split("/")[-1].split(".")[0]
                                 in response.json()[key]
-                            ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                            ), (
+                                f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                            )
                         else:
-                            assert (
-                                response.json()[key] == value
-                            ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                            assert response.json()[key] == value, (
+                                f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                            )
 
                     # Checks that the object was created in the database
-                    assert object.objects.filter(
-                        id=response.json()["id"]
-                    ).exists(), f"{verbose_name} created with the API are not saved in the database"
+                    assert object.objects.filter(id=response.json()["id"]).exists(), (
+                        f"{verbose_name} created with the API are not saved in the database"
+                    )
 
             # Uses the API endpoint to assert that the created object is accessible
             response = authenticated_client.get(url)
 
-            assert (
-                response.status_code == status.HTTP_200_OK
-            ), f"{verbose_name} are not accessible with authentication"
+            assert response.status_code == status.HTTP_200_OK, (
+                f"{verbose_name} are not accessible with authentication"
+            )
 
             if not (fails or user_perm_fails) and len(response.json()["results"]) != 0:
                 params = {**build_params, **test_params}
@@ -683,11 +685,13 @@ class EndpointTestsQueries:
                                 response_item[key],
                             )
                             == value
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        ), (
+                            f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        )
                     else:
-                        assert (
-                            response_item[key] == value
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        assert response_item[key] == value, (
+                            f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        )
 
         def update_object(
             authenticated_client,
@@ -759,27 +763,28 @@ class EndpointTestsQueries:
             )
             if not user_group or view_perms[:2] == (False, status.HTTP_200_OK):
                 if view_perms[2] == "outside_scope":
-                    assert (
-                        response.status_code == status.HTTP_404_NOT_FOUND
-                    ), f"{verbose_name} object detail can be accessed outside the domain"
+                    assert response.status_code == status.HTTP_404_NOT_FOUND, (
+                        f"{verbose_name} object detail can be accessed outside the domain"
+                    )
                 else:
                     if (
                         verbose_name != "Users"
                     ):  # Users don't have permission to view users details
-                        assert (
-                            response.status_code == status.HTTP_200_OK
-                        ), f"{verbose_name} object detail can not be accessed with permission"
+                        assert response.status_code == status.HTTP_200_OK, (
+                            f"{verbose_name} object detail can not be accessed with permission"
+                        )
             else:
-                assert (
-                    response.status_code == status.HTTP_404_NOT_FOUND
-                ), f"{verbose_name} object detail can be accessed without permission"
+                assert response.status_code == status.HTTP_404_NOT_FOUND, (
+                    f"{verbose_name} object detail can be accessed without permission"
+                )
 
             if not (fails or user_perm_fails):
                 if view_perms[2] == "outside_scope":
-                    assert (
-                        response.json()
-                        == {"detail": f"No {object.__name__} matches the given query."}
-                    ), f"{verbose_name} object detail can be accessed outside the domain"
+                    assert response.json() == {
+                        "detail": f"No {object.__name__} matches the given query."
+                    }, (
+                        f"{verbose_name} object detail can be accessed outside the domain"
+                    )
                 else:
                     for key, value in {**build_params, **test_build_params}.items():
                         if key == "attachment":
@@ -787,20 +792,22 @@ class EndpointTestsQueries:
                             assert (
                                 value.name.split("/")[-1].split(".")[0]
                                 in response.json()[key]
-                            ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                            ), (
+                                f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                            )
                         else:
-                            assert (
-                                response.json()[key] == value
-                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                            assert response.json()[key] == value, (
+                                f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                            )
 
             update_response = authenticated_client.patch(
                 url, update_params, format=query_format
             )
 
             if user_perm_reason == "outside_scope":
-                assert (
-                    update_response.status_code == status.HTTP_404_NOT_FOUND
-                ), f"{verbose_name} can be accessed outside the domain"
+                assert update_response.status_code == status.HTTP_404_NOT_FOUND, (
+                    f"{verbose_name} can be accessed outside the domain"
+                )
             else:
                 if not user_group or user_perm_expected_status == status.HTTP_200_OK:
                     # User has permission to update the object
@@ -828,11 +835,13 @@ class EndpointTestsQueries:
                             assert (
                                 value.split("/")[-1].split(".")[0]
                                 in update_response.json()[key]
-                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                            ), (
+                                f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                            )
                         else:
-                            assert (
-                                update_response.json()[key] == value
-                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                            assert update_response.json()[key] == value, (
+                                f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                            )
 
         def delete_object(
             authenticated_client,
@@ -899,28 +908,28 @@ class EndpointTestsQueries:
             )
             if not user_group or view_perms[:2] == (False, status.HTTP_200_OK):
                 if view_perms[2] == "outside_scope":
-                    assert (
-                        response.status_code == status.HTTP_404_NOT_FOUND
-                    ), f"{verbose_name} object detail can be accessed outside the domain"
+                    assert response.status_code == status.HTTP_404_NOT_FOUND, (
+                        f"{verbose_name} object detail can be accessed outside the domain"
+                    )
                 else:
                     if (
                         verbose_name != "Users"
                     ):  # Users don't have permission to view users details
-                        assert (
-                            response.status_code == status.HTTP_200_OK
-                        ), f"{verbose_name} object detail can not be accessed with permission"
+                        assert response.status_code == status.HTTP_200_OK, (
+                            f"{verbose_name} object detail can not be accessed with permission"
+                        )
             else:
-                assert (
-                    response.status_code == status.HTTP_404_NOT_FOUND
-                ), f"{verbose_name} object detail can be accessed without permission"
+                assert response.status_code == status.HTTP_404_NOT_FOUND, (
+                    f"{verbose_name} object detail can be accessed without permission"
+                )
 
             # Asserts that the object was deleted successfully
             delete_response = authenticated_client.delete(url)
 
             if user_perm_reason == "outside_scope":
-                assert (
-                    delete_response.status_code == status.HTTP_404_NOT_FOUND
-                ), f"{verbose_name} can be accessed outside the domain"
+                assert delete_response.status_code == status.HTTP_404_NOT_FOUND, (
+                    f"{verbose_name} can be accessed outside the domain"
+                )
             else:
                 if (
                     not user_group
@@ -943,9 +952,9 @@ class EndpointTestsQueries:
                 if not (fails or user_perm_fails):
                     # Asserts that the objects does not exists anymore
                     response = authenticated_client.get(url)
-                    assert (
-                        response.status_code == status.HTTP_404_NOT_FOUND
-                    ), f"{verbose_name} has not been properly deleted with authentication"
+                    assert response.status_code == status.HTTP_404_NOT_FOUND, (
+                        f"{verbose_name} has not been properly deleted with authentication"
+                    )
 
         def import_object(
             authenticated_client,
@@ -995,9 +1004,9 @@ class EndpointTestsQueries:
                 )
 
             if not (fails or user_perm_fails):
-                assert response.json() == {
-                    "status": "success"
-                }, f"{verbose_name} can not be imported with authentication"
+                assert response.json() == {"status": "success"}, (
+                    f"{verbose_name} can not be imported with authentication"
+                )
 
         def compare_results(
             authenticated_client,
@@ -1022,9 +1031,9 @@ class EndpointTestsQueries:
 
             # Uses the API endpoints to get the reference objects list
             reference = authenticated_client.get(reference_url)
-            assert (
-                reference.status_code == status.HTTP_200_OK
-            ), "reference endpoint is not accessible"
+            assert reference.status_code == status.HTTP_200_OK, (
+                "reference endpoint is not accessible"
+            )
 
             content = json.loads(reference.content)
             if isinstance(content, str):
@@ -1035,9 +1044,9 @@ class EndpointTestsQueries:
             ]:
                 comparelist = authenticated_client.get(compare_url)
                 compare = dict()
-                assert (
-                    comparelist.status_code == expected_status
-                ), f"{object['name']} is not in {compare_url} results"
+                assert comparelist.status_code == expected_status, (
+                    f"{object['name']} is not in {compare_url} results"
+                )
 
                 # find the object in the objects list
                 if not fails:
@@ -1049,13 +1058,13 @@ class EndpointTestsQueries:
                 for param in test_params:
                     if param in object and param in compare:
                         if type(param) == tuple:
-                            assert (
-                                object[param[0]] == param[1]
-                            ), f"the reference {param[0]} value is not {param[1]}"
-                            assert (
-                                compare[param[0]] == param[1]
-                            ), f"the endpoint to compare {param[0]} value is not {param[1]}"
+                            assert object[param[0]] == param[1], (
+                                f"the reference {param[0]} value is not {param[1]}"
+                            )
+                            assert compare[param[0]] == param[1], (
+                                f"the endpoint to compare {param[0]} value is not {param[1]}"
+                            )
                         else:
-                            assert (
-                                compare[param] == object[param]
-                            ), f"the endpoint to compare {param[0]} value is not {param[1]}"
+                            assert compare[param] == object[param], (
+                                f"the endpoint to compare {param[0]} value is not {param[1]}"
+                            )
