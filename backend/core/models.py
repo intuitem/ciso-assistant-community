@@ -1640,7 +1640,7 @@ class Asset(
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
             )
             if content.get("is_enabled", False)
-            and content.get("value", -1) in range(0, 5)
+            and content.get("value", -1) in range(0, 4)
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
