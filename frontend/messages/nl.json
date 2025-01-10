@@ -864,5 +864,6 @@
 	"scoreSemiColon": "Punt:",
 	"mappingInferenceHelpText": "Deze variabelen zijn vast en veranderen niet, afhankelijk van de bron.",
 	"bringTheEvidences": "Breng de bewijzen",
-	"bringTheEvidencesHelpText": "Als dit is uitgeschakeld, wordt het object gedupliceerd zonder de bijbehorende bewijzen"
+	"bringTheEvidencesHelpText": "Als dit is uitgeschakeld, wordt het object gedupliceerd zonder de bijbehorende bewijzen",
+	"publicationDate": "Publicatiedatum"
 }

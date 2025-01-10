@@ -4,15 +4,26 @@ ref_id: OWASP-ASVS-4.0.3
 name: OWASP ASVS 4.0.3
 description: OWASP Application Security Verification Standard. https://owasp.org/www-project-application-security-verification-standard/
 copyright: CC BY-SA 3.0 - The OWASP Foundation
-version: 2
+publication_date: 2024-04-07
+version: 3
 provider: OWASP
 packager: intuitem
+translations:
+  fr:
+    name: OWASP ASVS 4.0.3
+    description: OWASP Application Security Verification Standard. https://owasp.org/www-project-application-security-verification-standard/
+    copyright: CC BY-SA 3.0 - The OWASP Foundation
+    provider: OWASP
 objects:
   framework:
     urn: urn:intuitem:risk:framework:owasp-asvs-4.0.3
     ref_id: OWASP-ASVS-4.0.3
     name: OWASP ASVS 4.0.3
     description: 'OWASP Application Security Verification Standard '
+    translations:
+      fr:
+        name: OWASP ASVS 4.0.3
+        description: 'OWASP Application Security Verification Standard '
     implementation_groups_definition:
     - ref_id: L1
       name: Level 1
@@ -29,12 +40,22 @@ objects:
       depth: 1
       ref_id: V1
       name: Architecture, Design and Threat Modeling
+      translations:
+        fr:
+          name: "Architecture, conception et exigences en mati\xE8re de mod\xE9lisation\
+            \ des menaces"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.1
       name: Secure Software Development Lifecycle
+      translations:
+        fr:
+          name: "Exigences relatives au cycle de vie du d\xE9veloppement de logiciels\
+            \ s\xE9curis\xE9s"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.1
       assessable: true
       depth: 3
@@ -45,6 +66,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier l'utilisation d'un cycle de d\xE9veloppement de\
+            \ logiciel s\xE9curis\xE9 qui prend en compte la s\xE9curit\xE9 \xE0 tous\
+            \ les stades du d\xE9veloppement. ([C1](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.2
       assessable: true
       depth: 3
@@ -56,6 +83,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier l'utilisation de la mod\xE9lisation des menaces\
+            \ pour chaque modification de conception ou planification de sprint afin\
+            \ d'identifier les menaces, de planifier les contre-mesures, de faciliter\
+            \ les r\xE9ponses appropri\xE9es aux risques et d'orienter les tests de\
+            \ s\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.3
       assessable: true
       depth: 3
@@ -67,6 +102,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les r\xE9cits utilisateurs et les fonctionnalit\xE9\
+            s contiennent des contraintes de s\xE9curit\xE9 fonctionnelles, telles\
+            \ que \"En tant qu'utilisateur, je devrais pouvoir consulter et modifier\
+            \ mon profil. Je ne devrais pas pouvoir voir ou modifier le profil de\
+            \ quelqu'un d'autre\""
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.4
       assessable: true
       depth: 3
@@ -77,6 +120,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier la documentation et la justification de toutes\
+            \ les fronti\xE8res de confiance de la demande, de ses composantes et\
+            \ des flux de donn\xE9es importants."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.5
       assessable: true
       depth: 3
@@ -87,6 +136,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier la d\xE9finition et l'analyse de s\xE9curit\xE9\
+            \ de l'architecture de haut niveau de l'application et de tous les services\
+            \ \xE0 distance connect\xE9s. ([C1](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.6
       assessable: true
       depth: 3
@@ -98,6 +153,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier la mise en \u0153uvre de contr\xF4les de s\xE9\
+            curit\xE9 centralis\xE9s, simples (\xE9conomie de conception), v\xE9rifi\xE9\
+            s, s\xE9curis\xE9s et r\xE9utilisables pour \xE9viter les contr\xF4les\
+            \ en double, manquants, inefficaces ou peu s\xFBrs. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.7
       assessable: true
       depth: 3
@@ -108,12 +170,22 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que tous les d\xE9veloppeurs et testeurs disposent\
+            \ d'une liste de contr\xF4le de codage s\xE9curis\xE9, d'exigences de\
+            \ s\xE9curit\xE9, de lignes directrices ou de politiques."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.2
       name: Authentication Architecture
+      translations:
+        fr:
+          name: Exigences architecturales d'authentification
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2.1
       assessable: true
       depth: 3
@@ -124,6 +196,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les communications entre les composants de\
+            \ l'application, y compris les API, les intergiciels et les couches de\
+            \ donn\xE9es, sont authentifi\xE9es et utilisent des comptes utilisateurs\
+            \ individuels. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2.2
       assessable: true
       depth: 3
@@ -135,6 +214,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les communications entre les composants de\
+            \ l'application, y compris les API, le middleware et les couches de donn\xE9\
+            es, sont authentifi\xE9es. Les composants doivent avoir les privil\xE8\
+            ges les moins n\xE9cessaires possibles. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2.3
       assessable: true
       depth: 3
@@ -146,6 +232,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que toutes les m\xE9thodes d'authentification\
+            \ et les API de gestion de l'identit\xE9 mettent en \u0153uvre un contr\xF4\
+            le de s\xE9curit\xE9 de l'authentification coh\xE9rent, de sorte qu'il\
+            \ n'y ait pas d'alternatives plus faibles par rapport au risque de l'application."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2.4
       assessable: true
       depth: 3
@@ -157,12 +250,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les voies d'authentification et les\
+            \ API de gestion des identit\xE9s impl\xE9mentent une force de contr\xF4\
+            le de s\xE9curit\xE9 d'authentification coh\xE9rente, de sorte qu'il n'y\
+            \ ait pas d'alternative plus faible en fonction du risque de l'application."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.4
       name: Access Control Architecture
+      translations:
+        fr:
+          name: "Exigences architecturales en mati\xE8re de contr\xF4le d'acc\xE8s"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.4.1
       assessable: true
       depth: 3
@@ -174,6 +278,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que des points d'application de confiance tels\
+            \ que les passerelles de contr\xF4le d'acc\xE8s, les serveurs et les fonctions\
+            \ sans serveur font respecter les contr\xF4les d'acc\xE8s. N'imposez jamais\
+            \ de contr\xF4les d'acc\xE8s au client."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.4.4
       assessable: true
       depth: 3
@@ -186,6 +297,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application utilise un m\xE9canisme de contr\xF4\
+            le d'acc\xE8s unique et bien contr\xF4l\xE9 pour acc\xE9der aux donn\xE9\
+            es et ressources prot\xE9g\xE9es. Toutes les requ\xEAtes doivent passer\
+            \ par ce m\xE9canisme unique pour \xE9viter les copier-coller ou les chemins\
+            \ alternatifs non s\xE9curis\xE9s. ([C7](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.4.5
       assessable: true
       depth: 3
@@ -197,12 +316,25 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le contr\xF4le d'acc\xE8s bas\xE9 sur les\
+            \ attributs ou les caract\xE9ristiques est utilis\xE9, c'est-\xE0-dire\
+            \ que le code v\xE9rifie l'autorisation de l'utilisateur pour une caract\xE9\
+            ristique ou une donn\xE9e plut\xF4t que son seul r\xF4le. Les autorisations\
+            \ doivent tout de m\xEAme \xEAtre attribu\xE9es \xE0 l'aide de r\xF4les.\
+            \ ([C7](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.5
       name: Input and Output Architecture
+      translations:
+        fr:
+          name: "Exigences architecturales d'entr\xE9e et de sortie"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5.1
       assessable: true
       depth: 3
@@ -214,6 +346,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les exigences en mati\xE8re d'entr\xE9e et\
+            \ de sortie d\xE9finissent clairement la mani\xE8re de traiter et d'exploiter\
+            \ les donn\xE9es en fonction du type, du contenu et de la conformit\xE9\
+            \ aux lois, r\xE8glements et autres politiques applicables. "
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5.2
       assessable: true
       depth: 3
@@ -226,6 +365,15 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la s\xE9rialisation n'est pas utilis\xE9e\
+            \ lorsque vous communiquez avec des clients non fiables. Si cela n'est\
+            \ pas possible, assurez-vous que des contr\xF4les d'int\xE9grit\xE9 ad\xE9\
+            quats (et \xE9ventuellement un chiffrement si des donn\xE9es sensibles\
+            \ sont envoy\xE9es) sont appliqu\xE9s pour emp\xEAcher les attaques de\
+            \ d\xE9s\xE9rialisation, y compris l'injection d'objets."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5.3
       assessable: true
       depth: 3
@@ -236,6 +384,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la validation des entr\xE9es est appliqu\xE9\
+            e sur une couche de service de confiance. ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5.4
       assessable: true
       depth: 3
@@ -246,12 +399,21 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'encodage de sortie se fait \xE0 proximit\xE9\
+            \ ou par l'interpr\xE8te auquel il est destin\xE9. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.6
       name: Cryptographic Architecture
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re d'architecture cryptographique"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6.1
       assessable: true
       depth: 3
@@ -263,6 +425,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier qu'il existe une politique explicite de gestion\
+            \ des cl\xE9s cryptographiques et que le cycle de vie d'une cl\xE9 cryptographique\
+            \ suit une norme de gestion des cl\xE9s telle que NIST SP 800-57."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6.2
       assessable: true
       depth: 3
@@ -273,6 +441,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les consommateurs de services cryptographiques\
+            \ prot\xE8gent les cl\xE9s et autres secrets en utilisant des coffres-forts\
+            \ de cl\xE9s ou des alternatives bas\xE9es sur l'API."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6.3
       assessable: true
       depth: 3
@@ -283,6 +457,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les cl\xE9s et tous les mots de passe\
+            \ sont rempla\xE7ables et font partie d'un processus bien d\xE9fini de\
+            \ rechiffrement des donn\xE9es sensibles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6.4
       assessable: true
       depth: 3
@@ -294,12 +474,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'architecture traite les secrets c\xF4t\xE9\
+            \ client, tels que les cl\xE9s sym\xE9triques, les mots de passe ou les\
+            \ jetons d'API, comme non s\xE9curis\xE9s et ne les utilise jamais pour\
+            \ prot\xE9ger ou acc\xE9der \xE0 des donn\xE9es sensibles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.7
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.7
       name: Errors, Logging and Auditing Architecture
+      translations:
+        fr:
+          name: "Erreurs, enregistrement et v\xE9rification des exigences architecturales"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.7.1
       assessable: true
       depth: 3
@@ -310,6 +501,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier qu'un format de journalisation communs soit utilis\xE9\
+            s dans le syst\xE8me.  ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.7.2
       assessable: true
       depth: 3
@@ -320,12 +516,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les journaux sont transmis de mani\xE8re s\xE9\
+            curis\xE9e \xE0 un syst\xE8me de pr\xE9f\xE9rence distant pour analyse,\
+            \ d\xE9tection, alerte et escalade. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.8
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.8
       name: Data Protection and Privacy Architecture
+      translations:
+        fr:
+          name: "Exigences architecturales en mati\xE8re de protection des donn\xE9\
+            es et de la vie priv\xE9e"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.8.1
       assessable: true
       depth: 3
@@ -336,6 +543,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que toutes les donn\xE9es sensibles sont identifi\xE9\
+            es et class\xE9es en niveaux de protection."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.8.2
       assessable: true
       depth: 3
@@ -348,12 +560,24 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que tous les niveaux de protection sont associ\xE9\
+            s \xE0 un ensemble d'exigences de protection, telles que des exigences\
+            \ de chiffrement, d'int\xE9grit\xE9, de conservation, de respect de la\
+            \ vie priv\xE9e et d'autres exigences de confidentialit\xE9, et que celles-ci\
+            \ sont appliqu\xE9es dans l'architecture."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.9
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.9
       name: Communications Architecture
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re d'architecture des communications"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.9.1
       assessable: true
       depth: 3
@@ -365,6 +589,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application chiffre les communications entre\
+            \ les composants, en particulier lorsque ces composants se trouvent dans\
+            \ des conteneurs, syst\xE8mes, sites ou fournisseurs de cloud diff\xE9\
+            rents. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.9.2
       assessable: true
       depth: 3
@@ -376,12 +607,24 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les composants de l'application v\xE9rifient\
+            \ l'authenticit\xE9 de chaque partie d'un lien de communication afin de\
+            \ pr\xE9venir les attaques de type \"man-in-the-middle\". Par exemple,\
+            \ les composants d'application doivent valider les certificats et les\
+            \ cha\xEEnes TLS."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.10
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.10
       name: Malicious Software Architecture
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re d'architecture des logiciels malveillants"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.10.1
       assessable: true
       depth: 3
@@ -394,12 +637,25 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier qu'un syst\xE8me de contr\xF4le du code source\
+            \ est utilis\xE9, avec des proc\xE9dures pour s'assurer que les enregistrements\
+            \ sont accompagn\xE9s de tickets d'\xE9mission ou de modification. Le\
+            \ syst\xE8me de contr\xF4le du code source doit disposer d'un contr\xF4\
+            le d'acc\xE8s et d'utilisateurs identifiables pour permettre la tra\xE7\
+            abilit\xE9 de toute modification."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.11
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.11
       name: Business Logic Architecture
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re d'architecture de la logique d'entreprise"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.11.1
       assessable: true
       depth: 3
@@ -410,6 +666,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier la d\xE9finition et la documentation de tous les\
+            \ composants de l'application en ce qui concerne la logique m\xE9tier\
+            \ ou de s\xE9curit\xE9 qu'ils fournissent."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.11.2
       assessable: true
       depth: 3
@@ -420,6 +682,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que tous les flux de logique m\xE9tier de grande\
+            \ valeur, y compris l'authentification, la gestion de session et le contr\xF4\
+            le d'acc\xE8s, ne partagent pas un \xE9tat non synchronis\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.11.3
       assessable: true
       depth: 3
@@ -430,12 +698,24 @@ objects:
         and time-of-use race conditions.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que tous les flux de logique m\xE9tier de grande\
+            \ valeur, y compris l'authentification, la gestion de session et le contr\xF4\
+            le d'acc\xE8s, sont s\xE9curis\xE9s et r\xE9sistants aux conditions de\
+            \ concurrence (\"race condition\") au temps de contr\xF4le et au temps\
+            \ d'utilisation."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.12
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.12
       name: Secure File Upload Architecture
+      translations:
+        fr:
+          name: "T\xE9l\xE9chargement de fichiers s\xE9curis\xE9s Exigences architecturales"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.12.2
       assessable: true
       depth: 3
@@ -449,12 +729,27 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les fichiers envoy\xE9s par l'utilisateur\
+            \ - s'ils doivent \xEAtre affich\xE9s ou t\xE9l\xE9charg\xE9s \xE0 partir\
+            \ de l'application - sont servis par des t\xE9l\xE9chargements en flux\
+            \ d'octets, ou \xE0 partir d'un domaine sans rapport, comme un compartiment\
+            \ de stockage de fichiers en nuage. Mettre en \u0153uvre une politique\
+            \ de s\xE9curit\xE9 du contenu (CSP) appropri\xE9e pour r\xE9duire le\
+            \ risque de vecteurs XSS ou d'autres attaques provenant du fichier t\xE9\
+            l\xE9charg\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       ref_id: V1.14
       name: Configuration Architecture
+      translations:
+        fr:
+          name: Configuration des exigences architecturales
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.1
       assessable: true
       depth: 3
@@ -466,6 +761,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez la s\xE9paration des composants de diff\xE9rents\
+            \ niveaux de confiance via des contr\xF4les de s\xE9curit\xE9 bien d\xE9\
+            finis, des r\xE8gles de pare-feu, des passerelles API, des proxys inverses,\
+            \ des groupes de s\xE9curit\xE9 bas\xE9s sur le cloud ou des m\xE9canismes\
+            \ similaires."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.2
       assessable: true
       depth: 3
@@ -476,6 +779,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les signatures binaires, les connexions de\
+            \ confiance et les n\u0153uds v\xE9rifi\xE9s sont utilis\xE9s pour d\xE9\
+            ployer des binaires sur des dispositifs distants."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.3
       assessable: true
       depth: 3
@@ -486,6 +795,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que le pipeline de construction signale les composants\
+            \ obsol\xE8tes ou peu s\xFBrs et prend les mesures appropri\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.4
       assessable: true
       depth: 3
@@ -498,6 +812,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le pipeline de construction contient une \xE9\
+            tape de g\xE9n\xE9ration pour g\xE9n\xE9rer automatiquement et v\xE9rifier\
+            \ le d\xE9ploiement s\xE9curis\xE9 de l'application, en particulier si\
+            \ l'infrastructure de l'application est d\xE9finie par logiciel, comme\
+            \ les scripts de g\xE9n\xE9ration d'environnement cloud."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.5
       assessable: true
       depth: 3
@@ -510,6 +832,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les d\xE9ploiements d'applications sont correctement\
+            \ mis en bac \xE0 sable, conteneuris\xE9s et/ou isol\xE9s au niveau du\
+            \ r\xE9seau pour retarder et dissuader les attaquants d'attaquer d'autres\
+            \ applications, en particulier lorsqu'ils effectuent des actions sensibles\
+            \ ou dangereuses telles que la d\xE9s\xE9rialisation. ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.6
       assessable: true
       depth: 3
@@ -521,17 +851,32 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application n'utilise pas de technologies\
+            \ c\xF4t\xE9 client non prises en charge, non s\xE9curis\xE9es ou obsol\xE8\
+            tes telles que les plug-ins NSAPI, Flash, Shockwave, ActiveX, Silverlight,\
+            \ NACL ou des applets Java c\xF4t\xE9 client."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       assessable: false
       depth: 1
       ref_id: V2
       name: Authentication
+      translations:
+        fr:
+          name: Authentification
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.1
       name: Password Security
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re de s\xE9curit\xE9 des mots de passe"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.1
       assessable: true
       depth: 3
@@ -543,6 +888,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les mots de passe d\xE9finis par l'utilisateur\
+            \ comportent au moins 12 caract\xE8res (apr\xE8s avoir combin\xE9 plusieurs\
+            \ espaces). ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.2
       assessable: true
       depth: 3
@@ -554,6 +905,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les mots de passe de 64 caract\xE8res ou plus\
+            \ sont autoris\xE9s, mais pas au del\xE0 de 128 caract\xE8res. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.3
       assessable: true
       depth: 3
@@ -565,6 +921,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le mot de passe n'est pas tronqu\xE9. Toutefois,\
+            \ des espaces multiples cons\xE9cutifs peuvent \xEAtre remplac\xE9s par\
+            \ un seul espace. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.4
       assessable: true
       depth: 3
@@ -576,6 +938,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que tout caract\xE8re Unicode imprimable, y compris\
+            \ les caract\xE8res neutres comme les espaces et les Emojis, sont autoris\xE9\
+            s dans les mots de passe."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.5
       assessable: true
       depth: 3
@@ -586,6 +954,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les utilisateurs peuvent changer leur mot\
+            \ de passe."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.6
       assessable: true
       depth: 3
@@ -597,6 +970,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la fonctionnalit\xE9 de changement de mot\
+            \ de passe n\xE9cessite le mot de passe actuel et le nouveau mot de passe\
+            \ de l'utilisateur."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.7
       assessable: true
       depth: 3
@@ -614,6 +993,20 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les mots de passe soumis lors de l'enregistrement\
+            \ du compte, de la connexion et du changement de mot de passe sont compar\xE9\
+            s \xE0 un ensemble de mots de passe viol\xE9s, soit localement (comme\
+            \ les 1 000 ou 10 000 mots de passe les plus courants qui correspondent\
+            \ \xE0 la politique de mot de passe du syst\xE8me), soit en utilisant\
+            \ une API externe. En cas d'utilisation d'une API, une preuve de connaissance\
+            \ nulle ou un autre m\xE9canisme doit \xEAtre utilis\xE9 pour garantir\
+            \ que le mot de passe en texte clair n'est pas envoy\xE9 ou utilis\xE9\
+            \ pour v\xE9rifier l'\xE9tat de violation du mot de passe. Si le mot de\
+            \ passe est viol\xE9, l'application doit demander \xE0 l'utilisateur de\
+            \ d\xE9finir un nouveau mot de passe non viol\xE9. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.8
       assessable: true
       depth: 3
@@ -625,6 +1018,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'un compteur de force de mot de passe est fourni\
+            \ pour aider les utilisateurs \xE0 d\xE9finir un mot de passe plus fort."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.9
       assessable: true
       depth: 3
@@ -637,6 +1035,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'il n'existe pas de r\xE8gles de composition\
+            \ des mots de passe limitant le type de caract\xE8res autoris\xE9s. Il\
+            \ ne doit pas y avoir restrictions sur l'utilisation de majuscules ou\
+            \ de minuscules, de chiffres ou de caract\xE8res sp\xE9ciaux. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.10
       assessable: true
       depth: 3
@@ -648,6 +1053,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'il n'y a pas d'exigences en mati\xE8re de rotation\
+            \ p\xE9riodique du mots de passe ou d'historique des mots de passe."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.11
       assessable: true
       depth: 3
@@ -659,6 +1069,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la fonction \"coller\", les aides de mot de\
+            \ passe du navigateur et les gestionnaires de mots de passe externes sont\
+            \ autoris\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.12
       assessable: true
       depth: 3
@@ -671,12 +1087,23 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'utilisateur peut choisir soit de visualiser\
+            \ temporairement la totalit\xE9 du mot de passe masqu\xE9, soit de visualiser\
+            \ temporairement le dernier caract\xE8re tap\xE9 du mot de passe sur les\
+            \ plateformes qui n'ont pas cette fonctionnalit\xE9 en natif."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.2
       name: General Authenticator Security
+      translations:
+        fr:
+          name: "Exigences g\xE9n\xE9rales relatives aux authentificateurs"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.1
       assessable: true
       depth: 3
@@ -693,6 +1120,20 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les contr\xF4les anti-automatisation sont\
+            \ efficaces pour att\xE9nuer les attaques par violation des tests d'accr\xE9\
+            ditation, par \xE9num\xE9ration exhaustive (brute-force) et par verrouillage\
+            \ de compte. Ces contr\xF4les comprennent le blocage des mots de passe\
+            \ les plus courants, les verrouillages progressifs, la limitation de d\xE9\
+            bit, les CAPTCHA, les d\xE9lais toujours plus longs entre les tentatives,\
+            \ les restrictions d'adresse IP ou les restrictions bas\xE9es sur le risque\
+            \ telles que l'emplacement, la premi\xE8re connexion sur un appareil,\
+            \ les tentatives r\xE9centes de d\xE9verrouillage du compte, ou autres.\
+            \ V\xE9rifiez qu'il n'y a pas plus de 100 tentatives infructueuses par\
+            \ heure sur un seul compte."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.2
       assessable: true
       depth: 3
@@ -707,6 +1148,17 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'utilisation d'authentificateurs faibles\
+            \ (tels que les SMS et les e-mails) se limite \xE0 la v\xE9rification\
+            \ secondaire et \xE0 l'approbation des transactions et ne remplace pas\
+            \ les m\xE9thodes d'authentification plus s\xFBres. V\xE9rifiez que les\
+            \ m\xE9thodes plus fortes sont propos\xE9es avant les m\xE9thodes faibles,\
+            \ que les utilisateurs sont conscients des risques, ou que des mesures\
+            \ appropri\xE9es sont en place pour limiter les risques de compromission\
+            \ du compte."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.3
       assessable: true
       depth: 3
@@ -722,6 +1174,17 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que des notifications s\xE9curis\xE9es sont envoy\xE9\
+            es aux utilisateurs apr\xE8s la mise \xE0 jour des d\xE9tails d'authentification,\
+            \ tels que la r\xE9initialisation de l'identifiant, le changement d'adresse\
+            \ \xE9lectronique ou d'adresse, la connexion \xE0 partir d'un lieu inconnu\
+            \ ou risqu\xE9. L'utilisation de notifications \"push\" - plut\xF4t que\
+            \ de SMS ou d'e-mail - est pr\xE9f\xE9rable, mais en l'absence de notifications\
+            \ \"push\", les SMS ou les e-mails sont acceptables tant qu'aucune information\
+            \ sensible n'est divulgu\xE9e dans la notification."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.4
       assessable: true
       depth: 3
@@ -733,6 +1196,14 @@ objects:
         certificates.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier la r\xE9sistance \xE0 l'usurpation d'identit\xE9\
+            \ contre le phishing, comme l'utilisation de l'authentification multi-facteurs,\
+            \ les dispositifs cryptographiques avec intention (comme les cl\xE9s connect\xE9\
+            es avec un \"push to authenticate\"), ou \xE0 des niveaux AAL sup\xE9\
+            rieurs, les certificats c\xF4t\xE9 client."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.5
       assessable: true
       depth: 3
@@ -743,6 +1214,13 @@ objects:
         between the two endpoints.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que lorsqu'un fournisseur de services d'accr\xE9\
+            ditation (CSP) et l'application v\xE9rifiant l'authentification sont s\xE9\
+            par\xE9s, un TLS mutuellement authentifi\xE9 est en place entre les deux\
+            \ points terminaux."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.6
       assessable: true
       depth: 3
@@ -752,6 +1230,12 @@ objects:
         (OTP) devices, cryptographic authenticators, or lookup codes.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier la r\xE9sistance au attaque de rejeu par l'utilisation\
+            \ obligatoire de dispositifs OTP, d'authentificateurs cryptographiques\
+            \ ou de codes de consultation."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.7
       assessable: true
       depth: 3
@@ -761,12 +1245,22 @@ objects:
         token or user-initiated action such as a button press on a FIDO hardware key.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier l'intention d'authentification en exigeant l'entr\xE9\
+            e d'un jeton OTP ou une action initi\xE9e par l'utilisateur telle qu'une\
+            \ pression sur un bouton d'une cl\xE9 mat\xE9rielle FIDO."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.3
       name: Authenticator Lifecycle
+      translations:
+        fr:
+          name: Exigences relatives au cycle de vie des authentificateurs
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.3.1
       assessable: true
       depth: 3
@@ -780,6 +1274,16 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les mots de passe ou codes d'activation initiaux\
+            \ g\xE9n\xE9r\xE9s par le syst\xE8me DOIVENT \xEAtre g\xE9n\xE9r\xE9s\
+            \ de mani\xE8re al\xE9atoire et s\xE9curis\xE9e, DOIVENT comporter au\
+            \ moins 6 caract\xE8res, PEUVENT contenir des lettres et des chiffres,\
+            \ et expirent apr\xE8s une courte p\xE9riode de temps. Ces secrets initiaux\
+            \ ne doivent pas \xEAtre autoris\xE9s \xE0 devenir le mot de passe \xE0\
+            \ long terme."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.3.2
       assessable: true
       depth: 3
@@ -790,6 +1294,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'inscription et l'utilisation de dispositifs\
+            \ d'authentification fournis par l'abonn\xE9 sont prises en charge, comme\
+            \ les jetons U2F ou FIDO."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.3.3
       assessable: true
       depth: 3
@@ -800,12 +1310,22 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les instructions de renouvellement sont envoy\xE9\
+            es suffisamment t\xF4t pour renouveler les authentificateurs \xE0 dur\xE9\
+            e d\xE9termin\xE9e."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.4
       name: Credential Storage
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re de stockage des identifiants"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.1
       assessable: true
       depth: 3
@@ -819,6 +1339,16 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les mots de passe sont stock\xE9s sous une\
+            \ forme qui r\xE9siste aux attaques hors ligne. Les mots de passe DOIVENT\
+            \ \xEAtre sal\xE9s et hach\xE9s \xE0 l'aide d'une fonction approuv\xE9\
+            e de d\xE9rivation de cl\xE9 ou de hachage de mot de passe \xE0 sens unique.\
+            \ Les fonctions de d\xE9rivation de cl\xE9 et de hachage de mot de passe\
+            \ prennent un mot de passe, un sel et un facteur de co\xFBt en entr\xE9\
+            e pour g\xE9n\xE9rer un hachage de mot de passe. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.2
       assessable: true
       depth: 3
@@ -830,6 +1360,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le sel a une longueur d'au moins 32 bits et\
+            \ qu'il est choisi arbitrairement pour minimiser les collisions de la\
+            \ valeur du sel parmi les hashs stock\xE9s. Pour chaque authentifiant,\
+            \ une valeur de sel unique et le hachage qui en r\xE9sulte DOIVENT \xEA\
+            tre stock\xE9s. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.3
       assessable: true
       depth: 3
@@ -841,6 +1379,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que si le PBKDF2 est utilis\xE9, le nombre d'it\xE9\
+            rations DOIT \xEAtre aussi important que les performances du serveur de\
+            \ v\xE9rification le permettent, g\xE9n\xE9ralement au moins 100 000 it\xE9\
+            rations. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.4
       assessable: true
       depth: 3
@@ -851,6 +1396,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que si bcrypt est utilis\xE9, le facteur de travail\
+            \ DOIT \xEAtre aussi important que les performances du serveur de v\xE9\
+            rification le permettent, g\xE9n\xE9ralement au moins 10. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.5
       assessable: true
       depth: 3
@@ -866,12 +1417,28 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier qu'une it\xE9ration suppl\xE9mentaire d'une fonction\
+            \ de d\xE9rivation cl\xE9 est effectu\xE9e, en utilisant une valeur de\
+            \ sel qui est secr\xE8te et connue uniquement du v\xE9rificateur. G\xE9\
+            n\xE9rer la valeur de sel en utilisant un g\xE9n\xE9rateur de bits al\xE9\
+            atoires approuv\xE9 [SP 800-90Ar1] et fournir au moins la s\xE9curit\xE9\
+            \ minimale sp\xE9cifi\xE9e dans la derni\xE8re r\xE9vision de la norme\
+            \ SP 800-131A. La valeur de sel secr\xE8te DOIT \xEAtre stock\xE9e s\xE9\
+            par\xE9ment des mots de passe hach\xE9s (par exemple, dans un dispositif\
+            \ sp\xE9cialis\xE9 comme un module de s\xE9curit\xE9 mat\xE9riel)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.5
       name: Credential Recovery
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re de r\xE9cup\xE9ration des identifiants"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.1
       assessable: true
       depth: 3
@@ -883,6 +1450,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'un secret d'activation initiale ou de r\xE9\
+            cup\xE9ration g\xE9n\xE9r\xE9 par le syst\xE8me n'est pas envoy\xE9 en\
+            \ clair \xE0 l'utilisateur.  ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.2
       assessable: true
       depth: 3
@@ -894,6 +1467,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les indices de mot de passe ou l'authentification\
+            \ bas\xE9e sur la connaissance (dites \"questions secr\xE8tes\") ne sont\
+            \ pas pr\xE9sents."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.3
       assessable: true
       depth: 3
@@ -905,6 +1484,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la r\xE9cup\xE9ration du mot de passe ne r\xE9\
+            v\xE8le en aucune fa\xE7on le mot de passe actuel. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.4
       assessable: true
       depth: 3
@@ -916,6 +1500,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les comptes partag\xE9s ou par d\xE9faut ne\
+            \ sont pas pr\xE9sents (par exemple \"root\", \"admin\" ou \"sa\")."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.5
       assessable: true
       depth: 3
@@ -927,6 +1516,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que si un facteur d'authentification est modifi\xE9\
+            \ ou remplac\xE9, l'utilisateur est inform\xE9 de cet \xE9v\xE9nement."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.6
       assessable: true
       depth: 3
@@ -939,6 +1533,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier les mots de passe oubli\xE9s, et les autres chemins\
+            \ de r\xE9cup\xE9ration utilisent un m\xE9canisme de r\xE9cup\xE9ration\
+            \ s\xE9curis\xE9, tel que TOTP ou autre soft token, mobile push, ou un\
+            \ autre m\xE9canisme de r\xE9cup\xE9ration hors ligne. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.7
       assessable: true
       depth: 3
@@ -950,12 +1551,22 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier qu'en cas de perte des facteurs d'authentification\
+            \ OTP ou multi-facteurs, la preuve d'identit\xE9 est effectu\xE9e au m\xEA\
+            me niveau que lors de l'inscription."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.6
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.6
       name: Look-up Secret Verifier
+      translations:
+        fr:
+          name: "Exigences relatives aux v\xE9rificateurs des secrets"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.6.1
       assessable: true
       depth: 3
@@ -965,6 +1576,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les secrets de la table d'authentification\
+            \ ne peuvent \xEAtre utilis\xE9s qu'une seule fois."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.6.2
       assessable: true
       depth: 3
@@ -976,6 +1592,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les secrets de la table d'authentification\
+            \ ont un caract\xE8re al\xE9atoire suffisant (112 bits d'entropie) ou,\
+            \ s'ils ont moins de 112 bits d'entropie, qu'ils sont sal\xE9s avec un\
+            \ sel unique et al\xE9atoire de 32 bits et hach\xE9s avec un hachage unidirectionnel\
+            \ approuv\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.6.3
       assessable: true
       depth: 3
@@ -986,12 +1610,21 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les secrets de la table d'authentification\
+            \ r\xE9sistent aux attaques hors ligne, comme les valeurs pr\xE9visibles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.7
       name: Out of Band Verifier
+      translations:
+        fr:
+          name: "Exigences relatives aux v\xE9rificateurs hors bande"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.1
       assessable: true
       depth: 3
@@ -1004,6 +1637,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les authentificateurs de texte en clair hors\
+            \ bande (NIST \"restreint\"), tels que les SMS ou le PSTN, ne sont pas\
+            \ propos\xE9s par d\xE9faut, et que des alternatives plus fortes, telles\
+            \ que les notifications \"push\", sont propos\xE9es en premier lieu."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.2
       assessable: true
       depth: 3
@@ -1015,6 +1655,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le v\xE9rificateur hors bande expire les demandes\
+            \ d'authentification, les codes ou les jetons hors bande apr\xE8s 10 minutes."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.3
       assessable: true
       depth: 3
@@ -1026,6 +1671,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les demandes d'authentification, codes ou\
+            \ jetons hors bande du v\xE9rificateur ne sont utilisables qu'une seule\
+            \ fois, et uniquement pour la demande d'authentification originale."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.4
       assessable: true
       depth: 3
@@ -1037,6 +1688,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'authentificateur et le v\xE9rificateur hors\
+            \ bande communiquent sur un canal ind\xE9pendant s\xE9curis\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.5
       assessable: true
       depth: 3
@@ -1047,6 +1703,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le v\xE9rificateur hors bande ne conserve\
+            \ qu'une version hach\xE9e du code d'authentification."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.6
       assessable: true
       depth: 3
@@ -1058,12 +1719,24 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le code d'authentification initial est g\xE9\
+            n\xE9r\xE9 par un g\xE9n\xE9rateur de nombres al\xE9atoires s\xE9curis\xE9\
+            , contenant au moins 20 bits d'entropie (en g\xE9n\xE9ral, un nombre al\xE9\
+            atoire de six chiffres est suffisant)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.8
       name: One Time Verifier
+      translations:
+        fr:
+          name: "Exigences relatives aux v\xE9rificateurs uniques \xE0 facteur unique\
+            \ ou \xE0 facteurs multiples"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.1
       assessable: true
       depth: 3
@@ -1074,6 +1747,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les OTP bas\xE9es sur le temps ont une dur\xE9\
+            e de vie d\xE9finie avant d'expirer."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.2
       assessable: true
       depth: 3
@@ -1085,6 +1763,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les cl\xE9s sym\xE9triques utilis\xE9es pour\
+            \ v\xE9rifier les OTP soumises sont hautement prot\xE9g\xE9es, par exemple\
+            \ en utilisant un module de s\xE9curit\xE9 mat\xE9riel ou un stockage\
+            \ de cl\xE9s bas\xE9 sur un syst\xE8me d'exploitation s\xE9curis\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.3
       assessable: true
       depth: 3
@@ -1095,6 +1780,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que des algorithmes cryptographiques approuv\xE9\
+            s sont utilis\xE9s dans la g\xE9n\xE9ration, dans la pr\xE9paration et\
+            \ dans la v\xE9rification des OTP."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.4
       assessable: true
       depth: 3
@@ -1105,6 +1796,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'OTP bas\xE9 sur le temps ne peut \xEAtre\
+            \ utilis\xE9 qu'une seule fois pendant la p\xE9riode de validit\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.5
       assessable: true
       depth: 3
@@ -1116,6 +1812,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que si un jeton OTP multi-facteur bas\xE9 sur\
+            \ le temps est r\xE9utilis\xE9 pendant la p\xE9riode de validit\xE9, il\
+            \ est enregistr\xE9 et rejet\xE9 avec des notifications s\xE9curis\xE9\
+            es envoy\xE9es au d\xE9tenteur du dispositif."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.6
       assessable: true
       depth: 3
@@ -1127,6 +1830,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que le g\xE9n\xE9rateur OTP physique \xE0 facteur\
+            \ unique peut \xEAtre r\xE9voqu\xE9 en cas de vol ou autre perte. S'assurer\
+            \ que la r\xE9vocation est imm\xE9diatement effective pour toutes les\
+            \ sessions connect\xE9es, quel que soit le lieu."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.7
       assessable: true
       depth: 3
@@ -1138,12 +1848,24 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les authentificateurs biom\xE9triques sont\
+            \ limit\xE9s \xE0 une utilisation en tant que facteurs secondaires en\
+            \ conjonction avec quelque chose que vous avez et quelque chose que vous\
+            \ connaissez."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.9
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.9
       name: Cryptographic Verifier
+      translations:
+        fr:
+          name: "Exigences relatives aux v\xE9rificateurs de logiciels et d'appareils\
+            \ cryptographiques"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.9.1
       assessable: true
       depth: 3
@@ -1156,6 +1878,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les cl\xE9s cryptographiques utilis\xE9es\
+            \ dans la v\xE9rification sont stock\xE9es de mani\xE8re s\xFBre et prot\xE9\
+            g\xE9es contre la divulgation, par exemple en utilisant un TPM ou un HSM,\
+            \ ou un service OS qui peut utiliser ce stockage s\xE9curis\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.9.2
       assessable: true
       depth: 3
@@ -1167,6 +1896,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le nonce de d\xE9fi est d'une longueur d'au\
+            \ moins 64 bits, et statistiquement unique ou non pendant la dur\xE9e\
+            \ de vie du dispositif cryptographique."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.9.3
       assessable: true
       depth: 3
@@ -1177,12 +1912,22 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que des algorithmes cryptographiques approuv\xE9\
+            s sont utilis\xE9s dans la g\xE9n\xE9ration, la pr\xE9paration et la v\xE9\
+            rification."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       ref_id: V2.10
       name: Service Authentication
+      translations:
+        fr:
+          name: Exigences d'authentification des services
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10.1
       assessable: true
       depth: 3
@@ -1193,6 +1938,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les secrets d'int\xE9gration ne reposent pas\
+            \ sur des mots de passe immuables, tels que les cl\xE9s API ou les comptes\
+            \ privil\xE9gi\xE9s partag\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10.2
       assessable: true
       depth: 3
@@ -1204,6 +1955,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que si des mots de passe sont requis pour l'authentification\
+            \ des services, le compte de service utilis\xE9 n'est pas un identifiant\
+            \ par d\xE9faut. (par exemple, root/root ou admin/admin sont utilis\xE9\
+            s par d\xE9faut dans certains services lors de l'installation)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10.3
       assessable: true
       depth: 3
@@ -1214,6 +1972,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les mots de passe sont stock\xE9s avec une\
+            \ protection suffisante pour emp\xEAcher les attaques de r\xE9cup\xE9\
+            ration hors ligne, y compris l'acc\xE8s au syst\xE8me local."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10.4
       assessable: true
       depth: 3
@@ -1227,17 +1991,37 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les mots de passe, les int\xE9grations avec\
+            \ les bases de donn\xE9es et les syst\xE8mes tiers, les seeds et les secrets\
+            \ internes, ainsi que les cl\xE9s API sont g\xE9r\xE9s de mani\xE8re s\xE9\
+            curis\xE9e et ne sont pas inclus dans le code source ou stock\xE9s dans\
+            \ des d\xE9p\xF4ts de code source. Ce type de stockage DEVRAIT r\xE9sister\
+            \ aux attaques hors ligne. L'utilisation d'un stockage de cl\xE9s logiciel\
+            \ s\xE9curis\xE9 (L1), d'un module de plate-forme de confiance (TPM) ou\
+            \ d'un module de s\xE9curit\xE9 mat\xE9riel (L3) est recommand\xE9e pour\
+            \ le stockage des mots de passe."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       assessable: false
       depth: 1
       ref_id: V3
       name: Session Management
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification de la gestion des sessions"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       ref_id: V3.1
       name: Fundamental Session Management Security
+      translations:
+        fr:
+          name: "Exigences fondamentales en mati\xE8re de gestion des sessions"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.1.1
       assessable: true
       depth: 3
@@ -1248,12 +2032,21 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application ne r\xE9v\xE8le jamais les jetons\
+            \ de session dans les param\xE8tres d'URL ou les messages d'erreur. "
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       ref_id: V3.2
       name: Session Binding
+      translations:
+        fr:
+          name: Exigences contraignantes de la session
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2.1
       assessable: true
       depth: 3
@@ -1265,6 +2058,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application g\xE9n\xE8re un nouveau jeton\
+            \ de session sur l'authentification de l'utilisateur. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2.2
       assessable: true
       depth: 3
@@ -1276,6 +2074,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les jetons de session poss\xE8dent au moins\
+            \ 64 bits d'entropie. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2.3
       assessable: true
       depth: 3
@@ -1288,6 +2091,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application ne stocke que des jetons de\
+            \ session dans le navigateur en utilisant des m\xE9thodes s\xFBres telles\
+            \ que les cookies correctement s\xE9curis\xE9s (voir section 3.4) ou le\
+            \ stockage de session HTML 5."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2.4
       assessable: true
       depth: 3
@@ -1298,12 +2108,22 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les jetons de session sont g\xE9n\xE9r\xE9\
+            s \xE0 l'aide d'algorithmes cryptographiques approuv\xE9s. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       ref_id: V3.3
       name: Session Termination
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re de d\xE9connexion et de temporisation des\
+            \ sessions"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3.1
       assessable: true
       depth: 3
@@ -1316,6 +2136,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la d\xE9connexion et l'expiration invalident\
+            \ le jeton de session, de sorte que le bouton de retour ou une partie\
+            \ de confiance en aval ne reprenne pas une session authentifi\xE9e, y\
+            \ compris entre les parties de confiance. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3.2
       assessable: true
       depth: 3
@@ -1328,6 +2155,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "Si les authentificateurs permettent aux utilisateurs de rester\
+            \ connect\xE9s, v\xE9rifiez que la r\xE9-authentification a lieu p\xE9\
+            riodiquement, que ce soit en cas d'utilisation active ou apr\xE8s une\
+            \ p\xE9riode d'inactivit\xE9. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3.3
       assessable: true
       depth: 3
@@ -1340,6 +2174,15 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application offre la possibilit\xE9 de mettre\
+            \ fin \xE0 toutes les autres sessions actives apr\xE8s un changement de\
+            \ mot de passe r\xE9ussi (y compris le changement par r\xE9initialisation/r\xE9\
+            cup\xE9ration du mot de passe), et que cette option est effective dans\
+            \ toute l'application, la connexion f\xE9d\xE9r\xE9e (si elle existe)\
+            \ et toute partie qui se fie \xE0 elle."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3.4
       assessable: true
       depth: 3
@@ -1350,12 +2193,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les utilisateurs sont en mesure de consulter\
+            \ et (apr\xE8s avoir saisi \xE0 nouveau leurs identifiants de connexion)\
+            \ de se d\xE9connecter d'une ou de toutes les sessions et de tous les\
+            \ dispositifs actuellement actifs."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       ref_id: V3.4
       name: Cookie-based Session Management
+      translations:
+        fr:
+          name: "Gestion de session bas\xE9e sur les cookies"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.1
       assessable: true
       depth: 3
@@ -1367,6 +2221,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les jetons de session bas\xE9s sur des cookies\
+            \ ont l'attribut 'Secure'. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.2
       assessable: true
       depth: 3
@@ -1378,6 +2237,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les jetons de session bas\xE9s sur des cookies\
+            \ ont l'attribut 'HttpOnly'. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.3
       assessable: true
       depth: 3
@@ -1389,6 +2253,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les jetons de session bas\xE9s sur des cookies\
+            \ utilisent l'attribut 'SameSite' pour limiter l'exposition aux attaques\
+            \ de contrefa\xE7on par requ\xEAte intersite. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.4
       assessable: true
       depth: 3
@@ -1400,6 +2270,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les jetons de session bas\xE9s sur les cookies\
+            \ utilisent le pr\xE9fixe \"__Host-\" (voir r\xE9f\xE9rences) pour assurer\
+            \ la confidentialit\xE9 des cookies de session."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.5
       assessable: true
       depth: 3
@@ -1413,12 +2289,24 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que si la demande est publi\xE9e sous un nom de\
+            \ domaine avec d'autres applications qui d\xE9finissent ou utilisent des\
+            \ cookies de session susceptibles de les remplacer ou de les divulguer,\
+            \ d\xE9finissez l'attribut de chemin dans les jetons de session bas\xE9\
+            s sur les cookies en utilisant le chemin le plus pr\xE9cis possible. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.5
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       ref_id: V3.5
       name: Token-based Session Management
+      translations:
+        fr:
+          name: "Gestion de session \xE0 jetons"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.5.1
       assessable: true
       depth: 3
@@ -1429,6 +2317,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application permet aux utilisateurs de r\xE9\
+            voquer les jetons OAuth qui forment des relations d'approbation avec les\
+            \ applications li\xE9es. "
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.5.2
       assessable: true
       depth: 3
@@ -1439,6 +2333,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application utilise des jetons de session\
+            \ plut\xF4t que des secrets et des cl\xE9s d'API statiques, sauf dans\
+            \ le cas d'anciennes impl\xE9mentations (legacy)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.5.3
       assessable: true
       depth: 3
@@ -1450,12 +2350,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les jetons de session sans \xE9tat utilisent\
+            \ les signatures num\xE9riques, le chiffrement et d'autres contre-mesures\
+            \ pour se prot\xE9ger contre les attaques par alt\xE9ration, mise sous\
+            \ enveloppe, rediffusion, chiffrement nul et substitution de cl\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.6
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       ref_id: V3.6
       name: Federated Re-authentication
+      translations:
+        fr:
+          name: "Re-authentification d'une f\xE9d\xE9ration ou d'une assertion"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.6.1
       assessable: true
       depth: 3
@@ -1466,6 +2377,14 @@ objects:
         the user if they haven't used a session within that period.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les parties qui se fient \xE0 la proc\xE9\
+            dure pr\xE9cisent le d\xE9lai maximal d'authentification aux fournisseurs\
+            \ de services d'authentification (CSP) et que ces derniers r\xE9-authentifient\
+            \ l'abonn\xE9 s'ils n'ont pas utilis\xE9 de session pendant cette p\xE9\
+            riode."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.6.2
       assessable: true
       depth: 3
@@ -1476,12 +2395,23 @@ objects:
         if they need to re-authenticate the user.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les fournisseurs de services d'accr\xE9ditation\
+            \ (CSP) informent les parties ayant fait confiance au dernier \xE9v\xE9\
+            nement d'authentification, afin de permettre aux RP de d\xE9terminer s'ils\
+            \ doivent r\xE9-authentifier l'utilisateur."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.7
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       ref_id: V3.7
       name: Defenses Against Session Management Exploits
+      translations:
+        fr:
+          name: "D\xE9fenses contre l'exploitation de la gestion des sessions"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.7.1
       assessable: true
       depth: 3
@@ -1494,17 +2424,32 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application garantit une session de connexion\
+            \ compl\xE8te et valide ou exige une nouvelle authentification ou une\
+            \ v\xE9rification secondaire avant d'autoriser toute transaction sensible\
+            \ ou modification de compte."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4
       assessable: false
       depth: 1
       ref_id: V4
       name: Access Control
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification du contr\xF4le d'acc\xE8s"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4
       ref_id: V4.1
       name: General Access Control Design
+      translations:
+        fr:
+          name: "Conception g\xE9n\xE9rale du contr\xF4le d'acc\xE8s"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.1.1
       assessable: true
       depth: 3
@@ -1517,6 +2462,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application applique les r\xE8gles de contr\xF4\
+            le d'acc\xE8s sur une couche de service de confiance, en particulier si\
+            \ le contr\xF4le d'acc\xE8s c\xF4t\xE9 client est pr\xE9sent et pourrait\
+            \ \xEAtre contourn\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.1.2
       assessable: true
       depth: 3
@@ -1529,6 +2481,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que tous les attributs des utilisateurs et des\
+            \ donn\xE9es et les informations sur les politiques utilis\xE9es par les\
+            \ contr\xF4les d'acc\xE8s ne peuvent \xEAtre manipul\xE9s par les utilisateurs\
+            \ finaux, sauf autorisation sp\xE9cifique."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.1.3
       assessable: true
       depth: 3
@@ -1542,6 +2501,15 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que le principe du moindre privil\xE8ge existe\
+            \ - les utilisateurs ne doivent pouvoir acc\xE9der qu'aux fonctions, fichiers\
+            \ de donn\xE9es, URL, contr\xF4leurs, services et autres ressources pour\
+            \ lesquels ils poss\xE8dent une autorisation sp\xE9cifique. Cela implique\
+            \ une protection contre l'usurpation et l'\xE9l\xE9vation des privil\xE8\
+            ges. ([C7](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.1.5
       assessable: true
       depth: 3
@@ -1553,12 +2521,21 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les contr\xF4les d'acc\xE8s \xE9chouent de\
+            \ mani\xE8re s\xFBre, y compris lorsqu'une exception se produit. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4
       ref_id: V4.2
       name: Operation Level Access Control
+      translations:
+        fr:
+          name: "Contr\xF4le d'acc\xE8s au niveau des op\xE9rations"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.2.1
       assessable: true
       depth: 3
@@ -1572,6 +2549,16 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les donn\xE9es sensibles et les API sont prot\xE9\
+            g\xE9es contre les attaques par r\xE9f\xE9rence directe \xE0 un objet\
+            \ (IDOR) non s\xE9curis\xE9es visant la cr\xE9ation, la lecture, la mise\
+            \ \xE0 jour et la suppression d'enregistrements, telles que la cr\xE9\
+            ation ou la mise \xE0 jour de l'enregistrement de quelqu'un d'autre, la\
+            \ consultation de tous les enregistrements ou la suppression de tous les\
+            \ enregistrements."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.2.2
       assessable: true
       depth: 3
@@ -1584,12 +2571,23 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application ou le cadriciel applique un\
+            \ m\xE9canisme anti-CSRF fort pour prot\xE9ger les fonctionnalit\xE9s\
+            \ authentifi\xE9es, et qu'une anti-automation ou un anti-CSRF efficace\
+            \ prot\xE8ge les fonctionnalit\xE9s non authentifi\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4
       ref_id: V4.3
       name: Other Access Control Considerations
+      translations:
+        fr:
+          name: "Autres consid\xE9rations relatives au contr\xF4le d'acc\xE8s"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.3.1
       assessable: true
       depth: 3
@@ -1601,6 +2599,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les interfaces administratives utilisent une\
+            \ authentification multifactorielle appropri\xE9e pour emp\xEAcher toute\
+            \ utilisation non autoris\xE9e."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.3.2
       assessable: true
       depth: 3
@@ -1614,6 +2618,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la navigation dans les r\xE9pertoires est\
+            \ d\xE9sactiv\xE9e, sauf si vous le souhaitez d\xE9lib\xE9r\xE9ment. En\
+            \ outre, les applications ne doivent pas permettre la d\xE9couverte ou\
+            \ la divulgation de m\xE9tadonn\xE9es de fichiers ou de r\xE9pertoires,\
+            \ tels que les dossiers Thumbs.db, .DS_Store, .git ou .svn."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.3.3
       assessable: true
       depth: 3
@@ -1626,17 +2638,35 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que la demande dispose d'une autorisation suppl\xE9\
+            mentaire (telle qu'une authentification renforc\xE9e ou adaptative) pour\
+            \ les syst\xE8mes \xE0 faible valeur, et/ou d'une s\xE9paration des t\xE2\
+            ches pour les demandes \xE0 valeur \xE9lev\xE9e afin de faire appliquer\
+            \ les contr\xF4les anti-fraude en fonction du risque de fraude de la demande\
+            \ et de la fraude pass\xE9e."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5
       assessable: false
       depth: 1
       ref_id: V5
       name: Validation, Sanitization and Encoding
+      translations:
+        fr:
+          name: "Exigences de validation, d'assainissement et de v\xE9rification de\
+            \ l'encodage"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5
       ref_id: V5.1
       name: Input Validation
+      translations:
+        fr:
+          name: "Exigences de validation des entr\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.1
       assessable: true
       depth: 3
@@ -1650,6 +2680,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application dispose de d\xE9fenses contre\
+            \ les attaques de pollution des param\xE8tres HTTP, en particulier si\
+            \ le cadre de l'application ne fait aucune distinction quant \xE0 la source\
+            \ des param\xE8tres de la requ\xEAte (GET, POST, cookies, en-t\xEAtes\
+            \ ou variables d'environnement)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.2
       assessable: true
       depth: 3
@@ -1662,6 +2700,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les cadriciels prot\xE8gent contre les attaques\
+            \ par assignation massive de param\xE8tres, ou que l'application dispose\
+            \ de contre-mesures pour prot\xE9ger contre l'assignation dangereuse de\
+            \ param\xE8tres, comme le marquage des champs priv\xE9s ou similaires.\
+            \ ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.3
       assessable: true
       depth: 3
@@ -1674,6 +2720,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les entr\xE9es (champs de formulaire\
+            \ HTML, demandes REST, param\xE8tres URL, en-t\xEAtes HTTP, cookies, fichiers\
+            \ batch, flux RSS, etc) sont valid\xE9es par une validation positive (liste\
+            \ d'autorisation). ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.4
       assessable: true
       depth: 3
@@ -1688,6 +2741,15 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les donn\xE9es structur\xE9es sont fortement\
+            \ typ\xE9es et valid\xE9es par rapport \xE0 un sch\xE9ma d\xE9fini comprenant\
+            \ les caract\xE8res, la longueur et le mod\xE8le autoris\xE9s (par exemple,\
+            \ num\xE9ros de carte de cr\xE9dit ou de t\xE9l\xE9phone, ou valider que\
+            \ deux champs connexes sont raisonnables, comme v\xE9rifier la correspondance\
+            \ entre la banlieue et le code postal). ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.5
       assessable: true
       depth: 3
@@ -1700,12 +2762,23 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les redirections et les transferts d'URL n'autorisent\
+            \ que les destinations pr\xE9vu, ou affichez un avertissement lors d'une\
+            \ redirection vers un contenu potentiellement non fiable."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5
       ref_id: V5.2
       name: Sanitization and Sandboxing
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re d'assainissement et de \xAB bac \xE0 sable\
+            \ \xBB"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.1
       assessable: true
       depth: 3
@@ -1718,6 +2791,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les entr\xE9es HTML non fiables provenant\
+            \ d'\xE9diteurs WYSIWYG ou similaires sont correctement assainit avec\
+            \ une biblioth\xE8que ou une fonction de framework de nettoyage HTML.\
+            \ ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.2
       assessable: true
       depth: 3
@@ -1729,6 +2809,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les donn\xE9es non structur\xE9es sont assainit\
+            \ afin d'appliquer les mesures de s\xE9curit\xE9 telles que les caract\xE8\
+            res et la longueur autoris\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.3
       assessable: true
       depth: 3
@@ -1740,6 +2826,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application assainit les entr\xE9es de l'utilisateur\
+            \ avant de passer aux syst\xE8mes de messagerie pour prot\xE9ger contre\
+            \ l'injection SMTP ou IMAP."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.4
       assessable: true
       depth: 3
@@ -1752,6 +2844,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application \xE9vite l'utilisation de eval()\
+            \ ou d'autres fonctions d'ex\xE9cution de code dynamique. Lorsqu'il n'y\
+            \ a pas d'alternative, toute entr\xE9e utilisateur incluse doit \xEAtre\
+            \ assainit ou mise en sandbox avant d'\xEAtre ex\xE9cut\xE9e."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.5
       assessable: true
       depth: 3
@@ -1763,6 +2862,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application prot\xE8ge contre les attaques\
+            \ par injection de mod\xE8les en veillant \xE0 ce que toute entr\xE9e\
+            \ de l'utilisateur incluse soit aseptis\xE9e ou mise en bac \xE0 sable."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.6
       assessable: true
       depth: 3
@@ -1775,6 +2880,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application prot\xE8ge contre les attaques\
+            \ SSRF, en validant ou en assainissant les donn\xE9es non fiables ou les\
+            \ m\xE9tadonn\xE9es de fichiers HTTP, comme les noms de fichiers et les\
+            \ champs de saisie d'URL, utiliser la liste d'autorisation des protocoles,\
+            \ domaines, chemins et ports."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.7
       assessable: true
       depth: 3
@@ -1787,6 +2900,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application assainit, d\xE9sactive ou met\
+            \ en place une isolation (sandbox) pour le contenu scriptable fourni par\
+            \ l'utilisateur (Scalable Vector Graphics - SVG), en particulier en ce\
+            \ qui concerne les XSS r\xE9sultant de scripts natif au code pr\xE9sent\
+            \ et foreignObject."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.8
       assessable: true
       depth: 3
@@ -1799,12 +2920,24 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application assainit, d\xE9sactive ou met\
+            \ en sandbox le contenu des scripts ou des mod\xE8les d'expression fournis\
+            \ par l'utilisateur, tels que les feuilles de style Markdown, CSS ou XSL,\
+            \ le BBCode ou autres."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5
       ref_id: V5.3
       name: Output Encoding and Injection Prevention
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re d'encodage de sortie et de pr\xE9vention\
+            \ des injections"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.1
       assessable: true
       depth: 3
@@ -1820,6 +2953,15 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'encodage de sortie est pertinent pour l'interpr\xE8\
+            te et le contexte requis. Par exemple, utilisez des encodeurs sp\xE9cifiques\
+            \ pour les valeurs HTML, les attributs HTML, JavaScript, les param\xE8\
+            tres URL, les en-t\xEAtes HTTP, SMTP et autres selon le contexte, en particulier\
+            \ \xE0 partir d'entr\xE9es non fiables (par exemple les noms avec Unicode\
+            \ ou apostrophes, comme \u306D\u3053 ou O'Hara). ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.2
       assessable: true
       depth: 3
@@ -1832,6 +2974,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'encodage de sortie pr\xE9serve le jeu de\
+            \ caract\xE8res et la langue choisis par l'utilisateur, de sorte que tout\
+            \ point de caract\xE8re Unicode soit valide et trait\xE9 en toute s\xE9\
+            curit\xE9. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.3
       assessable: true
       depth: 3
@@ -1844,6 +2993,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'encodage des sorties en fonction du contexte,\
+            \ de pr\xE9f\xE9rence automatis\xE9 - ou au pire, manuel - prot\xE8ge\
+            \ contre le XSS r\xE9fl\xE9chi, stock\xE9 et bas\xE9 sur le DOM. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.4
       assessable: true
       depth: 3
@@ -1856,6 +3011,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que la s\xE9lection de donn\xE9es ou les requ\xEA\
+            tes de base de donn\xE9es (par exemple SQL, HQL, ORM, NoSQL) utilisent\
+            \ des requ\xEAtes param\xE9tr\xE9es, des ORM, des cadres d'entit\xE9s,\
+            \ ou sont autrement prot\xE9g\xE9es contre les attaques par injection\
+            \ de base de donn\xE9es. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.5
       assessable: true
       depth: 3
@@ -1868,6 +3031,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que, lorsque des m\xE9canismes param\xE9tr\xE9\
+            s ou plus s\xFBrs ne sont pas pr\xE9sents, un encodage de sortie sp\xE9\
+            cifique au contexte est utilis\xE9 pour se prot\xE9ger contre les attaques\
+            \ par injection, comme l'utilisation de l'\xE9chappement SQL pour se prot\xE9\
+            ger contre l'injection SQL. ([C3, C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.6
       assessable: true
       depth: 3
@@ -1879,6 +3050,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application se prot\xE8ge contre les attaques\
+            \ par injection de JSON, les attaques par \xE9valuation de JSON et les\
+            \ \xE9valuations d'expressions JavaScript. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.7
       assessable: true
       depth: 3
@@ -1891,6 +3068,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application prot\xE8ge contre les vuln\xE9\
+            rabilit\xE9s de LDAP Injection, ou que des contr\xF4les de s\xE9curit\xE9\
+            \ sp\xE9cifiques pour emp\xEAcher des injections LDAP ont \xE9t\xE9 mis\
+            \ en place. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.8
       assessable: true
       depth: 3
@@ -1903,6 +3087,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application prot\xE8ge contre l'injection\
+            \ de commandes du syst\xE8me d'exploitation et que les appels du syst\xE8\
+            me d'exploitation utilisent des requ\xEAtes param\xE9tr\xE9es du syst\xE8\
+            me d'exploitation ou utilisent l'encodage contextuel de la sortie de la\
+            \ ligne de commande. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.9
       assessable: true
       depth: 3
@@ -1914,6 +3106,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application prot\xE8ge contre les attaques\
+            \ par inclusion de fichier local (LFI) ou par inclusion de fichier distant\
+            \ (RFI)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.10
       assessable: true
       depth: 3
@@ -1925,12 +3123,22 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application prot\xE8ge contre les attaques\
+            \ par injection XPath ou par injection XML. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5
       ref_id: V5.4
       name: Memory, String, and Unmanaged Code
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re de m\xE9moire, de cha\xEEnes de caract\xE8\
+            res et de code non g\xE9r\xE9"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.4.1
       assessable: true
       depth: 3
@@ -1941,6 +3149,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application utilise une cha\xEEne de caract\xE8\
+            res \xE0 m\xE9moire s\xE9curis\xE9e, une copie m\xE9moire s\xE9curis\xE9\
+            e et l'arithm\xE9tique des pointeurs pour d\xE9tecter ou emp\xEAcher les\
+            \ d\xE9bordements de pile, de m\xE9moire tampon ou de tas."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.4.2
       assessable: true
       depth: 3
@@ -1951,6 +3166,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les cha\xEEnes de format ne prennent pas d'entr\xE9\
+            e potentiellement hostile, et sont constantes."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.4.3
       assessable: true
       depth: 3
@@ -1961,12 +3181,22 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les techniques de validation des signes, des\
+            \ plages et des entr\xE9es sont utilis\xE9es pour \xE9viter les d\xE9\
+            bordements d'entiers."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5
       ref_id: V5.5
       name: Deserialization Prevention
+      translations:
+        fr:
+          name: "Exigences de pr\xE9vention de la d\xE9s\xE9rialisation"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5.1
       assessable: true
       depth: 3
@@ -1978,6 +3208,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les objets s\xE9rialis\xE9s utilisent des\
+            \ contr\xF4les d'int\xE9grit\xE9 ou sont chiffr\xE9s pour emp\xEAcher\
+            \ la cr\xE9ation d'objets hostiles ou la falsification de donn\xE9es.\
+            \ ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5.2
       assessable: true
       depth: 3
@@ -1991,6 +3228,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application restreint correctement les analyseurs\
+            \ XML pour n'utiliser que la configuration la plus restrictive possible\
+            \ et pour s'assurer que les fonctions dangereuses telles que la r\xE9\
+            solution d'entit\xE9s externes sont d\xE9sactiv\xE9es pour emp\xEAcher\
+            \ les XXE. "
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5.3
       assessable: true
       depth: 3
@@ -2003,6 +3248,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la d\xE9s\xE9rialisation des donn\xE9es non\
+            \ fiables est \xE9vit\xE9e ou prot\xE9g\xE9e \xE0 la fois dans le code\
+            \ personnalis\xE9 et les biblioth\xE8ques tierces (comme les analyseurs\
+            \ JSON, XML et YAML). "
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5.4
       assessable: true
       depth: 3
@@ -2015,17 +3267,31 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que lors de l'analyse de JSON dans les navigateurs\
+            \ ou les backends bas\xE9s sur JavaScript, JSON.parse est utilis\xE9 pour\
+            \ analyser le document JSON. N'utilisez pas eval() pour analyser JSON."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6
       assessable: false
       depth: 1
       ref_id: V6
       name: Stored Cryptography
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification de la cryptographie stock\xE9e"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6
       ref_id: V6.1
       name: Data Classification
+      translations:
+        fr:
+          name: "Classification des donn\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.1.1
       assessable: true
       depth: 3
@@ -2037,6 +3303,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les donn\xE9es priv\xE9es r\xE9glement\xE9\
+            es sont stock\xE9es sous forme chiffr\xE9e pendant le repos, comme les\
+            \ informations d'identification personnelle (IIP), les informations personnelles\
+            \ sensibles ou les donn\xE9es consid\xE9r\xE9es comme susceptibles d'\xEA\
+            tre soumises \xE0 la GDPR de l'UE."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.1.2
       assessable: true
       depth: 3
@@ -2048,6 +3322,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les donn\xE9es de sant\xE9 r\xE9glement\xE9\
+            es sont stock\xE9es de mani\xE8re chiffr\xE9e pendant le repos, comme\
+            \ les dossiers m\xE9dicaux, les d\xE9tails des dispositifs m\xE9dicaux\
+            \ ou les dossiers de recherche d\xE9sanonymis\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.1.3
       assessable: true
       depth: 3
@@ -2059,12 +3340,25 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les donn\xE9es financi\xE8res r\xE9glement\xE9\
+            es sont stock\xE9es de mani\xE8re crypt\xE9e lorsqu'elles sont au repos,\
+            \ telles que les comptes financiers, les d\xE9fauts ou les ant\xE9c\xE9\
+            dents de cr\xE9dit, les dossiers fiscaux, l'historique des salaires, les\
+            \ b\xE9n\xE9ficiaires ou les dossiers de march\xE9 ou de recherche d\xE9\
+            sanonymis\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6
       ref_id: V6.2
       name: Algorithms
+      translations:
+        fr:
+          name: Algorithmes
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.1
       assessable: true
       depth: 3
@@ -2076,6 +3370,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que tous les modules cryptographiques \xE9chouent\
+            \ en toute s\xE9curit\xE9, et que les erreurs sont trait\xE9es de mani\xE8\
+            re \xE0 ne pas permettre les attaques de type \"Padding Oracle\"."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.2
       assessable: true
       depth: 3
@@ -2087,6 +3387,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que des algorithmes, des biblioth\xE8ques cryptographiques\
+            \ et des modes \xE9prouv\xE9s par l'industrie ou approuv\xE9s par le gouvernement\
+            \ sont utilis\xE9s, au lieu de la cryptographie cod\xE9e sur mesure. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.3
       assessable: true
       depth: 3
@@ -2097,6 +3403,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le vecteur d'initialisation du chiffrement,\
+            \ la configuration du chiffrement et les modes de blocage sont configur\xE9\
+            s de mani\xE8re s\xE9curis\xE9e en utilisant les derniers conseils."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.4
       assessable: true
       depth: 3
@@ -2108,6 +3420,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les algorithmes de chiffrement ou de hachage,\
+            \ les longueurs de cl\xE9, le nombre de rondes, les chiffrements ou les\
+            \ modes, peuvent \xEAtre reconfigur\xE9s, mis \xE0 niveau ou \xE9chang\xE9\
+            s \xE0 tout moment, pour se prot\xE9ger contre les failles cryptographiques.\
+            \ ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.5
       assessable: true
       depth: 3
@@ -2120,6 +3440,15 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les modes de blocs non s\xE9curis\xE9s connus\
+            \ (c'est-\xE0-dire ECB, etc.), les modes de remplissage (c'est-\xE0-dire\
+            \ PKCS#1 v1.5, etc.), les chiffrements avec des blocs de petites tailles\
+            \ (c'est-\xE0-dire Triple-DES, Blowfish, etc.) et les algorithmes de hachage\
+            \ faibles (c'est-\xE0-dire MD5, SHA1, etc.) ne sont pas utilis\xE9s, sauf\
+            \ si cela est n\xE9cessaire pour la r\xE9trocompatibilit\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.6
       assessable: true
       depth: 3
@@ -2131,6 +3460,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les nonces, vecteurs d'initialisation et autres\
+            \ num\xE9ros \xE0 usage unique ne doivent pas \xEAtre utilis\xE9s plus\
+            \ d'une fois avec une cl\xE9 de chiffrement donn\xE9e. La m\xE9thode de\
+            \ g\xE9n\xE9ration doit \xEAtre appropri\xE9e \xE0 l'algorithme utilis\xE9\
+            ."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.7
       assessable: true
       depth: 3
@@ -2141,6 +3478,13 @@ objects:
         party.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les donn\xE9es chiffr\xE9es sont authentifi\xE9\
+            es par des signatures, des modes de chiffrement authentifi\xE9s ou le\
+            \ [HMAC](https://en.wikipedia.org/wiki/HMAC) pour s'assurer que le texte\
+            \ chiffr\xE9 n'est pas alt\xE9r\xE9 par une partie non autoris\xE9e."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.8
       assessable: true
       depth: 3
@@ -2151,12 +3495,23 @@ objects:
         avoid leaking information.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les op\xE9rations cryptographiques\
+            \ sont \xE0 temps constant, sans op\xE9rations de \"court-circuit\" dans\
+            \ les comparaisons, les calculs ou les retours, afin d'\xE9viter les fuites\
+            \ d'informations."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6
       ref_id: V6.3
       name: Random Values
+      translations:
+        fr:
+          name: "Valeurs al\xE9atoires"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.3.1
       assessable: true
       depth: 3
@@ -2169,6 +3524,15 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que tous les nombres al\xE9atoires, noms de fichiers\
+            \ al\xE9atoires, GUIDs al\xE9atoires et cha\xEEnes al\xE9atoires sont\
+            \ g\xE9n\xE9r\xE9s en utilisant le g\xE9n\xE9rateur de nombres al\xE9\
+            atoires s\xE9curis\xE9 cryptographiquement approuv\xE9 par le module cryptographique\
+            \ lorsque ces valeurs al\xE9atoires sont destin\xE9es \xE0 ne pas \xEA\
+            tre devin\xE9es par un attaquant."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.3.2
       assessable: true
       depth: 3
@@ -2180,6 +3544,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les GUID al\xE9atoires sont cr\xE9\xE9s en\
+            \ utilisant l'algorithme GUID v4, et un g\xE9n\xE9rateur de nombres pseudo-al\xE9\
+            atoires s\xE9curis\xE9 cryptographiquement (CSPRNG). Les GUID cr\xE9\xE9\
+            s \xE0 l'aide d'autres g\xE9n\xE9rateurs de nombres pseudo-al\xE9atoires\
+            \ peuvent \xEAtre pr\xE9visibles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.3.3
       assessable: true
       depth: 3
@@ -2190,12 +3562,23 @@ objects:
         gracefully in such circumstances.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les nombres al\xE9atoires sont cr\xE9\xE9\
+            s avec une entropie correcte m\xEAme lorsque l'application est soumise\
+            \ \xE0 une forte charge, ou que l'application se d\xE9grade gracieusement\
+            \ dans de telles circonstances."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6
       ref_id: V6.4
       name: Secret Management
+      translations:
+        fr:
+          name: Gestion du secret
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.4.1
       assessable: true
       depth: 3
@@ -2206,6 +3589,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'une solution de gestion des secrets, telle\
+            \ qu'un coffre fort de cl\xE9s, est utilis\xE9 pour cr\xE9er, stocker,\
+            \ contr\xF4ler l'acc\xE8s aux secrets et les d\xE9truire en toute s\xE9\
+            curit\xE9. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.4.2
       assessable: true
       depth: 3
@@ -2217,17 +3607,32 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le mat\xE9riel cl\xE9 ne soit pas expos\xE9\
+            \ \xE0 l'application mais utilise plut\xF4t un module de s\xE9curit\xE9\
+            \ isol\xE9 comme un coffre-fort pour les op\xE9rations cryptographiques.\
+            \ ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7
       assessable: false
       depth: 1
       ref_id: V7
       name: Error Handling and Logging
+      translations:
+        fr:
+          name: "Traitement des erreurs et exigences de v\xE9rification de l'enregistrement"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7
       ref_id: V7.1
       name: Log Content
+      translations:
+        fr:
+          name: Exigences relatives au contenu des journaux
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.1.1
       assessable: true
       depth: 3
@@ -2240,6 +3645,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le journal n'enregistre pas les r\xE9f\xE9\
+            rences ou les d\xE9tails de paiement. Les jetons de session ne doivent\
+            \ \xEAtre stock\xE9s dans les journaux que sous une forme hach\xE9e et\
+            \ irr\xE9versible. ([C9, C10](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.1.2
       assessable: true
       depth: 3
@@ -2251,6 +3663,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application n'enregistre pas d'autres donn\xE9\
+            es sensibles telles que d\xE9finies par les lois locales sur la protection\
+            \ de la vie priv\xE9e ou la politique de s\xE9curit\xE9 pertinente. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.1.3
       assessable: true
       depth: 3
@@ -2262,6 +3680,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application enregistre les \xE9v\xE9nements\
+            \ pertinents pour la s\xE9curit\xE9, y compris les \xE9v\xE9nements d'authentification\
+            \ r\xE9ussis et \xE9chou\xE9s, les \xE9checs de contr\xF4le d'acc\xE8\
+            s, les \xE9checs de d\xE9s\xE9rialisation et les \xE9checs de validation\
+            \ des entr\xE9es. ([C5, C7](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.1.4
       assessable: true
       depth: 3
@@ -2273,12 +3699,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que chaque \xE9v\xE9nement consign\xE9 dans le\
+            \ journal contient les informations n\xE9cessaires pour permettre une\
+            \ enqu\xEAte d\xE9taill\xE9e sur la chronologie de l'\xE9v\xE9nement.\
+            \ ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7
       ref_id: V7.2
       name: Log Processing
+      translations:
+        fr:
+          name: Exigences de traitement des journaux
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.2.1
       assessable: true
       depth: 3
@@ -2290,6 +3727,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les d\xE9cisions d'authentification\
+            \ sont consign\xE9es, sans stocker d'identifiants de session ou de mots\
+            \ de passe sensibles. Cela devrait inclure les demandes avec les m\xE9\
+            tadonn\xE9es pertinentes n\xE9cessaires aux enqu\xEAtes de s\xE9curit\xE9\
+            . "
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.2.2
       assessable: true
       depth: 3
@@ -2301,12 +3746,24 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les d\xE9cisions de contr\xF4le d'acc\xE8\
+            s peuvent \xEAtre enregistr\xE9es et que toutes les d\xE9cisions qui ont\
+            \ \xE9chou\xE9 sont enregistr\xE9es. Cela devrait inclure les demandes\
+            \ avec les m\xE9tadonn\xE9es pertinentes n\xE9cessaires aux enqu\xEAtes\
+            \ de s\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7
       ref_id: V7.3
       name: Log Protection
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re de protection des journaux"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.3.1
       assessable: true
       depth: 3
@@ -2317,6 +3774,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application encode correctement les donn\xE9\
+            es fournies par l'utilisateur pour \xE9viter l'injection de logs. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.3.3
       assessable: true
       depth: 3
@@ -2327,6 +3789,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les journaux de s\xE9curit\xE9 sont prot\xE9\
+            g\xE9s contre tout acc\xE8s et toute modification non autoris\xE9s. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.3.4
       assessable: true
       depth: 3
@@ -2338,12 +3805,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les sources de temps sont synchronis\xE9es\
+            \ avec l'heure et le fuseau horaire corrects. Envisager s\xE9rieusement\
+            \ de n'enregistrer les donn\xE9es qu'en UTC si les syst\xE8mes sont globaux\
+            \ pour faciliter l'analyse criminalistique post-incident. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7
       ref_id: V7.4
       name: Error Handling
+      translations:
+        fr:
+          name: Traitement des erreurs
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.4.1
       assessable: true
       depth: 3
@@ -2356,6 +3834,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'un message g\xE9n\xE9rique s'affiche lorsqu'une\
+            \ erreur inattendue ou sensible \xE0 la s\xE9curit\xE9 se produit, \xE9\
+            ventuellement avec un identifiant unique que le personnel de soutien peut\
+            \ utiliser pour enqu\xEAter.  ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.4.2
       assessable: true
       depth: 3
@@ -2367,6 +3852,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le traitement des exceptions est utilis\xE9\
+            \ dans toute le code source pour tenir compte des conditions d'erreur\
+            \ pr\xE9vues et impr\xE9vues. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.4.3
       assessable: true
       depth: 3
@@ -2377,17 +3868,31 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'un gestionnaire d'erreurs de \"dernier recours\"\
+            \ est d\xE9fini, qui prendra en compte toutes les exceptions non trait\xE9\
+            es. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8
       assessable: false
       depth: 1
       ref_id: V8
       name: Data Protection
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification de la protection des donn\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8
       ref_id: V8.1
       name: General Data Protection
+      translations:
+        fr:
+          name: "Protection g\xE9n\xE9rale des donn\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.1
       assessable: true
       depth: 3
@@ -2398,6 +3903,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application prot\xE8ge les donn\xE9es sensibles\
+            \ contre la mise en cache dans des composants du serveur tels que les\
+            \ \xE9quilibreurs de charge et les caches d'applications."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.2
       assessable: true
       depth: 3
@@ -2409,6 +3920,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que toutes les copies en cache ou temporaires\
+            \ de donn\xE9es sensibles stock\xE9es sur le serveur sont prot\xE9g\xE9\
+            es contre tout acc\xE8s non autoris\xE9 ou purg\xE9es/invalid\xE9es apr\xE8\
+            s que l'utilisateur autoris\xE9 a acc\xE9d\xE9 aux donn\xE9es sensibles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.3
       assessable: true
       depth: 3
@@ -2419,6 +3937,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application minimise le nombre de param\xE8\
+            tres dans une requ\xEAte, tels que les champs cach\xE9s, les variables\
+            \ Ajax, les cookies et les valeurs d'en-t\xEAte."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.4
       assessable: true
       depth: 3
@@ -2430,6 +3954,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application peut d\xE9tecter et alerter\
+            \ sur un nombre anormal de demandes, par exemple par IP, par utilisateur,\
+            \ par total par heure ou par jour, ou tout ce qui a un sens pour l'application."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.5
       assessable: true
       depth: 3
@@ -2439,6 +3969,12 @@ objects:
         that test restoration of data is performed.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que des sauvegardes r\xE9guli\xE8res des donn\xE9\
+            es importantes sont effectu\xE9es et que des tests de restauration des\
+            \ donn\xE9es sont effectu\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.6
       assessable: true
       depth: 3
@@ -2448,12 +3984,22 @@ objects:
         stolen or corrupted.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les sauvegardes sont stock\xE9es en toute\
+            \ s\xE9curit\xE9 pour \xE9viter que les donn\xE9es ne soient vol\xE9es\
+            \ ou corrompues."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8
       ref_id: V8.2
       name: Client-side Data Protection
+      translations:
+        fr:
+          name: "Protection des donn\xE9es c\xF4t\xE9 client"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.2.1
       assessable: true
       depth: 3
@@ -2465,6 +4011,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application d\xE9finit suffisamment d'en-t\xEA\
+            tes anticaching pour que les donn\xE9es sensibles ne soient pas mises\
+            \ en cache dans les navigateurs modernes."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.2.2
       assessable: true
       depth: 3
@@ -2476,6 +4028,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les donn\xE9es stock\xE9es dans le stockage\
+            \ du navigateur (telles que localStorage, sessionStorage, IndexedDB ou\
+            \ cookies) ne contiennent pas de donn\xE9es sensibles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.2.3
       assessable: true
       depth: 3
@@ -2487,12 +4045,22 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les donn\xE9es authentifi\xE9es sont effac\xE9\
+            es du stockage du client, tel que le DOM du navigateur, apr\xE8s la fin\
+            \ du client ou de la session."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8
       ref_id: V8.3
       name: Sensitive Private Data
+      translations:
+        fr:
+          name: "Donn\xE9es priv\xE9es sensibles"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.1
       assessable: true
       depth: 3
@@ -2505,6 +4073,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les donn\xE9es sensibles sont envoy\xE9es\
+            \ au serveur dans le corps ou les en-t\xEAtes du message HTTP, et que\
+            \ les param\xE8tres de la cha\xEEne de requ\xEAte de tout verbe HTTP ne\
+            \ contiennent pas de donn\xE9es sensibles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.2
       assessable: true
       depth: 3
@@ -2516,6 +4091,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les utilisateurs disposent d'une m\xE9thode\
+            \ pour supprimer ou exporter leurs donn\xE9es sur demande."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.3
       assessable: true
       depth: 3
@@ -2528,6 +4108,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les utilisateurs disposent d'un langage clair\
+            \ concernant la collecte et l'utilisation des informations personnelles\
+            \ fournies et que les utilisateurs ont donn\xE9 leur consentement pour\
+            \ l'utilisation de ces donn\xE9es avant qu'elles ne soient utilis\xE9\
+            es de quelque mani\xE8re que ce soit."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.4
       assessable: true
       depth: 3
@@ -2540,6 +4128,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que toutes les donn\xE9es sensibles cr\xE9\xE9\
+            es et trait\xE9es par l'application ont \xE9t\xE9 identifi\xE9es, et s'assurer\
+            \ qu'une politique est en place sur la mani\xE8re de traiter les donn\xE9\
+            es sensibles. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.5
       assessable: true
       depth: 3
@@ -2551,6 +4146,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'acc\xE8s aux donn\xE9es sensibles est contr\xF4\
+            l\xE9 (sans enregistrer les donn\xE9es sensibles elles-m\xEAmes), si les\
+            \ donn\xE9es sont collect\xE9es en vertu des directives pertinentes sur\
+            \ la protection des donn\xE9es ou si l'enregistrement de l'acc\xE8s est\
+            \ n\xE9cessaire."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.6
       assessable: true
       depth: 3
@@ -2562,6 +4165,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les informations sensibles contenues dans\
+            \ la m\xE9moire sont \xE9cras\xE9es d\xE8s qu'elles ne sont plus n\xE9\
+            cessaires pour att\xE9nuer les attaques de vidage de la m\xE9moire, en\
+            \ utilisant des z\xE9ros ou des donn\xE9es al\xE9atoires."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.7
       assessable: true
       depth: 3
@@ -2573,6 +4183,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les informations sensibles ou priv\xE9es qui\
+            \ doivent \xEAtre chiffr\xE9es, le sont \xE0 l'aide d'algorithmes approuv\xE9\
+            s qui assurent \xE0 la fois la confidentialit\xE9 et l'int\xE9grit\xE9\
+            . ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.8
       assessable: true
       depth: 3
@@ -2584,17 +4201,32 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les informations personnelles sensibles font\
+            \ l'objet d'une classification de conservation des donn\xE9es, de sorte\
+            \ que les donn\xE9es anciennes ou p\xE9rim\xE9es soient supprim\xE9es\
+            \ automatiquement, selon un calendrier ou selon la situation."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9
       assessable: false
       depth: 1
       ref_id: V9
       name: Communication
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification des communications"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9
       ref_id: V9.1
       name: Client Communication Security
+      translations:
+        fr:
+          name: "Exigences de s\xE9curit\xE9 des communications des clients"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1.1
       assessable: true
       depth: 3
@@ -2606,6 +4238,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le TLS s\xE9curis\xE9 est utilis\xE9 pour\
+            \ toutes les connexions des clients et ne revient pas \xE0 des protocoles\
+            \ non s\xE9curis\xE9s ou non chiffr\xE9s. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1.2
       assessable: true
       depth: 3
@@ -2617,6 +4255,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez \xE0 l'aide d'outils de test TLS en ligne ou actualis\xE9\
+            s que seuls les algorithmes, les chiffrages et les protocoles puissants\
+            \ sont activ\xE9s, les algorithmes et les chiffrages les plus puissants\
+            \ \xE9tant d\xE9finis de pr\xE9f\xE9rence."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1.3
       assessable: true
       depth: 3
@@ -2629,12 +4274,23 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que seules les derni\xE8res versions recommand\xE9\
+            es du protocole TLS sont activ\xE9es, telles que TLS 1.2 et TLS 1.3. La\
+            \ derni\xE8re version du protocole TLS doit \xEAtre l'option pr\xE9f\xE9\
+            r\xE9e."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9
       ref_id: V9.2
       name: Server Communication Security
+      translations:
+        fr:
+          name: "Exigences de s\xE9curit\xE9 des communications du serveur"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.1
       assessable: true
       depth: 3
@@ -2647,6 +4303,15 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les connexions vers et depuis le serveur utilisent\
+            \ des certificats TLS de confiance. Lorsque des certificats g\xE9n\xE9\
+            r\xE9s en interne ou auto-sign\xE9s sont utilis\xE9s, le serveur doit\
+            \ \xEAtre configur\xE9 pour ne faire confiance qu'\xE0 des AC internes\
+            \ sp\xE9cifiques et \xE0 des certificats auto-sign\xE9s sp\xE9cifiques.\
+            \ Tous les autres doivent \xEAtre rejet\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.2
       assessable: true
       depth: 3
@@ -2660,6 +4325,16 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les communications chiffr\xE9es telles que\
+            \ TLS sont utilis\xE9es pour toutes les connexions entrantes et sortantes,\
+            \ y compris pour les ports de gestion, la surveillance, l'authentification,\
+            \ les appels d'API ou de service web, les connexions de base de donn\xE9\
+            es, de nuage, sans serveur, d'ordinateur central, externes et de partenaires.\
+            \ Le serveur ne doit pas se rabattre sur des protocoles non s\xE9curis\xE9\
+            s ou non chiffr\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.3
       assessable: true
       depth: 3
@@ -2670,6 +4345,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les connexions chiffr\xE9es \xE0 des\
+            \ syst\xE8mes externes qui impliquent des informations ou des fonctions\
+            \ sensibles sont authentifi\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.4
       assessable: true
       depth: 3
@@ -2680,6 +4361,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la r\xE9vocation de certification appropri\xE9\
+            e, telle que le protocol OCSP (Online Certificate Status Protocol), est\
+            \ activ\xE9e et configur\xE9e."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.5
       assessable: true
       depth: 3
@@ -2688,17 +4375,30 @@ objects:
       description: Verify that backend TLS connection failures are logged.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les \xE9checs de connexion TLS en arri\xE8\
+            re-plan sont enregistr\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10
       assessable: false
       depth: 1
       ref_id: V10
       name: Malicious Code
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification des codes malveillants"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10
       ref_id: V10.1
       name: Code Integrity
+      translations:
+        fr:
+          name: "Contr\xF4les de l'int\xE9grit\xE9 du code"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.1.1
       assessable: true
       depth: 3
@@ -2709,12 +4409,23 @@ objects:
         connections.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'un outil d'analyse de code est utilis\xE9 pour\
+            \ d\xE9tecter les codes potentiellement malveillants, tels que les fonctions\
+            \ temporelles, les op\xE9rations de fichiers et les connexions r\xE9seau\
+            \ non s\xE9curis\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10
       ref_id: V10.2
       name: Malicious Code Search
+      translations:
+        fr:
+          name: Recherche de code malveillant
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.1
       assessable: true
       depth: 3
@@ -2727,6 +4438,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le code source de l'application et les biblioth\xE8\
+            ques tierces ne contiennent pas de \"t\xE9l\xE9phone \xE0 la maison\"\
+            \ ou de capacit\xE9s de collecte de donn\xE9es non autoris\xE9es. Lorsque\
+            \ de telles fonctionnalit\xE9s existent, obtenez l'autorisation de l'utilisateur\
+            \ pour leur fonctionnement avant de collecter des donn\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.2
       assessable: true
       depth: 3
@@ -2738,6 +4457,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application ne demande pas d'autorisations\
+            \ inutiles ou excessives pour les caract\xE9ristiques ou capteurs li\xE9\
+            s \xE0 la vie priv\xE9e, tels que les contacts, les cam\xE9ras, les microphones\
+            \ ou l'emplacement."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.3
       assessable: true
       depth: 3
@@ -2750,6 +4476,17 @@ objects:
         functionality that could be used maliciously if discovered.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le code source de l'application et les biblioth\xE8\
+            ques tierces ne contiennent pas de portes d\xE9rob\xE9es, telles que des\
+            \ comptes ou des cl\xE9s cod\xE9es en dur ou suppl\xE9mentaires non document\xE9\
+            es, des obscurcissements de code, des blobs binaires non document\xE9\
+            s, des rootkits, ou des fonctions de d\xE9bogage anti-d\xE9bogage, non\
+            \ s\xE9curis\xE9es, ou encore des fonctionnalit\xE9s obsol\xE8tes, non\
+            \ s\xE9curis\xE9es ou cach\xE9es qui pourraient \xEAtre utilis\xE9es de\
+            \ mani\xE8re malveillante si elles \xE9taient d\xE9couvertes."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.4
       assessable: true
       depth: 3
@@ -2759,6 +4496,12 @@ objects:
         do not contain time bombs by searching for date and time related functions.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le code source de l'application et les biblioth\xE8\
+            ques tierces ne contiennent pas de bombes \xE0 retardement en recherchant\
+            \ les fonctions li\xE9es \xE0 la date et \xE0 l'heure."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.5
       assessable: true
       depth: 3
@@ -2769,6 +4512,12 @@ objects:
         logic bombs.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le code source de l'application et les biblioth\xE8\
+            ques tierces ne contiennent pas de code malveillant, tel que des attaques\
+            \ de type salami, des contournements logiques ou des bombes logiques."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.6
       assessable: true
       depth: 3
@@ -2778,12 +4527,22 @@ objects:
         do not contain Easter eggs or any other potentially unwanted functionality.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le code source de l'application et les biblioth\xE8\
+            ques tierces ne contiennent pas d'\u0153ufs de P\xE2ques ou toute autre\
+            \ fonctionnalit\xE9 potentiellement ind\xE9sirable."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10
       ref_id: V10.3
       name: Application Integrity
+      translations:
+        fr:
+          name: "Contr\xF4les d'int\xE9grit\xE9 des applications d\xE9ploy\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.3.1
       assessable: true
       depth: 3
@@ -2797,6 +4556,15 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que si l'application dispose d'une fonction de\
+            \ mise \xE0 jour automatique du client ou du serveur, les mises \xE0 jour\
+            \ doivent \xEAtre obtenues par des canaux s\xE9curis\xE9s et sign\xE9\
+            es num\xE9riquement. Le code de mise \xE0 jour doit valider la signature\
+            \ num\xE9rique de la mise \xE0 jour avant l'installation ou l'ex\xE9cution\
+            \ de la mise \xE0 jour."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.3.2
       assessable: true
       depth: 3
@@ -2810,6 +4578,15 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application utilise des protections d'int\xE9\
+            grit\xE9, telles que la signature de code ou l'int\xE9grit\xE9 des sous-ressources.\
+            \ L'application ne doit pas charger ou ex\xE9cuter du code provenant de\
+            \ sources non fiables, comme des includes de chargement, des modules,\
+            \ des plugins, du code ou des biblioth\xE8ques provenant de sources non\
+            \ fiables ou de l'Internet."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.3.3
       assessable: true
       depth: 3
@@ -2826,17 +4603,37 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application est prot\xE9g\xE9e contre les\
+            \ reprises de sous-domaines si elle repose sur des entr\xE9es DNS ou des\
+            \ sous-domaines DNS, tels que des noms de domaine expir\xE9s, des pointeurs\
+            \ DNS ou CNAME obsol\xE8tes, des projets expir\xE9s dans des d\xE9p\xF4\
+            ts de code source publics, ou des API de nuages transitoires, des fonctions\
+            \ sans serveur, ou des espaces de stockage (*autogen-bucket-id*.cloud.example.com)\
+            \ ou similaires. Les protections peuvent consister \xE0 s'assurer que\
+            \ les noms DNS utilis\xE9s par les applications sont r\xE9guli\xE8rement\
+            \ v\xE9rifi\xE9s pour d\xE9tecter toute expiration ou modification."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11
       assessable: false
       depth: 1
       ref_id: V11
       name: Business Logic
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification de la logique d'entreprise"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11
       ref_id: V11.1
       name: Business Logic Security
+      translations:
+        fr:
+          name: "Exigences de s\xE9curit\xE9 de la logique d'entreprise"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.1
       assessable: true
       depth: 3
@@ -2848,6 +4645,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application traitera seulement les flux\
+            \ de logique m\xE9tier pour un utilisateur dans l'ordre s\xE9quentiel\
+            \ des \xE9tapes et sans sauter d'\xE9tapes."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.2
       assessable: true
       depth: 3
@@ -2860,6 +4663,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application ne traitera que des flux de\
+            \ logique m\xE9tier dont toutes les \xE9tapes sont trait\xE9es dans un\
+            \ temps humain r\xE9aliste, c'est-\xE0-dire que les transactions ne sont\
+            \ pas soumises trop rapidement."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.3
       assessable: true
       depth: 3
@@ -2871,6 +4681,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application comporte des limites appropri\xE9\
+            es pour des actions ou des transactions commerciales sp\xE9cifiques qui\
+            \ sont correctement ex\xE9cut\xE9es par utilisateur."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.4
       assessable: true
       depth: 3
@@ -2883,6 +4699,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application dispose de contr\xF4les anti-automatisation\
+            \ suffisants pour d\xE9tecter et prot\xE9ger contre l'exfiltration de\
+            \ donn\xE9es, les demandes excessives de logique m\xE9tiers, les t\xE9\
+            l\xE9chargements excessifs de fichiers ou les attaques par d\xE9ni de\
+            \ service."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.5
       assessable: true
       depth: 3
@@ -2895,6 +4719,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application a des limites ou une validation\
+            \ de la logique m\xE9tier pour se prot\xE9ger contre les risques ou les\
+            \ menaces commerciales probables, identifi\xE9s \xE0 l'aide de la mod\xE9\
+            lisation des menaces ou de m\xE9thodologies similaires."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.6
       assessable: true
       depth: 3
@@ -2905,6 +4736,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la demande ne souffre pas de probl\xE8mes\
+            \ de \"temps de contr\xF4le au moment de l'utilisation\" (TOCTOU) ou d'autres\
+            \ situation de comp\xE9tition (race condition) pour les op\xE9rations\
+            \ sensibles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.7
       assessable: true
       depth: 3
@@ -2916,6 +4754,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les moniteurs de demande ne pr\xE9sentent\
+            \ pas d'\xE9v\xE9nements ou d'activit\xE9s inhabituels du point de vue\
+            \ de la logique m\xE9tier. Par exemple, des tentatives d'effectuer des\
+            \ actions hors service ou des actions qu'un utilisateur normal ne tenterait\
+            \ jamais. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.8
       assessable: true
       depth: 3
@@ -2926,17 +4772,31 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application dispose d'alertes configurables\
+            \ lorsque des attaques automatis\xE9es ou une activit\xE9 inhabituelle\
+            \ sont d\xE9tect\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12
       assessable: false
       depth: 1
       ref_id: V12
       name: Files and Resources
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification des dossiers et des ressources"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12
       ref_id: V12.1
       name: File Upload
+      translations:
+        fr:
+          name: "Exigences pour le t\xE9l\xE9chargement de fichiers"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.1.1
       assessable: true
       depth: 3
@@ -2948,6 +4808,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application n'accepte pas de fichiers volumineux\
+            \ qui pourraient remplir l'espace de stockage ou provoquer un d\xE9ni\
+            \ de service."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.1.2
       assessable: true
       depth: 3
@@ -2959,6 +4825,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application contr\xF4le les fichiers compress\xE9\
+            s (par exemple, zip, gz, docx, odt) par rapport \xE0 la taille maximale\
+            \ autoris\xE9e non compress\xE9e et au nombre maximal de fichiers avant\
+            \ de d\xE9compresser le fichier."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.1.3
       assessable: true
       depth: 3
@@ -2970,12 +4843,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'un quota de taille de fichier et un nombre\
+            \ maximum de fichiers par utilisateur sont appliqu\xE9s pour s'assurer\
+            \ qu'un seul utilisateur ne peut pas remplir le stockage avec trop de\
+            \ fichiers, ou des fichiers excessivement gros."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12
       ref_id: V12.2
       name: File Integrity
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re d'int\xE9grit\xE9 des fichiers"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.2.1
       assessable: true
       depth: 3
@@ -2986,12 +4870,22 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les fichiers obtenus de sources non fiables\
+            \ sont valid\xE9s comme \xE9tant du type attendu en fonction du contenu\
+            \ du fichier."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12
       ref_id: V12.3
       name: File Execution
+      translations:
+        fr:
+          name: "Exigences relatives \xE0 l'ex\xE9cution des fichiers"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.1
       assessable: true
       depth: 3
@@ -3004,6 +4898,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les m\xE9tadonn\xE9es de nom de fichier soumises\
+            \ par l'utilisateur ne sont pas utilis\xE9es directement par les syst\xE8\
+            mes de fichiers du syst\xE8me ou du cadre et qu'une API URL est utilis\xE9\
+            e pour prot\xE9ger contre la travers\xE9e du chemin (path traversal)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.2
       assessable: true
       depth: 3
@@ -3015,6 +4916,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les m\xE9tadonn\xE9es de nom de fichier soumises\
+            \ par l'utilisateur sont valid\xE9es ou ignor\xE9es pour emp\xEAcher la\
+            \ divulgation, la cr\xE9ation, la mise \xE0 jour ou la suppression de\
+            \ fichiers locaux (LFI)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.3
       assessable: true
       depth: 3
@@ -3027,6 +4935,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les m\xE9tadonn\xE9es de nom de fichier soumises\
+            \ par l'utilisateur sont valid\xE9es ou ignor\xE9es pour emp\xEAcher la\
+            \ divulgation ou l'ex\xE9cution de fichiers distants (RFI), qui peuvent\
+            \ \xE9galement conduire \xE0 des SSRF. "
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.4
       assessable: true
       depth: 3
@@ -3040,6 +4955,15 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application prot\xE8ge contre le t\xE9l\xE9\
+            chargement de fichiers r\xE9fl\xE9chis (RFD) en validant ou en ignorant\
+            \ les noms de fichiers soumis par les utilisateurs dans un param\xE8tre\
+            \ JSON, JSONP ou URL, l'en-t\xEAte Content-Type de la r\xE9ponse doit\
+            \ \xEAtre d\xE9fini sur text/plain, et l'en-t\xEAte Content-Disposition\
+            \ doit avoir un nom de fichier fixe."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.5
       assessable: true
       depth: 3
@@ -3051,6 +4975,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les m\xE9tadonn\xE9es de fichiers non fiables\
+            \ ne sont pas utilis\xE9es directement avec l'API syst\xE8me ou les biblioth\xE8\
+            ques, pour se prot\xE9ger contre l'injection de commandes du syst\xE8\
+            me d'exploitation."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.6
       assessable: true
       depth: 3
@@ -3062,12 +4993,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application n'inclut pas et n'ex\xE9cute\
+            \ pas de fonctionnalit\xE9s provenant de sources non fiables, telles que\
+            \ des r\xE9seaux de distribution de contenu non v\xE9rifi\xE9s, des biblioth\xE8\
+            ques JavaScript, des biblioth\xE8ques node npm ou des DLL c\xF4t\xE9 serveur."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12
       ref_id: V12.4
       name: File Storage
+      translations:
+        fr:
+          name: "Exigences en mati\xE8re de stockage des fichiers"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.4.1
       assessable: true
       depth: 3
@@ -3079,6 +5021,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les fichiers obtenus \xE0 partir de sources\
+            \ non fiables sont stock\xE9s en dehors de la racine Web, avec des autorisations\
+            \ limit\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.4.2
       assessable: true
       depth: 3
@@ -3090,12 +5038,22 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les fichiers obtenus de sources non fiables\
+            \ sont analys\xE9s par des scanners antivirus pour emp\xEAcher le t\xE9\
+            l\xE9chargement de contenus malveillants connus."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.5
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12
       ref_id: V12.5
       name: File Download
+      translations:
+        fr:
+          name: "Exigences de t\xE9l\xE9chargement des fichiers"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.5.1
       assessable: true
       depth: 3
@@ -3110,6 +5068,17 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'application web est configur\xE9 pour ne\
+            \ servir que les fichiers ayant des extensions de fichier sp\xE9cifiques\
+            \ afin d'\xE9viter les informations involontaires et les fuites de code\
+            \ source. Par exemple, les fichiers de sauvegarde (par exemple .bak),\
+            \ les fichiers de travail temporaires (par exemple .swp), les fichiers\
+            \ compress\xE9s (.zip, .tar.gz, etc) et les autres extensions couramment\
+            \ utilis\xE9es par les \xE9diteurs doivent \xEAtre bloqu\xE9s, sauf si\
+            \ cela est n\xE9cessaire."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.5.2
       assessable: true
       depth: 3
@@ -3121,12 +5090,21 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les demandes directes aux fichiers t\xE9l\xE9\
+            charg\xE9s ne seront jamais ex\xE9cut\xE9es en tant que contenu HTML/JavaScript."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.6
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12
       ref_id: V12.6
       name: SSRF Protection
+      translations:
+        fr:
+          name: Exigences de protection des SSRF
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.6.1
       assessable: true
       depth: 3
@@ -3139,17 +5117,33 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le serveur web ou d'application est configur\xE9\
+            \ avec une liste d'autorisation de ressources ou de syst\xE8mes \xE0 partir\
+            \ desquels le serveur peut envoyer des requ\xEAtes ou charger des donn\xE9\
+            es/fichiers."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13
       assessable: false
       depth: 1
       ref_id: V13
       name: API and Web Service
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification des API et des services Web"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13
       ref_id: V13.1
       name: Generic Web Service Security
+      translations:
+        fr:
+          name: "Exigences g\xE9n\xE9riques de v\xE9rification de la s\xE9curit\xE9\
+            \ des services web"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.1.1
       assessable: true
       depth: 3
@@ -3162,6 +5156,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que tous les composants de l'application utilisent\
+            \ les m\xEAmes encodages et analyseurs pour \xE9viter les attaques par\
+            \ analyse qui exploitent des comportements diff\xE9rents d'URI ou d'analyse\
+            \ de fichiers qui pourraient \xEAtre utilis\xE9s dans les attaques SSRF\
+            \ et RFI."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.1.3
       assessable: true
       depth: 3
@@ -3173,6 +5175,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les URL des API n'exposent pas d'informations\
+            \ sensibles, telles que la cl\xE9 API, les jetons de session, etc."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.1.4
       assessable: true
       depth: 3
@@ -3184,6 +5191,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les d\xE9cisions d'autorisation sont prises\
+            \ \xE0 la fois \xE0 l'URI, appliqu\xE9es par la s\xE9curit\xE9 programmatique\
+            \ ou d\xE9clarative au niveau du contr\xF4leur ou du routeur, et au niveau\
+            \ des ressources, appliqu\xE9es par des autorisations bas\xE9es sur des\
+            \ mod\xE8les de permission."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.1.5
       assessable: true
       depth: 3
@@ -3195,12 +5210,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les demandes contenant des types de contenu\
+            \ inattendus ou manquants sont rejet\xE9es avec les en-t\xEAtes appropri\xE9\
+            s (statut de r\xE9ponse HTTP 406 Inacceptable ou 415 Type de support non\
+            \ pris en charge)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13
       ref_id: V13.2
       name: RESTful Web Service
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification pour les services web de type RESTful"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.1
       assessable: true
       depth: 3
@@ -3213,6 +5239,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les m\xE9thodes HTTP RESTful activ\xE9es sont\
+            \ un choix valable pour l'utilisateur ou une action, comme par exemple\
+            \ emp\xEAcher les utilisateurs normaux d'utiliser le verbe DELETE ou PUT\
+            \ sur des API ou des ressources prot\xE9g\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.2
       assessable: true
       depth: 3
@@ -3224,6 +5257,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que la validation du sch\xE9ma JSON est en place\
+            \ et v\xE9rifi\xE9e avant d'accepter la saisie."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.3
       assessable: true
       depth: 3
@@ -3237,6 +5275,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les services Web RESTful qui utilisent des\
+            \ cookies sont prot\xE9g\xE9s contre la falsification de requ\xEAte intersite\
+            \ via l'utilisation d'au moins un ou plusieurs des \xE9l\xE9ments suivants\_\
+            : mod\xE8le de cookie de double soumission, nonces CSRF ou v\xE9rifications\
+            \ d'en-t\xEAte de requ\xEAte d'origine."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.5
       assessable: true
       depth: 3
@@ -3247,6 +5293,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les services REST v\xE9rifient explicitement\
+            \ que le type de contenu entrant est bien celui attendu, par exemple application/xml\
+            \ ou application/json."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.6
       assessable: true
       depth: 3
@@ -3261,12 +5313,28 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les en-t\xEAtes de message et la charge utile\
+            \ sont dignes de confiance et non modifi\xE9s en transit. Exiger un chiffrement\
+            \ fort pour le transport (TLS uniquement) peut \xEAtre suffisant dans\
+            \ de nombreux cas, car il assure \xE0 la fois la confidentialit\xE9 et\
+            \ la protection de l'int\xE9grit\xE9. Les signatures num\xE9riques par\
+            \ message peuvent fournir une assurance suppl\xE9mentaire en plus des\
+            \ protections de transport pour les applications de haute s\xE9curit\xE9\
+            , mais apportent avec elles une complexit\xE9 et des risques suppl\xE9\
+            mentaires \xE0 peser par rapport aux avantages."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13
       ref_id: V13.3
       name: SOAP Web Service
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification du service web SOAP"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.3.1
       assessable: true
       depth: 3
@@ -3279,6 +5347,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que la validation du sch\xE9ma XSD a lieu pour\
+            \ garantir un document XML correctement form\xE9, suivie de la validation\
+            \ de chaque champ de saisie avant tout traitement de ces donn\xE9es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.3.2
       assessable: true
       depth: 3
@@ -3289,12 +5363,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que la charge utile du message est sign\xE9e en\
+            \ utilisant WS-Security pour assurer un transport fiable entre le client\
+            \ et le service."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13
       ref_id: V13.4
       name: GraphQL
+      translations:
+        fr:
+          name: "GraphQL et autres exigences de s\xE9curit\xE9 de la couche de donn\xE9\
+            es des services Web"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.4.1
       assessable: true
       depth: 3
@@ -3307,6 +5392,15 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'une liste de requ\xEAtes autoris\xE9es ou une\
+            \ combinaison de limitation de la profondeur et de la quantit\xE9 est\
+            \ utilis\xE9e pour emp\xEAcher les d\xE9nis de service (DoS) de GraphQL\
+            \ ou de l'expression de la couche de donn\xE9es r\xE9sultant de requ\xEA\
+            tes imbriqu\xE9es et co\xFBteuses. Pour les sc\xE9narios plus avanc\xE9\
+            s, il convient d'utiliser l'analyse du co\xFBt des requ\xEAtes."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.4.2
       assessable: true
       depth: 3
@@ -3317,17 +5411,31 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la logique d'autorisation de GraphQL ou d'une\
+            \ autre couche de donn\xE9es doit \xEAtre mise en \u0153uvre au niveau\
+            \ de la couche de logique d'entreprise au lieu de la couche GraphQL."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14
       assessable: false
       depth: 1
       ref_id: V14
       name: Configuration
+      translations:
+        fr:
+          name: "Exigences de v\xE9rification de la configuration"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14
       ref_id: V14.1
       name: Build and Deploy
+      translations:
+        fr:
+          name: Exigences sur les constructions
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.1
       assessable: true
       depth: 3
@@ -3339,6 +5447,13 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les processus de construction et de d\xE9\
+            ploiement des applications sont effectu\xE9s de mani\xE8re s\xFBre et\
+            \ r\xE9p\xE9table, comme l'automatisation des CI / CD, la gestion automatis\xE9\
+            e de la configuration et les scripts de d\xE9ploiement automatis\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.2
       assessable: true
       depth: 3
@@ -3351,6 +5466,16 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les drapeaux du compilateur sont configur\xE9\
+            s pour activer toutes les protections et les avertissements disponibles\
+            \ contre les d\xE9bordements de m\xE9moire tampon, y compris la randomisation\
+            \ de la pile, la pr\xE9vention de l'ex\xE9cution des donn\xE9es, et pour\
+            \ casser la compilation si un pointeur, une m\xE9moire, une cha\xEEne\
+            \ de format, un entier ou une cha\xEEne de caract\xE8res dangereux sont\
+            \ trouv\xE9s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.3
       assessable: true
       depth: 3
@@ -3361,6 +5486,12 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la configuration du serveur est durcie conform\xE9\
+            ment aux recommandations du serveur d'application et des frameworks utilis\xE9\
+            s."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.4
       assessable: true
       depth: 3
@@ -3373,6 +5504,14 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que l'application, la configuration et toutes\
+            \ les d\xE9pendances peuvent \xEAtre red\xE9ploy\xE9es \xE0 l'aide de\
+            \ scripts de d\xE9ploiement automatis\xE9s, construites \xE0 partir d'un\
+            \ runbook document\xE9 et test\xE9 dans un d\xE9lai raisonnable, ou restaur\xE9\
+            es \xE0 partir de sauvegardes en temps utile."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.5
       assessable: true
       depth: 3
@@ -3382,12 +5521,22 @@ objects:
         of all security-relevant configurations to detect tampering.
       implementation_groups:
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les administrateurs autoris\xE9s peuvent v\xE9\
+            rifier l'int\xE9grit\xE9 de toutes les configurations pertinentes pour\
+            \ la s\xE9curit\xE9 afin de d\xE9tecter les alt\xE9rations."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14
       ref_id: V14.2
       name: Dependency
+      translations:
+        fr:
+          name: "Exigences sur les d\xE9pendances"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.1
       assessable: true
       depth: 3
@@ -3399,6 +5548,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que tous les composants sont \xE0 jour, de pr\xE9\
+            f\xE9rence en utilisant un v\xE9rificateur de d\xE9pendances pendant le\
+            \ temps de construction ou de compilation. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.2
       assessable: true
       depth: 3
@@ -3410,6 +5565,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les fonctionnalit\xE9s, la documentation,\
+            \ les applications d'exemple et les configurations inutiles sont supprim\xE9\
+            es."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.3
       assessable: true
       depth: 3
@@ -3423,6 +5584,14 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que si les actifs d'application, tels que les\
+            \ biblioth\xE8ques JavaScript, les feuilles de style CSS ou les polices\
+            \ web, sont h\xE9berg\xE9s en externe sur un r\xE9seau de diffusion de\
+            \ contenu (CDN) ou un fournisseur externe, l'int\xE9grit\xE9 des sous-ressources\
+            \ (SRI) est utilis\xE9e pour valider l'int\xE9grit\xE9 de l'actif."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.4
       assessable: true
       depth: 3
@@ -3433,6 +5602,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les composants tiers proviennent de d\xE9\
+            p\xF4ts pr\xE9d\xE9finis, fiables et continuellement entretenus. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.5
       assessable: true
       depth: 3
@@ -3443,6 +5617,11 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier qu'un catalogue d'inventaire de toutes les biblioth\xE8\
+            ques tierces en service est tenu \xE0 jour. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.6
       assessable: true
       depth: 3
@@ -3454,12 +5633,23 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que la surface d'attaque est r\xE9duite en mettant\
+            \ en bac \xE0 sable ou en encapsulant des biblioth\xE8ques tierces pour\
+            \ n'exposer que le comportement requis dans l'application. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))"
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14
       ref_id: V14.3
       name: Unintended Security Disclosure
+      translations:
+        fr:
+          name: "Exigences de divulgation involontaire de renseignements sur la s\xE9\
+            curit\xE9"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.3.2
       assessable: true
       depth: 3
@@ -3472,6 +5662,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que les modes de d\xE9bogage du serveur web ou\
+            \ d'application et du cadre d'application sont d\xE9sactiv\xE9s en production\
+            \ afin d'\xE9liminer les fonctionnalit\xE9s de d\xE9bogage, les consoles\
+            \ de d\xE9veloppement et les divulgations de s\xE9curit\xE9 non intentionnelles."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.3.3
       assessable: true
       depth: 3
@@ -3483,12 +5680,22 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les en-t\xEAtes HTTP ou toute partie de la\
+            \ r\xE9ponse HTTP n'exposent pas d'informations d\xE9taill\xE9es sur la\
+            \ version des composants du syst\xE8me."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14
       ref_id: V14.4
       name: HTTP Security Headers
+      translations:
+        fr:
+          name: "Exigences relatives aux en-t\xEAtes de s\xE9curit\xE9 HTTP"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.1
       assessable: true
       depth: 3
@@ -3502,6 +5709,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que chaque r\xE9ponse HTTP contient un en-t\xEA\
+            te Content-Type. Les types de contenu text/*, */*+xml et application/xml\
+            \ doivent \xE9galement sp\xE9cifier un jeu de caract\xE8res s\xFBr (par\
+            \ exemple, UTF-8, ISO-8859-1)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.2
       assessable: true
       depth: 3
@@ -3514,6 +5728,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les r\xE9ponses de l'API contiennent\
+            \ Content-Disposition : attachment ; filename=\"api.json\" (ou tout autre\
+            \ nom de fichier appropri\xE9 pour le type de contenu)."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.3
       assessable: true
       depth: 3
@@ -3526,6 +5746,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier qu'une politique de s\xE9curit\xE9 du contenu\
+            \ (CSP) est en place pour aider \xE0 att\xE9nuer l'impact des attaques\
+            \ XSS comme les vuln\xE9rabilit\xE9s d'injection HTML, DOM, JSON et JavaScript."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.4
       assessable: true
       depth: 3
@@ -3537,6 +5763,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que toutes les r\xE9ponses contiennent X-Content-Type-Options:\
+            \ nosniff."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.5
       assessable: true
       depth: 3
@@ -3549,6 +5780,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'en-t\xEAte Strict-Transport-Security est\
+            \ inclus dans toutes les r\xE9ponses et pour tous les sous-domaines, comme\
+            \ Strict-Transport-Security : max-age=15724800 ; includeSubdomains."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.6
       assessable: true
       depth: 3
@@ -3561,6 +5798,11 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez qu'un en-t\xEAte \"Referrer-Policy\" appropri\xE9\
+            \ est inclus, tel que \"no-referrer\" ou \"same-origin\"."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.7
       assessable: true
       depth: 3
@@ -3574,12 +5816,24 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifier que le contenu d'une application web ne peut pas\
+            \ \xEAtre int\xE9gr\xE9 par d\xE9faut dans un site tiers et que l'int\xE9\
+            gration des ressources exactes n'est autoris\xE9e que si n\xE9cessaire\
+            \ en utilisant un en-t\xEAte appropri\xE9 tel \"Content-Security-Policy:\
+            \ frame-ancestors\" ou \"X-Frame-Options\"."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14
       ref_id: V14.5
       name: HTTP Request Header Validation
+      translations:
+        fr:
+          name: "Exigences sur la validation des en-t\xEAtes de requ\xEAte HTTP"
+          description: null
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5.1
       assessable: true
       depth: 3
@@ -3592,6 +5846,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que le serveur d'application accepte seulement\
+            \ les m\xE9thodes HTTP utilis\xE9es par l'application/API (incluant les\
+            \ requetes de type OPTIONS), et les journalise/alertes sur toutes les\
+            \ demandes qui sont invalades pour le contexte de l'application."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5.2
       assessable: true
       depth: 3
@@ -3604,6 +5865,12 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'en-t\xEAte Origin fourni n'est pas utilis\xE9\
+            \ pour les d\xE9cisions d'authentification ou de contr\xF4le d'acc\xE8\
+            s, car l'en-t\xEAte Origin peut facilement \xEAtre modifi\xE9 par un attaquant."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5.3
       assessable: true
       depth: 3
@@ -3616,6 +5883,13 @@ objects:
       - L1
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l'en-t\xEAte \"Cross-Origin Resource Sharing\"\
+            \ (CORS) Access-Control-Allow-Origin utilise une liste d'autorisation\
+            \ stricte de domaines et sous-domaines de confiance pour la comparaison\
+            \ avec l'origine \"null\" et ne la prend pas en charge."
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5.4
       assessable: true
       depth: 3
@@ -3626,3 +5900,9 @@ objects:
       implementation_groups:
       - L2
       - L3
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que les en-t\xEAtes HTTP ajout\xE9s par un proxy\
+            \ de confiance ou des dispositifs SSO, tels qu'un jeton au porteur, sont\
+            \ authentifi\xE9s par l'application."
