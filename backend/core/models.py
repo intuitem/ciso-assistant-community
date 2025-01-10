@@ -2802,8 +2802,6 @@ class ComplianceAssessment(Assessment):
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            # ----- REMOVE THIS COMMENT AFTER REVIEW ----- #
-            # .exclude(score=None) # If is_scored is True we must consider the score in the global score right ?
             .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
