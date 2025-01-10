@@ -1583,7 +1583,8 @@ class Asset(
                     security_objectives[key] = content
                 else:
                     security_objectives[key]["value"] = max(
-                        security_objectives[key]["value"], content.get("value", 0)
+                        security_objectives[key].get("value", 0),
+                        content.get("value", 0),
                     )
         return {"objectives": security_objectives}
 
@@ -1639,7 +1640,7 @@ class Asset(
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
             )
             if content.get("is_enabled", False)
-            and content.get("value", -1) in range(0, 5)
+            and content.get("value", -1) in range(0, 4)
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
