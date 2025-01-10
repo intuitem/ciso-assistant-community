@@ -4,6 +4,8 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import * as m from '$paraglide/messages';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { languageTag } from '$paraglide/runtime';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	export let data;
@@ -130,6 +132,14 @@
 			<p class="text-md leading-5 text-gray-700">{m.description()}: {data.library.description}</p>
 			<p class="text-md leading-5 text-gray-700">{m.provider()}: {data.library.provider}</p>
 			<p class="text-md leading-5 text-gray-700">{m.packager()}: {data.library.packager}</p>
+			{#if data.library.publication_date}
+				<p class="text-md leading-5 text-gray-700">
+					{m.publicationDate()}: {formatDateOrDateTime(
+						data.library.publication_date,
+						languageTag()
+					)}
+				</p>
+			{/if}
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
 					{m.dependencies()}:

@@ -4,6 +4,7 @@ ref_id: matrice-des-risques-critiques-3x3
 name: Matrice des risques critiques 3x3
 description: Matrice des risques critiques 3x3
 version: 1
+publication_date: 2024-05-11
 provider: intuitem
 packager: protocolpaladin
 objects:

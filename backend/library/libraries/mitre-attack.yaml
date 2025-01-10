@@ -21,6 +21,7 @@ copyright: "Terms of Use\nLICENSE\nThe MITRE Corporation (MITRE) hereby grants y
   \ THE INFORMATION THEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES\
   \ OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE."
 version: 2
+publication_date: 2024-02-11
 provider: Mitre ATT&CK
 packager: intuitem
 objects:
