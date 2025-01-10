@@ -4,6 +4,7 @@ ref_id: map-nist-csf-1.1-iso27001-2022
 name: Mapping from nist-csf-1.1 to iso27001-2022
 description: Mapping from nist-csf-1.1 to iso27001-2022
 version: 1
+publication_date: 2024-06-24
 copyright: NIST and ISO/IEC
 provider: NIST and ISO/IEC
 packager: intuitem

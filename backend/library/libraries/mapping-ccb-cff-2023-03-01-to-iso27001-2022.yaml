@@ -6,6 +6,7 @@ description: Mapping from CCB CyberFundamentals Framework to International stand
   ISO/IEC 27001:2022
 copyright: intuitem
 version: 1
+publication_date: 2024-11-04
 provider: CCB
 packager: intuitem
 dependencies:

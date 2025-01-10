@@ -13,6 +13,7 @@ description: "El Real Decreto 3/2010, de 8 de enero, por el que se regula el Esq
   \ Security Guides:\nhttps://www.ccn-cert.cni.es/es/guias.html"
 copyright: "BOLET\xCDN OFICIAL DEL ESTADO"
 version: 1
+publication_date: 2024-08-20
 provider: "Ministerio espa\xF1ol de Asuntos Econ\xF3micos y Transformaci\xF3n Digital "
 packager: intuitem
 objects:

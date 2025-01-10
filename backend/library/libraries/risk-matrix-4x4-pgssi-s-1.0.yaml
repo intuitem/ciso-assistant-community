@@ -6,6 +6,7 @@ description: Matrice de risques 4x4 PGSSI-S v1.0
 copyright: Agence du Numérique en Santé
 annotation: https://esante.gouv.fr/produits-services/pgssi-s
 version: 1
+publication_date: 2024-05-11
 provider: ANS
 packager: Ackwa.fr
 objects:

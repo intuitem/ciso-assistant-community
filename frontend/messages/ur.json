@@ -864,5 +864,6 @@
 	"scoreSemiColon": "سکور:",
 	"mappingInferenceHelpText": "یہ متغیرات طے شدہ ہیں اور ماخذ کے لحاظ سے تبدیل نہیں ہوں گے۔",
 	"bringTheEvidences": "ثبوت لے کر آئیں",
-	"bringTheEvidencesHelpText": "اگر غیر فعال ہو تو، اعتراض کو اس کے ثبوت کے بغیر نقل کر دیا جائے گا۔"
+	"bringTheEvidencesHelpText": "اگر غیر فعال ہو تو، اعتراض کو اس کے ثبوت کے بغیر نقل کر دیا جائے گا۔",
+	"publicationDate": "اشاعت کی تاریخ"
 }

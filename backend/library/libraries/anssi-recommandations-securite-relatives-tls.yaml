@@ -10,6 +10,7 @@ description: "Ce guide a pour objectif de pr\xE9senter les bonnes pratiques rela
   changes d\u2019information par l\u2019interm\xE9diaire de TLS.\L\nhttps://cyber.gouv.fr/sites/default/files/2017/07/anssi-guide-recommandations_de_securite_relatives_a_tls-v1.2.pdf"
 copyright: Licence ouverte / Open Licence (Etalab v1)
 version: 1
+publication_date: 2024-08-04
 provider: ANSSI
 packager: protocolpaladin
 objects:

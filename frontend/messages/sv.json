@@ -864,5 +864,6 @@
 	"scoreSemiColon": "Göra:",
 	"mappingInferenceHelpText": "Dessa variabler är fasta och kommer inte att ändras beroende på källan.",
 	"bringTheEvidences": "Kom med bevisen",
-	"bringTheEvidencesHelpText": "Om det är inaktiverat kommer objektet att dupliceras utan dess bevis"
+	"bringTheEvidencesHelpText": "Om det är inaktiverat kommer objektet att dupliceras utan dess bevis",
+	"publicationDate": "Publiceringsdatum"
 }

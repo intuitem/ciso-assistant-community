@@ -864,5 +864,6 @@
 	"scoreSemiColon": "अंक:",
 	"mappingInferenceHelpText": "ये चर निश्चित हैं और स्रोत के आधार पर परिवर्तित नहीं होंगे।",
 	"bringTheEvidences": "सबूत लाओ",
-	"bringTheEvidencesHelpText": "यदि अक्षम किया गया है, तो ऑब्जेक्ट को उसके साक्ष्य के बिना डुप्लिकेट किया जाएगा"
+	"bringTheEvidencesHelpText": "यदि अक्षम किया गया है, तो ऑब्जेक्ट को उसके साक्ष्य के बिना डुप्लिकेट किया जाएगा",
+	"publicationDate": "प्रकाशन की तिथि"
 }
