@@ -54,6 +54,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: 1.11.2
         version: 1.11.2(babel-plugin-macros@3.1.0)
+      '@inlang/plugin-message-format':
+        specifier: 2.2.0
+        version: 2.2.0
       '@playwright/test':
         specifier: ^1.49.1
         version: 1.49.1
@@ -731,6 +734,9 @@ packages:
 
   '@inlang/paraglide-vite@1.2.74':
     resolution: {integrity: sha512-SRHwD7vGO89NEzY2g+TsZWHo8EKoWrVppl/WePKzviRytUggOWZjW+Fxog2suOxC7Gm/C9X9r+7srzvrYasm7w==}
+
+  '@inlang/plugin-message-format@2.2.0':
+    resolution: {integrity: sha512-6MJLExr3OLqbR8gCP4UEgNMgdaJFFCug2GLmFwid7Ana4kObnbCA33YN3m3eN8p+lmnv7zpfW7oeyTZXZLoptg==}
 
   '@inlang/plugin@2.4.14':
     resolution: {integrity: sha512-HFI1t1tKs6jXqwKVl59vvt7kvMgg2Po7xA3IFijfJTZCt0tTI8txqeXCUV9jhUop29Hqj6a5zQd32BYv33Dulw==}
@@ -4751,6 +4757,8 @@ snapshots:
       - babel-plugin-macros
       - debug
       - supports-color
+
+  '@inlang/plugin-message-format@2.2.0': {}
 
   '@inlang/plugin@2.4.14(@sinclair/typebox@0.31.28)':
     dependencies:
