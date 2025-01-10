@@ -1,3 +1,6 @@
+import { safeTranslate } from '$lib/utils/i18n';
+import * as m from '$paraglide/messages';
+
 // id is not needed, just to help us with authoring
 export const steps = [
 	{
@@ -32,7 +35,7 @@ export const steps = [
 		}
 	},
 	{
-		id: 6,
+		id: 5,
 		element: '#catalog',
 		popover: {
 			title: 'Click to unfold',
@@ -40,24 +43,24 @@ export const steps = [
 				'The library of CISO Assistant is quite comprehensive and contain multiple objects: frameworks, threats, matrices.'
 		}
 	},
-	{ id: 7, element: '#frameworks', popover: { title: 'click here' } },
+	{ id: 6, element: '#frameworks', popover: { title: 'click here' } },
 	{
-		id: 8,
+		id: 7,
 		element: '#add-button',
 		popover: { title: 'Click to import one', description: 'Description' }
 	},
 	{
-		id: 9,
+		id: 8,
 		element: '#search-input',
 		popover: { title: 'Type to filter', description: 'You can try csf v2' }
 	},
 	{
-		id: 10,
+		id: 9,
 		element: '#tablerow-import-button',
 		popover: { title: 'Click here to load it' }
 	},
 	{
-		id: 11,
+		id: 10,
 		element: '#riskMatrices',
 		popover: {
 			title: 'click here',
@@ -66,12 +69,12 @@ export const steps = [
 		}
 	},
 	{
-		id: 12,
+		id: 11,
 		element: '#add-button',
 		popover: { title: 'Click to import one', description: 'Description' }
 	},
 	{
-		id: 13,
+		id: 12,
 		element: '#filters',
 		popover: {
 			description:
@@ -79,32 +82,32 @@ export const steps = [
 		}
 	},
 	{
-		id: 14,
+		id: 13,
 		element: '#tablerow-import-button',
 		popover: { title: 'Click here to load it' }
 	},
-	{ id: 15, element: '#compliance', popover: { title: 'Click to unfold' } },
+	{ id: 14, element: '#compliance', popover: { title: 'Click to unfold' } },
 	{
-		id: 16,
+		id: 15,
 		element: '#complianceAssessments',
 		popover: {
 			description:
 				'This is where you can create and manage your audits that will serve as your baseline'
 		}
 	},
-	{ id: 17, element: '#risk', popover: { title: 'Click to unfold' } },
+	{ id: 16, element: '#risk', popover: { title: 'Click to unfold' } },
 	{
-		id: 18,
+		id: 17,
 		element: '#riskAssessments',
 		popover: { description: 'And this is where you will be able to perform your risk assessments' }
 	},
 	{
-		id: 19,
+		id: 18,
 		element: '#sidebar-more-btn',
 		popover: { description: 'You can retrigger the guided tour and adjust your preferences here.' }
 	},
 	{
-		id: 20,
+		id: 19,
 		element: 'none',
 		popover: {
 			title: 'All set',
