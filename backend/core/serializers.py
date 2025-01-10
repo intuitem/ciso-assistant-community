@@ -28,7 +28,8 @@ class SerializerFactory:
     """
 
     def __init__(self, *modules: str):
-        self.modules = list(reversed(modules))  # Reverse to prioritize later modules
+        # Reverse to prioritize later modules
+        self.modules = list(reversed(modules))
 
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
@@ -207,7 +208,7 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     project = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
-    risk_scenarios = FieldsRelatedField(many=True)
+    risk_scenarios = FieldsRelatedField(many=True, fields=["id", "name", "ref_id"])
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
     ebios_rm_study = FieldsRelatedField(["id", "name"])

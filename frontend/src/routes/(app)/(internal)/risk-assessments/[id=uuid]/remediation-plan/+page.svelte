@@ -67,7 +67,7 @@
 <p class="p-2 m-2 text-lg font-semibold">{m.associatedRiskScenarios()}:</p>
 
 <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex flex-col">
-	{#each data.risk_assessment.risk_scenarios as scenario}
+	{#each data.risk_assessment.risk_scenarios.sort( (a, b) => String(a?.ref_id).localeCompare(String(b?.ref_id)) ) as scenario}
 		<tr class="bg-gray-100">
 			<td class="text-lg p-3" colspan="9">
 				<a
