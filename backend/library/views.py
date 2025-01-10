@@ -221,6 +221,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
                     "version",
                     "packager",
                     "provider",
+                    "publication_date",
                     "builtin",
                     "objects_meta",
                     "reference_count",
