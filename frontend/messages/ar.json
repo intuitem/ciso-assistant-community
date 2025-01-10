@@ -868,5 +868,6 @@
 	"bringTheEvidencesHelpText": "في حالة التعطيل، سيتم تكرار الكائن بدون أدلته",
 	"documentationScore": "درجة التوثيق",
 	"useDocumentationScore": "استخدام درجة التوثيق",
-	"useDocumentationScoreHelpText": "ستتوفر درجة ثانية (درجة التوثيق) لتقييم المتطلبات."
+	"useDocumentationScoreHelpText": "ستتوفر درجة ثانية (درجة التوثيق) لتقييم المتطلبات.",
+	"publicationDate": "تاريخ النشر"
 }

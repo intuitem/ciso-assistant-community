@@ -867,5 +867,6 @@
 	"bringTheEvidencesHelpText": "Als dit is uitgeschakeld, wordt het object gedupliceerd zonder de bijbehorende bewijzen",
 	"documentationScore": "Documentatie score",
 	"useDocumentationScore": "Documentatiescore gebruiken",
-	"useDocumentationScoreHelpText": "Een tweede score (documentatiescore) zal beschikbaar zijn om de vereisten te beoordelen."
+	"useDocumentationScoreHelpText": "Een tweede score (documentatiescore) zal beschikbaar zijn om de vereisten te beoordelen.",
+	"publicationDate": "Publicatiedatum"
 }

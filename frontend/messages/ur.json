@@ -867,5 +867,6 @@
 	"bringTheEvidencesHelpText": "اگر غیر فعال ہو تو، اعتراض کو اس کے ثبوت کے بغیر نقل کر دیا جائے گا۔",
 	"documentationScore": "دستاویزی سکور",
 	"useDocumentationScore": "دستاویزی سکور استعمال کریں۔",
-	"useDocumentationScoreHelpText": "ضروریات کو پورا کرنے کے لیے دوسرا سکور (دستاویزی سکور) دستیاب ہوگا۔"
+	"useDocumentationScoreHelpText": "ضروریات کو پورا کرنے کے لیے دوسرا سکور (دستاویزی سکور) دستیاب ہوگا۔",
+	"publicationDate": "اشاعت کی تاریخ"
 }

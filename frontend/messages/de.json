@@ -867,5 +867,6 @@
 	"bringTheEvidencesHelpText": "Wenn deaktiviert, wird das Objekt ohne seine Beweise dupliziert",
 	"documentationScore": "Bewertung der Dokumentation",
 	"useDocumentationScore": "Dokumentationsnote verwenden",
-	"useDocumentationScoreHelpText": "Eine zweite Punktzahl (Dokumentationspunktzahl) wird verfügbar sein, um die Anforderungen zu bewerten."
+	"useDocumentationScoreHelpText": "Eine zweite Punktzahl (Dokumentationspunktzahl) wird verfügbar sein, um die Anforderungen zu bewerten.",
+	"publicationDate": "Veröffentlichungsdatum"
 }

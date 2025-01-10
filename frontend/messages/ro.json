@@ -867,5 +867,6 @@
 	"bringTheEvidencesHelpText": "Dacă este dezactivat, obiectul va fi duplicat fără dovezile sale",
 	"documentationScore": "Punctajul documentației",
 	"useDocumentationScore": "Utilizați punctajul documentației",
-	"useDocumentationScoreHelpText": "Un al doilea punctaj (punctajul pentru documentație) va fi disponibil pentru evaluarea cerințelor."
+	"useDocumentationScoreHelpText": "Un al doilea punctaj (punctajul pentru documentație) va fi disponibil pentru evaluarea cerințelor.",
+	"publicationDate": "Data publicării"
 }

@@ -867,5 +867,6 @@
 	"bringTheEvidencesHelpText": "Se disabilitato, l'oggetto verrà duplicato senza le sue prove",
 	"documentationScore": "Punteggio della documentazione",
 	"useDocumentationScore": "Utilizzare il punteggio della documentazione",
-	"useDocumentationScoreHelpText": "Un secondo punteggio (punteggio di documentazione) sarà disponibile per valutare i requisiti."
+	"useDocumentationScoreHelpText": "Un secondo punteggio (punteggio di documentazione) sarà disponibile per valutare i requisiti.",
+	"publicationDate": "Data di pubblicazione"
 }
