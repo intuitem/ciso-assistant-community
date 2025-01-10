@@ -1084,6 +1084,7 @@
 	"material": "Matériel",
 	"environmental": "Environnemental",
 	"documentationScore": "Score de documentation",
+	"implementationScore": "Score d'implémentation",
 	"useDocumentationScore": "Utiliser le score de documentation",
 	"useDocumentationScoreHelpText": "Un deuxième score (le score de documentation) sera disponible pour évaluer les exigences."
 }
