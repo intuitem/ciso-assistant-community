@@ -284,6 +284,14 @@
 										{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)}
 									</span>
 								</p>
+								{#if mappingInference.sourceRequirementAssessment.is_scored}
+									<p class="whitespace-pre-line py-1">
+										<span class="italic">{m.scoreSemiColon()}</span>
+										<span class="badge h-fit">
+											{safeTranslate(mappingInference.sourceRequirementAssessment.score)}
+										</span>
+									</p>
+								{/if}
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.suggestionColon()}</span>
 									<span

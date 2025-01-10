@@ -2509,6 +2509,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "source_requirement_assessment"
                     ]["id"]
                 )
+                requirement_assessment.observation = (
+                    baseline_requirement_assessment.observation
+                )
                 requirement_assessment.evidences.add(
                     *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
                 )

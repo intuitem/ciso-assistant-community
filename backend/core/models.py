@@ -2788,6 +2788,9 @@ class ComplianceAssessment(Assessment):
                 requirement_assessment.is_scored = (
                     baseline_requirement_assessment.is_scored
                 )
+                requirement_assessment.observation = (
+                    baseline_requirement_assessment.observation
+                )
                 requirement_assessment.evidences.set(
                     baseline_requirement_assessment.evidences.all()
                 )
@@ -3196,6 +3199,8 @@ class ComplianceAssessment(Assessment):
                     "source_requirement_assessment": {
                         "str": str(ref),
                         "id": str(ref.id),
+                        "is_scored": ref.is_scored,
+                        "score": ref.score,
                         "coverage": mapping.coverage,
                     },
                     # "mappings": [mapping.id for mapping in mappings],
