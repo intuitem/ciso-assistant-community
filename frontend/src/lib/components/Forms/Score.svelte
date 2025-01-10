@@ -92,7 +92,7 @@
 	{/if}
 	<div class="flex flex-col w-full justify-evenly space-x-4">
 		{#if isApplicable}
-			<div class="flex w-full items-center justify-center flex-col">
+			<div class="flex w-full space-y-2 items-center justify-center flex-col">
 				<RangeSlider
 					class="w-full"
 					data-testid="range-slider-input"
@@ -104,16 +104,7 @@
 					ticked
 					disabled={!$isScored}
 				>
-					<div class="flex space-x-8 justify-center items-center">
-						{#if $isScored && scores_definition && $value !== null}
-							{#each scores_definition as definition}
-								{#if definition.score === $value}
-									<p class="w-full max-w-[80ch]">
-										{definition.name}{definition.description ? `: ${definition.description}` : ''}
-									</p>
-								{/if}
-							{/each}
-						{/if}
+					<div class="flex space-x-8 justify-between items-center">
 						{#if !always_enabled}
 							<SlideToggle
 								bind:checked={$isScored}
@@ -124,33 +115,42 @@
 								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
 							>
 						{/if}
-						<ProgressRadial
-							stroke={100}
-							meter={displayScoreColor($value, max_score, inversedColors)}
-							value={$isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
-							font={150}
-							class="shrink-0"
-							width={'w-12'}>{$isScored ? $value : '--'}</ProgressRadial
-						>
-						<strong>{m.score()}</strong>
-						{#if show_documentation_score}
-							<div class="flex space-x-8 justify-center items-center">
-								<ProgressRadial
-									stroke={100}
-									meter={displayScoreColor($documentationScore, max_score, inversedColors)}
-									value={$isScored
-										? formatScoreValue($documentationScore, max_score, fullDonut)
-										: min_score}
-									font={150}
-									class="shrink-0"
-									width={'w-12'}>{$isScored ? $documentationScore : '--'}</ProgressRadial
-								>
-								<strong>{m.documentationScore()}</strong>
-							</div>
+						{#if $isScored && scores_definition && $value !== null}
+							{#each scores_definition as definition}
+								{#if definition.score === $value}
+									<p class="w-full max-w-[80ch]">
+										{definition.name}{definition.description ? `: ${definition.description}` : ''}
+									</p>
+								{/if}
+							{/each}
 						{/if}
+						<div class="flex space-x-2 justify-center items-center">
+							{#if show_documentation_score}<span>{m.implementationScore()}</span>{/if}
+							<ProgressRadial
+								stroke={100}
+								meter={displayScoreColor($value, max_score, inversedColors)}
+								value={$isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
+								font={150}
+								class="shrink-0"
+								width={'w-12'}>{$isScored ? $value : '--'}</ProgressRadial
+							>
+						</div>
 					</div>
 				</RangeSlider>
 				{#if show_documentation_score}
+					<div class="flex space-x-2 justify-end w-full items-center">
+						<span>{m.documentationScore()}</span>
+						<ProgressRadial
+							stroke={100}
+							meter={displayScoreColor($documentationScore, max_score, inversedColors)}
+							value={$isScored
+								? formatScoreValue($documentationScore, max_score, fullDonut)
+								: min_score}
+							font={150}
+							class="shrink-0"
+							width={'w-12'}>{$isScored ? $documentationScore : '--'}</ProgressRadial
+						>
+					</div>
 					<RangeSlider
 						class="w-full"
 						data-testid="range-slider-input"
