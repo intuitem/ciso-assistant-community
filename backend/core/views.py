@@ -2477,9 +2477,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         instance: ComplianceAssessment = serializer.save()
         instance.create_requirement_assessments(baseline)
         if baseline and baseline.framework != instance.framework:
-            target_framework = serializer.validated_data["framework"]
             mapping_set = RequirementMappingSet.objects.get(
-                target_framework=target_framework,
+                target_framework=serializer.validated_data["framework"],
                 source_framework=baseline.framework,
             )
             for (
