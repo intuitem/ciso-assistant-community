@@ -11,6 +11,7 @@ Conventions:
     The first tab shall be named "library_content" and contain the description of the library in the other tabs
         library_urn                     | <urn>
         library_version                 | <version>
+        library_publication_date        | <date>
         library_locale                  | <en/fr/...>
         library_ref_id                  | <ref_id>
         library_name                    | <name>
@@ -115,6 +116,7 @@ from collections import defaultdict
 LIBRARY_VARS = (
     "library_urn",
     "library_version",
+    "library_publication_date",
     "library_locale",
     "library_ref_id",
     "library_name",
@@ -839,6 +841,7 @@ library = {
     "description": library_vars["library_description"],
     "copyright": library_vars["library_copyright"],
     "version": library_vars["library_version"],
+    "publication_date": library_vars["library_publication_date"].date(),
     "provider": library_vars["library_provider"],
     "packager": library_vars["library_packager"],
 }
