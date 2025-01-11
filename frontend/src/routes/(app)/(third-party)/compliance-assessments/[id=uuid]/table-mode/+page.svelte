@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Score from '$lib/components/Forms/Score.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import {
@@ -19,11 +22,8 @@
 		type ModalSettings,
 		type ModalStore
 	} from '@skeletonlabs/skeleton';
-	import type { Actions, PageData } from '../../table-mode/$types';
-	import { page } from '$app/stores';
-	import Score from '$lib/components/Forms/Score.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import type { Actions, PageData } from './$types';
 
 	export let data: PageData;
 	export let form: Actions;
