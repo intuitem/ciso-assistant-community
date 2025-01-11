@@ -14,7 +14,7 @@ description: "TSP Section 100\n2017 Trust Services Criteria for Security, Availa
   \ of information used by the entity. Link: https://www.aicpa-cima.com/resources/download/2017-trust-services-criteria-with-revised-points-of-focus-2022"
 copyright: "\xA9 2023 Association of International Certified Professional Accountants\xAE"
 version: 1
-publication_date: 2023-09-30
+publication_date: 2025-01-12
 provider: AICPA
 packager: intuitem
 translations:
@@ -53,9 +53,10 @@ objects:
         name: SOC2-2017-Rev-2022
         description: 'SOC2-2017 Trust Services Criteria '
     requirement_nodes:
-    - urn: None:1
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1
       assessable: false
       depth: 1
+      ref_id: CC1
       name: Control Environment
       translations:
         es:
@@ -64,7 +65,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.1
       assessable: false
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1
       ref_id: CC1.1
       name: COSO Principle 1
       description: The entity demonstrates a commitment to integrity and ethical values.
@@ -158,7 +159,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.2
       assessable: false
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1
       ref_id: CC1.2
       name: COSO Principle 2
       description: The board of directors demonstrates independence from management
@@ -233,7 +234,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.3
       assessable: false
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1
       ref_id: CC1.3
       name: COSO Principle 3
       description: Management establishes, with board oversight, structures, reporting
@@ -351,7 +352,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.4
       assessable: false
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1
       ref_id: CC1.4
       name: COSO Principle 4
       description: The entity demonstrates a commitment to attract, develop, and retain
@@ -472,7 +473,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1.5
       assessable: false
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc1
       ref_id: CC1.5
       name: COSO Principle 5
       description: The entity holds individuals accountable for their internal control
@@ -589,9 +590,10 @@ objects:
             \ de sanciones, que se aplica seg\xFAn sea necesario, cuando un empleado\
             \ viola las pol\xEDticas de privacidad de la entidad o cuando el comportamiento\
             \ negligente de un empleado causa un incidente de privacidad."
-    - urn: None:2
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2
       assessable: false
       depth: 1
+      ref_id: CC2
       name: Information & Communication
       translations:
         es:
@@ -600,7 +602,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.1
       assessable: false
       depth: 2
-      parent_urn: None:2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2
       ref_id: CC2.1
       name: COSO Principle 13
       description: The entity obtains or generates and uses relevant, quality information
@@ -756,7 +758,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.2
       assessable: false
       depth: 2
-      parent_urn: None:2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2
       ref_id: CC2.2
       name: COSO Principle 14
       description: The entity internally communicates information, including objectives
@@ -974,7 +976,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2.3
       assessable: false
       depth: 2
-      parent_urn: None:2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc2
       ref_id: CC2.3
       name: COSO Principle 15
       description: The entity communicates with external parties regarding matters
@@ -1181,9 +1183,10 @@ objects:
             \ - Los usuarios externos reciben informaci\xF3n sobre c\xF3mo notificar\
             \ fallos del sistema, incidentes, preocupaciones y otras quejas al personal\
             \ apropiado de la entidad."
-    - urn: None:3
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3
       assessable: false
       depth: 1
+      ref_id: CC3
       name: Risk Assessment
       translations:
         es:
@@ -1192,7 +1195,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.1
       assessable: false
       depth: 2
-      parent_urn: None:3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3
       ref_id: CC3.1
       name: COSO Principle 6
       description: The entity specifies objectives with sufficient clarity to enable
@@ -1448,7 +1451,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.2
       assessable: false
       depth: 2
-      parent_urn: None:3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3
       ref_id: CC3.2
       name: COSO Principle 7
       description: 'COSO Principle 7: The entity identifies risks to the achievement
@@ -1607,7 +1610,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.3
       assessable: false
       depth: 2
-      parent_urn: None:3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3
       ref_id: CC3.3
       name: COSO Principle 8
       description: The entity considers the potential for fraud in assessing risks
@@ -1695,7 +1698,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3.4
       assessable: false
       depth: 2
-      parent_urn: None:3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc3
       ref_id: CC3.4
       name: COSO Principle 9
       description: 'COSO Principle 9: The entity identifies and assesses changes that
@@ -1803,9 +1806,10 @@ objects:
             \ los componentes de los sistemas de la entidad, y (2) la probabilidad\
             \ y magnitud de los riesgos resultantes para el logro de los objetivos\
             \ de la entidad."
-    - urn: None:4
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4
       assessable: false
       depth: 1
+      ref_id: CC4
       name: Monitoring Activities
       translations:
         es:
@@ -1814,7 +1818,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4.1
       assessable: false
       depth: 2
-      parent_urn: None:4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4
       ref_id: CC4.1
       name: COSO Principle 16
       description: The entity selects, develops, and performs ongoing and/or separate
@@ -1948,7 +1952,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4.2
       assessable: false
       depth: 2
-      parent_urn: None:4
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4
       ref_id: CC4.2
       name: COSO Principle 17
       description: The entity evaluates and communicates internal control deficiencies
@@ -1974,11 +1978,11 @@ objects:
           description: "[COSO] Eval\xFAa los resultados - La direcci\xF3n y el consejo\
             \ de administraci\xF3n, seg\xFAn proceda, eval\xFAan los resultados de\
             \ las evaluaciones en curso y de las independientes."
-    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4.2.2.
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4.2.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc4.2
-      ref_id: CC4.2.2.
+      ref_id: CC4.2.2
       description: "[COSO] Communicates Deficiencies \u2014 Deficiencies are communicated\
         \ to parties responsable for taking corrective action and to senior management\
         \ and the board of directors, as appropriate."
@@ -2000,9 +2004,10 @@ objects:
           name: null
           description: "[COSO] Supervisa las medidas correctoras: la direcci\xF3n\
             \ controla si las deficiencias se subsanan a tiempo."
-    - urn: None:5
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5
       assessable: false
       depth: 1
+      ref_id: CC5
       name: Control Activities
       translations:
         es:
@@ -2011,7 +2016,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.1
       assessable: false
       depth: 2
-      parent_urn: None:5
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5
       ref_id: CC5.1
       name: COSO Principle 10
       description: The entity selects and develops control activities that contribute
@@ -2115,7 +2120,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.2
       assessable: false
       depth: 2
-      parent_urn: None:5
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5
       ref_id: CC5.2
       name: COSO Principle 11
       description: The entity also selects and develops general control activities
@@ -2200,7 +2205,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5.3
       assessable: false
       depth: 2
-      parent_urn: None:5
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc5
       ref_id: CC5.3
       name: COSO Principle 12
       description: 'The entity deploys control activities through policies that establish
@@ -2307,9 +2312,10 @@ objects:
             \ La direcci\xF3n revisa peri\xF3dicamente las actividades de control\
             \ para determinar si siguen siendo pertinentes y las actualiza cuando\
             \ es necesario."
-    - urn: None:6
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       assessable: false
       depth: 1
+      ref_id: CC6
       name: Logical and Physical Access Controls
       translations:
         es:
@@ -2318,7 +2324,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.1
       assessable: false
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       ref_id: CC6.1
       description: The entity implements logical access security software, infrastructure,
         and architectures over protected information assets to protect them from security
@@ -2554,7 +2560,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.2
       assessable: false
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       ref_id: CC6.2
       description: Prior to issuing system credentials and granting system access,
         the entity registers and authorizes new internal and external users whose
@@ -2624,7 +2630,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.3
       assessable: false
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       ref_id: CC6.3
       description: "The entity authorizes, modifies, or removes access to data, software,\
         \ functions, and other protected information assets based on roles, responsibilities,\
@@ -2703,7 +2709,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.4
       assessable: false
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       ref_id: CC6.4
       description: "The entity restricts physical access to facilities and protected\
         \ information assets (for example, data center facilities, backup media storage,\
@@ -2779,7 +2785,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.5
       assessable: false
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       ref_id: CC6.5
       description: "The entity discontinues logical and physical protections over\
         \ physical assets only after the ability to read or recover data and software\
@@ -2814,7 +2820,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.6
       assessable: false
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       ref_id: CC6.6
       description: The entity implements logical access security measures to protect
         against threats from sources outside its system boundaries.
@@ -2886,7 +2892,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.7
       assessable: false
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       ref_id: CC6.7
       description: "The entity restricts the transmission, movement, and removal of\
         \ information to authorized internal and external users and processes, and\
@@ -2962,7 +2968,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6.8
       assessable: false
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc6
       ref_id: CC6.8
       description: "The entity implements controls to prevent or detect and act upon\
         \ the introduction of unauthorized or malicious software to meet the entity\u2019\
@@ -3055,9 +3061,10 @@ objects:
             \ transferidos o devueltos a la custodia de la entidad en busca de malware\
             \ y otro software no autorizado. El malware u otro software detectado\
             \ se elimina antes de su conexi\xF3n a la red de la entidad."
-    - urn: None:7
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7
       assessable: false
       depth: 1
+      ref_id: CC7
       name: System Operations
       translations:
         es:
@@ -3066,7 +3073,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.1
       assessable: false
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7
       ref_id: CC7.1
       description: "To meet its objectives, the entity uses detection and monitoring\
         \ procedures to identify \n(1) changes to configurations that result in the\
@@ -3159,7 +3166,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.2
       assessable: false
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7
       ref_id: CC7.2
       description: The entity monitors system components and the operation of those
         components for anomalies that are indicative of malicious acts, natural disasters,
@@ -3250,7 +3257,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.3
       assessable: false
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7
       ref_id: CC7.3
       description: The entity evaluates security events to determine whether they
         could or have resulted in a failure of the entity to meet its objectives (security
@@ -3373,7 +3380,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.4
       assessable: false
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7
       ref_id: CC7.4
       description: The entity responds to identified security incidents by executing
         a defined incident-response program to understand, contain, remediate, and
@@ -3600,7 +3607,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7.5
       assessable: false
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc7
       ref_id: CC7.5
       description: The entity identifies, develops, and implements activities to recover
         from identified security incidents.
@@ -3707,9 +3714,10 @@ objects:
             \ consideren la posibilidad de falta de disponibilidad del personal clave;\
             \ y \n(4) revisi\xF3n de la postura de resiliencia y los planes de continuidad\
             \ basados en los resultados de las pruebas."
-    - urn: None:8
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8
       assessable: false
       depth: 1
+      ref_id: CC8
       name: Change Management
       translations:
         es:
@@ -3718,7 +3726,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8.1
       assessable: false
       depth: 2
-      parent_urn: None:8
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc8
       ref_id: CC8.1
       description: The entity authorizes, designs, develops or acquires, configures,
         documents, tests, approves, and implements changes to infrastructure, data,
@@ -4004,9 +4012,10 @@ objects:
             \ requisitos de privacidad en el dise\xF1o de sus sistemas y procesos,\
             \ y limita la recopilaci\xF3n y el procesamiento de informaci\xF3n personal\
             \ a lo que sea necesario para el prop\xF3sito identificado."
-    - urn: None:9
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9
       assessable: false
       depth: 1
+      ref_id: CC9
       name: Risk Mitigation
       translations:
         es:
@@ -4015,7 +4024,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.1
       assessable: false
       depth: 2
-      parent_urn: None:9
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9
       ref_id: CC9.1
       description: The entity identifies, selects, and develops risk mitigation activities
         for risks arising from potential business disruptions.
@@ -4069,7 +4078,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9.2
       assessable: false
       depth: 2
-      parent_urn: None:9
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:cc9
       ref_id: CC9.2
       description: The entity assesses and manages risks associated with vendors and
         business partners.
@@ -4301,9 +4310,10 @@ objects:
             n sea necesario, la entidad eval\xFAa el cumplimiento por parte de los\
             \ proveedores y socios comerciales de los compromisos y requisitos de\
             \ privacidad de la entidad y toma las medidas correctivas necesarias."
-    - urn: None:10
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a
       assessable: false
       depth: 1
+      ref_id: A
       name: Additional Criteria for Avalability
       translations:
         es:
@@ -4312,7 +4322,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.1
       assessable: false
       depth: 2
-      parent_urn: None:10
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a
       ref_id: A1.1
       description: The entity maintains, monitors, and evaluates current processing
         capacity and use of system components (infrastructure, data, and software)
@@ -4375,7 +4385,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.2
       assessable: false
       depth: 2
-      parent_urn: None:10
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a
       ref_id: A1.2
       description: The entity authorizes, designs, develops or acquires, implements,
         operates, approves, maintains, and monitors environmental protections, software,
@@ -4563,7 +4573,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a1.3
       assessable: false
       depth: 2
-      parent_urn: None:10
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:a
       ref_id: A1.3
       description: The entity tests recovery plan procedures supporting system recovery
         to meet its objectives.
@@ -4613,9 +4623,10 @@ objects:
           description: "Pruebas de integridad y exhaustividad de los datos de las\
             \ copias de seguridad - La integridad y exhaustividad de la informaci\xF3\
             n de las copias de seguridad se comprueba peri\xF3dicamente."
-    - urn: None:11
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c
       assessable: false
       depth: 1
+      ref_id: C
       name: Additional Criteria for Confidentiality
       translations:
         es:
@@ -4624,7 +4635,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c1.1
       assessable: false
       depth: 2
-      parent_urn: None:11
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c
       ref_id: C1.1
       description: "The entity identifies and maintains confidential information to\
         \ meet the entity\u2019s objectives related to confidentiality."
@@ -4680,7 +4691,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c1.2
       assessable: false
       depth: 2
-      parent_urn: None:11
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:c
       ref_id: C1.2
       description: "The entity disposes of confidential information to meet the entity\u2019\
         s objectives related to confidentiality."
@@ -4719,9 +4730,10 @@ objects:
             ticas y procedimientos para borrar autom\xE1tica o manualmente o destruir\
             \ de cualquier otra forma la informaci\xF3n confidencial que ha sido identificada\
             \ para su destrucci\xF3n."
-    - urn: None:12
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       assessable: false
       depth: 1
+      ref_id: PI
       name: Additional Criteria for Processing Integrity  (OVER THE PROVISION OF SERVICES
         OR THE PRODUCTION, MANUFACTURING, OR DISTRIBUTION OF GOODS)
       translations:
@@ -4733,7 +4745,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.1
       assessable: true
       depth: 2
-      parent_urn: None:12
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PP1.1
       description: The entity obtains or generates, uses, and communicates relevant,
         quality information regarding the objectives related to processing, including
@@ -4749,7 +4761,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.2
       assessable: true
       depth: 2
-      parent_urn: None:12
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PP1.2
       description: "The entity implements policies and procedures over system inputs,\
         \ including controls over completeness and accuracy, to result in products,\
@@ -4763,7 +4775,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.3
       assessable: true
       depth: 2
-      parent_urn: None:12
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PP1.3
       description: "The entity implements policies and procedures over system processing\
         \ to result in products, services, and reporting to meet the entity\u2019\
@@ -4777,7 +4789,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.4
       assessable: true
       depth: 2
-      parent_urn: None:12
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PP1.4
       description: "The entity implements policies and procedures to make available\
         \ or deliver output completely, accurately, and timely in accordance with\
@@ -4792,7 +4804,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pp1.5
       assessable: true
       depth: 2
-      parent_urn: None:12
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:pi
       ref_id: PP1.5
       description: "The entity implements policies and procedures to store inputs,\
         \ items in processing, and outputs completely, accurately, and timely in accordance\
@@ -4804,18 +4816,19 @@ objects:
             \ las entradas, los elementos en proceso y las salidas de forma completa,\
             \ precisa y oportuna de acuerdo con las especificaciones del sistema para\
             \ cumplir los objetivos de la entidad."
-    - urn: None:13
+    - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       assessable: false
       depth: 1
+      ref_id: P
       name: Additional Criteria for Privacity
       translations:
         es:
           name: Criterios adicionales de Privacidad
           description: null
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p1.0
-      assessable: true
+      assessable: false
       depth: 2
-      parent_urn: None:13
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       ref_id: P1.0
       description: Privacy Criteria Related to Notice and Communication of Objectives
         Related to Privacy
@@ -4845,9 +4858,9 @@ objects:
             \ en el uso de la informaci\xF3n personal, para cumplir los objetivos\
             \ de la entidad relacionados con la privacidad."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p2.0
-      assessable: true
+      assessable: false
       depth: 2
-      parent_urn: None:13
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       ref_id: P2.0
       description: Privacy Criteria Related to Choice and Consent
       translations:
@@ -4885,9 +4898,9 @@ objects:
             \ conservaci\xF3n, divulgaci\xF3n y eliminaci\xF3n de informaci\xF3n personal\
             \ est\xE1 documentada."
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p3.0
-      assessable: true
+      assessable: false
       depth: 2
-      parent_urn: None:13
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       ref_id: P3.0
       description: Privacy Criteria Related to Collection
       translations:
@@ -4959,7 +4972,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p4.0
       assessable: false
       depth: 2
-      parent_urn: None:13
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       ref_id: P4.0
       description: Privacy Criteria Related to Use, Retention, and Disposal
       translations:
@@ -5101,7 +5114,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p5.0
       assessable: false
       depth: 2
-      parent_urn: None:13
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       ref_id: P5.0
       description: Privacy Criteria Related to Access
       translations:
@@ -5312,7 +5325,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p6.0
       assessable: false
       depth: 2
-      parent_urn: None:13
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       ref_id: P6.0
       description: Privacy Criteria Related to Disclosure and Notification
       translations:
@@ -5696,7 +5709,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p7.0
       assessable: false
       depth: 2
-      parent_urn: None:13
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       ref_id: P7.0
       description: Privacy Criteria Related to Quality
       translations:
@@ -5747,7 +5760,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p8.0
       assessable: false
       depth: 2
-      parent_urn: None:13
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017-rev-2022:p
       ref_id: P8.0
       description: Privacy Criteria Related to Monitoring and Enforcement
       translations:
