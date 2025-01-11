@@ -81,7 +81,8 @@ export const LOCALE_DISPLAY_MAP = {
 	pt: '🇵🇹 Português',
 	pl: '🇵🇱 Polski',
 	ro: '🇷🇴 Română',
-	ar: '🇸🇦 العربية'
+	ar: '🇸🇦 العربية',
+	cs: '🇨🇿 Český'
 };
 
 export const ISO_8601_REGEX =

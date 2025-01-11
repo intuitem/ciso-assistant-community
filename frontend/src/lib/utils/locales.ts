@@ -48,7 +48,8 @@ export const LOCALE_MAP = {
 		name: 'urdu'
 	},
 	cs: {
-		name: 'czech'
+		name: 'czech',
+		flag: '🇨🇿'
 	},
 	sv: {
 		name: 'swedish'
