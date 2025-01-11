@@ -1,9 +1,8 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-	import { ProgressRadial, RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
-	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
+	import { ProgressRadial, RangeSlider } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
@@ -13,10 +12,10 @@
 
 	export let min_score = 0;
 	export let max_score = 100;
-	export let show_documentation_score: boolean = false;
 	export let score_step = 1;
-	export let always_enabled = false;
 	export let helpText: string | undefined = undefined;
+
+	export let disabled: boolean = false;
 
 	interface ScoresDefinition {
 		score: number;
@@ -28,47 +27,23 @@
 
 	export let form: SuperForm<Record<string, any>>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
-	const documentationScore = formFieldProxy(form, 'documentation_score')['value'];
-
-	const isScored = formFieldProxy(form, `is_scored`)['value'];
-
-	$: $value = $isScored ? ($value ?? min_score) : $value;
-	$: $documentationScore = $isScored ? ($documentationScore ?? min_score) : $documentationScore;
-
-	if (always_enabled) {
-		$isScored = true;
-	}
-
-	export let is_scored = $isScored;
-	export let score = $value;
-	export let documentation_score = $documentationScore;
-	$: is_scored = $isScored;
-	$: score = $value;
-	$: documentation_score = $documentationScore;
 
 	const dispatch = createEventDispatcher();
-	let previous = [$isScored, $value, $documentationScore];
+	let previous = [$value];
+
+	export let score = $value;
+	$: score = $value;
+
 	$: {
-		if (
-			(previous[0] !== $isScored ||
-				previous[1] !== $value ||
-				previous[2] !== $documentationScore) &&
-			previous[0] !== undefined &&
-			previous[2] !== undefined
-		) {
-			dispatch('change', {
-				isScored: $isScored,
-				score: $value,
-				documentationScore: $documentationScore
-			});
+		if (previous[0] !== $value && previous[0] !== undefined) {
+			dispatch('change', { score: $value });
 		}
-		previous = [$isScored, $value, $documentationScore];
+		previous = [$value];
 	}
 
 	$: if (max_score === 100) score_step = 5;
 
-	const result = formFieldProxy(form, 'result')['value'];
-	$: isApplicable = $result === 'not_applicable' ? false : true;
+	$: $value = !disabled ? ($value ?? min_score) : $value;
 </script>
 
 <div class={styles}>
@@ -90,85 +65,41 @@
 			{/each}
 		</div>
 	{/if}
-	<div class="flex flex-col w-full justify-evenly space-x-4">
-		{#if isApplicable}
-			<div class="flex w-full space-y-2 items-center justify-center flex-col">
-				<RangeSlider
-					class="w-full"
-					data-testid="range-slider-input"
-					name="range-slider"
-					bind:value={$value}
-					min={min_score}
-					max={max_score}
-					step={score_step}
-					ticked
-					disabled={!$isScored}
-				>
-					<div class="flex space-x-8 justify-between items-center">
-						{#if !always_enabled}
-							<SlideToggle
-								bind:checked={$isScored}
-								class="shrink-0"
-								active="bg-primary-500"
-								name="score-slider"
-							>
-								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
-							>
-						{/if}
-						{#if $isScored && scores_definition && $value !== null}
+	<div class="flex flex-row w-full items-center justify-evenly space-x-4">
+		<div class="flex w-full items-center justify-center">
+			<RangeSlider
+				class="w-full"
+				data-testid="range-slider-input"
+				name="range-slider"
+				bind:value={$value}
+				min={min_score}
+				max={max_score}
+				step={score_step}
+				ticked
+				{disabled}
+			>
+				<div class="flex justify-between space-x-8 items-center">
+					<slot name="left" />
+					<p class="w-full max-w-[80ch]">
+						{#if !disabled && scores_definition && $value !== null}
 							{#each scores_definition as definition}
 								{#if definition.score === $value}
-									<p class="w-full max-w-[80ch]">
-										{definition.name}{definition.description ? `: ${definition.description}` : ''}
-									</p>
+									{definition.name}{definition.description ? `: ${definition.description}` : ''}
 								{/if}
 							{/each}
 						{/if}
-						<div class="flex space-x-2 justify-center items-center">
-							{#if show_documentation_score}<span>{m.implementationScore()}</span>{/if}
-							<ProgressRadial
-								stroke={100}
-								meter={displayScoreColor($value, max_score, inversedColors)}
-								value={$isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
-								font={150}
-								class="shrink-0"
-								width={'w-12'}>{$isScored ? $value : '--'}</ProgressRadial
-							>
-						</div>
-					</div>
-				</RangeSlider>
-				{#if show_documentation_score}
-					<div class="flex space-x-2 justify-end w-full items-center">
-						<span>{m.documentationScore()}</span>
-						<ProgressRadial
-							stroke={100}
-							meter={displayScoreColor($documentationScore, max_score, inversedColors)}
-							value={$isScored
-								? formatScoreValue($documentationScore, max_score, fullDonut)
-								: min_score}
-							font={150}
-							class="shrink-0"
-							width={'w-12'}>{$isScored ? $documentationScore : '--'}</ProgressRadial
-						>
-					</div>
-					<RangeSlider
-						class="w-full"
-						data-testid="range-slider-input"
-						name="range-slider"
-						bind:value={$documentationScore}
-						min={min_score}
-						max={max_score}
-						step={score_step}
-						ticked
-						disabled={!$isScored}
-					></RangeSlider>
-				{/if}
-			</div>
-		{:else}
-			<p class="text-sm text-gray-500">
-				{m.notApplicableScore()}
-			</p>
-		{/if}
+					</p>
+					<ProgressRadial
+						stroke={100}
+						meter={displayScoreColor($value, max_score, inversedColors)}
+						value={!disabled ? formatScoreValue($value, max_score, fullDonut) : min_score}
+						font={150}
+						class="shrink-0"
+						width={'w-12'}>{!disabled ? $value : '--'}</ProgressRadial
+					>
+				</div>
+			</RangeSlider>
+		</div>
 	</div>
 	{#if helpText}
 		<p class="text-sm text-gray-500">{helpText}</p>
