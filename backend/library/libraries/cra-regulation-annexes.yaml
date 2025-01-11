@@ -1,13 +1,13 @@
 urn: urn:intuitem:risk:library:cra-resolution-annexes
 locale: en
 ref_id: CRA-resolution-annexes
-name: Cyber Resilience Act
-description: "European Parliament legislative resolution of 12 March 2024 on the proposal\
-  \ for a regulation of the European Parliament and of the Council on horizontal cybersecurity\
-  \ requirements for products with digital elements and amending Regulation (EU) 2019/1020\
-  \ (COM(2022)0454 \u2013 C9-0308/2022 \u2013 2022/0272(COD))\nhttps://www.europarl.europa.eu/doceo/document/TA-9-2024-0130_EN.pdf"
+name: Cyber Resilience Act - Annexes (CRA)
+description: Annexes to the REGULATION (EU) 2024/2847 OF THE EUROPEAN PARLIAMENT AND
+  OF THE COUNCIL of 23 October 2024 on horizontal cybersecurity requirements for products
+  with digital elements and amending Regulations (EU) No 168/2013 and (EU) No 2019/1020
+  and Directive (EU) 2020/1828 (Cyber Resilience Act)
 copyright: European Union law
-version: 2
+version: 3
 publication_date: 2024-06-25
 provider: EU
 packager: intuitem
@@ -15,12 +15,11 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:cra-resolution-annexes
     ref_id: CRA-resolution-annexes
-    name: Cyber Resilience Act
-    description: "European Parliament legislative resolution of 12 March 2024 on the\
-      \ proposal for a regulation of the European Parliament and of the Council on\
-      \ horizontal cybersecurity requirements for products with digital elements and\
-      \ amending Regulation (EU) 2019/1020 (COM(2022)0454 \u2013 C9-0308/2022 \u2013\
-      \ 2022/0272(COD))\nhttps://www.europarl.europa.eu/doceo/document/TA-9-2024-0130_EN.pdf"
+    name: Cyber Resilience Act - Annexes (CRA)
+    description: Annexes to the REGULATION (EU) 2024/2847 OF THE EUROPEAN PARLIAMENT
+      AND OF THE COUNCIL of 23 October 2024 on horizontal cybersecurity requirements
+      for products with digital elements and amending Regulations (EU) No 168/2013
+      and (EU) No 2019/1020 and Directive (EU) 2020/1828 (Cyber Resilience Act)
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1
       assessable: false
