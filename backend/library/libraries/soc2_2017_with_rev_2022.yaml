@@ -1,7 +1,7 @@
 urn: urn:intuitem:risk:library:soc2-2017-rev-2022
 locale: en
 ref_id: SOC2-2017-Rev-2022
-name: 'SOC2-2017 Trust Services Criteria '
+name: SOC2-2017 Trust Services Criteria (revision 2022)
 description: "TSP Section 100\n2017 Trust Services Criteria for Security, Availability,\
   \ Processing Integrity, Confidentiality, and Privacy (with Revised Points of Focus\
   \ \u2013 2022)\n\nTSC presents control criteria established by the AICPA\u2019s\
@@ -37,7 +37,7 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:soc2-2017-rev-2022
     ref_id: SOC2-2017-Rev-2022
-    name: 'SOC2-2017 Trust Services Criteria '
+    name: SOC2-2017 Trust Services Criteria (revision 2022)
     description: "TSP Section 100\n2017 Trust Services Criteria for Security, Availability,\
       \ Processing Integrity, Confidentiality, and Privacy (with Revised Points of\
       \ Focus \u2013 2022)\n\nTSC presents control criteria established by the AICPA\u2019\
