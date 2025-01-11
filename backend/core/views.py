@@ -2509,6 +2509,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "source_requirement_assessment"
                     ]["id"]
                 )
+                requirement_assessment.observation = (
+                    baseline_requirement_assessment.observation
+                )
                 requirement_assessment.evidences.add(
                     *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
                 )
@@ -2918,7 +2921,7 @@ def get_build(request):
         total, used, free = disk_info
         disk_response = {
             "Disk space": f"{humanize.naturalsize(total)}",
-            "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
+            "Used": f"{humanize.naturalsize(used)} ({int((used / total) * 100)} %)",
         }
     else:
         disk_response = {

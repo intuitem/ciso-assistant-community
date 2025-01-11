@@ -9,6 +9,7 @@ description: "Cette note technique d\xE9taille les pr\xE9requis n\xE9cessaires \
   information (SI bureautique, SI industriel, SI classifi\xE9...).\nhttps://cyber.gouv.fr/sites/default/files/2022/01/anssi-guide-recommandations_securite_architecture_systeme_journalisation.pdf"
 copyright: Licence ouverte / Open Licence v2.0 (Etalab)
 version: 1
+publication_date: 2024-08-04
 provider: ANSSI
 packager: protocolpaladin
 objects:

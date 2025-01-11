@@ -223,6 +223,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+    publication_date = models.DateField(null=True)
     builtin = models.BooleanField(default=False)
     objects_meta = models.JSONField(default=dict)
     dependencies = models.JSONField(
@@ -320,6 +321,7 @@ class StoredLibrary(LibraryMixin):
             copyright=library_data.get("copyright"),
             provider=library_data.get("provider"),
             packager=library_data.get("packager"),
+            publication_date=library_data.get("publication_date"),
             translations=library_data.get("translations", {}),
             objects_meta=objects_meta,
             dependencies=dependencies,
@@ -442,6 +444,7 @@ class LibraryUpdater:
                 "packager",
                 self.new_library.packager,
             ),  # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
+            ("publication_date", self.new_library.publication_date),
             # Should we even update the ref_id ?
             ("ref_id", self.new_library.ref_id),
             ("description", self.new_library.description),
@@ -1641,7 +1644,7 @@ class Asset(
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
             )
             if content.get("is_enabled", False)
-            and content.get("value", -1) in range(0, 5)
+            and content.get("value", -1) in range(0, 4)
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
@@ -2789,6 +2792,9 @@ class ComplianceAssessment(Assessment):
                 requirement_assessment.is_scored = (
                     baseline_requirement_assessment.is_scored
                 )
+                requirement_assessment.observation = (
+                    baseline_requirement_assessment.observation
+                )
                 requirement_assessment.evidences.set(
                     baseline_requirement_assessment.evidences.all()
                 )
@@ -3197,6 +3203,8 @@ class ComplianceAssessment(Assessment):
                     "source_requirement_assessment": {
                         "str": str(ref),
                         "id": str(ref.id),
+                        "is_scored": ref.is_scored,
+                        "score": ref.score,
                         "coverage": mapping.coverage,
                     },
                     # "mappings": [mapping.id for mapping in mappings],
