@@ -23,6 +23,7 @@
 	import { page } from '$app/stores';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import { superForm } from 'sveltekit-superforms';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
 	export let data: PageData;
 	export let form: Actions;
@@ -62,7 +63,7 @@
 	}
 
 	// Function to update requirement assessments, the data argument contain fields as keys and the associated values as values.
-	function updateBulk(
+	async function updateBulk(
 		requirementAssessment,
 		data: { [key: string]: string | number | boolean | null }
 	) {
@@ -71,14 +72,15 @@
 			...data,
 			id: requirementAssessment.id
 		};
-		fetch(form.action, {
+		const res = await fetch(form.action, {
 			method: 'POST',
 			body: JSON.stringify(formData)
 		});
+		return res;
 	}
 
 	// Function to update requirement assessments
-	function update(
+	async function update(
 		requirementAssessment,
 		field: string,
 		question: {
@@ -93,7 +95,7 @@
 			requirementAssessment.answer.questions[questionIndex].answer = question.answer;
 		}
 		const value = question ? requirementAssessment.answer : requirementAssessment[field];
-		updateBulk(requirementAssessment, {
+		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
 	}
@@ -178,19 +180,19 @@
 		})
 	);
 
-	function updateScore(requirementAssessment) {
+	async function updateScore(requirementAssessment) {
 		const isScored = requirementAssessment.is_scored;
 		const score = requirementAssessment.score;
 		const documentationScore = requirementAssessment.documentation_score;
 		requirementAssessmentScores[requirementAssessment.id] = [isScored, score, documentationScore];
-		setTimeout(() => {
+		setTimeout(async () => {
 			const currentScoreValue = requirementAssessmentScores[requirementAssessment.id];
 			if (
 				isScored === currentScoreValue[0] &&
 				score === currentScoreValue[1] &&
 				documentationScore === currentScoreValue[2]
 			) {
-				updateBulk(requirementAssessment, {
+				await updateBulk(requirementAssessment, {
 					is_scored: isScored,
 					score: score,
 					documentation_score: documentationScore
@@ -282,11 +284,11 @@
 												value={option.id}
 												bind:group={requirementAssessment.status}
 												name="status"
-												on:click={() => {
+												on:click={async () => {
 													const newStatus =
 														requirementAssessment.status === option.id ? 'to_do' : option.id;
 													requirementAssessment.status = newStatus;
-													update(requirementAssessment, 'status');
+													await update(requirementAssessment, 'status');
 												}}>{option.label}</RadioItem
 											>
 										{/each}
@@ -308,11 +310,11 @@
 												value={option.id}
 												bind:group={requirementAssessment.result}
 												name="result"
-												on:click={() => {
+												on:click={async () => {
 													const newResult =
 														requirementAssessment.result === option.id ? 'not_assessed' : option.id;
 													requirementAssessment.result = newResult;
-													update(requirementAssessment, 'result'); // Update result for both select and deselect
+													await update(requirementAssessment, 'result'); // Update result for both select and deselect
 												}}
 												>{option.label}
 											</RadioItem>
@@ -344,10 +346,10 @@
 														bind:group={question.answer}
 														name="question"
 														value={option}
-														on:click={() => {
+														on:click={async () => {
 															const newAnswer = question.answer === option ? null : option;
 															question.answer = newAnswer;
-															update(requirementAssessment, 'answer', question);
+															await update(requirementAssessment, 'answer', question);
 														}}
 														><span class="text-left">{option}</span>
 													</RadioItem>
@@ -359,7 +361,8 @@
 												placeholder=""
 												class="input w-fit"
 												bind:value={question.answer}
-												on:change={() => update(requirementAssessment, 'answer', question)}
+												on:change={async () =>
+													await update(requirementAssessment, 'answer', question)}
 												{...$$restProps}
 											/>
 										{:else}
@@ -368,7 +371,8 @@
 												class="input w-full"
 												bind:value={question.answer}
 												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-												on:change={() => update(requirementAssessment, 'answer', question)}
+												on:change={async () =>
+													await update(requirementAssessment, 'answer', question)}
 												{...$$restProps}
 											/>
 										{/if}
@@ -382,15 +386,49 @@
 								min_score={data.compliance_assessment.min_score}
 								max_score={data.compliance_assessment.max_score}
 								scores_definition={data.compliance_assessment.scores_definition}
-								show_documentation_score={data.compliance_assessment.show_documentation_score}
 								field="score"
-								label=""
+								label={m.implementationScore()}
 								styles="w-full p-1"
-								bind:is_scored={requirementAssessment.is_scored}
 								bind:score={requirementAssessment.score}
-								bind:documentation_score={requirementAssessment.documentation_score}
-								on:change={() => updateScore(requirementAssessment)}
-							/>
+								on:change={async () => await updateScore(requirementAssessment)}
+								disabled={!requirementAssessment.is_scored ||
+									requirementAssessment.result === 'not_applicable'}
+							>
+								<div slot="left">
+									<Checkbox
+										form={superForm(requirementAssessment.scoreForm, {
+											id: requirementAssessment.id
+										})}
+										field="is_scored"
+										label={''}
+										helpText={m.scoringHelpText()}
+										checkboxComponent="switch"
+										class="h-full flex flex-row items-center justify-center my-1"
+										classesContainer="h-full flex flex-row items-center space-x-4"
+										on:change={async () => {
+											requirementAssessment.is_scored = !requirementAssessment.is_scored;
+											await update(requirementAssessment, 'is_scored');
+										}}
+									/>
+								</div>
+							</Score>
+							{#if data.compliance_assessment.show_documentation_score}
+								<Score
+									form={superForm(requirementAssessment.scoreForm, {
+										id: requirementAssessment.id
+									})}
+									min_score={data.compliance_assessment.min_score}
+									max_score={data.compliance_assessment.max_score}
+									scores_definition={data.compliance_assessment.scores_definition}
+									field="documentation_score"
+									label={m.documentationScore()}
+									styles="w-full p-1"
+									bind:score={requirementAssessment.documentation_score}
+									on:change={async () => await updateScore(requirementAssessment)}
+									disabled={!requirementAssessment.is_scored ||
+										requirementAssessment.result === 'not_applicable'}
+								/>
+							{/if}
 							<Accordion regionCaret="flex">
 								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
 									<svelte:fragment slot="summary"
@@ -414,8 +452,8 @@
 												{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
 													<button
 														class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
-														on:click={() => {
-															update(requirementAssessment, 'observation');
+														on:click={async () => {
+															await update(requirementAssessment, 'observation');
 															requirementAssessment.observationBuffer =
 																requirementAssessment.observation;
 														}}

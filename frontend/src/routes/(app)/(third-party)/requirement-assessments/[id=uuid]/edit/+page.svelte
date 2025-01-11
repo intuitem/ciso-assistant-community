@@ -44,6 +44,7 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -320,6 +321,7 @@
 			data={data.form}
 			dataType="json"
 			let:form
+			let:data
 			validators={zod(schema)}
 			action="?/updateRequirementAssessment"
 			{...$$restProps}
@@ -348,8 +350,8 @@
 											type="button"
 											on:click={() => {
 												modalConfirmCreateSuggestedControls(
-													data.requirementAssessment.id,
-													data.requirementAssessment.name,
+													$page.data.requirementAssessment.id,
+													$page.data.requirementAssessment.name,
 													'?/createSuggestedControls'
 												);
 											}}
@@ -379,13 +381,13 @@
 									multiple
 									{form}
 									options={getOptions({
-										objects: data.model.foreignKeys['applied_controls'],
+										objects: $page.data.model.foreignKeys['applied_controls'],
 										extra_fields: [['folder', 'str']]
 									})}
 									field="applied_controls"
 								/>
 								<ModelTable
-									source={data.tables['applied-controls']}
+									source={$page.data.tables['applied-controls']}
 									hideFilters={true}
 									URLModel="applied-controls"
 								/>
@@ -410,13 +412,13 @@
 									multiple
 									{form}
 									options={getOptions({
-										objects: data.model.foreignKeys['evidences'],
+										objects: $page.data.model.foreignKeys['evidences'],
 										extra_fields: [['folder', 'str']]
 									})}
 									field="evidences"
 								/>
 								<ModelTable
-									source={data.tables['evidences']}
+									source={$page.data.tables['evidences']}
 									hideFilters={true}
 									URLModel="evidences"
 								/>
@@ -429,30 +431,55 @@
 			<HiddenInput {form} field="requirement" />
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col my-8 space-y-6">
-				{#if data.requirementAssessment.answer != null && Object.keys(data.requirementAssessment.answer).length !== 0}
+				{#if $page.data.requirementAssessment.answer != null && Object.keys($page.data.requirementAssessment.answer).length !== 0}
 					<Question {form} field="answer" label={m.question()} />
 				{/if}
 				<Select
 					{form}
-					options={data.model.selectOptions['status']}
+					options={$page.data.model.selectOptions['status']}
 					field="status"
 					label={m.status()}
 				/>
 				<Select
 					{form}
-					options={data.model.selectOptions['result']}
+					options={$page.data.model.selectOptions['result']}
 					field="result"
 					label={m.result()}
 				/>
-				<Score
-					{form}
-					min_score={data.compliance_assessment_score.min_score}
-					max_score={data.compliance_assessment_score.max_score}
-					scores_definition={data.compliance_assessment_score.scores_definition}
-					show_documentation_score={data.compliance_assessment_score.show_documentation_score}
-					field="score"
-					label="Score"
-				/>
+				<div class="flex flex-col">
+					<Score
+						{form}
+						min_score={$page.data.compliance_assessment_score.min_score}
+						max_score={$page.data.compliance_assessment_score.max_score}
+						scores_definition={$page.data.compliance_assessment_score.scores_definition}
+						field="score"
+						label={m.implementationScore()}
+						disabled={!data.is_scored || data.result === 'not_applicable'}
+					>
+						<div slot="left">
+							<Checkbox
+								{form}
+								field="is_scored"
+								label={''}
+								helpText={m.scoringHelpText()}
+								checkboxComponent="switch"
+								class="h-full flex flex-row items-center justify-center my-1"
+								classesContainer="h-full flex flex-row items-center space-x-4"
+							/>
+						</div>
+					</Score>
+				</div>
+				{#if $page.data.compliance_assessment_score.show_documentation_score}
+					<Score
+						{form}
+						min_score={$page.data.compliance_assessment_score.min_score}
+						max_score={$page.data.compliance_assessment_score.max_score}
+						scores_definition={$page.data.compliance_assessment_score.scores_definition}
+						field="documentation_score"
+						label={m.documentationScore()}
+						disabled={!data.is_scored || data.result === 'not_applicable'}
+					/>
+				{/if}
 
 				<TextArea {form} field="observation" label="Observation" />
 				<div class="flex flex-row justify-between space-x-4">
