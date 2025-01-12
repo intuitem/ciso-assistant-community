@@ -2550,11 +2550,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ]
         return Response({"results": res})
 
-    # ----- REMOVE THESE COMMENTS AFTER REVIEW ----- #
-    # I disabled cache because i must wait before the documentation_score being hidden/displayed in the requirement-assessment edit view after changing the show_documentation_score value of the ComplianceAssessment
-    # @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
-    # The vary_on_cookie is also disabled because it seem to only be here to support the cache_page disabled cache_page decorator
-    # @method_decorator(vary_on_cookie)
+    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
