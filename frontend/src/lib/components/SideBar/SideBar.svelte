@@ -24,13 +24,6 @@
 			}
 		},
 		{
-			id: 18,
-			element: '#sidebar-more-btn',
-			popover: {
-				description: m.gtSidebarStep18Desc()
-			}
-		},
-		{
 			id: 2,
 			element: '#organization',
 			popover: {
@@ -49,14 +42,7 @@
 			id: 4,
 			element: '#add-button',
 			popover: {
-				description: 'You will need to create a first domain to get started'
-			}
-		},
-		{
-			id: 4,
-			element: '#form-input-name',
-			popover: {
-				description: 'choose a name for your domain (eg. my organization, my departement)'
+				description: m.gtSidebarStep04Desc()
 			}
 		},
 		{
@@ -64,52 +50,68 @@
 			element: '#catalog',
 			popover: {
 				title: m.gtSidebarStepClickHere(),
-				description:
-					'The library of CISO Assistant is quite comprehensive and contain multiple objects: frameworks, threats, matrices.'
+				description: m.gtSidebarStep05Desc()
 			}
 		},
-		{ id: 6, element: '#frameworks', popover: { title: 'click here' } },
+		{
+			id: 6,
+			element: '#frameworks',
+			popover: {
+				title: m.gtSidebarStepClickHere()
+			}
+		},
 		{
 			id: 7,
 			element: '#add-button',
-			popover: { title: 'Click to import one', description: 'Description' }
+			popover: {
+				title: m.gtSidebarStepClickHere(),
+				description: m.gtSidebarStep07Desc()
+			}
 		},
 		{
 			id: 8,
 			element: '#search-input',
-			popover: { title: 'Type to filter', description: 'You can try csf v2' }
+			popover: {
+				title: m.gtSidebarStep08Title(),
+				description: m.gtSidebarStep08Desc()
+			}
 		},
 		{
 			id: 9,
 			element: '#tablerow-import-button',
-			popover: { title: 'Click here to load it' }
+			popover: {
+				description: m.gtSidebarStep09Desc()
+			}
 		},
 		{
 			id: 10,
 			element: '#riskMatrices',
 			popover: {
 				title: m.gtSidebarStepClickHere(),
-				description:
-					"You will also need a matrix for your risk assessment. Let's filter the library content to focus on that."
+				description: m.gtSidebarStep10Desc()
 			}
 		},
 		{
 			id: 11,
 			element: '#add-button',
-			popover: { title: 'Click to import one', description: 'Description' }
+			popover: {
+				title: m.gtSidebarStep11Title(),
+				description: m.gtSidebarStep11Desc()
+			}
 		},
 		{
 			id: 12,
 			element: '#filters',
 			popover: {
-				description:
-					'Notice that we came back to the library view with an extra filter being applied.'
+				description: m.gtSidebarStep12Desc()
 			}
 		},
 		{
 			id: 13,
 			element: '#tablerow-import-button',
-			popover: { title: 'Click here to load it' }
+			popover: {
+				description: m.gtSidebarStep13Desc()
+			}
 		},
 		{
 			id: 14,
@@ -122,16 +124,21 @@
 			id: 15,
 			element: '#complianceAssessments',
 			popover: {
-				description:
-					'This is where you can create and manage your audits that will serve as your baseline'
+				description: m.gtSidebarStep15Desc()
 			}
 		},
-		{ id: 16, element: '#risk', popover: { title: m.gtSidebarStepClickHere() } },
+		{
+			id: 16,
+			element: '#risk',
+			popover: {
+				title: m.gtSidebarStepClickHere()
+			}
+		},
 		{
 			id: 17,
 			element: '#riskAssessments',
 			popover: {
-				description: 'And this is where you will be able to perform your risk assessments'
+				description: m.gtSidebarStep17Desc()
 			}
 		},
 		{
@@ -145,9 +152,8 @@
 			id: 19,
 			element: 'none',
 			popover: {
-				title: 'All set',
-				description:
-					'You are good to go. Feel free to reach out the Discord server to interact with the growing community!'
+				title: m.gtSidebarStep19Title(),
+				description: m.gtSidebarStep19Desc()
 			}
 		}
 	];

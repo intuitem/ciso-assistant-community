@@ -1087,6 +1087,21 @@
 	"gtSidebarStepClickHere": "Click here",
 	"gtSidebarStep01Msg": "Welcome!",
 	"gtSidebarStep01Desc": "The quick guided tour will help setup the main parts to get started with CISO Assistant.",
+	"gtSidebarStep03Desc": "First, you will need a domain to get started. A domain is an organisational scope that isolates objects and enforces the RBAC.",
+	"gtSidebarStep04Desc": "This is how you will create your first domain",
+	"gtSidebarStep05Desc": "The library of CISO Assistant is quite comprehensive and contain multiple objects: frameworks, threats, matrices and more.",
+	"gtSidebarStep07Desc": "Let's see how to import a framework",
+	"gtSidebarStep08Title": "Start typing to filter",
+	"gtSidebarStep08Desc": "Let's try 'nist csf'",
+	"gtSidebarStep09Desc": "This is how you can import it",
+	"gtSidebarStep10Desc": "You will also need a matrix for your risk assessment. Let's filter the library content to focus on that.",
+	"gtSidebarStep11Title": "Click to import one",
+	"gtSidebarStep11Desc": "Description",
+	"gtSidebarStep12Desc": "Notice that we came back to the library view with an extra filter being applied.",
+	"gtSidebarStep13Desc": "This is how you can load it",
+	"gtSidebarStep15Desc": "This is where you can create and manage your audits that will serve as your baseline",
+	"gtSidebarStep17Desc": "And this is where you will be able to perform your risk assessments",
 	"gtSidebarStep18Desc": "You can retrigger the guided tour and adjust your preferences here.",
-	"gtSidebarStep03Desc": "First, you will need a domain to get started. A domain is an organisational scope that isolates objects and enforces the RBAC."
+	"gtSidebarStep19Title": "All set",
+	"gtSidebarStep19Desc": "You are good to go. Feel free to reach out the Discord server to interact with the growing community!"
 }
