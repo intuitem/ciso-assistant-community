@@ -854,5 +854,6 @@
 	"addTag": "Přidat štítek",
 	"tagsHelpText": "Štítky pomáhají kategorizovat a filtrovat více objektů. Můžete je spravovat v menu Extra.",
 	"bringTheEvidences": "Přineste důkazy",
-	"bringTheEvidencesHelpText": "Pokud je zakázáno, objekt bude duplikován bez jeho důkazů"
+	"bringTheEvidencesHelpText": "Pokud je zakázáno, objekt bude duplikován bez jeho důkazů",
+	"publicationDate": "Datum zveřejnění"
 }

@@ -334,7 +334,7 @@
 											>
 												{#each question.options as option}
 													<RadioItem
-														class="shadow-md"
+														class="shadow-md flex"
 														bind:group={question.answer}
 														name="question"
 														value={option}
@@ -343,7 +343,7 @@
 															question.answer = newAnswer;
 															update(requirementAssessment, 'answer', question);
 														}}
-														>{option}
+														><span class="text-left">{option}</span>
 													</RadioItem>
 												{/each}
 											</RadioGroup>

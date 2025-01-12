@@ -37,12 +37,4 @@ docker rmi "$BACKEND_IMAGE" "$FRONTEND_IMAGE" 2>/dev/null
 
 # Start the containers
 docker compose up -d
-
-# Wait for the database to be ready
-echo "Giving some time for the database to be ready, please wait ..."
-sleep 50
-
-# Apply migrations
-BACKEND_CONTAINER=$(docker ps --filter "ancestor=$BACKEND_IMAGE" --format "{{.Names}}")
-docker compose exec "$BACKEND_CONTAINER" poetry run python manage.py migrate
 echo "CISO assistant updated successfully"
