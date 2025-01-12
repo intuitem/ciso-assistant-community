@@ -110,6 +110,7 @@
 								id="add-button"
 								title={safeTranslate('add-' + data.model.localName)}
 								on:click={modalCreateForm}
+								on:click={handleClickForGT}
 								><i class="fa-solid fa-file-circle-plus"></i>
 							</button>
 							{#if URLModel === 'applied-controls'}

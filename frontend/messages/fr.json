@@ -1083,5 +1083,10 @@
 	"human": "Humain",
 	"material": "Matériel",
 	"environmental": "Environnemental",
-	"guidedTour": "Visite guidée"
+	"guidedTour": "Visite guidée",
+	"gtSidebarStepClickHere": "Cliquez ici",
+	"gtSidebarStep01Msg": "Bienvenue !",
+	"gtSidebarStep18Desc": "Vous pouvez retrouver la visite guidée à tout moment en cliquant ici",
+	"gtSidebarStep01Desc": "Cette première visite guidée vous permettra de vous familiariser avec le menu de CISO Assistant et charger les objets indispensables.",
+	"gtSidebarStep03Desc": "Pour commencer, vous aurez besoin d'un domaine. Un domaine représente une seggregation fonctionnelle, isole les objets et applique une stratégie RBAC dessus."
 }

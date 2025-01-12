@@ -1083,5 +1083,10 @@
 	"human": "Human",
 	"material": "Material",
 	"environmental": "Environmental",
-	"guidedTour": "Guided tour"
+	"guidedTour": "Guided tour",
+	"gtSidebarStepClickHere": "Click here",
+	"gtSidebarStep01Msg": "Welcome!",
+	"gtSidebarStep01Desc": "The quick guided tour will help setup the main parts to get started with CISO Assistant.",
+	"gtSidebarStep18Desc": "You can retrigger the guided tour and adjust your preferences here.",
+	"gtSidebarStep03Desc": "First, you will need a domain to get started. A domain is an organisational scope that isolates objects and enforces the RBAC."
 }
