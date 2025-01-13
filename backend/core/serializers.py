@@ -148,6 +148,10 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 
 
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
+    filtering_labels = serializers.SlugRelatedField(
+        many=True, slug_field="label", queryset=FilteringLabel.objects.all()
+    )
+
     class Meta:
         model = Vulnerability
         fields = [
@@ -413,6 +417,10 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):
+    qualifications = serializers.SlugRelatedField(
+        slug_field="urn", many=True, queryset=Qualification.objects.all()
+    )
+
     class Meta:
         model = RiskScenario
         fields = [
