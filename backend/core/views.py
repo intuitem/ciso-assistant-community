@@ -2526,6 +2526,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for requirement_assessment in instance.requirement_assessments.all():
                 requirement_assessment.create_applied_controls_from_suggestions()
 
+    def perform_update(self, serializer):
+        compliance_assessment = serializer.save()
+        if compliance_assessment.show_documentation_score:
+            ra_null_documentation_score = RequirementAssessment.objects.filter(
+                compliance_assessment=compliance_assessment,
+                is_scored=True,
+                documentation_score__isnull=True,
+            )
+            ra_null_documentation_score.update(
+                documentation_score=compliance_assessment.min_score
+            )
+
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
         data = assessment_per_status(request.user, ComplianceAssessment)
