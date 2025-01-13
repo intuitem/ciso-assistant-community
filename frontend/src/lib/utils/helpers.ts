@@ -23,7 +23,8 @@ export function getRequirementTitle(ref_id: string, name: string) {
 	return title;
 }
 
-export function displayScoreColor(value: number, max_score: number, inversedColors = false) {
+export function displayScoreColor(value: number | null, max_score: number, inversedColors = false) {
+	value ??= 0;
 	value = (value * 100) / max_score;
 	if (inversedColors) {
 		if (value < 25) {

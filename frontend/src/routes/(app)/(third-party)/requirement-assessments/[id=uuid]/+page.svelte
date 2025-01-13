@@ -65,7 +65,8 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
 
 	const max_score = data.complianceAssessmentScore.max_score;
-	const value = data.requirementAssessment.score;
+	const score = data.requirementAssessment.score;
+	const documentationScore = data.requirementAssessment.documentation_score;
 
 	let tabSet = $page.data.user.is_third_party ? 1 : 0;
 </script>
@@ -90,12 +91,22 @@
 		{#if data.requirementAssessment.is_scored}
 			<ProgressRadial
 				stroke={100}
-				meter={displayScoreColor(value, max_score)}
-				value={formatScoreValue(value, max_score)}
+				meter={displayScoreColor(score, max_score)}
+				value={formatScoreValue(score, max_score)}
 				font={150}
 				class="shrink-0"
-				width={'w-10'}>{value}</ProgressRadial
+				width={'w-10'}>{score}</ProgressRadial
 			>
+			{#if data.complianceAssessmentScore.show_documentation_score}
+				<ProgressRadial
+					stroke={100}
+					meter={displayScoreColor(documentationScore, max_score)}
+					value={formatScoreValue(documentationScore, max_score)}
+					font={150}
+					class="shrink-0"
+					width={'w-10'}>{documentationScore}</ProgressRadial
+				>
+			{/if}
 		{/if}
 	</div>
 	{#if data.requirement.description}

@@ -41,6 +41,7 @@
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { nodeIsDragged } from '@unovis/ts/components/graph/modules/node/style';
 
 	$: tree = data.tree;
 
@@ -90,7 +91,10 @@
 		}
 		if (node.is_scored && node.assessable && node.result !== 'not_applicable') {
 			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
-			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;
+			const nodeMeanScore = data.compliance_assessment.show_documentation_score
+				? (node.score + node.documentation_score) / 2
+				: node.score;
+			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + nodeMeanScore;
 		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
@@ -105,7 +109,6 @@
 	};
 
 	function transformToTreeView(nodes: Node[]) {
-		if (!tree) return [];
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
 			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
@@ -127,7 +130,9 @@
 					statusColor: complianceStatusColorMap[node.status],
 					resultColor: complianceResultColorMap[node.result],
 					score: node.score,
+					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
+					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children)) : []

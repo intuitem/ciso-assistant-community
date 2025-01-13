@@ -99,6 +99,14 @@
 		}
 	}}
 />
+<Checkbox
+	{form}
+	field="show_documentation_score"
+	label={m.useDocumentationScore()}
+	helpText={m.useDocumentationScoreHelpText()}
+	cacheLock={cacheLocks['show_documentation_score']}
+	bind:cachedValue={formDataCache['show_documentation_score']}
+/>
 {#if model.selectOptions['selected_implementation_groups'] && model.selectOptions['selected_implementation_groups'].length}
 	<AutocompleteSelect
 		multiple

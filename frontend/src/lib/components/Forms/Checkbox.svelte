@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { SlideToggle, type CssClasses } from '@skeletonlabs/skeleton';
+	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	export let label: string | undefined = undefined;
@@ -17,6 +18,12 @@
 	label = label ?? field;
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
+
+	const dispatch = createEventDispatcher();
+
+	function handleChange() {
+		dispatch('change', $value);
+	}
 
 	$: if (cachedValue !== undefined) {
 		value.set(cachedValue);
@@ -49,6 +56,7 @@
 					class="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"
 					bind:checked={cachedValue}
+					on:change={handleChange}
 					{...$constraints}
 					{...$$restProps}
 					{disabled}
@@ -59,6 +67,7 @@
 					type="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"
 					bind:checked={cachedValue}
+					on:change={handleChange}
 					{...$constraints}
 					{...$$restProps}
 					{disabled}
