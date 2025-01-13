@@ -93,8 +93,8 @@
 		}
 	);
 
-	function nodeScore(): number {
-		if (!resultCounts) return -1;
+	function nodeScore(): number | null {
+		if (!resultCounts) return null;
 		let mean = resultCounts['total_score'] / resultCounts['scored'];
 		return Math.floor(mean * 10) / 10;
 	}
@@ -277,7 +277,7 @@
 						</div>
 					{/each}
 				</div>
-				{#if nodeScore() >= 0}
+				{#if nodeScore() !== null}
 					<span>
 						<ProgressRadial
 							stroke={100}
