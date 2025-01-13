@@ -32,6 +32,21 @@ class EntityWriteSerializer(BaseModelSerializer):
         exclude = ["owned_folders"]
 
 
+class EntityImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = Entity
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "mission",
+            "reference_link",
+            "owned_folders",
+            "created_at",
+            "updated_at",
+        ]
+
+
 class EntityAssessmentReadSerializer(BaseModelSerializer):
     compliance_assessment = FieldsRelatedField()
     evidence = FieldsRelatedField()

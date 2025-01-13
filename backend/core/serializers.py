@@ -147,6 +147,23 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at", "is_published"]
 
 
+class VulnerabilityImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = Vulnerability
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "status",
+            "severity",
+            "filtering_labels",
+            "applied_controls",
+            "created_at",
+            "updated_at",
+        ]
+
+
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
     # NOTE: This is a workaround to filter the approvers on api view
     #       but it causes some problems in api_tests. Serializers are
@@ -192,6 +209,20 @@ class ProjectReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class ProjectImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = Project
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "lc_status",
+            "created_at",
+            "updated_at",
+        ]
+
+
 class RiskAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
@@ -216,6 +247,27 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     class Meta:
         model = RiskAssessment
         exclude = []
+
+
+class RiskAssessmentImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = RiskAssessment
+        fields = [
+            "ref_id",
+            "name",
+            "version",
+            "description",
+            "folder",
+            "project",
+            "eta",
+            "due_date",
+            "status",
+            "observation",
+            "risk_matrix",
+            "ebios_rm_study",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class AssetWriteSerializer(BaseModelSerializer):
@@ -258,6 +310,24 @@ class AssetReadSerializer(AssetWriteSerializer):
     )
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
+
+
+class AssetImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = Asset
+        fields = [
+            "type",
+            "name",
+            "description",
+            "business_value",
+            "reference_link",
+            "security_objectives",
+            "disaster_recovery_objectives",
+            "parent_assets",
+            "folder",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
@@ -342,6 +412,33 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     owner = FieldsRelatedField(many=True)
 
 
+class RiskScenarioImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = RiskScenario
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "risk_assessment",
+            "treatment",
+            "threats",
+            "vulnerabilities",
+            "assets",
+            "existing_controls",
+            "existing_applied_controls",
+            "applied_controls",
+            "current_proba",
+            "current_impact",
+            "residual_proba",
+            "residual_impact",
+            "strength_of_knowledge",
+            "justification",
+            "created_at",
+            "updated_at",
+            "qualifications",
+        ]
+
+
 class AppliedControlWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AppliedControl
@@ -373,6 +470,31 @@ class AppliedControlDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = AppliedControl
         fields = ["name", "description", "folder"]
+
+
+class AppliedControlImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "folder",
+            "ref_id",
+            "name",
+            "description",
+            "priority",
+            "reference_control",
+            "created_at",
+            "updated_at",
+            "category",
+            "csf_function",
+            "status",
+            "start_date",
+            "eta",
+            "expiry_date",
+            "link",
+            "effort",
+            "cost",
+            "evidences",
+        ]
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
@@ -531,6 +653,18 @@ class FolderReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class FolderImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = Folder
+        fields = [
+            "name",
+            "description",
+            "content_type",
+            "created_at",
+            "updated_at",
+        ]
+
+
 # Compliance Assessment
 
 
@@ -588,6 +722,19 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class EvidenceImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = Evidence
+        fields = [
+            "folder",
+            "name",
+            "description",
+            "attachment",
+            "created_at",
+            "updated_at",
+        ]
+
+
 class AttachmentUploadSerializer(serializers.Serializer):
     attachment = serializers.FileField(required=True)
 
@@ -643,6 +790,31 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
+
+
+class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "ref_id",
+            "name",
+            "version",
+            "description",
+            "folder",
+            "project",
+            "eta",
+            "due_date",
+            "status",
+            "observation",
+            "framework",
+            "selected_implementation_groups",
+            "min_score",
+            "max_score",
+            "scores_definition",
+            "ebios_rm_study",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
@@ -721,6 +893,30 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementMappingSet
         fields = "__all__"
+
+
+class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = RequirementAssessment
+        fields = [
+            "created_at",
+            "updated_at",
+            "eta",
+            "due_date",
+            "folder",
+            "status",
+            "result",
+            "score",
+            "is_scored",
+            "observation",
+            "compliance_assessment",
+            "requirement",
+            "selected",
+            "mapping_inference",
+            "answer",
+            "evidences",
+            "applied_controls",
+        ]
 
 
 class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
