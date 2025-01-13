@@ -4,20 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0048_alter_asset_security_objectives'),
+        ("core", "0048_alter_asset_security_objectives"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='complianceassessment',
-            name='show_documentation_score',
+            model_name="complianceassessment",
+            name="show_documentation_score",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='requirementassessment',
-            name='documentation_score',
-            field=models.IntegerField(blank=True, null=True, verbose_name='Documentation Score'),
+            model_name="requirementassessment",
+            name="documentation_score",
+            field=models.IntegerField(
+                blank=True, null=True, verbose_name="Documentation Score"
+            ),
         ),
     ]
