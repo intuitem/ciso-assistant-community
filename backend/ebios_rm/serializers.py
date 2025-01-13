@@ -49,6 +49,29 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = EbiosRMStudy
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "eta",
+            "due_date",
+            "version",
+            "status",
+            "observation",
+            "meta",
+            "assets",
+            "compliance_assessments",
+            "folder",
+            "risk_matrix",
+            "reference_entity",
+            "created_at",
+            "updated_at",
+        ]
+
+
 class FearedEventWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FearedEvent
@@ -65,6 +88,25 @@ class FearedEventReadSerializer(BaseModelSerializer):
     class Meta:
         model = FearedEvent
         fields = "__all__"
+
+
+class FearedEventImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = FearedEvent
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "gravity",
+            "is_selected",
+            "justification",
+            "ebios_rm_study",
+            "qualifications",
+            "assets",
+            "folder",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class RoToWriteSerializer(BaseModelSerializer):
@@ -87,6 +129,26 @@ class RoToReadSerializer(BaseModelSerializer):
     class Meta:
         model = RoTo
         fields = "__all__"
+
+
+class RoToImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = RoTo
+        fields = [
+            "risk_origin",
+            "target_objective",
+            "motivation",
+            "resources",
+            "activity",
+            "is_selected",
+            "justification",
+            "pertinence",
+            "ebios_rm_study",
+            "feared_events",
+            "folder",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class StakeholderWriteSerializer(BaseModelSerializer):
@@ -125,6 +187,29 @@ class StakeholderReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class StakeholderImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = Stakeholder
+        fields = [
+            "created_at",
+            "updated_at",
+            "folder",
+            "ebios_rm_study",
+            "entity",
+            "category",
+            "current_dependency",
+            "current_penetration",
+            "current_maturity",
+            "current_trust",
+            "residual_dependency",
+            "residual_penetration",
+            "residual_maturity",
+            "residual_trust",
+            "is_selected",
+            "applied_controls",
+        ]
+
+
 class StrategicScenarioWriteSerializer(BaseModelSerializer):
     class Meta:
         model = StrategicScenario
@@ -141,6 +226,21 @@ class StrategicScenarioReadSerializer(BaseModelSerializer):
     class Meta:
         model = StrategicScenario
         fields = "__all__"
+
+
+class StrategicScenarioImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = StrategicScenario
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "ebios_rm_study",
+            "ro_to_couple",
+            "folder",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class AttackPathWriteSerializer(BaseModelSerializer):
@@ -160,6 +260,24 @@ class AttackPathReadSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
         fields = "__all__"
+
+
+class AttackPathImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = AttackPath
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "ebios_rm_study",
+            "strategic_scenario",
+            "stakeholders",
+            "folder",
+            "is_selected",
+            "justification",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class OperationalScenarioWriteSerializer(BaseModelSerializer):
@@ -184,3 +302,20 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     class Meta:
         model = OperationalScenario
         fields = "__all__"
+
+
+class OperationalScenarioImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = OperationalScenario
+        fields = [
+            "operating_modes_description",
+            "likelihood",
+            "is_selected",
+            "justification",
+            "ebios_rm_study",
+            "attack_path",
+            "threats",
+            "folder",
+            "created_at",
+            "updated_at",
+        ]
