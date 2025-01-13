@@ -894,7 +894,7 @@
 	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi Anda di sini",
 	"forgotPassword": "Lupa kata sandi",
 	"ssoSettingsUpdated": "Pengaturan SSO diperbarui",
-	"scoreSemiColon": "Skor:",
+	"score": "Skor",
 	"mappingInferenceHelpText": "Variabel-variabel ini tetap dan tidak akan berubah tergantung pada sumber.",
 	"priority": "Prioritas",
 	"p1": "P1",
@@ -1083,5 +1083,8 @@
 	"missionsAndOrganizationalServices": "Misi dan layanan organisasi",
 	"human": "Manusia",
 	"material": "Materi",
-	"environmental": "Lingkungan"
+	"environmental": "Lingkungan",
+	"documentationScore": "Skor dokumentasi",
+	"useDocumentationScore": "Gunakan skor dokumentasi",
+	"useDocumentationScoreHelpText": "Skor kedua (skor dokumentasi) akan tersedia untuk menilai persyaratan."
 }
