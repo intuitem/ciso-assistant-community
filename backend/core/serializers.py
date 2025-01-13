@@ -349,6 +349,29 @@ class ReferenceControlReadSerializer(ReferentialSerializer):
         exclude = ["translations"]
 
 
+class ReferenceControlImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = ReferenceControl
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "urn",
+            "provider",
+            "category",
+            "csf_function",
+            "typical_evidence",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "folder",
+            "library",
+            "created_at",
+            "updated_at",
+        ]
+
+
 """class LibraryReadSerializer(BaseModelSerializer):
     class Meta:
         model = LoadedLibrary
@@ -367,8 +390,6 @@ class ThreatWriteSerializer(BaseModelSerializer):
         model = Threat
         exclude = ["translations"]
 
-    # ["id", "folder", "ref_id", "name", "description", "provider"] # TODO: check why not all?
-
 
 class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
@@ -377,6 +398,26 @@ class ThreatReadSerializer(ReferentialSerializer):
     class Meta:
         model = Threat
         exclude = ["translations"]
+
+
+class ThreatImportExportSerializer(BaseModelSerializer):
+    class Meta:
+        model = Threat
+        fields = [
+            "created_at",
+            "updated_at",
+            "folder",
+            "urn",
+            "ref_id",
+            "provider",
+            "name",
+            "description",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "library",
+        ]
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
