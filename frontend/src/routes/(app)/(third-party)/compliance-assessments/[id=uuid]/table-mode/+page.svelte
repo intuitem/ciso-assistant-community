@@ -387,7 +387,9 @@
 								max_score={data.compliance_assessment.max_score}
 								scores_definition={data.compliance_assessment.scores_definition}
 								field="score"
-								label={m.implementationScore()}
+								label={data.compliance_assessment.show_documentation_score
+									? m.implementationScore()
+									: m.score()}
 								styles="w-full p-1"
 								bind:score={requirementAssessment.score}
 								on:change={async () => await updateScore(requirementAssessment)}
@@ -419,7 +421,6 @@
 									})}
 									min_score={data.compliance_assessment.min_score}
 									max_score={data.compliance_assessment.max_score}
-									scores_definition={data.compliance_assessment.scores_definition}
 									field="documentation_score"
 									label={m.documentationScore()}
 									styles="w-full p-1"
