@@ -76,6 +76,11 @@ spec:
           {{- end }}
           - name: DJANGO_DEBUG
             value: {{ ternary "True" "False" .Values.backend.config.djangoDebug | quote }}
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "ciso-assistant.fullname" . }}-backend
+                key: django-secret-key
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
             value: {{ .Values.backend.config.emailAdmin }}
           - name: CISO_ASSISTANT_URL
@@ -120,6 +125,8 @@ spec:
           {{- end }}
         {{- if or (and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled) .Values.backend.persistence.localStorage.enabled }}
         volumeMounts:
+        - mountPath: /tmp
+          name: tmp-data
         {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
         - name: sqlite-data
           mountPath: /ciso/db
@@ -151,6 +158,9 @@ spec:
       {{- end }}
       {{- if or (and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled) .Values.backend.persistence.localStorage.enabled }}
       volumes:
+      - name: tmp-data
+        emptyDir:
+          sizeLimit: 256Mi
       {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
       - name: sqlite-data
         persistentVolumeClaim:

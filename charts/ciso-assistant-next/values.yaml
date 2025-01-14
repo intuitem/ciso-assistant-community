@@ -88,6 +88,9 @@ backend:
     ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
     databaseType: sqlite
 
+    # -- Set Django secret key
+    djangoSecretKey: "changeme"
+
     # -- Enable Django debug mode
     djangoDebug: false
 
@@ -144,18 +147,18 @@ backend:
   env: []
 
   # -- Toggle and define container-level security context
-  containerSecurityContext:
-    seLinuxOptions: {}
-    runAsUser: 1001
-    runAsGroup: 1001
-    runAsNonRoot: true
-    privileged: false
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop: ["ALL"]
-    seccompProfile:
-      type: "RuntimeDefault"
+  containerSecurityContext: {}
+  #  seLinuxOptions: {}
+  #  runAsUser: 1001
+  #  runAsGroup: 1001
+  #  runAsNonRoot: true
+  #  privileged: false
+  #  readOnlyRootFilesystem: true
+  #  allowPrivilegeEscalation: false
+  #  capabilities:
+  #    drop: ["ALL"]
+  #  seccompProfile:
+  #    type: "RuntimeDefault"
 
   ## Backend service configuration
   service:
@@ -213,18 +216,18 @@ frontend:
   env: []
 
   # -- Toggle and define container-level security context
-  containerSecurityContext:
-    seLinuxOptions: {}
-    runAsUser: 1001
-    runAsGroup: 1001
-    runAsNonRoot: true
-    privileged: false
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop: ["ALL"]
-    seccompProfile:
-      type: "RuntimeDefault"
+  containerSecurityContext: {}
+  #  seLinuxOptions: {}
+  #  runAsUser: 1001
+  #  runAsGroup: 1001
+  #  runAsNonRoot: true
+  #  privileged: false
+  #  readOnlyRootFilesystem: true
+  #  allowPrivilegeEscalation: false
+  #  capabilities:
+  #    drop: ["ALL"]
+  #  seccompProfile:
+  #    type: "RuntimeDefault"
 
   ## Frontend service configuration
   service:
