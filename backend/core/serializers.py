@@ -841,7 +841,6 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "scores_definition",
-            "ebios_rm_study",
             "created_at",
             "updated_at",
         ]

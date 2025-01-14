@@ -193,19 +193,11 @@ def get_domain_export_objects(domain: Folder):
         risk_assessment__in=risk_assessments
     ).distinct()
 
-    compliance_assessments = ComplianceAssessment.objects.filter(
-        Q(project__in=projects) | Q(folder=domain)
-    ).distinct()
-    requirement_assessments = RequirementAssessment.objects.filter(
-        compliance_assessment__in=compliance_assessments
-    ).distinct()
-
     ebios_rm_studies = EbiosRMStudy.objects.filter(folder=domain).distinct()
     feared_events = FearedEvent.objects.filter(
         ebios_rm_study__in=ebios_rm_studies
     ).distinct()
-    ro_tos = RoTo.objects.filter(
-        ebios_rm_study__in=ebios_rm_studies).distinct()
+    ro_tos = RoTo.objects.filter(ebios_rm_study__in=ebios_rm_studies).distinct()
     strategic_scenarios = StrategicScenario.objects.filter(
         ebios_rm_study__in=ebios_rm_studies
     ).distinct()
@@ -217,6 +209,15 @@ def get_domain_export_objects(domain: Folder):
     ).distinct()
     stakeholders = Stakeholder.objects.filter(
         ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+
+    compliance_assessments = ComplianceAssessment.objects.filter(
+        Q(project__in=projects)
+        | Q(folder=domain)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+    ).distinct()
+    requirement_assessments = RequirementAssessment.objects.filter(
+        compliance_assessment__in=compliance_assessments
     ).distinct()
 
     entities = Entity.objects.filter(

@@ -78,11 +78,13 @@ from core.utils import RoleCodename, UserGroupCodename
 
 from ebios_rm.models import (
     EbiosRMStudy,
-    OperationalScenario,
 )
 
 from .models import *
 from .serializers import *
+
+from serdes.utils import get_domain_export_objects
+from serdes.serializers import ExportSerializer
 
 import structlog
 
@@ -1963,6 +1965,13 @@ class FolderViewSet(BaseModelViewSet):
                 },
             }
         )
+
+    @action(detail=True, methods=["get"])
+    def export(self, request, pk):
+        instance = self.get_object()
+        objects = get_domain_export_objects(instance)
+        dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
+        return Response(dump_data)
 
 
 class UserPreferencesView(APIView):
