@@ -40,7 +40,7 @@ spec:
           - name: DB_HOST
             value: {{ template "ciso-assistant.fullname" . }}-postgresql
           - name: DB_PORT
-            value: 5432
+            value: "5432"
           - name: POSTGRES_NAME
             value: {{ .Values.postgresql.global.postgresql.auth.database | quote }}
           - name: POSTGRES_USER
@@ -123,10 +123,10 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-rescue-password
           {{- end }}
-        {{- if or (and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled) .Values.backend.persistence.localStorage.enabled }}
         volumeMounts:
-        - mountPath: /tmp
-          name: tmp-data
+        - name: tmp-data
+          mountPath: /tmp 
+        {{- if or (and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled) .Values.backend.persistence.localStorage.enabled }}
         {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
         - name: sqlite-data
           mountPath: /ciso/db
