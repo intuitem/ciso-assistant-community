@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from django.db.models import Model
 from django.db.models.deletion import Collector
+from collections import defaultdict
 
 from iam.models import Folder
 
@@ -60,6 +61,8 @@ from ebios_rm.serializers import (
 )
 
 from tprm.serializers import EntityImportExportSerializer
+
+from django.db import models
 
 
 def get_all_objects():
@@ -181,3 +184,46 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
     }
 
     return model_serializer_map.get(model, None)
+
+def get_model_dependencies(model, all_models):
+    """
+    Retrieve the models that the given model depends on via required relationships.
+    """
+    dependencies = []
+    for field in model._meta.get_fields():
+        # Include only relations
+        if field.is_relation and field.related_model in all_models:
+            # Include only mandatory relationships
+            if isinstance(field, models.ForeignKey) or isinstance(field, models.OneToOneField) or isinstance(field, models.ManyToManyField):
+                dependencies.append(field.related_model)
+    return dependencies
+
+def build_dependency_graph(models):
+    """
+    Build a dependency graph from a list of models, considering only internal dependencies.
+    """
+    graph = defaultdict(list)
+    for model in models:
+        dependencies = get_model_dependencies(model, models)
+        graph[model].extend(dependencies)
+    return graph
+
+def topological_sort(graph):
+    """
+    Perform a topological sort on the dependency graph.
+    Return a list of models in the correct creation order.
+    """
+    visited = set()
+    result = []
+
+    def visit(node):
+        if node not in visited:
+            visited.add(node)
+            for neighbor in graph[node]:
+                visit(neighbor)
+            result.append(node)
+
+    for node in graph:
+        visit(node)
+
+    return result

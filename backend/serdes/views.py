@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 
 from ciso_assistant.settings import VERSION, SQLITE_FILE
 from serdes.serializers import LoadBackupSerializer, ImportSerializer
-from serdes.utils import import_export_serializer_class
+from serdes.utils import import_export_serializer_class, topological_sort, build_dependency_graph
 from django.apps import apps
 from rest_framework.exceptions import ValidationError
 
@@ -185,53 +185,76 @@ class ImportView(APIView):
         # Store validation errors
         validation_errors = []
         
+        # Retrieve all models referenced in the data
+        model_names = {obj['model'] for obj in parsed_data.get('objects', [])}
+        models = [apps.get_model(model_name) for model_name in model_names]
+        
+        # Build dependency graph and resolve creation order
+        graph = build_dependency_graph(models)
+        try:
+            creation_order = topological_sort(graph)
+        except ValueError as e:
+            logger.error(
+            "Cyclic dependency detected",
+            error=str(e),
+            )
+            raise ValidationError({"error": f"Cyclic dependency detected: {str(e)}"})
+        
         # Process objects
-        for obj in parsed_data.get('objects', []):
-            model_name = obj.get('model')  # e.g., 'core.folder'
-            fields = obj.get('fields', {})
-            obj_id = obj.get('id')
+        for model in creation_order:
+            model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+            for obj in parsed_data.get('objects', []):
+                if obj['model'] != model_name:
+                    continue
+
+                fields = obj.get('fields', {})
+                obj_id = obj.get('id')
             
-            try:
-                # Get model class from model_name (e.g., 'core.folder' -> Folder model class)
-                model_class = apps.get_model(model_name)
-                
-                # Get appropriate serializer
-                SerializerClass = import_export_serializer_class(model_class)
-                
-                # Validate object data
-                serializer = SerializerClass(data=fields)
-                print(serializer)
-                if not serializer.is_valid():
+                try:
+                    # Get model class from model_name (e.g., 'core.folder' -> Folder model class)
+                    model_class = apps.get_model(model_name)
+                    
+                    # Get appropriate serializer
+                    SerializerClass = import_export_serializer_class(model_class)
+                    
+                    # Validate object data
+                    serializer = SerializerClass(data=fields)
+                    if not serializer.is_valid():
+                        validation_errors.append({
+                            'model': model_name,
+                            'id': obj_id,
+                            'errors': serializer.errors
+                        })
+                        continue
+                        
+                    try:
+                        # Store validated data (or save, depending on your needs)
+                        validated_data = serializer.validated_data
+                        logger.info(
+                            "Validated object",
+                            model=model_name,
+                            id=obj_id,
+                            data=validated_data,
+                        )
+                    except Exception as e:
+                        validation_errors.append({
+                            'model': model_name,
+                            'id': obj_id,
+                            'errors': str(e)
+                        })
+                        
+                except LookupError:
                     validation_errors.append({
                         'model': model_name,
                         'id': obj_id,
-                        'errors': serializer.errors
+                        'errors': f"Unknown model type: {model_name}"
                     })
-                    continue
-                    
-                try:
-                    # Store validated data (or save, depending on your needs)
-                    validated_data = serializer.validated_data
-                    print(f"Validated {model_name} {obj_id}: {validated_data}")
                 except Exception as e:
                     validation_errors.append({
                         'model': model_name,
                         'id': obj_id,
-                        'errors': str(e)
+                        'errors': f"Error processing object: {str(e)}"
                     })
-                    
-            except LookupError:
-                validation_errors.append({
-                    'model': model_name,
-                    'id': obj_id,
-                    'errors': f"Unknown model type: {model_name}"
-                })
-            except Exception as e:
-                validation_errors.append({
-                    'model': model_name,
-                    'id': obj_id,
-                    'errors': f"Error processing object: {str(e)}"
-                })
         
         if validation_errors:
             raise ValidationError(validation_errors)

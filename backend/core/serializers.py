@@ -236,6 +236,9 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class RiskAssessmentImportExportSerializer(BaseModelSerializer):
+    project = serializers.CharField()
+    risk_matrix = serializers.CharField()
+    
     class Meta:
         model = RiskAssessment
         fields = [
@@ -824,6 +827,9 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
+    project = serializers.CharField()
+    framework = serializers.CharField()
+    
     class Meta:
         model = ComplianceAssessment
         fields = [
@@ -842,7 +848,6 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "scores_definition",
-            "ebios_rm_study",
             "created_at",
             "updated_at",
         ]
