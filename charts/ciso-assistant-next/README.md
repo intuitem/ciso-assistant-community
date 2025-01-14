@@ -2,7 +2,7 @@
 
 
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.9.3](https://img.shields.io/badge/AppVersion-v1.9.3-informational?style=flat-square) 
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.0.6](https://img.shields.io/badge/AppVersion-v2.0.6-informational?style=flat-square) 
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -18,7 +18,7 @@ A Helm chart for CISO Assistant k8s's deployment
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/bitnamicharts | postgresql | 16.3.4 |
+| oci://registry-1.docker.io/bitnamicharts | postgresql | 16.4.2 |
 
 ## Installing the chart
 
@@ -51,7 +51,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | backend.config.smtp.rescue.port | int | `587` | Rescue SMTP hostname |
 | backend.config.smtp.rescue.useTls | bool | `true` | Enable TLS for rescue SMTP |
 | backend.config.smtp.rescue.username | string | `"username"` | Rescue SMTP hostname |
-| backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
+| backend.containerSecurityContext | object | `{}`  | Toggle and define container-level security context |
 | backend.env | list | `[]` | Environment variables to pass to backend |
 | backend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the backend |
 | backend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the backend |
@@ -80,7 +80,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | externalPgsql.port | int | `5432` | Port of an external PostgreSQL to connect |
 | externalPgsql.user | string | `"ciso-assistant"` | User of an external PostgreSQL instance to connect |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
-| frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
+| frontend.containerSecurityContext | object | `{}`  | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
 | frontend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the frontend |
 | frontend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the frontend |
@@ -103,7 +103,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | global.image.tag | string | `""` | Overrides the global CISO Assistant image tag whose default is the chart appVersion |
 | global.imagePullSecrets | list | `[]` | Secrets with credentials to pull images from a private registry |
 | global.nodeSelector | object | `{}` | Default node selector for all components |
-| global.securityContext | object | `{"fsGroup":1001,"fsGroupChangePolicy":"Always","supplementalGroups":[],"sysctls":[]}` | Toggle and define pod-level security context |
+| global.securityContext | object | `{}`  | Toggle and define pod-level security context |
 | global.tolerations | list | `[]` | Default tolerations for all components |
 | ingress.annotations | object | `{}` | Additional ingress annotations |
 | ingress.certificateSecret | object | `{}` | Custom TLS certificate as secret # Note: 'key' and 'certificate' are expected in PEM format |

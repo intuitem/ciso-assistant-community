@@ -32,11 +32,12 @@ global:
   clusterDomain: cluster.local
 
   # -- Toggle and define pod-level security context
-  securityContext:
-    fsGroupChangePolicy: Always
-    sysctls: []
-    supplementalGroups: []
-    fsGroup: 1001
+  # @default -- `{}` 
+  securityContext: {}
+  #  fsGroupChangePolicy: Always
+  #  sysctls: []
+  #  supplementalGroups: []
+  #  fsGroup: 1001
 
   # -- Default node selector for all components
   nodeSelector: {}
@@ -147,6 +148,7 @@ backend:
   env: []
 
   # -- Toggle and define container-level security context
+  # @default -- `{}` 
   containerSecurityContext: {}
   #  seLinuxOptions: {}
   #  runAsUser: 1001
@@ -216,6 +218,7 @@ frontend:
   env: []
 
   # -- Toggle and define container-level security context
+  # @default -- `{}` 
   containerSecurityContext: {}
   #  seLinuxOptions: {}
   #  runAsUser: 1001
