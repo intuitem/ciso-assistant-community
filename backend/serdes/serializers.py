@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db.models.query import QuerySet
 from rest_framework import serializers
 
-from .utils import app_dot_model
+from .utils import app_dot_model, import_export_serializer_class
 
 
 class LoadBackupSerializer(serializers.Serializer):
@@ -59,7 +59,9 @@ class ExportSerializer(serializers.Serializer):
                     {
                         "model": app_dot_model(queryset.model),
                         "id": str(obj.id),
-                        "fields": obj.__dict__,
+                        "fields": import_export_serializer_class(queryset.model)(
+                            obj
+                        ).data,
                     }
                 )
 
