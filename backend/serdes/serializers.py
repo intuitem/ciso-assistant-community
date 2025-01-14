@@ -1,5 +1,11 @@
-from rest_framework import serializers
 import re
+
+from django.utils import timezone
+from django.conf import settings
+from django.db.models.query import QuerySet
+from rest_framework import serializers
+
+from .utils import app_dot_model
 
 
 class LoadBackupSerializer(serializers.Serializer):
@@ -37,3 +43,24 @@ class ObjectSerializer(serializers.Serializer):
 class ExportSerializer(serializers.Serializer):
     meta = MetaSerializer()
     objects = ObjectSerializer(many=True)
+
+    @staticmethod
+    def dump_data(scope: list[QuerySet]) -> dict:
+        meta = {
+            "media_version": settings.VERSION,
+            "exported_at": timezone.now().isoformat(),
+        }
+
+        objects = []
+
+        for queryset in scope:
+            for obj in queryset:
+                objects.append(
+                    {
+                        "model": app_dot_model(queryset.model),
+                        "id": str(obj.id),
+                        "fields": obj.__dict__,
+                    }
+                )
+
+        return {"meta": meta, "objects": objects}
