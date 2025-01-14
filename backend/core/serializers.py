@@ -58,7 +58,8 @@ class SerializerFactory:
 class BaseModelSerializer(serializers.ModelSerializer):
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
         if hasattr(instance, "urn") and getattr(instance, "urn"):
-            raise PermissionDenied({"urn": "Imported objects cannot be modified"})
+            raise PermissionDenied(
+                {"urn": "Imported objects cannot be modified"})
         try:
             object_updated = super().update(instance, validated_data)
             return object_updated
@@ -148,10 +149,6 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 
 
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
-    filtering_labels = serializers.SlugRelatedField(
-        many=True, slug_field="label", queryset=FilteringLabel.objects.all()
-    )
-
     class Meta:
         model = Vulnerability
         fields = [
@@ -161,7 +158,6 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
             "folder",
             "status",
             "severity",
-            "filtering_labels",
             "applied_controls",
             "created_at",
             "updated_at",
@@ -243,8 +239,10 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     project = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
-    risk_scenarios = FieldsRelatedField(many=True, fields=["id", "name", "ref_id"])
-    risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
+    risk_scenarios = FieldsRelatedField(
+        many=True, fields=["id", "name", "ref_id"])
+    risk_scenarios_count = serializers.IntegerField(
+        source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
     ebios_rm_study = FieldsRelatedField(["id", "name"])
 
@@ -449,7 +447,8 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     residual_impact = serializers.JSONField(source="get_residual_impact")
     residual_level = serializers.JSONField(source="get_residual_risk")
 
-    strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
+    strength_of_knowledge = serializers.JSONField(
+        source="get_strength_of_knowledge")
 
     applied_controls = FieldsRelatedField(many=True)
     existing_applied_controls = FieldsRelatedField(many=True)
