@@ -1,19 +1,17 @@
 import importlib
 from typing import Any
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
-
-
-from core.models import *
-from iam.models import *
-from ebios_rm.models import EbiosRMStudy
-
-from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
-from django.contrib.auth import get_user_model
-from django.db import models
-from core.serializer_fields import FieldsRelatedField
 
 import structlog
+from django.contrib.auth import get_user_model
+from django.db import models
+from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
+
+from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from core.models import *
+from core.serializer_fields import FieldsRelatedField
+from ebios_rm.models import EbiosRMStudy
+from iam.models import *
 
 logger = structlog.get_logger(__name__)
 
