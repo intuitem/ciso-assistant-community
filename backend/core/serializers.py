@@ -4,14 +4,15 @@ from typing import Any
 import structlog
 from django.contrib.auth import get_user_model
 from django.db import models
-from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
 from core.serializer_fields import FieldsRelatedField
 from ebios_rm.models import EbiosRMStudy
 from iam.models import *
+
+from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 logger = structlog.get_logger(__name__)
 
