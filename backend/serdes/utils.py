@@ -2,11 +2,64 @@ from typing import Iterable
 
 import django.apps
 from django.contrib.contenttypes.models import ContentType
-from django.core import serializers
+from rest_framework import serializers
 from django.db.models import Model
 from django.db.models.deletion import Collector
 
 from iam.models import Folder
+
+from core.models import (
+    Asset,
+    AppliedControl,
+    Evidence,
+    Project,
+    RiskAssessment,
+    RiskScenario,
+    ComplianceAssessment,
+    RequirementAssessment,
+    Vulnerability,
+    Threat,
+    ReferenceControl,
+)
+
+from ebios_rm.models import (
+    EbiosRMStudy,
+    FearedEvent,
+    RoTo,
+    OperationalScenario,
+    Stakeholder,
+    StrategicScenario,
+    AttackPath,
+)
+
+from tprm.models import Entity
+
+from core.serializers import (
+    FolderImportExportSerializer,
+    AssetImportExportSerializer,
+    AppliedControlImportExportSerializer,
+    EvidenceImportExportSerializer,
+    ProjectImportExportSerializer,
+    RiskAssessmentImportExportSerializer,
+    RiskScenarioImportExportSerializer,
+    ComplianceAssessmentImportExportSerializer,
+    RequirementAssessmentImportExportSerializer,
+    VulnerabilityImportExportSerializer,
+    ThreatImportExportSerializer,
+    ReferenceControlImportExportSerializer,
+)
+
+from ebios_rm.serializers import (
+    EbiosRMStudyImportExportSerializer,
+    FearedEventImportExportSerializer,
+    RoToImportExportSerializer,
+    OperationalScenarioImportExportSerializer,
+    StakeholderImportExportSerializer,
+    StrategicScenarioImportExportSerializer,
+    AttackPathImportExportSerializer,
+)
+
+from tprm.serializers import EntityImportExportSerializer
 
 
 def get_all_objects():
@@ -101,3 +154,30 @@ def app_dot_model(model: Model) -> str:
     """
     content_type = ContentType.objects.get_for_model(model)
     return f"{content_type.app_label}.{content_type.model}"
+
+
+def import_export_serializer_class(model: Model) -> serializers.Serializer:
+    model_serializer_map = {
+        Folder: FolderImportExportSerializer,
+        Asset: AssetImportExportSerializer,
+        AppliedControl: AppliedControlImportExportSerializer,
+        Evidence: EvidenceImportExportSerializer,
+        Project: ProjectImportExportSerializer,
+        RiskAssessment: RiskAssessmentImportExportSerializer,
+        RiskScenario: RiskScenarioImportExportSerializer,
+        ComplianceAssessment: ComplianceAssessmentImportExportSerializer,
+        RequirementAssessment: RequirementAssessmentImportExportSerializer,
+        Vulnerability: VulnerabilityImportExportSerializer,
+        Threat: ThreatImportExportSerializer,
+        ReferenceControl: ReferenceControlImportExportSerializer,
+        EbiosRMStudy: EbiosRMStudyImportExportSerializer,
+        FearedEvent: FearedEventImportExportSerializer,
+        RoTo: RoToImportExportSerializer,
+        OperationalScenario: OperationalScenarioImportExportSerializer,
+        Stakeholder: StakeholderImportExportSerializer,
+        Entity: EntityImportExportSerializer,
+        StrategicScenario: StrategicScenarioImportExportSerializer,
+        AttackPath: AttackPathImportExportSerializer,
+    }
+
+    return model_serializer_map.get(model, None)
