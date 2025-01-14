@@ -9,4 +9,9 @@ urlpatterns = [
         views.LoadBackupView.as_view(),
         name="load-backup",
     ),
+    path(
+        "import/",
+        views.ImportView.as_view(),
+        name="import",
+    ),
 ]

@@ -195,6 +195,7 @@ class ProjectReadSerializer(BaseModelSerializer):
 
 
 class ProjectImportExportSerializer(BaseModelSerializer):
+    folder = serializers.CharField()
     class Meta:
         model = Project
         fields = [

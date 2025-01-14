@@ -14,7 +14,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ciso_assistant.settings import VERSION, SQLITE_FILE
-from serdes.serializers import LoadBackupSerializer
+from serdes.serializers import LoadBackupSerializer, ImportSerializer
+from serdes.utils import import_export_serializer_class
+from django.apps import apps
+from rest_framework.exceptions import ValidationError
 
 import structlog
 
@@ -171,3 +174,109 @@ class LoadBackupView(APIView):
         return self.load_backup(
             request, decompressed_data, backup_version, current_version
         )
+
+
+class ImportView(APIView):
+    parser_classes = (FileUploadParser,)
+    serializer_class = ImportSerializer
+    
+    def import_objects(self, parsed_data):
+        """Import and validate objects using appropriate serializers."""
+        # Store validation errors
+        validation_errors = []
+        
+        # Process objects
+        for obj in parsed_data.get('objects', []):
+            model_name = obj.get('model')  # e.g., 'core.folder'
+            fields = obj.get('fields', {})
+            obj_id = obj.get('id')
+            
+            try:
+                # Get model class from model_name (e.g., 'core.folder' -> Folder model class)
+                model_class = apps.get_model(model_name)
+                
+                # Get appropriate serializer
+                SerializerClass = import_export_serializer_class(model_class)
+                
+                # Validate object data
+                serializer = SerializerClass(data=fields)
+                print(serializer)
+                if not serializer.is_valid():
+                    validation_errors.append({
+                        'model': model_name,
+                        'id': obj_id,
+                        'errors': serializer.errors
+                    })
+                    continue
+                    
+                try:
+                    # Store validated data (or save, depending on your needs)
+                    validated_data = serializer.validated_data
+                    print(f"Validated {model_name} {obj_id}: {validated_data}")
+                except Exception as e:
+                    validation_errors.append({
+                        'model': model_name,
+                        'id': obj_id,
+                        'errors': str(e)
+                    })
+                    
+            except LookupError:
+                validation_errors.append({
+                    'model': model_name,
+                    'id': obj_id,
+                    'errors': f"Unknown model type: {model_name}"
+                })
+            except Exception as e:
+                validation_errors.append({
+                    'model': model_name,
+                    'id': obj_id,
+                    'errors': f"Error processing object: {str(e)}"
+                })
+        
+        if validation_errors:
+            raise ValidationError(validation_errors)
+        
+        return True
+
+    def post(self, request, *args, **kwargs):
+        backup_file = request.data["file"]
+        data = backup_file.read()
+        is_gzip = data.startswith(GZIP_MAGIC_NUMBER)
+        decompressed_data = gzip.decompress(data) if is_gzip else data
+        
+        # Convert bytes to string if necessary
+        if isinstance(decompressed_data, bytes):
+            decompressed_data = decompressed_data.decode('utf-8')
+        
+        # Extract JSON content from multipart form-data
+        if '{\n  "meta"' in decompressed_data:
+            # Find the start and end of the JSON content
+            json_start = decompressed_data.index('{\n  "meta"')
+            json_end = decompressed_data.rindex('}') + 1
+            json_content = decompressed_data[json_start:json_end]
+            
+            try:
+                # Parse the JSON content
+                parsed_data = json.loads(json_content)
+                
+                # Validate and import the data
+                self.import_objects(parsed_data)
+                return Response(
+                    {"message": "Import successful"}, 
+                    status=status.HTTP_200_OK
+                )
+            except json.JSONDecodeError:
+                return Response(
+                    {"error": "Invalid JSON format"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except ValidationError as e:
+                return Response(
+                    {"errors": e.detail}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            return Response(
+                {"error": "Invalid file format"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )

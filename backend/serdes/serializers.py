@@ -134,3 +134,10 @@ class ExportSerializer(serializers.Serializer):
                 )
 
         return {"meta": meta, "objects": objects}
+
+
+class ImportSerializer(serializers.Serializer):
+    file = serializers.Field
+
+    class Meta:
+        fields = ("file",)
