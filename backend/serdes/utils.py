@@ -3,7 +3,7 @@ from typing import Iterable
 import django.apps
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
-from django.db.models import Model
+from django.db.models import Model, Q
 from django.db.models.deletion import Collector
 
 from iam.models import Folder
@@ -181,3 +181,104 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
     }
 
     return model_serializer_map.get(model, None)
+
+
+def get_domain_export_objects(domain: Folder):
+    projects = Project.objects.filter(folder=domain).distinct()
+
+    risk_assessments = RiskAssessment.objects.filter(
+        Q(project__in=projects) | Q(folder=domain)
+    ).distinct()
+    risk_scenarios = RiskScenario.objects.filter(
+        risk_assessment__in=risk_assessments
+    ).distinct()
+
+    compliance_assessments = ComplianceAssessment.objects.filter(
+        Q(project__in=projects) | Q(folder=domain)
+    ).distinct()
+    requirement_assessments = RequirementAssessment.objects.filter(
+        compliance_assessment__in=compliance_assessments
+    ).distinct()
+
+    ebios_rm_studies = EbiosRMStudy.objects.filter(folder=domain).distinct()
+    feared_events = FearedEvent.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+    ro_tos = RoTo.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies).distinct()
+    strategic_scenarios = StrategicScenario.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+    attack_paths = AttackPath.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+    operational_scenarios = OperationalScenario.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+    stakeholders = Stakeholder.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+
+    entities = Entity.objects.filter(
+        Q(folder=domain)
+        | Q(stakeholders__in=stakeholders)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+    ).distinct()
+
+    assets = Asset.objects.filter(
+        Q(folder=domain)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(feared_events__in=feared_events)
+    ).distinct()
+
+    vulnerabilities = Vulnerability.objects.filter(
+        Q(folder=domain) | Q(risk_scenarios__in=risk_scenarios)
+    ).distinct()
+
+    applied_controls = AppliedControl.objects.filter(
+        Q(folder=domain)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(risk_scenarios_e__in=risk_scenarios)
+        | Q(requirement_assessments__in=requirement_assessments)
+        | Q(stakeholders__in=stakeholders)
+        | Q(vulnerabilities__in=vulnerabilities)
+    ).distinct()
+
+    reference_controls = ReferenceControl.objects.filter(
+        Q(folder=domain) | Q(appliedcontrol__in=applied_controls)
+    ).distinct()
+
+    threats = Threat.objects.filter(
+        Q(folder=domain)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(operational_scenarios__in=operational_scenarios)
+    ).distinct()
+
+    evidences = Evidence.objects.filter(
+        Q(folder=domain)
+        | Q(applied_controls__in=applied_controls)
+        | Q(requirement_assessments__in=requirement_assessments)
+    ).distinct()
+
+    return {
+        "asset": assets,
+        "appliedcontrol": applied_controls,
+        "evidence": evidences,
+        "project": projects,
+        "riskassessment": risk_assessments,
+        "riskscenario": risk_scenarios,
+        "complianceassessment": compliance_assessments,
+        "requirementassessment": requirement_assessments,
+        "vulnerability": vulnerabilities,
+        "threat": threats,
+        "referencecontrol": reference_controls,
+        "ebiosrmstudy": ebios_rm_studies,
+        "fearedevent": feared_events,
+        "roto": ro_tos,
+        "operationalscenario": operational_scenarios,
+        "stakeholder": stakeholders,
+        "entity": entities,
+        "strategicscenario": strategic_scenarios,
+        "attackpath": attack_paths,
+    }
