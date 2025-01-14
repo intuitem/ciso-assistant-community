@@ -1,6 +1,7 @@
 from typing import Iterable
 
 import django.apps
+from django.contrib.contenttypes.models import ContentType
 from django.core import serializers
 from django.db.models import Model
 from django.db.models.deletion import Collector
@@ -91,3 +92,12 @@ def restore_objects(path: str, format: str = "json"):
     for obj in objects:
         obj.save()
     return path
+
+
+def app_dot_model(model: Model) -> str:
+    """
+    Get the app label and model name of a model.
+    e.g. 'app_label.model_name'
+    """
+    content_type = ContentType.objects.get_for_model(model)
+    return f"{content_type.app_label}.{content_type.model}"
