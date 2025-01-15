@@ -70,6 +70,6 @@ app.kubernetes.io/component: {{ .component }}
 Define complete url based on scheme and domain
 */}}
 {{- define "ciso-assistant.url" -}}
-{{- $scheme := ternary "https" "http" .Values.ingress.tls -}}
+{{- $scheme := ternary "https" "http" .Values.global.tls -}}
 {{- printf "%s://%s" $scheme .Values.global.domain -}}
 {{- end -}}
