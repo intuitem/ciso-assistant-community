@@ -7,7 +7,7 @@ from django.db import models
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
-from core.serializer_fields import FieldsRelatedField
+from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from ebios_rm.models import EbiosRMStudy
 from iam.models import *
 
@@ -170,6 +170,9 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 
 
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
     class Meta:
         model = Vulnerability
         fields = [
@@ -218,7 +221,7 @@ class ProjectReadSerializer(BaseModelSerializer):
 
 
 class ProjectImportExportSerializer(BaseModelSerializer):
-    folder = serializers.CharField()
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = Project
@@ -262,6 +265,10 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
 class RiskAssessmentImportExportSerializer(BaseModelSerializer):
     project = serializers.CharField()
     risk_matrix = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    project = HashSlugRelatedField(slug_field="pk", read_only=True)
+    ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = RiskAssessment
@@ -326,7 +333,8 @@ class AssetReadSerializer(AssetWriteSerializer):
 
 
 class AssetImportExportSerializer(BaseModelSerializer):
-    folder = serializers.CharField()
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = Asset
@@ -362,6 +370,8 @@ class ReferenceControlReadSerializer(ReferentialSerializer):
 
 class ReferenceControlImportExportSerializer(BaseModelSerializer):
     library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = ReferenceControl
@@ -415,6 +425,8 @@ class ThreatReadSerializer(ReferentialSerializer):
 
 class ThreatImportExportSerializer(BaseModelSerializer):
     library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = Threat
@@ -476,7 +488,15 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
     qualifications = serializers.SlugRelatedField(
         slug_field="urn", many=True, read_only=True
     )
-    threats = serializers.SlugRelatedField(slug_field="urn", many=True, read_only=True)
+
+    threats = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    risk_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    existing_applied_controls = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = RiskScenario
@@ -538,7 +558,9 @@ class AppliedControlDuplicateSerializer(BaseModelSerializer):
 
 
 class AppliedControlImportExportSerializer(BaseModelSerializer):
-    reference_control = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    reference_control = HashSlugRelatedField(slug_field="pk", read_only=True)
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = AppliedControl
@@ -721,13 +743,13 @@ class FolderReadSerializer(BaseModelSerializer):
 
 
 class FolderImportExportSerializer(BaseModelSerializer):
-    parent_folder = serializers.CharField()
+    parent_folder = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = Folder
         fields = [
-            "name",
             "parent_folder",
+            "name",
             "description",
             "content_type",
             "created_at",
@@ -816,6 +838,8 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
 
 class EvidenceImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
     class Meta:
         model = Evidence
         fields = [
@@ -888,6 +912,9 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
     project = serializers.CharField()
     framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    project = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = ComplianceAssessment
@@ -992,6 +1019,11 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
 
 class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
     requirement = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = RequirementAssessment
