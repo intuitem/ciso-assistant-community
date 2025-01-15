@@ -50,8 +50,7 @@ class StoredLibraryDetailedSerializer(ReferentialSerializer):
 
 class LoadedLibraryImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    dependencies = HashSlugRelatedField(
-        slug_field="pk", read_only=True, many=True)
+    dependencies = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = LoadedLibrary

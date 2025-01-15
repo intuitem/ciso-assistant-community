@@ -57,8 +57,7 @@ class SerializerFactory:
 class BaseModelSerializer(serializers.ModelSerializer):
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
         if hasattr(instance, "urn") and getattr(instance, "urn"):
-            raise PermissionDenied(
-                {"urn": "Imported objects cannot be modified"})
+            raise PermissionDenied({"urn": "Imported objects cannot be modified"})
         try:
             object_updated = super().update(instance, validated_data)
             return object_updated
@@ -172,8 +171,7 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    applied_controls = HashSlugRelatedField(
-        slug_field="pk", read_only=True, many=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = Vulnerability
@@ -254,10 +252,8 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     project = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
-    risk_scenarios = FieldsRelatedField(
-        many=True, fields=["id", "name", "ref_id"])
-    risk_scenarios_count = serializers.IntegerField(
-        source="risk_scenarios.count")
+    risk_scenarios = FieldsRelatedField(many=True, fields=["id", "name", "ref_id"])
+    risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
     ebios_rm_study = FieldsRelatedField(["id", "name"])
 
@@ -267,8 +263,7 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class RiskAssessmentImportExportSerializer(BaseModelSerializer):
-    risk_matrix = serializers.SlugRelatedField(
-        slug_field="urn", read_only=True)
+    risk_matrix = serializers.SlugRelatedField(slug_field="urn", read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     project = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -338,8 +333,7 @@ class AssetReadSerializer(AssetWriteSerializer):
 
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    parent_assets = HashSlugRelatedField(
-        slug_field="pk", read_only=True, many=True)
+    parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = Asset
@@ -481,8 +475,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     residual_impact = serializers.JSONField(source="get_residual_impact")
     residual_level = serializers.JSONField(source="get_residual_risk")
 
-    strength_of_knowledge = serializers.JSONField(
-        source="get_strength_of_knowledge")
+    strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
 
     applied_controls = FieldsRelatedField(many=True)
     existing_applied_controls = FieldsRelatedField(many=True)
@@ -497,14 +490,12 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
 
     threats = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
     risk_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
-    vulnerabilities = HashSlugRelatedField(
-        slug_field="pk", read_only=True, many=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     existing_applied_controls = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
     )
-    applied_controls = HashSlugRelatedField(
-        slug_field="pk", read_only=True, many=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = RiskScenario
@@ -568,8 +559,7 @@ class AppliedControlDuplicateSerializer(BaseModelSerializer):
 class AppliedControlImportExportSerializer(BaseModelSerializer):
     reference_control = HashSlugRelatedField(slug_field="pk", read_only=True)
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    evidences = HashSlugRelatedField(
-        slug_field="pk", read_only=True, many=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = AppliedControl
@@ -1026,16 +1016,12 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
-    requirement = serializers.SlugRelatedField(
-        slug_field="urn", read_only=True)
+    requirement = serializers.SlugRelatedField(slug_field="urn", read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    compliance_assessment = HashSlugRelatedField(
-        slug_field="pk", read_only=True)
-    evidences = HashSlugRelatedField(
-        slug_field="pk", read_only=True, many=True)
-    applied_controls = HashSlugRelatedField(
-        slug_field="pk", read_only=True, many=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = RequirementAssessment
