@@ -1456,6 +1456,7 @@ erDiagram
 - The export is a zip file containing a json dump of concerned objects and attached evidences.
 - The import is atomic, any error provokes a rollback.
 - The export function is only available in the PRO version.
+- The version of CISO Assistant is published in the export. The version at import shall be identical.
 
 ### Additional features
 
