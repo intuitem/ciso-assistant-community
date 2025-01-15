@@ -104,16 +104,15 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | global.imagePullSecrets | list | `[]` | Secrets with credentials to pull images from a private registry |
 | global.nodeSelector | object | `{}` | Default node selector for all components |
 | global.securityContext | object | `{}`  | Toggle and define pod-level security context |
+| global.tls | bool | `false` | Globally enable TLS (Ingress, URLs, etc.) |
 | global.tolerations | list | `[]` | Default tolerations for all components |
 | ingress.annotations | object | `{}` | Additional ingress annotations |
 | ingress.certificateSecret | object | `{}` | Custom TLS certificate as secret # Note: 'key' and 'certificate' are expected in PEM format |
 | ingress.enabled | bool | `true` | Enable an ingress resource for the CISO Assistant |
-| ingress.hostname | string | `""` (defaults to global.domain) | CISO Assistant hostname |
 | ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | ingress.labels | object | `{}` | Additional ingress labels |
 | ingress.path | string | `"/"` | The path to CISO Assistant |
 | ingress.pathType | string | `"Prefix"` | Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific` |
-| ingress.tls | bool | `false` | Enable TLS configuration for the hostname defined at `ingress.hostname` # TLS certificate will be retrieved from a TLS secret `{{ ciso-assistant.fullname }}-tls` # You can create this secret manually via `certificateSecret` option |
 | nameOverride | string | `"ciso-assistant"` | Provide a name in place of `ciso-assistant` |
 | postgresql.enabled | bool | `false` | Enable to deploy PostgreSQL. |
 | postgresql.global.postgresql.auth.database | string | `"ciso-assistant"` | Database name |

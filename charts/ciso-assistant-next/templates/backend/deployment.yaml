@@ -126,7 +126,6 @@ spec:
         volumeMounts:
         - name: tmp-data
           mountPath: /tmp 
-        {{- if or (and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled) .Values.backend.persistence.localStorage.enabled }}
         {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
         - name: sqlite-data
           mountPath: /ciso/db
@@ -134,7 +133,6 @@ spec:
         {{- if .Values.backend.persistence.localStorage.enabled }}
         - name: localstorage-data
           mountPath: /ciso/localStorage
-        {{- end }}
         {{- end }}
         ports:
         - name: http
@@ -156,7 +154,6 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or (and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled) .Values.backend.persistence.localStorage.enabled }}
       volumes:
       - name: tmp-data
         emptyDir:
@@ -170,5 +167,4 @@ spec:
       - name: localstorage-data
         persistentVolumeClaim:
           claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
-      {{- end }}
       {{- end }}
