@@ -2011,7 +2011,7 @@ class FolderViewSet(BaseModelViewSet):
 
         except ValidationError as e:
             logger.error(f"Validation errors during import: {str(e)}")
-            return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Failed to import"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             logger.exception(f"Unexpected error during import: {str(e)}")
@@ -2042,8 +2042,8 @@ class FolderViewSet(BaseModelViewSet):
     def _import_objects(self, parsed_data):
         """Import and validate objects using appropriate serializers."""
         validation_errors = []
-        required_libraries = set()
-        libraries_to_import = []
+        required_libraries = []
+        missing_libraries = []
 
         try:
             # Initialize processing
@@ -2066,12 +2066,12 @@ class FolderViewSet(BaseModelViewSet):
 
             # Check if all required libraries are loaded
             for library in required_libraries:
-                if not LoadedLibrary.objects.filter(urn=library).exists():
-                    libraries_to_import.append(library)
+                if not LoadedLibrary.objects.filter(urn=library["urn"]).exists():
+                    missing_libraries.append(library)
 
-            if libraries_to_import:
-                logger.warning(f"Missing libraries: {libraries_to_import}")
-                return {"missing_libraries": libraries_to_import}
+            if missing_libraries:
+                logger.warning(f"Missing libraries: {missing_libraries}")
+                return {"missing_libraries": missing_libraries}
 
         except Exception as e:
             logger.exception(f"Failed to import objects: {str(e)}")
@@ -2107,6 +2107,7 @@ class FolderViewSet(BaseModelViewSet):
         if not model_objects:
             return
 
+        # Sort objects that are referenced before objects referencing them
         self_ref_field = get_self_referencing_field(model)
         if self_ref_field:
             try:
@@ -2118,6 +2119,8 @@ class FolderViewSet(BaseModelViewSet):
                 raise ValidationError(
                     {"error": f"Cyclic dependency detected in {model_name}"}
                 )
+        
+        print(model_objects)
 
         for i in range(0, len(model_objects), self.batch_size):
             batch = model_objects[i : i + self.batch_size]
@@ -2133,16 +2136,17 @@ class FolderViewSet(BaseModelViewSet):
 
             try:
                 # Skip objects from libraries
-                if fields.get("library"):
+                if fields.get("library") or model_name == "core.loadedlibrary":
                     logger.info(
-                        f"Skipping creation of object {obj_id} from library {fields['library']}"
+                        f"Skipping creation of object {obj_id} coming from a library"
                     )
-                    required_libraries.add(fields["library"])
+                    if model_name == "core.loadedlibrary":
+                        required_libraries.append({"urn": fields["urn"], "name": fields["name"]})
                     continue
 
                 # Process serialization
                 SerializerClass = import_export_serializer_class(model)
-                serializer = SerializerClass(data=fields)
+                serializer = SerializerClass(data=fields) if model_name != "core.loadedlibrary" else None
 
                 if not serializer.is_valid():
                     validation_errors.append(
@@ -2155,7 +2159,6 @@ class FolderViewSet(BaseModelViewSet):
                     continue
 
             except Exception as e:
-                print(fields)
                 logger.error(
                     f"Error processing object {obj_id} in {model_name}: {str(e)}"
                 )
