@@ -302,6 +302,8 @@ class AssetReadSerializer(AssetWriteSerializer):
 
 
 class AssetImportExportSerializer(BaseModelSerializer):
+    folder = serializers.CharField()
+    
     class Meta:
         model = Asset
         fields = [
@@ -688,10 +690,13 @@ class FolderReadSerializer(BaseModelSerializer):
 
 
 class FolderImportExportSerializer(BaseModelSerializer):
+    parent_folder = serializers.CharField()
+    
     class Meta:
         model = Folder
         fields = [
             "name",
+            "parent_folder",
             "description",
             "content_type",
             "created_at",

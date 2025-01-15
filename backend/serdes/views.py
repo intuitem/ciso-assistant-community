@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 
 from ciso_assistant.settings import VERSION, SQLITE_FILE
 from serdes.serializers import LoadBackupSerializer, ImportSerializer
-from serdes.utils import import_export_serializer_class, topological_sort, build_dependency_graph
+from serdes.utils import import_export_serializer_class, topological_sort, build_dependency_graph, get_self_referencing_field, sort_objects_by_self_reference
 from django.apps import apps
 from rest_framework.exceptions import ValidationError
 
@@ -179,127 +179,142 @@ class LoadBackupView(APIView):
 class ImportView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = ImportSerializer
-    
-    def import_objects(self, parsed_data):
-        """Import and validate objects using appropriate serializers."""
-        # Store validation errors
-        validation_errors = []
-        
-        # Retrieve all models referenced in the data
-        model_names = {obj['model'] for obj in parsed_data.get('objects', [])}
-        models = [apps.get_model(model_name) for model_name in model_names]
-        
-        # Build dependency graph and resolve creation order
-        graph = build_dependency_graph(models)
-        try:
-            creation_order = topological_sort(graph)
-        except ValueError as e:
-            logger.error(
-            "Cyclic dependency detected",
-            error=str(e),
-            )
-            raise ValidationError({"error": f"Cyclic dependency detected: {str(e)}"})
-        
-        # Process objects
-        for model in creation_order:
-            model_name = f"{model._meta.app_label}.{model._meta.model_name}"
-            for obj in parsed_data.get('objects', []):
-                if obj['model'] != model_name:
-                    continue
-
-                fields = obj.get('fields', {})
-                obj_id = obj.get('id')
-            
-                try:
-                    # Get model class from model_name (e.g., 'core.folder' -> Folder model class)
-                    model_class = apps.get_model(model_name)
-                    
-                    # Get appropriate serializer
-                    SerializerClass = import_export_serializer_class(model_class)
-                    
-                    # Validate object data
-                    serializer = SerializerClass(data=fields)
-                    if not serializer.is_valid():
-                        validation_errors.append({
-                            'model': model_name,
-                            'id': obj_id,
-                            'errors': serializer.errors
-                        })
-                        continue
-                        
-                    try:
-                        # Store validated data (or save, depending on your needs)
-                        validated_data = serializer.validated_data
-                        logger.info(
-                            "Validated object",
-                            model=model_name,
-                            id=obj_id,
-                            data=validated_data,
-                        )
-                    except Exception as e:
-                        validation_errors.append({
-                            'model': model_name,
-                            'id': obj_id,
-                            'errors': str(e)
-                        })
-                        
-                except LookupError:
-                    validation_errors.append({
-                        'model': model_name,
-                        'id': obj_id,
-                        'errors': f"Unknown model type: {model_name}"
-                    })
-                except Exception as e:
-                    validation_errors.append({
-                        'model': model_name,
-                        'id': obj_id,
-                        'errors': f"Error processing object: {str(e)}"
-                    })
-        
-        if validation_errors:
-            raise ValidationError(validation_errors)
-        
-        return True
+    batch_size = 100  # Configurable batch size for processing
 
     def post(self, request, *args, **kwargs):
-        backup_file = request.data["file"]
+        """Handle file upload and initiate import process."""
+        try:
+            parsed_data = self._process_uploaded_file(request.data["file"])
+            self.import_objects(parsed_data)
+            return Response(
+                {"message": "Import successful"}, 
+                status=status.HTTP_200_OK
+            )
+        except KeyError:
+            return Response(
+                {"error": "No file provided"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except json.JSONDecodeError:
+            return Response(
+                {"error": "Invalid JSON format"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as e:
+            return Response(
+                {"errors": e.detail}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def _process_uploaded_file(self, backup_file):
+        """Process the uploaded file and return parsed data."""
         data = backup_file.read()
         is_gzip = data.startswith(GZIP_MAGIC_NUMBER)
         decompressed_data = gzip.decompress(data) if is_gzip else data
         
-        # Convert bytes to string if necessary
         if isinstance(decompressed_data, bytes):
             decompressed_data = decompressed_data.decode('utf-8')
         
-        # Extract JSON content from multipart form-data
-        if '{\n  "meta"' in decompressed_data:
-            # Find the start and end of the JSON content
-            json_start = decompressed_data.index('{\n  "meta"')
-            json_end = decompressed_data.rindex('}') + 1
-            json_content = decompressed_data[json_start:json_end]
+        if '{\n  "meta"' not in decompressed_data:
+            raise ValidationError("Invalid file format")
             
+        json_start = decompressed_data.index('{\n  "meta"')
+        json_end = decompressed_data.rindex('}') + 1
+        json_content = decompressed_data[json_start:json_end]
+        
+        return json.loads(json_content)
+
+    def import_objects(self, parsed_data):
+        """Import and validate objects using appropriate serializers."""
+        validation_errors = []
+        
+        try:
+            # Initialize processing
+            objects = parsed_data.get('objects', [])
+            if not objects:
+                return True
+
+            # Get models and validate dependencies
+            models_map = self._get_models_map(objects)
+            creation_order = self._resolve_dependencies(list(models_map.values()))
+
+            # Process each model in order
+            for model in creation_order:
+                self._process_model_objects(
+                    model=model,
+                    objects=objects,
+                    validation_errors=validation_errors
+                )
+
+        except Exception as e:
+            logger.exception("Failed to import objects")
+            raise ValidationError({"error": f"Import failed: {str(e)}"})
+
+        if validation_errors:
+            raise ValidationError(validation_errors)
+
+        return True
+
+    def _get_models_map(self, objects):
+        """Build a map of model names to model classes."""
+        model_names = {obj['model'] for obj in objects}
+        return {
+            name: apps.get_model(name)
+            for name in model_names
+        }
+
+    def _resolve_dependencies(self, all_models):
+        """Resolve model dependencies and detect cycles."""
+        graph = build_dependency_graph(all_models)
+        try:
+            return topological_sort(graph)
+        except ValueError as e:
+            logger.error("Cyclic dependency detected", error=str(e))
+            raise ValidationError({"error": f"Cyclic dependency detected: {str(e)}"})
+
+    def _process_model_objects(self, model, objects, validation_errors):
+        """Process all objects for a given model."""
+        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+        model_objects = [obj for obj in objects if obj['model'] == model_name]
+
+        if not model_objects:
+            return
+
+        self_ref_field = get_self_referencing_field(model)
+        if self_ref_field:
             try:
-                # Parse the JSON content
-                parsed_data = json.loads(json_content)
+                model_objects = sort_objects_by_self_reference(model_objects, self_ref_field)
+            except ValueError as e:
+                raise ValidationError({"error": f"Cyclic dependency detected in {model_name}: {str(e)}"})
+
+        for i in range(0, len(model_objects), self.batch_size):
+            batch = model_objects[i:i + self.batch_size]
+            self._process_batch(model, batch, validation_errors)
+
+    def _process_batch(self, model, batch, validation_errors):
+        """Process a batch of objects."""
+        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+
+        for obj in batch:
+            obj_id = obj.get('id')
+            fields = obj.get('fields', {}).copy()
+
+            try:
                 
-                # Validate and import the data
-                self.import_objects(parsed_data)
-                return Response(
-                    {"message": "Import successful"}, 
-                    status=status.HTTP_200_OK
-                )
-            except json.JSONDecodeError:
-                return Response(
-                    {"error": "Invalid JSON format"}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            except ValidationError as e:
-                return Response(
-                    {"errors": e.detail}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        else:
-            return Response(
-                {"error": "Invalid file format"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+                SerializerClass = import_export_serializer_class(model)
+                serializer = SerializerClass(data=fields)
+                
+                if not serializer.is_valid():
+                    validation_errors.append({
+                        'model': model_name,
+                        'id': obj_id,
+                        'errors': serializer.errors,
+                    })
+                    continue
+
+            except Exception as e:
+                validation_errors.append({
+                    'model': model_name,
+                    'id': obj_id,
+                    'errors': str(e)
+                })
