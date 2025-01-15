@@ -191,10 +191,9 @@ def get_model_dependencies(
         is_required = (
             (
                 isinstance(field, (models.ForeignKey, models.OneToOneField))
-                and not field.null
             )
             or isinstance(field, models.ManyToManyField)
-        ) and field.related_model != model
+        )
 
         if is_required:
             dependencies.append(field.related_model)
@@ -221,7 +220,6 @@ def build_dependency_graph(
         dependencies = get_model_dependencies(model, models_set)
         if dependencies:
             graph[model].extend(dependencies)
-
     return graph
 
 
@@ -253,6 +251,8 @@ def topological_sort(
             temporary_marks.add(node)
 
             for neighbor in graph.get(node, []):
+                if neighbor == node:
+                    continue
                 visit(neighbor)
 
             temporary_marks.remove(node)
@@ -354,7 +354,7 @@ def sort_objects_by_self_reference(
 def get_domain_export_objects(domain: Folder):
     folders = Folder.objects.filter(
         Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])
-    ).distinct()
+    ).filter(content_type=Folder.ContentType.DOMAIN).distinct()
 
     projects = Project.objects.filter(folder__in=folders).distinct()
 

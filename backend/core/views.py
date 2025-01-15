@@ -2044,6 +2044,7 @@ class FolderViewSet(BaseModelViewSet):
         validation_errors = []
         required_libraries = []
         missing_libraries = []
+        link_dump_database_ids = {}
 
         try:
             # Initialize processing
@@ -2062,6 +2063,7 @@ class FolderViewSet(BaseModelViewSet):
                     objects=objects,
                     validation_errors=validation_errors,
                     required_libraries=required_libraries,
+                    link_dump_database_ids=link_dump_database_ids
                 )
 
             # Check if all required libraries are loaded
@@ -2098,7 +2100,7 @@ class FolderViewSet(BaseModelViewSet):
             raise ValidationError({"error": "Cyclic dependency detected"})
 
     def _process_model_objects(
-        self, model, objects, validation_errors, required_libraries
+        self, model, objects, validation_errors, required_libraries, link_dump_database_ids
     ):
         """Process all objects for a given model."""
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
@@ -2119,14 +2121,16 @@ class FolderViewSet(BaseModelViewSet):
                 raise ValidationError(
                     {"error": f"Cyclic dependency detected in {model_name}"}
                 )
-        
-        print(model_objects)
 
         for i in range(0, len(model_objects), self.batch_size):
             batch = model_objects[i : i + self.batch_size]
-            self._process_batch(model, batch, validation_errors, required_libraries)
+            self._validation_batch(model, batch, validation_errors, required_libraries)
+        
+        for i in range(0, len(model_objects), self.batch_size):
+            batch = model_objects[i : i + self.batch_size]
+            self._creation_batch(model, batch, link_dump_database_ids)
 
-    def _process_batch(self, model, batch, validation_errors, required_libraries):
+    def _validation_batch(self, model, batch, validation_errors, required_libraries):
         """Process a batch of objects."""
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
 
@@ -2157,7 +2161,7 @@ class FolderViewSet(BaseModelViewSet):
                         }
                     )
                     continue
-
+                
             except Exception as e:
                 logger.error(
                     f"Error processing object {obj_id} in {model_name}: {str(e)}"
@@ -2169,6 +2173,20 @@ class FolderViewSet(BaseModelViewSet):
                         "errors": [str(e)],
                     }
                 )
+    def _creation_batch(self, model, batch, link_dump_database_ids):
+        """Process a batch to create objects."""
+
+        for obj in batch:
+            obj_id = obj.get("id")
+            fields = obj.get("fields", {}).copy()
+            
+            match model:
+                case Folder:
+                    fields["parent_folder"] = Folder.get_root_folder()
+            
+            obj_created = model.objects.create(**fields)
+            link_dump_database_ids[obj_id] = obj_created.id
+            print(link_dump_database_ids)
 
 
 class UserPreferencesView(APIView):
