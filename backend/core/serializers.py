@@ -219,6 +219,7 @@ class ProjectReadSerializer(BaseModelSerializer):
 
 class ProjectImportExportSerializer(BaseModelSerializer):
     folder = serializers.CharField()
+
     class Meta:
         model = Project
         fields = [
@@ -326,7 +327,7 @@ class AssetReadSerializer(AssetWriteSerializer):
 
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = serializers.CharField()
-    
+
     class Meta:
         model = Asset
         fields = [
@@ -721,7 +722,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
 class FolderImportExportSerializer(BaseModelSerializer):
     parent_folder = serializers.CharField()
-    
+
     class Meta:
         model = Folder
         fields = [

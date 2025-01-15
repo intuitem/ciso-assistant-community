@@ -1,6 +1,8 @@
 import csv
 import mimetypes
 import re
+import gzip
+import json
 import tempfile
 import uuid
 import zipfile
@@ -35,6 +37,7 @@ from django.core.cache import cache
 
 from django.db.models import F, Q
 
+from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -47,7 +50,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, UserGroup
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets, serializers
 from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
     action,
@@ -83,7 +86,14 @@ from ebios_rm.models import (
 from .models import *
 from .serializers import *
 
-from serdes.utils import get_domain_export_objects
+from serdes.utils import (
+    get_domain_export_objects,
+    import_export_serializer_class,
+    topological_sort,
+    build_dependency_graph,
+    get_self_referencing_field,
+    sort_objects_by_self_reference,
+)
 from serdes.serializers import ExportSerializer
 
 import structlog
@@ -1804,6 +1814,7 @@ class FolderViewSet(BaseModelViewSet):
     model = Folder
     filterset_class = FolderFilter
     search_fields = ["ref_id"]
+    batch_size = 100  # Configurable batch size for processing domain import
 
     def perform_create(self, serializer):
         """
@@ -1972,6 +1983,189 @@ class FolderViewSet(BaseModelViewSet):
         objects = get_domain_export_objects(instance)
         dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
         return Response(dump_data)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import",
+        parser_classes=[FileUploadParser],
+    )
+    def import_domain(self, request):
+        """Handle file upload and initiate import process."""
+        try:
+            parsed_data = self._process_uploaded_file(request.data["file"])
+            result = self._import_objects(parsed_data)
+            return Response(result, status=status.HTTP_200_OK)
+
+        except KeyError:
+            logger.error("No file provided in the request")
+            return Response(
+                {"errors": ["No file provided"]}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in uploaded file")
+            return Response(
+                {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except ValidationError as e:
+            logger.error(f"Validation errors during import: {str(e)}")
+            return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            logger.exception(f"Unexpected error during import: {str(e)}")
+            return Response(
+                {"errors": ["An unexpected error occurred"]},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def _process_uploaded_file(self, dump_file):
+        """Process the uploaded file and return parsed data."""
+        GZIP_MAGIC_NUMBER = b"\x1f\x8b"
+        data = dump_file.read()
+        is_gzip = data.startswith(GZIP_MAGIC_NUMBER)
+        decompressed_data = gzip.decompress(data) if is_gzip else data
+
+        if isinstance(decompressed_data, bytes):
+            decompressed_data = decompressed_data.decode("utf-8")
+
+        if '{\n  "meta"' not in decompressed_data:
+            raise ValidationError("Invalid file format")
+
+        json_start = decompressed_data.index('{\n  "meta"')
+        json_end = decompressed_data.rindex("}") + 1
+        json_content = decompressed_data[json_start:json_end]
+
+        return json.loads(json_content)
+
+    def _import_objects(self, parsed_data):
+        """Import and validate objects using appropriate serializers."""
+        validation_errors = []
+        required_libraries = set()
+        libraries_to_import = []
+
+        try:
+            # Initialize processing
+            objects = parsed_data.get("objects", [])
+            if not objects:
+                return {"message": "No objects to import"}
+
+            # Get models and validate dependencies
+            models_map = self._get_models_map(objects)
+            creation_order = self._resolve_dependencies(list(models_map.values()))
+
+            # Process each model in order
+            for model in creation_order:
+                self._process_model_objects(
+                    model=model,
+                    objects=objects,
+                    validation_errors=validation_errors,
+                    required_libraries=required_libraries,
+                )
+
+            # Check if all required libraries are loaded
+            for library in required_libraries:
+                if not LoadedLibrary.objects.filter(urn=library).exists():
+                    libraries_to_import.append(library)
+
+            if libraries_to_import:
+                logger.warning(f"Missing libraries: {libraries_to_import}")
+                return {"missing_libraries": libraries_to_import}
+
+        except Exception as e:
+            logger.exception(f"Failed to import objects: {str(e)}")
+            raise ValidationError({"errors": [str(e)]})
+
+        if validation_errors:
+            logger.error(f"Validation errors: {validation_errors}")
+            return {"validation_errors": validation_errors}
+
+        return {"message": "Import successful"}
+
+    def _get_models_map(self, objects):
+        """Build a map of model names to model classes."""
+        model_names = {obj["model"] for obj in objects}
+        return {name: apps.get_model(name) for name in model_names}
+
+    def _resolve_dependencies(self, all_models):
+        """Resolve model dependencies and detect cycles."""
+        graph = build_dependency_graph(all_models)
+        try:
+            return topological_sort(graph)
+        except ValueError as e:
+            logger.error("Cyclic dependency detected", error=str(e))
+            raise ValidationError({"error": "Cyclic dependency detected"})
+
+    def _process_model_objects(
+        self, model, objects, validation_errors, required_libraries
+    ):
+        """Process all objects for a given model."""
+        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+        model_objects = [obj for obj in objects if obj["model"] == model_name]
+
+        if not model_objects:
+            return
+
+        self_ref_field = get_self_referencing_field(model)
+        if self_ref_field:
+            try:
+                model_objects = sort_objects_by_self_reference(
+                    model_objects, self_ref_field
+                )
+            except ValueError as e:
+                logger.error(f"Cyclic dependency detected in {model_name}: {str(e)}")
+                raise ValidationError(
+                    {"error": f"Cyclic dependency detected in {model_name}"}
+                )
+
+        for i in range(0, len(model_objects), self.batch_size):
+            batch = model_objects[i : i + self.batch_size]
+            self._process_batch(model, batch, validation_errors, required_libraries)
+
+    def _process_batch(self, model, batch, validation_errors, required_libraries):
+        """Process a batch of objects."""
+        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+
+        for obj in batch:
+            obj_id = obj.get("id")
+            fields = obj.get("fields", {}).copy()
+
+            try:
+                # Skip objects from libraries
+                if fields.get("library"):
+                    logger.info(
+                        f"Skipping creation of object {obj_id} from library {fields['library']}"
+                    )
+                    required_libraries.add(fields["library"])
+                    continue
+
+                # Process serialization
+                SerializerClass = import_export_serializer_class(model)
+                serializer = SerializerClass(data=fields)
+
+                if not serializer.is_valid():
+                    validation_errors.append(
+                        {
+                            "model": model_name,
+                            "id": obj_id,
+                            "errors": serializer.errors,
+                        }
+                    )
+                    continue
+
+            except Exception as e:
+                print(fields)
+                logger.error(
+                    f"Error processing object {obj_id} in {model_name}: {str(e)}"
+                )
+                validation_errors.append(
+                    {
+                        "model": model_name,
+                        "id": obj_id,
+                        "errors": [str(e)],
+                    }
+                )
 
 
 class UserPreferencesView(APIView):
