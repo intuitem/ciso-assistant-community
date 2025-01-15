@@ -746,9 +746,6 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
 
 class FrameworkImportExportSerializer(BaseModelSerializer):
     library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
-    reference_controls = serializers.SlugRelatedField(
-        slug_field="urn", many=True, read_only=True
-    )
 
     class Meta:
         model = Framework
@@ -757,7 +754,6 @@ class FrameworkImportExportSerializer(BaseModelSerializer):
             "ref_id",
             "name",
             "library",
-            "reference_controls",
             "min_score",
             "max_score",
             "implementation_groups_definition",
