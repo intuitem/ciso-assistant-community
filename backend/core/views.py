@@ -2011,7 +2011,7 @@ class FolderViewSet(BaseModelViewSet):
 
         except ValidationError as e:
             logger.error(f"Validation errors during import: {str(e)}")
-            return Response({"Failed to import"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             logger.exception(f"Unexpected error during import: {str(e)}")
@@ -2054,6 +2054,12 @@ class FolderViewSet(BaseModelViewSet):
 
             # Get models and validate dependencies
             models_map = self._get_models_map(objects)
+            if Folder in models_map.values():
+                logger.error("Dump contains a domain")
+                return {"error": "Dump contains a domain"}
+            
+            # Create the base folder
+            link_dump_database_ids["base_folder"] = Folder.objects.create(name='Star', content_type=Folder.ContentType.DOMAIN)
             creation_order = self._resolve_dependencies(list(models_map.values()))
 
             # Process each model in order
@@ -2140,17 +2146,17 @@ class FolderViewSet(BaseModelViewSet):
 
             try:
                 # Skip objects from libraries
-                if fields.get("library") or model_name == "core.loadedlibrary":
+                if fields.get("library") or model == LoadedLibrary:
                     logger.info(
-                        f"Skipping creation of object {obj_id} coming from a library"
+                        f"Skipping validation of object {obj_id} coming from a library"
                     )
-                    if model_name == "core.loadedlibrary":
+                    if model == LoadedLibrary:
                         required_libraries.append({"urn": fields["urn"], "name": fields["name"]})
                     continue
 
                 # Process serialization
                 SerializerClass = import_export_serializer_class(model)
-                serializer = SerializerClass(data=fields) if model_name != "core.loadedlibrary" else None
+                serializer = SerializerClass(data=fields) if model != LoadedLibrary else None
 
                 if not serializer.is_valid():
                     validation_errors.append(
@@ -2180,13 +2186,33 @@ class FolderViewSet(BaseModelViewSet):
             obj_id = obj.get("id")
             fields = obj.get("fields", {}).copy()
             
-            match model:
-                case Folder:
-                    fields["parent_folder"] = Folder.get_root_folder()
+            if fields.get("library") or model == LoadedLibrary:
+                logger.info(
+                    f"Skipping creation of object {obj_id} coming from a library"
+                )
+                continue
+            elif fields.get("folder"):
+                fields["folder"] = link_dump_database_ids.get("base_folder")
+
+            match model._meta.model_name:
+                case "asset":
+                    parent_ids = []
+                    for id in fields.get("parent_assets"):
+                        parent_ids.append(link_dump_database_ids.get(id, ''))
+                    fields.pop("parent_assets")
+                case "riskassessment":
+                    fields["project"] = Project.objects.get(id=link_dump_database_ids.get(fields["project"]))
+                    fields["risk_matrix"] = RiskMatrix.objects.get(urn=fields.get("risk_matrix"))
+                case "complianceassessment":
+                    fields["project"] = Project.objects.get(id=link_dump_database_ids.get(fields["project"]))
+                    fields["framework"] = Framework.objects.get(urn=fields.get("framework"))
             
             obj_created = model.objects.create(**fields)
             link_dump_database_ids[obj_id] = obj_created.id
-            print(link_dump_database_ids)
+            
+            match model._meta.model_name:
+                case "asset":
+                    obj_created.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
 
 
 class UserPreferencesView(APIView):
