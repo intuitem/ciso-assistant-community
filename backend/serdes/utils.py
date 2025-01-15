@@ -22,6 +22,7 @@ from core.models import (
     Vulnerability,
     Threat,
     ReferenceControl,
+    LoadedLibrary,
 )
 
 from ebios_rm.models import (
@@ -64,6 +65,8 @@ from ebios_rm.serializers import (
 )
 
 from tprm.serializers import EntityImportExportSerializer
+
+from library.serializers import LoadedLibraryImportExportSerializer
 
 
 def get_all_objects():
@@ -184,6 +187,7 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         AttackPath: AttackPathImportExportSerializer,
         Framework: FrameworkImportExportSerializer,
         RiskMatrix: RiskMatrixImportExportSerializer,
+        LoadedLibrary: LoadedLibraryImportExportSerializer,
     }
 
     return model_serializer_map.get(model, None)
@@ -203,11 +207,13 @@ def get_domain_export_objects(domain: Folder):
         risk_assessment__in=risk_assessments
     ).distinct()
 
-    ebios_rm_studies = EbiosRMStudy.objects.filter(folder__in=folders).distinct()
+    ebios_rm_studies = EbiosRMStudy.objects.filter(
+        folder__in=folders).distinct()
     feared_events = FearedEvent.objects.filter(
         ebios_rm_study__in=ebios_rm_studies
     ).distinct()
-    ro_tos = RoTo.objects.filter(ebios_rm_study__in=ebios_rm_studies).distinct()
+    ro_tos = RoTo.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies).distinct()
     strategic_scenarios = StrategicScenario.objects.filter(
         ebios_rm_study__in=ebios_rm_studies
     ).distinct()
@@ -281,8 +287,17 @@ def get_domain_export_objects(domain: Folder):
         | Q(requirement_assessments__in=requirement_assessments)
     ).distinct()
 
+    loaded_libraries = LoadedLibrary.objects.filter(
+        Q(folder__in=folders)
+        | Q(threats__in=threats)
+        | Q(reference_controls__in=reference_controls)
+        | Q(risk_matrices__in=risk_matrices)
+        | Q(frameworks__in=frameworks)
+    ).distinct()
+
     return {
         "folder": folders,
+        "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,
         "framework": frameworks,
         "riskmatrix": risk_matrices,
