@@ -130,6 +130,29 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
     pass
 
 
+class RiskMatrixImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    class Meta:
+        model = RiskMatrix
+        fields = [
+            "created_at",
+            "updated_at",
+            "urn",
+            "name",
+            "description",
+            "ref_id",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "library",
+            "is_enabled",
+            "provider",
+            "json_definition",
+        ]
+
+
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
@@ -237,8 +260,8 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
 
 class RiskAssessmentImportExportSerializer(BaseModelSerializer):
     project = serializers.CharField()
-    risk_matrix = serializers.CharField()
-    
+    risk_matrix = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
     class Meta:
         model = RiskAssessment
         fields = [
@@ -337,6 +360,8 @@ class ReferenceControlReadSerializer(ReferentialSerializer):
 
 
 class ReferenceControlImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
     class Meta:
         model = ReferenceControl
         fields = [
@@ -388,6 +413,8 @@ class ThreatReadSerializer(ReferentialSerializer):
 
 
 class ThreatImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
     class Meta:
         model = Threat
         fields = [
@@ -446,8 +473,9 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):
     qualifications = serializers.SlugRelatedField(
-        slug_field="urn", many=True, queryset=Qualification.objects.all()
+        slug_field="urn", many=True, read_only=True
     )
+    threats = serializers.SlugRelatedField(slug_field="urn", many=True, read_only=True)
 
     class Meta:
         model = RiskScenario
@@ -509,6 +537,8 @@ class AppliedControlDuplicateSerializer(BaseModelSerializer):
 
 
 class AppliedControlImportExportSerializer(BaseModelSerializer):
+    reference_control = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
     class Meta:
         model = AppliedControl
         fields = [
@@ -721,6 +751,29 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     pass
 
 
+class FrameworkImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    class Meta:
+        model = Framework
+        fields = [
+            "urn",
+            "ref_id",
+            "name",
+            "library",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "provider",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "created_at",
+            "updated_at",
+        ]
+
+
 class RequirementNodeReadSerializer(ReferentialSerializer):
     reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
@@ -833,8 +886,8 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
     project = serializers.CharField()
-    framework = serializers.CharField()
-    
+    framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
     class Meta:
         model = ComplianceAssessment
         fields = [
@@ -937,6 +990,8 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
+    requirement = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
     class Meta:
         model = RequirementAssessment
         fields = [

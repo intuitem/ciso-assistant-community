@@ -3,7 +3,7 @@ from typing import Iterable
 import django.apps
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
-from django.db.models import Model
+from django.db.models import Model, Q
 from django.db.models.deletion import Collector
 from collections import defaultdict
 
@@ -15,8 +15,10 @@ from core.models import (
     Asset,
     AppliedControl,
     Evidence,
+    Framework,
     Project,
     RiskAssessment,
+    RiskMatrix,
     RiskScenario,
     ComplianceAssessment,
     RequirementAssessment,
@@ -50,6 +52,8 @@ from core.serializers import (
     VulnerabilityImportExportSerializer,
     ThreatImportExportSerializer,
     ReferenceControlImportExportSerializer,
+    FrameworkImportExportSerializer,
+    RiskMatrixImportExportSerializer,
 )
 
 from ebios_rm.serializers import (
@@ -183,6 +187,8 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         Entity: EntityImportExportSerializer,
         StrategicScenario: StrategicScenarioImportExportSerializer,
         AttackPath: AttackPathImportExportSerializer,
+        Framework: FrameworkImportExportSerializer,
+        RiskMatrix: RiskMatrixImportExportSerializer,
     }
 
     return model_serializer_map.get(model, None)
@@ -364,3 +370,120 @@ def sort_objects_by_self_reference(
     
     return [object_map[obj_id] for obj_id in reversed(sorted_ids)]
 
+
+def get_domain_export_objects(domain: Folder):
+    folders = Folder.objects.filter(
+        Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])
+    ).distinct()
+
+    projects = Project.objects.filter(folder__in=folders).distinct()
+
+    risk_assessments = RiskAssessment.objects.filter(
+        Q(project__in=projects) | Q(folder__in=folders)
+    ).distinct()
+    risk_scenarios = RiskScenario.objects.filter(
+        risk_assessment__in=risk_assessments
+    ).distinct()
+
+    ebios_rm_studies = EbiosRMStudy.objects.filter(folder__in=folders).distinct()
+    feared_events = FearedEvent.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+    ro_tos = RoTo.objects.filter(ebios_rm_study__in=ebios_rm_studies).distinct()
+    strategic_scenarios = StrategicScenario.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+    attack_paths = AttackPath.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+    operational_scenarios = OperationalScenario.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+    stakeholders = Stakeholder.objects.filter(
+        ebios_rm_study__in=ebios_rm_studies
+    ).distinct()
+
+    risk_matrices = RiskMatrix.objects.filter(
+        Q(folder__in=folders)
+        | Q(riskassessment__in=risk_assessments)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+    ).distinct()
+
+    compliance_assessments = ComplianceAssessment.objects.filter(
+        Q(project__in=projects)
+        | Q(folder__in=folders)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+    ).distinct()
+    requirement_assessments = RequirementAssessment.objects.filter(
+        compliance_assessment__in=compliance_assessments
+    ).distinct()
+    frameworks = Framework.objects.filter(
+        Q(folder__in=folders) | Q(complianceassessment__in=compliance_assessments)
+    ).distinct()
+
+    entities = Entity.objects.filter(
+        Q(folder__in=folders)
+        | Q(stakeholders__in=stakeholders)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+    ).distinct()
+
+    assets = Asset.objects.filter(
+        Q(folder__in=folders)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(feared_events__in=feared_events)
+    ).distinct()
+
+    vulnerabilities = Vulnerability.objects.filter(
+        Q(folder__in=folders) | Q(risk_scenarios__in=risk_scenarios)
+    ).distinct()
+
+    applied_controls = AppliedControl.objects.filter(
+        Q(folder__in=folders)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(risk_scenarios_e__in=risk_scenarios)
+        | Q(requirement_assessments__in=requirement_assessments)
+        | Q(stakeholders__in=stakeholders)
+        | Q(vulnerabilities__in=vulnerabilities)
+    ).distinct()
+
+    reference_controls = ReferenceControl.objects.filter(
+        Q(folder__in=folders) | Q(appliedcontrol__in=applied_controls)
+    ).distinct()
+
+    threats = Threat.objects.filter(
+        Q(folder__in=folders)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(operational_scenarios__in=operational_scenarios)
+    ).distinct()
+
+    evidences = Evidence.objects.filter(
+        Q(folder__in=folders)
+        | Q(applied_controls__in=applied_controls)
+        | Q(requirement_assessments__in=requirement_assessments)
+    ).distinct()
+
+    return {
+        "folder": folders,
+        "vulnerability": vulnerabilities,
+        "framework": frameworks,
+        "riskmatrix": risk_matrices,
+        "referencecontrol": reference_controls,
+        "threat": threats,
+        "asset": assets,
+        "appliedcontrol": applied_controls,
+        "entity": entities,
+        "evidence": evidences,
+        "project": projects,
+        "complianceassessment": compliance_assessments,
+        "requirementassessment": requirement_assessments,
+        "ebiosrmstudy": ebios_rm_studies,
+        "riskassessment": risk_assessments,
+        "riskscenario": risk_scenarios,
+        "fearedevent": feared_events,
+        "roto": ro_tos,
+        "operationalscenario": operational_scenarios,
+        "stakeholder": stakeholders,
+        "strategicscenario": strategic_scenarios,
+        "attackpath": attack_paths,
+    }

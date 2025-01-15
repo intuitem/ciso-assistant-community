@@ -142,7 +142,6 @@ class RoToImportExportSerializer(BaseModelSerializer):
             "activity",
             "is_selected",
             "justification",
-            "pertinence",
             "ebios_rm_study",
             "feared_events",
             "folder",
