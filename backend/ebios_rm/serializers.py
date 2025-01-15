@@ -1,7 +1,7 @@
 from core.serializers import (
     BaseModelSerializer,
-    FieldsRelatedField,
 )
+from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.models import RiskMatrix
 from .models import (
     EbiosRMStudy,
@@ -50,6 +50,15 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
 
 
 class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
+    risk_matrix = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    compliance_assessments = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
+    reference_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+
     class Meta:
         model = EbiosRMStudy
         fields = [
@@ -91,6 +100,14 @@ class FearedEventReadSerializer(BaseModelSerializer):
 
 
 class FearedEventImportExportSerializer(BaseModelSerializer):
+    qualifications = serializers.SlugRelatedField(
+        slug_field="urn", many=True, read_only=True
+    )
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
     class Meta:
         model = FearedEvent
         fields = [
@@ -132,6 +149,10 @@ class RoToReadSerializer(BaseModelSerializer):
 
 
 class RoToImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
+    feared_events = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+
     class Meta:
         model = RoTo
         fields = [
@@ -187,6 +208,11 @@ class StakeholderReadSerializer(BaseModelSerializer):
 
 
 class StakeholderImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
+    entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
     class Meta:
         model = Stakeholder
         fields = [
@@ -228,6 +254,10 @@ class StrategicScenarioReadSerializer(BaseModelSerializer):
 
 
 class StrategicScenarioImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
+    ro_to_couple = HashSlugRelatedField(slug_field="pk", read_only=True)
+
     class Meta:
         model = StrategicScenario
         fields = [
@@ -262,6 +292,11 @@ class AttackPathReadSerializer(BaseModelSerializer):
 
 
 class AttackPathImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
+    strategic_scenario = HashSlugRelatedField(slug_field="pk", read_only=True)
+    stakeholders = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
     class Meta:
         model = AttackPath
         fields = [
@@ -304,6 +339,11 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
 
 
 class OperationalScenarioImportExportSerializer(BaseModelSerializer):
+    ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
+    attack_path = HashSlugRelatedField(slug_field="pk", read_only=True)
+    threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
     class Meta:
         model = OperationalScenario
         fields = [
