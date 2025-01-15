@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models.query import QuerySet
 from rest_framework import serializers
+from hashlib import sha256
 
 from .utils import app_dot_model, import_export_serializer_class
 
@@ -126,7 +127,7 @@ class ExportSerializer(serializers.Serializer):
                 objects.append(
                     {
                         "model": app_dot_model(queryset.model),
-                        "id": str(obj.id),
+                        "id": sha256(str(obj.id).encode()).hexdigest()[:12],
                         "fields": import_export_serializer_class(queryset.model)(
                             obj
                         ).data,
