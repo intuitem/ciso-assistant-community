@@ -207,13 +207,11 @@ def get_domain_export_objects(domain: Folder):
         risk_assessment__in=risk_assessments
     ).distinct()
 
-    ebios_rm_studies = EbiosRMStudy.objects.filter(
-        folder__in=folders).distinct()
+    ebios_rm_studies = EbiosRMStudy.objects.filter(folder__in=folders).distinct()
     feared_events = FearedEvent.objects.filter(
         ebios_rm_study__in=ebios_rm_studies
     ).distinct()
-    ro_tos = RoTo.objects.filter(
-        ebios_rm_study__in=ebios_rm_studies).distinct()
+    ro_tos = RoTo.objects.filter(ebios_rm_study__in=ebios_rm_studies).distinct()
     strategic_scenarios = StrategicScenario.objects.filter(
         ebios_rm_study__in=ebios_rm_studies
     ).distinct()
