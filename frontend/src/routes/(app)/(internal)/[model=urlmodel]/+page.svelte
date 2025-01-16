@@ -158,7 +158,7 @@
 							{#if URLModel === 'folders'}
 								<button
 									class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-									data-testid="add-button"
+									data-testid="import-button"
 									title={safeTranslate('importFolder')}
 									on:click={modalFolderImportForm}
 									><i class="fa-solid fa-file-import"></i>
