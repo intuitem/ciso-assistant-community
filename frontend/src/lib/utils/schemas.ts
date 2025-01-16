@@ -176,7 +176,6 @@ export const ReferenceControlSchema = z.object({
 
 export const AssetSchema = z.object({
 	...NameDescriptionMixin,
-	business_value: z.string().optional(),
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional(),
