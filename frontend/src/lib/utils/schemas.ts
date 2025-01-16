@@ -69,7 +69,7 @@ export const FolderSchema = z.object({
 
 export const FolderImportSchema = z.object({
 	name: nameSchema,
-	file: z.any().optional().nullable(),
+	file: z.instanceof(File)
 });
 
 export const ProjectSchema = z.object({
