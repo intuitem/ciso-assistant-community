@@ -9,6 +9,7 @@ import tempfile
 import uuid
 import zipfile
 from datetime import date, datetime, timedelta
+from typing import Dict, Any, List
 import time
 import pytz
 from typing import Any, Tuple
@@ -2033,7 +2034,7 @@ class FolderViewSet(BaseModelViewSet):
 
         except ValidationError as e:
             logger.error(f"Validation errors during import: {str(e)}")
-            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+            return Response("Validation errors during import", status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             logger.exception(f"Unexpected error during import: {str(e)}")
@@ -2280,7 +2281,6 @@ class FolderViewSet(BaseModelViewSet):
                 self._set_many_to_many_relations(
                     model=model,
                     obj=obj_created,
-                    fields=fields,
                     many_to_many_map_ids=many_to_many_map_ids,
                 )
 
@@ -2294,287 +2294,191 @@ class FolderViewSet(BaseModelViewSet):
         self, model, fields, link_dump_database_ids, many_to_many_map_ids
     ):
         """Process model-specific relationships."""
+        def get_mapped_ids(ids: List[str], link_dump_database_ids: Dict[str, str]) -> List[str]:
+            return [link_dump_database_ids.get(id, "") for id in ids]
         model_name = model._meta.model_name
         fields = fields.copy()
 
-        match model_name:
-            case "asset":
-                parent_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("parent_assets", [])
-                ]
-                many_to_many_map_ids["parent_ids"] = parent_ids
-            case "riskassessment":
-                fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(fields["project"])
-                )
-                fields["risk_matrix"] = RiskMatrix.objects.get(
-                    urn=fields.get("risk_matrix")
-                )
-                fields["ebios_rm_study"] = (
-                    EbiosRMStudy.objects.get(
-                        id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                    )
-                    if fields.get("ebios_rm_study")
-                    else None
-                )
-            case "complianceassessment":
-                fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(fields["project"])
-                )
-                fields["framework"] = Framework.objects.get(urn=fields.get("framework"))
-            case "appliedcontrol":
-                evidence_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("evidences", [])
-                ]
-                many_to_many_map_ids["evidence_ids"] = evidence_ids
-                fields["reference_control"] = (
-                    ReferenceControl.objects.filter(
-                        urn=link_dump_database_ids.get(fields["reference_control"])
-                    ).first()
-                    or ReferenceControl.objects.filter(
-                        id=link_dump_database_ids.get(fields["reference_control"])
-                    ).first()
-                )
-            case "evidence":
-                fields.pop("attachment")
-                fields.pop("size")
-                fields.pop("attachment_hash")
-            case "requirementassessment":
-                fields["requirement"] = RequirementNode.objects.get(
-                    urn=fields.get("requirement")
-                )
-                fields["compliance_assessment"] = ComplianceAssessment.objects.get(
-                    id=link_dump_database_ids.get(fields["compliance_assessment"])
-                )
-                applied_control_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("applied_controls", [])
-                ]
-                many_to_many_map_ids["applied_controls"] = applied_control_ids
-                evidence_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("evidences", [])
-                ]
-                many_to_many_map_ids["evidence_ids"] = evidence_ids
-            case "vulnerability":
-                applied_control_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("applied_controls", [])
-                ]
-                many_to_many_map_ids["applied_controls"] = applied_control_ids
-            case "riskscenario":
-                fields["risk_assessment"] = RiskAssessment.objects.get(
-                    id=link_dump_database_ids.get(fields["risk_assessment"])
-                )
-                threat_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("threats", [])
-                ]
-                many_to_many_map_ids["threat_ids"] = threat_ids
-                vulnerability_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("vulnerabilities", [])
-                ]
-                many_to_many_map_ids["vulnerability_ids"] = vulnerability_ids
-                asset_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("assets", [])
-                ]
-                many_to_many_map_ids["asset_ids"] = asset_ids
-                applied_control_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("applied_controls", [])
-                ]
-                many_to_many_map_ids["applied_control_ids"] = applied_control_ids
-                existing_applied_control_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("existing_applied_controls", [])
-                ]
-                many_to_many_map_ids["existing_applied_control_ids"] = (
-                    existing_applied_control_ids
-                )
-            case "entity":
-                fields.pop(
-                    "owned_folders"
-                )  # Remove owned_folders from entity as we don't serialize folders
-            case "ebiosrmstudy":
-                fields["risk_matrix"] = RiskMatrix.objects.get(
-                    urn=fields.get("risk_matrix")
-                )
-                fields["reference_entity"] = Entity.objects.get(
-                    id=link_dump_database_ids.get(fields["reference_entity"])
-                )
-                asset_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("assets", [])
-                ]
-                many_to_many_map_ids["asset_ids"] = asset_ids
-                compliance_assessment_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("compliance_assessments", [])
-                ]
-                many_to_many_map_ids["compliance_assessment_ids"] = (
-                    compliance_assessment_ids
-                )
-            case "fearedevent":
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                )
-                qualifications_urn = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("qualifications", [])
-                ]
-                many_to_many_map_ids["qualifications_urn"] = qualifications_urn
-                asset_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("assets", [])
-                ]
-                many_to_many_map_ids["asset_ids"] = asset_ids
-            case "roto":
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                )
-                feared_event_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("feared_events", [])
-                ]
-                many_to_many_map_ids["feared_event_ids"] = feared_event_ids
-            case "stakeholder":
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                )
-                fields["entity"] = Entity.objects.get(
-                    id=link_dump_database_ids.get(fields["entity"])
-                )
-                applied_control_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("applied_controls", [])
-                ]
-                many_to_many_map_ids["applied_controls"] = applied_control_ids
-            case "strategicscenario":
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                )
-                fields["ro_to_couple"] = RoTo.objects.get(
-                    id=link_dump_database_ids.get(fields["ro_to_couple"])
-                )
-            case "attackpath":
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                )
-                fields["strategic_scenario"] = StrategicScenario.objects.get(
-                    id=link_dump_database_ids.get(fields["strategic_scenario"])
-                )
-                stakeholder_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("stakeholders", [])
-                ]
-                many_to_many_map_ids["stakeholder_ids"] = stakeholder_ids
-            case "operationalscenario":
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                )
-                fields["attack_path"] = AttackPath.objects.get(
-                    id=link_dump_database_ids.get(fields["attack_path"])
-                )
-                threat_ids = [
-                    link_dump_database_ids.get(id, "")
-                    for id in fields.pop("threats", [])
-                ]
-                many_to_many_map_ids["threat_ids"] = threat_ids
+        if model_name == "asset":
+            many_to_many_map_ids["parent_ids"] = get_mapped_ids(fields.pop("parent_assets", []), link_dump_database_ids)
+    
+        elif model_name == "riskassessment":
+            fields["project"] = Project.objects.get(id=link_dump_database_ids.get(fields["project"]))
+            fields["risk_matrix"] = RiskMatrix.objects.get(urn=fields.get("risk_matrix"))
+            fields["ebios_rm_study"] = (
+                EbiosRMStudy.objects.get(id=link_dump_database_ids.get(fields["ebios_rm_study"]))
+                if fields.get("ebios_rm_study") else None
+            )
+        
+        elif model_name == "complianceassessment":
+            fields["project"] = Project.objects.get(id=link_dump_database_ids.get(fields["project"]))
+            fields["framework"] = Framework.objects.get(urn=fields.get("framework"))
+        
+        elif model_name == "appliedcontrol":
+            many_to_many_map_ids["evidence_ids"] = get_mapped_ids(fields.pop("evidences", []), link_dump_database_ids)
+            ref_control_id = link_dump_database_ids.get(fields["reference_control"])
+            fields["reference_control"] = (
+                ReferenceControl.objects.filter(urn=ref_control_id).first() or
+                ReferenceControl.objects.filter(id=ref_control_id).first()
+            )
+        
+        elif model_name == "evidence":
+            fields.pop("attachment", None)
+            fields.pop("size", None)
+            fields.pop("attachment_hash", None)
+        
+        elif model_name == "requirementassessment":
+            fields["requirement"] = RequirementNode.objects.get(urn=fields.get("requirement"))
+            fields["compliance_assessment"] = ComplianceAssessment.objects.get(
+                id=link_dump_database_ids.get(fields["compliance_assessment"])
+            )
+            many_to_many_map_ids.update({
+                "applied_controls": get_mapped_ids(fields.pop("applied_controls", []), link_dump_database_ids),
+                "evidence_ids": get_mapped_ids(fields.pop("evidences", []), link_dump_database_ids)
+            })
+        
+        elif model_name == "vulnerability":
+            many_to_many_map_ids["applied_controls"] = get_mapped_ids(
+                fields.pop("applied_controls", []), link_dump_database_ids
+            )
+        
+        elif model_name == "riskscenario":
+            fields["risk_assessment"] = RiskAssessment.objects.get(
+                id=link_dump_database_ids.get(fields["risk_assessment"])
+            )
+            # Process all related fields at once
+            related_fields = ["threats", "vulnerabilities", "assets", "applied_controls", "existing_applied_controls"]
+            for field in related_fields:
+                map_key = f"{field.rstrip('s')}_ids" if not field.endswith('controls') else f"{field}_ids"
+                many_to_many_map_ids[map_key] = get_mapped_ids(fields.pop(field, []), link_dump_database_ids)
+        
+        elif model_name == "entity":
+            fields.pop("owned_folders", None)
+        
+        elif model_name == "ebiosrmstudy":
+            fields.update({
+                "risk_matrix": RiskMatrix.objects.get(urn=fields.get("risk_matrix")),
+                "reference_entity": Entity.objects.get(id=link_dump_database_ids.get(fields["reference_entity"]))
+            })
+            many_to_many_map_ids.update({
+                "asset_ids": get_mapped_ids(fields.pop("assets", []), link_dump_database_ids),
+                "compliance_assessment_ids": get_mapped_ids(fields.pop("compliance_assessments", []), link_dump_database_ids)
+            })
+
+        elif model_name == "fearedevent":
+            fields["ebios_rm_study"] = EbiosRMStudy.objects.get(id=link_dump_database_ids.get(fields["ebios_rm_study"]))
+            many_to_many_map_ids.update({
+                "qualifications_urn": get_mapped_ids(fields.pop("qualifications", []), link_dump_database_ids),
+                "asset_ids": get_mapped_ids(fields.pop("assets", []), link_dump_database_ids)
+            })
+
+        elif model_name == "roto":
+            fields["ebios_rm_study"] = EbiosRMStudy.objects.get(id=link_dump_database_ids.get(fields["ebios_rm_study"]))
+            many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
+                fields.pop("feared_events", []), link_dump_database_ids
+            )
+
+        elif model_name == "stakeholder":
+            fields.update({
+                "ebios_rm_study": EbiosRMStudy.objects.get(id=link_dump_database_ids.get(fields["ebios_rm_study"])),
+                "entity": Entity.objects.get(id=link_dump_database_ids.get(fields["entity"]))
+            })
+            many_to_many_map_ids["applied_controls"] = get_mapped_ids(
+                fields.pop("applied_controls", []), link_dump_database_ids
+            )
+
+        elif model_name == "strategicscenario":
+            fields.update({
+                "ebios_rm_study": EbiosRMStudy.objects.get(id=link_dump_database_ids.get(fields["ebios_rm_study"])),
+                "ro_to_couple": RoTo.objects.get(id=link_dump_database_ids.get(fields["ro_to_couple"]))
+            })
+
+        elif model_name == "attackpath":
+            fields.update({
+                "ebios_rm_study": EbiosRMStudy.objects.get(id=link_dump_database_ids.get(fields["ebios_rm_study"])),
+                "strategic_scenario": StrategicScenario.objects.get(id=link_dump_database_ids.get(fields["strategic_scenario"]))
+            })
+            many_to_many_map_ids["stakeholder_ids"] = get_mapped_ids(
+                fields.pop("stakeholders", []), link_dump_database_ids
+            )
+
+        elif model_name == "operationalscenario":
+            fields.update({
+                "ebios_rm_study": EbiosRMStudy.objects.get(id=link_dump_database_ids.get(fields["ebios_rm_study"])),
+                "attack_path": AttackPath.objects.get(id=link_dump_database_ids.get(fields["attack_path"]))
+            })
+            many_to_many_map_ids["threat_ids"] = get_mapped_ids(
+                fields.pop("threats", []), link_dump_database_ids
+            )
 
         return fields
 
-    def _set_many_to_many_relations(self, model, obj, fields, many_to_many_map_ids):
+    def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
         """Set many-to-many relationships after object creation."""
         model_name = model._meta.model_name
 
-        match model_name:
-            case "asset":
-                if parent_ids := many_to_many_map_ids.get("parent_ids"):
-                    obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
-            case "appliedcontrol":
-                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
-                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
-            case "requirementassessment":
-                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
-                    obj.applied_controls.set(
-                        AppliedControl.objects.filter(id__in=applied_control_ids)
-                    )
-                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
-                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
-            case "vulnerability":
-                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
-                    obj.applied_controls.set(
-                        AppliedControl.objects.filter(id__in=applied_control_ids)
-                    )
-            case "riskscenario":
-                if threat_ids := many_to_many_map_ids.get("threat_ids"):
-                    uuids, urns = self._split_uuids_urns(threat_ids)
-                    obj.threats.set(
-                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
-                    )
-                if vulnerability_ids := many_to_many_map_ids.get("vulnerability_ids"):
-                    obj.vulnerabilities.set(
-                        Vulnerability.objects.filter(id__in=vulnerability_ids)
-                    )
-                if asset_ids := many_to_many_map_ids.get("asset_ids"):
-                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
-                if applied_control_ids := many_to_many_map_ids.get(
-                    "applied_control_ids"
-                ):
-                    obj.applied_controls.set(
-                        AppliedControl.objects.filter(id__in=applied_control_ids)
-                    )
-                if existing_applied_control_ids := many_to_many_map_ids.get(
-                    "existing_applied_control_ids"
-                ):
-                    obj.existing_applied_controls.set(
-                        AppliedControl.objects.filter(
-                            id__in=existing_applied_control_ids
-                        )
-                    )
-            case "ebiosrmstudy":
-                if asset_ids := many_to_many_map_ids.get("asset_ids"):
-                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
-                if compliance_assessment_ids := many_to_many_map_ids.get(
-                    "compliance_assessment_ids"
-                ):
-                    obj.compliance_assessments.set(
-                        ComplianceAssessment.objects.filter(
-                            id__in=compliance_assessment_ids
-                        )
-                    )
-            case "fearedevent":
-                if qualifications_urn := many_to_many_map_ids.get("qualifications_urn"):
-                    obj.qualifications.set(
-                        Qualification.objects.filter(urn__in=qualifications_urn)
-                    )
-                if asset_ids := many_to_many_map_ids.get("asset_ids"):
-                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
-            case "roto":
-                if feared_event_ids := many_to_many_map_ids.get("feared_event_ids"):
-                    obj.feared_events.set(
-                        FearedEvent.objects.filter(id__in=feared_event_ids)
-                    )
-            case "stakeholder":
-                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
-                    obj.applied_controls.set(
-                        AppliedControl.objects.filter(id__in=applied_control_ids)
-                    )
-            case "attackpath":
-                if stakeholder_ids := many_to_many_map_ids.get("stakeholder_ids"):
-                    obj.stakeholders.set(
-                        Stakeholder.objects.filter(id__in=stakeholder_ids)
-                    )
-            case "operationalscenario":
-                if threat_ids := many_to_many_map_ids.get("threat_ids"):
-                    uuids, urns = self._split_uuids_urns(threat_ids)
-                    obj.threats.set(
-                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
-                    )
+        if model_name == "asset":
+            if parent_ids := many_to_many_map_ids.get("parent_ids"):
+                obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
+
+        elif model_name == "appliedcontrol":
+            if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
+        elif model_name == "requirementassessment":
+            if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                obj.applied_controls.set(AppliedControl.objects.filter(id__in=applied_control_ids))
+            if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
+        elif model_name == "vulnerability":
+            if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                obj.applied_controls.set(AppliedControl.objects.filter(id__in=applied_control_ids))
+
+        elif model_name == "riskscenario":
+            if threat_ids := many_to_many_map_ids.get("threat_ids"):
+                uuids, urns = self._split_uuids_urns(threat_ids)
+                obj.threats.set(Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns)))
+
+            for field, model_class in {
+                "vulnerability_ids": (Vulnerability, "vulnerabilities"),
+                "asset_ids": (Asset, "assets"),
+                "applied_control_ids": (AppliedControl, "applied_controls"),
+                "existing_applied_control_ids": (AppliedControl, "existing_applied_controls")
+            }.items():
+                if ids := many_to_many_map_ids.get(field):
+                    getattr(obj, model_class[1]).set(model_class[0].objects.filter(id__in=ids))
+
+        elif model_name == "ebiosrmstudy":
+            if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+            if compliance_assessment_ids := many_to_many_map_ids.get("compliance_assessment_ids"):
+                obj.compliance_assessments.set(
+                    ComplianceAssessment.objects.filter(id__in=compliance_assessment_ids)
+                )
+
+        elif model_name == "fearedevent":
+            if qualifications_urn := many_to_many_map_ids.get("qualifications_urn"):
+                obj.qualifications.set(Qualification.objects.filter(urn__in=qualifications_urn))
+            if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+
+        elif model_name == "roto":
+            if feared_event_ids := many_to_many_map_ids.get("feared_event_ids"):
+                obj.feared_events.set(FearedEvent.objects.filter(id__in=feared_event_ids))
+
+        elif model_name == "stakeholder":
+            if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                obj.applied_controls.set(AppliedControl.objects.filter(id__in=applied_control_ids))
+
+        elif model_name == "attackpath":
+            if stakeholder_ids := many_to_many_map_ids.get("stakeholder_ids"):
+                obj.stakeholders.set(Stakeholder.objects.filter(id__in=stakeholder_ids))
+
+        elif model_name == "operationalscenario":
+            if threat_ids := many_to_many_map_ids.get("threat_ids"):
+                uuids, urns = self._split_uuids_urns(threat_ids)
+                obj.threats.set(Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns)))
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""
