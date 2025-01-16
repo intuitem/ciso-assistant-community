@@ -81,7 +81,14 @@ from core.utils import RoleCodename, UserGroupCodename
 
 from ebios_rm.models import (
     EbiosRMStudy,
+    FearedEvent,
+    RoTo,
+    StrategicScenario,
+    Stakeholder,
+    AttackPath,
 )
+
+from tprm.models import Entity
 
 from .models import *
 from .serializers import *
@@ -2073,11 +2080,10 @@ class FolderViewSet(BaseModelViewSet):
             if Folder in models_map.values():
                 logger.error("Dump contains a domain")
                 return {"error": "Dump contains a domain"}
-            
+
             # Create base folder and store its ID
             base_folder = Folder.objects.create(
-                name='Star', 
-                content_type=Folder.ContentType.DOMAIN
+                name="Star", content_type=Folder.ContentType.DOMAIN
             )
             link_dump_database_ids["base_folder"] = base_folder
 
@@ -2090,7 +2096,7 @@ class FolderViewSet(BaseModelViewSet):
                     model=model,
                     objects=objects,
                     validation_errors=validation_errors,
-                    required_libraries=required_libraries
+                    required_libraries=required_libraries,
                 )
 
             if validation_errors:
@@ -2111,7 +2117,7 @@ class FolderViewSet(BaseModelViewSet):
                 self._create_model_objects(
                     model=model,
                     objects=objects,
-                    link_dump_database_ids=link_dump_database_ids
+                    link_dump_database_ids=link_dump_database_ids,
                 )
 
             return {"message": "Import successful"}
@@ -2120,7 +2126,9 @@ class FolderViewSet(BaseModelViewSet):
             logger.exception(f"Failed to import objects: {str(e)}")
             raise ValidationError({"errors": [str(e)]})
 
-    def _validate_model_objects(self, model, objects, validation_errors, required_libraries):
+    def _validate_model_objects(
+        self, model, objects, validation_errors, required_libraries
+    ):
         """Validate all objects for a model before creation."""
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
         model_objects = [obj for obj in objects if obj["model"] == model_name]
@@ -2130,12 +2138,12 @@ class FolderViewSet(BaseModelViewSet):
 
         # Process validation in batches
         for i in range(0, len(model_objects), self.batch_size):
-            batch = model_objects[i:i + self.batch_size]
+            batch = model_objects[i : i + self.batch_size]
             self._validate_batch(
                 model=model,
                 batch=batch,
                 validation_errors=validation_errors,
-                required_libraries=required_libraries
+                required_libraries=required_libraries,
             )
 
     def _validate_batch(self, model, batch, validation_errors, required_libraries):
@@ -2150,10 +2158,9 @@ class FolderViewSet(BaseModelViewSet):
                 # Handle library objects
                 if fields.get("library") or model == LoadedLibrary:
                     if model == LoadedLibrary:
-                        required_libraries.append({
-                            "urn": fields["urn"],
-                            "name": fields["name"]
-                        })
+                        required_libraries.append(
+                            {"urn": fields["urn"], "name": fields["name"]}
+                        )
                     continue
 
                 # Validate using serializer
@@ -2161,19 +2168,25 @@ class FolderViewSet(BaseModelViewSet):
                 serializer = SerializerClass(data=fields)
 
                 if not serializer.is_valid():
-                    validation_errors.append({
-                        "model": model_name,
-                        "id": obj_id,
-                        "errors": serializer.errors,
-                    })
+                    validation_errors.append(
+                        {
+                            "model": model_name,
+                            "id": obj_id,
+                            "errors": serializer.errors,
+                        }
+                    )
 
             except Exception as e:
-                logger.error(f"Error validating object {obj_id} in {model_name}: {str(e)}")
-                validation_errors.append({
-                    "model": model_name,
-                    "id": obj_id,
-                    "errors": [str(e)],
-                })
+                logger.error(
+                    f"Error validating object {obj_id} in {model_name}: {str(e)}"
+                )
+                validation_errors.append(
+                    {
+                        "model": model_name,
+                        "id": obj_id,
+                        "errors": [str(e)],
+                    }
+                )
 
     def _create_model_objects(self, model, objects, link_dump_database_ids):
         """Create all objects for a model after validation."""
@@ -2182,23 +2195,25 @@ class FolderViewSet(BaseModelViewSet):
 
         if not model_objects:
             return
-        
+
         # Handle self-referencing dependencies
         self_ref_field = get_self_referencing_field(model)
         if self_ref_field:
             try:
-                model_objects = sort_objects_by_self_reference(model_objects, self_ref_field)
+                model_objects = sort_objects_by_self_reference(
+                    model_objects, self_ref_field
+                )
             except ValueError as e:
                 logger.error(f"Cyclic dependency detected in {model_name}: {str(e)}")
-                raise ValidationError({"error": f"Cyclic dependency detected in {model_name}"})
+                raise ValidationError(
+                    {"error": f"Cyclic dependency detected in {model_name}"}
+                )
 
         # Process creation in batches
         for i in range(0, len(model_objects), self.batch_size):
-            batch = model_objects[i:i + self.batch_size]
+            batch = model_objects[i : i + self.batch_size]
             self._create_batch(
-                model=model,
-                batch=batch,
-                link_dump_database_ids=link_dump_database_ids
+                model=model, batch=batch, link_dump_database_ids=link_dump_database_ids
             )
 
     def _create_batch(self, model, batch, link_dump_database_ids):
@@ -2224,7 +2239,7 @@ class FolderViewSet(BaseModelViewSet):
                     model=model,
                     fields=fields,
                     link_dump_database_ids=link_dump_database_ids,
-                    many_to_many_map_ids=many_to_many_map_ids
+                    many_to_many_map_ids=many_to_many_map_ids,
                 )
 
                 # Create object and store ID mapping
@@ -2236,14 +2251,18 @@ class FolderViewSet(BaseModelViewSet):
                     model=model,
                     obj=obj_created,
                     fields=fields,
-                    many_to_many_map_ids=many_to_many_map_ids
+                    many_to_many_map_ids=many_to_many_map_ids,
                 )
 
             except Exception as e:
                 logger.error(f"Error creating object {obj_id}: {str(e)}")
-                raise ValidationError(f"Error creating {model._meta.model_name}: {str(e)}")
+                raise ValidationError(
+                    f"Error creating {model._meta.model_name}: {str(e)}"
+                )
 
-    def _process_model_relationships(self, model, fields, link_dump_database_ids, many_to_many_map_ids):
+    def _process_model_relationships(
+        self, model, fields, link_dump_database_ids, many_to_many_map_ids
+    ):
         """Process model-specific relationships."""
         model_name = model._meta.model_name
         fields = fields.copy()
@@ -2251,14 +2270,10 @@ class FolderViewSet(BaseModelViewSet):
         match model_name:
             case "asset":
                 parent_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("parent_assets", [])
                 ]
                 many_to_many_map_ids["parent_ids"] = parent_ids
-            case "ebiosrmstudy":
-                fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(fields["project"])
-                )
             case "riskassessment":
                 fields["project"] = Project.objects.get(
                     id=link_dump_database_ids.get(fields["project"])
@@ -2266,28 +2281,30 @@ class FolderViewSet(BaseModelViewSet):
                 fields["risk_matrix"] = RiskMatrix.objects.get(
                     urn=fields.get("risk_matrix")
                 )
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                ) if fields.get("ebios_rm_study") else None
+                fields["ebios_rm_study"] = (
+                    EbiosRMStudy.objects.get(
+                        id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                    )
+                    if fields.get("ebios_rm_study")
+                    else None
+                )
             case "complianceassessment":
                 fields["project"] = Project.objects.get(
                     id=link_dump_database_ids.get(fields["project"])
                 )
-                fields["framework"] = Framework.objects.get(
-                    urn=fields.get("framework")
-                )
+                fields["framework"] = Framework.objects.get(urn=fields.get("framework"))
             case "appliedcontrol":
                 evidence_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("evidences", [])
                 ]
                 many_to_many_map_ids["evidence_ids"] = evidence_ids
                 fields["reference_control"] = (
                     ReferenceControl.objects.filter(
                         urn=link_dump_database_ids.get(fields["reference_control"])
-                    ).first() or
-                    ReferenceControl.objects.filter(
-                        urn=link_dump_database_ids.get(fields["reference_control"])
+                    ).first()
+                    or ReferenceControl.objects.filter(
+                        id=link_dump_database_ids.get(fields["reference_control"])
                     ).first()
                 )
             case "evidence":
@@ -2300,18 +2317,18 @@ class FolderViewSet(BaseModelViewSet):
                     id=link_dump_database_ids.get(fields["compliance_assessment"])
                 )
                 applied_control_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("applied_controls", [])
                 ]
                 many_to_many_map_ids["applied_controls"] = applied_control_ids
                 evidence_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("evidences", [])
                 ]
                 many_to_many_map_ids["evidence_ids"] = evidence_ids
             case "vulnerability":
                 applied_control_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("applied_controls", [])
                 ]
                 many_to_many_map_ids["applied_controls"] = applied_control_ids
@@ -2320,31 +2337,122 @@ class FolderViewSet(BaseModelViewSet):
                     id=link_dump_database_ids.get(fields["risk_assessment"])
                 )
                 threat_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("threats", [])
                 ]
                 many_to_many_map_ids["threat_ids"] = threat_ids
                 vulnerability_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("vulnerabilities", [])
                 ]
                 many_to_many_map_ids["vulnerability_ids"] = vulnerability_ids
                 asset_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("assets", [])
                 ]
                 many_to_many_map_ids["asset_ids"] = asset_ids
                 applied_control_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("applied_controls", [])
                 ]
                 many_to_many_map_ids["applied_control_ids"] = applied_control_ids
                 existing_applied_control_ids = [
-                    link_dump_database_ids.get(id, '')
+                    link_dump_database_ids.get(id, "")
                     for id in fields.pop("existing_applied_controls", [])
                 ]
-                many_to_many_map_ids["existing_applied_control_ids"] = existing_applied_control_ids
-            
+                many_to_many_map_ids["existing_applied_control_ids"] = (
+                    existing_applied_control_ids
+                )
+            case "entity":
+                fields.pop(
+                    "owned_folders"
+                )  # Remove owned_folders from entity as we don't serialize folders
+            case "ebiosrmstudy":
+                fields["risk_matrix"] = RiskMatrix.objects.get(
+                    urn=fields.get("risk_matrix")
+                )
+                fields["reference_entity"] = Entity.objects.get(
+                    id=link_dump_database_ids.get(fields["reference_entity"])
+                )
+                asset_ids = [
+                    link_dump_database_ids.get(id, "")
+                    for id in fields.pop("assets", [])
+                ]
+                many_to_many_map_ids["asset_ids"] = asset_ids
+                compliance_assessment_ids = [
+                    link_dump_database_ids.get(id, "")
+                    for id in fields.pop("compliance_assessments", [])
+                ]
+                many_to_many_map_ids["compliance_assessment_ids"] = (
+                    compliance_assessment_ids
+                )
+            case "fearedevent":
+                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                )
+                qualifications_urn = [
+                    link_dump_database_ids.get(id, "")
+                    for id in fields.pop("qualifications", [])
+                ]
+                many_to_many_map_ids["qualifications_urn"] = qualifications_urn
+                asset_ids = [
+                    link_dump_database_ids.get(id, "")
+                    for id in fields.pop("assets", [])
+                ]
+                many_to_many_map_ids["asset_ids"] = asset_ids
+            case "roto":
+                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                )
+                feared_event_ids = [
+                    link_dump_database_ids.get(id, "")
+                    for id in fields.pop("feared_events", [])
+                ]
+                many_to_many_map_ids["feared_event_ids"] = feared_event_ids
+            case "stakeholder":
+                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                )
+                fields["entity"] = Entity.objects.get(
+                    id=link_dump_database_ids.get(fields["entity"])
+                )
+                applied_control_ids = [
+                    link_dump_database_ids.get(id, "")
+                    for id in fields.pop("applied_controls", [])
+                ]
+                many_to_many_map_ids["applied_controls"] = applied_control_ids
+            case "strategicscenario":
+                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                )
+                fields["ro_to_couple"] = RoTo.objects.get(
+                    id=link_dump_database_ids.get(fields["ro_to_couple"])
+                )
+            case "attackpath":
+                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                )
+                fields["strategic_scenario"] = StrategicScenario.objects.get(
+                    id=link_dump_database_ids.get(fields["strategic_scenario"])
+                )
+                stakeholder_ids = [
+                    link_dump_database_ids.get(id, "")
+                    for id in fields.pop("stakeholders", [])
+                ]
+                many_to_many_map_ids["stakeholder_ids"] = stakeholder_ids
+            case "operationalscenario":
+                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                )
+                fields["attack_path"] = AttackPath.objects.get(
+                    id=link_dump_database_ids.get(fields["attack_path"])
+                )
+                threat_ids = [
+                    link_dump_database_ids.get(id, "")
+                    for id in fields.pop("threats", [])
+                ]
+                many_to_many_map_ids["threat_ids"] = threat_ids
+
         return fields
 
     def _set_many_to_many_relations(self, model, obj, fields, many_to_many_map_ids):
@@ -2354,23 +2462,17 @@ class FolderViewSet(BaseModelViewSet):
         match model_name:
             case "asset":
                 if parent_ids := many_to_many_map_ids.get("parent_ids"):
-                    obj.parent_assets.set(
-                        Asset.objects.filter(id__in=parent_ids)
-                    )
+                    obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
             case "appliedcontrol":
                 if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
-                    obj.evidences.set(
-                        Evidence.objects.filter(id__in=evidence_ids)
-                    )
+                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
             case "requirementassessment":
                 if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
                     obj.applied_controls.set(
                         AppliedControl.objects.filter(id__in=applied_control_ids)
                     )
                 if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
-                    obj.evidences.set(
-                        Evidence.objects.filter(id__in=evidence_ids)
-                    )
+                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
             case "vulnerability":
                 if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
                     obj.applied_controls.set(
@@ -2387,18 +2489,61 @@ class FolderViewSet(BaseModelViewSet):
                         Vulnerability.objects.filter(id__in=vulnerability_ids)
                     )
                 if asset_ids := many_to_many_map_ids.get("asset_ids"):
-                    obj.assets.set(
-                        Asset.objects.filter(id__in=asset_ids)
-                    )
-                if applied_control_ids := many_to_many_map_ids.get("applied_control_ids"):
+                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+                if applied_control_ids := many_to_many_map_ids.get(
+                    "applied_control_ids"
+                ):
                     obj.applied_controls.set(
                         AppliedControl.objects.filter(id__in=applied_control_ids)
                     )
-                if existing_applied_control_ids := many_to_many_map_ids.get("existing_applied_control_ids"):
+                if existing_applied_control_ids := many_to_many_map_ids.get(
+                    "existing_applied_control_ids"
+                ):
                     obj.existing_applied_controls.set(
-                        AppliedControl.objects.filter(id__in=existing_applied_control_ids)
+                        AppliedControl.objects.filter(
+                            id__in=existing_applied_control_ids
+                        )
                     )
-    
+            case "ebiosrmstudy":
+                if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+                if compliance_assessment_ids := many_to_many_map_ids.get(
+                    "compliance_assessment_ids"
+                ):
+                    obj.compliance_assessments.set(
+                        ComplianceAssessment.objects.filter(
+                            id__in=compliance_assessment_ids
+                        )
+                    )
+            case "fearedevent":
+                if qualifications_urn := many_to_many_map_ids.get("qualifications_urn"):
+                    obj.qualifications.set(
+                        Qualification.objects.filter(urn__in=qualifications_urn)
+                    )
+                if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+            case "roto":
+                if feared_event_ids := many_to_many_map_ids.get("feared_event_ids"):
+                    obj.feared_events.set(
+                        FearedEvent.objects.filter(id__in=feared_event_ids)
+                    )
+            case "stakeholder":
+                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                    obj.applied_controls.set(
+                        AppliedControl.objects.filter(id__in=applied_control_ids)
+                    )
+            case "attackpath":
+                if stakeholder_ids := many_to_many_map_ids.get("stakeholder_ids"):
+                    obj.stakeholders.set(
+                        Stakeholder.objects.filter(id__in=stakeholder_ids)
+                    )
+            case "operationalscenario":
+                if threat_ids := many_to_many_map_ids.get("threat_ids"):
+                    uuids, urns = self._split_uuids_urns(threat_ids)
+                    obj.threats.set(
+                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                    )
+
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""
         uuids = []
@@ -2410,6 +2555,7 @@ class FolderViewSet(BaseModelViewSet):
             except ValueError:
                 urns.append(item)
         return uuids, urns
+
 
 class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]

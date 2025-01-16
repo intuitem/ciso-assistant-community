@@ -110,6 +110,7 @@ def dump_objects(queryset: Iterable[Model], path: str, format: str = "json"):
             outfile.write(serialized_objects)
     return path
 
+
 def restore_objects(path: str, format: str = "json"):
     """
     Restore objects from a file.
@@ -189,11 +190,8 @@ def get_model_dependencies(
 
         # Check if the relationship is required
         is_required = (
-            (
-                isinstance(field, (models.ForeignKey, models.OneToOneField))
-            )
-            or isinstance(field, models.ManyToManyField)
-        )
+            isinstance(field, (models.ForeignKey, models.OneToOneField))
+        ) or isinstance(field, models.ManyToManyField)
 
         if is_required:
             dependencies.append(field.related_model)
@@ -352,9 +350,13 @@ def sort_objects_by_self_reference(
 
 
 def get_domain_export_objects(domain: Folder):
-    folders = Folder.objects.filter(
-        Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])
-    ).filter(content_type=Folder.ContentType.DOMAIN).distinct()
+    folders = (
+        Folder.objects.filter(
+            Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])
+        )
+        .filter(content_type=Folder.ContentType.DOMAIN)
+        .distinct()
+    )
 
     projects = Project.objects.filter(folder__in=folders).distinct()
 
