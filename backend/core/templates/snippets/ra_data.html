@@ -54,8 +54,8 @@
     <!--Risk matrix view-->
     <div class="m-4 px-4 py-8 shadow rounded-lg bg-white page-break text-sm">
         <div class="text-xl pb-4 font-semibold">{% trans "Risk matrix view" %}</div>
-        <div class="flex space-x-3">
-            <div class="w-1/2 shadow rounded-lg p-6">
+        <div class="">
+            <div class="shadow rounded-lg p-6">
                 <h3 class="font-bold p-2 m-2 text-lg">{% trans "Current" %}</h3>
                 {% if pdf %}
                     {% include 'snippets/risk_matrix.html' with enriched_data=ri_clusters.current %}
@@ -63,7 +63,7 @@
                     {% include 'snippets/risk_matrix.html' with data=ri_clusters.current %}
                 {% endif %}
             </div>
-            <div class="w-1/2 shadow rounded-lg p-6">
+            <div class="shadow rounded-lg p-6">
                 <h3 class="font-bold p-2 m-2 text-lg">{% trans "Residual" %}</h3>
                 {% if pdf %}
                     {% include 'snippets/risk_matrix.html' with enriched_data=ri_clusters.residual %}
