@@ -294,7 +294,7 @@ def get_domain_export_objects(domain: Folder):
     ).distinct()
 
     return {
-        "folder": folders,
+        # "folder": folders,
         "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,
         "framework": frameworks,
