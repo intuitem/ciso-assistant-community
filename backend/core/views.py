@@ -1972,7 +1972,7 @@ class FolderViewSet(BaseModelViewSet):
         objects = get_domain_export_objects(instance)
         dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
         compressed_data = gzip.compress(json.dumps(dump_data).encode("utf-8"))
-        response = Response(compressed_data, content_type="application/json")
+        response = HttpResponse(compressed_data, content_type="application/json")
         response["Content-Disposition"] = (
             f'attachment; filename="ciso-assistant-domain-{timezone.now()}.json.gz"'
         )
