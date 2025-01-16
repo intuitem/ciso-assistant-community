@@ -839,6 +839,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
 class EvidenceImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    attachment = serializers.CharField(allow_blank=True)
 
     class Meta:
         model = Evidence

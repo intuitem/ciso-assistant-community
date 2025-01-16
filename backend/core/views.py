@@ -2039,58 +2039,6 @@ class FolderViewSet(BaseModelViewSet):
 
         return json.loads(json_content)
 
-    def _import_objects(self, parsed_data):
-        """Import and validate objects using appropriate serializers."""
-        validation_errors = []
-        required_libraries = []
-        missing_libraries = []
-        link_dump_database_ids = {}
-
-        try:
-            # Initialize processing
-            objects = parsed_data.get("objects", [])
-            if not objects:
-                return {"message": "No objects to import"}
-
-            # Get models and validate dependencies
-            models_map = self._get_models_map(objects)
-            if Folder in models_map.values():
-                logger.error("Dump contains a domain")
-                return {"error": "Dump contains a domain"}
-            
-            # Create the base folder
-            link_dump_database_ids["base_folder"] = Folder.objects.create(name='Star', content_type=Folder.ContentType.DOMAIN)
-            creation_order = self._resolve_dependencies(list(models_map.values()))
-
-            # Process each model in order
-            for model in creation_order:
-                self._process_model_objects(
-                    model=model,
-                    objects=objects,
-                    validation_errors=validation_errors,
-                    required_libraries=required_libraries,
-                    link_dump_database_ids=link_dump_database_ids
-                )
-
-            # Check if all required libraries are loaded
-            for library in required_libraries:
-                if not LoadedLibrary.objects.filter(urn=library["urn"]).exists():
-                    missing_libraries.append(library)
-
-            if missing_libraries:
-                logger.warning(f"Missing libraries: {missing_libraries}")
-                return {"missing_libraries": missing_libraries}
-
-        except Exception as e:
-            logger.exception(f"Failed to import objects: {str(e)}")
-            raise ValidationError({"errors": [str(e)]})
-
-        if validation_errors:
-            logger.error(f"Validation errors: {validation_errors}")
-            return {"validation_errors": validation_errors}
-
-        return {"message": "Import successful"}
-
     def _get_models_map(self, objects):
         """Build a map of model names to model classes."""
         model_names = {obj["model"] for obj in objects}
@@ -2105,39 +2053,102 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    def _process_model_objects(
-        self, model, objects, validation_errors, required_libraries, link_dump_database_ids
-    ):
-        """Process all objects for a given model."""
+    def _import_objects(self, parsed_data):
+        """
+        Import and validate objects using appropriate serializers.
+        Handles both validation and creation in separate phases.
+        """
+        validation_errors = []
+        required_libraries = []
+        missing_libraries = []
+        link_dump_database_ids = {}
+
+        try:
+            objects = parsed_data.get("objects", [])
+            if not objects:
+                return {"message": "No objects to import"}
+
+            # Validate models and check for domain
+            models_map = self._get_models_map(objects)
+            if Folder in models_map.values():
+                logger.error("Dump contains a domain")
+                return {"error": "Dump contains a domain"}
+            
+            # Create base folder and store its ID
+            base_folder = Folder.objects.create(
+                name='Star', 
+                content_type=Folder.ContentType.DOMAIN
+            )
+            link_dump_database_ids["base_folder"] = base_folder
+
+            # Get creation order
+            creation_order = self._resolve_dependencies(list(models_map.values()))
+
+            # Validation phase
+            for model in creation_order:
+                self._validate_model_objects(
+                    model=model,
+                    objects=objects,
+                    validation_errors=validation_errors,
+                    required_libraries=required_libraries
+                )
+
+            if validation_errors:
+                logger.error(f"Validation errors: {validation_errors}")
+                return {"validation_errors": validation_errors}
+
+            # Check for missing libraries
+            for library in required_libraries:
+                if not LoadedLibrary.objects.filter(urn=library["urn"]).exists():
+                    missing_libraries.append(library)
+
+            if missing_libraries:
+                logger.warning(f"Missing libraries: {missing_libraries}")
+                return {"missing_libraries": missing_libraries}
+
+            # Creation phase
+            for model in creation_order:
+                self._create_model_objects(
+                    model=model,
+                    objects=objects,
+                    link_dump_database_ids=link_dump_database_ids
+                )
+
+            return {"message": "Import successful"}
+
+        except Exception as e:
+            logger.exception(f"Failed to import objects: {str(e)}")
+            raise ValidationError({"errors": [str(e)]})
+
+    def _validate_model_objects(self, model, objects, validation_errors, required_libraries):
+        """Validate all objects for a model before creation."""
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
         model_objects = [obj for obj in objects if obj["model"] == model_name]
 
         if not model_objects:
             return
 
-        # Sort objects that are referenced before objects referencing them
+        # Handle self-referencing dependencies
         self_ref_field = get_self_referencing_field(model)
         if self_ref_field:
             try:
-                model_objects = sort_objects_by_self_reference(
-                    model_objects, self_ref_field
-                )
+                model_objects = sort_objects_by_self_reference(model_objects, self_ref_field)
             except ValueError as e:
                 logger.error(f"Cyclic dependency detected in {model_name}: {str(e)}")
-                raise ValidationError(
-                    {"error": f"Cyclic dependency detected in {model_name}"}
-                )
+                raise ValidationError({"error": f"Cyclic dependency detected in {model_name}"})
 
+        # Process validation in batches
         for i in range(0, len(model_objects), self.batch_size):
-            batch = model_objects[i : i + self.batch_size]
-            self._validation_batch(model, batch, validation_errors, required_libraries)
-        
-        for i in range(0, len(model_objects), self.batch_size):
-            batch = model_objects[i : i + self.batch_size]
-            self._creation_batch(model, batch, link_dump_database_ids)
+            batch = model_objects[i:i + self.batch_size]
+            self._validate_batch(
+                model=model,
+                batch=batch,
+                validation_errors=validation_errors,
+                required_libraries=required_libraries
+            )
 
-    def _validation_batch(self, model, batch, validation_errors, required_libraries):
-        """Process a batch of objects."""
+    def _validate_batch(self, model, batch, validation_errors, required_libraries):
+        """Validate a batch of objects."""
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
 
         for obj in batch:
@@ -2145,75 +2156,185 @@ class FolderViewSet(BaseModelViewSet):
             fields = obj.get("fields", {}).copy()
 
             try:
-                # Skip objects from libraries
+                # Handle library objects
                 if fields.get("library") or model == LoadedLibrary:
-                    logger.info(
-                        f"Skipping validation of object {obj_id} coming from a library"
-                    )
                     if model == LoadedLibrary:
-                        required_libraries.append({"urn": fields["urn"], "name": fields["name"]})
+                        required_libraries.append({
+                            "urn": fields["urn"],
+                            "name": fields["name"]
+                        })
                     continue
 
-                # Process serialization
+                # Validate using serializer
                 SerializerClass = import_export_serializer_class(model)
-                serializer = SerializerClass(data=fields) if model != LoadedLibrary else None
+                serializer = SerializerClass(data=fields)
 
                 if not serializer.is_valid():
-                    validation_errors.append(
-                        {
-                            "model": model_name,
-                            "id": obj_id,
-                            "errors": serializer.errors,
-                        }
-                    )
-                    continue
-                
-            except Exception as e:
-                logger.error(
-                    f"Error processing object {obj_id} in {model_name}: {str(e)}"
-                )
-                validation_errors.append(
-                    {
+                    validation_errors.append({
                         "model": model_name,
                         "id": obj_id,
-                        "errors": [str(e)],
-                    }
-                )
-    def _creation_batch(self, model, batch, link_dump_database_ids):
-        """Process a batch to create objects."""
+                        "errors": serializer.errors,
+                    })
 
+            except Exception as e:
+                logger.error(f"Error validating object {obj_id} in {model_name}: {str(e)}")
+                validation_errors.append({
+                    "model": model_name,
+                    "id": obj_id,
+                    "errors": [str(e)],
+                })
+
+    def _create_model_objects(self, model, objects, link_dump_database_ids):
+        """Create all objects for a model after validation."""
+        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+        model_objects = [obj for obj in objects if obj["model"] == model_name]
+
+        if not model_objects:
+            return
+
+        # Process creation in batches
+        for i in range(0, len(model_objects), self.batch_size):
+            batch = model_objects[i:i + self.batch_size]
+            self._create_batch(
+                model=model,
+                batch=batch,
+                link_dump_database_ids=link_dump_database_ids
+            )
+
+    def _create_batch(self, model, batch, link_dump_database_ids):
+        """Create a batch of objects with proper relationship handling."""
         for obj in batch:
             obj_id = obj.get("id")
             fields = obj.get("fields", {}).copy()
-            
-            if fields.get("library") or model == LoadedLibrary:
-                logger.info(
-                    f"Skipping creation of object {obj_id} coming from a library"
+
+            try:
+                # Handle library objects
+                if fields.get("library") or model == LoadedLibrary:
+                    logger.info(f"Skipping creation of library object {obj_id}")
+                    link_dump_database_ids[obj_id] = fields.get("urn")
+                    continue
+
+                # Handle folder reference
+                if fields.get("folder"):
+                    fields["folder"] = link_dump_database_ids.get("base_folder")
+
+                # Process model-specific relationships
+                many_to_many_map_ids = {}
+                fields = self._process_model_relationships(
+                    model=model,
+                    fields=fields,
+                    link_dump_database_ids=link_dump_database_ids,
+                    many_to_many_map_ids=many_to_many_map_ids
                 )
-                continue
-            elif fields.get("folder"):
-                fields["folder"] = link_dump_database_ids.get("base_folder")
 
-            match model._meta.model_name:
-                case "asset":
-                    parent_ids = []
-                    for id in fields.get("parent_assets"):
-                        parent_ids.append(link_dump_database_ids.get(id, ''))
-                    fields.pop("parent_assets")
-                case "riskassessment":
-                    fields["project"] = Project.objects.get(id=link_dump_database_ids.get(fields["project"]))
-                    fields["risk_matrix"] = RiskMatrix.objects.get(urn=fields.get("risk_matrix"))
-                case "complianceassessment":
-                    fields["project"] = Project.objects.get(id=link_dump_database_ids.get(fields["project"]))
-                    fields["framework"] = Framework.objects.get(urn=fields.get("framework"))
-            
-            obj_created = model.objects.create(**fields)
-            link_dump_database_ids[obj_id] = obj_created.id
-            
-            match model._meta.model_name:
-                case "asset":
-                    obj_created.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
+                # Create object and store ID mapping
+                obj_created = model.objects.create(**fields)
+                link_dump_database_ids[obj_id] = obj_created.id
 
+                # Handle many-to-many relationships
+                self._set_many_to_many_relations(
+                    model=model,
+                    obj=obj_created,
+                    fields=fields,
+                    many_to_many_map_ids=many_to_many_map_ids
+                )
+
+            except Exception as e:
+                logger.error(f"Error creating object {obj_id}: {str(e)}")
+                raise ValidationError(f"Error creating {model._meta.model_name}: {str(e)}")
+
+    def _process_model_relationships(self, model, fields, link_dump_database_ids, many_to_many_map_ids):
+        """Process model-specific relationships."""
+        model_name = model._meta.model_name
+        fields = fields.copy()
+
+        match model_name:
+            case "asset":
+                parent_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("parent_assets", [])
+                ]
+                many_to_many_map_ids["parent_ids"] = parent_ids
+            case "ebiosrmstudy":
+                fields["project"] = Project.objects.get(
+                    id=link_dump_database_ids.get(fields["project"])
+                )
+            case "riskassessment":
+                fields["project"] = Project.objects.get(
+                    id=link_dump_database_ids.get(fields["project"])
+                )
+                fields["risk_matrix"] = RiskMatrix.objects.get(
+                    urn=fields.get("risk_matrix")
+                )
+                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                ) if fields.get("ebios_rm_study") else None
+            case "complianceassessment":
+                fields["project"] = Project.objects.get(
+                    id=link_dump_database_ids.get(fields["project"])
+                )
+                fields["framework"] = Framework.objects.get(
+                    urn=fields.get("framework")
+                )
+            case "appliedcontrol":
+                evidence_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("evidences", [])
+                ]
+                many_to_many_map_ids["evidence_ids"] = evidence_ids
+                fields["reference_control"] = (
+                    ReferenceControl.objects.filter(
+                        urn=link_dump_database_ids.get(fields["reference_control"])
+                    ).first() or
+                    ReferenceControl.objects.filter(
+                        urn=link_dump_database_ids.get(fields["reference_control"])
+                    ).first()
+                )
+            case "evidence":
+                fields.pop("attachment")
+            case "requirementassessment":
+                fields["requirement"] = RequirementNode.objects.get(
+                    urn=fields.get("requirement")
+                )
+                fields["compliance_assessment"] = ComplianceAssessment.objects.get(
+                    id=link_dump_database_ids.get(fields["compliance_assessment"])
+                )
+                applied_control_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("applied_controls", [])
+                ]
+                many_to_many_map_ids["applied_controls"] = applied_control_ids
+                evidence_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("evidences", [])
+                ]
+                many_to_many_map_ids["evidence_ids"] = evidence_ids
+        return fields
+
+    def _set_many_to_many_relations(self, model, obj, fields, many_to_many_map_ids):
+        """Set many-to-many relationships after object creation."""
+        model_name = model._meta.model_name
+
+        match model_name:
+            case "asset":
+                if parent_ids := many_to_many_map_ids.get("parent_ids"):
+                    obj.parent_assets.set(
+                        Asset.objects.filter(id__in=parent_ids)
+                    )
+            case "appliedcontrol":
+                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                    obj.evidences.set(
+                        Evidence.objects.filter(id__in=evidence_ids)
+                    )
+            case "requirementassessment":
+                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                    obj.applied_controls.set(
+                        AppliedControl.objects.filter(id__in=applied_control_ids)
+                    )
+                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                    obj.evidences.set(
+                        Evidence.objects.filter(id__in=evidence_ids)
+                    )
 
 class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
