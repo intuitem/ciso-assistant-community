@@ -12,6 +12,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let customNameDescription = false;
+	export let importFolder = false;
 	export let model: ModelInfo;
 	export let duplicate = false;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -49,6 +50,7 @@
 		<ModelForm
 			{form}
 			{customNameDescription}
+			{importFolder}
 			{suggestions}
 			{parent}
 			{invalidateAll}

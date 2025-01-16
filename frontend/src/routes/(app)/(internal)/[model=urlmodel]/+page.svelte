@@ -48,6 +48,38 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalFolderImportForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.model['folderImportForm'],
+				model: data.model,
+				customNameDescription: true,
+				importFolder: true,
+				formAction: '?/importFolder',
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + data.model.localName)
+		};
+		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
+			modalComponent = {
+				ref: MissingConstraintsModal
+			};
+			modal = {
+				type: 'component',
+				component: modalComponent,
+				title: m.warning(),
+				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
+				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
+			};
+		}
+		modalStore.trigger(modal);
+	}
+
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
@@ -122,6 +154,13 @@
 								>
 							{/if}
 							{#if URLModel === 'folders'}
+								<button
+									class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+									data-testid="add-button"
+									title={safeTranslate('importFolder')}
+									on:click={modalFolderImportForm}
+									><i class="fa-solid fa-file-import"></i>
+								</button>
 								<a
 									href="x-rays/inspect"
 									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"

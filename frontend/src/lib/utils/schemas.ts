@@ -67,6 +67,11 @@ export const FolderSchema = z.object({
 	parent_folder: z.string().optional()
 });
 
+export const FolderImportSchema = z.object({
+	name: nameSchema,
+	file: z.any().optional().nullable(),
+});
+
 export const ProjectSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -477,6 +482,7 @@ export const operationalScenarioSchema = z.object({
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
+	'folders-import': FolderImportSchema,
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,

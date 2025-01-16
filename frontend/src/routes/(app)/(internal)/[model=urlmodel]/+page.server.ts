@@ -63,6 +63,16 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
+	if (model.urlModel === 'folders'){
+		const folderImportForm = await superValidate(
+			zod(modelSchema('folders-import')),
+			{
+				errors: false
+			}
+		);
+		model['folderImportForm'] = folderImportForm;
+	}
+
 	return { createForm, deleteForm, model, URLModel };
 };
 
@@ -78,5 +88,42 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return defaultDeleteFormAction({ event, urlModel: event.params.model! });
+	},
+	importFolder: async (event) => {
+		const formData = await event.request.formData();
+		
+		if (!formData) return;
+
+		const schema = modelSchema('folders-import');
+
+		const form = await superValidate(formData, zod(schema));
+
+		const endpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/duplicate/`;
+
+		if (!form.valid) {
+			console.error(form.errors);
+			return fail(400, { form: form });
+		}
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		};
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const modelVerboseName: string = urlParamModelVerboseName(event.params.model as string);
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyDuplicateObject({
+					object: safeTranslate(modelVerboseName).toLowerCase()
+				})
+			},
+			event
+		);
+
+		return { form };
 	}
 };

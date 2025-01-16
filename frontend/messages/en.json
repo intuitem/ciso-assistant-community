@@ -1087,5 +1087,6 @@
 	"documentationScore": "Documentation score",
 	"implementationScore": "Implementation score",
 	"useDocumentationScore": "Use documentation score",
-	"useDocumentationScoreHelpText": "A second score (the documentation score) will be available for scoring the requirements."
+	"useDocumentationScoreHelpText": "A second score (the documentation score) will be available for scoring the requirements.",
+	"importFolder": "Import domain"
 }
