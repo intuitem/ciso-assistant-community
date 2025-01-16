@@ -263,7 +263,6 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class RiskAssessmentImportExportSerializer(BaseModelSerializer):
-    project = serializers.CharField()
     risk_matrix = serializers.SlugRelatedField(slug_field="urn", read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
