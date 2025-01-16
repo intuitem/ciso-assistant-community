@@ -2128,15 +2128,6 @@ class FolderViewSet(BaseModelViewSet):
         if not model_objects:
             return
 
-        # Handle self-referencing dependencies
-        self_ref_field = get_self_referencing_field(model)
-        if self_ref_field:
-            try:
-                model_objects = sort_objects_by_self_reference(model_objects, self_ref_field)
-            except ValueError as e:
-                logger.error(f"Cyclic dependency detected in {model_name}: {str(e)}")
-                raise ValidationError({"error": f"Cyclic dependency detected in {model_name}"})
-
         # Process validation in batches
         for i in range(0, len(model_objects), self.batch_size):
             batch = model_objects[i:i + self.batch_size]
@@ -2191,6 +2182,15 @@ class FolderViewSet(BaseModelViewSet):
 
         if not model_objects:
             return
+        
+        # Handle self-referencing dependencies
+        self_ref_field = get_self_referencing_field(model)
+        if self_ref_field:
+            try:
+                model_objects = sort_objects_by_self_reference(model_objects, self_ref_field)
+            except ValueError as e:
+                logger.error(f"Cyclic dependency detected in {model_name}: {str(e)}")
+                raise ValidationError({"error": f"Cyclic dependency detected in {model_name}"})
 
         # Process creation in batches
         for i in range(0, len(model_objects), self.batch_size):
@@ -2309,6 +2309,42 @@ class FolderViewSet(BaseModelViewSet):
                     for id in fields.pop("evidences", [])
                 ]
                 many_to_many_map_ids["evidence_ids"] = evidence_ids
+            case "vulnerability":
+                applied_control_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("applied_controls", [])
+                ]
+                many_to_many_map_ids["applied_controls"] = applied_control_ids
+            case "riskscenario":
+                fields["risk_assessment"] = RiskAssessment.objects.get(
+                    id=link_dump_database_ids.get(fields["risk_assessment"])
+                )
+                threat_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("threats", [])
+                ]
+                many_to_many_map_ids["threat_ids"] = threat_ids
+                vulnerability_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("vulnerabilities", [])
+                ]
+                many_to_many_map_ids["vulnerability_ids"] = vulnerability_ids
+                asset_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("assets", [])
+                ]
+                many_to_many_map_ids["asset_ids"] = asset_ids
+                applied_control_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("applied_controls", [])
+                ]
+                many_to_many_map_ids["applied_control_ids"] = applied_control_ids
+                existing_applied_control_ids = [
+                    link_dump_database_ids.get(id, '')
+                    for id in fields.pop("existing_applied_controls", [])
+                ]
+                many_to_many_map_ids["existing_applied_control_ids"] = existing_applied_control_ids
+            
         return fields
 
     def _set_many_to_many_relations(self, model, obj, fields, many_to_many_map_ids):
@@ -2335,6 +2371,45 @@ class FolderViewSet(BaseModelViewSet):
                     obj.evidences.set(
                         Evidence.objects.filter(id__in=evidence_ids)
                     )
+            case "vulnerability":
+                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                    obj.applied_controls.set(
+                        AppliedControl.objects.filter(id__in=applied_control_ids)
+                    )
+            case "riskscenario":
+                if threat_ids := many_to_many_map_ids.get("threat_ids"):
+                    uuids, urns = self._split_uuids_urns(threat_ids)
+                    obj.threats.set(
+                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                    )
+                if vulnerability_ids := many_to_many_map_ids.get("vulnerability_ids"):
+                    obj.vulnerabilities.set(
+                        Vulnerability.objects.filter(id__in=vulnerability_ids)
+                    )
+                if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                    obj.assets.set(
+                        Asset.objects.filter(id__in=asset_ids)
+                    )
+                if applied_control_ids := many_to_many_map_ids.get("applied_control_ids"):
+                    obj.applied_controls.set(
+                        AppliedControl.objects.filter(id__in=applied_control_ids)
+                    )
+                if existing_applied_control_ids := many_to_many_map_ids.get("existing_applied_control_ids"):
+                    obj.existing_applied_controls.set(
+                        AppliedControl.objects.filter(id__in=existing_applied_control_ids)
+                    )
+    
+    def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
+        """Split a list of strings into UUIDs and URNs."""
+        uuids = []
+        urns = []
+        for item in ids:
+            try:
+                uuid = UUID(str(item))
+                uuids.append(uuid)
+            except ValueError:
+                urns.append(item)
+        return uuids, urns
 
 class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]

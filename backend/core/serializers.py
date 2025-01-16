@@ -485,10 +485,6 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):
-    qualifications = serializers.SlugRelatedField(
-        slug_field="urn", many=True, read_only=True
-    )
-
     threats = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
     risk_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
     vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
