@@ -71,13 +71,6 @@
 	);
 </script>
 
-<TextArea
-	{form}
-	field="business_value"
-	label={m.businessValue()}
-	cacheLock={cacheLocks['business_value']}
-	bind:cachedValue={formDataCache['business_value']}
-/>
 <AutocompleteSelect
 	{form}
 	multiple
