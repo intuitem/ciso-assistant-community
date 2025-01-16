@@ -1087,5 +1087,7 @@
 	"documentationScore": "Score de documentation",
 	"implementationScore": "Score d'implémentation",
 	"useDocumentationScore": "Utiliser le score de documentation",
-	"useDocumentationScoreHelpText": "Un deuxième score (le score de documentation) sera disponible pour évaluer les exigences."
+	"useDocumentationScoreHelpText": "Un deuxième score (le score de documentation) sera disponible pour évaluer les exigences.",
+	"importFolder": "Importer un domaine",
+	"importFolderHelpText": "Importer un domaine à partir d'un ZIP ou fichier JSON"
 }
