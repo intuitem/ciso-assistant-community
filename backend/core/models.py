@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import hashlib
 from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
@@ -1729,6 +1730,12 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         else:
             return f"{size / 1024 / 1024:.1f} MB"
 
+    @property
+    def attachment_hash(self):
+        if not self.attachment:
+            return None
+        return hashlib.sha256(self.attachment.read()).hexdigest()
+
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
@@ -2732,6 +2739,7 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
+    show_documentation_score = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Compliance assessment")
@@ -2808,7 +2816,6 @@ class ComplianceAssessment(Assessment):
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            .exclude(score=None)
             .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
@@ -2820,12 +2827,18 @@ class ComplianceAssessment(Assessment):
         )
         score = 0
         n = 0
+
         for ras in requirement_assessments_scored:
             if not (ig) or (ig & set(ras.requirement.implementation_groups)):
-                score += ras.score
+                score += ras.score or 0
                 n += 1
+                if self.show_documentation_score:
+                    score += ras.documentation_score or 0
+                    n += 1
         if n > 0:
-            return round(score / n, 1)
+            global_score = score / n
+            # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
+            return int(global_score * 10) / 10
         else:
             return -1
 
@@ -3250,14 +3263,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         verbose_name=_("Result"),
         default=Result.NOT_ASSESSED,
     )
+    is_scored = models.BooleanField(
+        default=False,
+        verbose_name=_("Is scored"),
+    )
     score = models.IntegerField(
         blank=True,
         null=True,
         verbose_name=_("Score"),
     )
-    is_scored = models.BooleanField(
-        default=False,
-        verbose_name=_("Is scored"),
+    documentation_score = models.IntegerField(
+        blank=True, null=True, verbose_name=_("Documentation Score")
     )
     evidences = models.ManyToManyField(
         Evidence,

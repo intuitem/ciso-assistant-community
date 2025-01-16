@@ -836,6 +836,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 class EvidenceImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     attachment = serializers.CharField(allow_blank=True)
+    size = serializers.CharField(source="get_size")
 
     class Meta:
         model = Evidence
@@ -846,6 +847,8 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "attachment",
             "created_at",
             "updated_at",
+            "size",
+            "attachment_hash",
         ]
 
 
@@ -907,7 +910,6 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
-    project = serializers.CharField()
     framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)

@@ -72,6 +72,66 @@ from tprm.serializers import EntityImportExportSerializer
 from django.db import models
 from library.serializers import LoadedLibraryImportExportSerializer
 
+from core.models import (
+    Asset,
+    AppliedControl,
+    Evidence,
+    Framework,
+    Project,
+    RiskAssessment,
+    RiskMatrix,
+    RiskScenario,
+    ComplianceAssessment,
+    RequirementAssessment,
+    Vulnerability,
+    Threat,
+    ReferenceControl,
+    LoadedLibrary,
+)
+
+from ebios_rm.models import (
+    EbiosRMStudy,
+    FearedEvent,
+    RoTo,
+    OperationalScenario,
+    Stakeholder,
+    StrategicScenario,
+    AttackPath,
+)
+
+from tprm.models import Entity
+
+from core.serializers import (
+    FolderImportExportSerializer,
+    AssetImportExportSerializer,
+    AppliedControlImportExportSerializer,
+    EvidenceImportExportSerializer,
+    ProjectImportExportSerializer,
+    RiskAssessmentImportExportSerializer,
+    RiskScenarioImportExportSerializer,
+    ComplianceAssessmentImportExportSerializer,
+    RequirementAssessmentImportExportSerializer,
+    VulnerabilityImportExportSerializer,
+    ThreatImportExportSerializer,
+    ReferenceControlImportExportSerializer,
+    FrameworkImportExportSerializer,
+    RiskMatrixImportExportSerializer,
+)
+
+from ebios_rm.serializers import (
+    EbiosRMStudyImportExportSerializer,
+    FearedEventImportExportSerializer,
+    RoToImportExportSerializer,
+    OperationalScenarioImportExportSerializer,
+    StakeholderImportExportSerializer,
+    StrategicScenarioImportExportSerializer,
+    AttackPathImportExportSerializer,
+)
+
+from tprm.serializers import EntityImportExportSerializer
+
+from library.serializers import LoadedLibraryImportExportSerializer
+
 
 def get_all_objects():
     """
@@ -347,8 +407,7 @@ def sort_objects_by_self_reference(
         raise ValidationError("Detected objects unreachable from root")
 
     return [object_map[obj_id] for obj_id in reversed(sorted_ids)]
-
-
+    
 def get_domain_export_objects(domain: Folder):
     folders = (
         Folder.objects.filter(
@@ -357,7 +416,6 @@ def get_domain_export_objects(domain: Folder):
         .filter(content_type=Folder.ContentType.DOMAIN)
         .distinct()
     )
-
     projects = Project.objects.filter(folder__in=folders).distinct()
 
     risk_assessments = RiskAssessment.objects.filter(
@@ -454,7 +512,7 @@ def get_domain_export_objects(domain: Folder):
     ).distinct()
 
     return {
-        "folder": folders,
+        # "folder": folders,
         "loadedlibrary": loaded_libraries,
         "vulnerability": vulnerabilities,
         "framework": frameworks,

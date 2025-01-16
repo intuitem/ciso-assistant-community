@@ -1,4 +1,6 @@
 import csv
+import gzip
+import json
 import mimetypes
 import re
 import gzip
@@ -8,19 +10,17 @@ import uuid
 import zipfile
 from datetime import date, datetime, timedelta
 import time
-from django.views.generic import detail
 import pytz
 from typing import Any, Tuple
 from uuid import UUID
 from itertools import cycle
 import django_filters as df
-from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
+from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 import shutil
 from pathlib import Path
 import humanize
 
-from django.http import StreamingHttpResponse
 from wsgiref.util import FileWrapper
 
 import io
@@ -30,6 +30,7 @@ import random
 from docxtpl import DocxTemplate
 from .generators import gen_audit_context
 
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -44,7 +45,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db import models
 from django.forms import ValidationError
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
@@ -64,7 +65,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
 
 
 from weasyprint import HTML
@@ -474,7 +474,7 @@ class AssetViewSet(BaseModelViewSet):
                         "value": "parent",
                     }
                 )
-        meta = {"display_name": f"Assets Explorer"}
+        meta = {"display_name": "Assets Explorer"}
 
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
@@ -1989,7 +1989,12 @@ class FolderViewSet(BaseModelViewSet):
         instance = self.get_object()
         objects = get_domain_export_objects(instance)
         dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
-        return Response(dump_data)
+        compressed_data = gzip.compress(json.dumps(dump_data).encode("utf-8"))
+        response = HttpResponse(compressed_data, content_type="application/json")
+        response["Content-Disposition"] = (
+            f'attachment; filename="ciso-assistant-domain-{timezone.now()}.json.gz"'
+        )
+        return response
 
     @action(
         detail=False,
@@ -3118,6 +3123,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for requirement_assessment in instance.requirement_assessments.all():
                 requirement_assessment.create_applied_controls_from_suggestions()
 
+    def perform_update(self, serializer):
+        compliance_assessment = serializer.save()
+        if compliance_assessment.show_documentation_score:
+            ra_null_documentation_score = RequirementAssessment.objects.filter(
+                compliance_assessment=compliance_assessment,
+                is_scored=True,
+                documentation_score__isnull=True,
+            )
+            ra_null_documentation_score.update(
+                documentation_score=compliance_assessment.min_score
+            )
+
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
         data = assessment_per_status(request.user, ComplianceAssessment)
@@ -3156,6 +3173,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "scores_definition": get_referential_translation(
                     compliance_assessment.framework, "scores_definition", get_language()
                 ),
+                "show_documentation_score": compliance_assessment.show_documentation_score,
             }
         )
 

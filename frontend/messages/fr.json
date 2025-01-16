@@ -893,7 +893,7 @@
 	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
 	"forgotPassword": "Mot de passe oublié",
 	"ssoSettingsUpdated": "Paramètres SSO mis à jour",
-	"scoreSemiColon": "Score:",
+	"score": "Score",
 	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source.",
 	"priority": "Priorité",
 	"p1": "P1",
@@ -903,7 +903,7 @@
 	"ebiosWs1": "Atelier 1 : Cadrage et Socle de sécurité",
 	"ebiosWs2": "Atelier 2 : Sources de risque",
 	"ebiosWs3": "Atelier 3 : Scénarios stratégiques",
-	"ebiosWs4": "Atelier 4 : Scenarios opérationnels",
+	"ebiosWs4": "Atelier 4 : Scénarios opérationnels",
 	"ebiosWs5": "Atelier 5 : Traitement du risque",
 	"ebiosWs1_1": "Définir le cadre de l’étude",
 	"ebiosWs1_2": "Définir le périmètre métier et technique",
@@ -916,7 +916,7 @@
 	"ebiosWs3_2": "Élaborer les scénarios stratégiques",
 	"ebiosWs3_3": "Définir les mesures de sécurité sur l’écosystème",
 	"ebiosWs4_1": "Elaborer les scénarios opérationnels",
-	"ebiosWs4_2": "Evaluer la vraisemblance des scénarios opérationnel",
+	"ebiosWs4_2": "Evaluer la vraisemblance des scénarios opérationnels",
 	"ebiosWs5_1": "Réaliser une évaluation des risques",
 	"ebiosWs5_2": "Décider de la stratégie de traitement du risque",
 	"ebiosWs5_3": "Définir les mesures de sécurité",
@@ -1083,5 +1083,9 @@
 	"missionsAndOrganizationalServices": "Missions et service de l'organisation",
 	"human": "Humain",
 	"material": "Matériel",
-	"environmental": "Environnemental"
+	"environmental": "Environnemental",
+	"documentationScore": "Score de documentation",
+	"implementationScore": "Score d'implémentation",
+	"useDocumentationScore": "Utiliser le score de documentation",
+	"useDocumentationScoreHelpText": "Un deuxième score (le score de documentation) sera disponible pour évaluer les exigences."
 }
