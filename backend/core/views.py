@@ -32,6 +32,7 @@ from docxtpl import DocxTemplate
 from .generators import gen_audit_context
 
 from django.utils import timezone
+from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -1998,7 +1999,7 @@ class FolderViewSet(BaseModelViewSet):
         compressed_data = gzip.compress(json.dumps(dump_data).encode("utf-8"))
         response = HttpResponse(compressed_data, content_type="application/json")
         response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-domain-{timezone.now()}.json.gz"'
+            f'attachment; filename="ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}.json.gz"'
         )
         return response
 
