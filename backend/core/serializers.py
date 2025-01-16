@@ -837,6 +837,8 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
 
 class EvidenceImportExportSerializer(BaseModelSerializer):
+    size = serializers.CharField(source="get_size")
+
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
@@ -848,6 +850,7 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "attachment",
             "created_at",
             "updated_at",
+            "size",
         ]
 
 
