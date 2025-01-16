@@ -1088,5 +1088,6 @@
 	"implementationScore": "Implementation score",
 	"useDocumentationScore": "Use documentation score",
 	"useDocumentationScoreHelpText": "A second score (the documentation score) will be available for scoring the requirements.",
-	"importFolder": "Import domain"
+	"importFolder": "Import domain",
+	"importFolderHelpText": "Import a domain from a JSON or ZIP file"
 }

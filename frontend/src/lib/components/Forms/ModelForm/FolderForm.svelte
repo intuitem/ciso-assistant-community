@@ -23,5 +23,5 @@
 		bind:cachedValue={formDataCache['name']}
 		data-focusindex="0"
 	/>
-	<FileInput {form} allowPaste={true} field="file" label={m.file()} allowedExtensions={['bak']} />
+	<FileInput {form} allowPaste={true} field="file" label={m.file()} allowedExtensions={['bak']} helpText={m.importFolderHelpText()} />
 {/if}

@@ -65,7 +65,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add-' + data.model.localName)
+			title: safeTranslate('importFolder')
 		};
 		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -157,7 +157,7 @@
 							{/if}
 							{#if URLModel === 'folders'}
 								<button
-									class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+									class="inline-block border-e p-3 btn-mini bg-sky-400 text-white w-12 focus:relative"
 									data-testid="import-button"
 									title={safeTranslate('importFolder')}
 									on:click={modalFolderImportForm}
