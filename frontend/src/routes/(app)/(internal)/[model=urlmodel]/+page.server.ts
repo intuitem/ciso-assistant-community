@@ -8,7 +8,7 @@ import {
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms';
+import { fail, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
@@ -63,13 +63,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	if (model.urlModel === 'folders'){
-		const folderImportForm = await superValidate(
-			zod(modelSchema('folders-import')),
-			{
-				errors: false
-			}
-		);
+	if (model.urlModel === 'folders') {
+		const folderImportForm = await superValidate(zod(modelSchema('folders-import')), {
+			errors: false
+		});
 		model['folderImportForm'] = folderImportForm;
 	}
 
@@ -90,40 +87,32 @@ export const actions: Actions = {
 		return defaultDeleteFormAction({ event, urlModel: event.params.model! });
 	},
 	importFolder: async (event) => {
-		const formData = await event.request.formData();
-		
-		if (!formData) return;
+		const formData = Object.fromEntries(await event.request.formData());
+		if (!formData) return fail(400, { error: 'No form data' });
 
-		const schema = modelSchema('folders-import');
-
-		const form = await superValidate(formData, zod(schema));
-
-		const endpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/duplicate/`;
-
+		const form = await superValidate(formData, zod(modelSchema('folders-import')));
 		if (!form.valid) {
-			console.error(form.errors);
-			return fail(400, { form: form });
+			return fail(400, { form });
 		}
 
-		const requestInitOptions: RequestInit = {
+		const { file } = formData as { file: File };
+
+		const endpoint = `${BASE_API_URL}/folders/import/`;
+
+		const response = await event.fetch(endpoint, {
 			method: 'POST',
-			body: JSON.stringify(form.data)
-		};
-		const response = await event.fetch(endpoint, requestInitOptions);
-
-		if (!response.ok) return handleErrorResponse({ event, response, form });
-
-		const modelVerboseName: string = urlParamModelVerboseName(event.params.model as string);
-		setFlash(
-			{
-				type: 'success',
-				message: m.successfullyDuplicateObject({
-					object: safeTranslate(modelVerboseName).toLowerCase()
-				})
+			headers: {
+				'Content-Disposition': `attachment; filename="${file.name}"`,
+				'Content-Type': file.type,
+				'X-CISOAssistantDomainName': form.data.name
 			},
-			event
-		);
+			body: file
+		});
 
-		return { form };
+		if (!response.ok) {
+			return fail(response.status, { form });
+		}
+
+		return withFiles({ form });
 	}
 };

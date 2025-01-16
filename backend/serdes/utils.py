@@ -407,7 +407,8 @@ def sort_objects_by_self_reference(
         raise ValidationError("Detected objects unreachable from root")
 
     return [object_map[obj_id] for obj_id in reversed(sorted_ids)]
-    
+
+
 def get_domain_export_objects(domain: Folder):
     folders = (
         Folder.objects.filter(

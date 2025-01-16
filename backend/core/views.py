@@ -59,7 +59,12 @@ from rest_framework.decorators import (
     permission_classes,
     renderer_classes,
 )
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import (
+    FileUploadParser,
+    MultiPartParser,
+    JSONParser,
+    FormParser,
+)
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -2000,23 +2005,28 @@ class FolderViewSet(BaseModelViewSet):
         detail=False,
         methods=["post"],
         url_path="import",
-        parser_classes=[FileUploadParser],
+        parser_classes=(FileUploadParser,),
     )
     def import_domain(self, request):
         """Handle file upload and initiate import process."""
         try:
+            domain_name = request.headers.get(
+                "X-CISOAssistantDomainName", str(uuid.uuid4())
+            )
+            if Folder.objects.filter(name=domain_name).exists():
+                domain_name = f"{domain_name}-{str(uuid.uuid4())}"
             parsed_data = self._process_uploaded_file(request.data["file"])
-            result = self._import_objects(parsed_data)
+            result = self._import_objects(parsed_data, domain_name)
             return Response(result, status=status.HTTP_200_OK)
 
-        except KeyError:
-            logger.error("No file provided in the request")
+        except KeyError as e:
+            logger.error("No file provided in the request", exc_info=e)
             return Response(
                 {"errors": ["No file provided"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON format in uploaded file")
+        except json.JSONDecodeError as e:
+            logger.error("Invalid JSON format in uploaded file", exc_info=e)
             return Response(
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -2037,13 +2047,6 @@ class FolderViewSet(BaseModelViewSet):
         GZIP_MAGIC_NUMBER = b"\x1f\x8b"
         data = dump_file.read()
 
-        # Remove multipart headers
-        delimiter = b"\r\n\r\n"
-        parts = data.split(delimiter, maxsplit=1)
-        if len(parts) > 1:
-            data = parts[1]
-            data = data.split(b"\r\n----------------------------")[0]
-
         # Check if the file is GZIP
         is_gzip = data.startswith(GZIP_MAGIC_NUMBER)
         decompressed_data = gzip.decompress(data) if is_gzip else data
@@ -2052,15 +2055,13 @@ class FolderViewSet(BaseModelViewSet):
         if isinstance(decompressed_data, bytes):
             decompressed_data = decompressed_data.decode("utf-8")
 
-        # Validate and extract JSON content
-        if '{"meta"' not in decompressed_data:
-            raise ValidationError("Invalid file format")
-
-        json_start = decompressed_data.index('{"meta"')
-        json_end = decompressed_data.rindex("}") + 1
-        json_content = decompressed_data[json_start:json_end]
-
-        return json.loads(json_content)
+        try:
+            stringified_dump = json.loads(decompressed_data)
+        except json.JSONDecodeError as e:
+            logger.error("Invalid JSON format in uploaded file", exc_info=e)
+            raise
+        else:
+            return stringified_dump
 
     def _get_models_map(self, objects):
         """Build a map of model names to model classes."""
@@ -2076,7 +2077,7 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    def _import_objects(self, parsed_data):
+    def _import_objects(self, parsed_data, domain_name: str):
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases.
@@ -2087,7 +2088,7 @@ class FolderViewSet(BaseModelViewSet):
         link_dump_database_ids = {}
 
         try:
-            objects = parsed_data.get("objects", [])
+            objects = parsed_data.get("objects", None)
             if not objects:
                 return {"message": "No objects to import"}
 
@@ -2099,7 +2100,7 @@ class FolderViewSet(BaseModelViewSet):
 
             # Create base folder and store its ID
             base_folder = Folder.objects.create(
-                name="Star", content_type=Folder.ContentType.DOMAIN
+                name=domain_name, content_type=Folder.ContentType.DOMAIN
             )
             link_dump_database_ids["base_folder"] = base_folder
 
@@ -2258,7 +2259,20 @@ class FolderViewSet(BaseModelViewSet):
                     many_to_many_map_ids=many_to_many_map_ids,
                 )
 
-                # Create object and store ID mapping
+                obj = model(**fields)
+
+                try:
+                    # Run clean to validate unique constraints
+                    obj.clean()
+                except ValidationError as e:
+                    for field, error in e.error_dict.items():
+                        # TODO: differentiate between is_unique_in_scope errors and regular validation errors.
+                        # Also, differentiate between string fields and other types, as appending would not work for other types.
+                        print(f"Error in field {field}: {error}")
+                        fields[field] = f"{fields[field]} {uuid.uuid4()}"
+
+                logger.debug("Creating object", fields=fields)
+
                 obj_created = model.objects.create(**fields)
                 link_dump_database_ids[obj_id] = obj_created.id
 
