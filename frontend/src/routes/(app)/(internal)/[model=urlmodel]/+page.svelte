@@ -57,6 +57,8 @@
 				customNameDescription: true,
 				importFolder: true,
 				formAction: '?/importFolder',
+				enctype: 'multipart/form-data',
+				dataType: 'form'
 			}
 		};
 		let modal: ModalSettings = {

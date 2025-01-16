@@ -61,6 +61,7 @@
 			caching={true}
 			action={formAction}
 			{debug}
+			{...$$restProps}
 		/>
 	</div>
 {/if}
