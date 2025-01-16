@@ -2036,16 +2036,27 @@ class FolderViewSet(BaseModelViewSet):
         """Process the uploaded file and return parsed data."""
         GZIP_MAGIC_NUMBER = b"\x1f\x8b"
         data = dump_file.read()
+
+        # Remove multipart headers
+        delimiter = b"\r\n\r\n"
+        parts = data.split(delimiter, maxsplit=1)
+        if len(parts) > 1:
+            data = parts[1]
+            data = data.split(b"\r\n----------------------------")[0]
+
+        # Check if the file is GZIP
         is_gzip = data.startswith(GZIP_MAGIC_NUMBER)
         decompressed_data = gzip.decompress(data) if is_gzip else data
 
+        # Decode bytes to string if necessary
         if isinstance(decompressed_data, bytes):
             decompressed_data = decompressed_data.decode("utf-8")
 
-        if '{\n  "meta"' not in decompressed_data:
+        # Validate and extract JSON content
+        if '{"meta"' not in decompressed_data:
             raise ValidationError("Invalid file format")
 
-        json_start = decompressed_data.index('{\n  "meta"')
+        json_start = decompressed_data.index('{"meta"')
         json_end = decompressed_data.rindex("}") + 1
         json_content = decompressed_data[json_start:json_end]
 
