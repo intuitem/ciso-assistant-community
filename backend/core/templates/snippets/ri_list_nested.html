@@ -1,5 +1,4 @@
 {% load i18n %}
-{% load static tailwind_tags %}
 
 <style>
     th, td {
@@ -9,34 +8,34 @@
 
 <table class="w-full p-4 leading-normal">
     <thead>
-        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "ID" %}
         </th>
-        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Name" %}
         </th>
-        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Threats" %}
         </th>
-        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Existing controls" %}
         </th>
-        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Current risk level" %}
         </th>
-        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Residual risk level" %}
         </th>
-        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Status" %}
         </th>
-        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Suggested measures" %}
         </th>
     </thead>
     <tbody>
         {% for scenario in scenarios %}
-            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500 text-center">
+            <tr class="">
                 <td class="px-5 py-5 border-b border-gray-200 text-sm">
                     {{ scenario.ref_id }}
                 </td>
