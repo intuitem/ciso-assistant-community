@@ -2314,6 +2314,8 @@ class FolderViewSet(BaseModelViewSet):
                 )
             case "evidence":
                 fields.pop("attachment")
+                fields.pop("size")
+                fields.pop("attachment_hash")
             case "requirementassessment":
                 fields["requirement"] = RequirementNode.objects.get(
                     urn=fields.get("requirement")
