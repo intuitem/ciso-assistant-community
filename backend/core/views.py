@@ -8,13 +8,12 @@ import uuid
 import zipfile
 from datetime import date, datetime, timedelta
 import time
-from django.views.generic import detail
 import pytz
 from typing import Any, Tuple
 from uuid import UUID
 from itertools import cycle
 import django_filters as df
-from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
+from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 import shutil
 from pathlib import Path
@@ -63,7 +62,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
 
 
 from weasyprint import HTML
@@ -459,7 +457,7 @@ class AssetViewSet(BaseModelViewSet):
                         "value": "parent",
                     }
                 )
-        meta = {"display_name": f"Assets Explorer"}
+        meta = {"display_name": "Assets Explorer"}
 
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
