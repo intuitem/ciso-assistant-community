@@ -1,4 +1,6 @@
 import csv
+import gzip
+import json
 import mimetypes
 import re
 import tempfile
@@ -18,7 +20,6 @@ import shutil
 from pathlib import Path
 import humanize
 
-from django.http import StreamingHttpResponse
 from wsgiref.util import FileWrapper
 
 import io
@@ -28,6 +29,7 @@ import random
 from docxtpl import DocxTemplate
 from .generators import gen_audit_context
 
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -41,7 +43,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db import models
 from django.forms import ValidationError
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
@@ -1971,7 +1973,12 @@ class FolderViewSet(BaseModelViewSet):
         instance = self.get_object()
         objects = get_domain_export_objects(instance)
         dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
-        return Response(dump_data)
+        compressed_data = gzip.compress(json.dumps(dump_data).encode("utf-8"))
+        response = Response(compressed_data, content_type="application/json")
+        response["Content-Disposition"] = (
+            f'attachment; filename="ciso-assistant-domain-{timezone.now()}.json.gz"'
+        )
+        return response
 
 
 class UserPreferencesView(APIView):
