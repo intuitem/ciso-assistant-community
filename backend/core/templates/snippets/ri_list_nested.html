@@ -2,7 +2,35 @@
 
 <style>
     th, td {
-        border: 1px solid black;
+        border: 1px solid #e2e8f0;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        color: #475569;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f8fafc; /* for both the scenarios and matrices */
+    }
+
+    .risk-level {
+        padding: 4px 8px;
+        border-radius: 4px;
+        text-align: center;
+    }
+
+    tbody tr {
+        page-break-inside: avoid;
+    }
+
+    .cell-content {
+        max-width: 200px;
+        word-wrap: break-word;
     }
 </style>
 
