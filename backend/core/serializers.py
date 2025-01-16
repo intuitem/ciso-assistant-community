@@ -851,6 +851,7 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "size",
+            "attachment_hash",
         ]
 
 
