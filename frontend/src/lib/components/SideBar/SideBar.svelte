@@ -36,7 +36,7 @@
 			popover: {
 				title: 'Organization',
 				description:
-					'This is where you will define the hierarchy and perimeters of your organization. Click here.'
+					'This is where you will define the hierarchy and perimeters of your organization. Click on it.'
 			}
 		},
 		{
@@ -59,7 +59,7 @@
 			element: '#projects',
 			popover: {
 				description:
-					'Projects are functional perimeters within a domain. You will need at least one. Click here.'
+					'Projects are functional perimeters within a domain. You will need at least one. Click on it.'
 			}
 		},
 		{
@@ -83,7 +83,7 @@
 			element: '#catalog',
 			popover: {
 				description:
-					'You will be able to browse the loaded objects per category and import new ones'
+					'You will be able to browse the loaded objects per category and import new ones. <b>Click on it.</b>'
 			}
 		},
 		{
@@ -92,14 +92,14 @@
 			popover: {
 				title: 'Frameworks',
 				description:
-					'View and manage compliance frameworks. You will need at least one to initiate an audit. Click here.'
+					'View and manage compliance frameworks. You will need at least one to initiate an audit. Click on it.'
 			}
 		},
 		{
 			id: 11,
 			element: '#add-button',
 			popover: {
-				description: 'Import new frameworks here.'
+				description: 'This where you will be able to import new frameworks.'
 			}
 		},
 		{
@@ -108,21 +108,21 @@
 			popover: {
 				title: 'Risk Matrices',
 				description:
-					'View and manage risk matrices. You will need at least one to initiate a risk assessment. Click here.'
+					'View and manage risk matrices. You will need at least one to initiate a risk assessment. Click on it.'
 			}
 		},
 		{
 			id: 11,
 			element: '#add-button',
 			popover: {
-				description: 'Import new matrices here.'
+				description: 'This is where you will be able to import new matrices.'
 			}
 		},
 		{
 			id: 17,
 			element: '#compliance',
 			popover: {
-				description: 'This where will be able to manage your compliance activities. Click here.'
+				description: 'This where will be able to manage your compliance activities. Click on it.'
 			}
 		},
 		{
@@ -138,7 +138,7 @@
 			element: '#risk',
 			popover: {
 				description:
-					'This is where you will be able to manage your risk analysis and registry. Click here.'
+					'This is where you will be able to manage your risk analysis and registry. Click on it.'
 			}
 		},
 		{
