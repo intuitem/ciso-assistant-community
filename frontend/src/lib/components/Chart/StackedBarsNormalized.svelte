@@ -36,6 +36,24 @@
 			'not applicable'
 		];
 
+		// Map the internal names to translated labels
+		const getSeriesLabel = (name: string) => {
+			switch (name) {
+				case 'not assessed':
+					return m.notAssessed();
+				case 'partially compliant':
+					return m.partiallyCompliant();
+				case 'non compliant':
+					return m.nonCompliant();
+				case 'compliant':
+					return m.compliant();
+				case 'not applicable':
+					return m.notApplicable();
+				default:
+					return name;
+			}
+		};
+
 		const series = seriesNames.map((name, categoryIdx) => {
 			return {
 				name,
@@ -59,7 +77,8 @@
 			color: ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
 			//color: ['#D2D5DB', '#FDE048', '#F87171', '#86EFAC', '#000'],
 			legend: {
-				selectedMode: false
+				selectedMode: false,
+				formatter: (name) => getSeriesLabel(name)
 			},
 			grid,
 			xAxis: {
