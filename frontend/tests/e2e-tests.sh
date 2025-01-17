@@ -80,15 +80,6 @@ if [[ "$(id -u "$(whoami)")" -eq 0 ]]; then
   echo "Running this script with a root account is highly discouraged as it can cause bugs with playwright."
 fi
 
-if [[ -z "$POETRY_ACTIVE" ]]; then
-	echo "This script must be executed in a poetry shell!"
-	echo "Poetry have to be installed as described in the README.md file."
-	echo "[1] Navigate to the backend directory at the root of the repository."
-	echo "[2] Use the 'poetry shell' command to enter in the poetry shell."
-	echo "[3] Go back and re-execute this script with the shell."
-	exit 1
-fi
-
 if python3 -c "
 import socket
 try :
@@ -195,23 +186,23 @@ export EMAIL_PORT=$MAILER_SMTP_SERVER_PORT
 
 cd $APP_DIR/backend/
 if [[ -z $KEEP_DATABASE_SNAPSHOT ]]; then
-	python3 manage.py makemigrations
-	python3 manage.py migrate
+	poetry run python3 manage.py makemigrations
+	poetry run python3 manage.py migrate
 elif [[ ! -f "$DB_DIR/$DB_INIT_NAME" ]]; then
-		python3 manage.py makemigrations
-		python3 manage.py migrate
+		poetry run python3 manage.py makemigrations
+		poetry run python3 manage.py migrate
 		cp "$DB_DIR/$DB_NAME" "$DB_DIR/$DB_INIT_NAME"
 else
 	# Copying the initial database instead of applying the migrations saves a lot of time
 	cp "$DB_DIR/$DB_INIT_NAME" "$DB_DIR/$DB_NAME"
 fi
 
-python3 manage.py createsuperuser --noinput
+poetry run python3 manage.py createsuperuser --noinput
 if [[ -n "$STORE_BACKEND_OUTPUT"  ]]; then
-	nohup python3 manage.py runserver $BACKEND_PORT >$APP_DIR/frontend/tests/utils/.testbackendoutput.out 2>&1 &
+	nohup poetry run python3 manage.py runserver $BACKEND_PORT >$APP_DIR/frontend/tests/utils/.testbackendoutput.out 2>&1 &
 	echo "You can view the backend server output at $APP_DIR/frontend/tests/utils/.testbackendoutput.out"
 else
-	nohup python3 manage.py runserver $BACKEND_PORT >/dev/null 2>&1 &
+	nohup poetry run python3 manage.py runserver $BACKEND_PORT >/dev/null 2>&1 &
 fi
 BACKEND_PID=$!
 echo "Test backend server started on port $BACKEND_PORT (PID: $BACKEND_PID)"
