@@ -19,141 +19,169 @@
 			id: 1,
 			element: 'none',
 			popover: {
-				title: m.gtSidebarStep01Msg(),
-				description: m.gtSidebarStep01Desc()
+				title: 'Welcome!',
+				description: "Let's take a tour of the main features to get you started."
 			}
 		},
 		{
 			id: 2,
-			element: '#organization',
+			element: '#sidebar-more-btn',
 			popover: {
-				title: m.gtSidebarStepClickHere()
+				title: 'Guided Tour Access',
+				description: 'You can always restart this tour by clicking the help button here.'
 			}
 		},
 		{
 			id: 3,
-			element: '#domains',
+			element: '#organization',
 			popover: {
-				title: m.gtSidebarStepClickHere(),
-				description: m.gtSidebarStep03Desc()
+				title: 'Organization',
+				description:
+					'This is where you will define the hierarchy and perimeters of your organization. Click here'
 			}
 		},
 		{
 			id: 4,
-			element: '#add-button',
+			element: '#domains',
 			popover: {
-				description: m.gtSidebarStep04Desc()
+				title: 'Domains',
+				description:
+					'Domains allow you to isolate your objects using the associated roles. Click here'
 			}
 		},
 		{
 			id: 5,
-			element: '#catalog',
+			element: '#add-button',
 			popover: {
-				title: m.gtSidebarStepClickHere(),
-				description: m.gtSidebarStep05Desc()
+				description: 'This where you will be able to create a new domain.'
 			}
 		},
 		{
 			id: 6,
-			element: '#frameworks',
+			element: '#projects',
 			popover: {
-				title: m.gtSidebarStepClickHere()
+				title: 'Projects',
+				description: 'Projects are functional perimeters within a domain. Click here'
 			}
 		},
 		{
 			id: 7,
 			element: '#add-button',
 			popover: {
-				title: m.gtSidebarStepClickHere(),
-				description: m.gtSidebarStep07Desc()
+				description: 'This is where you will be able to create a project.'
 			}
 		},
 		{
 			id: 8,
-			element: '#search-input',
+			element: '#catalog-step',
 			popover: {
-				title: m.gtSidebarStep08Title(),
-				description: m.gtSidebarStep08Desc()
+				title: 'Catalog Overview',
+				description:
+					"Let's explore the catalog features. This is where you will be able to import frameworks, threats catalog, matrices and so much more"
 			}
 		},
 		{
 			id: 9,
-			element: '#tablerow-import-button',
+			element: '#catalog',
 			popover: {
-				description: m.gtSidebarStep09Desc()
+				title: 'Catalog',
+				description: 'Browse and manage your catalog items.'
 			}
 		},
 		{
 			id: 10,
-			element: '#riskMatrices',
+			element: '#frameworks',
 			popover: {
-				title: m.gtSidebarStepClickHere(),
-				description: m.gtSidebarStep10Desc()
+				title: 'Frameworks',
+				description:
+					'View and manage compliance frameworks. You will need at least one to initiate an audit'
 			}
 		},
 		{
 			id: 11,
 			element: '#add-button',
 			popover: {
-				title: m.gtSidebarStep11Title(),
-				description: m.gtSidebarStep11Desc()
-			}
-		},
-		{
-			id: 12,
-			element: '#filters',
-			popover: {
-				description: m.gtSidebarStep12Desc()
-			}
-		},
-		{
-			id: 13,
-			element: '#tablerow-import-button',
-			popover: {
-				description: m.gtSidebarStep13Desc()
+				title: 'Import Framework',
+				description: 'Import existing frameworks here.'
 			}
 		},
 		{
 			id: 14,
-			element: '#compliance',
+			element: '#riskMatrices',
 			popover: {
-				title: m.gtSidebarStepClickHere()
+				title: 'Risk Matrices',
+				description:
+					'View and manage risk matrices. You will need at least one to initiate a risk assessment'
 			}
 		},
 		{
-			id: 15,
-			element: '#complianceAssessments',
+			id: 11,
+			element: '#add-button',
 			popover: {
-				description: m.gtSidebarStep15Desc()
-			}
-		},
-		{
-			id: 16,
-			element: '#risk',
-			popover: {
-				title: m.gtSidebarStepClickHere()
+				title: 'Import Matrix',
+				description: 'Import existing matrices here.'
 			}
 		},
 		{
 			id: 17,
-			element: '#riskAssessments',
+			element: '#compliance',
 			popover: {
-				description: m.gtSidebarStep17Desc()
+				title: 'Compliance',
+				description: 'Manage compliance requirements.'
 			}
 		},
 		{
 			id: 18,
-			element: '#sidebar-more-btn',
+			element: '#complianceAssessments',
 			popover: {
-				description: m.gtSidebarStep18Desc()
+				title: 'Audit',
+				description: 'Access audit features and reports.'
 			}
 		},
 		{
 			id: 19,
-			element: 'none',
+			element: '#risk',
 			popover: {
-				title: m.gtSidebarStep19Title(),
-				description: m.gtSidebarStep19Desc()
+				title: 'Risk Management',
+				description: 'Access risk management features.'
+			}
+		},
+		{
+			id: 20,
+			element: '#riskAssessments',
+			popover: {
+				title: 'Risk Assessment',
+				description: 'Perform and manage risk assessments.'
+			}
+		},
+		{
+			id: 20,
+			element: '#overview',
+			popover: {
+				title: 'Analytics',
+				description: 'Perform and manage risk assessments.'
+			}
+		},
+		{
+			id: 21,
+			element: '#analytics',
+			popover: {
+				description: 'View detailed analytics and reports.'
+			}
+		},
+		{
+			id: 22,
+			element: '#myAssignments',
+			popover: {
+				description: 'View and manage your assigned tasks.'
+			}
+		},
+		{
+			id: 23,
+			element: '#sidebar-more-btn',
+			popover: {
+				title: 'Help & Tour',
+				description: 'Remember, you can always restart the tour from here!'
 			}
 		}
 	];
