@@ -2011,62 +2011,90 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
-        # include_attachments = bool(
-        #     request.query_params.get("include_attachments", False)
-        # )
-
         include_attachments = True
         instance = self.get_object()
 
         logger.info(
-            "Domain export started",
-            domain=instance,
+            "Starting domain export",
+            domain_id=instance.id,
+            domain_name=instance.name,
             include_attachments=include_attachments,
+            user=request.user.username,
         )
 
         objects = get_domain_export_objects(instance)
 
-        dumpfile_name = (
-            f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
+        logger.debug(
+            "Retrieved domain objects for export",
+            object_types=list(objects.keys()),
+            total_objects=sum(len(queryset) for queryset in objects.values()),
+            objects_per_model={
+                model: len(queryset) for model, queryset in objects.items()
+            },
         )
-        zip_name = f"{dumpfile_name}.zip"
 
-        with zipfile.ZipFile(zip_name, "w") as zipf:
+        # Create in-memory zip file
+        zip_buffer = io.BytesIO()
+
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
             if include_attachments:
                 evidences = objects.get("evidence", Evidence.objects.none()).filter(
                     attachment__isnull=False
                 )
                 logger.info(
-                    "Exporting attachments",
-                    count=evidences.count(),
-                    evidences=evidences,
+                    "Processing evidence attachments",
+                    total_evidences=evidences.count(),
+                    domain_id=instance.id,
                 )
+
                 for evidence in evidences:
-                    if evidence.attachment:
-                        with tempfile.NamedTemporaryFile(delete=True) as tmp:
-                            # Download the attachment to the temporary file
-                            if default_storage.exists(evidence.attachment.name):
-                                file = default_storage.open(
-                                    evidence.attachment.name)
-                                tmp.write(file.read())
-                                # tmp.flush()
-                                zipf.write(
-                                    tmp.name,
-                                    os.path.join(
-                                        "attachments",
-                                        os.path.basename(
-                                            evidence.attachment.name),
-                                    ),
-                                )
+                    if evidence.attachment and default_storage.exists(
+                        evidence.attachment.name
+                    ):
+                        # Read file directly into memory
+                        with default_storage.open(evidence.attachment.name) as file:
+                            file_content = file.read()
+                            # Write the file content directly to the zip
+                            zipf.writestr(
+                                os.path.join(
+                                    "attachments",
+                                    os.path.basename(evidence.attachment.name),
+                                ),
+                                file_content,
+                            )
+
+            # Add the JSON dump to the zip file
+            dumpfile_name = (
+                f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
+            )
             dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
+
+            logger.debug(
+                "Adding JSON dump to zip",
+                json_size=len(json.dumps(dump_data).encode("utf-8")),
+                filename=f"{dumpfile_name}.json",
+            )
+
             zipf.writestr(
                 f"{dumpfile_name}.json", json.dumps(dump_data).encode("utf-8")
             )
 
-        response = FileResponse(open(zip_name, "rb"), as_attachment=True)
-        response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
+        # Reset buffer position to the start
+        zip_buffer.seek(0)
+        final_size = len(zip_buffer.getvalue())
 
-        os.remove(zip_name)
+        # Create the response with the in-memory zip file
+        response = HttpResponse(zip_buffer.getvalue(),
+                                content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="{dumpfile_name}.zip"'
+
+        logger.info(
+            "Domain export completed successfully",
+            domain_id=instance.id,
+            domain_name=instance.name,
+            zip_size=final_size,
+            filename=f"{dumpfile_name}.zip",
+        )
 
         return response
 
