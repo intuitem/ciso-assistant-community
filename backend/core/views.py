@@ -2015,8 +2015,6 @@ class FolderViewSet(BaseModelViewSet):
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
-            if Folder.objects.filter(name=domain_name).exists():
-                domain_name = f"{domain_name}-{str(uuid.uuid4())}"
             parsed_data = self._process_uploaded_file(request.data["file"])
             result = self._import_objects(parsed_data, domain_name)
             return Response(result, status=status.HTTP_200_OK)
@@ -2031,19 +2029,6 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Invalid JSON format in uploaded file", exc_info=e)
             return Response(
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        except ValidationError as e:
-            logger.error(f"Validation errors during import: {str(e)}")
-            return Response(
-                "Validation errors during import", status=status.HTTP_400_BAD_REQUEST
-            )
-
-        except Exception as e:
-            logger.exception(f"Unexpected error during import: {str(e)}")
-            return Response(
-                {"errors": ["An unexpected error occurred"]},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     def _process_uploaded_file(self, dump_file):
@@ -2145,7 +2130,7 @@ class FolderViewSet(BaseModelViewSet):
 
         except Exception as e:
             logger.exception(f"Failed to import objects: {str(e)}")
-            raise ValidationError({"errors": [str(e)]})
+            raise ValidationError(e)
 
     def _validate_model_objects(
         self, model, objects, validation_errors, required_libraries

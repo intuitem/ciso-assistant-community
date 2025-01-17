@@ -1,4 +1,4 @@
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
+import { defaultDeleteFormAction, defaultWriteFormAction, handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import {
 	getModelInfo,
@@ -109,9 +109,7 @@ export const actions: Actions = {
 			body: file
 		});
 
-		if (!response.ok) {
-			return fail(response.status, { form });
-		}
+		if (!response.ok) return await handleErrorResponse({ event, response: response, form });
 
 		return withFiles({ form });
 	}
