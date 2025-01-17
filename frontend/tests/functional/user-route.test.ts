@@ -55,7 +55,6 @@ test('user usual routine actions are working correctly', async ({
 		await pages.assetsPage.createItem({
 			name: vars.assetName,
 			description: vars.description,
-			business_value: 'Test value',
 			folder: vars.folderName,
 			type: 'Primary'
 		});
