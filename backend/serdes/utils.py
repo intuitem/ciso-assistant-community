@@ -132,6 +132,10 @@ from tprm.serializers import EntityImportExportSerializer
 
 from library.serializers import LoadedLibraryImportExportSerializer
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 
 def get_all_objects():
     """
@@ -244,8 +248,10 @@ def get_model_dependencies(
     """
     dependencies = []
 
+    logger.debug("Getting model dependencies", model=model)
     for field in model._meta.get_fields():
         if not field.is_relation or field.related_model not in all_models:
+            logger.debug("Skipping field", field=field)
             continue
 
         # Check if the relationship is required
@@ -271,13 +277,20 @@ def build_dependency_graph(
     Returns:
         Dictionary mapping models to their dependencies
     """
-    models_set = set(models)
+    models_set = set(models + [Folder])
     graph = defaultdict(list)
+
+    logger.debug("Building dependency graph", models=models)
 
     for model in models:
         dependencies = get_model_dependencies(model, models_set)
+
+        logger.debug("Model dependencies", model=model, dependencies=dependencies)
+
         if dependencies:
             graph[model].extend(dependencies)
+
+    logger.debug("Dependency graph", graph=graph)
     return graph
 
 

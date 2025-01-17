@@ -15,7 +15,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 
 	return new Response(await res.blob(), {
 		headers: {
-			'Content-Type': 'application/gzip',
+			'Content-Type': 'application/zip',
 			'Content-Disposition': `attachment; filename="${fileName}"`
 		}
 	});

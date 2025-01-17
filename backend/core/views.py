@@ -2055,9 +2055,7 @@ class FolderViewSet(BaseModelViewSet):
                 filename=f"{dumpfile_name}.json",
             )
 
-            zipf.writestr(
-                f"{dumpfile_name}.json", json.dumps(dump_data).encode("utf-8")
-            )
+            zipf.writestr("data.json", json.dumps(dump_data).encode("utf-8"))
 
         # Reset buffer position to the start
         zip_buffer.seek(0)
@@ -2089,8 +2087,10 @@ class FolderViewSet(BaseModelViewSet):
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
-            parsed_data = self._process_uploaded_file(request.data["file"])
-            result = self._import_objects(parsed_data, domain_name)
+            parsed_data, attachments_dir = self._process_uploaded_file(
+                request.data["file"]
+            )
+            result = self._import_objects(parsed_data, domain_name, attachments_dir)
             return Response(result, status=status.HTTP_200_OK)
 
         except KeyError as e:
@@ -2105,22 +2105,51 @@ class FolderViewSet(BaseModelViewSet):
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
-    def _process_uploaded_file(self, dump_file):
+    def _process_uploaded_file(self, dump_file: str | Path) -> Tuple[Any, Path | None]:
         """Process the uploaded file and return parsed data."""
-        GZIP_MAGIC_NUMBER = b"\x1f\x8b"
-        data = dump_file.read()
+        if not zipfile.is_zipfile(dump_file):
+            logger.error("Invalid ZIP file format")
+            raise ValidationError({"file": "invalidZipFileFormat"})
 
-        # Check if the file is GZIP
-        is_gzip = data.startswith(GZIP_MAGIC_NUMBER)
-        decompressed_data = gzip.decompress(data) if is_gzip else data
+        attachments_import_path = None
+
+        with zipfile.ZipFile(dump_file, mode="r") as zipf:
+            if "data.json" not in zipf.namelist():
+                logger.error("No data.json file found in uploaded file")
+                raise ValidationError({"file": "noDataJsonFileFound"})
+
+            infolist = zipf.infolist()
+
+            directories = list(set([Path(f.filename).parent.name for f in infolist]))
+            if "attachments" in directories:
+                attachments = {
+                    f for f in infolist if Path(f.filename).parent.name == "attachments"
+                }
+                logger.info(
+                    "Attachments found in uploaded file",
+                    attachments_count=len(attachments),
+                )
+                attachments_import_path = Path(settings.LOCAL_STORAGE_DIRECTORY) / str(
+                    uuid.uuid4()
+                )
+                for attachment in attachments:
+                    try:
+                        # NOTE: ZipFile.extract() keeps the directory structure,
+                        # therefore attachments located under the "attachments" directory
+                        # will be extracted to settings.LOCAL_STORAGE_DIRECTORY/attachments_import_path/attachments
+                        zipf.extract(attachment, path=attachments_import_path)
+                    except Exception as e:
+                        logger.error("Error extracting attachment", exc_info=e)
+
+            decompressed_data = zipf.read("data.json")
 
         # Decode bytes to string if necessary
         if isinstance(decompressed_data, bytes):
             decompressed_data = decompressed_data.decode("utf-8")
 
         try:
-            stringified_dump = json.loads(decompressed_data)
-            import_version = stringified_dump["meta"]["media_version"]
+            json_dump = json.loads(decompressed_data)
+            import_version = json_dump["meta"]["media_version"]
         except json.JSONDecodeError as e:
             logger.error("Invalid JSON format in uploaded file", exc_info=e)
             raise
@@ -2131,7 +2160,8 @@ class FolderViewSet(BaseModelViewSet):
             raise ValidationError(
                 {"file": "importVersionNotCompatibleWithCurrentVersion"}
             )
-        return stringified_dump
+
+        return json_dump, attachments_import_path
 
     def _get_models_map(self, objects):
         """Build a map of model names to model classes."""
@@ -2140,14 +2170,21 @@ class FolderViewSet(BaseModelViewSet):
 
     def _resolve_dependencies(self, all_models):
         """Resolve model dependencies and detect cycles."""
+        logger.debug("Resolving model dependencies", all_models=all_models)
+
         graph = build_dependency_graph(all_models)
+
+        logger.debug("Dependency graph", graph=graph)
+
         try:
             return topological_sort(graph)
         except ValueError as e:
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    def _import_objects(self, parsed_data, domain_name: str):
+    def _import_objects(
+        self, parsed_data: dict, domain_name: str, attachments_dir: Path | None
+    ):
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
@@ -2171,6 +2208,10 @@ class FolderViewSet(BaseModelViewSet):
 
             # Validation phase (outside transaction since it doesn't modify database)
             creation_order = self._resolve_dependencies(list(models_map.values()))
+
+            logger.debug("Resolved creation order", creation_order=creation_order)
+
+            logger.debug("Starting objects validation", objects=objects)
 
             for model in creation_order:
                 self._validate_model_objects(
@@ -2197,12 +2238,19 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 link_dump_database_ids["base_folder"] = base_folder
 
+                logger.info(
+                    "Starting objects creation",
+                    objects_count=len(objects),
+                    attachments_dir=attachments_dir,
+                    creation_order=creation_order,
+                )
                 # Create all objects within the transaction
                 for model in creation_order:
                     self._create_model_objects(
                         model=model,
                         objects=objects,
                         link_dump_database_ids=link_dump_database_ids,
+                        attachments_dir=attachments_dir,
                     )
 
             return {"message": "Import successful"}
@@ -2274,10 +2322,16 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
 
-    def _create_model_objects(self, model, objects, link_dump_database_ids):
+    def _create_model_objects(
+        self, model, objects, link_dump_database_ids, attachments_dir: Path | None
+    ):
         """Create all objects for a model after validation."""
+        logger.debug("Creating objects for model", model=model)
+
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
         model_objects = [obj for obj in objects if obj["model"] == model_name]
+
+        logger.debug("Model objects", model=model, count=len(model_objects))
 
         if not model_objects:
             return
@@ -2299,10 +2353,15 @@ class FolderViewSet(BaseModelViewSet):
         for i in range(0, len(model_objects), self.batch_size):
             batch = model_objects[i : i + self.batch_size]
             self._create_batch(
-                model=model, batch=batch, link_dump_database_ids=link_dump_database_ids
+                model=model,
+                batch=batch,
+                link_dump_database_ids=link_dump_database_ids,
+                attachments_dir=attachments_dir,
             )
 
-    def _create_batch(self, model, batch, link_dump_database_ids):
+    def _create_batch(
+        self, model, batch, link_dump_database_ids, attachments_dir: Path | None
+    ):
         """Create a batch of objects with proper relationship handling."""
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
@@ -2328,6 +2387,7 @@ class FolderViewSet(BaseModelViewSet):
                         fields=fields,
                         link_dump_database_ids=link_dump_database_ids,
                         many_to_many_map_ids=many_to_many_map_ids,
+                        attachments_dir=attachments_dir,
                     )
 
                     obj = model(**fields)
@@ -2360,7 +2420,12 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
     def _process_model_relationships(
-        self, model, fields, link_dump_database_ids, many_to_many_map_ids
+        self,
+        model,
+        fields,
+        link_dump_database_ids,
+        many_to_many_map_ids,
+        attachments_dir: Path | None,
     ):
         """Process model-specific relationships."""
 
@@ -2410,7 +2475,14 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "evidence":
-                fields.pop("attachment", None)
+                attachment_filename = fields.pop("attachment", None)
+                if attachments_dir and attachment_filename:
+                    # NOTE: Added 'attachments' to the path to match the extraction path,
+                    # as ZipFile.extract() keeps the directory structure.
+                    # Not the cleanest solution, but it works.
+                    fields["attachment"] = str(
+                        attachments_dir / "attachments" / attachment_filename
+                    )
                 fields.pop("size", None)
                 fields.pop("attachment_hash", None)
 

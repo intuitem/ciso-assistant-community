@@ -28,7 +28,7 @@
 		allowPaste={true}
 		field="file"
 		label={m.file()}
-		allowedExtensions={['bak']}
+		allowedExtensions={['bak', 'zip']}
 		helpText={m.importFolderHelpText()}
 	/>
 {/if}
