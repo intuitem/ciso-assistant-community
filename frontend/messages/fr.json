@@ -1090,5 +1090,8 @@
 	"useDocumentationScoreHelpText": "Un deuxième score (le score de documentation) sera disponible pour évaluer les exigences.",
 	"importFolder": "Importer un domaine",
 	"importFolderHelpText": "Importer un domaine à partir d'un ZIP ou fichier JSON",
-	"importVersionNotCompatibleWithCurrentVersion": "La version de l'import n'est pas compatible avec la version actuelle de l'application."
+	"importVersionNotCompatibleWithCurrentVersion": "La version de l'import n'est pas compatible avec la version actuelle de l'application.",
+	"errorOccuredDuringImport": "Une erreur s'est produite lors de l'import",
+	"successfullyImportedFolder": "Domaine importé avec succès",
+	"missingLibrariesInImport": "Certaines bibliothèques sont manquantes, voir la liste ci-dessus"
 }

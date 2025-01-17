@@ -1,4 +1,4 @@
-import { defaultDeleteFormAction, defaultWriteFormAction, handleErrorResponse } from '$lib/utils/actions';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import {
 	getModelInfo,
@@ -8,10 +8,13 @@ import {
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
-import { fail, superValidate, withFiles } from 'sveltekit-superforms';
+import { fail, superValidate, withFiles, setError } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
+import { setFlash } from 'sveltekit-flash-message/server';
+import * as m from '$paraglide/messages';
+import { safeTranslate } from '$lib/utils/i18n';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
@@ -108,8 +111,34 @@ export const actions: Actions = {
 			},
 			body: file
 		});
+		const res = await response.json();
 
-		if (!response.ok) return await handleErrorResponse({ event, response: response, form });
+		if (!response.ok && res.missing_libraries) {
+			setError(form, 'file', m.missingLibrariesInImport());
+			for (const value of res.missing_libraries) {
+				setError(form, 'non_field_errors', value);
+			}
+			return fail(400, { form });
+		}
+
+		if (!response.ok) {
+			if (res.error) {
+				setFlash({ type: 'error', message: safeTranslate(res.error) }, event);
+				return { form };
+			}
+			Object.entries(res).forEach(([key, value]) => {
+				setError(form, key, safeTranslate(value));
+			});
+			return fail(400, { form });
+		}
+
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyImportedFolder()
+			},
+			event
+		);
 
 		return withFiles({ form });
 	}
