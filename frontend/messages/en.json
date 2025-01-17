@@ -893,7 +893,7 @@
 	"youCanSetPasswordHere": "You can set your password here",
 	"forgotPassword": "Forgot password",
 	"ssoSettingsUpdated": "SSO settings updated",
-	"scoreSemiColon": "Score:",
+	"score": "Score",
 	"mappingInferenceHelpText": "These variables are fixed and will not change depending on the source.",
 	"priority": "Priority",
 	"p1": "P1",
@@ -1104,5 +1104,9 @@
 	"gtSidebarStep17Desc": "And this is where you will be able to perform your risk assessments",
 	"gtSidebarStep18Desc": "You can retrigger the guided tour and adjust your preferences here.",
 	"gtSidebarStep19Title": "All set",
-	"gtSidebarStep19Desc": "You are good to go. Feel free to reach out the Discord server to interact with the growing community!"
+	"gtSidebarStep19Desc": "You are good to go. Feel free to reach out the Discord server to interact with the growing community!",
+	"documentationScore": "Documentation score",
+	"implementationScore": "Implementation score",
+	"useDocumentationScore": "Use documentation score",
+	"useDocumentationScoreHelpText": "A second score (the documentation score) will be available for scoring the requirements."
 }

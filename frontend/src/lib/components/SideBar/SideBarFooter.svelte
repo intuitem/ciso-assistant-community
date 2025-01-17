@@ -50,12 +50,11 @@
 	};
 
 	let value = languageTag();
-
 	async function handleLocaleChange(event: Event) {
 		event.preventDefault();
 		value = event?.target?.value;
 		setLanguageTag(value);
-		fetch('/api/user-preferences', {
+		fetch('/fe-api/user-preferences', {
 			method: 'PATCH',
 			body: JSON.stringify({
 				lang: value

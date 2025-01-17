@@ -176,7 +176,6 @@ export const ReferenceControlSchema = z.object({
 
 export const AssetSchema = z.object({
 	...NameDescriptionMixin,
-	business_value: z.string().optional(),
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional(),
@@ -219,8 +218,9 @@ export const RequirementAssessmentSchema = z.object({
 	answer: jsonSchema,
 	status: z.string(),
 	result: z.string(),
-	score: z.number().optional().nullable(),
 	is_scored: z.boolean().optional(),
+	score: z.number().optional().nullable(),
+	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
 	requirement: z.string(),
@@ -264,6 +264,7 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
+	show_documentation_score: z.boolean().optional().default(false),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
