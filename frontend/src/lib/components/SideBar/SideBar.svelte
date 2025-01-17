@@ -27,7 +27,6 @@
 			id: 2,
 			element: '#sidebar-more-btn',
 			popover: {
-				title: 'Guided Tour Access',
 				description: 'You can always restart this tour by clicking the help button here.'
 			}
 		},
@@ -37,16 +36,15 @@
 			popover: {
 				title: 'Organization',
 				description:
-					'This is where you will define the hierarchy and perimeters of your organization. Click here'
+					'This is where you will define the hierarchy and perimeters of your organization. Click here.'
 			}
 		},
 		{
 			id: 4,
 			element: '#domains',
 			popover: {
-				title: 'Domains',
 				description:
-					'Domains allow you to isolate your objects using the associated roles. Click here'
+					'Domains allow you to isolate your objects using the associated roles. You will need at least one. Click here.'
 			}
 		},
 		{
@@ -60,8 +58,8 @@
 			id: 6,
 			element: '#projects',
 			popover: {
-				title: 'Projects',
-				description: 'Projects are functional perimeters within a domain. Click here'
+				description:
+					'Projects are functional perimeters within a domain. You will need at least one. Click here.'
 			}
 		},
 		{
@@ -77,15 +75,15 @@
 			popover: {
 				title: 'Catalog Overview',
 				description:
-					"Let's explore the catalog features. This is where you will be able to import frameworks, threats catalog, matrices and so much more"
+					'The catalog is where you will be able to import frameworks, threats, matrices and other predifined objects'
 			}
 		},
 		{
 			id: 9,
 			element: '#catalog',
 			popover: {
-				title: 'Catalog',
-				description: 'Browse and manage your catalog items.'
+				description:
+					'You will be able to browse the loaded objects per category and import new ones'
 			}
 		},
 		{
@@ -94,15 +92,14 @@
 			popover: {
 				title: 'Frameworks',
 				description:
-					'View and manage compliance frameworks. You will need at least one to initiate an audit'
+					'View and manage compliance frameworks. You will need at least one to initiate an audit. Click here.'
 			}
 		},
 		{
 			id: 11,
 			element: '#add-button',
 			popover: {
-				title: 'Import Framework',
-				description: 'Import existing frameworks here.'
+				description: 'Import new frameworks here.'
 			}
 		},
 		{
@@ -111,39 +108,37 @@
 			popover: {
 				title: 'Risk Matrices',
 				description:
-					'View and manage risk matrices. You will need at least one to initiate a risk assessment'
+					'View and manage risk matrices. You will need at least one to initiate a risk assessment. Click here.'
 			}
 		},
 		{
 			id: 11,
 			element: '#add-button',
 			popover: {
-				title: 'Import Matrix',
-				description: 'Import existing matrices here.'
+				description: 'Import new matrices here.'
 			}
 		},
 		{
 			id: 17,
 			element: '#compliance',
 			popover: {
-				title: 'Compliance',
-				description: 'Manage compliance requirements.'
+				description: 'This where will be able to manage your compliance activities. Click here.'
 			}
 		},
 		{
 			id: 18,
 			element: '#complianceAssessments',
 			popover: {
-				title: 'Audit',
-				description: 'Access audit features and reports.'
+				title: 'Audits',
+				description: 'This is where you will be able to drive and track your audits and baselines'
 			}
 		},
 		{
 			id: 19,
 			element: '#risk',
 			popover: {
-				title: 'Risk Management',
-				description: 'Access risk management features.'
+				description:
+					'This is where you will be able to manage your risk analysis and registry. Click here.'
 			}
 		},
 		{
@@ -151,7 +146,7 @@
 			element: '#riskAssessments',
 			popover: {
 				title: 'Risk Assessment',
-				description: 'Perform and manage risk assessments.'
+				description: 'Group and manage your analysis through risk assessments.'
 			}
 		},
 		{
@@ -159,21 +154,21 @@
 			element: '#overview',
 			popover: {
 				title: 'Analytics',
-				description: 'Perform and manage risk assessments.'
+				description: 'The overview section cover your main dashboards and analytics.'
 			}
 		},
 		{
 			id: 21,
 			element: '#analytics',
 			popover: {
-				description: 'View detailed analytics and reports.'
+				description: 'View the aggregated analytics and reports here.'
 			}
 		},
 		{
 			id: 22,
 			element: '#myAssignments',
 			popover: {
-				description: 'View and manage your assigned tasks.'
+				description: 'or track your indivdual assignements and tasks here.'
 			}
 		},
 		{
