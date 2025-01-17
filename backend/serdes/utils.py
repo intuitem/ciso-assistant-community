@@ -251,7 +251,6 @@ def get_model_dependencies(
     logger.debug("Getting model dependencies", model=model)
     for field in model._meta.get_fields():
         if not field.is_relation or field.related_model not in all_models:
-            logger.debug("Skipping field", field=field)
             continue
 
         # Check if the relationship is required
@@ -501,15 +500,23 @@ def get_domain_export_objects(domain: Folder):
         | Q(vulnerabilities__in=vulnerabilities)
     ).distinct()
 
-    reference_controls = ReferenceControl.objects.filter(
-        Q(folder__in=folders) | Q(appliedcontrol__in=applied_controls)
-    ).distinct()
+    reference_controls = (
+        ReferenceControl.objects.filter(
+            Q(folder__in=folders) | Q(appliedcontrol__in=applied_controls)
+        )
+        .filter(library__isnull=True)
+        .distinct()
+    )
 
-    threats = Threat.objects.filter(
-        Q(folder__in=folders)
-        | Q(risk_scenarios__in=risk_scenarios)
-        | Q(operational_scenarios__in=operational_scenarios)
-    ).distinct()
+    threats = (
+        Threat.objects.filter(
+            Q(folder__in=folders)
+            | Q(risk_scenarios__in=risk_scenarios)
+            | Q(operational_scenarios__in=operational_scenarios)
+        )
+        .filter(library__isnull=True)
+        .distinct()
+    )
 
     evidences = Evidence.objects.filter(
         Q(folder__in=folders)

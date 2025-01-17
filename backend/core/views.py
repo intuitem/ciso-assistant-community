@@ -2129,9 +2129,9 @@ class FolderViewSet(BaseModelViewSet):
                     "Attachments found in uploaded file",
                     attachments_count=len(attachments),
                 )
-                attachments_import_path = Path(settings.LOCAL_STORAGE_DIRECTORY) / str(
-                    uuid.uuid4()
-                )
+                attachments_import_path = Path(
+                    settings.LOCAL_STORAGE_DIRECTORY
+                ).relative_to(settings.BASE_DIR) / str(uuid.uuid4())
                 for attachment in attachments:
                     try:
                         # NOTE: ZipFile.extract() keeps the directory structure,
@@ -2211,7 +2211,7 @@ class FolderViewSet(BaseModelViewSet):
 
             logger.debug("Resolved creation order", creation_order=creation_order)
 
-            logger.debug("Starting objects validation", objects=objects)
+            logger.debug("Starting objects validation", objects_count=len(objects))
 
             for model in creation_order:
                 self._validate_model_objects(
@@ -2221,14 +2221,20 @@ class FolderViewSet(BaseModelViewSet):
                     required_libraries=required_libraries,
                 )
 
+            logger.debug("required_libraries", required_libraries=required_libraries)
+
             if validation_errors:
-                logger.error(f"Validation errors: {validation_errors}")
-                raise ValidationError({"validation error"})
+                logger.error(
+                    "Failed to validate objets", validation_errors=validation_errors
+                )
+                raise ValidationError({"validation_errors": validation_errors})
 
             # Check for missing libraries
             for library in required_libraries:
                 if not LoadedLibrary.objects.filter(urn=library).exists():
                     missing_libraries.append(library)
+
+            logger.debug("missing_libraries", missing_libraries=missing_libraries)
 
             # Creation phase - wrap in transaction
             with transaction.atomic():
@@ -2256,7 +2262,7 @@ class FolderViewSet(BaseModelViewSet):
             return {"message": "Import successful"}
 
         except ValidationError as e:
-            if missing_libraries == "missingLibraries":
+            if missing_libraries:
                 logger.warning(f"Missing libraries: {missing_libraries}")
                 raise ValidationError({"missing_libraries": missing_libraries})
             logger.exception(f"Failed to import objects: {str(e)}")
@@ -2293,9 +2299,10 @@ class FolderViewSet(BaseModelViewSet):
             try:
                 # Handle library objects
                 if fields.get("library") or model == LoadedLibrary:
-                    if model == LoadedLibrary:
-                        required_libraries.append(fields["urn"])
-                    continue
+                    required_libraries.append(fields["urn"])
+                    logger.info(
+                        "Adding library to required libraries", urn=fields["urn"]
+                    )
 
                 # Validate using serializer
                 SerializerClass = import_export_serializer_class(model)
@@ -2312,7 +2319,8 @@ class FolderViewSet(BaseModelViewSet):
 
             except Exception as e:
                 logger.error(
-                    f"Error validating object {obj_id} in {model_name}: {str(e)}"
+                    f"Error validating object {obj_id} in {model_name}: {str(e)}",
+                    exc_info=e,
                 )
                 validation_errors.append(
                     {
@@ -2435,209 +2443,214 @@ class FolderViewSet(BaseModelViewSet):
             return [link_dump_database_ids.get(id, "") for id in ids]
 
         model_name = model._meta.model_name
-        fields = fields.copy()
+        _fields = fields.copy()
+
+        logger.debug(
+            "Processing model relationships", model=model_name, _fields=_fields
+        )
 
         match model_name:
             case "asset":
                 many_to_many_map_ids["parent_ids"] = get_mapped_ids(
-                    fields.pop("parent_assets", []), link_dump_database_ids
+                    _fields.pop("parent_assets", []), link_dump_database_ids
                 )
 
             case "riskassessment":
-                fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(fields["project"])
+                _fields["project"] = Project.objects.get(
+                    id=link_dump_database_ids.get(_fields["project"])
                 )
-                fields["risk_matrix"] = RiskMatrix.objects.get(
-                    urn=fields.get("risk_matrix")
+                _fields["risk_matrix"] = RiskMatrix.objects.get(
+                    urn=_fields.get("risk_matrix")
                 )
-                fields["ebios_rm_study"] = (
+                _fields["ebios_rm_study"] = (
                     EbiosRMStudy.objects.get(
-                        id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                        id=link_dump_database_ids.get(_fields["ebios_rm_study"])
                     )
-                    if fields.get("ebios_rm_study")
+                    if _fields.get("ebios_rm_study")
                     else None
                 )
 
             case "complianceassessment":
-                fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(fields["project"])
+                _fields["project"] = Project.objects.get(
+                    id=link_dump_database_ids.get(_fields["project"])
                 )
-                fields["framework"] = Framework.objects.get(urn=fields.get("framework"))
+                _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
 
             case "appliedcontrol":
                 many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
-                    fields.pop("evidences", []), link_dump_database_ids
+                    _fields.pop("evidences", []), link_dump_database_ids
                 )
-                ref_control_id = link_dump_database_ids.get(fields["reference_control"])
-                fields["reference_control"] = (
-                    ReferenceControl.objects.filter(urn=ref_control_id).first()
-                    or ReferenceControl.objects.filter(id=ref_control_id).first()
+                ref_control_id = link_dump_database_ids.get(
+                    _fields["reference_control"]
                 )
+                _fields["reference_control"] = ReferenceControl.objects.filter(
+                    urn=ref_control_id
+                ).first()
 
             case "evidence":
-                attachment_filename = fields.pop("attachment", None)
+                attachment_filename = _fields.pop("attachment", None)
                 if attachments_dir and attachment_filename:
                     # NOTE: Added 'attachments' to the path to match the extraction path,
                     # as ZipFile.extract() keeps the directory structure.
                     # Not the cleanest solution, but it works.
-                    fields["attachment"] = str(
+                    _fields["attachment"] = str(
                         attachments_dir / "attachments" / attachment_filename
                     )
-                fields.pop("size", None)
-                fields.pop("attachment_hash", None)
+                _fields.pop("size", None)
+                _fields.pop("attachment_hash", None)
 
             case "requirementassessment":
-                fields["requirement"] = RequirementNode.objects.get(
-                    urn=fields.get("requirement")
+                _fields["requirement"] = RequirementNode.objects.get(
+                    urn=_fields.get("requirement")
                 )
-                fields["compliance_assessment"] = ComplianceAssessment.objects.get(
-                    id=link_dump_database_ids.get(fields["compliance_assessment"])
+                _fields["compliance_assessment"] = ComplianceAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["compliance_assessment"])
                 )
                 many_to_many_map_ids.update(
                     {
                         "applied_controls": get_mapped_ids(
-                            fields.pop("applied_controls", []), link_dump_database_ids
+                            _fields.pop("applied_controls", []), link_dump_database_ids
                         ),
                         "evidence_ids": get_mapped_ids(
-                            fields.pop("evidences", []), link_dump_database_ids
+                            _fields.pop("evidences", []), link_dump_database_ids
                         ),
                     }
                 )
 
             case "vulnerability":
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
-                    fields.pop("applied_controls", []), link_dump_database_ids
+                    _fields.pop("applied_controls", []), link_dump_database_ids
                 )
 
             case "riskscenario":
-                fields["risk_assessment"] = RiskAssessment.objects.get(
-                    id=link_dump_database_ids.get(fields["risk_assessment"])
+                _fields["risk_assessment"] = RiskAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["risk_assessment"])
                 )
-                # Process all related fields at once
-                related_fields = [
+                # Process all related _fields at once
+                related__fields = [
                     "threats",
                     "vulnerabilities",
                     "assets",
                     "applied_controls",
                     "existing_applied_controls",
                 ]
-                for field in related_fields:
+                for field in related__fields:
                     map_key = (
                         f"{field.rstrip('s')}_ids"
                         if not field.endswith("controls")
                         else f"{field}_ids"
                     )
                     many_to_many_map_ids[map_key] = get_mapped_ids(
-                        fields.pop(field, []), link_dump_database_ids
+                        _fields.pop(field, []), link_dump_database_ids
                     )
 
             case "entity":
-                fields.pop("owned_folders", None)
+                _fields.pop("owned_folders", None)
 
             case "ebiosrmstudy":
-                fields.update(
+                _fields.update(
                     {
                         "risk_matrix": RiskMatrix.objects.get(
-                            urn=fields.get("risk_matrix")
+                            urn=_fields.get("risk_matrix")
                         ),
                         "reference_entity": Entity.objects.get(
-                            id=link_dump_database_ids.get(fields["reference_entity"])
+                            id=link_dump_database_ids.get(_fields["reference_entity"])
                         ),
                     }
                 )
                 many_to_many_map_ids.update(
                     {
                         "asset_ids": get_mapped_ids(
-                            fields.pop("assets", []), link_dump_database_ids
+                            _fields.pop("assets", []), link_dump_database_ids
                         ),
                         "compliance_assessment_ids": get_mapped_ids(
-                            fields.pop("compliance_assessments", []),
+                            _fields.pop("compliance_assessments", []),
                             link_dump_database_ids,
                         ),
                     }
                 )
 
             case "fearedevent":
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                _fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(_fields["ebios_rm_study"])
                 )
                 many_to_many_map_ids.update(
                     {
                         "qualifications_urn": get_mapped_ids(
-                            fields.pop("qualifications", []), link_dump_database_ids
+                            _fields.pop("qualifications", []), link_dump_database_ids
                         ),
                         "asset_ids": get_mapped_ids(
-                            fields.pop("assets", []), link_dump_database_ids
+                            _fields.pop("assets", []), link_dump_database_ids
                         ),
                     }
                 )
 
             case "roto":
-                fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
-                    id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                _fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(_fields["ebios_rm_study"])
                 )
                 many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
-                    fields.pop("feared_events", []), link_dump_database_ids
+                    _fields.pop("feared_events", []), link_dump_database_ids
                 )
 
             case "stakeholder":
-                fields.update(
+                _fields.update(
                     {
                         "ebios_rm_study": EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
                         ),
                         "entity": Entity.objects.get(
-                            id=link_dump_database_ids.get(fields["entity"])
+                            id=link_dump_database_ids.get(_fields["entity"])
                         ),
                     }
                 )
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
-                    fields.pop("applied_controls", []), link_dump_database_ids
+                    _fields.pop("applied_controls", []), link_dump_database_ids
                 )
 
             case "strategicscenario":
-                fields.update(
+                _fields.update(
                     {
                         "ebios_rm_study": EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
                         ),
                         "ro_to_couple": RoTo.objects.get(
-                            id=link_dump_database_ids.get(fields["ro_to_couple"])
+                            id=link_dump_database_ids.get(_fields["ro_to_couple"])
                         ),
                     }
                 )
 
             case "attackpath":
-                fields.update(
+                _fields.update(
                     {
                         "ebios_rm_study": EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
                         ),
                         "strategic_scenario": StrategicScenario.objects.get(
-                            id=link_dump_database_ids.get(fields["strategic_scenario"])
+                            id=link_dump_database_ids.get(_fields["strategic_scenario"])
                         ),
                     }
                 )
                 many_to_many_map_ids["stakeholder_ids"] = get_mapped_ids(
-                    fields.pop("stakeholders", []), link_dump_database_ids
+                    _fields.pop("stakeholders", []), link_dump_database_ids
                 )
 
             case "operationalscenario":
-                fields.update(
+                _fields.update(
                     {
                         "ebios_rm_study": EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(fields["ebios_rm_study"])
+                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
                         ),
                         "attack_path": AttackPath.objects.get(
-                            id=link_dump_database_ids.get(fields["attack_path"])
+                            id=link_dump_database_ids.get(_fields["attack_path"])
                         ),
                     }
                 )
                 many_to_many_map_ids["threat_ids"] = get_mapped_ids(
-                    fields.pop("threats", []), link_dump_database_ids
+                    _fields.pop("threats", []), link_dump_database_ids
                 )
 
-        return fields
+        return _fields
 
     def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
         """Set many-to-many relationships after object creation."""
