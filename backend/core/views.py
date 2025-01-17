@@ -16,7 +16,7 @@ from typing import Any, Tuple
 from uuid import UUID
 from itertools import cycle
 import django_filters as df
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE, VERSION
 
 import shutil
 from pathlib import Path
@@ -2046,11 +2046,16 @@ class FolderViewSet(BaseModelViewSet):
 
         try:
             stringified_dump = json.loads(decompressed_data)
+            import_version = stringified_dump["meta"]["media_version"]
         except json.JSONDecodeError as e:
             logger.error("Invalid JSON format in uploaded file", exc_info=e)
             raise
-        else:
-            return stringified_dump
+        if not import_version == VERSION:
+            logger.error(f"Import version {import_version} not compatible with current version {VERSION}")
+            raise ValidationError(
+                {"file": "importVersionNotCompatibleWithCurrentVersion"}
+            )
+        return stringified_dump
 
     def _get_models_map(self, objects):
         """Build a map of model names to model classes."""
