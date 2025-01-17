@@ -1091,5 +1091,7 @@
 	"importFolder": "Import domain",
 	"importFolderHelpText": "Import a domain from a JSON or ZIP file",
 	"importVersionNotCompatibleWithCurrentVersion": "The import version is not compatible with the current version of the application",
-	"errorOccuredDuringImport": "An error occurred during the import"
+	"errorOccuredDuringImport": "An error occurred during the import",
+	"successfullyImportedFolder": "Folder successfully imported",
+	"missingLibrariesInImport": "Some libraries are missing, see the list above"
 }

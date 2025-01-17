@@ -2051,7 +2051,9 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Invalid JSON format in uploaded file", exc_info=e)
             raise
         if not import_version == VERSION:
-            logger.error(f"Import version {import_version} not compatible with current version {VERSION}")
+            logger.error(
+                f"Import version {import_version} not compatible with current version {VERSION}"
+            )
             raise ValidationError(
                 {"file": "importVersionNotCompatibleWithCurrentVersion"}
             )
@@ -2084,17 +2086,18 @@ class FolderViewSet(BaseModelViewSet):
         try:
             objects = parsed_data.get("objects", None)
             if not objects:
-                return {"message": "No objects to import"}
+                logger.error("No objects found in the dump")
+                raise ValidationError({"error": "No objects found in the dump"})
 
             # Validate models and check for domain
             models_map = self._get_models_map(objects)
             if Folder in models_map.values():
                 logger.error("Dump contains a domain")
-                return {"error": "Dump contains a domain"}
+                raise ValidationError({"error": "Dump contains a domain"})
 
             # Validation phase (outside transaction since it doesn't modify database)
             creation_order = self._resolve_dependencies(list(models_map.values()))
-            
+
             for model in creation_order:
                 self._validate_model_objects(
                     model=model,
@@ -2105,16 +2108,12 @@ class FolderViewSet(BaseModelViewSet):
 
             if validation_errors:
                 logger.error(f"Validation errors: {validation_errors}")
-                return {"validation_errors": validation_errors}
+                raise ValidationError({"validation error"})
 
             # Check for missing libraries
             for library in required_libraries:
-                if not LoadedLibrary.objects.filter(urn=library["urn"]).exists():
+                if not LoadedLibrary.objects.filter(urn=library).exists():
                     missing_libraries.append(library)
-
-            if missing_libraries:
-                logger.warning(f"Missing libraries: {missing_libraries}")
-                return {"missing_libraries": missing_libraries}
 
             # Creation phase - wrap in transaction
             with transaction.atomic():
@@ -2135,9 +2134,10 @@ class FolderViewSet(BaseModelViewSet):
             return {"message": "Import successful"}
 
         except ValidationError as e:
+            if missing_libraries == "missingLibraries":
+                logger.warning(f"Missing libraries: {missing_libraries}")
+                raise ValidationError({"missing_libraries": missing_libraries})
             logger.exception(f"Failed to import objects: {str(e)}")
-            # The transaction.atomic() context manager will automatically
-            # roll back all changes if an exception occurs
             raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
 
     def _validate_model_objects(
@@ -2172,9 +2172,7 @@ class FolderViewSet(BaseModelViewSet):
                 # Handle library objects
                 if fields.get("library") or model == LoadedLibrary:
                     if model == LoadedLibrary:
-                        required_libraries.append(
-                            {"urn": fields["urn"], "name": fields["name"]}
-                        )
+                        required_libraries.append(fields["urn"])
                     continue
 
                 # Validate using serializer
@@ -2314,12 +2312,12 @@ class FolderViewSet(BaseModelViewSet):
                     urn=fields.get("risk_matrix")
                 )
                 fields["ebios_rm_study"] = (
-                        EbiosRMStudy.objects.get(
-                            id=link_dump_database_ids.get(fields["ebios_rm_study"])
-                        )
-                        if fields.get("ebios_rm_study")
-                        else None
+                    EbiosRMStudy.objects.get(
+                        id=link_dump_database_ids.get(fields["ebios_rm_study"])
                     )
+                    if fields.get("ebios_rm_study")
+                    else None
+                )
 
             case "complianceassessment":
                 fields["project"] = Project.objects.get(
@@ -2407,7 +2405,8 @@ class FolderViewSet(BaseModelViewSet):
                             fields.pop("assets", []), link_dump_database_ids
                         ),
                         "compliance_assessment_ids": get_mapped_ids(
-                            fields.pop("compliance_assessments", []), link_dump_database_ids
+                            fields.pop("compliance_assessments", []),
+                            link_dump_database_ids,
                         ),
                     }
                 )
@@ -2576,7 +2575,9 @@ class FolderViewSet(BaseModelViewSet):
 
             case "attackpath":
                 if stakeholder_ids := many_to_many_map_ids.get("stakeholder_ids"):
-                    obj.stakeholders.set(Stakeholder.objects.filter(id__in=stakeholder_ids))
+                    obj.stakeholders.set(
+                        Stakeholder.objects.filter(id__in=stakeholder_ids)
+                    )
 
             case "operationalscenario":
                 if threat_ids := many_to_many_map_ids.get("threat_ids"):
