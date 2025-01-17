@@ -45,7 +45,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.db import models
+from django.db import models, transaction
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
@@ -53,7 +53,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, UserGroup
-from rest_framework import filters, permissions, status, viewsets, serializers
+from rest_framework import filters, permissions, status, viewsets
 from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
     action,
@@ -2074,7 +2074,7 @@ class FolderViewSet(BaseModelViewSet):
     def _import_objects(self, parsed_data, domain_name: str):
         """
         Import and validate objects using appropriate serializers.
-        Handles both validation and creation in separate phases.
+        Handles both validation and creation in separate phases within a transaction.
         """
         validation_errors = []
         required_libraries = []
@@ -2092,16 +2092,9 @@ class FolderViewSet(BaseModelViewSet):
                 logger.error("Dump contains a domain")
                 return {"error": "Dump contains a domain"}
 
-            # Create base folder and store its ID
-            base_folder = Folder.objects.create(
-                name=domain_name, content_type=Folder.ContentType.DOMAIN
-            )
-            link_dump_database_ids["base_folder"] = base_folder
-
-            # Get creation order
+            # Validation phase (outside transaction since it doesn't modify database)
             creation_order = self._resolve_dependencies(list(models_map.values()))
-
-            # Validation phase
+            
             for model in creation_order:
                 self._validate_model_objects(
                     model=model,
@@ -2123,19 +2116,29 @@ class FolderViewSet(BaseModelViewSet):
                 logger.warning(f"Missing libraries: {missing_libraries}")
                 return {"missing_libraries": missing_libraries}
 
-            # Creation phase
-            for model in creation_order:
-                self._create_model_objects(
-                    model=model,
-                    objects=objects,
-                    link_dump_database_ids=link_dump_database_ids,
+            # Creation phase - wrap in transaction
+            with transaction.atomic():
+                # Create base folder and store its ID
+                base_folder = Folder.objects.create(
+                    name=domain_name, content_type=Folder.ContentType.DOMAIN
                 )
+                link_dump_database_ids["base_folder"] = base_folder
+
+                # Create all objects within the transaction
+                for model in creation_order:
+                    self._create_model_objects(
+                        model=model,
+                        objects=objects,
+                        link_dump_database_ids=link_dump_database_ids,
+                    )
 
             return {"message": "Import successful"}
 
-        except Exception as e:
+        except ValidationError as e:
             logger.exception(f"Failed to import objects: {str(e)}")
-            raise ValidationError(e)
+            # The transaction.atomic() context manager will automatically
+            # roll back all changes if an exception occurs
+            raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
 
     def _validate_model_objects(
         self, model, objects, validation_errors, required_libraries
@@ -2229,59 +2232,60 @@ class FolderViewSet(BaseModelViewSet):
 
     def _create_batch(self, model, batch, link_dump_database_ids):
         """Create a batch of objects with proper relationship handling."""
-        for obj in batch:
-            obj_id = obj.get("id")
-            fields = obj.get("fields", {}).copy()
-
-            try:
-                # Handle library objects
-                if fields.get("library") or model == LoadedLibrary:
-                    logger.info(f"Skipping creation of library object {obj_id}")
-                    link_dump_database_ids[obj_id] = fields.get("urn")
-                    continue
-
-                # Handle folder reference
-                if fields.get("folder"):
-                    fields["folder"] = link_dump_database_ids.get("base_folder")
-
-                # Process model-specific relationships
-                many_to_many_map_ids = {}
-                fields = self._process_model_relationships(
-                    model=model,
-                    fields=fields,
-                    link_dump_database_ids=link_dump_database_ids,
-                    many_to_many_map_ids=many_to_many_map_ids,
-                )
-
-                obj = model(**fields)
+        # Create all objects in the batch within a single transaction
+        with transaction.atomic():
+            for obj in batch:
+                obj_id = obj.get("id")
+                fields = obj.get("fields", {}).copy()
 
                 try:
-                    # Run clean to validate unique constraints
-                    obj.clean()
-                except ValidationError as e:
-                    for field, error in e.error_dict.items():
-                        # TODO: differentiate between is_unique_in_scope errors and regular validation errors.
-                        # Also, differentiate between string fields and other types, as appending would not work for other types.
-                        print(f"Error in field {field}: {error}")
-                        fields[field] = f"{fields[field]} {uuid.uuid4()}"
+                    # Handle library objects
+                    if fields.get("library") or model == LoadedLibrary:
+                        logger.info(f"Skipping creation of library object {obj_id}")
+                        link_dump_database_ids[obj_id] = fields.get("urn")
+                        continue
 
-                logger.debug("Creating object", fields=fields)
+                    # Handle folder reference
+                    if fields.get("folder"):
+                        fields["folder"] = link_dump_database_ids.get("base_folder")
 
-                obj_created = model.objects.create(**fields)
-                link_dump_database_ids[obj_id] = obj_created.id
+                    # Process model-specific relationships
+                    many_to_many_map_ids = {}
+                    fields = self._process_model_relationships(
+                        model=model,
+                        fields=fields,
+                        link_dump_database_ids=link_dump_database_ids,
+                        many_to_many_map_ids=many_to_many_map_ids,
+                    )
 
-                # Handle many-to-many relationships
-                self._set_many_to_many_relations(
-                    model=model,
-                    obj=obj_created,
-                    many_to_many_map_ids=many_to_many_map_ids,
-                )
+                    obj = model(**fields)
 
-            except Exception as e:
-                logger.error(f"Error creating object {obj_id}: {str(e)}")
-                raise ValidationError(
-                    f"Error creating {model._meta.model_name}: {str(e)}"
-                )
+                    try:
+                        # Run clean to validate unique constraints
+                        obj.clean()
+                    except ValidationError as e:
+                        for field, error in e.error_dict.items():
+                            fields[field] = f"{fields[field]} {uuid.uuid4()}"
+
+                    logger.debug("Creating object", fields=fields)
+
+                    # Create the object
+                    obj_created = model.objects.create(**fields)
+                    link_dump_database_ids[obj_id] = obj_created.id
+
+                    # Handle many-to-many relationships
+                    self._set_many_to_many_relations(
+                        model=model,
+                        obj=obj_created,
+                        many_to_many_map_ids=many_to_many_map_ids,
+                    )
+
+                except Exception as e:
+                    logger.error(f"Error creating object {obj_id}: {str(e)}")
+                    # This will trigger a rollback of the entire batch
+                    raise ValidationError(
+                        f"Error creating {model._meta.model_name}: {str(e)}"
+                    )
 
     def _process_model_relationships(
         self, model, fields, link_dump_database_ids, many_to_many_map_ids

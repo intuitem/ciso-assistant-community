@@ -1090,5 +1090,6 @@
 	"useDocumentationScoreHelpText": "A second score (the documentation score) will be available for scoring the requirements.",
 	"importFolder": "Import domain",
 	"importFolderHelpText": "Import a domain from a JSON or ZIP file",
-	"importVersionNotCompatibleWithCurrentVersion": "The import version is not compatible with the current version of the application"
+	"importVersionNotCompatibleWithCurrentVersion": "The import version is not compatible with the current version of the application",
+	"errorOccuredDuringImport": "An error occurred during the import"
 }
