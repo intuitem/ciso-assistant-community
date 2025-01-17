@@ -1,101 +1,111 @@
 {% load i18n %}
 
-<main class="p-2 m-2 main">
-    <div class="bg-white p-2 m-2 shadow rounded-lg space-x-3 flex flex-row justify-center">
-        <p class="font-semibold text-lg"> {% trans "Domain" %}: {{ risk_assessment.project.folder }}</p>
-        <p>/</p>
-        <p class="font-semibold text-lg"> {% trans "Project" %}: {{ risk_assessment.project }}</p>
-        <p>/</p>
-        <p class="font-semibold text-lg"> {% trans "Risk assessment" %}: {{ risk_assessment.name }} - {{ risk_assessment.version }}</p>
-    </div>
-    <p class="p-2 m-2 text-lg font-semibold"> {% trans "Associated risk scenarios" %}: </p>
-    <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex">
-        <table class="w-full p-2 mt-2">
-            <thead>
-            </thead>
-            <tbody>
-            {% if not context %}
-            <tr class="">
-                <td colspan="" class="p-4 m-2 text-xl text-center"><i class="fas fa-exclamation-circle"></i>
-                {% trans "Risk risk_assessment seems to be empty. Measure Plan cannot be generated." %}
-                </td>
-            </tr>
-            {% endif %}
-            {% for scenario in context %}
-            <tr class="bg-gray-100">
-                <td class="text-lg p-3" colspan="9">
-                    <p class="text-indigo-500 hover:text-indigo-700">{{ scenario.ref_id }}: {{ scenario.name }}</p>
-                    <span class="text-xs text-center p-1 mx-1 rounded"
-                    {% if scenario.treatment == 'open' %}
-                    style="background-color: #fed7aa"
-                    {% elif scenario.treatment == 'mitigate' %}
-                    style="background-color: #bbf7d0"
-                    {% elif scenario.treatment == 'accept' %}
-                    style="background-color: #bae6fd"
-                    {% else %}
-                    style="background-color: #fca5a5"
-                    {% endif %}">{{ scenario.get_treatment_display|lower}}
-                    </span>
-                </td>
-            </tr>
-            {% if not scenario.applied_controls.all %}
-            <tr>
-                <td colspan="9" class="p-2 text-left"><i class="fas fa-exclamation-circle"></i> {% trans "No associated measure" %}
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td class="text-md pl-6 pb-3 font-medium" colspan="9"> {% trans "Existing controls" %}: </td>
-            </tr>
-            <tr>
-                <td class="text-sm pl-6 pb-3" colspan="9"> {{ scenario.existing_controls }} </td>
-            </tr>
-            <tr>
-                <td class="text-md pl-6 pb-3 font-medium" colspan="9"> {% trans "Additional measures" %}: </td>
-            </tr>
-            <tr class="text-sm uppercase">
-                <td class="px-2 text-center">#</td>
-                <td class="px-2 font-semibold">{% trans "Name" %}</td>
-                <td class="px-2 font-semibold">{% trans "Description" %}</td>
-                <td class="px-2 font-semibold">{% trans "Type" %}</td>
-                <td class="px-2 font-semibold">{% trans "Reference control" %}</td>
-                <td class="px-2 font-semibold">{% trans "ETA" %}</td>
-                <td class="px-2 font-semibold">{% trans "Effort" %}</td>
-                <td class="px-2 font-semibold">{% trans "Cost" %}</td>
-                <td class="px-2 font-semibold text-center">{% trans "Link" %}</td>
-                <td class="px-2 font-semibold text-center">{% trans "Status" %}</td>
-            </tr>
-            {% endif %}
-            {% for appliedcontrol in scenario.applied_controls.all %}
-            <tr class="hover:text-indigo-500 border-b cursor-pointer hover:scale-[0.99] duration-500">
-                <td class="px-2 py-3 text-center pl-4">{{ appliedcontrol.mid }}</td>
-                <td class="px-2 py-3">{{ appliedcontrol.name }}</td>
-                <td class="px-2 py-3 max-w-md">{% if appliedcontrol.description %}{{ appliedcontrol.description|linebreaksbr }}{% endif %}</td>
-                <td class="px-2 py-3">{{ appliedcontrol.get_type_display }}</td>
-                <td class="px-2 py-3">{% if appliedcontrol.reference_control %}{{ appliedcontrol.reference_control }}{% else %}--{% endif %}</td>
-                <td class="px-2 py-3">{% if appliedcontrol.eta %}{{ appliedcontrol.eta }}{% else %}--{%endif%}</td>
-                <td class="px-2 py-3">{% if appliedcontrol.effort %}{{ appliedcontrol.effort }}{% else %}--{%endif%}</td>
-                <td class="px-2 py-3">{% if appliedcontrol.cost %}{{ appliedcontrol.cost }}{% else %}--{%endif%}</td>
-                <td class="px-2 py-3 text-center">{% if appliedcontrol.link %}<a onclick="event.stopPropagation();" href="{{ appliedcontrol.link }}"
-                                                                   class="hover:text-blue-400"><i
-                        class="fas fa-external-link-square-alt"></i></a>{% else %}--{% endif %}
-                </td>
-                <td class="text-center"><span class="text-xs text-gray-900 whitespace-nowrap text-center p-1 mx-1 rounded
-                    {% if appliedcontrol.status == 'open' %}
-                    bg-orange-200
-                    {% elif appliedcontrol.status == 'in_progress' %}
-                    bg-blue-200
-                    {% elif appliedcontrol.status == 'on_hold' %}
-                    bg-red-300
-                    {% else %}
-                    bg-green-200
-                    {% endif %}">{{ appliedcontrol.get_status_display|lower }}
-                    </span></td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
+<main class="p-4">
+    {# Header Section #}
+    <div class="bg-white p-4 mb-4 shadow rounded-lg">
+        <div class="flex flex-row justify-center space-x-3">
+            <p class="font-semibold text-lg">{% trans "Domain" %}: {{ risk_assessment.project.folder }}</p>
+            <span class="text-gray-500">/</span>
+            <p class="font-semibold text-lg">{% trans "Project" %}: {{ risk_assessment.project }}</p>
+            <span class="text-gray-500">/</span>
+            <p class="font-semibold text-lg">{% trans "Risk assessment" %}: {{ risk_assessment.name }} - {{ risk_assessment.version }}</p>
+        </div>
     </div>
 
+    {# Risk Scenarios Section #}
+    <h2 class="p-4 text-lg font-semibold">{% trans "Associated risk scenarios" %}</h2>
+
+    <div class="bg-white p-4 shadow rounded-lg">
+        <table class="w-full">
+            <caption class="sr-only">{% trans "Risk Scenarios and Controls" %}</caption>
+            {% if not context %}
+                <tr>
+                    <td colspan="9" class="p-4 text-xl text-center">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% trans "Risk assessment seems to be empty. Measure Plan cannot be generated." %}
+                    </td>
+                </tr>
+            {% else %}
+                {% for scenario in context %}
+                    {# Scenario Header #}
+                    <tr class="bg-gray-100">
+                        <th colspan="9" class="text-lg p-4 text-left">
+                            <div class="text-indigo-700">{{ scenario.ref_id }}: {{ scenario.name }}</div>
+                            <span class="text-xs px-2 py-1 rounded inline-block mt-1"
+                                  style="background-color: {% if scenario.treatment == 'open' %}#fed7aa
+                                                         {% elif scenario.treatment == 'mitigate' %}#bbf7d0
+                                                         {% elif scenario.treatment == 'accept' %}#bae6fd
+                                                         {% else %}#fca5a5{% endif %}">
+                                {{ scenario.get_treatment_display|lower }}
+                            </span>
+                        </th>
+                    </tr>
+
+                    {# Existing Controls Section #}
+                    <tr>
+                        <th colspan="9" class="text-md p-4 text-left font-medium">
+                            {% trans "Existing controls" %}:
+                        </th>
+                    </tr>
+                    <tr>
+                        <td colspan="9" class="text-sm px-6 pb-4">
+                            {{ scenario.existing_controls|default:"--" }}
+                        </td>
+                    </tr>
+
+                    {% if scenario.applied_controls.exists %}
+                        {# Additional Measures Section #}
+                        <tr>
+                            <th colspan="9" class="text-md p-4 text-left font-medium">
+                                {% trans "Additional measures" %}:
+                            </th>
+                        </tr>
+
+                        {# Table Headers #}
+                        <tr class="text-sm uppercase bg-gray-50">
+                            <th class="p-2 text-center">#</th>
+                            <th class="p-2 text-left">{% trans "Name" %}</th>
+                            <th class="p-2 text-left">{% trans "Description" %}</th>
+                            <th class="p-2 text-left">{% trans "Type" %}</th>
+                            <th class="p-2 text-left">{% trans "Reference control" %}</th>
+                            <th class="p-2 text-left">{% trans "ETA" %}</th>
+                            <th class="p-2 text-left">{% trans "Effort" %}</th>
+                            <th class="p-2 text-left">{% trans "Cost" %}</th>
+                            <th class="p-2 text-center">{% trans "Status" %}</th>
+                        </tr>
+
+                        {# Applied Controls #}
+                        {% for appliedcontrol in scenario.applied_controls.all %}
+                            <tr class="border-b">
+                                <td class="p-3 text-center">{{ appliedcontrol.mid }}</td>
+                                <td class="p-3">{{ appliedcontrol.name }}</td>
+                                <td class="p-3 max-w-md">{{ appliedcontrol.description|default:"--"|linebreaksbr }}</td>
+                                <td class="p-3">{{ appliedcontrol.get_type_display }}</td>
+                                <td class="p-3">{{ appliedcontrol.reference_control|default:"--" }}</td>
+                                <td class="p-3">{{ appliedcontrol.eta|default:"--" }}</td>
+                                <td class="p-3">{{ appliedcontrol.effort|default:"--" }}</td>
+                                <td class="p-3">{{ appliedcontrol.cost|default:"--" }}</td>
+                                <td class="p-3 text-center">
+                                    <span class="text-xs px-2 py-1 rounded inline-block
+                                        {% if appliedcontrol.status == 'open' %}bg-orange-200
+                                        {% elif appliedcontrol.status == 'in_progress' %}bg-blue-200
+                                        {% elif appliedcontrol.status == 'on_hold' %}bg-red-300
+                                        {% else %}bg-green-200{% endif %}">
+                                        {{ appliedcontrol.get_status_display|lower }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="p-4 text-center">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {% trans "No associated measure" %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </table>
+    </div>
 </main>
