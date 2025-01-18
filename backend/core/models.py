@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import hashlib
 from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
@@ -1728,6 +1729,12 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
+
+    @property
+    def attachment_hash(self):
+        if not self.attachment:
+            return None
+        return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
