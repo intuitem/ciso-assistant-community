@@ -2087,10 +2087,10 @@ class FolderViewSet(BaseModelViewSet):
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
-            parsed_data, attachments_dir = self._process_uploaded_file(
+            parsed_data = self._process_uploaded_file(
                 request.data["file"]
             )
-            result = self._import_objects(parsed_data, domain_name, attachments_dir)
+            result = self._import_objects(parsed_data, domain_name)
             return Response(result, status=status.HTTP_200_OK)
 
         except KeyError as e:
@@ -2105,22 +2105,37 @@ class FolderViewSet(BaseModelViewSet):
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
-    def _process_uploaded_file(self, dump_file: str | Path) -> Tuple[Any, Path | None]:
+    def _process_uploaded_file(self, dump_file: str | Path) -> Any:
         """Process the uploaded file and return parsed data."""
         if not zipfile.is_zipfile(dump_file):
             logger.error("Invalid ZIP file format")
             raise ValidationError({"file": "invalidZipFileFormat"})
 
-        attachments_import_path = None
-
         with zipfile.ZipFile(dump_file, mode="r") as zipf:
             if "data.json" not in zipf.namelist():
                 logger.error("No data.json file found in uploaded file")
                 raise ValidationError({"file": "noDataJsonFileFound"})
-
             infolist = zipf.infolist()
-
             directories = list(set([Path(f.filename).parent.name for f in infolist]))
+            decompressed_data = zipf.read("data.json")
+            # Decode bytes to string if necessary
+            if isinstance(decompressed_data, bytes):
+                decompressed_data = decompressed_data.decode("utf-8")
+            try:
+                json_dump = json.loads(decompressed_data)
+                import_version = json_dump["meta"]["media_version"]
+            except json.JSONDecodeError as e:
+                logger.error("Invalid JSON format in uploaded file", exc_info=e)
+                raise
+            if not "objects" in json_dump:
+                raise ValidationError("badly formatted json")
+            if not import_version == VERSION:
+                logger.error(
+                    f"Import version {import_version} not compatible with current version {VERSION}"
+                )
+                raise ValidationError(
+                    {"file": "importVersionNotCompatibleWithCurrentVersion"}
+                )
             if "attachments" in directories:
                 attachments = {
                     f for f in infolist if Path(f.filename).parent.name == "attachments"
@@ -2129,39 +2144,20 @@ class FolderViewSet(BaseModelViewSet):
                     "Attachments found in uploaded file",
                     attachments_count=len(attachments),
                 )
-                attachments_import_path = Path(
-                    settings.LOCAL_STORAGE_DIRECTORY
-                ).relative_to(settings.BASE_DIR) / str(uuid.uuid4())
                 for attachment in attachments:
                     try:
-                        # NOTE: ZipFile.extract() keeps the directory structure,
-                        # therefore attachments located under the "attachments" directory
-                        # will be extracted to settings.LOCAL_STORAGE_DIRECTORY/attachments_import_path/attachments
-                        zipf.extract(attachment, path=attachments_import_path)
+                        content=zipf.read(attachment)
+                        current_name = Path(attachment.filename).name
+                        new_name = default_storage.save(current_name, io.BytesIO(content))
+                        if new_name != current_name:
+                            for x in json_dump["objects"]:
+                                if x["model"] == "core.evidence" and x["fields"]["attachment"] == current_name:
+                                    x["fields"]["attachment"] = new_name
+
                     except Exception as e:
                         logger.error("Error extracting attachment", exc_info=e)
-
-            decompressed_data = zipf.read("data.json")
-
-        # Decode bytes to string if necessary
-        if isinstance(decompressed_data, bytes):
-            decompressed_data = decompressed_data.decode("utf-8")
-
-        try:
-            json_dump = json.loads(decompressed_data)
-            import_version = json_dump["meta"]["media_version"]
-        except json.JSONDecodeError as e:
-            logger.error("Invalid JSON format in uploaded file", exc_info=e)
-            raise
-        if not import_version == VERSION:
-            logger.error(
-                f"Import version {import_version} not compatible with current version {VERSION}"
-            )
-            raise ValidationError(
-                {"file": "importVersionNotCompatibleWithCurrentVersion"}
-            )
-
-        return json_dump, attachments_import_path
+    
+        return json_dump
 
     def _get_models_map(self, objects):
         """Build a map of model names to model classes."""
@@ -2182,9 +2178,7 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    def _import_objects(
-        self, parsed_data: dict, domain_name: str, attachments_dir: Path | None
-    ):
+    def _import_objects(self, parsed_data: dict, domain_name: str):
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
@@ -2193,7 +2187,6 @@ class FolderViewSet(BaseModelViewSet):
         required_libraries = []
         missing_libraries = []
         link_dump_database_ids = {}
-
         try:
             objects = parsed_data.get("objects", None)
             if not objects:
@@ -2247,7 +2240,6 @@ class FolderViewSet(BaseModelViewSet):
                 logger.info(
                     "Starting objects creation",
                     objects_count=len(objects),
-                    attachments_dir=attachments_dir,
                     creation_order=creation_order,
                 )
                 # Create all objects within the transaction
@@ -2256,7 +2248,6 @@ class FolderViewSet(BaseModelViewSet):
                         model=model,
                         objects=objects,
                         link_dump_database_ids=link_dump_database_ids,
-                        attachments_dir=attachments_dir,
                     )
 
             return {"message": "Import successful"}
@@ -2298,11 +2289,14 @@ class FolderViewSet(BaseModelViewSet):
 
             try:
                 # Handle library objects
-                if fields.get("library") or model == LoadedLibrary:
-                    required_libraries.append(fields["urn"])
+                if model == LoadedLibrary:
+                    continue
+                if fields.get("library"):
+                    required_libraries.append(fields["library"])
                     logger.info(
-                        "Adding library to required libraries", urn=fields["urn"]
+                        "Adding library to required libraries", urn=fields["library"]
                     )
+                    continue
 
                 # Validate using serializer
                 SerializerClass = import_export_serializer_class(model)
@@ -2331,7 +2325,7 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
     def _create_model_objects(
-        self, model, objects, link_dump_database_ids, attachments_dir: Path | None
+        self, model, objects, link_dump_database_ids
     ):
         """Create all objects for a model after validation."""
         logger.debug("Creating objects for model", model=model)
@@ -2364,11 +2358,10 @@ class FolderViewSet(BaseModelViewSet):
                 model=model,
                 batch=batch,
                 link_dump_database_ids=link_dump_database_ids,
-                attachments_dir=attachments_dir,
             )
 
     def _create_batch(
-        self, model, batch, link_dump_database_ids, attachments_dir: Path | None
+        self, model, batch, link_dump_database_ids
     ):
         """Create a batch of objects with proper relationship handling."""
         # Create all objects in the batch within a single transaction
@@ -2395,14 +2388,11 @@ class FolderViewSet(BaseModelViewSet):
                         fields=fields,
                         link_dump_database_ids=link_dump_database_ids,
                         many_to_many_map_ids=many_to_many_map_ids,
-                        attachments_dir=attachments_dir,
                     )
-
-                    obj = model(**fields)
 
                     try:
                         # Run clean to validate unique constraints
-                        obj.clean()
+                        model(**fields).clean()
                     except ValidationError as e:
                         for field, error in e.error_dict.items():
                             fields[field] = f"{fields[field]} {uuid.uuid4()}"
@@ -2433,7 +2423,6 @@ class FolderViewSet(BaseModelViewSet):
         fields,
         link_dump_database_ids,
         many_to_many_map_ids,
-        attachments_dir: Path | None,
     ):
         """Process model-specific relationships."""
 
@@ -2488,14 +2477,6 @@ class FolderViewSet(BaseModelViewSet):
                 ).first()
 
             case "evidence":
-                attachment_filename = _fields.pop("attachment", None)
-                if attachments_dir and attachment_filename:
-                    # NOTE: Added 'attachments' to the path to match the extraction path,
-                    # as ZipFile.extract() keeps the directory structure.
-                    # Not the cleanest solution, but it works.
-                    _fields["attachment"] = str(
-                        attachments_dir / "attachments" / attachment_filename
-                    )
                 _fields.pop("size", None)
                 _fields.pop("attachment_hash", None)
 
@@ -3436,20 +3417,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             with zipfile.ZipFile(zip_name, "w") as zipf:
                 for evidence in evidences:
                     if evidence.attachment:
-                        with tempfile.NamedTemporaryFile(delete=True) as tmp:
-                            # Download the attachment to the temporary file
-                            if default_storage.exists(evidence.attachment.name):
-                                file = default_storage.open(evidence.attachment.name)
-                                tmp.write(file.read())
-                                tmp.flush()
-                                zipf.write(
-                                    tmp.name,
-                                    os.path.join(
-                                        "evidences",
-                                        os.path.basename(evidence.attachment.name),
-                                    ),
-                                )
-                zipf.writestr("index.html", index_content)
+                        if default_storage.exists(evidence.attachment.name):
+                            zipf.writetr(
+                                os.path.join(
+                                    "evidences",
+                                    os.path.basename(evidence.attachment.name),
+                                ),
+                                default_storage.open(evidence.attachment.name).read()
+                            )
+            zipf.writestr("index.html", index_content)
 
             response = FileResponse(open(zip_name, "rb"), as_attachment=True)
             response["Content-Disposition"] = f'attachment; filename="{zip_name}"'

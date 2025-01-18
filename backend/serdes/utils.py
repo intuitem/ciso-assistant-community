@@ -503,9 +503,7 @@ def get_domain_export_objects(domain: Folder):
     reference_controls = (
         ReferenceControl.objects.filter(
             Q(folder__in=folders) | Q(appliedcontrol__in=applied_controls)
-        )
-        .filter(library__isnull=True)
-        .distinct()
+        ).distinct()
     )
 
     threats = (
@@ -513,9 +511,7 @@ def get_domain_export_objects(domain: Folder):
             Q(folder__in=folders)
             | Q(risk_scenarios__in=risk_scenarios)
             | Q(operational_scenarios__in=operational_scenarios)
-        )
-        .filter(library__isnull=True)
-        .distinct()
+        ).distinct()
     )
 
     evidences = Evidence.objects.filter(
