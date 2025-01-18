@@ -500,19 +500,15 @@ def get_domain_export_objects(domain: Folder):
         | Q(vulnerabilities__in=vulnerabilities)
     ).distinct()
 
-    reference_controls = (
-        ReferenceControl.objects.filter(
-            Q(folder__in=folders) | Q(appliedcontrol__in=applied_controls)
-        ).distinct()
-    )
+    reference_controls = ReferenceControl.objects.filter(
+        Q(folder__in=folders) | Q(appliedcontrol__in=applied_controls)
+    ).distinct()
 
-    threats = (
-        Threat.objects.filter(
-            Q(folder__in=folders)
-            | Q(risk_scenarios__in=risk_scenarios)
-            | Q(operational_scenarios__in=operational_scenarios)
-        ).distinct()
-    )
+    threats = Threat.objects.filter(
+        Q(folder__in=folders)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(operational_scenarios__in=operational_scenarios)
+    ).distinct()
 
     evidences = Evidence.objects.filter(
         Q(folder__in=folders)

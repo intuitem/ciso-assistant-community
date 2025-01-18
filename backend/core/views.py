@@ -2087,9 +2087,7 @@ class FolderViewSet(BaseModelViewSet):
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
-            parsed_data = self._process_uploaded_file(
-                request.data["file"]
-            )
+            parsed_data = self._process_uploaded_file(request.data["file"])
             result = self._import_objects(parsed_data, domain_name)
             return Response(result, status=status.HTTP_200_OK)
 
@@ -2146,17 +2144,22 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 for attachment in attachments:
                     try:
-                        content=zipf.read(attachment)
+                        content = zipf.read(attachment)
                         current_name = Path(attachment.filename).name
-                        new_name = default_storage.save(current_name, io.BytesIO(content))
+                        new_name = default_storage.save(
+                            current_name, io.BytesIO(content)
+                        )
                         if new_name != current_name:
                             for x in json_dump["objects"]:
-                                if x["model"] == "core.evidence" and x["fields"]["attachment"] == current_name:
+                                if (
+                                    x["model"] == "core.evidence"
+                                    and x["fields"]["attachment"] == current_name
+                                ):
                                     x["fields"]["attachment"] = new_name
 
                     except Exception as e:
                         logger.error("Error extracting attachment", exc_info=e)
-    
+
         return json_dump
 
     def _get_models_map(self, objects):
@@ -2324,9 +2327,7 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
 
-    def _create_model_objects(
-        self, model, objects, link_dump_database_ids
-    ):
+    def _create_model_objects(self, model, objects, link_dump_database_ids):
         """Create all objects for a model after validation."""
         logger.debug("Creating objects for model", model=model)
 
@@ -2360,9 +2361,7 @@ class FolderViewSet(BaseModelViewSet):
                 link_dump_database_ids=link_dump_database_ids,
             )
 
-    def _create_batch(
-        self, model, batch, link_dump_database_ids
-    ):
+    def _create_batch(self, model, batch, link_dump_database_ids):
         """Create a batch of objects with proper relationship handling."""
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
@@ -3423,7 +3422,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                                     "evidences",
                                     os.path.basename(evidence.attachment.name),
                                 ),
-                                default_storage.open(evidence.attachment.name).read()
+                                default_storage.open(evidence.attachment.name).read(),
                             )
             zipf.writestr("index.html", index_content)
 
