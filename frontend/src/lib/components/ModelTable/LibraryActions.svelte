@@ -66,6 +66,7 @@
 				<button
 					type="submit"
 					data-testid="tablerow-import-button"
+					id="tablerow-import-button"
 					on:click={(e) => e.stopPropagation()}
 				>
 					<i class="fa-solid fa-file-import" />

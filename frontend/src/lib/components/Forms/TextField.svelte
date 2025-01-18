@@ -59,6 +59,7 @@
 			type="text"
 			class="{'input ' + _class} {classesTextField($errors)}"
 			data-testid="form-input-{field.replaceAll('_', '-')}"
+			id="form-input-{field.replaceAll('_', '-')}"
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
