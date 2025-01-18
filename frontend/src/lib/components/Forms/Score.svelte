@@ -6,6 +6,7 @@
 
 	export let label: string | undefined = undefined;
 	export let field: string;
+	export let isDoc: boolean = false;
 	export let fullDonut: boolean = false;
 	export let inversedColors: boolean = false;
 	export let styles: string = '';
@@ -84,7 +85,11 @@
 						{#if !disabled && scores_definition && $value !== null}
 							{#each scores_definition as definition}
 								{#if definition.score === $value}
-									{definition.name}{definition.description ? `: ${definition.description}` : ''}
+									{#if isDoc && definition.description_doc}
+										{definition.description_doc}`
+									{:else}
+										{definition.name}{definition.description ? `: ${definition.description}` : ''}
+									{/if}
 								{/if}
 							{/each}
 						{/if}
