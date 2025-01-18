@@ -238,7 +238,11 @@
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if filteredFields.length > 0 && hasRows && !hideFilters}
-			<button use:popup={popupFilter} class="btn variant-filled-primary self-end relative">
+			<button
+				use:popup={popupFilter}
+				class="btn variant-filled-primary self-end relative"
+				id="filters"
+			>
 				<i class="fa-solid fa-filter mr-2" />
 				{m.filters()}
 				{#if filterCount}
