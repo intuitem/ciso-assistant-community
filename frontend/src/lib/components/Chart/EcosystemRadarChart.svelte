@@ -12,6 +12,11 @@
 	export let name = '';
 	export let data;
 
+	export let max = 6;
+	export let greenZoneRadius = 0.2;
+	export let yellowZoneRadius = 0.9;
+	export let redZoneRadius = 2.5;
+
 	// data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
 	// x,y, z
 	// x: criticité calculée avec cap à 5,5
@@ -122,7 +127,7 @@
 			},
 			radiusAxis: {
 				type: 'value',
-				max: 6,
+				max: max,
 				inverse: true,
 				axisLabel: { show: true },
 				axisLine: {
@@ -194,7 +199,7 @@
 					itemStyle: { borderJoin: 'round' },
 					symbol: 'none',
 					data: new Array(360).fill(0).map((_, index) => {
-						return [2.5, index];
+						return [redZoneRadius, index];
 					}),
 					lineStyle: {
 						color: '#E73E51',
@@ -211,10 +216,10 @@
 					coordinateSystem: 'polar',
 					symbol: 'none',
 					data: new Array(360).fill(0).map((_, index) => {
-						return [0.2, index];
+						return [yellowZoneRadius, index];
 					}),
 					lineStyle: {
-						color: '#00ADA8',
+						color: '#F8EA47',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
@@ -228,10 +233,10 @@
 					coordinateSystem: 'polar',
 					symbol: 'none',
 					data: new Array(360).fill(0).map((_, index) => {
-						return [0.9, index];
+						return [greenZoneRadius, index];
 					}),
 					lineStyle: {
-						color: '#F8EA47',
+						color: '#00ADA8',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
