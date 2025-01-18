@@ -478,6 +478,7 @@
 						max_score={$page.data.compliance_assessment_score.max_score}
 						field="documentation_score"
 						label={m.documentationScore()}
+						isDoc=True
 						disabled={!data.is_scored || data.result === 'not_applicable'}
 					/>
 				{/if}
