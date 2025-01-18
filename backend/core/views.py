@@ -3417,14 +3417,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 for evidence in evidences:
                     if evidence.attachment:
                         if default_storage.exists(evidence.attachment.name):
-                            zipf.writetr(
+                            zipf.writestr(
                                 os.path.join(
                                     "evidences",
                                     os.path.basename(evidence.attachment.name),
                                 ),
                                 default_storage.open(evidence.attachment.name).read(),
                             )
-            zipf.writestr("index.html", index_content)
+                zipf.writestr("index.html", index_content)
 
             response = FileResponse(open(zip_name, "rb"), as_attachment=True)
             response["Content-Disposition"] = f'attachment; filename="{zip_name}"'
