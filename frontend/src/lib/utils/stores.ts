@@ -50,3 +50,7 @@ export const createModalCache = {
 	},
 	data: {}
 };
+
+import type { Driver } from 'driver.js';
+
+export const driverInstance = writable<Driver | null>(null);

@@ -6,20 +6,7 @@
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
-
-	// if (browser) {
-	// 	let buttonList = document.querySelectorAll('button');
-	// 	buttonList.forEach((button) => {
-	// 		button.addEventListener('click', () => {
-	// 			buttonList.forEach((button) => {
-	// 				button.classList.remove('bg-primary-100');
-	// 				button.classList.remove('text-primary-800');
-	// 			});
-	// 			button.classList.add('bg-primary-100');
-	// 			button.classList.add('text-primary-800');
-	// 		});
-	// 	});
-	// }
+	import { driverInstance } from '$lib/utils/stores';
 
 	const user = $page.data.user;
 
@@ -54,6 +41,12 @@
 	function lastAccordionItemOpened(value: string) {
 		lastAccordionItem.set(value);
 	}
+
+	function handleNavClick() {
+		setTimeout(() => {
+			$driverInstance?.moveNext();
+		}, 0);
+	}
 </script>
 
 <nav class="flex-grow scrollbar">
@@ -75,6 +68,7 @@
 			<AccordionItem
 				id={item.name.toLowerCase().replace(' ', '-')}
 				on:click={() => lastAccordionItemOpened(item.name)}
+				on:click={handleNavClick}
 				open={$lastAccordionItem === item.name}
 			>
 				<svelte:fragment slot="summary"><SideBarCategory {item} /></svelte:fragment>
