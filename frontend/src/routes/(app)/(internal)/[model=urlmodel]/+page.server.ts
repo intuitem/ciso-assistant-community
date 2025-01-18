@@ -8,10 +8,13 @@ import {
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms';
+import { fail, superValidate, withFiles, setError } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
+import { setFlash } from 'sveltekit-flash-message/server';
+import * as m from '$paraglide/messages';
+import { safeTranslate } from '$lib/utils/i18n';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
@@ -63,6 +66,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
+	if (model.urlModel === 'folders') {
+		const folderImportForm = await superValidate(zod(modelSchema('folders-import')), {
+			errors: false
+		});
+		model['folderImportForm'] = folderImportForm;
+	}
+
 	return { createForm, deleteForm, model, URLModel };
 };
 
@@ -78,5 +88,58 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return defaultDeleteFormAction({ event, urlModel: event.params.model! });
+	},
+	importFolder: async (event) => {
+		const formData = Object.fromEntries(await event.request.formData());
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(formData, zod(modelSchema('folders-import')));
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const { file } = formData as { file: File };
+
+		const endpoint = `${BASE_API_URL}/folders/import/`;
+
+		const response = await event.fetch(endpoint, {
+			method: 'POST',
+			headers: {
+				'Content-Disposition': `attachment; filename="${file.name}"`,
+				'Content-Type': file.type,
+				'X-CISOAssistantDomainName': form.data.name
+			},
+			body: file
+		});
+		const res = await response.json();
+
+		if (!response.ok && res.missing_libraries) {
+			setError(form, 'file', m.missingLibrariesInImport());
+			for (const value of res.missing_libraries) {
+				setError(form, 'non_field_errors', value);
+			}
+			return fail(400, { form });
+		}
+
+		if (!response.ok) {
+			if (res.error) {
+				setFlash({ type: 'error', message: safeTranslate(res.error) }, event);
+				return { form };
+			}
+			Object.entries(res).forEach(([key, value]) => {
+				setError(form, key, safeTranslate(value));
+			});
+			return fail(400, { form });
+		}
+
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyImportedFolder()
+			},
+			event
+		);
+
+		return withFiles({ form });
 	}
 };

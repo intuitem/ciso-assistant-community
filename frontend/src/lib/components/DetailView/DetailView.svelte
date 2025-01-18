@@ -392,6 +392,7 @@
 					{/if}
 				</div>
 			{/if}
+			<slot name="actions" />
 		</div>
 	</div>
 </div>

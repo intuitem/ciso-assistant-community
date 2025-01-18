@@ -48,6 +48,40 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalFolderImportForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.model['folderImportForm'],
+				model: data.model,
+				customNameDescription: true,
+				importFolder: true,
+				formAction: '?/importFolder',
+				enctype: 'multipart/form-data',
+				dataType: 'form'
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('importFolder')
+		};
+		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
+			modalComponent = {
+				ref: MissingConstraintsModal
+			};
+			modal = {
+				type: 'component',
+				component: modalComponent,
+				title: m.warning(),
+				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
+				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
+			};
+		}
+		modalStore.trigger(modal);
+	}
+
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
@@ -122,6 +156,13 @@
 								>
 							{/if}
 							{#if URLModel === 'folders'}
+								<button
+									class="inline-block border-e p-3 btn-mini bg-sky-400 text-white w-12 focus:relative"
+									data-testid="import-button"
+									title={safeTranslate('importFolder')}
+									on:click={modalFolderImportForm}
+									><i class="fa-solid fa-file-import"></i>
+								</button>
 								<a
 									href="x-rays/inspect"
 									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"

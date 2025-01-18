@@ -75,11 +75,11 @@ export async function handleErrorResponse({
 		res['filtering_labels'] = res.label;
 	}
 	if (res.warning) {
-		setFlash({ type: 'warning', message: res.warning }, event);
+		setFlash({ type: 'warning', message: safeTranslate(res.warning) }, event);
 		return { form };
 	}
 	if (res.error) {
-		setFlash({ type: 'error', message: res.error }, event);
+		setFlash({ type: 'error', message: safeTranslate(res.error) }, event);
 		return { form };
 	}
 	Object.entries(res).forEach(([key, value]) => {
