@@ -269,6 +269,68 @@ def gen_audit_context(id, doc, tree, lang):
 
         return category_result_counts
 
+    def aggregate_category_scores(data):
+        """
+        Aggregate scores per category from the tree structure, using existing score values.
+        Each scoreable item has a standard max_score of 100.
+
+        Args:
+            data (dict): Tree structure containing assessment data with score values
+
+        Returns:
+            dict: Dictionary with category URNs as keys and score information as values
+        """
+
+        def recursive_score_calculation(node_data):
+            # Initialize score tracking for this node
+            scores = {
+                "total_score": 0,  # Sum of all scores
+                "item_count": 0,  # Number of scoreable items
+                "scored_count": 0,  # Number of items that have been scored
+            }
+
+            # Check if the current node is scoreable
+            if node_data.get("is_scored", False):
+                scores["item_count"] = 1
+
+                if node_data.get("score") is not None:
+                    scores["total_score"] = node_data["score"]
+                    scores["scored_count"] = 1
+
+            # Recursively process children
+            for child_id, child_data in node_data.get("children", {}).items():
+                child_scores = recursive_score_calculation(child_data)
+
+                # Aggregate child scores
+                scores["total_score"] += child_scores["total_score"]
+                scores["item_count"] += child_scores["item_count"]
+                scores["scored_count"] += child_scores["scored_count"]
+
+            return scores
+
+        # Dictionary to store category scores
+        category_scores = {}
+
+        # Process only top-level nodes (categories)
+        for node_id, node_data in data.items():
+            if node_data.get("parent_urn") is None:
+                scores = recursive_score_calculation(node_data)
+
+                # Calculate average score for the category
+                average_score = 0
+                if scores["scored_count"] > 0:
+                    average_score = scores["total_score"] / scores["scored_count"]
+
+                category_scores[node_data["urn"]] = {
+                    "name": node_data["node_content"],
+                    "total_score": scores["total_score"],
+                    "item_count": scores["item_count"],
+                    "scored_count": scores["scored_count"],
+                    "average_score": round(average_score, 1),
+                }
+
+        return category_scores
+
     context = dict()
     audit = ComplianceAssessment.objects.get(id=id)
 
@@ -279,6 +341,10 @@ def gen_audit_context(id, doc, tree, lang):
     result_counts = count_category_results(tree)
 
     agg_drifts = list()
+
+    # Calculate category scores
+    category_scores = aggregate_category_scores(tree)
+    print(category_scores)
 
     for key, content in tree.items():
         total = sum(result_counts[content["urn"]].values())
@@ -415,5 +481,8 @@ def gen_audit_context(id, doc, tree, lang):
         "ac_count": ac_total,
         "igs": IGs,
     }
+
+    # Add to context
+    context["category_scores"] = category_scores
 
     return context
