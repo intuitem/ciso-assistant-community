@@ -8,6 +8,7 @@ from docx.shared import Cm
 import matplotlib.pyplot as plt
 import numpy as np
 
+from django.utils.translation import gettext_lazy as _
 # from icecream import ic
 
 from django.db.models import Count
@@ -172,7 +173,7 @@ def plot_spider_chart(data, colors=None, title=None):
     return chart_buffer
 
 
-def gen_audit_context(id, doc, tree):
+def gen_audit_context(id, doc, tree, lang):
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -247,15 +248,42 @@ def gen_audit_context(id, doc, tree):
 
     aggregated["total"] = total
 
+    # temporary hack since the gettext_lazy wasn't consistent
+    i18n_dict = {
+        "en": {
+            "compliant": "Compliant",
+            "partially_compliant": "Partially compliant",
+            "non_compliant": "Non compliant",
+            "not_applicable": "Not applicable",
+            "not_assessed": "Not assessed",
+        },
+        "fr": {
+            "compliant": "Conformes",
+            "partially_compliant": "Partiellement conformes",
+            "non_compliant": "Non conformes",
+            "not_applicable": "Non applicables",
+            "not_assessed": "Non évalués",
+        },
+    }
+
     donut_data = [
-        {"category": "Conforme", "value": aggregated["compliant"]},
+        {"category": i18n_dict[lang]["compliant"], "value": aggregated["compliant"]},
         {
-            "category": "Partiellement conforme",
+            "category": i18n_dict[lang]["partially_compliant"],
             "value": aggregated["partially_compliant"],
         },
-        {"category": "Non conforme", "value": aggregated["non_compliant"]},
-        {"category": "Non applicable", "value": aggregated["not_applicable"]},
-        {"category": "Non évalué", "value": aggregated["not_assessed"]},
+        {
+            "category": i18n_dict[lang]["non_compliant"],
+            "value": aggregated["non_compliant"],
+        },
+        {
+            "category": i18n_dict[lang]["not_applicable"],
+            "value": aggregated["not_applicable"],
+        },
+        {
+            "category": i18n_dict[lang]["not_assessed"],
+            "value": aggregated["not_assessed"],
+        },
     ]
 
     custom_colors = ["#2196F3"]
