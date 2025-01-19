@@ -86,10 +86,11 @@
 							{#if !disabled && scores_definition && $value !== null}
 								{#each scores_definition as definition}
 									{#if definition.score === $value}
-										<p class="font-bold text-center">{definition.name}</p>
-										{#if isDoc && definition.description_doc}{definition.description_doc.trim()}
-										{:else}
-											{definition.description ? `${definition.description}` : ''}
+										<p class="font-bold">{definition.name}</p>
+										{#if isDoc && definition.description_doc}
+											{definition.description_doc}
+										{:else if definition.description}
+											{definition.description}
 										{/if}
 									{/if}
 								{/each}
