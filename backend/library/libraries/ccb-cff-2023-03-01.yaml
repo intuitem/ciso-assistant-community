@@ -59,8 +59,9 @@ objects:
             \ au cours des deux derni\xE8res ann\xE9es."
     - score: 3
       name: Defined
-      description: 'Formal process exists and is implemented. Evidence available for
-        most activities.
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for most activities.
 
         Less than 10% process exceptions.'
       description_doc: 'Formally approved Process documentation exists, and exceptions
@@ -70,17 +71,20 @@ objects:
       translations:
         fr:
           name: "D\xE9fini"
-          description: "Un processus formel existe et est mis en \u0153uvre. Des preuves\
-            \ sont disponibles pour la plupart des activit\xE9s. \nMoins de 10 % d\u2019\
-            exceptions au processus."
+          description: "Un processus formel existe et est mis en \u0153uvre.\nDes\
+            \ preuves sont disponibles pour la plupart des activit\xE9s. \nMoins de\
+            \ 10 % d\u2019exceptions au processus."
           description_doc: "Il existe une documentation formellement approuv\xE9e\
             \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
             es.\nLes exceptions sont document\xE9es et approuv\xE9es dans moins de\
             \ 5 % des cas."
     - score: 4
       name: Managed
-      description: 'Formal process exists and is implemented. Evidence available for
-        all activities. Detailed metrics of the process are captured and reported.
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for all activities.
+
+        Detailed metrics of the process are captured and reported.
 
         Minimal target for metrics has been established.
 
@@ -92,17 +96,21 @@ objects:
       translations:
         fr:
           name: "G\xE9r\xE9"
-          description: "Un processus formel existe et est mis en \u0153uvre. Des preuves\
-            \ sont disponibles pour toutes les activit\xE9s. Des mesures d\xE9taill\xE9\
-            es du processus sont saisies et communiqu\xE9es. Un objectif minimum est\
-            \ fix\xE9 pour les indicateurs.\nMoins de 5 % des exceptions au processus."
+          description: "Un processus formel existe et est mis en \u0153uvre.\nDes\
+            \ preuves sont disponibles pour toutes les activit\xE9s.\nDes mesures\
+            \ d\xE9taill\xE9es du processus sont saisies et communiqu\xE9es.\nUn objectif\
+            \ minimum est fix\xE9 pour les indicateurs.\nMoins de 5 % des exceptions\
+            \ au processus."
           description_doc: "Il existe une documentation formellement approuv\xE9e\
             \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
             es.\nExceptions document\xE9es et approuv\xE9es < 3 % du temps."
     - score: 5
       name: Optimizing
-      description: 'Formal process exists and is implemented. Evidence available for
-        all activities. Detailed metrics of the process are captured and reported.
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for all activities.
+
+        Detailed metrics of the process are captured and reported.
 
         Minimal target for metrics has been established and continually improving.
 
@@ -114,11 +122,11 @@ objects:
       translations:
         fr:
           name: "Optimis\xE9"
-          description: "Un processus formel existe et est mis en \u0153uvre. Des preuves\
-            \ sont disponibles pour toutes les activit\xE9s. Des mesures d\xE9taill\xE9\
-            es du processus sont saisies et communiqu\xE9es. Des objectifs minimaux\
-            \ sont fix\xE9s pour les indicateurs et sont am\xE9lior\xE9s en permanence.\
-            \ Moins de 1 % des exceptions au processus."
+          description: "Un processus formel existe et est mis en \u0153uvre.\nDes\
+            \ preuves sont disponibles pour toutes les activit\xE9s.\nDes mesures\
+            \ d\xE9taill\xE9es du processus sont saisies et communiqu\xE9es.\nDes\
+            \ objectifs minimaux sont fix\xE9s pour les indicateurs et sont am\xE9\
+            lior\xE9s en permanence.\nMoins de 1 % des exceptions au processus."
           description_doc: "Il existe une documentation formellement approuv\xE9e\
             \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
             es.\nExceptions document\xE9es et approuv\xE9es < 0,5 % du temps."
