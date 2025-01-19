@@ -679,7 +679,7 @@ for tab in dataframe:
                 score = row[header["score"]].value
                 name = row[header["name"]].value
                 description = row[header["description"]].value
-                description_doc = row[header["description-doc"]].value if "description-doc" in header else None
+                description_doc = row[header["description_doc"]].value if "description_doc" in header else None
                 translations = get_translations(header, row)
                 current_score = {
                     "score": score,
@@ -687,7 +687,7 @@ for tab in dataframe:
                     "description": description,
                 }
                 if description_doc:
-                    current_score["description-doc"] = description_doc
+                    current_score["description_doc"] = description_doc
                 if translations:
                     current_score["translations"] = translations
                 scores_definition.append(current_score)

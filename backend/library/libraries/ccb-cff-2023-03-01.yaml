@@ -37,6 +37,7 @@ objects:
     - score: 1
       name: Initial
       description: Standard process does not exist.
+      description_doc: No Process documentation or not formally approved by management.
       translations:
         fr:
           name: Initial
@@ -46,6 +47,8 @@ objects:
     - score: 2
       name: Repeatable
       description: Ad-hoc process exists and is done informally.
+      description_doc: Formally approved Process documentation exists but not reviewed
+        in the previous 2 years.
       translations:
         fr:
           name: "R\xE9p\xE9table"
@@ -60,6 +63,10 @@ objects:
         most activities.
 
         Less than 10% process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 5% of the time.'
       translations:
         fr:
           name: "D\xE9fini"
@@ -78,6 +85,10 @@ objects:
         Minimal target for metrics has been established.
 
         Less than 5% of process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 3% of the time.'
       translations:
         fr:
           name: "G\xE9r\xE9"
@@ -96,6 +107,10 @@ objects:
         Minimal target for metrics has been established and continually improving.
 
         Less than 1% of process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 0,5% of the time.'
       translations:
         fr:
           name: "Optimis\xE9"

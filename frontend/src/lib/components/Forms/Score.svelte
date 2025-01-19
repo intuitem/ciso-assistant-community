@@ -47,6 +47,7 @@
 	$: $value = !disabled ? ($value ?? min_score) : $value;
 </script>
 
+<slot name="left" />
 <div class={styles}>
 	{#if label !== undefined}
 		<div>
@@ -80,7 +81,7 @@
 				{disabled}
 			>
 				<div class="flex justify-between space-x-8 items-center">
-					<slot name="left" />
+					
 					<p class="w-full max-w-[80ch]">
 						{#if !disabled && scores_definition && $value !== null}
 							{#each scores_definition as definition}
