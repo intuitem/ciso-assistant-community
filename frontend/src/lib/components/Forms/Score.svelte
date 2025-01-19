@@ -50,17 +50,6 @@
 <slot name="left" />
 {#if !disabled}
 	<div class={styles}>
-		{#if label !== undefined}
-			<div>
-				{#if $constraints?.required}
-					<label class="text-sm font-semibold" for={field}
-						>{label} <span class="text-red-500">*</span></label
-					>
-				{:else}
-					<label class="text-sm font-semibold" for={field}>{label}</label>
-				{/if}
-			</div>
-		{/if}
 		{#if $errors && $errors.length > 0}
 			<div>
 				{#each $errors as error}
@@ -69,7 +58,7 @@
 			</div>
 		{/if}
 		<div class="flex flex-row w-full items-center justify-evenly space-x-4">
-			<div class="flex w-full items-center justify-center">
+			<div class="flex w-full items-center justify-center border-2 rounded-lg p-2">
 				<RangeSlider
 					class="w-full"
 					data-testid="range-slider-input"
@@ -81,8 +70,18 @@
 					ticked
 					{disabled}
 				>
-					<div class="flex justify-between space-x-8 w-full">
-						<div class="flex space-x-8 w-full justify-center items-center">
+					<div class="flex justify-between space-x-8 w-full items-start">
+						{#if label !== undefined}
+							{#if $constraints?.required}
+								<label class="text-sm font-semibold" for={field}
+									>{label} <span class="text-red-500">*</span></label
+								>
+							{:else}
+								<label class="text-sm font-semibold" for={field}>{label}</label>
+							{/if}
+					{/if}
+			
+						<div class="flex space-x-8 w-full justify-center">
 							<p class="w-full max-w-[80ch] justify-center text-center whitespace-pre-wrap">
 								{#if !disabled && scores_definition && $value !== null}
 									{#each scores_definition as definition}
