@@ -5,10 +5,10 @@ name: "Recommandations sur les architectures des syst\xE8mes d'information sensi
   \ ou Diffusion Restreinte"
 description: "Outil d'aide et de suivi d'impl\xE9mentation de la s\xE9curit\xE9 (OASIS)\n\
   Recommandations sur les architectures des syst\xE8mes d'information sensibles ou\
-  \ Diffusion Restreinte"
+  \ Diffusion Restreinte\nhttps://cyber.gouv.fr/publications/recommandations-pour-les-architectures-des-si-sensibles-ou-dr"
 copyright: ANSSI Etalab
 version: 1
-publication_date: 2024-06-03
+publication_date: 2025-01-20
 provider: ANSSI
 packager: intuitem
 objects:
@@ -19,7 +19,7 @@ objects:
       \ ou Diffusion Restreinte"
     description: "Outil d'aide et de suivi d'impl\xE9mentation de la s\xE9curit\xE9\
       \ (OASIS)\nRecommandations sur les architectures des syst\xE8mes d'information\
-      \ sensibles ou Diffusion Restreinte"
+      \ sensibles ou Diffusion Restreinte\nhttps://cyber.gouv.fr/publications/recommandations-pour-les-architectures-des-si-sensibles-ou-dr"
     implementation_groups_definition:
     - ref_id: lb
       name: '*'
