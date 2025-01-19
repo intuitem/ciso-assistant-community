@@ -81,7 +81,6 @@
 				{disabled}
 			>
 				<div class="flex justify-between space-x-8 items-center">
-					
 					<p class="w-full max-w-[80ch]">
 						{#if !disabled && scores_definition && $value !== null}
 							{#each scores_definition as definition}
