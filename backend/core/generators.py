@@ -111,6 +111,69 @@ def plot_donut(data, colors=None):
     return chart_buffer
 
 
+def plot_completion_bar(data, colors=None, title=None):
+    """
+    Create a vertical bar chart showing completion percentage per category
+
+    Args:
+        data (list): List of dictionaries with 'category' and 'value' keys
+        colors (list, optional): Custom color palette
+        title (str, optional): Chart title
+
+    Returns:
+        io.BytesIO: Buffer containing the bar chart image
+    """
+    plt.close("all")
+
+    categories = [item["category"] for item in data]
+    values = [item["value"] for item in data]
+
+    default_colors = [
+        "#2196F3",  # Blue
+        "#4CAF50",  # Green
+        "#FFC107",  # Amber
+        "#F44336",  # Red
+        "#9C27B0",  # Purple
+    ]
+
+    plt.figure(figsize=(12, 6))
+    ax = plt.gca()
+
+    plot_colors = colors if colors is not None else default_colors[: len(categories)]
+    bars = plt.bar(categories, values, color=plot_colors)
+
+    # Add value labels on top of each bar
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(
+            bar.get_x() + bar.get_width() / 2,
+            height,
+            f"{int(height)}%",
+            ha="center",
+            va="bottom",
+        )
+
+    # Customize the chart
+    plt.ylim(0, 100)  # Set y-axis from 0 to 100 for percentages
+    plt.ylabel("Completion (%)")
+
+    # Rotate x-axis labels for better readability if needed
+    plt.xticks(rotation=45, ha="right")
+
+    if title:
+        plt.title(title)
+
+    plt.tight_layout()
+
+    # Save to buffer
+    chart_buffer = io.BytesIO()
+    plt.savefig(chart_buffer, format="png", dpi=300, bbox_inches="tight")
+    chart_buffer.seek(0)
+    plt.close()
+
+    return chart_buffer
+
+
 def plot_spider_chart(data, colors=None, title=None):
     """
     Create a spider/radar chart from the input data
@@ -330,6 +393,10 @@ def gen_audit_context(id, doc, tree, lang):
     ]
     hbar_buffer = plot_horizontal_bar(ac_chart_data, colors=custom_colors)
 
+    completion_bar_buffer = plot_completion_bar(spider_data, colors=custom_colors)
+
+    chart_completion = InlineImage(doc, completion_bar_buffer, width=Cm(15))
+
     res_donut = InlineImage(doc, plot_donut(donut_data), width=Cm(15))
     chart_spider = InlineImage(doc, spider_chart_buffer, width=Cm(15))
     ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
@@ -340,6 +407,7 @@ def gen_audit_context(id, doc, tree, lang):
         "contributors": f"{authors}\n{reviewers}",
         "req": aggregated,
         "compliance_donut": res_donut,
+        "completion_bar": chart_completion,
         "compliance_radar": chart_spider,
         "drifts_per_domain": agg_drifts,
         "chart_controls": ac_chart,
