@@ -82,14 +82,14 @@
 			>
 				<div class="flex justify-between space-x-8 w-full">
 					<div class="flex space-x-8 w-full justify-center items-center">
-						<p class="w-full max-w-[80ch] justify-center text-center">
+						<p class="w-full max-w-[80ch] justify-center text-center whitespace-pre-wrap">
 							{#if !disabled && scores_definition && $value !== null}
 								{#each scores_definition as definition}
 									{#if definition.score === $value}
-										{#if isDoc && definition.description_doc}
-											{definition.name}: {definition.description_doc}`
+										<p class="font-bold text-center">{definition.name}</p>
+										{#if isDoc && definition.description_doc}{definition.description_doc.trim()}
 										{:else}
-											{definition.name}{definition.description ? `: ${definition.description}` : ''}
+											{definition.description ? `${definition.description}` : ''}
 										{/if}
 									{/if}
 								{/each}
