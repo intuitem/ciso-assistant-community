@@ -80,26 +80,29 @@
 				ticked
 				{disabled}
 			>
-				<div class="flex justify-between space-x-8 items-center">
-					<p class="w-full max-w-[80ch]">
-						{#if !disabled && scores_definition && $value !== null}
-							{#each scores_definition as definition}
-								{#if definition.score === $value}
-									{#if isDoc && definition.description_doc}
-										{definition.description_doc}`
-									{:else}
-										{definition.name}{definition.description ? `: ${definition.description}` : ''}
+				<div class="flex justify-between space-x-8 w-full">
+					<div class="flex space-x-8 w-full justify-center items-center">
+						<p class="w-full max-w-[80ch] justify-center text-center">
+							{#if !disabled && scores_definition && $value !== null}
+								{#each scores_definition as definition}
+									{#if definition.score === $value}
+										{#if isDoc && definition.description_doc}
+											{definition.name}: {definition.description_doc}`
+										{:else}
+											{definition.name}{definition.description ? `: ${definition.description}` : ''}
+										{/if}
 									{/if}
-								{/if}
-							{/each}
-						{/if}
-					</p>
+								{/each}
+							{/if}
+						</p>
+					</div>
 					<ProgressRadial
 						stroke={100}
 						meter={displayScoreColor($value, max_score, inversedColors)}
 						value={!disabled ? formatScoreValue($value, max_score, fullDonut) : min_score}
 						font={150}
 						class="shrink-0"
+						border-4
 						width={'w-12'}>{!disabled ? $value : '--'}</ProgressRadial
 					>
 				</div>
