@@ -79,8 +79,8 @@
 							{:else}
 								<label class="text-sm font-semibold" for={field}>{label}</label>
 							{/if}
-					{/if}
-			
+						{/if}
+
 						<div class="flex space-x-8 w-full justify-center">
 							<p class="w-full max-w-[80ch] justify-center text-center whitespace-pre-wrap">
 								{#if !disabled && scores_definition && $value !== null}
