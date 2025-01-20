@@ -177,7 +177,7 @@ def plot_completion_bar(data, colors=None, title=None):
 def plot_category_radar(category_scores, max_score=100, colors=None, title=None):
     """
     Create a radar/spider chart showing scores per category
-    
+
     Args:
         category_scores (dict): Dictionary containing category scores from aggregate_category_scores()
         max_score (float): Maximum possible score value (default: 100)
@@ -190,8 +190,8 @@ def plot_category_radar(category_scores, max_score=100, colors=None, title=None)
     plt.close("all")
 
     # Extract data
-    categories = [data['name'] for data in category_scores.values()]
-    scores = [data['average_score'] for data in category_scores.values()]
+    categories = [data["name"] for data in category_scores.values()]
+    scores = [data["average_score"] for data in category_scores.values()]
 
     # Number of categories
     N = len(categories)
@@ -235,7 +235,7 @@ def plot_category_radar(category_scores, max_score=100, colors=None, title=None)
         plt.title(title)
 
     plt.tight_layout()
-    
+
     # Save to buffer
     chart_buffer = io.BytesIO()
     plt.savefig(chart_buffer, format="png", dpi=300, bbox_inches="tight")
@@ -417,8 +417,8 @@ def gen_audit_context(id, doc, tree, lang):
     category_scores = aggregate_category_scores(tree)
     max_score = 100  # default
     for node in tree.values():
-        if node.get('max_score') is not None:
-            max_score = node['max_score']
+        if node.get("max_score") is not None:
+            max_score = node["max_score"]
             break
     print(category_scores)
 
@@ -497,7 +497,9 @@ def gen_audit_context(id, doc, tree, lang):
         colors=custom_colors,
     )
 
-    category_radar_buffer = plot_category_radar(category_scores, max_score=max_score, colors=custom_colors)
+    category_radar_buffer = plot_category_radar(
+        category_scores, max_score=max_score, colors=custom_colors
+    )
     chart_category_radar = InlineImage(doc, category_radar_buffer, width=Cm(15))
 
     requirement_assessments_objects = audit.get_requirement_assessments(
