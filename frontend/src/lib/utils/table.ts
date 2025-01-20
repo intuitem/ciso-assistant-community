@@ -560,8 +560,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'is_sso'],
-		body: ['email', 'first_name', 'last_name', 'is_sso']
+		head: ['email', 'firstName', 'lastName', 'is_sso', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'is_sso', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],
