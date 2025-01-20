@@ -2,21 +2,39 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages';
+	import type { PageData } from './$types';
 
-	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	export let data: PageData;
 
-	const modalStore = getModalStore();
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+
+	const modalStore: ModalStore = getModalStore();
 
 	let form: HTMLFormElement;
 	let file: HTMLInputElement;
 
-	function modalConfirmUpload(): void {
-		const modal: ModalSettings = {
-			type: 'confirm',
-			title: m.importBackup(),
-			body: m.confirmImportBackup(),
-			response: () => form.requestSubmit()
+	// Function to handle modal confirmation for any action
+	function modalConfirm(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: {
+				_form: form, // Form to be triggered
+				id: id,
+				debug: false,
+				URLModel: 'backup-restore',
+				formAction: form.requestSubmit()
+			}
 		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: `Confirm ${action}`,
+			body: `Are you sure you want to proceed with ${action} for ${name}?`
+		};
+
 		if (file) modalStore.trigger(modal);
 	}
 
@@ -56,7 +74,7 @@
 				<button
 					class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
 					type="button"
-					on:click={modalConfirmUpload}>{m.upload()}</button
+					on:click={() => modalConfirm(data.settings.id, 'Backup', 'import')}>{m.upload()}</button
 				>
 			</form>
 		</div>
