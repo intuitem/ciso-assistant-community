@@ -281,7 +281,7 @@ export const actions: Actions = {
 			},
 			event
 		);
-		return { form };
+		return { form, newControl: measure.id };
 	},
 	createEvidence: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
