@@ -70,6 +70,7 @@ Conventions:
         The normal tree order shall be respected
         If multiple threats or reference_control are given for a requirements, they shall be separated by blank or comma.
         They shall be prefixed by the id of the corresponding base_urn and a semicolumn.
+        Scores tab shall contain score, name and description column. Optionally, description_doc can be given.
     For reference controls:
         The first line is a header, with the following possible fields (* for required):
             - ref_id(*)
@@ -678,12 +679,15 @@ for tab in dataframe:
                 score = row[header["score"]].value
                 name = row[header["name"]].value
                 description = row[header["description"]].value
+                description_doc = row[header["description_doc"]].value if "description_doc" in header else None
                 translations = get_translations(header, row)
                 current_score = {
                     "score": score,
                     "name": name,
                     "description": description,
                 }
+                if description_doc:
+                    current_score["description_doc"] = description_doc
                 if translations:
                     current_score["translations"] = translations
                 scores_definition.append(current_score)
