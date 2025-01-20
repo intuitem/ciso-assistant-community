@@ -15,8 +15,13 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import * as m from '$paraglide/messages.js';
 	import { languageTag } from '$paraglide/runtime.js';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { Tab, TabGroup, getModalStore } from '@skeletonlabs/skeleton';
+	import type {
+		PopupSettings,
+		ModalComponent,
+		ModalSettings,
+		ModalStore
+	} from '@skeletonlabs/skeleton';
+	import { popup, Tab, TabGroup, getModalStore } from '@skeletonlabs/skeleton';
 
 	import { onMount } from 'svelte';
 
@@ -24,6 +29,12 @@
 	const modalStore: ModalStore = getModalStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
+
+	const popupHover: PopupSettings = {
+		event: 'hover',
+		target: 'popupHover',
+		placement: 'left'
+	};
 
 	export let data;
 	export let mailing = false;
@@ -385,23 +396,24 @@
 
 			{#if displayEditButton()}
 				{#if data.data.state === 'Created'}
-					<div class="flex flex-col space-y-2 ml-4 {data.data.approver ? '' : 'mb-4'}">
+					<div class="flex flex-col space-y-2 ml-4">
 						<button
 							on:click={(_) => {
 								modalConfirm(data.data.id, data.data.name, '?/submit');
 							}}
 							on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
-							class="btn variant-filled-primary"
+							class="btn variant-filled-primary [&>*]:pointer-events-none"
 							disabled={!data.data.approver}
+							use:popup={popupHover}
 						>
 							<i class="fas fa-paper-plane mr-2" />
 							{m.submit()}
 						</button>
 						{#if !data.data.approver}
-							<span class="text-sm font-semibold"
-								>{m.riskAcceptanceMissingApproverMessage()}
-								<span class="text-red-500">*</span></span
-							>
+							<div class="card variant-ghost-surface p-4 z-20" data-popup="popupHover">
+								<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
+								<div class="arrow variant-filled-surface" />
+							</div>
 						{/if}
 					</div>
 				{/if}
