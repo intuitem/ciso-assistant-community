@@ -3142,12 +3142,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def word_report(self, request, pk):
+        """
+        Word report generation (Exec)
+        """
+        lang = "en"
+        if request.user.preferences.get("lang") is not None:
+            lang = request.user.preferences.get("lang")
+            if lang not in ["fr", "en"]:
+                lang = "en"
         template_path = (
             Path(settings.BASE_DIR)
             / "core"
             / "templates"
             / "core"
-            / "audit_report_template.docx"
+            / f"audit_report_template_{lang}.docx"
         )
         doc = DocxTemplate(template_path)
         _framework = self.get_object().framework
@@ -3160,7 +3168,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         implementation_groups = self.get_object().selected_implementation_groups
         filter_graph_by_implementation_groups(tree, implementation_groups)
-        context = gen_audit_context(pk, doc, tree)
+        context = gen_audit_context(pk, doc, tree, lang)
         doc.render(context)
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
