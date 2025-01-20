@@ -175,6 +175,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 66. Guide de sécurité des données (CNIL) 🇫🇷
 67. International Traffic in Arms Regulations (ITAR) 🇺🇸
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
+69. OWASP's checklist for LLM governance and security 🌐 
 
 ### Community contributions
 
@@ -201,9 +202,13 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
+- Indonesia PDP 🇮🇩
+- COBAC R-2024/01
+- ICO Data protection self-assessment 🇬🇧
 - NIST 800-82
-- FTC safeguards
-- CNIL checklist
+- ASD ISM 🇦🇺
+- Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
+
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
@@ -506,8 +511,9 @@ Set DJANGO_DEBUG=False for security reason.
 - RO: Romanian
 - HI: Hindi
 - UR: Urdu
-- CZ: Czech
+- CS: Czech
 - SV: Swedish
+- ID: Indonesian
 
 ## Contributors 🤝
 

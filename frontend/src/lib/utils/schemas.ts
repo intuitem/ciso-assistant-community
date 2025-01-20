@@ -67,6 +67,11 @@ export const FolderSchema = z.object({
 	parent_folder: z.string().optional()
 });
 
+export const FolderImportSchema = z.object({
+	name: nameSchema,
+	file: z.instanceof(File)
+});
+
 export const ProjectSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -176,7 +181,6 @@ export const ReferenceControlSchema = z.object({
 
 export const AssetSchema = z.object({
 	...NameDescriptionMixin,
-	business_value: z.string().optional(),
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional(),
@@ -219,8 +223,9 @@ export const RequirementAssessmentSchema = z.object({
 	answer: jsonSchema,
 	status: z.string(),
 	result: z.string(),
-	score: z.number().optional().nullable(),
 	is_scored: z.boolean().optional(),
+	score: z.number().optional().nullable(),
+	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
 	requirement: z.string(),
@@ -264,6 +269,7 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
+	show_documentation_score: z.boolean().optional().default(false),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -432,18 +438,18 @@ export const roToSchema = z.object({
 export const StakeholderSchema = z.object({
 	ebios_rm_study: z.string(),
 	applied_controls: z.string().uuid().optional().array().optional(),
-	category: z.string().optional(),
+	category: z.string(),
 	entity: z.string().optional(),
 	current_dependency: z.number().min(0).max(4).default(0).optional(),
 	current_penetration: z.number().min(0).max(4).default(0).optional(),
 	current_maturity: z.number().min(1).max(4).default(1).optional(),
 	current_trust: z.number().min(1).max(4).default(1).optional(),
-	current_criticality: z.number().min(0).max(4).default(0).optional(),
+	current_criticality: z.number().min(0).max(16).default(0).optional(),
 	residual_dependency: z.number().min(0).max(4).default(0).optional(),
 	residual_penetration: z.number().min(0).max(4).default(0).optional(),
 	residual_maturity: z.number().min(1).max(4).default(1).optional(),
 	residual_trust: z.number().min(1).max(4).default(1).optional(),
-	residual_criticality: z.number().min(0).max(4).default(0).optional(),
+	residual_criticality: z.number().min(0).max(16).default(0).optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
 });
@@ -475,6 +481,7 @@ export const operationalScenarioSchema = z.object({
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
+	'folders-import': FolderImportSchema,
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,

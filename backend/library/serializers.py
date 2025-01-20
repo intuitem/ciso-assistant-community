@@ -1,7 +1,7 @@
 from core.models import StoredLibrary, LoadedLibrary
 from rest_framework import serializers
-from core.serializers import ReferentialSerializer
-from core.serializer_fields import FieldsRelatedField
+from core.serializers import ReferentialSerializer, BaseModelSerializer
+from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 
 """class LibraryObjectSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
@@ -31,6 +31,7 @@ class StoredLibrarySerializer(ReferentialSerializer):
             "version",
             "packager",
             "provider",
+            "publication_date",
             "builtin",
             "objects_meta",
             "is_loaded",
@@ -45,6 +46,34 @@ class StoredLibraryDetailedSerializer(ReferentialSerializer):
     class Meta:
         model = StoredLibrary
         exclude = ["translations"]
+
+
+class LoadedLibraryImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    dependencies = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = LoadedLibrary
+        fields = [
+            "created_at",
+            "updated_at",
+            "version",
+            "folder",
+            "urn",
+            "ref_id",
+            "provider",
+            "name",
+            "description",
+            "annotation",
+            "locale",
+            "packager",
+            "publication_date",
+            "builtin",
+            "objects_meta",
+            "translations",
+            "dependencies",
+            "copyright",
+        ]
 
 
 class LoadedLibraryDetailedSerializer(ReferentialSerializer):
@@ -80,6 +109,7 @@ class LoadedLibrarySerializer(ReferentialSerializer):
             "version",
             "packager",
             "provider",
+            "publication_date",
             "builtin",
             "objects_meta",
             "reference_count",

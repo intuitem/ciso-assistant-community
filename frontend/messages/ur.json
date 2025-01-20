@@ -110,7 +110,6 @@
 	"providerColon": "مہیا کرنے والا:",
 	"domain": "ڈومین",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "علاج کی حیثیت",
 	"qualification": "اہلیت",
 	"currentLevel": "موجودہ سطح",
@@ -862,8 +861,12 @@
 	"addTag": "ٹیگ شامل کریں۔",
 	"tagsHelpText": "ٹیگز اشیاء کی درجہ بندی اور فلٹر کرنے کے لیے استعمال ہوتے ہیں۔ آپ اضافی سیکشن میں ٹیگ شامل کر سکتے ہیں۔",
 	"forgotPassword": "پاس ورڈ بھول گئے۔",
-	"scoreSemiColon": "سکور:",
+	"score": "سکور",
 	"mappingInferenceHelpText": "یہ متغیرات طے شدہ ہیں اور ماخذ کے لحاظ سے تبدیل نہیں ہوں گے۔",
 	"bringTheEvidences": "ثبوت لے کر آئیں",
-	"bringTheEvidencesHelpText": "اگر غیر فعال ہو تو، اعتراض کو اس کے ثبوت کے بغیر نقل کر دیا جائے گا۔"
+	"bringTheEvidencesHelpText": "اگر غیر فعال ہو تو، اعتراض کو اس کے ثبوت کے بغیر نقل کر دیا جائے گا۔",
+	"documentationScore": "دستاویزی سکور",
+	"useDocumentationScore": "دستاویزی سکور استعمال کریں۔",
+	"useDocumentationScoreHelpText": "ضروریات کو پورا کرنے کے لیے دوسرا سکور (دستاویزی سکور) دستیاب ہوگا۔",
+	"publicationDate": "اشاعت کی تاریخ"
 }

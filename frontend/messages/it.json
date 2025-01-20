@@ -110,7 +110,6 @@
 	"providerColon": "Fornitore:",
 	"domain": "Dominio",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "Stato di avanzamento del trattamento",
 	"qualification": "Categorizzazione",
 	"currentLevel": "Rischio attuale",
@@ -862,8 +861,12 @@
 	"addTag": "Aggiungi tag",
 	"tagsHelpText": "I tag vengono utilizzati per categorizzare e filtrare gli elementi. Puoi aggiungere tag nella sezione Extra",
 	"forgotPassword": "Ha dimenticato la password",
-	"scoreSemiColon": "Punto:",
+	"score": "Punto",
 	"mappingInferenceHelpText": "Queste variabili sono fisse e non cambiano a seconda della fonte.",
 	"bringTheEvidences": "Portare le prove",
-	"bringTheEvidencesHelpText": "Se disabilitato, l'oggetto verrà duplicato senza le sue prove"
+	"bringTheEvidencesHelpText": "Se disabilitato, l'oggetto verrà duplicato senza le sue prove",
+	"documentationScore": "Punteggio della documentazione",
+	"useDocumentationScore": "Utilizzare il punteggio della documentazione",
+	"useDocumentationScoreHelpText": "Un secondo punteggio (punteggio di documentazione) sarà disponibile per valutare i requisiti.",
+	"publicationDate": "Data di pubblicazione"
 }

@@ -110,7 +110,6 @@
 	"providerColon": "Aanbieder:",
 	"domain": "Domein",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "Behandelstatus",
 	"qualification": "Kwalificatie",
 	"currentLevel": "Huidig niveau",
@@ -862,8 +861,12 @@
 	"addTag": "Tag toevoegen",
 	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra",
 	"forgotPassword": "Wachtwoord vergeten",
-	"scoreSemiColon": "Punt:",
+	"score": "Punt",
 	"mappingInferenceHelpText": "Deze variabelen zijn vast en veranderen niet, afhankelijk van de bron.",
 	"bringTheEvidences": "Breng de bewijzen",
-	"bringTheEvidencesHelpText": "Als dit is uitgeschakeld, wordt het object gedupliceerd zonder de bijbehorende bewijzen"
+	"bringTheEvidencesHelpText": "Als dit is uitgeschakeld, wordt het object gedupliceerd zonder de bijbehorende bewijzen",
+	"documentationScore": "Documentatie score",
+	"useDocumentationScore": "Documentatiescore gebruiken",
+	"useDocumentationScoreHelpText": "Een tweede score (documentatiescore) zal beschikbaar zijn om de vereisten te beoordelen.",
+	"publicationDate": "Publicatiedatum"
 }

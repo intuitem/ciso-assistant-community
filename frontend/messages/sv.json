@@ -112,7 +112,6 @@
 	"providerColon": "Leverantör:",
 	"domain": "Domän",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "Behandlingsstatus",
 	"qualification": "Kvalificering",
 	"currentLevel": "Nuvarande nivå",
@@ -862,8 +861,12 @@
 	"youCanSetPasswordHere": "Du kan ställa in ditt lösenord här.",
 	"forgotPassword": "Glömt lösenord",
 	"ssoSettingsUpdated": "SSO-inställningar uppdaterade",
-	"scoreSemiColon": "Göra:",
+	"score": "Göra",
 	"mappingInferenceHelpText": "Dessa variabler är fasta och kommer inte att ändras beroende på källan.",
 	"bringTheEvidences": "Kom med bevisen",
-	"bringTheEvidencesHelpText": "Om det är inaktiverat kommer objektet att dupliceras utan dess bevis"
+	"bringTheEvidencesHelpText": "Om det är inaktiverat kommer objektet att dupliceras utan dess bevis",
+	"documentationScore": "Poäng för dokumentation",
+	"useDocumentationScore": "Använd poängsättning av dokumentation",
+	"useDocumentationScoreHelpText": "En andra poäng (dokumentationspoängen) kommer att finnas tillgänglig för att bedöma kraven.",
+	"publicationDate": "Publiceringsdatum"
 }

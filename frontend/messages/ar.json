@@ -111,7 +111,6 @@
 	"providerColon": "مزود:",
 	"domain": "النطاق",
 	"urn": "URN",
-	"id": "معرف",
 	"treatmentStatus": "حالة المعالجة",
 	"qualification": "المؤهلات",
 	"currentLevel": "المستوى الحالي",
@@ -863,8 +862,12 @@
 	"addTag": "إضافة علامة",
 	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\"",
 	"forgotPassword": "هل نسيت كلمة السر",
-	"scoreSemiColon": "نتيجة:",
+	"score": "نتيجة",
 	"mappingInferenceHelpText": "هذه المتغيرات ثابتة ولن تتغير اعتمادًا على المصدر.",
 	"bringTheEvidences": "أحضر الأدلة",
-	"bringTheEvidencesHelpText": "في حالة التعطيل، سيتم تكرار الكائن بدون أدلته"
+	"bringTheEvidencesHelpText": "في حالة التعطيل، سيتم تكرار الكائن بدون أدلته",
+	"documentationScore": "درجة التوثيق",
+	"useDocumentationScore": "استخدام درجة التوثيق",
+	"useDocumentationScoreHelpText": "ستتوفر درجة ثانية (درجة التوثيق) لتقييم المتطلبات.",
+	"publicationDate": "تاريخ النشر"
 }

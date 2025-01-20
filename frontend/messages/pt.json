@@ -110,7 +110,6 @@
 	"providerColon": "Fornecedor:",
 	"domain": "Domínio",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "Status de tratamento",
 	"qualification": "Qualificação",
 	"currentLevel": "Nível atual",
@@ -862,8 +861,12 @@
 	"addTag": "Adicionar etiqueta",
 	"tagsHelpText": "As tags são usadas para categorizar e filtrar os itens. Você pode adicionar tags na seção Extra",
 	"forgotPassword": "Esqueceu sua senha",
-	"scoreSemiColon": "Pontuação:",
+	"score": "Pontuação",
 	"mappingInferenceHelpText": "Essas variáveis são fixas e não mudarão dependendo da fonte.",
 	"bringTheEvidences": "Traga as evidências",
-	"bringTheEvidencesHelpText": "Se desabilitado, o objeto será duplicado sem suas evidências"
+	"bringTheEvidencesHelpText": "Se desabilitado, o objeto será duplicado sem suas evidências",
+	"documentationScore": "Pontuação da documentação",
+	"useDocumentationScore": "Utilizar a pontuação da documentação",
+	"useDocumentationScoreHelpText": "Uma segunda pontuação (a pontuação da documentação) estará disponível para avaliar os requisitos.",
+	"publicationDate": "Data de publicação"
 }

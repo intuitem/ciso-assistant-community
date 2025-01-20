@@ -110,7 +110,6 @@
 	"providerColon": "Proveedor:",
 	"domain": "Dominio",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "Estado del tratamiento",
 	"qualification": "Cualificación",
 	"currentLevel": "Nivel actual",
@@ -862,8 +861,12 @@
 	"addTag": "Agregar etiqueta",
 	"tagsHelpText": "Las etiquetas se utilizan para categorizar y filtrar los elementos. Puedes agregar etiquetas en la sección Extra",
 	"forgotPassword": "Has olvidado tu contraseña",
-	"scoreSemiColon": "Puntaje:",
+	"score": "Puntaje",
 	"mappingInferenceHelpText": "Estas variables son fijas y no cambiarán dependiendo de la fuente.",
 	"bringTheEvidences": "Traer las evidencias",
-	"bringTheEvidencesHelpText": "Si está deshabilitado, el objeto se duplicará sin sus evidencias."
+	"bringTheEvidencesHelpText": "Si está deshabilitado, el objeto se duplicará sin sus evidencias.",
+	"documentationScore": "Puntuación de la documentación",
+	"useDocumentationScore": "Utilizar la puntuación de la documentación",
+	"useDocumentationScoreHelpText": "Se dispondrá de una segunda puntuación (puntuación de la documentación) para evaluar los requisitos.",
+	"publicationDate": "Fecha de publicación"
 }

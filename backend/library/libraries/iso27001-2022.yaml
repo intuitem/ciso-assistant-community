@@ -5,7 +5,8 @@ name: International standard ISO/IEC 27001:2022
 description: "Information security, cybersecurity and privacy protection \u2014 Information\
   \ security management systems \u2014 Requirements"
 copyright: See https://www.iso.org/standard/27001
-version: 6
+version: 7
+publication_date: 2024-03-02
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -1074,7 +1075,7 @@ objects:
         name: Journalisation
         description: "Cette mesure de s\xE9curit\xE9 permet la journalisation des\
           \ activit\xE9s au sein des syst\xE8mes pour soutenir la surveillance, la\
-          \ d\xE9tection des incidents et les enqu\xEAtes m\xE9dico-l\xE9gales."
+          \ d\xE9tection des incidents et les analyses forensiques."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.16
     ref_id: A.8.16
     name: Monitoring activities

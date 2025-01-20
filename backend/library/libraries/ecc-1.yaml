@@ -8,6 +8,7 @@ description: "The Saudi National Cybersecurity Authority developed the essential
   \ https://nca.gov.sa/en/legislation?item=191&slug=controls-list"
 copyright: "\xA9 NCA"
 version: 1
+publication_date: 2024-04-19
 provider: NCA
 packager: intuitem
 objects:

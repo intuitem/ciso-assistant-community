@@ -110,7 +110,6 @@
 	"providerColon": "Dostawca:",
 	"domain": "Domena",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "Status leczenia",
 	"qualification": "Kwalifikacja",
 	"currentLevel": "Obecny poziom",
@@ -862,8 +861,12 @@
 	"addTag": "Dodaj tag",
 	"tagsHelpText": "Tagi służą do kategoryzowania i filtrowania elementów. Możesz dodać tagi w sekcji Extra",
 	"forgotPassword": "Zapomniałem hasła",
-	"scoreSemiColon": "Wynik:",
+	"score": "Wynik",
 	"mappingInferenceHelpText": "Te zmienne są stałe i nie zmieniają się w zależności od źródła.",
 	"bringTheEvidences": "Przynieś dowody",
-	"bringTheEvidencesHelpText": "Jeśli wyłączone, obiekt zostanie zduplikowany bez dowodów"
+	"bringTheEvidencesHelpText": "Jeśli wyłączone, obiekt zostanie zduplikowany bez dowodów",
+	"documentationScore": "Wynik dokumentacji",
+	"useDocumentationScore": "Korzystanie z punktacji dokumentacji",
+	"useDocumentationScoreHelpText": "Drugi wynik (wynik dokumentacji) będzie dostępny do oceny wymagań.",
+	"publicationDate": "Data publikacji"
 }

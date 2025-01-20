@@ -93,8 +93,8 @@
 		}
 	);
 
-	function nodeScore(): number {
-		if (!resultCounts) return -1;
+	function nodeScore(): number | null {
+		if (!resultCounts) return null;
 		let mean = resultCounts['total_score'] / resultCounts['scored'];
 		return Math.floor(mean * 10) / 10;
 	}
@@ -116,11 +116,16 @@
 									breadcrumbAction="push"
 									href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}"
 								>
-									{#if title}
-										<span style="font-weight: 600;">{title}</span>
-									{/if}
-									{#if description}
-										<p>{description}</p>
+									{#if title || description}
+										{#if title}
+											<span style="font-weight: 600;">{title}</span>
+										{/if}
+										{#if description}
+											<p>{description}</p>
+										{/if}
+									{:else if node.question && node.question.questions && node.question.questions[0]}
+										<!-- This only displays the first question -->
+										{node.question.questions[0].text}
 									{/if}
 								</Anchor>
 							{:else}
@@ -272,7 +277,7 @@
 						</div>
 					{/each}
 				</div>
-				{#if nodeScore() >= 0}
+				{#if nodeScore() !== null}
 					<span>
 						<ProgressRadial
 							stroke={100}

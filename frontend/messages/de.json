@@ -110,7 +110,6 @@
 	"providerColon": "Anbieter:",
 	"domain": "Domäne",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "Behandlungsstatus",
 	"qualification": "Qualifizierung",
 	"currentLevel": "Aktuelles Niveau",
@@ -862,8 +861,12 @@
 	"addTag": "Tag hinzufügen",
 	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen",
 	"forgotPassword": "Passwort vergessen",
-	"scoreSemiColon": "Punktzahl:",
+	"score": "Punktzahl",
 	"mappingInferenceHelpText": "Diese Variablen sind fest und ändern sich je nach Quelle nicht.",
 	"bringTheEvidences": "Bringen Sie die Beweise",
-	"bringTheEvidencesHelpText": "Wenn deaktiviert, wird das Objekt ohne seine Beweise dupliziert"
+	"bringTheEvidencesHelpText": "Wenn deaktiviert, wird das Objekt ohne seine Beweise dupliziert",
+	"documentationScore": "Bewertung der Dokumentation",
+	"useDocumentationScore": "Dokumentationsnote verwenden",
+	"useDocumentationScoreHelpText": "Eine zweite Punktzahl (Dokumentationspunktzahl) wird verfügbar sein, um die Anforderungen zu bewerten.",
+	"publicationDate": "Veröffentlichungsdatum"
 }

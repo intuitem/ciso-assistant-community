@@ -8,6 +8,7 @@
 	} from '$lib/utils/crud';
 	import { stringify } from '$lib/utils/helpers';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
+	import { toCamelCase } from '$lib/utils/locales.js';
 	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
@@ -223,10 +224,10 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const popupFilter: PopupSettings = {
-		event: 'click',
+		event: 'focus-click',
 		target: 'popupFilter',
 		placement: 'bottom-start',
-		closeQuery: 'a[href]'
+		closeQuery: 'li'
 	};
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
@@ -237,7 +238,11 @@
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if filteredFields.length > 0 && hasRows && !hideFilters}
-			<button use:popup={popupFilter} class="btn variant-filled-primary self-end relative">
+			<button
+				use:popup={popupFilter}
+				class="btn variant-filled-primary self-end relative"
+				id="filters"
+			>
 				<i class="fa-solid fa-filter mr-2" />
 				{m.filters()}
 				{#if filterCount}
@@ -345,9 +350,17 @@
 										{:else if value && value.str}
 											{#if value.id}
 												{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-												<Anchor href={itemHref} class="anchor" stopPropagation
-													>{value.str ?? '-'}</Anchor
-												>
+												{#if key === 'ro_to_couple'}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+															'-'
+														)[1]}</Anchor
+													>
+												{:else}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{value.str}</Anchor
+													>
+												{/if}
 											{:else}
 												{value.str ?? '-'}
 											{/if}
@@ -360,7 +373,7 @@
 											>
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
-										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'publication_date' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else if [true, false].includes(value)}
 											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
@@ -397,7 +410,7 @@
 										URLModel={actionsURLModel}
 										detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
 										editURL={!(row.meta.builtin || row.meta.urn)
-											? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}`
+											? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`
 											: undefined}
 										{row}
 										hasBody={$$slots.actionsBody}
