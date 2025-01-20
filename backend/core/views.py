@@ -1674,19 +1674,34 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     def accept(self, request, pk):
         if request.user == self.get_object().approver:
             self.get_object().set_state("accepted")
-        return Response({"results": "state updated to accepted"})
+            return Response({"results": "state updated to accepted"})
+        else:
+            return Response(
+                {"error": "only approver can accept a risk acceptance"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
     def reject(self, request, pk):
         if request.user == self.get_object().approver:
             self.get_object().set_state("rejected")
-        return Response({"results": "state updated to rejected"})
+            return Response({"results": "state updated to rejected"})
+        else:
+            return Response(
+                {"error": "only approver can reject a risk acceptance"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
     def revoke(self, request, pk):
         if request.user == self.get_object().approver:
             self.get_object().set_state("revoked")
-        return Response({"results": "state updated to revoked"})
+            return Response({"results": "state updated to revoked"})
+        else:
+            return Response(
+                {"error": "only approver can revoke a risk acceptance"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
     def waiting(self, request):
