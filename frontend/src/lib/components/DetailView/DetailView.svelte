@@ -367,28 +367,8 @@
 					{m.sendQuestionnaire()}
 				</button>
 			{/if}
-			{#if data.data.state === 'Created'}
-				<div class="flex flex-col space-y-2 ml-4 {data.data.approver ? '' : 'mb-4'}">
-					<button
-						on:click={(_) => {
-							modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
-						class="btn variant-filled-primary"
-						disabled={!data.data.approver}
-					>
-						<i class="fas fa-paper-plane mr-2" />
-						{m.submit()}
-					</button>
-					{#if !data.data.approver}
-						<span class="text-sm font-semibold"
-							>{m.riskAcceptanceMissingApproverMessage()} <span class="text-red-500">*</span></span
-						>
-					{/if}
-				</div>
-			{/if}
 
-			{#if data.data.state === 'Submitted'}
+			{#if data.data.state === 'Submitted' && canEditObject}
 				<div class="flex flex-col space-y-2 ml-4">
 					<button
 						on:click={(_) => {
@@ -404,6 +384,27 @@
 			{/if}
 
 			{#if displayEditButton()}
+				{#if data.data.state === 'Created'}
+					<div class="flex flex-col space-y-2 ml-4 {data.data.approver ? '' : 'mb-4'}">
+						<button
+							on:click={(_) => {
+								modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
+							class="btn variant-filled-primary"
+							disabled={!data.data.approver}
+						>
+							<i class="fas fa-paper-plane mr-2" />
+							{m.submit()}
+						</button>
+						{#if !data.data.approver}
+							<span class="text-sm font-semibold"
+								>{m.riskAcceptanceMissingApproverMessage()}
+								<span class="text-red-500">*</span></span
+							>
+						{/if}
+					</div>
+				{/if}
 				<div class="flex flex-col space-y-2 ml-4">
 					<Anchor
 						breadcrumbAction="push"
