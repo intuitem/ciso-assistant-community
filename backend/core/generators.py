@@ -174,6 +174,76 @@ def plot_completion_bar(data, colors=None, title=None):
     return chart_buffer
 
 
+def plot_category_radar(category_scores, colors=None, title=None):
+    """
+    Create a radar/spider chart showing scores per category
+
+    Args:
+        category_scores (dict): Dictionary containing category scores from aggregate_category_scores()
+        colors (list, optional): Custom color palette
+        title (str, optional): Chart title
+
+    Returns:
+        io.BytesIO: Buffer containing the radar chart image
+    """
+    plt.close("all")
+
+    # Extract data
+    categories = [data["name"] for data in category_scores.values()]
+    scores = [data["average_score"] for data in category_scores.values()]
+
+    # Number of categories
+    N = len(categories)
+
+    default_colors = [
+        "#2196F3",  # Blue
+        "#4CAF50",  # Green
+        "#FFC107",  # Amber
+        "#F44336",  # Red
+        "#9C27B0",  # Purple
+    ]
+
+    # Compute angle for each axis
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+
+    # Close the plot by appending the first value and angle
+    values = scores + scores[:1]
+    angles_plot = angles + [angles[0]]
+
+    # Create the plot
+    plt.figure(figsize=(12, 12))
+    ax = plt.subplot(111, polar=True)
+
+    plot_colors = colors if colors is not None else default_colors[: len(categories)]
+
+    # Plot the scores
+    ax.plot(angles_plot, values, "o-", linewidth=2, color=plot_colors[0])
+    ax.fill(angles_plot, values, alpha=0.25, color=plot_colors[0])
+
+    # Fix axis to go in the right order and start at 12 o'clock
+    ax.set_theta_offset(np.pi / 2)
+    ax.set_theta_direction(-1)
+
+    # Draw axis lines for each angle and label
+    plt.xticks(angles, categories)
+
+    # Set y-axis limits from 0 to 100
+    ax.set_ylim(0, 100)
+
+    if title:
+        plt.title(title)
+
+    plt.tight_layout()
+
+    # Save to buffer
+    chart_buffer = io.BytesIO()
+    plt.savefig(chart_buffer, format="png", dpi=300, bbox_inches="tight")
+    chart_buffer.seek(0)
+    plt.close()
+
+    return chart_buffer
+
+
 def plot_spider_chart(data, colors=None, title=None):
     """
     Create a spider/radar chart from the input data
@@ -421,6 +491,9 @@ def gen_audit_context(id, doc, tree, lang):
         colors=custom_colors,
     )
 
+    category_radar_buffer = plot_category_radar(category_scores, colors=custom_colors)
+    chart_category_radar = InlineImage(doc, category_radar_buffer, width=Cm(15))
+
     requirement_assessments_objects = audit.get_requirement_assessments(
         include_non_assessable=True
     )
@@ -484,5 +557,5 @@ def gen_audit_context(id, doc, tree, lang):
 
     # Add to context
     context["category_scores"] = category_scores
-
+    context["category_radar"] = chart_category_radar
     return context
