@@ -508,6 +508,46 @@ class AssetViewSet(BaseModelViewSet):
     def disaster_recovery_objectives(self, request):
         return Response({"results": Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES})
 
+    @action(detail=False, name="Export assets as CSV")
+    def export_csv(self, request):
+        (viewable_assets_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Asset
+        )
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="assets_export.csv"'
+
+        writer = csv.writer(response, delimiter=";")
+        columns = [
+            "internal_id",
+            "name",
+            "description",
+            "type",
+            "security_objectives",
+            "disaster_recovery_objectives",
+            "link",
+            "owners",
+            "parent_assets",
+            "labels",
+        ]
+        writer.writerow(columns)
+
+        for asset in Asset.objects.filter(id__in=viewable_assets_ids):
+            row = [
+                asset.id,
+                asset.name,
+                asset.description,
+                asset.type,
+                asset.get_security_objectives_display(),
+                asset.get_disaster_recovery_objectives_display(),
+                asset.reference_link,
+                ",".join([o.email for o in asset.owner.all()]),
+                ",".join([o.name for o in asset.parent_assets.all()]),
+                ",".join([o.label for o in asset.filtering_labels.all()]),
+            ]
+            writer.writerow(row)
+
+        return response
+
 
 class ReferenceControlViewSet(BaseModelViewSet):
     """
