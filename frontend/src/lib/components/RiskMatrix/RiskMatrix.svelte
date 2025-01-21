@@ -80,7 +80,11 @@
 				{/if}
 			</div>
 			{#each row as cell, j}
-				<Cell {cell} cellData={displayedData[i][j]} {dataItemComponent} />
+				{#if displayedData}
+					<Cell {cell} cellData={displayedData[i][j]} {dataItemComponent} />
+				{:else}
+					<Cell {cell} {dataItemComponent} />
+				{/if}
 			{/each}
 		{/each}
 		<div />
