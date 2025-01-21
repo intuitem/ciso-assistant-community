@@ -66,7 +66,7 @@
 								on:click={modalCreateForm}
 								><i class="fa-solid fa-file-circle-plus"></i>
 							</button>
-							{#if URLModel === 'applied-controls'}
+							{#if ['applied-controls', 'assets'].includes(URLModel)}
 								<a
 									href="{URLModel}/export/"
 									class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
