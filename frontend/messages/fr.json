@@ -1124,5 +1124,7 @@
 	"importVersionNotCompatibleWithCurrentVersion": "La version de l'import n'est pas compatible avec la version actuelle de l'application.",
 	"errorOccuredDuringImport": "Une erreur s'est produite lors de l'import",
 	"successfullyImportedFolder": "Domaine importé avec succès",
-	"missingLibrariesInImport": "Certaines bibliothèques sont manquantes, voir la liste ci-dessus"
+	"missingLibrariesInImport": "Certaines bibliothèques sont manquantes, voir la liste ci-dessus",
+	"backupVersionError": "Impossible de charger la sauvegarde, la version de la sauvegarde est invalide",
+	"confirmYes": "Confirmez en écrivant 'yes' puis validez:"
 }

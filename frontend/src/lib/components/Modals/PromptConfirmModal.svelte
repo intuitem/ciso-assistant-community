@@ -16,7 +16,7 @@
 	export let _form = {};
 	export let URLModel: urlModel | '' = '';
 	export let id: string = '';
-	export let formAction: string;
+	export let formAction: string = '';
 	export let bodyComponent: ComponentType | undefined;
 	export let bodyProps: Record<string, unknown> = {};
 
@@ -24,10 +24,12 @@
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
-	const { form } = superForm(_form, {
-		dataType: 'json',
-		id: `confirm-modal-form-${crypto.randomUUID()}`
-	});
+	const { form } = _form
+		? superForm(_form, {
+				dataType: 'json',
+				id: `confirm-modal-form-${crypto.randomUUID()}`
+			})
+		: null;
 
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
@@ -46,7 +48,7 @@
 		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 
-		<p class="text-red-500 font-bold">Confirm by typing "yes" below:</p>
+		<p class="text-red-500 font-bold">{m.confirmYes()}</p>
 		<input
 			type="text"
 			bind:value={userInput}
@@ -59,27 +61,42 @@
 				<svelte:component this={bodyComponent} {...bodyProps} />
 			</div>
 		{/if}
+		{#if _form && Object.keys(_form).length > 0}
+			<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
+				<footer class="modal-footer {parent.regionFooter}">
+					<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
+						>{m.cancel()}</button
+					>
+					<input type="hidden" name="urlmodel" value={URLModel} />
+					<input type="hidden" name="id" value={id} />
+					<button
+						class="btn variant-filled-error"
+						type="submit"
+						on:click={parent.onConfirm}
+						disabled={!userInput || userInput.trim().toLowerCase() !== 'yes'}
+					>
+						{m.submit()}
+					</button>
+				</footer>
+			</SuperForm>
 
-		<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
+			{#if debug === true}
+				<SuperDebug data={$form} />
+			{/if}
+		{:else}
 			<footer class="modal-footer {parent.regionFooter}">
 				<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 					>{m.cancel()}</button
 				>
-				<input type="hidden" name="urlmodel" value={URLModel} />
-				<input type="hidden" name="id" value={id} />
 				<button
 					class="btn variant-filled-error"
-					type="submit"
+					type="button"
 					on:click={parent.onConfirm}
 					disabled={!userInput || userInput.trim().toLowerCase() !== 'yes'}
 				>
 					{m.submit()}
 				</button>
 			</footer>
-		</SuperForm>
-
-		{#if debug === true}
-			<SuperDebug data={$form} />
 		{/if}
 	</div>
 {/if}

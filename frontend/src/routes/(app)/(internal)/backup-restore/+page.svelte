@@ -16,23 +16,19 @@
 	let file: HTMLInputElement;
 
 	// Function to handle modal confirmation for any action
-	function modalConfirm(id: string, name: string, action: string): void {
+	function modalConfirm(): void {
 		const modalComponent: ModalComponent = {
-			ref: PromptConfirmModal,
-			props: {
-				_form: form, // Form to be triggered
-				id: id,
-				debug: false,
-				URLModel: 'backup-restore',
-				formAction: form.requestSubmit()
-			}
+			ref: PromptConfirmModal
 		};
 
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: `Confirm ${action}`,
-			body: `Are you sure you want to proceed with ${action} for ${name}?`
+			title: m.importBackup(),
+			body: m.confirmImportBackup(),
+			response: (r: boolean) => {
+				if (r) form.requestSubmit();
+			}
 		};
 
 		if (file) modalStore.trigger(modal);
@@ -74,7 +70,7 @@
 				<button
 					class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
 					type="button"
-					on:click={() => modalConfirm(data.settings.id, 'Backup', 'import')}>{m.upload()}</button
+					on:click={modalConfirm}>{m.upload()}</button
 				>
 			</form>
 		</div>
