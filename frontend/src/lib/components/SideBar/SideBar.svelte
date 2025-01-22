@@ -4,13 +4,18 @@
 	import SideBarNavigation from './SideBarNavigation.svelte';
 	import SideBarToggle from './SideBarToggle.svelte';
 	import { onMount } from 'svelte';
-	export let open: boolean;
-	export let firstTime = false; // this needs to come from the db ; we also need to make room for variable about the specialized guided tours
-	import { driverInstance } from '$lib/utils/stores';
-	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
 
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { driverInstance, firstTimeConnection } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
+
+	import { driver } from 'driver.js';
+	import 'driver.js/dist/driver.css';
+	import { page } from '$app/stores';
+
+	export let open: boolean;
+
+	const user = $page.data?.user;
+	$firstTimeConnection = $firstTimeConnection && user.accessible_domains.length === 0;
 
 	// id is not needed, just to help us with authoring
 	// this is not great, but couldn't find a way for i18n while separating the file.
@@ -173,26 +178,8 @@
 		}
 	];
 
-	function wrapStepWithTranslation(step: any) {
-		const { popover, ...rest } = step;
-
-		if (!popover) return step;
-
-		return {
-			...rest,
-			popover: {
-				...popover,
-				title: safeTranslate(popover.title),
-				description: safeTranslate(popover.description)
-			}
-		};
-	}
-	import { driver } from 'driver.js';
-	import 'driver.js/dist/driver.css';
-	import { description } from '$paraglide/messages/ro';
-
 	function triggerVisit() {
-		const translatedSteps = steps; //steps.map(wrapStepWithTranslation);
+		const translatedSteps = steps;
 		const driverObj = driver({
 			showProgress: true,
 			steps: translatedSteps
@@ -200,11 +187,15 @@
 		$driverInstance = driverObj;
 		driverObj.drive();
 	}
+
 	onMount(() => {
-		if (firstTime) {
+		if ($firstTimeConnection) {
 			triggerVisit();
+			$firstTimeConnection = false; // This will prevent the tour from showing up again on page reload
 		}
 	});
+
+	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
 </script>
 
 <aside
