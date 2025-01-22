@@ -1,9 +1,14 @@
 from django.db.models.query import QuerySet
 import math
+import random
 
 
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     qs = stakeholders_queryset
+
+    def add_jitter(value, max_jitter=5):
+        """Add a small random offset to prevent perfect overlaps"""
+        return value + random.uniform(-max_jitter, max_jitter)
 
     def get_exposure_segment_id(value):
         if value < 3:
