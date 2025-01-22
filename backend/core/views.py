@@ -67,7 +67,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.exceptions import PermissionDenied
 
 
 from weasyprint import HTML
@@ -105,6 +104,8 @@ from serdes.utils import (
     sort_objects_by_self_reference,
 )
 from serdes.serializers import ExportSerializer
+
+from django.core.exceptions import PermissionDenied
 
 import structlog
 
@@ -2081,16 +2082,10 @@ class FolderViewSet(BaseModelViewSet):
     )
     def import_domain(self, request):
         """Handle file upload and initiate import process."""
-        if "add_folder" not in request.user.permissions:
-            logger.error(
-                "User does not have permission to import domain", user=request.user
-            )
-            return Response(
-                {"error": "userDoesNotHavePermissionToImportDomain"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
 
         try:
+            if "add_folder" not in request.user.permissions:
+                raise PermissionDenied()
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
@@ -2099,20 +2094,24 @@ class FolderViewSet(BaseModelViewSet):
             return Response(result, status=status.HTTP_200_OK)
 
         except PermissionDenied as e:
-            logger.error("Error importing domain", exc_info=e)
+            logger.error(
+                "User does not have permission to import domain",
+                user=request.user,
+                exc_info=True,
+            )
             return Response(
                 {"error": "userDoesNotHavePermissionToImportDomain"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
         except KeyError as e:
-            logger.error("No file provided in the request", exc_info=e)
+            logger.error("No file provided in the request", exc_info=True)
             return Response(
                 {"errors": ["No file provided"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
         except json.JSONDecodeError as e:
-            logger.error("Invalid JSON format in uploaded file", exc_info=e)
+            logger.error("Invalid JSON format in uploaded file", exc_info=True)
             return Response(
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -2137,7 +2136,7 @@ class FolderViewSet(BaseModelViewSet):
                 json_dump = json.loads(decompressed_data)
                 import_version = json_dump["meta"]["media_version"]
             except json.JSONDecodeError as e:
-                logger.error("Invalid JSON format in uploaded file", exc_info=e)
+                logger.error("Invalid JSON format in uploaded file", exc_info=True)
                 raise
             if not "objects" in json_dump:
                 raise ValidationError("badly formatted json")
@@ -2172,7 +2171,7 @@ class FolderViewSet(BaseModelViewSet):
                                     x["fields"]["attachment"] = new_name
 
                     except Exception as e:
-                        logger.error("Error extracting attachment", exc_info=e)
+                        logger.error("Error extracting attachment", exc_info=True)
 
         return json_dump
 
@@ -2340,7 +2339,7 @@ class FolderViewSet(BaseModelViewSet):
             except Exception as e:
                 logger.error(
                     f"Error validating object {obj_id} in {model_name}: {str(e)}",
-                    exc_info=e,
+                    exc_info=True,
                 )
                 validation_errors.append(
                     {
