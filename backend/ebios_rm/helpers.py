@@ -6,7 +6,7 @@ import random
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     qs = stakeholders_queryset
 
-    def add_jitter(value, max_jitter=5):
+    def add_jitter(value, max_jitter=5.0):
         """Add a small random offset to prevent perfect overlaps"""
         return value + random.uniform(-max_jitter, max_jitter)
 
@@ -46,8 +46,6 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     r_data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
     angle_offset = {"client": 135, "partner": 225, "supplier": 45}
 
-    cnt_c_not_displayed = 0
-    cnt_r_not_displayed = 0
     for sh in qs:
         # current
         c_reliability = sh.current_maturity * sh.current_trust
@@ -64,7 +62,7 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
             get_exposure_segment_id(c_exposure) * (45 / 4)
         )
 
-        vector = [c_criticality, angle, c_exposure_val, str(sh)]
+        vector = [c_criticality, add_jitter(angle, 10), c_exposure_val, str(sh)]
 
         cluser_id = get_reliability_cluster(c_reliability)
         c_data[cluser_id].append(vector)
@@ -84,7 +82,7 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
             get_exposure_segment_id(r_exposure) * (45 / 4)
         )
 
-        vector = [r_criticality, angle, r_exposure_val, str(sh)]
+        vector = [r_criticality, add_jitter(angle, 10), r_exposure_val, str(sh)]
 
         cluser_id = get_reliability_cluster(r_reliability)
         r_data[cluser_id].append(vector)
