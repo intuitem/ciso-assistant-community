@@ -13,13 +13,18 @@ tactic_to_csf_funtion = {
 }
 
 output_file_name = "d3fend.xlsx"
-library_description = "A cybersecurity ontology designed to standardize vocabulary for employing techniques to counter malicious cyber threats."
+
+library_description = """A cybersecurity ontology designed to standardize vocabulary for employing techniques to counter malicious cyber threats.
+Version - 1.0.0 - 2024-12-20
+https://d3fend.mitre.org/resources/"""
+
 library_copyright = """Terms of Use
 LICENSE
 The MITRE Corporation (MITRE) hereby grants you a non-exclusive, royalty-free license to use D3FEND for research, development, and commercial purposes. Any copy you make for such purposes is authorized provided that you reproduce MITRE’s copyright designation and this license in any such copy.
 DISCLAIMERS
 ALL DOCUMENTS AND THE INFORMATION CONTAINED THEREIN ARE PROVIDED ON AN "AS IS" BASIS AND THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS OR IS SPONSORED BY (IF ANY), THE MITRE CORPORATION, ITS BOARD OF TRUSTEES, OFFICERS, AGENTS, AND EMPLOYEES, DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION THEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 """
+
 packager = "intuitem"
 
 

@@ -2,8 +2,12 @@ urn: urn:intuitem:risk:library:mitre-d3fend
 locale: en
 ref_id: d3fend
 name: Mitre D3FEND
-description: A cybersecurity ontology designed to standardize vocabulary for employing
+description: 'A cybersecurity ontology designed to standardize vocabulary for employing
   techniques to counter malicious cyber threats.
+
+  Version - 1.0.0 - 2024-12-20
+
+  https://d3fend.mitre.org/resources/'
 copyright: "Terms of Use\nLICENSE\nThe MITRE Corporation (MITRE) hereby grants you\
   \ a non-exclusive, royalty-free license to use D3FEND for research, development,\
   \ and commercial purposes. Any copy you make for such purposes is authorized provided\
