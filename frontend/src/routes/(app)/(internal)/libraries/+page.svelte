@@ -22,8 +22,8 @@
 	<TabGroup>
 		<!-- data.loadedLibrariesTable.body.length > 0 -->
 		{#if data.loadedLibrariesTable.body.length > 0}
-			<Tab bind:group={tabSet} value={0}>{m.librariesStore()}</Tab>
-			<Tab bind:group={tabSet} value={1}>{m.loadedLibraries()}</Tab>
+			<Tab bind:group={tabSet} value={0}>{m.librariesStore()} <span class="badge variant-soft-primary">{data.storedLibrariesTable.body.length}</span></Tab>
+			<Tab bind:group={tabSet} value={1}>{m.loadedLibraries()} <span class="badge variant-soft-primary">{data.loadedLibrariesTable.body.length}</span></Tab>
 		{:else}
 			<div class="card p-4 variant-soft-secondary w-full m-4">
 				<i class="fa-solid fa-info-circle mr-2" />
