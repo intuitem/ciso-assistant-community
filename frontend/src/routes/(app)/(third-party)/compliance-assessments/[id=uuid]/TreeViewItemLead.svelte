@@ -28,7 +28,7 @@
 		<span class="badge {classesText} h-fit" style="background-color: {resultColor ?? '#d1d5db'};">
 			{leadResult}
 		</span>
-		{#if statusI18n !== 'notApplicable' && isScored}
+		{#if resultI18n !== 'notApplicable' && isScored}
 			<ProgressRadial
 				stroke={100}
 				meter={displayScoreColor(score, max_score)}
