@@ -537,8 +537,10 @@ class AssetViewSet(BaseModelViewSet):
                 asset.name,
                 asset.description,
                 asset.type,
-                asset.get_security_objectives_display(),
-                asset.get_disaster_recovery_objectives_display(),
+                ",".join([i["str"] for i in asset.get_security_objectives_display()]),
+                ",".join(
+                    [i["str"] for i in asset.get_disaster_recovery_objectives_display()]
+                ),
                 asset.reference_link,
                 ",".join([o.email for o in asset.owner.all()]),
                 ",".join([o.name for o in asset.parent_assets.all()]),
