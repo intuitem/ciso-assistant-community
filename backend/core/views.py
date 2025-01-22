@@ -2135,10 +2135,10 @@ class FolderViewSet(BaseModelViewSet):
             try:
                 json_dump = json.loads(decompressed_data)
                 import_version = json_dump["meta"]["media_version"]
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 logger.error("Invalid JSON format in uploaded file", exc_info=True)
                 raise
-            if not "objects" in json_dump:
+            if "objects" not in json_dump:
                 raise ValidationError("badly formatted json")
             if not import_version == VERSION:
                 logger.error(
@@ -2170,7 +2170,7 @@ class FolderViewSet(BaseModelViewSet):
                                 ):
                                     x["fields"]["attachment"] = new_name
 
-                    except Exception as e:
+                    except Exception:
                         logger.error("Error extracting attachment", exc_info=True)
 
         return json_dump
@@ -2222,7 +2222,7 @@ class FolderViewSet(BaseModelViewSet):
                 if f"add_{model._meta.model_name}" not in user.permissions:
                     error_dict[model._meta.model_name] = "permission_denied"
             if error_dict:
-                raise PermissionDenied(detail=error_dict)
+                raise PermissionDenied()
 
             # Validation phase (outside transaction since it doesn't modify database)
             creation_order = self._resolve_dependencies(list(models_map.values()))
@@ -2279,9 +2279,9 @@ class FolderViewSet(BaseModelViewSet):
 
         except ValidationError as e:
             if missing_libraries:
-                logger.warning(f"Missing libraries: {missing_libraries}")
+                logger.warning("Missing libraries", libraries=missing_libraries)
                 raise ValidationError({"missing_libraries": missing_libraries})
-            logger.exception(f"Failed to import objects: {str(e)}")
+            logger.exception("Failed to import objects", objects=str(e))
             raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
 
     def _validate_model_objects(
@@ -2324,8 +2324,8 @@ class FolderViewSet(BaseModelViewSet):
                     continue
 
                 # Validate using serializer
-                SerializerClass = import_export_serializer_class(model)
-                serializer = SerializerClass(data=fields)
+                serializer_class = import_export_serializer_class(model)
+                serializer = serializer_class(data=fields)
 
                 if not serializer.is_valid():
                     validation_errors.append(
@@ -2432,7 +2432,7 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
                 except Exception as e:
-                    logger.error(f"Error creating object {obj_id}: {str(e)}")
+                    logger.error("Error creating object", obj=obj, exc_info=True)
                     # This will trigger a rollback of the entire batch
                     raise ValidationError(
                         f"Error creating {model._meta.model_name}: {str(e)}"
