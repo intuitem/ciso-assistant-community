@@ -2081,7 +2081,30 @@ class FolderViewSet(BaseModelViewSet):
         parser_classes=(FileUploadParser,),
     )
     def import_domain(self, request):
-        """Handle file upload and initiate import process."""
+        """
+        Import a domain from an uploaded file with permission validation.
+        
+        This method handles the process of importing a domain from a file upload, including
+        permission checks, file processing, and object import.
+        
+        Parameters:
+            request (Request): The HTTP request containing the file to import.
+        
+        Returns:
+            Response: A response with the import result or an error message.
+        
+        Raises:
+            PermissionDenied: If the user lacks the 'add_folder' permission.
+            KeyError: If no file is provided in the request.
+            json.JSONDecodeError: If the uploaded file contains invalid JSON.
+        
+        Example:
+            POST /api/folders/import_domain/
+            Headers:
+                X-CISOAssistantDomainName: Optional custom domain name
+            Body:
+                file: JSON file containing domain data
+        """
 
         try:
             if "add_folder" not in request.user.permissions:
@@ -2117,7 +2140,33 @@ class FolderViewSet(BaseModelViewSet):
             )
 
     def _process_uploaded_file(self, dump_file: str | Path) -> Any:
-        """Process the uploaded file and return parsed data."""
+        """
+        Process an uploaded ZIP file containing domain data and validate its contents.
+        
+        This method performs comprehensive validation and processing of an uploaded ZIP file
+        for domain import, including:
+        - Verifying the file is a valid ZIP archive
+        - Checking for the presence of a 'data.json' file
+        - Decoding and parsing JSON data
+        - Validating import version compatibility
+        - Handling file attachments
+        
+        Parameters:
+            dump_file (str | Path): Path to the uploaded ZIP file to be processed
+        
+        Returns:
+            dict: Parsed JSON data containing domain objects and metadata
+        
+        Raises:
+            ValidationError: If the uploaded file is invalid, has incorrect format, or is
+                             incompatible with the current version
+            json.JSONDecodeError: If the JSON data cannot be parsed
+        
+        Notes:
+            - Saves attachments to storage with potential filename modifications
+            - Logs various processing steps and potential errors
+            - Requires 'VERSION' constant to be defined for version compatibility check
+        """
         if not zipfile.is_zipfile(dump_file):
             logger.error("Invalid ZIP file format")
             raise ValidationError({"file": "invalidZipFileFormat"})
@@ -2176,12 +2225,56 @@ class FolderViewSet(BaseModelViewSet):
         return json_dump
 
     def _get_models_map(self, objects):
-        """Build a map of model names to model classes."""
+        """
+        Build a mapping of model names to their corresponding Django model classes.
+        
+        This method creates a dictionary that maps model names to their actual model classes
+        using Django's apps registry. It is typically used during data import or serialization
+        processes to dynamically retrieve model classes based on their string representation.
+        
+        Parameters:
+            objects (list): A list of dictionaries containing model information, 
+                            where each dictionary has a 'model' key representing the model name.
+        
+        Returns:
+            dict: A dictionary where keys are model names and values are the corresponding 
+                  Django model classes retrieved from the apps registry.
+        
+        Example:
+            objects = [
+                {"model": "core.Folder"},
+                {"model": "core.Project"}
+            ]
+            models_map = self._get_models_map(objects)
+            # models_map will contain {
+            #     "core.Folder": <class 'core.models.Folder'>,
+            #     "core.Project": <class 'core.models.Project'>
+            # }
+        """
         model_names = {obj["model"] for obj in objects}
         return {name: apps.get_model(name) for name in model_names}
 
     def _resolve_dependencies(self, all_models):
-        """Resolve model dependencies and detect cycles."""
+        """
+        Resolve model dependencies and detect cycles in the import process.
+        
+        This method builds a dependency graph for the given models and performs a topological sort to determine the correct import order. It handles potential cyclic dependencies by raising a validation error.
+        
+        Parameters:
+            all_models (list): A list of models to be processed for dependency resolution.
+        
+        Returns:
+            list: An ordered list of models sorted based on their dependencies.
+        
+        Raises:
+            ValidationError: If a cyclic dependency is detected during the topological sorting process.
+        
+        Notes:
+            - Uses `build_dependency_graph` to create a dependency graph
+            - Employs `topological_sort` to determine the correct import order
+            - Logs debug information about the dependency resolution process
+            - Logs an error if a cyclic dependency is found
+        """
         logger.debug("Resolving model dependencies", all_models=all_models)
 
         graph = build_dependency_graph(all_models)
@@ -2196,8 +2289,36 @@ class FolderViewSet(BaseModelViewSet):
 
     def _import_objects(self, parsed_data: dict, domain_name: str, user):
         """
-        Import and validate objects using appropriate serializers.
-        Handles both validation and creation in separate phases within a transaction.
+        Import and validate objects from a parsed data dictionary with comprehensive error handling and permission checks.
+        
+        This method performs a two-phase import process for domain objects:
+        1. Validation Phase: Checks object integrity, dependencies, and user permissions
+        2. Creation Phase: Creates objects within a database transaction
+        
+        Parameters:
+            parsed_data (dict): Dictionary containing objects to be imported
+            domain_name (str): Name of the domain for the imported objects
+            user (User): Current user performing the import operation
+        
+        Returns:
+            dict: A dictionary with a success message upon successful import
+        
+        Raises:
+            ValidationError: If validation fails due to:
+                - No objects in the dump
+                - Presence of a domain in the dump
+                - Object validation errors
+                - Missing required libraries
+            PermissionDenied: If the user lacks permission to create any object type
+        
+        Side Effects:
+            - Creates a base folder for the imported domain
+            - Creates all imported objects in the database
+            - Logs validation and creation processes
+        
+        Performance Notes:
+            - Uses database transaction to ensure atomic object creation
+            - Resolves object dependencies before creation
         """
         validation_errors = []
         required_libraries = []
@@ -2287,7 +2408,23 @@ class FolderViewSet(BaseModelViewSet):
     def _validate_model_objects(
         self, model, objects, validation_errors, required_libraries
     ):
-        """Validate all objects for a model before creation."""
+        """
+        Validate all objects for a specific model before creation.
+        
+        This method processes model objects in batches, performing comprehensive validation to ensure data integrity before object creation.
+        
+        Parameters:
+            model (Model): Django model class to validate objects against
+            objects (list): List of dictionaries containing object data
+            validation_errors (dict): Dictionary to accumulate validation errors
+            required_libraries (set): Set of libraries required for validation
+        
+        Notes:
+            - Skips validation if no objects exist for the specified model
+            - Processes objects in batches defined by self.batch_size
+            - Delegates detailed batch validation to self._validate_batch method
+            - Tracks validation errors for each batch in the validation_errors dictionary
+        """
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
         model_objects = [obj for obj in objects if obj["model"] == model_name]
 
@@ -2305,7 +2442,28 @@ class FolderViewSet(BaseModelViewSet):
             )
 
     def _validate_batch(self, model, batch, validation_errors, required_libraries):
-        """Validate a batch of objects."""
+        """
+        Validate a batch of objects for import, performing serializer-based validation and tracking errors.
+        
+        This method validates a batch of objects for a specific model, handling special cases like library objects
+        and collecting validation errors. It supports dynamic serializer selection and comprehensive error tracking.
+        
+        Parameters:
+            model (Model): Django model class to validate objects against
+            batch (list): List of objects to validate, each containing 'id' and 'fields'
+            validation_errors (list): Mutable list to collect validation errors during processing
+            required_libraries (list): Mutable list to track libraries required for import
+        
+        Behavior:
+            - Skips validation for LoadedLibrary model
+            - Tracks library dependencies when library fields are present
+            - Uses dynamic serializer for model-specific validation
+            - Captures and logs validation errors with model, object ID, and specific error details
+            - Handles unexpected exceptions during validation
+        
+        Raises:
+            No explicit exceptions, but populates validation_errors list with encountered issues
+        """
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
 
         for obj in batch:
@@ -2384,7 +2542,31 @@ class FolderViewSet(BaseModelViewSet):
             )
 
     def _create_batch(self, model, batch, link_dump_database_ids):
-        """Create a batch of objects with proper relationship handling."""
+        """
+        Create a batch of objects with proper relationship handling during data import.
+        
+        This method handles the batch creation of database objects, managing complex relationships
+        and handling potential validation errors during the import process.
+        
+        Parameters:
+            model (Model): Django model class for object creation
+            batch (list): List of dictionaries containing object data to be imported
+            link_dump_database_ids (dict): Mapping of original object IDs to newly created database IDs
+        
+        Returns:
+            None
+        
+        Raises:
+            ValidationError: If an error occurs during object creation or relationship processing
+        
+        Notes:
+            - Skips library objects
+            - Handles folder references
+            - Processes model-specific relationships
+            - Validates unique constraints
+            - Supports many-to-many relationship handling
+            - Uses atomic transaction to ensure data integrity
+        """
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
             for obj in batch:
