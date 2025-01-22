@@ -996,6 +996,8 @@
 	"noReviewer": "No reviewer assigned",
 	"selectAudit": "Select audit",
 	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
+	"markAsValid": "Mark as valid",
+	"markAsNotValid": "Mark as not valid",
 	"addStakeholder": "Add stakeholder",
 	"operationalScenario": "Operational scenario",
 	"operationalScenarioRefId": "Operational scenario {refId}",

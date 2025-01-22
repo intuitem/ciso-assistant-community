@@ -987,6 +987,8 @@
 	"notSelected": "Non retenu",
 	"resetPasswordHere": "Vous pouvez réinitialiser votre mot de passe ici.",
 	"resetPassword": "Réinitialiser le mot de passe",
+	"markAsValid": "marquée terminée",
+	"markAsNotValid": "marquer en cours",
 	"ebiosRm": "Ebios RM",
 	"workshopOne": "Atelier 1",
 	"refIdSemiColon": "ID :",
