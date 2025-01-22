@@ -382,69 +382,70 @@
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
 							{#if !shallow}
-							<Score
-								form={superForm(requirementAssessment.scoreForm, { id: requirementAssessment.id })}
-								min_score={data.compliance_assessment.min_score}
-								max_score={data.compliance_assessment.max_score}
-								scores_definition={data.compliance_assessment.scores_definition}
-								field="score"
-								label={data.compliance_assessment.show_documentation_score
-									? m.implementationScore()
-									: m.score()}
-								styles="w-full p-1"
-								bind:score={requirementAssessment.score}
-								on:change={async () => await updateScore(requirementAssessment)}
-								disabled={!requirementAssessment.is_scored ||
-									requirementAssessment.result === 'not_applicable'}
-							>
-								<div slot="left">
-									<Checkbox
-										form={superForm(requirementAssessment.scoreForm, {
-											id: requirementAssessment.id
-										})}
-										field="is_scored"
-										label={''}
-										helpText={m.scoringHelpText()}
-										checkboxComponent="switch"
-										class="h-full flex flex-row items-center justify-center my-1"
-										classesContainer="h-full flex flex-row items-center space-x-4"
-										on:change={async () => {
-											requirementAssessment.is_scored = !requirementAssessment.is_scored;
-											await update(requirementAssessment, 'is_scored');
-										}}
-									/>
-								</div>
-							</Score>
-							{:else}
-							<div class="flex w-full font-semibold">
-							{#if data.compliance_assessment.show_documentation_score}
-							{m.implementationScoreResult()}{requirementAssessment.score}
-							{:else}
-							{m.scoreResult()}{requirementAssessment.score}
-							{/if}
-							</div>
-
-							{/if}
-							{#if data.compliance_assessment.show_documentation_score}
-								{#if !shallow}
 								<Score
 									form={superForm(requirementAssessment.scoreForm, {
 										id: requirementAssessment.id
 									})}
 									min_score={data.compliance_assessment.min_score}
 									max_score={data.compliance_assessment.max_score}
-									field="documentation_score"
-									label={m.documentationScore()}
+									scores_definition={data.compliance_assessment.scores_definition}
+									field="score"
+									label={data.compliance_assessment.show_documentation_score
+										? m.implementationScore()
+										: m.score()}
 									styles="w-full p-1"
-									bind:score={requirementAssessment.documentation_score}
+									bind:score={requirementAssessment.score}
 									on:change={async () => await updateScore(requirementAssessment)}
 									disabled={!requirementAssessment.is_scored ||
 										requirementAssessment.result === 'not_applicable'}
-								/>
-								{:else}
+								>
+									<div slot="left">
+										<Checkbox
+											form={superForm(requirementAssessment.scoreForm, {
+												id: requirementAssessment.id
+											})}
+											field="is_scored"
+											label={''}
+											helpText={m.scoringHelpText()}
+											checkboxComponent="switch"
+											class="h-full flex flex-row items-center justify-center my-1"
+											classesContainer="h-full flex flex-row items-center space-x-4"
+											on:change={async () => {
+												requirementAssessment.is_scored = !requirementAssessment.is_scored;
+												await update(requirementAssessment, 'is_scored');
+											}}
+										/>
+									</div>
+								</Score>
+							{:else}
 								<div class="flex w-full font-semibold">
-									{m.documentationScoreResult()}{requirementAssessment.score}
+									{#if data.compliance_assessment.show_documentation_score}
+										{m.implementationScoreResult()}{requirementAssessment.score}
+									{:else}
+										{m.scoreResult()}{requirementAssessment.score}
+									{/if}
 								</div>
+							{/if}
+							{#if data.compliance_assessment.show_documentation_score}
+								{#if !shallow}
+									<Score
+										form={superForm(requirementAssessment.scoreForm, {
+											id: requirementAssessment.id
+										})}
+										min_score={data.compliance_assessment.min_score}
+										max_score={data.compliance_assessment.max_score}
+										field="documentation_score"
+										label={m.documentationScore()}
+										styles="w-full p-1"
+										bind:score={requirementAssessment.documentation_score}
+										on:change={async () => await updateScore(requirementAssessment)}
+										disabled={!requirementAssessment.is_scored ||
+											requirementAssessment.result === 'not_applicable'}
+									/>
+								{:else}
+									<div class="flex w-full font-semibold">
+										{m.documentationScoreResult()}{requirementAssessment.score}
+									</div>
 								{/if}
 							{/if}
 							<Accordion regionCaret="flex">
