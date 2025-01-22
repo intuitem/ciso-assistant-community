@@ -134,7 +134,7 @@
 
 {#if nodes && nodes.length > 0}
 	{#each nodes as node, i}
-	<!-- class={node.contentProps.hidden === true ? 'hidden' : null} this has to be updated to see only assessable requirements has class prop is not used anymore in TreeViewItem -->
+		<!-- class={node.contentProps.hidden === true ? 'hidden' : null} this has to be updated to see only assessable requirements has class prop is not used anymore in TreeViewItem -->
 		<TreeViewItem
 			bind:this={treeItems[i]}
 			bind:children={children[i]}
