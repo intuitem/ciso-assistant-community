@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ciso-assistant.fullname" . }}-frontend
+  namespace: {{ .Release.Namespace }}
+  {{- with .Values.frontend.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.frontend.name "component" .Values.frontend.name) | nindent 4 }}
+spec:
+  ports:
+  - name: {{ .Values.frontend.service.portName }}
+    protocol: TCP
+    port: {{ .Values.frontend.service.port }}
+    targetPort: http
+  selector:
+    {{- include "ciso-assistant.selectorLabels" (dict "context" . "component" .Values.frontend.name) | nindent 4 }}
