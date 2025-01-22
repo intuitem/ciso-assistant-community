@@ -59,95 +59,141 @@
 					<div>
 						<ol class="relative text-gray-500 border-s border-gray-200">
 							{#each meta as step, i}
-								<li class="flex flex-row justify-between mb-10 ms-6">
-									{#if createRiskAnalysis && i == 0}
-										<slot name="addRiskAnalysis"></slot>
-									{:else if !step.disabled}
-										<Anchor
-											href={step.href}
-											prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
-											label={safeTranslate(`ebiosWs${workshop}_${i + 1}`)}
-											class="hover:text-purple-800"
-										>
-											{#if step.status == 'done'}
-												<span
-													class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
+								<ContextMenu.Root
+									open={openMenuIndex === i}
+									onOpenChange={(isOpen) => (openMenuIndex = isOpen ? i : null)}
+								>
+									<ContextMenu.Trigger>
+										<li class="flex flex-row justify-between mb-10 ms-6">
+											{#if createRiskAnalysis && i == 0}
+												<slot name="addRiskAnalysis"></slot>
+											{:else if !step.disabled}
+												<Anchor
+													href={step.href}
+													prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
+													label={safeTranslate(`ebiosWs${workshop}_${i + 1}`)}
+													class="hover:text-purple-800"
 												>
-													<i class="fa-solid fa-check" />
-												</span>
+													{#if step.status == 'done'}
+														<span
+															class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
+														>
+															<i class="fa-solid fa-check" />
+														</span>
+													{:else}
+														<span
+															class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+														>
+															<i class="fa-solid fa-clipboard-check" />
+														</span>
+													{/if}
+													<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
+													<p class="text-sm">{step.title}</p>
+												</Anchor>
 											{:else}
-												<span
-													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+												<div
+													class="text-gray-300 [&>*]:pointer-events-none"
+													use:popup={popupHover[i]}
 												>
-													<i class="fa-solid fa-clipboard-check" />
-												</span>
-											{/if}
-											<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
-											<p class="text-sm">{step.title}</p>
-										</Anchor>
-									{:else}
-										<div class="text-gray-300 [&>*]:pointer-events-none" use:popup={popupHover[i]}>
-											<div
-												class="transition card bg-white shadow-lg p-4 z-20 duration-300"
-												data-popup={'popup' + workshop + i}
-											>
-												<p
-													data-testid="activity-tooltip"
-													class="border-l-4 {borderColor} text-gray-500 p-2"
-												>
-													{step.tooltip}
-												</p>
-												<div class="arrow bg-white" />
-											</div>
-											<span
-												class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
-											>
-												<i class="fa-solid fa-clipboard-check" />
-											</span>
-											<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
-											<p class="text-sm">{step.title}</p>
-										</div>
-									{/if}
-									{#if !step.disabled}
-										<button
-											class="btn bg-initial"
-											data-testid="sidebar-more-btn"
-											use:popup={{
-												event: 'click',
-												target: `popupStep-${workshop}.${i + 1}`,
-												placement: 'top'
-											}}><i class="fa-solid fa-ellipsis-vertical" /></button
-										>
-										<div
-											class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-											data-testid="sidebar-more-panel"
-											data-popup="popupStep-{workshop}.{i + 1}"
-										>
-											<form
-												action="/ebios-rm/{$page.params.id}?/changeStepState"
-												method="POST"
-												use:enhance={() => {
-													return async () => {
-														if (step.status !== 'done') step.status = 'done';
-														else step.status = 'in_progress';
-													};
-												}}
-											>
-												<input type="hidden" name="workshop" value={workshop} />
-												<input type="hidden" name="step" value={i + 1} />
-												{#if step.status === 'done'}
-													<input type="hidden" name="status" value="in_progress" />
-													<button type="submit" class="btn bg-initial"
-														>{m.markAsInProgress()}</button
+													<div
+														class="transition card bg-white shadow-lg p-4 z-20 duration-300"
+														data-popup={'popup' + workshop + i}
 													>
-												{:else}
-													<input type="hidden" name="status" value="done" />
-													<button type="submit" class="btn bg-initial">{m.markAsDone()}</button>
-												{/if}
-											</form>
-										</div>
-									{/if}
-								</li>
+														<p
+															data-testid="activity-tooltip"
+															class="border-l-4 {borderColor} text-gray-500 p-2"
+														>
+															{step.tooltip}
+														</p>
+														<div class="arrow bg-white" />
+													</div>
+													<span
+														class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+													>
+														<i class="fa-solid fa-clipboard-check" />
+													</span>
+													<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
+													<p class="text-sm">{step.title}</p>
+												</div>
+											{/if}
+											{#if !step.disabled}
+												<button
+													class="btn bg-initial"
+													data-testid="sidebar-more-btn"
+													use:popup={{
+														event: 'click',
+														target: `popupStep-${workshop}.${i + 1}`,
+														placement: 'top'
+													}}><i class="fa-solid fa-ellipsis-vertical" /></button
+												>
+												<div
+													class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+													data-testid="sidebar-more-panel"
+													data-popup="popupStep-{workshop}.{i + 1}"
+												>
+													<form
+														action="/ebios-rm/{$page.params.id}?/changeStepState"
+														method="POST"
+														use:enhance={() => {
+															return async () => {
+																if (step.status !== 'done') step.status = 'done';
+																else step.status = 'in_progress';
+															};
+														}}
+													>
+														<input type="hidden" name="workshop" value={workshop} />
+														<input type="hidden" name="step" value={i + 1} />
+														{#if step.status === 'done'}
+															<input type="hidden" name="status" value="in_progress" />
+															<button type="submit" class="btn bg-initial"
+																>{m.markAsInProgress()}</button
+															>
+														{:else}
+															<input type="hidden" name="status" value="done" />
+															<button type="submit" class="btn bg-initial">{m.markAsDone()}</button>
+														{/if}
+													</form>
+												</div>
+											{/if}
+										</li>
+									</ContextMenu.Trigger>
+									<ContextMenu.Content
+										class="z-50 w-full max-w-[229px] rounded-xl bg-gray-700 text-white px-2 py-2 shadow-xl outline-none transition-all duration-300"
+									>
+										<ContextMenu.Item
+											class="px-4 py-2 rounded-md text-base font-medium hover:bg-gray-600 transition-all duration-300 cursor-pointer"
+											on:click={async () => {
+												const newStatus = step.status === 'done' ? 'in_progress' : 'done';
+												const formData = new FormData();
+												formData.append('workshop', workshop.toString());
+												formData.append('step', (i + 1).toString());
+												formData.append('status', newStatus);
+
+												// Submit the data to the backend
+												const response = await fetch(
+													`/ebios-rm/${$page.params.id}?/changeStepState`,
+													{
+														method: 'POST',
+														body: formData
+													}
+												);
+
+												// Handle success or error
+												if (response.ok) {
+													step.status = newStatus; // Update the local state
+												} else {
+													console.error('Failed to update step state');
+												}
+											}}
+										>
+											{#if step.status === 'done'}
+												{m.markAsInProgress()}
+											{:else}
+												{m.markAsDone()}
+											{/if}
+										</ContextMenu.Item>
+									</ContextMenu.Content>
+								</ContextMenu.Root>
 							{/each}
 						</ol>
 					</div>
