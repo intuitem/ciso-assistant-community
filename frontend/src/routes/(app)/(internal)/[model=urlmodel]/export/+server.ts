@@ -2,8 +2,8 @@ import { BASE_API_URL } from '$lib/utils/constants';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-export const GET: RequestHandler = async ({ fetch }) => {
-	const URLModel = 'applied-controls';
+export const GET: RequestHandler = async ({ params, fetch }) => {
+	const URLModel = params.model;
 	const endpoint = `${BASE_API_URL}/${URLModel}/export_csv/`;
 
 	const res = await fetch(endpoint);
@@ -11,7 +11,7 @@ export const GET: RequestHandler = async ({ fetch }) => {
 		error(400, 'Error fetching the CSV file');
 	}
 
-	const fileName = `applied-controls-${new Date().toISOString()}.csv`;
+	const fileName = `${URLModel}-${new Date().toISOString()}.csv`;
 
 	return new Response(await res.blob(), {
 		headers: {
