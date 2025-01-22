@@ -996,6 +996,7 @@
 	"noReviewer": "Aucun relecteur assigné",
 	"selectAudit": "Sélectionner un audit",
 	"errorAssetGraphMustNotContainCycles": "Le graphe des actifs ne doit pas contenir de boucles.",
+	"errorFolderGraphMustNotContainCycles": "Le graphe des domaines ne doit pas contenir de boucles.",
 	"addStakeholder": "Ajouter une partie prenante",
 	"operationalScenario": "Scénario opérationnel",
 	"operationalScenarioRefId": "Scénario opérationnel {refId}",
