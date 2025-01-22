@@ -996,6 +996,7 @@
 	"noReviewer": "No reviewer assigned",
 	"selectAudit": "Select audit",
 	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
+	"errorFolderGraphMustNotContainCycles": "The domain graph must not contain cycles.",
 	"addStakeholder": "Add stakeholder",
 	"operationalScenario": "Operational scenario",
 	"operationalScenarioRefId": "Operational scenario {refId}",
