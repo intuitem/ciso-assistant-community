@@ -2093,7 +2093,7 @@ class FolderViewSet(BaseModelViewSet):
             result = self._import_objects(parsed_data, domain_name, user=request.user)
             return Response(result, status=status.HTTP_200_OK)
 
-        except PermissionDenied as e:
+        except PermissionDenied:
             logger.error(
                 "User does not have permission to import domain",
                 user=request.user,
@@ -2104,13 +2104,13 @@ class FolderViewSet(BaseModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        except KeyError as e:
+        except KeyError:
             logger.error("No file provided in the request", exc_info=True)
             return Response(
                 {"errors": ["No file provided"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError:
             logger.error("Invalid JSON format in uploaded file", exc_info=True)
             return Response(
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
