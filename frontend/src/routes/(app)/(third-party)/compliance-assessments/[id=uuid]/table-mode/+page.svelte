@@ -381,6 +381,7 @@
 							</div>
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
+							{#if !shallow}
 							<Score
 								form={superForm(requirementAssessment.scoreForm, { id: requirementAssessment.id })}
 								min_score={data.compliance_assessment.min_score}
@@ -414,7 +415,18 @@
 									/>
 								</div>
 							</Score>
+							{:else}
+							<div class="flex w-full font-semibold">
 							{#if data.compliance_assessment.show_documentation_score}
+							{m.implementationScoreResult()}{requirementAssessment.score}
+							{:else}
+							{m.scoreResult()}{requirementAssessment.score}
+							{/if}
+							</div>
+
+							{/if}
+							{#if data.compliance_assessment.show_documentation_score}
+								{#if !shallow}
 								<Score
 									form={superForm(requirementAssessment.scoreForm, {
 										id: requirementAssessment.id
@@ -429,6 +441,11 @@
 									disabled={!requirementAssessment.is_scored ||
 										requirementAssessment.result === 'not_applicable'}
 								/>
+								{:else}
+								<div class="flex w-full font-semibold">
+									{m.documentationScoreResult()}{requirementAssessment.score}
+								</div>
+								{/if}
 							{/if}
 							<Accordion regionCaret="flex">
 								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
