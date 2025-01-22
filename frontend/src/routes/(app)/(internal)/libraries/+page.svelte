@@ -16,14 +16,29 @@
 	$: if (data.loadedLibrariesTable.body.length === 0) tabSet = 0;
 
 	let fileResetSignal = false;
+
+	$: availableUpdatesCount = Object.values(data.loadedLibrariesTable.meta).filter(
+		(lib) => lib.has_update
+	).length;
 </script>
 
 <div class="card bg-white shadow">
 	<TabGroup>
 		<!-- data.loadedLibrariesTable.body.length > 0 -->
 		{#if data.loadedLibrariesTable.body.length > 0}
-			<Tab bind:group={tabSet} value={0}>{m.librariesStore()}</Tab>
-			<Tab bind:group={tabSet} value={1}>{m.loadedLibraries()}</Tab>
+			<Tab bind:group={tabSet} value={0}
+				>{m.librariesStore()}
+				<span class="badge variant-soft-primary">{data.storedLibrariesTable.body.length}</span></Tab
+			>
+			<Tab bind:group={tabSet} value={1}
+				>{m.loadedLibraries()}
+				<span class="badge variant-soft-primary">{data.loadedLibrariesTable.body.length}</span>
+				{#if availableUpdatesCount > 0}
+					<span class="badge variant-soft-success"
+						>{availableUpdatesCount} <i class="fa-solid fa-circle-up ml-1" /></span
+					>
+				{/if}
+			</Tab>
 		{:else}
 			<div class="card p-4 variant-soft-secondary w-full m-4">
 				<i class="fa-solid fa-info-circle mr-2" />
