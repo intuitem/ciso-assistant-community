@@ -142,6 +142,7 @@
 			bind:group
 			bind:name
 			bind:value={node.id}
+			classProp={node.contentProps.hidden === true ? 'hidden' : ''}
 			mappingInference={hasMappingInference(node)}
 			hideLead={!node.lead}
 			hideChildren={!node.children || node.children.length === 0}
