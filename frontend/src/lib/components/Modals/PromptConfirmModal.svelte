@@ -22,8 +22,6 @@
 
 	import { superForm } from 'sveltekit-superforms';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-
 	const { form } = _form
 		? superForm(_form, {
 				dataType: 'json',
@@ -38,6 +36,7 @@
 
 	import SuperDebug from 'sveltekit-superforms';
 	import type { ComponentType } from 'svelte';
+	import { enhance } from '$app/forms';
 	export let debug = false;
 
 	let userInput = '';
@@ -52,7 +51,7 @@
 		<input
 			type="text"
 			bind:value={userInput}
-			placeholder="Type 'yes' to confirm"
+			placeholder={m.confirmYesPlaceHolder()}
 			class="w-full mt-2 p-2 border border-gray-300 rounded"
 		/>
 
@@ -62,7 +61,7 @@
 			</div>
 		{/if}
 		{#if _form && Object.keys(_form).length > 0}
-			<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
+			<form method="POST" action={formAction} use:enhance class="modal-form {cForm}">
 				<footer class="modal-footer {parent.regionFooter}">
 					<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
 						>{m.cancel()}</button
@@ -73,12 +72,12 @@
 						class="btn variant-filled-error"
 						type="submit"
 						on:click={parent.onConfirm}
-						disabled={!userInput || userInput.trim().toLowerCase() !== 'yes'}
+						disabled={!userInput || userInput.trim().toLowerCase() !== m.yes()}
 					>
 						{m.submit()}
 					</button>
 				</footer>
-			</SuperForm>
+			</form>
 
 			{#if debug === true}
 				<SuperDebug data={$form} />
@@ -92,7 +91,7 @@
 					class="btn variant-filled-error"
 					type="button"
 					on:click={parent.onConfirm}
-					disabled={!userInput || userInput.trim().toLowerCase() !== 'yes'}
+					disabled={!userInput || userInput.trim().toLowerCase() !== m.yes()}
 				>
 					{m.submit()}
 				</button>

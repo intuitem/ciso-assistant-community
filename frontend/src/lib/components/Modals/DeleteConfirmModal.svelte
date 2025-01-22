@@ -42,7 +42,6 @@
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
         <button type="button" class="btn {parent.buttonNeutral}" data-testid="delete-cancel-button" on:click={parent.onClose}>{m.cancel()}</button>
-        <input type="hidden" name="delete" />
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
         <button class="btn variant-filled-error" data-testid="delete-confirm-button" type="submit" on:click={parent.onClose}>{m.submit()}</button>

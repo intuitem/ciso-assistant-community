@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import type { ModelMapEntry } from '$lib/utils/crud';
 	import type { urlModel } from '$lib/utils/types';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
@@ -60,6 +61,38 @@
 		modalStore.trigger(modal);
 	}
 
+	function promptModalConfirmDelete(
+		id: string,
+		row: { [key: string]: string | number | boolean | null }
+	): void {
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: {
+				_form: deleteForm,
+				id: id,
+				debug: false,
+				URLModel: URLModel,
+				formAction: '?/delete'
+			}
+		};
+		const name =
+			URLModel === 'users' && row.first_name
+				? `${row.first_name} ${row.last_name} (${row.email})`
+				: (row.name ?? Object.values(row)[0]);
+		const body =
+			URLModel === 'users'
+				? m.deleteUserMessage({ name: name })
+				: m.deleteModalMessage({ name: name });
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.deleteModalTitle(),
+			body: body
+		};
+		modalStore.trigger(modal);
+	}
+
 	const user = $page.data.user;
 	$: canDeleteObject = Object.hasOwn(user.permissions, `delete_${model?.name}`) && !preventDelete;
 	$: canEditObject = Object.hasOwn(user.permissions, `change_${model?.name}`);
@@ -98,15 +131,27 @@
 			>
 		{/if}
 		{#if displayDelete}
-			<button
-				on:click={(_) => {
-					modalConfirmDelete(row.meta[identifierField], row);
-					stopPropagation(_);
-				}}
-				on:keydown={() => modalConfirmDelete(row.meta.id, row)}
-				class="cursor-pointer hover:text-primary-500"
-				data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
-			>
+			{#if URLModel === 'folders'}
+				<button
+					on:click={(_) => {
+						promptModalConfirmDelete(row.meta[identifierField], row);
+						stopPropagation(_);
+					}}
+					on:keydown={() => promptModalConfirmDelete(row.meta.id, row)}
+					class="cursor-pointer hover:text-primary-500"
+					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
+				>
+			{:else}
+				<button
+					on:click={(_) => {
+						modalConfirmDelete(row.meta[identifierField], row);
+						stopPropagation(_);
+					}}
+					on:keydown={() => modalConfirmDelete(row.meta.id, row)}
+					class="cursor-pointer hover:text-primary-500"
+					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
+				>
+			{/if}
 		{/if}
 	{/if}
 	<slot name="tail" />
