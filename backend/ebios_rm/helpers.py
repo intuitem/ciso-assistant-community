@@ -39,7 +39,7 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
 
     c_data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
     r_data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
-    angle_offsets = {"client": 135, "partner": 225, "supplier": 45}
+    angle_offset = {"client": 135, "partner": 225, "supplier": 45}
 
     cnt_c_not_displayed = 0
     cnt_r_not_displayed = 0
@@ -55,7 +55,7 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
             else 5.25
         )
 
-        angle = angle_offsets[sh.category] + (
+        angle = angle_offset[sh.category] + (
             get_exposure_segment_id(c_exposure) * (45 / 4)
         )
 
@@ -75,7 +75,7 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
             else 5.25
         )
 
-        angle = angle_offsets[sh.category] + (
+        angle = angle_offset[sh.category] + (
             get_exposure_segment_id(r_exposure) * (45 / 4)
         )
 
