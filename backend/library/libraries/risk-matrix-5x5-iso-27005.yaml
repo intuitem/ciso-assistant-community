@@ -5,6 +5,7 @@ name: 5x5 ISO-27005
 description: 5x5 matrix from ISO 27005 Annex A
 copyright: ISO
 version: 3
+publication_date: 2024-07-22
 provider: intuitem
 packager: intuitem
 translations:

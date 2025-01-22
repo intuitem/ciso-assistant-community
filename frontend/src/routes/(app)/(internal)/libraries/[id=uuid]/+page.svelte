@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { breadcrumbObject } from '$lib/utils/stores';
+	import { page } from '$app/stores';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 	import * as m from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { languageTag } from '$paraglide/runtime';
+	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	export let data;
 	let loading = { form: false, library: '' };
@@ -13,12 +14,6 @@
 	interface LibraryObjects {
 		[key: string]: any;
 	}
-
-	const breadcrumb_library_data = {
-		...data.library,
-		id: data.library.id
-	};
-	$: breadcrumbObject.set(breadcrumb_library_data);
 
 	const libraryObjects: LibraryObjects = data.library.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
@@ -37,10 +32,10 @@
 		});
 	}
 
-	import { ProgressRadial, tableSourceMapper, type TreeViewNode } from '@skeletonlabs/skeleton';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { enhance } from '$app/forms';
+	import type { TableSource } from '$lib/components/ModelTable/types';
+	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import { ProgressRadial, tableSourceMapper } from '@skeletonlabs/skeleton';
 
 	const riskMatricesTable: TableSource = {
 		head: { name: 'name', description: 'description' },
@@ -137,6 +132,14 @@
 			<p class="text-md leading-5 text-gray-700">{m.description()}: {data.library.description}</p>
 			<p class="text-md leading-5 text-gray-700">{m.provider()}: {data.library.provider}</p>
 			<p class="text-md leading-5 text-gray-700">{m.packager()}: {data.library.packager}</p>
+			{#if data.library.publication_date}
+				<p class="text-md leading-5 text-gray-700">
+					{m.publicationDate()}: {formatDateOrDateTime(
+						data.library.publication_date,
+						languageTag()
+					)}
+				</p>
+			{/if}
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
 					{m.dependencies()}:

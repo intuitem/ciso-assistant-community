@@ -6,7 +6,8 @@ description: Requirements from article 21 of directive 2022/2555 of the european
   and of the council of 14 December 2022 on measures for a high common level of cybersecurity
   across the Union.
 copyright: European law
-version: 2
+version: 3
+publication_date: 2024-02-11
 provider: EU
 packager: intuitem
 translations:
@@ -25,6 +26,14 @@ translations:
       \ gemeinsames Cybersicherheitsniveau in der Union, zur \xC4nderung der Verordnung\
       \ (EU) Nr. 910/2014 und der Richtlinie (EU) 2018/1972 sowie zur Aufhebung der\
       \ Richtlinie (EU) 2016/1148 (NIS-2-Richtlinie)"
+  es:
+    name: Directiva NIS2
+    description: "Art\xEDculo 21 de la DIRECTIVA (UE) 2022/2555 DEL PARLAMENTO EUROPEO\
+      \ Y DEL CONSEJO de 14 de diciembre de 2022 relativa a las medidas destinadas\
+      \ a garantizar un elevado nivel com\xFAn de ciberseguridad en toda la Uni\xF3\
+      n, por la que se modifican el Reglamento (UE) n.o 910/2014 y la Directiva (UE)\
+      \ 2018/1972 y por la que se deroga la Directiva (UE) 2016/1148 (Directiva SRI\
+      \ 2)"
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 - urn:intuitem:risk:library:mitre-attack
@@ -53,6 +62,14 @@ objects:
           r ein hohes gemeinsames Cybersicherheitsniveau in der Union, zur \xC4nderung\
           \ der Verordnung (EU) Nr. 910/2014 und der Richtlinie (EU) 2018/1972 sowie\
           \ zur Aufhebung der Richtlinie (EU) 2016/1148 (NIS-2-Richtlinie)"
+      es:
+        name: Directiva NIS2
+        description: "Art\xEDculo 21 de la DIRECTIVA (UE) 2022/2555 DEL PARLAMENTO\
+          \ EUROPEO Y DEL CONSEJO de 14 de diciembre de 2022 relativa a las medidas\
+          \ destinadas a garantizar un elevado nivel com\xFAn de ciberseguridad en\
+          \ toda la Uni\xF3n, por la que se modifican el Reglamento (UE) n.o 910/2014\
+          \ y la Directiva (UE) 2018/1972 y por la que se deroga la Directiva (UE)\
+          \ 2016/1148 (Directiva SRI 2)"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:nis2-directive:node2
       assessable: false
@@ -67,6 +84,9 @@ objects:
         de:
           name: Artikel 21
           description: "Risikomanagementma\xDFnahmen im Bereich der Cybersicherheit"
+        es:
+          name: "Art\xEDculo 21"
+          description: "Medidas para la gesti\xF3n de riesgos de ciberseguridad"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.1
       assessable: true
       depth: 2
@@ -99,6 +119,15 @@ objects:
             \ zu beherrschen und die Auswirkungen von Sicherheitsvorf\xE4llen auf\
             \ die Empf\xE4nger ihrer Dienste und auf andere Dienste zu verhindern\
             \ oder m\xF6glichst gering zu halten."
+        es:
+          name: null
+          description: "Los Estados miembros velar\xE1n por que las entidades esenciales\
+            \ e importantes tomen las medidas t\xE9cnicas, operativas y de organizaci\xF3\
+            n adecuadas y proporcionadas para gestionar los riesgos que se planteen\
+            \ para la seguridad de los sistemas de redes y de informaci\xF3n que utilizan\
+            \ dichas entidades en sus operaciones o en la prestaci\xF3n de sus servicios\
+            \ y prevenir o minimizar las repercusiones de los incidentes en los destinatarios\
+            \ de sus servicios y en otros servicios."
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.1.sp2
       assessable: true
       depth: 3
@@ -133,6 +162,17 @@ objects:
             \ und die Wahrscheinlichkeit des Eintretens von Sicherheitsvorf\xE4llen\
             \ und deren Schwere, einschlie\xDFlich ihrer gesellschaftlichen und wirtschaftlichen\
             \ Auswirkungen, geb\xFChrend zu ber\xFCcksichtigen."
+        es:
+          name: null
+          description: "Teniendo en cuenta la situaci\xF3n y, en su caso, las normas\
+            \ europeas e internacionales pertinentes, as\xED como el coste de su aplicaci\xF3\
+            n, las medidas a que se refiere el p\xE1rrafo primero garantizar\xE1n\
+            \ un nivel de seguridad de los sistemas de redes y de informaci\xF3n adecuado\
+            \ en relaci\xF3n con los riesgos planteados. Al evaluar la proporcionalidad\
+            \ de dichas medidas, se tendr\xE1 debidamente en cuenta el grado de exposici\xF3\
+            n de la entidad a los riesgos, el tama\xF1o de la entidad y la probabilidad\
+            \ de que se produzcan incidentes y su gravedad, incluidas sus repercusiones\
+            \ sociales y econ\xF3micas."
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2
       assessable: true
       depth: 2
@@ -155,6 +195,13 @@ objects:
             \ gefahren\xFCbergreifenden Ansatz beruhen, der darauf abzielt, die Netz-\
             \ und Informationssysteme und die physische Umwelt dieser Systeme vor\
             \ Sicherheitsvorf\xE4llen zu sch\xFCtzen, und zumindest Folgendes umfassen:"
+        es:
+          name: null
+          description: "Las medidas a que se hace referencia en el apartado 1 se fundamentar\xE1\
+            n en un enfoque basado en todos los peligros que tenga por objeto proteger\
+            \ los sistemas de redes y de informaci\xF3n y el entorno f\xEDsico de\
+            \ dichos sistemas frente a incidentes, e incluir\xE1n al menos los siguientes\
+            \ elementos:"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.a
       assessable: true
       depth: 3
@@ -170,6 +217,10 @@ objects:
           name: null
           description: "Konzepte in Bezug auf die Risikoanalyse und Sicherheit f\xFC\
             r Informationssysteme;"
+        es:
+          name: null
+          description: "las pol\xEDticas de seguridad de los sistemas de informaci\xF3\
+            n y an\xE1lisis de riesgos;"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.b
       assessable: true
       depth: 3
@@ -183,6 +234,9 @@ objects:
         de:
           name: null
           description: "Bew\xE4ltigung von Sicherheitsvorf\xE4llen;"
+        es:
+          name: null
+          description: "la gesti\xF3n de incidentes;"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.c
       assessable: true
       depth: 3
@@ -199,6 +253,11 @@ objects:
           name: null
           description: Aufrechterhaltung des Betriebs, wie Backup-Management und Wiederherstellung
             nach einem Notfall, und Krisenmanagement;
+        es:
+          name: null
+          description: "la continuidad de las actividades, como la gesti\xF3n de copias\
+            \ de seguridad y la recuperaci\xF3n en caso de cat\xE1strofe, y la gesti\xF3\
+            n de crisis;"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.d
       assessable: true
       depth: 3
@@ -219,6 +278,11 @@ objects:
           description: "Sicherheit der Lieferkette einschlie\xDFlich sicherheitsbezogener\
             \ Aspekte der Beziehungen zwischen den einzelnen Einrichtungen und ihren\
             \ unmittelbaren Anbietern oder Diensteanbietern;"
+        es:
+          name: null
+          description: la seguridad de la cadena de suministro, incluidos los aspectos
+            de seguridad relativos a las relaciones entre cada entidad y sus proveedores
+            o prestadores de servicios directos;
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.e
       assessable: true
       depth: 3
@@ -237,6 +301,11 @@ objects:
           description: "Sicherheitsma\xDFnahmen bei Erwerb, Entwicklung und Wartung\
             \ von Netz- und Informationssystemen, einschlie\xDFlich Management und\
             \ Offenlegung von Schwachstellen;"
+        es:
+          name: null
+          description: "la seguridad en la adquisici\xF3n, el desarrollo y el mantenimiento\
+            \ de sistemas de redes y de informaci\xF3n, incluida la gesti\xF3n y divulgaci\xF3\
+            n de las vulnerabilidades;"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.f
       assessable: true
       depth: 3
@@ -254,6 +323,10 @@ objects:
           name: null
           description: "Konzepte und Verfahren zur Bewertung der Wirksamkeit von Risikomanagementma\xDF\
             nahmen im Bereich der Cybersicherheit;"
+        es:
+          name: null
+          description: "las pol\xEDticas y los procedimientos para evaluar la eficacia\
+            \ de las medidas para la gesti\xF3n de riesgos de ciberseguridad;"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.g
       assessable: true
       depth: 3
@@ -269,6 +342,10 @@ objects:
           name: null
           description: grundlegende Verfahren im Bereich der Cyberhygiene und Schulungen
             im Bereich der Cybersicherheit;
+        es:
+          name: null
+          description: "las pr\xE1cticas b\xE1sicas de ciberhigiene y formaci\xF3\
+            n en ciberseguridad;"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.h
       assessable: true
       depth: 3
@@ -285,6 +362,10 @@ objects:
           name: null
           description: "Konzepte und Verfahren f\xFCr den Einsatz von Kryptografie\
             \ und gegebenenfalls Verschl\xFCsselung;"
+        es:
+          name: null
+          description: "las pol\xEDticas y procedimientos relativos a la utilizaci\xF3\
+            n de criptograf\xEDa y, en su caso, de cifrado;"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.i
       assessable: true
       depth: 3
@@ -300,6 +381,10 @@ objects:
           name: null
           description: "Sicherheit des Personals, Konzepte f\xFCr die Zugriffskontrolle\
             \ und Management von Anlagen;"
+        es:
+          name: null
+          description: "la seguridad de los recursos humanos, las pol\xEDticas de\
+            \ control de acceso y la gesti\xF3n de activos;"
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.j
       assessable: true
       depth: 3
@@ -322,6 +407,12 @@ objects:
             \ oder kontinuierlichen Authentifizierung, gesicherte Sprach-, Video-\
             \ und Textkommunikation sowie gegebenenfalls gesicherte Notfallkommunikationssysteme\
             \ innerhalb der Einrichtung."
+        es:
+          name: null
+          description: "el uso de soluciones de autenticaci\xF3n multifactorial o\
+            \ de autenticaci\xF3n continua, comunicaciones de voz, v\xEDdeo y texto\
+            \ seguras y sistemas seguros de comunicaciones de emergencia en la entidad,\
+            \ cuando proceda."
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.3
       assessable: false
       depth: 2
@@ -365,6 +456,20 @@ objects:
             \ Ergebnisse der gem\xE4\xDF Artikel 22 Absatz 1 durchgef\xFChrten koordinierten\
             \ Risikobewertungen in Bezug auf die Sicherheit kritischer Lieferketten\
             \ ber\xFCcksichtigen m\xFCssen."
+        es:
+          name: null
+          description: "Los Estados miembros velar\xE1n por que, al estudiar la idoneidad\
+            \ de las medidas a que se refiere el apartado 2, letra d), del presente\
+            \ art\xEDculo, las entidades tengan en cuenta las vulnerabilidades espec\xED\
+            ficas de cada proveedor y prestador de servicios directo y la calidad\
+            \ general de los productos y las pr\xE1cticas en materia de ciberseguridad\
+            \ de sus proveedores y prestadores de servicios, incluidos sus procedimientos\
+            \ de desarrollo seguro. Los Estados miembros tambi\xE9n velar\xE1n por\
+            \ que, al estudiar la idoneidad de las medidas a que se refiere el apartado\
+            \ 2, letra d), las entidades deban tener en cuenta los resultados de las\
+            \ evaluaciones coordinadas de los riesgos de seguridad de las cadenas\
+            \ de suministro cr\xEDticas realizadas de conformidad con el art\xEDculo\
+            \ 22, apartado 1."
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.4
       assessable: false
       depth: 2
@@ -387,6 +492,12 @@ objects:
             \ die feststellt, dass sie den in Absatz 2 genannten Ma\xDFnahmen nicht\
             \ nachkommt, unverz\xFCglich alle erforderlichen, angemessenen und verh\xE4\
             ltnism\xE4\xDFigen Korrekturma\xDFnahmen ergreift."
+        es:
+          name: null
+          description: "Los Estados miembros se asegurar\xE1n de que cuando una entidad\
+            \ constate que no cumple las medidas previstas en el apartado 2, adopte,\
+            \ sin demora indebida, todas las medidas correctoras apropiadas y proporcionadas\
+            \ necesarias."
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.5
       assessable: false
       depth: 2
@@ -468,3 +579,30 @@ objects:
             \ e aus und arbeitet mit ihnen zusammen.\n\nDiese Durchf\xFChrungsrechtsakte\
             \ werden gem\xE4\xDF dem in Artikel 39 Absatz 2 genannten Pr\xFCfverfahren\
             \ erlassen."
+        es:
+          name: null
+          description: "A m\xE1s tardar el 17 de octubre de 2024, la Comisi\xF3n adoptar\xE1\
+            \ actos de ejecuci\xF3n por los que se establezcan los requisitos t\xE9\
+            cnicos y metodol\xF3gicos de las medidas a que se refiere el apartado\
+            \ 2 con respecto a los proveedores de servicios de DNS, los registros\
+            \ de nombres de dominio de primer nivel, los proveedores de servicios\
+            \ de computaci\xF3n en nube, los proveedores de servicios de centros de\
+            \ datos, los proveedores de redes de distribuci\xF3n de contenidos, los\
+            \ proveedores de servicios gestionados, los proveedores de servicios de\
+            \ seguridad gestionados, as\xED como los proveedores de mercados en l\xED\
+            nea, de motores de b\xFAsqueda en l\xEDnea y de plataformas de servicios\
+            \ de redes sociales, y los prestadores de servicios de confianza.\n\n\
+            La Comisi\xF3n podr\xE1 adoptar actos de ejecuci\xF3n en los que se establezcan\
+            \ los requisitos t\xE9cnicos y metodol\xF3gicos, as\xED como los requisitos\
+            \ sectoriales, seg\xFAn proceda, de las medidas a que se refiere el apartado\
+            \ 2 con respecto a las entidades esenciales e importantes distintas de\
+            \ las mencionadas en el p\xE1rrafo primero del presente apartado.\n\n\
+            Al elaborar los actos de ejecuci\xF3n a que se refieren los p\xE1rrafos\
+            \ primero y segundo del presente apartado, la Comisi\xF3n seguir\xE1,\
+            \ en la mayor medida de lo posible, las normas europeas e internacionales,\
+            \ as\xED como las especificaciones t\xE9cnicas pertinentes. La Comisi\xF3\
+            n intercambiar\xE1 asesoramiento y colaborar\xE1 con el Grupo de Cooperaci\xF3\
+            n y la ENISA acerca de los proyectos de actos de ejecuci\xF3n de conformidad\
+            \ con el art\xEDculo 14, apartado 4, letra e).\n\nDichos actos de ejecuci\xF3\
+            n se adoptar\xE1n de conformidad con el procedimiento de examen a que\
+            \ se refiere el art\xEDculo 39, apartado 2."

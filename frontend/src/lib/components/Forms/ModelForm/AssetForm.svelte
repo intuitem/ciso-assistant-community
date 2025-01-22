@@ -71,13 +71,6 @@
 	);
 </script>
 
-<TextArea
-	{form}
-	field="business_value"
-	label={m.businessValue()}
-	cacheLock={cacheLocks['business_value']}
-	bind:cachedValue={formDataCache['business_value']}
-/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -106,6 +99,7 @@
 />
 <AutocompleteSelect
 	disabled={data.type === 'PR'}
+	hidden={data.type === 'PR'}
 	multiple
 	{form}
 	options={getOptions({ objects: model.foreignKeys['parent_assets'], self: object })}

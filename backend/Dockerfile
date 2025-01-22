@@ -26,7 +26,7 @@ COPY poetry.lock /code/
 COPY startup.sh /code/
 
 RUN pip install --upgrade pip && \
-    pip install poetry==1.8.5
+    pip install poetry==2.0.1
 RUN poetry install
 RUN rm -rf $POETRY_CACHE_DIR
 

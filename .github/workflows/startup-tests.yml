@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 
 env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
   frontend-directory: ./frontend
@@ -12,14 +13,17 @@ env:
   enterprise-frontend-directory: ./enterprise/frontend
   enterprise-frontend-build-directory: ./enterprise/frontend/.build/frontend
   enterprise-backend-settings-module: enterprise_core.settings
+  POSTGRES_VERSION: "16"
+  UBUNTU_VERSION: "ubuntu-24.04"
+  PYTHON_VERSION: "3.12"
 
 jobs:
   startup-functional-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:14.12
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -30,7 +34,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -95,24 +99,28 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright test tests/functional/startup.test.ts
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Sanitize branch name
+        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: startup-functional-test-report
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
 
   startup-docker-compose-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       COMPOSE_TEST: True
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: lts/*
       - name: Install frontend dependencies
         working-directory: ${{ env.frontend-directory }}
         run: |
@@ -122,7 +130,10 @@ jobs:
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install
       - name: Build the Docker app
-        run: docker compose -f docker-compose-build.yml up -d
+        run: |
+          rm -rf db
+          mkdir db
+          docker compose -f docker-compose-build.yml up -d
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -149,11 +160,11 @@ jobs:
           fi
 
   enterprise-startup-functional-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:14.12
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -164,7 +175,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -228,24 +239,28 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright test tests/functional/startup.test.ts
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Sanitize branch name
+        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: enterprise-startup-functional-test-report
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/reports/
           retention-days: 5
 
   enterprise-startup-docker-compose-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       COMPOSE_TEST: True
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: lts/*
       - name: Install frontend dependencies
         working-directory: ${{ env.enterprise-frontend-directory }}
         run: make pre-build

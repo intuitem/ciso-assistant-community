@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
   frontend-directory: ./frontend
@@ -15,14 +16,17 @@ env:
   enterprise-frontend-build-directory: ./enterprise/frontend/.build/frontend
   enterprise-backend-settings-module: enterprise_core.settings
   DEBUG: pw:webserver
+  POSTGRES_VERSION: "16"
+  UBUNTU_VERSION: "ubuntu-24.04"
+  PYTHON_VERSION: "3.12"
 
 jobs:
   functional-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:14.1
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -36,7 +40,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
         playwright-browser: ["chromium"]
 
     steps:
@@ -48,7 +52,7 @@ jobs:
           cache: "pip"
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: lts/*
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -110,10 +114,14 @@ jobs:
         run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
           CI: true
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Sanitize branch name
+        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: functional-tests-report-${{ matrix.playwright-browser }}
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.frontend-directory }}/tests/results/
@@ -121,11 +129,11 @@ jobs:
           retention-days: 5
 
   enterprise-functional-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
-        image: postgres:14.12
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -139,7 +147,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
         playwright-browser: ["chromium"]
 
     steps:
@@ -212,10 +220,14 @@ jobs:
         run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
           CI: true
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Sanitize branch name
+        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: enterprise-functional-tests-report-${{ matrix.playwright-browser }}
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |
             ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/results/

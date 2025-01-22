@@ -10,7 +10,6 @@ showNotification.subscribe((val) => {
 	if (browser) return (localStorage.showNotification = val);
 });
 
-export const breadcrumbObject = writable({ id: '', name: '', email: '' });
 export const pageTitle = writable('');
 export const clientSideToast = writable(undefined);
 
@@ -51,3 +50,7 @@ export const createModalCache = {
 	},
 	data: {}
 };
+
+import type { Driver } from 'driver.js';
+
+export const driverInstance = writable<Driver | null>(null);

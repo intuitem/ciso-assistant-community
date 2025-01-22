@@ -92,7 +92,6 @@
 	{form}
 	label={m.criticality()}
 	field="criticality"
-	always_enabled={true}
 	inversedColors
 	fullDonut
 	min_score={1}
@@ -204,7 +203,3 @@
 	cacheLock={cacheLocks['observation']}
 	bind:cachedValue={formDataCache['observation']}
 />
-<!-- <Score {form} label={m.penetration()} field="penetration" always_enabled={true} inversedColors fullDonut max_score={5} />
-<Score {form} label={m.dependency()} field="dependency" always_enabled={true} inversedColors fullDonut max_score={5} />
-<Score {form} label={m.maturity()} field="maturity" always_enabled={true} inversedColors fullDonut max_score={5} />
-<Score {form} label={m.trust()} field="trust" always_enabled={true} inversedColors fullDonut max_score={5} /> -->

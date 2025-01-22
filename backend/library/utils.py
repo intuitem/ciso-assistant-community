@@ -38,9 +38,9 @@ def preview_library(framework: dict) -> dict[str, list]:
     """
     preview = {}
     requirement_nodes_list = []
-    if framework.get("requirement_nodes"):
+    if (requirement_nodes := framework.get("requirement_nodes")) is not None:
         index = 0
-        for requirement_node in framework["requirement_nodes"]:
+        for requirement_node in requirement_nodes:
             parent_urn = requirement_node.get("parent_urn")
             if parent_urn:
                 parent_urn = parent_urn.lower()
@@ -55,6 +55,7 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
+                    question=requirement_node.get("question"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
@@ -586,12 +587,15 @@ class LibraryImporter:
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
-                dependency = StoredLibrary.objects.get(
-                    urn=dependency_urn
-                )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
-                error_msg = dependency.load()
-                if error_msg is not None:
-                    return error_msg
+                try:
+                    dependency = StoredLibrary.objects.get(urn=dependency_urn)
+                    error_msg = dependency.load()
+                    if error_msg is not None:
+                        return error_msg
+                except StoredLibrary.DoesNotExist:
+                    err_msg = f"ERROR: Stored Library with URN {dependency_urn} does not exist"
+                    print(err_msg)
+                    raise Http404(err_msg)
             else:
                 # try to update the dependency, because we might need the last version for the main library
                 dependency = LoadedLibrary.objects.get(urn=dependency_urn)
@@ -622,6 +626,7 @@ class LibraryImporter:
                 "version": self._library.version,
                 "provider": self._library.provider,
                 "packager": self._library.packager,
+                "publication_date": self._library.publication_date,
                 "copyright": self._library.copyright,
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
                 "is_published": True,
@@ -678,7 +683,7 @@ class LibraryImporter:
                 break
             except OperationalError as e:
                 if e.args and e.args[0] == "database is locked":
-                    time.sleep(1)
+                    time.sleep(3)
                 else:
                     raise e
             except Exception as e:

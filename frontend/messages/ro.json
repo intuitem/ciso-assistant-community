@@ -110,7 +110,6 @@
 	"providerColon": "Furnizor:",
 	"domain": "Domeniu",
 	"urn": "URN",
-	"id": "ID",
 	"treatmentStatus": "Stare tratament",
 	"qualification": "Calificare",
 	"currentLevel": "Nivel curent",
@@ -862,8 +861,12 @@
 	"addTag": "Adăugați etichetă",
 	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra",
 	"forgotPassword": "Aţi uitat parola",
-	"scoreSemiColon": "Scor:",
+	"score": "Scor",
 	"mappingInferenceHelpText": "Aceste variabile sunt fixe și nu se vor modifica în funcție de sursă.",
 	"bringTheEvidences": "Aduceți dovezile",
-	"bringTheEvidencesHelpText": "Dacă este dezactivat, obiectul va fi duplicat fără dovezile sale"
+	"bringTheEvidencesHelpText": "Dacă este dezactivat, obiectul va fi duplicat fără dovezile sale",
+	"documentationScore": "Punctajul documentației",
+	"useDocumentationScore": "Utilizați punctajul documentației",
+	"useDocumentationScoreHelpText": "Un al doilea punctaj (punctajul pentru documentație) va fi disponibil pentru evaluarea cerințelor.",
+	"publicationDate": "Data publicării"
 }

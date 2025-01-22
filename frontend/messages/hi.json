@@ -110,7 +110,6 @@
 	"providerColon": "प्रदाता:",
 	"domain": "डोमेन",
 	"urn": "URN",
-	"id": "आईडी",
 	"treatmentStatus": "उपचार स्थिति",
 	"qualification": "योग्यता",
 	"currentLevel": "वर्तमान स्तर",
@@ -862,8 +861,12 @@
 	"addTag": "टैग जोड़ें",
 	"tagsHelpText": "टैग का उपयोग आइटम को वर्गीकृत और फ़िल्टर करने के लिए किया जाता है। आप अतिरिक्त अनुभाग में टैग जोड़ सकते हैं",
 	"forgotPassword": "पासवर्ड भूल गए",
-	"scoreSemiColon": "अंक:",
+	"score": "अंक",
 	"mappingInferenceHelpText": "ये चर निश्चित हैं और स्रोत के आधार पर परिवर्तित नहीं होंगे।",
 	"bringTheEvidences": "सबूत लाओ",
-	"bringTheEvidencesHelpText": "यदि अक्षम किया गया है, तो ऑब्जेक्ट को उसके साक्ष्य के बिना डुप्लिकेट किया जाएगा"
+	"bringTheEvidencesHelpText": "यदि अक्षम किया गया है, तो ऑब्जेक्ट को उसके साक्ष्य के बिना डुप्लिकेट किया जाएगा",
+	"documentationScore": "दस्तावेज़ीकरण स्कोर",
+	"useDocumentationScore": "दस्तावेज़ स्कोर का उपयोग करें",
+	"useDocumentationScoreHelpText": "आवश्यकताओं का आकलन करने के लिए दूसरी रेटिंग (दस्तावेज़ीकरण स्कोर) उपलब्ध होगी।",
+	"publicationDate": "प्रकाशन की तिथि"
 }

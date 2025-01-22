@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import { page } from '$app/stores';
-	import type { PageData } from './$types';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import type { PageData } from './$types';
 
+	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { toCamelCase } from '$lib/utils/locales';
-	import { safeTranslate } from '$lib/utils/i18n';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { isDark } from '$lib/utils/helpers';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
+	import { goto } from '$app/navigation';
+
+	import { onMount } from 'svelte';
 	export let data: PageData;
-
-	$: breadcrumbObject.set(data.scenario);
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
@@ -29,6 +29,25 @@
 	$: classesCellText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
 	};
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.metaKey || event.ctrlKey) return;
+		if (document.activeElement?.tagName !== 'BODY') return;
+		// Check if the pressed key is 'e' and the edit button should be displayed
+
+		if (event.key === 'e' && canEditObject) {
+			event.preventDefault();
+			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+		}
+	}
+	onMount(() => {
+		// Add event listener when component mounts
+		window.addEventListener('keydown', handleKeydown);
+
+		// Cleanup event listener when component is destroyed
+		return () => {
+			window.removeEventListener('keydown', handleKeydown);
+		};
+	});
 </script>
 
 <div class="flex flex-col space-y-3">
@@ -47,17 +66,17 @@
 			<div>
 				<p class="text-sm font-semibold text-gray-400">{m.description()}</p>
 				{#if data.scenario.description}
-					<p>{data.scenario.description}</p>
+					<p class="whitespace-pre-line">{data.scenario.description}</p>
 				{:else}
 					<p class="text-gray-400 italic text-sm">{m.noDescription()}</p>
 				{/if}
 			</div>
 		</div>
 		{#if canEditObject}
-			<a
+			<Anchor
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit mt-1"
-				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
+				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
 			>
 		{/if}
 	</div>
@@ -68,16 +87,16 @@
 			<div class="flex flex-row justify-between">
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-					<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
-						>{data.scenario.project.str}</a
+					<Anchor class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
+						>{data.scenario.project.str}</Anchor
 					>
 				</span>
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
-					<a
+					<Anchor
 						class="anchor text-sm font-semibold"
 						href="/risk-assessments/{data.scenario.risk_assessment.id}"
-						>{data.scenario.risk_assessment.str}</a
+						>{data.scenario.risk_assessment.str}</Anchor
 					>
 				</span>
 				<span>

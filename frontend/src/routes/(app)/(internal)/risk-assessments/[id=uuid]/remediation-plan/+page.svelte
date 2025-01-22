@@ -1,14 +1,11 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages.js';
-	import { breadcrumbObject } from '$lib/utils/stores';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { safeTranslate } from '$lib/utils/i18n.js';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import * as m from '$paraglide/messages.js';
 
 	export let data;
-
-	breadcrumbObject.set(data.risk_assessment);
 
 	const scenarioTreatmentColorMap = (status: string) => {
 		const map: Record<string, string> = {
@@ -70,7 +67,7 @@
 <p class="p-2 m-2 text-lg font-semibold">{m.associatedRiskScenarios()}:</p>
 
 <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex flex-col">
-	{#each data.risk_assessment.risk_scenarios as scenario}
+	{#each data.risk_assessment.risk_scenarios.sort( (a, b) => String(a?.ref_id).localeCompare(String(b?.ref_id)) ) as scenario}
 		<tr class="bg-gray-100">
 			<td class="text-lg p-3" colspan="9">
 				<a

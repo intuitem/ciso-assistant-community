@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { breadcrumbObject } from '$lib/utils/stores';
-
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud.js';
 	const showRisks = true;
 	export let data;
 	const riskMatrix = data.data;
-	breadcrumbObject.set(riskMatrix);
 </script>
 
 <div class="flex flex-row justify-between">
@@ -30,7 +27,7 @@
 														(item) => item.field === key
 													)?.urlModel
 												}/${val.id}`}
-												<a href={itemHref} class="anchor">{val.str}</a>
+												<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 											{:else}
 												{value}
 											{/if}
@@ -38,12 +35,17 @@
 									{/each}
 								</ul>
 							{:else if value.id}
-								{@const itemHref = `/${
-									URL_MODEL_MAP['risk-matrices']['foreignKeyFields']?.find(
-										(item) => item.field === key
-									)?.urlModel
-								}/${value.id}`}
-								<a href={itemHref} class="anchor">{value.str}</a>
+								{#if key === 'library'}
+									{@const itemHref = `/libraries/${value.id}?loaded`}
+									<Anchor href={itemHref} class="anchor">{value.name}</Anchor>
+								{:else}
+									{@const itemHref = `/${
+										URL_MODEL_MAP['risk-matrices']['foreignKeyFields']?.find(
+											(item) => item.field === key
+										)?.urlModel
+									}/${value.id}`}
+									<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
+								{/if}
 							{:else}
 								{value.str ?? value}
 							{/if}

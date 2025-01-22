@@ -8,6 +8,7 @@
 	} from '$lib/utils/crud';
 	import { stringify } from '$lib/utils/helpers';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
+	import { toCamelCase } from '$lib/utils/locales.js';
 	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
@@ -62,7 +63,11 @@
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`);
+		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
+			label:
+				rowMetaData.str ?? rowMetaData.name ?? rowMetaData.email ?? rowMetaData[identifierField],
+			breadcrumbAction: 'push'
+		});
 	}
 
 	function onRowKeydown(
@@ -98,7 +103,8 @@
 	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
-	import { goto } from '$app/navigation';
+	import { goto as _goto } from '$app/navigation';
+	import { goto } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { DataHandler } from '@vincjo/datatables';
 	import Pagination from './Pagination.svelte';
@@ -164,7 +170,7 @@
 				}
 			}
 		}
-		if (browser) goto($page.url);
+		if (browser) _goto($page.url);
 	}
 
 	$: {
@@ -215,12 +221,13 @@
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { popup } from '@skeletonlabs/skeleton';
 	import { browser } from '$app/environment';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const popupFilter: PopupSettings = {
-		event: 'click',
+		event: 'focus-click',
 		target: 'popupFilter',
 		placement: 'bottom-start',
-		closeQuery: 'a[href]'
+		closeQuery: 'li'
 	};
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
@@ -231,7 +238,11 @@
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if filteredFields.length > 0 && hasRows && !hideFilters}
-			<button use:popup={popupFilter} class="btn variant-filled-primary self-end relative">
+			<button
+				use:popup={popupFilter}
+				class="btn variant-filled-primary self-end relative"
+				id="filters"
+			>
 				<i class="fa-solid fa-filter mr-2" />
 				{m.filters()}
 				{#if filterCount}
@@ -320,13 +331,11 @@
 													<li>
 														{#if val.str && val.id}
 															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${val.id}`}
-															<a
-																href={itemHref}
-																class="anchor"
-																on:click={(e) => e.stopPropagation()}>{val.str}</a
+															<Anchor href={itemHref} class="anchor" stopPropagation
+																>{val.str}</Anchor
 															>
 														{:else if val.str}
-															{val.str}
+															{safeTranslate(val.str)}
 														{:else if unsafeTranslate(val.split(':')[0])}
 															<span class="text"
 																>{unsafeTranslate(val.split(':')[0] + 'Colon')}
@@ -341,9 +350,17 @@
 										{:else if value && value.str}
 											{#if value.id}
 												{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-												<a href={itemHref} class="anchor" on:click={(e) => e.stopPropagation()}
-													>{value.str ?? '-'}</a
-												>
+												{#if key === 'ro_to_couple'}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+															'-'
+														)[1]}</Anchor
+													>
+												{:else}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{value.str}</Anchor
+													>
+												{/if}
 											{:else}
 												{value.str ?? '-'}
 											{/if}
@@ -356,8 +373,23 @@
 											>
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
-										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'publication_date' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
+										{:else if [true, false].includes(value)}
+											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+										{:else if key === 'progress'}
+											<span class="ml-9"
+												>{safeTranslate('percentageDisplay', { number: value })}</span
+											>
+										{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+											<div class="flex items-center space-x-2">
+												<span>{safeTranslate(value ?? '-')}</span>
+												<span
+													class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-200 dark:text-green-900"
+												>
+													{m.accept()}
+												</span>
+											</div>
 										{:else}
 											{safeTranslate(value ?? '-')}
 										{/if}
@@ -378,7 +410,7 @@
 										URLModel={actionsURLModel}
 										detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
 										editURL={!(row.meta.builtin || row.meta.urn)
-											? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}`
+											? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`
 											: undefined}
 										{row}
 										hasBody={$$slots.actionsBody}

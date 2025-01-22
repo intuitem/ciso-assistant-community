@@ -1,15 +1,13 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
-import { modelSchema } from '$lib/utils/schemas';
-import { fail, setError, superValidate } from 'sveltekit-superforms';
-import type { PageServerLoad } from './$types';
-import type { Actions } from '@sveltejs/kit';
-import { zod } from 'sveltekit-superforms/adapters';
-import { setFlash } from 'sveltekit-flash-message/server';
-import * as m from '$paraglide/messages';
-import { z } from 'zod';
-import { safeTranslate } from '$lib/utils/i18n';
 import { nestedWriteFormAction } from '$lib/utils/actions';
+import { BASE_API_URL } from '$lib/utils/constants';
+import { getModelInfo } from '$lib/utils/crud';
+import { modelSchema } from '$lib/utils/schemas';
+import * as m from '$paraglide/messages';
+import type { Actions } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
@@ -23,6 +21,11 @@ export const load = (async ({ fetch, params }) => {
 
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
+	const scoreSchema = z.object({
+		is_scored: z.boolean().optional(),
+		score: z.number().optional().nullable(),
+		documentation_score: z.number().optional().nullable()
+	});
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
 			const evidenceInitialData = {
@@ -37,10 +40,19 @@ export const load = (async ({ fetch, params }) => {
 				}
 			);
 			const observationBuffer = requirementAssessment.observation;
+			const scoreForm = await superValidate(
+				{
+					is_scored: requirementAssessment.is_scored,
+					score: requirementAssessment.score,
+					documentation_score: requirementAssessment.documentation_score
+				},
+				zod(scoreSchema)
+			);
 			return {
 				...requirementAssessment,
 				evidenceCreateForm,
-				observationBuffer
+				observationBuffer,
+				scoreForm
 			};
 		})
 	);
@@ -69,7 +81,8 @@ export const load = (async ({ fetch, params }) => {
 		requirement_assessments,
 		requirements,
 		evidenceModel,
-		deleteForm
+		deleteForm,
+		title: m.tableMode()
 	};
 }) satisfies PageServerLoad;
 

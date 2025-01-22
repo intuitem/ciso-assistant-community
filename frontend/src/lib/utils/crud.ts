@@ -106,6 +106,7 @@ interface ForeignKeyField {
 	endpointUrl?: string;
 	urlParams?: string;
 	detail?: boolean;
+	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
 }
 
 interface Field {
@@ -177,7 +178,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Risk matrix',
 		verboseNamePlural: 'Risk matrices',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'libraries' }
 		]
 	},
 	'risk-assessments': {
@@ -229,6 +231,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'existing_applied_controls', urlModel: 'applied-controls' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' },
@@ -603,7 +606,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',
 		localName: 'ebiosRMstudy',
-		localNamePlural: 'ebiosRMstudy',
+		localNamePlural: 'ebiosRmStudies',
 		verboseName: 'Ebios RMstudy',
 		verboseNamePlural: 'Ebios RMstudy',
 		foreignKeyFields: [
@@ -612,7 +615,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
-			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' }
+			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
+			{ field: 'reference_entity', urlModel: 'entities' }
 		],
 		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }]
 	},
@@ -625,7 +629,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Feared events',
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'assets', urlModel: 'assets', urlParams: 'ebios_rm_studies=', detail: true },
+			{ field: 'assets', urlModel: 'assets', urlParams: 'type=PR&ebios_rm_studies=', detail: true },
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
 		selectFields: [{ field: 'gravity', valueType: 'number', detail: true }]
@@ -643,14 +647,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'feared_events',
 				urlModel: 'feared-events',
 				endpointUrl: 'ebios-rm/feared-events',
-				urlParams: 'ebios_rm_study=',
+				urlParams: 'is_selected=true&ebios_rm_study=',
 				detail: true
 			}
 		],
 		selectFields: [
 			{ field: 'risk-origin' },
 			{ field: 'motivation', valueType: 'number' },
-			{ field: 'resources', valueType: 'number' }
+			{ field: 'resources', valueType: 'number' },
+			{ field: 'activity', valueType: 'number' }
 		]
 	},
 	stakeholders: {
@@ -668,6 +673,32 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'category' }]
 	},
+	'strategic-scenarios': {
+		endpointUrl: 'ebios-rm/strategic-scenarios',
+		name: 'strategicscenario',
+		localName: 'strategicScenario',
+		localNamePlural: 'strategicScenarios',
+		verboseName: 'Strategic scenario',
+		verboseNamePlural: 'Strategic scenarios',
+		foreignKeyFields: [
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
+			{
+				field: 'ro_to_couple',
+				urlModel: 'ro-to',
+				endpointUrl: 'ebios-rm/ro-to',
+				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
+				detail: true
+			},
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'strategic_scenario',
+				urlModel: 'attack-paths',
+				endpointUrl: 'ebios-rm/attack-paths'
+			}
+		]
+	},
 	'attack-paths': {
 		endpointUrl: 'ebios-rm/attack-paths',
 		name: 'attackpath',
@@ -676,19 +707,23 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Attack path',
 		verboseNamePlural: 'Attack paths',
 		foreignKeyFields: [
-			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' },
-			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' },
+			{
+				field: 'stakeholders',
+				urlModel: 'stakeholders',
+				endpointUrl: 'ebios-rm/stakeholders',
+				urlParams: 'is_selected=true&ebios_rm_study=',
+				detail: true
+			},
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{
+				field: 'strategic_scenario',
+				urlModel: 'strategic-scenarios',
+				endpointUrl: 'ebios-rm/strategic-scenarios',
+				urlParams: 'ebios_rm_study=',
+				detail: true
+			}
 		]
-	},
-	attack_paths: {
-		endpointUrl: 'ebios-rm/attack-paths',
-		name: 'attackpath',
-		localName: 'attackPath',
-		localNamePlural: 'attackPaths',
-		verboseName: 'Attack path',
-		verboseNamePlural: 'Attack paths'
 	},
 	'operational-scenarios': {
 		endpointUrl: 'ebios-rm/operational-scenarios',
@@ -700,9 +735,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
-			{ field: 'attack_path', urlModel: 'attack-paths' }
+			{
+				field: 'attack_path',
+				urlModel: 'attack-paths',
+				endpointUrl: 'ebios-rm/attack-paths',
+				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
+				detail: true
+			}
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number' }]
+		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
 	}
 };
 

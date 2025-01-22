@@ -1,0 +1,1922 @@
+urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information
+locale: en
+ref_id: Standards-for-Safeguarding-Customer-Information
+name: Standards for Safeguarding Customer Information
+description: "The Federal Trade Commission (\u201CFTC\u201D or \u201CCommission\u201D\
+  ) is issuing a final rule (\u201CFinal Rule\u201D) to amend the Standards for Safeguarding\
+  \ Customer Information (\u201CSafeguards Rule\u201D or \u201CRule\u201D). The Final\
+  \ Rule contains five main modifications to the existing Rule. First, it adds provisions\
+  \ designed to provide covered financial institutions with more guidance on how to\
+  \ develop and implement specific aspects of an overall information security program,\
+  \ such as access controls, authentication, and encryption. Second, it adds provisions\
+  \ designed to improve the accountability of financial institutions' information\
+  \ security programs, such as by requiring periodic reports to boards of directors\
+  \ or governing bodies. Third, it exempts financial institutions that collect less\
+  \ customer information from certain requirements. Fourth, it expands the definition\
+  \ of \u201Cfinancial institution\u201D to include entities engaged in activities\
+  \ the Federal Reserve Board determines to be incidental to financial activities.\
+  \ This change adds \u201Cfinders\u201D\u2014companies that bring together buyers\
+  \ and sellers of a product or service\u2014within the scope of the Rule. Finally,\
+  \ the Final Rule defines several terms and provides related examples in the Rule\
+  \ itself rather than incorporates them from the Privacy of Consumer Financial Information\
+  \ Rule (\u201CPrivacy Rule\u201D).\nLink: https://www.ecfr.gov/current/title-16/chapter-I/subchapter-C/part-314 "
+copyright: Federal Trade Commission
+version: 1
+publication_date: 2024-12-24
+provider: Federal Trade Commission
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information
+    ref_id: Standards-for-Safeguarding-Customer-Information
+    name: Standards for Safeguarding Customer Information
+    description: "The Federal Trade Commission (\u201CFTC\u201D or \u201CCommission\u201D\
+      ) is issuing a final rule (\u201CFinal Rule\u201D) to amend the Standards for\
+      \ Safeguarding Customer Information (\u201CSafeguards Rule\u201D or \u201CRule\u201D\
+      ). The Final Rule contains five main modifications to the existing Rule. First,\
+      \ it adds provisions designed to provide covered financial institutions with\
+      \ more guidance on how to develop and implement specific aspects of an overall\
+      \ information security program, such as access controls, authentication, and\
+      \ encryption. Second, it adds provisions designed to improve the accountability\
+      \ of financial institutions' information security programs, such as by requiring\
+      \ periodic reports to boards of directors or governing bodies. Third, it exempts\
+      \ financial institutions that collect less customer information from certain\
+      \ requirements. Fourth, it expands the definition of \u201Cfinancial institution\u201D\
+      \ to include entities engaged in activities the Federal Reserve Board determines\
+      \ to be incidental to financial activities. This change adds \u201Cfinders\u201D\
+      \u2014companies that bring together buyers and sellers of a product or service\u2014\
+      within the scope of the Rule. Finally, the Final Rule defines several terms\
+      \ and provides related examples in the Rule itself rather than incorporates\
+      \ them from the Privacy of Consumer Financial Information Rule (\u201CPrivacy\
+      \ Rule\u201D).\nLink: https://www.ecfr.gov/current/title-16/chapter-I/subchapter-C/part-314 "
+    requirement_nodes:
+    - urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:part-314
+      assessable: false
+      depth: 1
+      ref_id: Part 314
+      name: Standards for Safeguarding Customer Information
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.1"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:part-314
+      ref_id: "\xA7 314.1"
+      name: Purpose and scope
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.1.a"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.1"
+      ref_id: "\xA7 314.1.a"
+      name: Purpose
+      description: This part, which implements sections 501 and 505(b)(2) of the Gramm-Leach-Bliley
+        Act, sets forth standards for developing, implementing, and maintaining reasonable
+        administrative, technical, and physical safeguards to protect the security,
+        confidentiality, and integrity of customer information.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.1.b"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.1"
+      ref_id: "\xA7 314.1.b"
+      name: Scope
+      description: "This part applies to the handling of customer information by all\
+        \ financial institutions over which the Federal Trade Commission (\u201CFTC\u201D\
+        \ or \u201CCommission\u201D) has jurisdiction. Namely, this part applies to\
+        \ those \u201Cfinancial institutions\u201D over which the Commission has rulemaking\
+        \ authority pursuant to section 501(b) of the Gramm-Leach-Bliley Act. An entity\
+        \ is a \u201Cfinancial institution\u201D if its business is engaging in an\
+        \ activity that is financial in nature or incidental to such financial activities\
+        \ as described in section 4(k) of the Bank Holding Company Act of 1956, 12\
+        \ U.S.C. 1843(k), which incorporates activities enumerated by the Federal\
+        \ Reserve Board in 12 CFR 225.28 and 225.86. The \u201Cfinancial institutions\u201D\
+        \ subject to the Commission's enforcement authority are those that are not\
+        \ otherwise subject to the enforcement authority of another regulator under\
+        \ section 505 of the Gramm-Leach-Bliley Act, 15 U.S.C. 6805. More specifically,\
+        \ those entities include, but are not limited to, mortgage lenders, \u201C\
+        pay day\u201D lenders, finance companies, mortgage brokers, account servicers,\
+        \ check cashers, wire transferors, travel agencies operated in connection\
+        \ with financial services, collection agencies, credit counselors and other\
+        \ financial advisors, tax preparation firms, non-federally insured credit\
+        \ unions, investment advisors that are not required to register with the Securities\
+        \ and Exchange Commission, and entities acting as finders. They are referred\
+        \ to in this part as \u201CYou.\u201D This part applies to all customer information\
+        \ in your possession, regardless of whether such information pertains to individuals\
+        \ with whom you have a customer relationship, or pertains to the customers\
+        \ of other financial institutions that have provided such information to you."
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:part-314
+      ref_id: "\xA7 314.2"
+      name: Definitions
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.a"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.a"
+      description: Authorized user  means any employee, contractor, agent, customer,
+        or other person that is authorized to access any of your information systems
+        or data.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.b"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.1"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b"
+      ref_id: "\xA7 314.2.b.1"
+      description: Consumer  means an individual who obtains or has obtained a financial
+        product or service from you that is to be used primarily for personal, family,
+        or household purposes, or that individual's legal representative.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b"
+      ref_id: "\xA7 314.2.b.2"
+      description: 'For example:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      ref_id: "\xA7 314.2.b.2.i"
+      description: An individual who applies to you for credit for personal, family,
+        or household purposes is a consumer of a financial service, regardless of
+        whether the credit is extended.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      ref_id: "\xA7 314.2.b.2.ii"
+      description: An individual who provides nonpublic personal information to you
+        in order to obtain a determination about whether he or she may qualify for
+        a loan to be used primarily for personal, family, or household purposes is
+        a consumer of a financial service, regardless of whether the loan is extended.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2.iii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      ref_id: "\xA7 314.2.b.2.iii"
+      description: An individual who provides nonpublic personal information to you
+        in connection with obtaining or seeking to obtain financial, investment, or
+        economic advisory services is a consumer, regardless of whether you establish
+        a continuing advisory relationship.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2.iv"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      ref_id: "\xA7 314.2.b.2.iv"
+      description: If you hold ownership or servicing rights to an individual's loan
+        that is used primarily for personal, family, or household purposes, the individual
+        is your consumer, even if you hold those rights in conjunction with one or
+        more other institutions. (The individual is also a consumer with respect to
+        the other financial institutions involved.) An individual who has a loan in
+        which you have ownership or servicing rights is your consumer, even if you,
+        or another institution with those rights, hire an agent to collect on the
+        loan.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2.v"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      ref_id: "\xA7 314.2.b.2.v"
+      description: An individual who is a consumer of another financial institution
+        is not your consumer solely because you act as agent for, or provide processing
+        or other services to, that financial institution.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2.vi"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      ref_id: "\xA7 314.2.b.2.vi"
+      description: An individual is not your consumer solely because he or she has
+        designated you as trustee for a trust.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2.vii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      ref_id: "\xA7 314.2.b.2.vii"
+      description: An individual is not your consumer solely because he or she is
+        a beneficiary of a trust for which you are a trustee.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2.viii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.b.2"
+      ref_id: "\xA7 314.2.b.2.viii"
+      description: An individual is not your consumer solely because he or she is
+        a participant or a beneficiary of an employee benefit plan that you sponsor
+        or for which you act as a trustee or fiduciary.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.c"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.c"
+      description: Customer  means a consumer who has a customer relationship with
+        you.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.d"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.d"
+      description: Customer information  means any record containing nonpublic personal
+        information about a customer of a financial institution, whether in paper,
+        electronic, or other form, that is handled or maintained by or on behalf of
+        you or your affiliates.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.e"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.1"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e"
+      ref_id: "\xA7 314.2.e.1"
+      description: Customer relationship  means a continuing relationship between
+        a consumer and you under which you provide one or more financial products
+        or services to the consumer that are to be used primarily for personal, family,
+        or household purposes.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e"
+      ref_id: "\xA7 314.2.e.2"
+      description: 'For example:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2"
+      ref_id: "\xA7 314.2.e.2.i"
+      description: 'Continuing relationship.  A consumer has a continuing relationship
+        with you if the consumer:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.a"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.A"
+      description: Has a credit or investment account with you;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.b"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.B"
+      description: Obtains a loan from you;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.c"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.C"
+      description: Purchases an insurance product from you;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.d"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.D"
+      description: Holds an investment product through you, such as when you act as
+        a custodian for securities or for assets in an Individual Retirement Arrangement;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.e"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.E"
+      description: Enters into an agreement or understanding with you whereby you
+        undertake to arrange or broker a home mortgage loan, or credit to purchase
+        a vehicle, for the consumer;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.f"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.F"
+      description: Enters into a lease of personal property on a non-operating basis
+        with you;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.g"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.G"
+      description: Obtains financial, investment, or economic advisory services from
+        you for a fee;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.h"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.H"
+      description: Becomes your client for the purpose of obtaining tax preparation
+        or credit counseling services from you;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.i"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.I"
+      description: Obtains career counseling while seeking employment with a financial
+        institution or the finance, accounting, or audit department of any company
+        (or while employed by such a financial institution or department of any company);
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.j"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.J"
+      description: Is obligated on an account that you purchase from another financial
+        institution, regardless of whether the account is in default when purchased,
+        unless you do not locate the consumer or attempt to collect any amount from
+        the consumer on the account;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.k"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.K"
+      description: Obtains real estate settlement services from you; or
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i.l"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.i"
+      ref_id: "\xA7 314.2.e.2.i.L"
+      description: Has a loan for which you own the servicing rights.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2"
+      ref_id: "\xA7 314.2.e.2.ii"
+      name: No continuing relationship
+      description: 'A consumer does not, however, have a continuing relationship with
+        you if:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii.a"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii"
+      ref_id: "\xA7 314.2.e.2.ii.A"
+      description: The consumer obtains a financial product or service from you only
+        in isolated transactions, such as using your ATM to withdraw cash from an
+        account at another financial institution; purchasing a money order from you;
+        cashing a check with you; or making a wire transfer through you;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii.b"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii"
+      ref_id: "\xA7 314.2.e.2.ii.B"
+      description: You sell the consumer's loan and do not retain the rights to service
+        that loan;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii.c"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii"
+      ref_id: "\xA7 314.2.e.2.ii.C"
+      description: You sell the consumer airline tickets, travel insurance, or traveler's
+        checks in isolated transactions;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii.d"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii"
+      ref_id: "\xA7 314.2.e.2.ii.D"
+      description: The consumer obtains one-time personal or real property appraisal
+        services from you; or
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii.e"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.e.2.ii"
+      ref_id: "\xA7 314.2.e.2.ii.E"
+      description: The consumer purchases checks for a personal checking account from
+        you.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.f"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.f"
+      description: Encryption  means the transformation of data into a form that results
+        in a low probability of assigning meaning without the use of a protective
+        process or key, consistent with current cryptographic standards and accompanied
+        by appropriate safeguards for cryptographic key material.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.g"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.g"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.g.1"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.g"
+      ref_id: "\xA7 314.2.g.1"
+      description: Financial product or service  means any product or service that
+        a financial holding company could offer by engaging in a financial activity
+        under section 4(k) of the Bank Holding Company Act of 1956 (12 U.S.C. 1843(k)).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.g.2"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.g"
+      ref_id: "\xA7 314.2.g.2"
+      description: Financial service  includes your evaluation or brokerage of information
+        that you collect in connection with a request or an application from a consumer
+        for a financial product or service.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.h"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.1"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h"
+      ref_id: "\xA7 314.2.h.1"
+      description: Financial institution  means any institution the business of which
+        is engaging in an activity that is financial in nature or incidental to such
+        financial activities as described in section 4(k) of the Bank Holding Company
+        Act of 1956, 12 U.S.C. 1843(k). An institution that is significantly engaged
+        in financial activities, or significantly engaged in activities incidental
+        to such financial activities, is a financial institution.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h"
+      ref_id: "\xA7 314.2.h.2"
+      description: 'Examples of financial institutions are as follows:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.i"
+      description: A retailer that extends credit by issuing its own credit card directly
+        to consumers is a financial institution because extending credit is a financial
+        activity listed in 12 CFR 225.28(b)(1) and referenced in section 4(k)(4)(F)
+        of the Bank Holding Company Act of 1956 (12 U.S.C. 1843(k)(4)(F)), and issuing
+        that extension of credit through a proprietary credit card demonstrates that
+        a retailer is significantly engaged in extending credit.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.ii"
+      description: An automobile dealership that, as a usual part of its business,
+        leases automobiles on a nonoperating basis for longer than 90 days is a financial
+        institution with respect to its leasing business because leasing personal
+        property on a nonoperating basis where the initial term of the lease is at
+        least 90 days is a financial activity listed in 12 CFR 225.28(b)(3) and referenced
+        in section 4(k)(4)(F) of the Bank Holding Company Act, 12 U.S.C. 1843(k)(4)(F).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.iii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.iii"
+      description: A personal property or real estate appraiser is a financial institution
+        because real and personal property appraisal is a financial activity listed
+        in 12 CFR 225.28(b)(2)(i) and referenced in section 4(k)(4)(F) of the Bank
+        Holding Company Act, 12 U.S.C. 1843(k)(4)(F).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.iv"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.iv"
+      description: A career counselor that specializes in providing career counseling
+        services to individuals currently employed by or recently displaced from a
+        financial organization, individuals who are seeking employment with a financial
+        organization, or individuals who are currently employed by or seeking placement
+        with the finance, accounting or audit departments of any company is a financial
+        institution because such career counseling activities are financial activities
+        listed in 12 CFR 225.28(b)(9)(iii) and referenced in section 4(k)(4)(F) of
+        the Bank Holding Company Act, 12 U.S.C. 1843(k)(4)(F).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.v"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.v"
+      description: A business that prints and sells checks for consumers, either as
+        its sole business or as one of its product lines, is a financial institution
+        because printing and selling checks is a financial activity that is listed
+        in 12 CFR 225.28(b)(10)(ii) and referenced in section 4(k)(4)(F) of the Bank
+        Holding Company Act, 12 U.S.C. 1843(k)(4)(F).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.vi"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.vi"
+      description: A business that regularly wires money to and from consumers is
+        a financial institution because transferring money is a financial activity
+        referenced in section 4(k)(4)(A) of the Bank Holding Company Act, 12 U.S.C.
+        1843(k)(4)(A), and regularly providing that service demonstrates that the
+        business is significantly engaged in that activity.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.vii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.vii"
+      description: A check cashing business is a financial institution because cashing
+        a check is exchanging money, which is a financial activity listed in section
+        4(k)(4)(A) of the Bank Holding Company Act, 12 U.S.C. 1843(k)(4)(A).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.viii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.viii"
+      description: An accountant or other tax preparation service that is in the business
+        of completing income tax returns is a financial institution because tax preparation
+        services is a financial activity listed in 12 CFR 225.28(b)(6)(vi) and referenced
+        in section 4(k)(4)(G) of the Bank Holding Company Act, 12 U.S.C. 1843(k)(4)(G).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.ix"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.ix"
+      description: A business that operates a travel agency in connection with financial
+        services is a financial institution because operating a travel agency in connection
+        with financial services is a financial activity listed in 12 CFR 225.86(b)(2)
+        and referenced in section 4(k)(4)(G) of the Bank Holding Company Act, 12 U.S.C.
+        1843(k)(4)(G).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.x"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.x"
+      description: An entity that provides real estate settlement services is a financial
+        institution because providing real estate settlement services is a financial
+        activity listed in 12 CFR 225.28(b)(2)(viii) and referenced in section 4(k)(4)(F)
+        of the Bank Holding Company Act, 12 U.S.C. 1843(k)(4)(F).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.xi"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.xi"
+      description: A mortgage broker is a financial institution because brokering
+        loans is a financial activity listed in 12 CFR 225.28(b)(1) and referenced
+        in section 4(k)(4)(F) of the Bank Holding Company Act, 12 U.S.C. 1843(k)(4)(F).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.xii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.xii"
+      description: An investment advisory company and a credit counseling service
+        are each financial institutions because providing financial and investment
+        advisory services are financial activities referenced in section 4(k)(4)(C)
+        of the Bank Holding Company Act, 12 U.S.C. 1843(k)(4)(C).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2.xiii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.2"
+      ref_id: "\xA7 314.2.h.2.xiii"
+      description: A company acting as a finder in bringing together one or more buyers
+        and sellers of any product or service for transactions that the parties themselves
+        negotiate and consummate is a financial institution because acting as a finder
+        is an activity that is financial in nature or incidental to a financial activity
+        listed in 12 CFR 225.86(d)(1).
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h"
+      ref_id: "\xA7 314.2.h.3"
+      description: 'Financial institution  does not include:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3"
+      ref_id: "\xA7 314.2.h.3.i"
+      description: Any person or entity with respect to any financial activity that
+        is subject to the jurisdiction of the Commodity Futures Trading Commission
+        under the Commodity Exchange Act (7 U.S.C. 1 et seq.);
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3"
+      ref_id: "\xA7 314.2.h.3.ii"
+      description: The Federal Agricultural Mortgage Corporation or any entity chartered
+        and operating under the Farm Credit Act of 1971 (12 U.S.C. 2001 et seq.);
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3.iii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3"
+      ref_id: "\xA7 314.2.h.3.iii"
+      description: "Institutions chartered by Congress specifically to engage in securitizations,\
+        \ secondary market sales (including sales of servicing rights) or similar\
+        \ transactions related to a transaction of a consumer, as long as such institutions\
+        \ do not sell or transfer nonpublic personal information to a nonaffiliated\
+        \ third party other than as permitted by \xA7\xA7 313.14 and 313.15; or"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3.iv"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.3"
+      ref_id: "\xA7 314.2.h.3.iv"
+      description: Entities that engage in financial activities but that are not significantly
+        engaged in those financial activities, and entities that engage in activities
+        incidental to financial activities but that are not significantly engaged
+        in activities incidental to financial activities.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h"
+      ref_id: "\xA7 314.2.h.4"
+      description: 'Examples of entities that are not significantly engaged in financial
+        activities are as follows:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4"
+      ref_id: "\xA7 314.2.h.4.i"
+      description: "A retailer is not a financial institution if its only means of\
+        \ extending credit are occasional \u201Clay away\u201D and deferred payment\
+        \ plans or accepting payment by means of credit cards issued by others."
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4"
+      ref_id: "\xA7 314.2.h.4.ii"
+      description: A retailer is not a financial institution merely because it accepts
+        payment in the form of cash, checks, or credit cards that it did not issue.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4.iii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4"
+      ref_id: "\xA7 314.2.h.4.iii"
+      description: "A merchant is not a financial institution merely because it allows\
+        \ an individual to \u201Crun a tab.\u201D"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4.iv"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.h.4"
+      ref_id: "\xA7 314.2.h.4.iv"
+      description: A grocery store is not a financial institution merely because it
+        allows individuals to whom it sells groceries to cash a check, or write a
+        check for a higher amount than the grocery purchase and obtain cash in return.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.i"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.i"
+      description: Information security program  means the administrative, technical,
+        or physical safeguards you use to access, collect, distribute, process, protect,
+        store, use, transmit, dispose of, or otherwise handle customer information.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.j"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.j"
+      description: Information system  means a discrete set of electronic information
+        resources organized for the collection, processing, maintenance, use, sharing,
+        dissemination or disposition of electronic information containing customer
+        information or connected to a system containing customer information, as well
+        as any specialized system such as industrial/process controls systems, telephone
+        switching and private branch exchange systems, and environmental controls
+        systems that contains customer information or that is connected to a system
+        that contains customer information.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.k"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.k"
+      description: 'Multi-factor authentication  means authentication through verification
+        of at least two of the following types of authentication factors:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.k.1"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.k"
+      ref_id: "\xA7 314.2.k.1"
+      description: Knowledge factors, such as a password;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.k.2"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.k"
+      ref_id: "\xA7 314.2.k.2"
+      description: Possession factors, such as a token; or
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.k.3"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.k"
+      ref_id: "\xA7 314.2.k.3"
+      description: Inherence factors, such as biometric characteristics.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.l"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.1"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l"
+      ref_id: "\xA7 314.2.l.1"
+      description: 'Nonpublic personal information  means:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.1.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.1"
+      ref_id: "\xA7 314.2.l.1.i"
+      description: Personally identifiable financial information; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.1.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.1"
+      ref_id: "\xA7 314.2.l.1.ii"
+      description: Any list, description, or other grouping of consumers (and publicly
+        available information pertaining to them) that is derived using any personally
+        identifiable financial information that is not publicly available.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.2"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l"
+      ref_id: "\xA7 314.2.l.2"
+      description: 'Nonpublic personal information  does not include:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.2.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.2"
+      ref_id: "\xA7 314.2.l.2.i"
+      description: Publicly available information, except as included on a list described
+        in paragraph (l)(1)(ii) of this section; or
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.2.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.2"
+      ref_id: "\xA7 314.2.l.2.ii"
+      description: Any list, description, or other grouping of consumers (and publicly
+        available information pertaining to them) that is derived without using any
+        personally identifiable financial information that is not publicly available.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.3"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l"
+      ref_id: "\xA7 314.2.l.3"
+      description: 'For example:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.3.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.3"
+      ref_id: "\xA7 314.2.l.3.i"
+      description: Nonpublic personal information includes any list of individuals'
+        names and street addresses that is derived in whole or in part using personally
+        identifiable financial information (that is not publicly available), such
+        as account numbers.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.3.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.l.3"
+      ref_id: "\xA7 314.2.l.3.ii"
+      description: Nonpublic personal information does not include any list of individuals'
+        names and addresses that contains only publicly available information, is
+        not derived, in whole or in part, using personally identifiable financial
+        information that is not publicly available, and is not disclosed in a manner
+        that indicates that any of the individuals on the list is a consumer of a
+        financial institution.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.m"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.m"
+      description: Notification event  means acquisition of unencrypted customer information
+        without the authorization of the individual to which the information pertains.
+        Customer information is considered unencrypted for this purpose if the encryption
+        key was accessed by an unauthorized person. Unauthorized acquisition will
+        be presumed to include unauthorized access to unencrypted customer information
+        unless you have reliable evidence showing that there has not been, or could
+        not reasonably have been, unauthorized acquisition of such information.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.n"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.n"
+      description: Penetration testing  means a test methodology in which assessors
+        attempt to circumvent or defeat the security features of an information system
+        by attempting penetration of databases or controls from outside or inside
+        your information systems.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.o"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.1"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o"
+      ref_id: "\xA7 314.2.o.1"
+      description: 'Personally identifiable financial information  means any information:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.1.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.1"
+      ref_id: "\xA7 314.2.o.1.i"
+      description: A consumer provides to you to obtain a financial product or service
+        from you;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.1.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.1"
+      ref_id: "\xA7 314.2.o.1.ii"
+      description: About a consumer resulting from any transaction involving a financial
+        product or service between you and a consumer; or
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.1.iii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.1"
+      ref_id: "\xA7 314.2.o.1.iii"
+      description: You otherwise obtain about a consumer in connection with providing
+        a financial product or service to that consumer.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o"
+      ref_id: "\xA7 314.2.o.2"
+      description: 'For example:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2"
+      ref_id: "\xA7 314.2.o.2.i"
+      name: Information included
+      description: 'Personally identifiable financial information includes:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i.a"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i"
+      ref_id: "\xA7 314.2.o.2.i.A"
+      description: Information a consumer provides to you on an application to obtain
+        a loan, credit card, or other financial product or service;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i.b"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i"
+      ref_id: "\xA7 314.2.o.2.i.B"
+      description: Account balance information, payment history, overdraft history,
+        and credit or debit card purchase information;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i.c"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i"
+      ref_id: "\xA7 314.2.o.2.i.C"
+      description: The fact that an individual is or has been one of your customers
+        or has obtained a financial product or service from you;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i.d"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i"
+      ref_id: "\xA7 314.2.o.2.i.D"
+      description: Any information about your consumer if it is disclosed in a manner
+        that indicates that the individual is or has been your consumer;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i.e"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i"
+      ref_id: "\xA7 314.2.o.2.i.E"
+      description: Any information that a consumer provides to you or that you or
+        your agent otherwise obtain in connection with collecting on, or servicing,
+        a credit account;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i.f"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i"
+      ref_id: "\xA7 314.2.o.2.i.F"
+      description: "Any information you collect through an internet \u201Ccookie\u201D\
+        \ (an information collecting device from a web server); and"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i.g"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.i"
+      ref_id: "\xA7 314.2.o.2.i.G"
+      description: Information from a consumer report.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2"
+      ref_id: "\xA7 314.2.o.2.ii"
+      name: Information not included
+      description: 'Personally identifiable financial information does not include:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.ii.a"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.ii"
+      ref_id: "\xA7 314.2.o.2.ii.A"
+      description: A list of names and addresses of customers of an entity that is
+        not a financial institution; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.ii.b"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.o.2.ii"
+      ref_id: "\xA7 314.2.o.2.ii.B"
+      description: Information that does not identify a consumer, such as aggregate
+        information or blind data that does not contain personal identifiers such
+        as account numbers, names, or addresses.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.p"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.1"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p"
+      ref_id: "\xA7 314.2.p.1"
+      description: 'Publicly available information  means any information that you
+        have a reasonable basis to believe is lawfully made available to the general
+        public from:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.1.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.1"
+      ref_id: "\xA7 314.2.p.1.i"
+      description: Federal, State, or local government records;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.1.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.1"
+      ref_id: "\xA7 314.2.p.1.ii"
+      description: Widely distributed media; or
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.1.iii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.1"
+      ref_id: "\xA7 314.2.p.1.iii"
+      description: Disclosures to the general public that are required to be made
+        by Federal, State, or local law.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.2"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p"
+      ref_id: "\xA7 314.2.p.2"
+      description: 'You have a reasonable basis to believe that information is lawfully
+        made available to the general public if you have taken steps to determine:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.2.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.2"
+      ref_id: "\xA7 314.2.p.2.i"
+      description: That the information is of the type that is available to the general
+        public; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.2.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.2"
+      ref_id: "\xA7 314.2.p.2.ii"
+      description: Whether an individual can direct that the information not be made
+        available to the general public and, if so, that your consumer has not done
+        so.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3"
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p"
+      ref_id: "\xA7 314.2.p.3"
+      description: 'For example:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3.i"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3"
+      ref_id: "\xA7 314.2.p.3.i"
+      name: Government records
+      description: Publicly available information in government records includes information
+        in government real estate records and security interest filings.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3.ii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3"
+      ref_id: "\xA7 314.2.p.3.ii"
+      name: Widely distributed media
+      description: Publicly available information from widely distributed media includes
+        information from a telephone book, a television or radio program, a newspaper,
+        or a website that is available to the general public on an unrestricted basis.
+        A website is not restricted merely because an internet service provider or
+        a site operator requires a fee or a password, so long as access is available
+        to the general public.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3.iii"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3"
+      ref_id: "\xA7 314.2.p.3.iii"
+      description: Reasonable basis
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3.iii.a"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3.iii"
+      ref_id: "\xA7 314.2.p.3.iii.A"
+      description: You have a reasonable basis to believe that mortgage information
+        is lawfully made available to the general public if you have determined that
+        the information is of the type included on the public record in the jurisdiction
+        where the mortgage would be recorded.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3.iii.b"
+      assessable: false
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.p.3.iii"
+      ref_id: "\xA7 314.2.p.3.iii.B"
+      description: You have a reasonable basis to believe that an individual's telephone
+        number is lawfully made available to the general public if you have located
+        the telephone number in the telephone book or the consumer has informed you
+        that the telephone number is not unlisted.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.q"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.q"
+      description: Security event  means an event resulting in unauthorized access
+        to, or disruption or misuse of, an information system, information stored
+        on such information system, or customer information held in physical form.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.r"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.r"
+      description: Service provider  means any person or entity that receives, maintains,
+        processes, or otherwise is permitted access to customer information through
+        its provision of services directly to a financial institution that is subject
+        to this part.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2.s"
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.2"
+      ref_id: "\xA7 314.2.s"
+      description: "You  includes each \u201Cfinancial institution\u201D (but excludes\
+        \ any \u201Cother person\u201D) over which the Commission has enforcement\
+        \ jurisdiction pursuant to section 505(a)(7) of the Gramm-Leach-Bliley Act."
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:part-314
+      ref_id: "\xA7 314.3"
+      name: Standards for safeguarding customer information
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3.a"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3"
+      ref_id: "\xA7 314.3.a"
+      name: Information security program
+      description: "You shall develop, implement, and maintain a comprehensive information\
+        \ security program that is written in one or more readily accessible parts\
+        \ and contains administrative, technical, and physical safeguards that are\
+        \ appropriate to your size and complexity, the nature and scope of your activities,\
+        \ and the sensitivity of any customer information at issue. The information\
+        \ security program shall include the elements set forth in \xA7 314.4 and\
+        \ shall be reasonably designed to achieve the objectives of this part, as\
+        \ set forth in paragraph (b) of this section."
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3.b"
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3"
+      ref_id: "\xA7 314.3.b"
+      name: Objectives
+      description: 'The objectives of section 501(b) of the Act, and of this part,
+        are to:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3.b.1"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3.b"
+      ref_id: "\xA7 314.3.b.1"
+      description: Insure the security and confidentiality of customer information;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3.b.2"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3.b"
+      ref_id: "\xA7 314.3.b.2"
+      description: Protect against any anticipated threats or hazards to the security
+        or integrity of such information; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3.b.3"
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.3.b"
+      ref_id: "\xA7 314.3.b.3"
+      description: Protect against unauthorized access to or use of such information
+        that could result in substantial harm or inconvenience to any customer.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:part-314
+      ref_id: "\xA7 314.4"
+      name: Elements
+    - urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4"
+      description: 'In order to develop, implement, and maintain your information
+        security program, you shall:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.a"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.a"
+      description: "Designate a qualified individual responsible for overseeing and\
+        \ implementing your information security program and enforcing your information\
+        \ security program (for purposes of this part, \u201CQualified Individual\u201D\
+        ). The Qualified Individual may be employed by you, an affiliate, or a service\
+        \ provider. To the extent the requirement in this paragraph (a) is met using\
+        \ a service provider or an affiliate, you shall:"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.a.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.a"
+      ref_id: "\xA7 314.4.a.1"
+      description: Retain responsibility for compliance with this part;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.a.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.a"
+      ref_id: "\xA7 314.4.a.2"
+      description: Designate a senior member of your personnel responsible for direction
+        and oversight of the Qualified Individual; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.a.3"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.a"
+      ref_id: "\xA7 314.4.a.3"
+      description: Require the service provider or affiliate to maintain an information
+        security program that protects you in accordance with the requirements of
+        this part.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.b"
+      description: Base your information security program on a risk assessment that
+        identifies reasonably foreseeable internal and external risks to the security,
+        confidentiality, and integrity of customer information that could result in
+        the unauthorized disclosure, misuse, alteration, destruction, or other compromise
+        of such information, and assesses the sufficiency of any safeguards in place
+        to control these risks.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b"
+      ref_id: "\xA7 314.4.b.1"
+      description: 'The risk assessment shall be written and shall include:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b.1.i"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b.1"
+      ref_id: "\xA7 314.4.b.1.i"
+      description: Criteria for the evaluation and categorization of identified security
+        risks or threats you face;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b.1.ii"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b.1"
+      ref_id: "\xA7 314.4.b.1.ii"
+      description: Criteria for the assessment of the confidentiality, integrity,
+        and availability of your information systems and customer information, including
+        the adequacy of the existing controls in the context of the identified risks
+        or threats you face; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b.1.iii"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b.1"
+      ref_id: "\xA7 314.4.b.1.iii"
+      description: Requirements describing how identified risks will be mitigated
+        or accepted based on the risk assessment and how the information security
+        program will address the risks.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.b"
+      ref_id: "\xA7 314.4.b.2"
+      description: You shall periodically perform additional risk assessments that
+        reexamine the reasonably foreseeable internal and external risks to the security,
+        confidentiality, and integrity of customer information that could result in
+        the unauthorized disclosure, misuse, alteration, destruction, or other compromise
+        of such information, and reassess the sufficiency of any safeguards in place
+        to control these risks.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.c"
+      description: 'Design and implement safeguards to control the risks you identify
+        through risk assessment, including by:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      ref_id: "\xA7 314.4.c.1"
+      description: 'Implementing and periodically reviewing access controls, including
+        technical and, as appropriate, physical controls to:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.1.i"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.1"
+      ref_id: "\xA7 314.4.c.1.i"
+      description: Authenticate and permit access only to authorized users to protect
+        against the unauthorized acquisition of customer information; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.1.ii"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.1"
+      ref_id: "\xA7 314.4.c.1.ii"
+      description: Limit authorized users' access only to customer information that
+        they need to perform their duties and functions, or, in the case of customers,
+        to access their own information;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      ref_id: "\xA7 314.4.c.2"
+      description: Identify and manage the data, personnel, devices, systems, and
+        facilities that enable you to achieve business purposes in accordance with
+        their relative importance to business objectives and your risk strategy;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.3"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      ref_id: "\xA7 314.4.c.3"
+      description: Protect by encryption all customer information held or transmitted
+        by you both in transit over external networks and at rest. To the extent you
+        determine that encryption of customer information, either in transit over
+        external networks or at rest, is infeasible, you may instead secure such customer
+        information using effective alternative compensating controls reviewed and
+        approved by your Qualified Individual;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.4"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      ref_id: "\xA7 314.4.c.4"
+      description: Adopt secure development practices for in-house developed applications
+        utilized by you for transmitting, accessing, or storing customer information
+        and procedures for evaluating, assessing, or testing the security of externally
+        developed applications you utilize to transmit, access, or store customer
+        information;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.5"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      ref_id: "\xA7 314.4.c.5"
+      description: Implement multi-factor authentication for any individual accessing
+        any information system, unless your Qualified Individual has approved in writing
+        the use of reasonably equivalent or more secure access controls;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.6"
+      assessable: false
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      ref_id: "\xA7 314.4.c.6"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.6.i"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.6"
+      ref_id: "\xA7 314.4.c.6.i"
+      description: Develop, implement, and maintain procedures for the secure disposal
+        of customer information in any format no later than two years after the last
+        date the information is used in connection with the provision of a product
+        or service to the customer to which it relates, unless such information is
+        necessary for business operations or for other legitimate business purposes,
+        is otherwise required to be retained by law or regulation, or where targeted
+        disposal is not reasonably feasible due to the manner in which the information
+        is maintained; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.6.ii"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.6"
+      ref_id: "\xA7 314.4.c.6.ii"
+      description: Periodically review your data retention policy to minimize the
+        unnecessary retention of data;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.7"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      ref_id: "\xA7 314.4.c.7"
+      description: Adopt procedures for change management; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c.8"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.c"
+      ref_id: "\xA7 314.4.c.8"
+      description: Implement policies, procedures, and controls designed to monitor
+        and log the activity of authorized users and detect unauthorized access or
+        use of, or tampering with, customer information by such users.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d"
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.d"
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d"
+      ref_id: "\xA7 314.4.d.1"
+      description: Regularly test or otherwise monitor the effectiveness of the safeguards'
+        key controls, systems, and procedures, including those to detect actual and
+        attempted attacks on, or intrusions into, information systems.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d"
+      ref_id: "\xA7 314.4.d.2"
+      description: 'For information systems, the monitoring and testing shall include
+        continuous monitoring or periodic penetration testing and vulnerability assessments.
+        Absent effective continuous monitoring or other systems to detect, on an ongoing
+        basis, changes in information systems that may create vulnerabilities, you
+        shall conduct:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d.2.i"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d.2"
+      ref_id: "\xA7 314.4.d.2.i"
+      description: Annual penetration testing of your information systems determined
+        each given year based on relevant identified risks in accordance with the
+        risk assessment; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d.2.ii"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.d.2"
+      ref_id: "\xA7 314.4.d.2.ii"
+      description: Vulnerability assessments, including any systemic scans or reviews
+        of information systems reasonably designed to identify publicly known security
+        vulnerabilities in your information systems based on the risk assessment,
+        at least every six months; and whenever there are material changes to your
+        operations or business arrangements; and whenever there are circumstances
+        you know or have reason to know may have a material impact on your information
+        security program.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.e"
+      description: 'Implement policies and procedures to ensure that personnel are
+        able to enact your information security program by:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e"
+      ref_id: "\xA7 314.4.e.1"
+      description: Providing your personnel with security awareness training that
+        is updated as necessary to reflect risks identified by the risk assessment;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e"
+      ref_id: "\xA7 314.4.e.2"
+      description: Utilizing qualified information security personnel employed by
+        you or an affiliate or service provider sufficient to manage your information
+        security risks and to perform or oversee the information security program;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e.3"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e"
+      ref_id: "\xA7 314.4.e.3"
+      description: Providing information security personnel with security updates
+        and training sufficient to address relevant security risks; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e.4"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.e"
+      ref_id: "\xA7 314.4.e.4"
+      description: Verifying that key information security personnel take steps to
+        maintain current knowledge of changing information security threats and countermeasures.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.f"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.f"
+      description: 'Oversee service providers, by:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.f.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.f"
+      ref_id: "\xA7 314.4.f.1"
+      description: Taking reasonable steps to select and retain service providers
+        that are capable of maintaining appropriate safeguards for the customer information
+        at issue;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.f.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.f"
+      ref_id: "\xA7 314.4.f.2"
+      description: Requiring your service providers by contract to implement and maintain
+        such safeguards; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.f.3"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.f"
+      ref_id: "\xA7 314.4.f.3"
+      description: Periodically assessing your service providers based on the risk
+        they present and the continued adequacy of their safeguards.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.g"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.g"
+      description: Evaluate and adjust your information security program in light
+        of the results of the testing and monitoring required by paragraph (d) of
+        this section; any material changes to your operations or business arrangements;
+        the results of risk assessments performed under paragraph (b)(2) of this section;
+        or any other circumstances that you know or have reason to know may have a
+        material impact on your information security program.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.h"
+      description: 'Establish a written incident response plan designed to promptly
+        respond to, and recover from, any security event materially affecting the
+        confidentiality, integrity, or availability of customer information in your
+        control. Such incident response plan shall address the following areas:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h"
+      ref_id: "\xA7 314.4.h.1"
+      description: The goals of the incident response plan;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h"
+      ref_id: "\xA7 314.4.h.2"
+      description: The internal processes for responding to a security event;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h.3"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h"
+      ref_id: "\xA7 314.4.h.3"
+      description: The definition of clear roles, responsibilities, and levels of
+        decision-making authority;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h.4"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h"
+      ref_id: "\xA7 314.4.h.4"
+      description: External and internal communications and information sharing;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h.5"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h"
+      ref_id: "\xA7 314.4.h.5"
+      description: Identification of requirements for the remediation of any identified
+        weaknesses in information systems and associated controls;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h.6"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h"
+      ref_id: "\xA7 314.4.h.6"
+      description: Documentation and reporting regarding security events and related
+        incident response activities; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h.7"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.h"
+      ref_id: "\xA7 314.4.h.7"
+      description: The evaluation and revision as necessary of the incident response
+        plan following a security event.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.i"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.i"
+      description: 'Require your Qualified Individual to report in writing, regularly
+        and at least annually, to your board of directors or equivalent governing
+        body. If no such board of directors or equivalent governing body exists, such
+        report shall be timely presented to a senior officer responsible for your
+        information security program. The report shall include the following information:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.i.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.i"
+      ref_id: "\xA7 314.4.i.1"
+      description: The overall status of the information security program and your
+        compliance with this part; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.i.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.i"
+      ref_id: "\xA7 314.4.i.2"
+      description: Material matters related to the information security program, addressing
+        issues such as risk assessment, risk management and control decisions, service
+        provider arrangements, results of testing, security events or violations and
+        management's responses thereto, and recommendations for changes in the information
+        security program.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j"
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:node132
+      ref_id: "\xA7 314.4.j"
+      description: Notify the Federal Trade Commission about notification events in
+        accordance with paragraphs (j)(1) and (2) of this section.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j"
+      ref_id: "\xA7 314.4.j.1"
+      name: Notification requirement
+      description: 'Upon discovery of a notification event as described in paragraph
+        (j)(2) of this section, if the notification event involves the information
+        of at least 500 consumers, you must notify the Federal Trade Commission as
+        soon as possible, and no later than 30 days after discovery of the event.
+        The notice shall be made electronically on a form to be located on the FTC''s
+        website, https://www.ftc.gov. The notice shall include the following:'
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1.i"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1"
+      ref_id: "\xA7 314.4.j.1.i"
+      description: The name and contact information of the reporting financial institution;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1.ii"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1"
+      ref_id: "\xA7 314.4.j.1.ii"
+      description: A description of the types of information that were involved in
+        the notification event;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1.iii"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1"
+      ref_id: "\xA7 314.4.j.1.iii"
+      description: If the information is possible to determine, the date or date range
+        of the notification event;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1.iv"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1"
+      ref_id: "\xA7 314.4.j.1.iv"
+      description: The number of consumers affected or potentially affected by the
+        notification event;
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1.v"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1"
+      ref_id: "\xA7 314.4.j.1.v"
+      description: A general description of the notification event; and
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1.vi"
+      assessable: true
+      depth: 6
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.1"
+      ref_id: "\xA7 314.4.j.1.vi"
+      description: Whether any law enforcement official has provided you with a written
+        determination that notifying the public of the breach would impede a criminal
+        investigation or cause damage to national security, and a means for the Federal
+        Trade Commission to contact the law enforcement official. A law enforcement
+        official may request an initial delay of up to 30 days following the date
+        when notice was provided to the Federal Trade Commission. The delay may be
+        extended for an additional period of up to 60 days if the law enforcement
+        official seeks such an extension in writing. Additional delay may be permitted
+        only if the Commission staff determines that public disclosure of a security
+        event continues to impede a criminal investigation or cause damage to national
+        security.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j.2"
+      assessable: true
+      depth: 5
+      parent_urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.4.j"
+      ref_id: "\xA7 314.4.j.2"
+      name: Notification event treated as discovered
+      description: A notification event shall be treated as discovered as of the first
+        day on which such event is known to you. You shall be deemed to have knowledge
+        of a notification event if such event is known to any person, other than the
+        person committing the breach, who is your employee, officer, or other agent.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.5"
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:part-314
+      ref_id: "\xA7 314.5"
+      name: Effective date
+      description: Section 314.4(j) is effective as of May 13, 2024.
+    - urn: "urn:intuitem:risk:library:standards-for-safeguarding-customer-information:\xA7\
+        -314.6"
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:library:standards-for-safeguarding-customer-information:part-314
+      ref_id: "\xA7 314.6"
+      name: Exceptions
+      description: Section 314.4(b)(1), (d)(2), (h), and (i) do not apply to financial
+        institutions that maintain customer information concerning fewer than five
+        thousand consumers.

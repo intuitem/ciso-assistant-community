@@ -1,36 +1,27 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-		ToastStore
-	} from '@skeletonlabs/skeleton';
-	import { TabGroup, Tab, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import { breadcrumbObject } from '$lib/utils/stores';
-	import { superForm } from 'sveltekit-superforms';
-	import { getModelInfo } from '$lib/utils/crud.js';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import { isURL } from '$lib/utils/helpers';
-	import { toCamelCase } from '$lib/utils/locales.js';
-	import { checkConstraints } from '$lib/utils/crud';
-	import { languageTag } from '$paraglide/runtime.js';
-	import * as m from '$paraglide/messages.js';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { URL_MODEL_MAP, checkConstraints } from '$lib/utils/crud';
+	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import List from '$lib/components/List/List.svelte';
-	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { isURL } from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { toCamelCase } from '$lib/utils/locales.js';
+	import * as m from '$paraglide/messages.js';
+	import { languageTag } from '$paraglide/runtime.js';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
+	import { Tab, TabGroup, getModalStore } from '@skeletonlabs/skeleton';
 
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 
+	import { goto } from '$app/navigation';
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
 
@@ -51,39 +42,17 @@
 		);
 	}
 
-	$: breadcrumbObject.set(data.data);
-
 	let tabSet = 0;
-
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
+		if (document.activeElement?.tagName !== 'BODY') return;
 		// Check if the pressed key is 'e' and the edit button should be displayed
 
-		// if (event.key === 'e' && displayEditButton()) {
-		// event.preventDefault();
-		// goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
-		//}
+		if (event.key === 'e' && displayEditButton()) {
+			event.preventDefault();
+			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+		}
 	}
 
 	onMount(() => {
@@ -205,6 +174,17 @@
 			!data.data.builtin
 		);
 	};
+
+	export let orderRelatedModels = [''];
+	if (data.urlModel === 'projects') {
+		orderRelatedModels = ['compliance-assessments', 'risk-assessments', 'entity-assessments'];
+	}
+	if (data.urlModel === 'entities') {
+		orderRelatedModels = ['entity-assessments', 'representatives', 'solutions'];
+	}
+	if (data.urlModel === 'folders') {
+		orderRelatedModels = ['projects', 'entities'];
+	}
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -277,7 +257,9 @@
 									{#if value !== null && value !== undefined && value !== ''}
 										{#if key === 'library'}
 											{@const itemHref = `/libraries/${value.id}?loaded`}
-											<a href={itemHref} class="anchor">{value.name}</a>
+											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+												>{value.name}</Anchor
+											>
 										{:else if key === 'severity'}
 											<!-- We must add translations for the following severity levels -->
 											<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
@@ -298,9 +280,11 @@
 																		(item) => item.field === key
 																	)?.urlModel
 																}/${val.id}`}
-																<a href={itemHref} class="anchor">{val.str}</a>
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	>{val.str}</Anchor
+																>
 															{:else if val.str}
-																{val.str}
+																{safeTranslate(val.str)}
 															{:else}
 																{value}
 															{/if}
@@ -310,13 +294,23 @@
 											{:else}
 												--
 											{/if}
-										{:else if value.id}
+										{:else if value.id && !value.hexcolor}
 											{@const itemHref = `/${
 												URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
 													(item) => item.field === key
 												)?.urlModel
 											}/${value.id}`}
-											<a href={itemHref} class="anchor">{value.str}</a>
+											{#if key === 'ro_to_couple'}
+												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+													>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+														'-'
+													)[1]}</Anchor
+												>
+											{:else}
+												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+													>{value.str}</Anchor
+												>
+											{/if}
 											<!-- Shortcut before DetailView refactoring -->
 										{:else if value === 'P1'}
 											<li class="fa-solid fa-flag text-red-500"></li>
@@ -331,10 +325,12 @@
 											<li class="fa-solid fa-flag text-gray-500"></li>
 											{m.p4()}
 										{:else if isURL(value) && !value.startsWith('urn')}
-											<a href={value} target="_blank" class="anchor">{value}</a>
+											<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
+												>{value}</Anchor
+											>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
-										{:else if m[toCamelCase((value.str || value.name) ?? value)]}
+										{:else if m[toCamelCase(value.str || value.name)]}
 											{safeTranslate((value.str || value.name) ?? value)}
 										{:else}
 											{(value.str || value.name) ?? value}
@@ -373,13 +369,18 @@
 			{/if}
 			{#if displayEditButton()}
 				<div class="flex flex-col space-y-2 ml-4">
-					<a
+					<Anchor
+						breadcrumbAction="push"
 						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+						label={m.edit()}
 						class="btn variant-filled-primary h-fit"
-						><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
+						><i
+							class="fa-solid fa-pen-to-square mr-2"
+							data-testid="edit-button"
+						/>{m.edit()}</Anchor
 					>
 					{#if data.urlModel === 'applied-controls'}
-						<span class="pt-4 font-light text-sm">Power-ups:</span>
+						<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 						<button
 							class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
 							on:click={(_) => modalAppliedControlDuplicateForm()}
@@ -391,6 +392,7 @@
 					{/if}
 				</div>
 			{/if}
+			<slot name="actions" />
 		</div>
 	</div>
 </div>
@@ -398,7 +400,9 @@
 {#if Object.keys(data.relatedModels).length > 0}
 	<div class="card shadow-lg mt-8 bg-white">
 		<TabGroup justify="justify-center">
-			{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
+			{#each Object.entries(data.relatedModels).sort((a, b) => {
+				return orderRelatedModels.indexOf(a[0]) - orderRelatedModels.indexOf(b[0]);
+			}) as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
 					{safeTranslate(model.info.localNamePlural)}
 					{#if model.table.body.length > 0}
@@ -407,7 +411,9 @@
 				</Tab>
 			{/each}
 			<svelte:fragment slot="panel">
-				{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
+				{#each Object.entries(data.relatedModels).sort((a, b) => {
+					return orderRelatedModels.indexOf(a[0]) - orderRelatedModels.indexOf(b[0]);
+				}) as [urlmodel, model], index}
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">

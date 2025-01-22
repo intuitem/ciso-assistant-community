@@ -9,6 +9,7 @@
 	import type { AnyZodObject } from 'zod';
 
 	import * as m from '$paraglide/messages';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -65,7 +66,10 @@
 
 	$: displayDetail = detailURL;
 	$: displayEdit =
-		canEditObject && URLModel && !['frameworks', 'risk-matrices'].includes(URLModel) && editURL;
+		canEditObject &&
+		URLModel &&
+		!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel) &&
+		editURL;
 	$: displayDelete = canDeleteObject && deleteForm !== undefined;
 </script>
 
@@ -76,18 +80,21 @@
 	<slot name="body" />
 	{#if !hasBody}
 		{#if displayDetail}
-			<a
+			<Anchor
+				breadcrumbAction="push"
 				href={detailURL}
 				class="unstyled cursor-pointer hover:text-primary-500"
-				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye" /></a
+				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye" /></Anchor
 			>
 		{/if}
 		{#if displayEdit}
-			<a
+			<Anchor
+				breadcrumbAction="push"
+				label={m.edit()}
 				href={editURL}
-				on:click={stopPropagation}
+				stopPropagation
 				class="unstyled cursor-pointer hover:text-primary-500"
-				data-testid="tablerow-edit-button"><i class="fa-solid fa-pen-to-square" /></a
+				data-testid="tablerow-edit-button"><i class="fa-solid fa-pen-to-square" /></Anchor
 			>
 		{/if}
 		{#if displayDelete}

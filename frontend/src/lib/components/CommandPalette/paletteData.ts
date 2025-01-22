@@ -1,65 +1,35 @@
 import * as m from '$paraglide/messages';
+import { navData } from '../SideBar/navData';
 
 export interface NavigationLink {
 	label: string;
 	href: string;
 }
+const flattenNavData = (navData) => {
+	const result = [];
 
-export const navigationLinks: NavigationLink[] = [
-	{
-		label: 'analytics',
-		href: '/'
-	},
-	{
-		label: 'myAssignments',
-		href: '/my-assignments'
-	},
-	{
-		label: 'domains',
-		href: '/folders'
-	},
-	{
-		label: 'assets',
-		href: '/assets'
-	},
-	{
-		label: 'complianceAssessments',
-		href: '/compliance-assessments'
-	},
-	{
-		label: 'riskAssessments',
-		href: '/risk-assessments'
-	},
-	{
-		label: 'riskScenarios',
-		href: '/risk-scenarios'
-	},
-	{
-		label: 'actionPlan',
-		href: '/applied-controls'
-	},
-	{
-		label: 'evidences',
-		href: '/evidences'
-	},
-	{
-		label: 'xRays',
-		href: '/x-rays'
-	},
-	{
-		label: 'tpSolutions',
-		href: '/solutions'
-	},
-	{
-		label: 'libraries',
-		href: '/libraries'
-	},
-	{
-		label: 'myProfile',
-		href: '/my-profile'
-	},
-	{
-		label: 'settings',
-		href: '/settings'
+	// Handle potentially incomplete/malformed data
+	if (!navData?.items) return result;
+
+	for (const section of navData.items) {
+		if (!section.items) continue;
+
+		for (const item of section.items) {
+			if (item.name && item.href) {
+				result.push({
+					label: item.name,
+					href: item.href
+				});
+			}
+		}
 	}
-];
+
+	return result;
+};
+export let navigationLinks: NavigationLink[] = flattenNavData(navData);
+navigationLinks.push({
+	label: 'myProfile',
+	href: '/my-profile'
+});
+
+// wre can use the same trick later on for dynamic actions

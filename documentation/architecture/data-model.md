@@ -900,6 +900,14 @@ Example:
 }
 ```
 
+## Internationalization approach
+
+The general approach is to translate everything in the frontend. We use paraglide to faciliate this process.
+
+The only exception is that referential objects are translated by the backend. The ACCEPT_LANGUAGE header in the request is used to indicate which language is used on the frontend side. The backend selects the most appropriate language to use (either the requested language, or the default language of the library).
+
+Note: generated documents (pdf, excel, word) are currently translated in the backend, but this should be migrated in the frontend.
+
 ## Access control model
 
 All objects in CISO Assistant follow a simple and consistent RBAC IAM model, including IAM objects themselves.
@@ -1348,7 +1356,8 @@ erDiagram
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
     EBIOS_RM_STUDY        |o--o{ RISK_ASSESSMENT      : generates
-    ATTACK_PATH           }o--|| RO_TO                : derives
+    STRATEGIC_SCENARIO    }o--|| RO_TO                : derives_from
+    ATTACK_PATH           }o--|| STRATEGIC_SCENARIO   : derives
     RO_TO                 }o--o{ FEARED_EVENT         : corresponds_to
     OPERATIONAL_SCENARIO  |o--|| ATTACK_PATH          : derives
     OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
@@ -1403,6 +1412,12 @@ erDiagram
         int    residual_trust
         bool   selected
         string justification
+    }
+
+    STRATEGIC_SCENARIO {
+        string ref_id
+        string name
+        string description
     }
 
     ATTACK_PATH {

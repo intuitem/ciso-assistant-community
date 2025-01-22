@@ -16,6 +16,7 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
+<p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
 <AutocompleteSelect
 	{form}
 	options={getOptions({ objects: model.foreignKeys['ebios_rm_study'] })}
@@ -39,6 +40,7 @@
 	label={m.gravity()}
 	cacheLock={cacheLocks['gravity']}
 	bind:cachedValue={formDataCache['gravity']}
+	helpText={m.gravityHelpText()}
 />
 <TextArea
 	{form}
@@ -57,6 +59,7 @@
 	})}
 	field="assets"
 	label={m.assets()}
+	helpText={m.fearedEventAssetHelpText()}
 />
 <AutocompleteSelect
 	multiple
@@ -66,5 +69,11 @@
 	})}
 	field="qualifications"
 	label={m.qualifications()}
+	helpText={m.fearedEventQualificationHelpText()}
 />
-<Checkbox {form} field="is_selected" label={m.isSelected()} />
+<Checkbox
+	{form}
+	field="is_selected"
+	label={m.isSelected()}
+	helpText={m.fearedEventIsSelectedHelpText()}
+/>

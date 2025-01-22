@@ -123,7 +123,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 
 const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.risk_assessment.name,
+	getColumn: (row) => row.risk_assessment?.name,
 	extraProps: {
 		defaultOptionName: 'riskAssessment'
 	}
@@ -156,9 +156,108 @@ const ASSET_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const QUALIFICATION_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.qualifications?.length ? row.qualifications.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'qualification'
+	},
+	alwaysDisplay: true
+};
+
+const GRAVITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.gravity.name,
+	extraProps: {
+		defaultOptionName: 'gravity'
+	},
+	alwaysDisplay: true
+};
+
+const LIKELIHOOD_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.likelihood.name,
+	extraProps: {
+		defaultOptionName: 'likelihood'
+	},
+	alwaysDisplay: true
+};
+
+const IS_SELECTED_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.is_selected ? 'true' : 'false'),
+	extraProps: {
+		defaultOptionName: 'is_selected'
+	},
+	alwaysDisplay: true
+};
+
+const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.risk_origin,
+	extraProps: {
+		defaultOptionName: 'risk_origin'
+	},
+	alwaysDisplay: true
+};
+
+const FEARED_EVENT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.feared_events?.length ? row.feared_events.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'feared_event'
+	},
+	alwaysDisplay: true
+};
+
+const PERTINENCE_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.pertinence,
+	extraProps: {
+		defaultOptionName: 'pertinence'
+	},
+	alwaysDisplay: true
+};
+
+const ENTITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.entity.str,
+	extraProps: {
+		defaultOptionName: 'entity'
+	},
+	alwaysDisplay: true
+};
+
+const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.current_criticality.toString(),
+	extraProps: {
+		defaultOptionName: 'current_criticality'
+	},
+	alwaysDisplay: true
+};
+
+const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.residual_criticality.toString(),
+	extraProps: {
+		defaultOptionName: 'residual_criticality'
+	},
+	alwaysDisplay: true
+};
+
+const STAKEHOLDER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.stakeholders?.length ? row.stakeholders.map((t) => t.str) : null),
+	extraProps: {
+		defaultOptionName: 'stakeholder'
+	},
+	alwaysDisplay: true
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.framework.ref_id,
+	getColumn: (row) => row.framework?.ref_id,
 	extraProps: {
 		defaultOptionName: 'framework' // Make translations
 	}
@@ -461,8 +560,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName'],
-		body: ['email', 'first_name', 'last_name']
+		head: ['email', 'firstName', 'lastName', 'is_sso', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'is_sso', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],
@@ -487,8 +586,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'description', 'project'],
-		body: ['ref_id', 'name', 'framework', 'description', 'project'],
+		head: ['ref_id', 'name', 'framework', 'description', 'project', 'reviewProgress'],
+		body: ['ref_id', 'name', 'framework', 'description', 'project', 'progress'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,
@@ -502,8 +601,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		breadcrumb_link_disabled: true
 	},
 	evidences: {
-		head: ['name', 'file', 'size', 'description'],
-		body: ['name', 'attachment', 'size', 'description'],
+		head: ['name', 'file', 'size', 'description', 'folder'],
+		body: ['name', 'attachment', 'size', 'description', 'folder'],
 		filters: {
 			folder: { ...DOMAIN_FILTER, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
 		}
@@ -518,8 +617,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['provider', 'name', 'description', 'locales', 'overview']
 	},
 	'stored-libraries': {
-		head: ['provider', 'name', 'description', 'language', 'overview'],
-		body: ['provider', 'name', 'description', 'locales', 'overview'],
+		head: ['provider', 'name', 'description', 'language', 'overview', 'publication_date'],
+		body: ['provider', 'name', 'description', 'locales', 'overview', 'publication_date'],
 		filters: {
 			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
@@ -527,8 +626,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'loaded-libraries': {
-		head: ['provider', 'name', 'description', 'language', 'overview'],
-		body: ['provider', 'name', 'description', 'locales', 'overview'],
+		head: ['provider', 'name', 'description', 'language', 'overview', 'publication_date'],
+		body: ['provider', 'name', 'description', 'locales', 'overview', 'publication_date'],
 		filters: {
 			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
@@ -571,37 +670,88 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description']
 	},
 	'feared-events': {
-		head: ['selected', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
-		body: ['is_selected', 'assets', 'description', 'qualifications', 'gravity']
+		head: ['selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		body: ['is_selected', 'name', 'assets', 'description', 'qualifications', 'gravity'],
+		filters: {
+			assets: ASSET_FILTER,
+			qualifications: QUALIFICATION_FILTER,
+			gravity: GRAVITY_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
 	},
 	'ro-to': {
+		head: ['isSelected', 'riskOrigin', 'targetObjective', 'fearedEvents', 'pertinence'],
+		body: ['is_selected', 'risk_origin', 'target_objective', 'feared_events', 'pertinence'],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			risk_origin: RISK_ORIGIN_FILTER,
+			feared_events: FEARED_EVENT_FILTER,
+			pertinence: PERTINENCE_FILTER
+		}
+	},
+	stakeholders: {
 		head: [
-			'isSelected',
-			'riskOrigin',
-			'targetObjective',
-			'motivation',
-			'fearedEvents',
-			'pertinence'
+			'is_selected',
+			'entity',
+			'category',
+			'current_criticality',
+			'applied_controls',
+			'residual_criticality'
 		],
 		body: [
 			'is_selected',
-			'risk_origin',
-			'target_objective',
-			'motivation',
-			'feared_events',
-			'pertinence'
-		]
+			'entity',
+			'category',
+			'current_criticality',
+			'applied_controls',
+			'residual_criticality'
+		],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			entity: ENTITY_FILTER,
+			category: CATEGORY_FILTER,
+			current_criticality: CURRENT_CRITICALITY_FILTER,
+			residual_criticality: RESIDUAL_CRITICALITY_FILTER
+		}
 	},
-	stakeholders: {
-		head: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
-		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
+	'strategic-scenarios': {
+		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
+		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
+		filters: {
+			gravity: GRAVITY_FILTER
+		}
 	},
 	'attack-paths': {
-		head: ['risk_origin', 'target_objective', 'stakeholders', 'attackPath'],
-		body: ['risk_origin', 'target_objective', 'stakeholders', 'description']
+		head: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'risk_origin',
+			'target_objective',
+			'stakeholders',
+			'attackPath'
+		],
+		body: [
+			'is_selected',
+			'ref_id',
+			'name',
+			'risk_origin',
+			'target_objective',
+			'stakeholders',
+			'description'
+		],
+		filters: {
+			is_selected: IS_SELECTED_FILTER,
+			stakeholders: STAKEHOLDER_FILTER
+		}
 	},
 	'operational-scenarios': {
-		head: ['description', 'threats', 'likelihood'],
-		body: ['description', 'threats', 'likelihood']
+		head: ['is_selected', 'operatingModesDescription', 'threats', 'likelihood'],
+		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
+		filters: {
+			threats: THREAT_FILTER,
+			likelihood: LIKELIHOOD_FILTER,
+			is_selected: IS_SELECTED_FILTER
+		}
 	}
 };

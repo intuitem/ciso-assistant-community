@@ -4,7 +4,8 @@ ref_id: risk-matrix-4x4-ebios-rm
 name: 4x4 risk matrix from EBIOS-RM
 description: based on the official guide of the EBIOS RM approach
 copyright: public domain
-version: 2
+version: 3
+publication_date: 2024-11-29
 provider: intuitem
 packager: intuitem
 translations:
@@ -171,4 +172,5 @@ objects:
       - 2
     translations:
       fr:
+        name: Matrice 4x4 EBIOS-RM
         description: "Bas\xE9e sur le guide officiel de la m\xE9thode EBIOS RM"

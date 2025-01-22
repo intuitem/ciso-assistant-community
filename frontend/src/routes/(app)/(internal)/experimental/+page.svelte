@@ -1,20 +1,11 @@
 <script lang="ts">
 	import Article from '$lib/components/DataViz/Article.svelte';
+	import { pageTitle } from '$lib/utils/stores';
+
+	$pageTitle = 'Experimental';
 </script>
 
 <div class="bg-white grid grid-cols-2 p-4 gap-4">
-	<Article
-		title="Controls Graph"
-		desc="Visualize dependencies and the impact of controls"
-		link="experimental/graph"
-		tags={['priority', 'controls']}
-	></Article>
-	<Article
-		title="Controls Timeline"
-		desc="Visualize applied controls as a timeline if start date and ETA are provided"
-		link="experimental/timeline"
-		tags={['schedule', 'controls']}
-	/>
 	<Article
 		title="Frameworks mapping"
 		desc="Visualize applied mapping data as a graph"
@@ -26,5 +17,11 @@
 		desc="Visualize assets and their relationships"
 		link="assets/graph"
 		tags={['analysis', 'assets']}
+	/>
+	<Article
+		title="Ecosystem radar"
+		desc="Visualize the stakeholders radar"
+		link="experimental/ecosystem"
+		tags={['analysis', 'tprm']}
 	/>
 </div>

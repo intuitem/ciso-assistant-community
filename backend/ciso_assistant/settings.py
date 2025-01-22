@@ -114,7 +114,9 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS", "localhost,127.0.0.1,host.docker.internal"
+).split(",")
 logger.info("ALLOWED_HOSTS: %s", ALLOWED_HOSTS)
 CSRF_TRUSTED_ORIGINS = [CISO_ASSISTANT_URL]
 LOCAL_STORAGE_DIRECTORY = os.environ.get(
@@ -313,8 +315,9 @@ LANGUAGES = [
     ("ro", "Romanian"),
     ("hi", "Hindi"),
     ("ur", "Urdu"),
-    ("cz", "Czech"),
+    ("cs", "Czech"),
     ("sv", "Swedish"),
+    ("id", "Indonesian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -375,15 +378,15 @@ SPECTACULAR_SETTINGS = {
     # OTHER SETTINGS
 }
 
-HUEY = {
-    "huey_class": "huey.SqliteHuey",  # Huey implementation to use.
-    "name": "huey-ciso-assistant",  # Use db name for huey.
-    "results": True,  # Store return values of tasks.
-    "store_none": False,  # If a task returns None, do not save to results.
-    "immediate": DEBUG,  # If DEBUG=True, run synchronously.
-    "utc": True,  # Use UTC for all times internally.
-    "filename": "db/huey.sqlite3",
-}
+# HUEY = {
+#    "huey_class": "huey.SqliteHuey",  # Huey implementation to use.
+#    "name": "huey-ciso-assistant",  # Use db name for huey.
+#    "results": True,  # Store return values of tasks.
+#    "store_none": False,  # If a task returns None, do not save to results.
+#    "immediate": DEBUG,  # If DEBUG=True, run synchronously.
+#    "utc": True,  # Use UTC for all times internally.
+#    "filename": "db/huey.sqlite3",
+# }
 
 # SSO with allauth
 

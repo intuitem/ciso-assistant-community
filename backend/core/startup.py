@@ -38,6 +38,15 @@ READER_PERMISSIONS_LIST = [
     "view_vulnerability",
     "view_user",
     "view_usergroup",
+    "view_ebiosrmstudy",
+    "view_fearedevent",
+    "view_roto",
+    "view_stakeholder",
+    "view_strategicscenario",
+    "view_attackpath",
+    "view_operationalscenario",
+    "view_qualification",
+    "view_globalsettings",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -65,6 +74,15 @@ APPROVER_PERMISSIONS_LIST = [
     "view_user",
     "view_requirementmappingset",
     "view_requirementmapping",
+    "view_ebiosrmstudy",
+    "view_fearedevent",
+    "view_roto",
+    "view_stakeholder",
+    "view_strategicscenario",
+    "view_attackpath",
+    "view_operationalscenario",
+    "view_qualification",
+    "view_globalsettings",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -142,6 +160,36 @@ ANALYST_PERMISSIONS_LIST = [
     "view_threat",
     "view_user",
     "view_usergroup",
+    "add_ebiosrmstudy",
+    "view_ebiosrmstudy",
+    "change_ebiosrmstudy",
+    "delete_ebiosrmstudy",
+    "add_fearedevent",
+    "view_fearedevent",
+    "change_fearedevent",
+    "delete_fearedevent",
+    "add_roto",
+    "view_roto",
+    "change_roto",
+    "delete_roto",
+    "add_stakeholder",
+    "view_stakeholder",
+    "change_stakeholder",
+    "delete_stakeholder",
+    "add_strategicscenario",
+    "view_strategicscenario",
+    "change_strategicscenario",
+    "delete_strategicscenario",
+    "add_attackpath",
+    "view_attackpath",
+    "change_attackpath",
+    "delete_attackpath",
+    "add_operationalscenario",
+    "view_operationalscenario",
+    "change_operationalscenario",
+    "delete_operationalscenario",
+    "view_qualification",
+    "view_globalsettings",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -227,6 +275,36 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_threat",
     "view_user",
     "view_usergroup",
+    "add_ebiosrmstudy",
+    "view_ebiosrmstudy",
+    "change_ebiosrmstudy",
+    "delete_ebiosrmstudy",
+    "add_fearedevent",
+    "view_fearedevent",
+    "change_fearedevent",
+    "delete_fearedevent",
+    "add_roto",
+    "view_roto",
+    "change_roto",
+    "delete_roto",
+    "add_stakeholder",
+    "view_stakeholder",
+    "change_stakeholder",
+    "delete_stakeholder",
+    "add_strategicscenario",
+    "view_strategicscenario",
+    "change_strategicscenario",
+    "delete_strategicscenario",
+    "add_attackpath",
+    "view_attackpath",
+    "change_attackpath",
+    "delete_attackpath",
+    "add_operationalscenario",
+    "view_operationalscenario",
+    "change_operationalscenario",
+    "delete_operationalscenario",
+    "view_qualification",
+    "view_globalsettings",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -315,6 +393,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "restore",
     "view_globalsettings",
     "change_globalsettings",
+    "view_ssosettings",
+    "change_ssosettings",
     "view_requirementmappingset",
     "add_requirementmappingset",
     "delete_requirementmappingset",
@@ -355,6 +435,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_stakeholder",
     "change_stakeholder",
     "delete_stakeholder",
+    "add_strategicscenario",
+    "view_strategicscenario",
+    "change_strategicscenario",
+    "delete_strategicscenario",
     "add_attackpath",
     "view_attackpath",
     "change_attackpath",
@@ -509,6 +593,14 @@ def startup(sender: AppConfig, **kwargs):
     )
     third_party_respondent.permissions.set(third_party_respondent_permissions)
 
+    # Create default Qualifications
+    try:
+        Qualification.create_default_qualifications()
+    except Exception as e:
+        logger.error("Error creating default qualifications", exc_info=e)
+
+    call_command("storelibraries")
+
     # if superuser defined and does not exist, then create it
     if (
         CISO_ASSISTANT_SUPERUSER_EMAIL
@@ -520,15 +612,6 @@ def startup(sender: AppConfig, **kwargs):
             )
         except Exception as e:
             logger.error("Error creating superuser", exc_info=e)
-
-    # Create default Qualifications
-    try:
-        if Qualification.objects.count() == 0:
-            Qualification.create_default_qualifications()
-    except Exception as e:
-        logger.error("Error creating default qualifications", exc_info=e)
-
-    call_command("storelibraries")
 
 
 class CoreConfig(AppConfig):

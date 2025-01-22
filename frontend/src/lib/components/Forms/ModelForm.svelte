@@ -47,6 +47,8 @@
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
+	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
+	import { goto } from '$lib/utils/breadcrumbs';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -58,6 +60,7 @@
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
 	export let duplicate = false;
+	export let importFolder = false;
 	export let customNameDescription = false;
 
 	const URLModel = model.urlModel as urlModel;
@@ -69,7 +72,7 @@
 			var currentUrl = window.location.href;
 			var url = new URL(currentUrl);
 			var nextValue = getSecureRedirect(url.searchParams.get('next'));
-			if (nextValue) window.location.href = nextValue;
+			if (nextValue) goto(nextValue);
 		}
 	}
 	$: shape = schema.shape || schema._def.schema.shape;
@@ -187,7 +190,7 @@
 	{#if URLModel === 'projects'}
 		<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'folders'}
-		<FolderForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		<FolderForm {form} {model} {cacheLocks} {formDataCache} {initialData} {importFolder} />
 	{:else if URLModel === 'risk-assessments'}
 		<RiskAssessmentForm
 			{form}
@@ -270,10 +273,12 @@
 		<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'stakeholders'}
 		<StakeholderForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'strategic-scenarios'}
+		<StrategicScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'attack-paths'}
 		<AttackPathForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'operational-scenarios'}
-		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

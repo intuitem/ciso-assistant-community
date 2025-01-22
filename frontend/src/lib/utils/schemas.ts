@@ -67,6 +67,11 @@ export const FolderSchema = z.object({
 	parent_folder: z.string().optional()
 });
 
+export const FolderImportSchema = z.object({
+	name: nameSchema,
+	file: z.instanceof(File)
+});
+
 export const ProjectSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -176,7 +181,6 @@ export const ReferenceControlSchema = z.object({
 
 export const AssetSchema = z.object({
 	...NameDescriptionMixin,
-	business_value: z.string().optional(),
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional(),
@@ -219,8 +223,9 @@ export const RequirementAssessmentSchema = z.object({
 	answer: jsonSchema,
 	status: z.string(),
 	result: z.string(),
-	score: z.number().optional().nullable(),
 	is_scored: z.boolean().optional(),
+	score: z.number().optional().nullable(),
+	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
 	requirement: z.string(),
@@ -264,6 +269,7 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
+	show_documentation_score: z.boolean().optional().default(false),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -396,13 +402,14 @@ export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	ref_id: z.string().optional().default(''),
-	risk_matrix: z.string().optional(),
+	risk_matrix: z.string(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string(),
-	compliance_assessments: z.string().uuid().optional().array().optional()
+	compliance_assessments: z.string().uuid().optional().array().optional(),
+	reference_entity: z.string().optional()
 });
 
 export const fearedEventsSchema = z.object({
@@ -431,25 +438,33 @@ export const roToSchema = z.object({
 export const StakeholderSchema = z.object({
 	ebios_rm_study: z.string(),
 	applied_controls: z.string().uuid().optional().array().optional(),
-	category: z.string().optional(),
+	category: z.string(),
 	entity: z.string().optional(),
-	current_dependency: z.number().min(0).max(4).optional(),
-	current_penetration: z.number().min(0).max(4).optional(),
-	current_maturity: z.number().min(1).max(4).optional(),
-	current_trust: z.number().min(1).max(4).optional(),
-	residual_dependency: z.number().min(0).max(4).optional(),
-	residual_penetration: z.number().min(0).max(4).optional(),
-	residual_maturity: z.number().min(1).max(4).optional(),
-	residual_trust: z.number().min(1).max(4).optional(),
+	current_dependency: z.number().min(0).max(4).default(0).optional(),
+	current_penetration: z.number().min(0).max(4).default(0).optional(),
+	current_maturity: z.number().min(1).max(4).default(1).optional(),
+	current_trust: z.number().min(1).max(4).default(1).optional(),
+	current_criticality: z.number().min(0).max(16).default(0).optional(),
+	residual_dependency: z.number().min(0).max(4).default(0).optional(),
+	residual_penetration: z.number().min(0).max(4).default(0).optional(),
+	residual_maturity: z.number().min(1).max(4).default(1).optional(),
+	residual_trust: z.number().min(1).max(4).default(1).optional(),
+	residual_criticality: z.number().min(0).max(16).default(0).optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
 });
 
-export const AttackPathSchema = z.object({
+export const StrategicScenarioSchema = z.object({
+	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
-	stakeholders: z.string().uuid().array(),
-	description: z.string(),
+	ref_id: z.string().optional()
+});
+
+export const AttackPathSchema = z.object({
+	...NameDescriptionMixin,
+	strategic_scenario: z.string().uuid(),
+	stakeholders: z.string().uuid().optional().array().optional(),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional()
 });
@@ -458,7 +473,7 @@ export const operationalScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	attack_path: z.string().uuid(),
 	threats: z.string().uuid().optional().array().optional(),
-	description: z.string(),
+	operating_modes_description: z.string(),
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().optional().default(false),
 	justification: z.string().optional()
@@ -466,6 +481,7 @@ export const operationalScenarioSchema = z.object({
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
+	'folders-import': FolderImportSchema,
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
@@ -493,6 +509,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
 	stakeholders: StakeholderSchema,
+	'strategic-scenarios': StrategicScenarioSchema,
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema
 };

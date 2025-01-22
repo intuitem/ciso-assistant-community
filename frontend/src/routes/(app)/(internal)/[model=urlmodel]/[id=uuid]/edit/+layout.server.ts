@@ -47,13 +47,26 @@ export const load: LayoutServerLoad = async (event) => {
 
 	if (foreignKeyFields) {
 		for (const keyField of foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			let queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			if (keyField.detailUrlParams && Array.isArray(keyField.detailUrlParams)) {
+				keyField.detailUrlParams.forEach((detailParam) => {
+					const paramValue = object[detailParam]?.id;
+					if (paramValue) {
+						queryParams += queryParams
+							? `&${detailParam}=${paramValue}`
+							: `?${detailParam}=${paramValue}`;
+					}
+				});
+			} // To prepare possible fetch for foreign keys with detail in generic views
 			const keyModel = getModelInfo(keyField.urlModel);
 			let url = keyModel.endpointUrl
 				? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
 				: `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}`;
-			if (keyModel.urlModel === 'assets' && event.params.model === 'feared-events') {
-				url = `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}${object.ebios_rm_study}`;
+			if (
+				['assets', 'attack-paths'].includes(keyModel.urlModel) &&
+				['feared-events', 'operational-scenarios'].includes(event.params.model)
+			) {
+				url = `${BASE_API_URL}/${keyModel.endpointUrl || keyModel.urlModel}/${queryParams}${object.ebios_rm_study}`;
 			}
 			const response = await event.fetch(url);
 			if (response.ok) {
@@ -86,5 +99,5 @@ export const load: LayoutServerLoad = async (event) => {
 	}
 	model.foreignKeys = foreignKeys;
 	model.selectOptions = selectOptions;
-	return { form, model, object, foreignKeys, selectOptions, URLModel };
+	return { form, model, object, foreignKeys, selectOptions, URLModel, title: m.edit() };
 };

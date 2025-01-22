@@ -12,6 +12,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let customNameDescription = false;
+	export let importFolder = false;
 	export let model: ModelInfo;
 	export let duplicate = false;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -21,7 +22,7 @@
 	export let suggestions: { [key: string]: any } = {};
 
 	// Base Classes
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	export let debug = false;
 
@@ -49,6 +50,7 @@
 		<ModelForm
 			{form}
 			{customNameDescription}
+			{importFolder}
 			{suggestions}
 			{parent}
 			{invalidateAll}
@@ -59,6 +61,7 @@
 			caching={true}
 			action={formAction}
 			{debug}
+			{...$$restProps}
 		/>
 	</div>
 {/if}

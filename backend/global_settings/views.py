@@ -40,19 +40,22 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     queryset = GlobalSettings.objects.filter(name="general")
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.model.objects.get(name="general")[0]
+        instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        instance = self.model.objects.get(name="general")
+        instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
     def get_object(self):
-        return self.model.objects.get(name="general")
+        obj = self.model.objects.get(name="general")
+        obj.is_published = True  # we could do that at creation, but it's ok here
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):

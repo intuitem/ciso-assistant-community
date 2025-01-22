@@ -11,8 +11,17 @@ export function unsafeTranslate(key: string, params = {}, options = {}): string 
 	if (Object.hasOwn(m, key)) {
 		return m[key](params, options);
 	}
+	if (typeof key === 'string' && key) {
+		let res = key.match('^([^:]+):([^:]+)$');
+		if (res) {
+			return (Object.hasOwn(m, res[1]) ? m[res[1]](params, options) : res[1]) + ':' + res[2];
+		}
+	}
 	if (Object.hasOwn(m, toCamelCase(key))) {
 		return m[toCamelCase(key)](params, options);
+	}
+	if (typeof key === 'boolean') {
+		return key ? '✅' : '❌';
 	}
 }
 

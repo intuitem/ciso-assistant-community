@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import hashlib
 from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
@@ -223,6 +224,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+    publication_date = models.DateField(null=True)
     builtin = models.BooleanField(default=False)
     objects_meta = models.JSONField(default=dict)
     dependencies = models.JSONField(
@@ -245,7 +247,8 @@ class StoredLibrary(LibraryMixin):
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
-    HASH_CHECKSUM_SET = set()  # For now a library isn't updated if its SHA256 checksum has already been registered in the database.
+    # For now a library isn't updated if its SHA256 checksum has already been registered in the database.
+    HASH_CHECKSUM_SET = set()
 
     @classmethod
     def __init_class__(cls):
@@ -259,7 +262,8 @@ class StoredLibrary(LibraryMixin):
     ) -> "StoredLibrary | None":
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
-            return None  # We do not store the library if its hash checksum is in the database.
+            # We do not store the library if its hash checksum is in the database.
+            return None
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
@@ -318,11 +322,13 @@ class StoredLibrary(LibraryMixin):
             copyright=library_data.get("copyright"),
             provider=library_data.get("provider"),
             packager=library_data.get("packager"),
+            publication_date=library_data.get("publication_date"),
             translations=library_data.get("translations", {}),
             objects_meta=objects_meta,
             dependencies=dependencies,
             is_loaded=is_loaded,
-            builtin=builtin,  # We have to add a "builtin: true" line to every builtin library file.
+            # We have to add a "builtin: true" line to every builtin library file.
+            builtin=builtin,
             hash_checksum=hash_checksum,
             content=library_objects,
         )
@@ -360,14 +366,14 @@ class LibraryUpdater:
             *old_library.risk_matrices.all(),
         ]
         self.new_library = new_library
-        library_content = json.loads(self.new_library.content)
+        new_library_content = json.loads(self.new_library.content)
         self.dependencies = self.new_library.dependencies
         if self.dependencies is None:
             self.dependencies = []
-        self.new_framework = library_content.get("framework")
-        self.new_matrices = library_content.get("risk_matrix")
-        self.threats = library_content.get("threats", [])
-        self.reference_controls = library_content.get("reference_controls", [])
+        self.new_framework = new_library_content.get("framework")
+        self.new_matrices = new_library_content.get("risk_matrix")
+        self.threats = new_library_content.get("threats", [])
+        self.reference_controls = new_library_content.get("reference_controls", [])
         self.new_objects = {obj["urn"].lower(): obj for obj in self.threats}
         self.new_objects.update(
             {obj["urn"].lower(): obj for obj in self.reference_controls}
@@ -439,7 +445,9 @@ class LibraryUpdater:
                 "packager",
                 self.new_library.packager,
             ),  # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
-            ("ref_id", self.new_library.ref_id),  # Should we even update the ref_id ?
+            ("publication_date", self.new_library.publication_date),
+            # Should we even update the ref_id ?
+            ("ref_id", self.new_library.ref_id),
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
             ("translations", self.new_library.translations),
@@ -932,7 +940,8 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_json_translated(self):
-        return update_translations_as_string(self.json_definition, "fr")  # Why "fr" ?
+        # Why "fr" ?
+        return update_translations_as_string(self.json_definition, "fr")
 
     def __str__(self) -> str:
         return self.get_name_translated
@@ -1267,6 +1276,48 @@ class Qualification(ReferentialObjectMixin, I18nObjectMixin):
             "name": "Financial",
             "urn": "urn:intuitem:risk:qualification:financial",
         },
+        {
+            "abbreviation": "Gov",
+            "qualification_ordering": 12,
+            "name": "Governance",
+            "urn": "urn:intuitem:risk:qualification:governance",
+        },
+        {
+            "abbreviation": "Mis",
+            "qualification_ordering": 13,
+            "name": "Missions and Organizational Services",
+            "urn": "urn:intuitem:risk:qualification:missions",
+        },
+        {
+            "abbreviation": "Hum",
+            "qualification_ordering": 14,
+            "name": "Human",
+            "urn": "urn:intuitem:risk:qualification:human",
+        },
+        {
+            "abbreviation": "Mat",
+            "qualification_ordering": 15,
+            "name": "Material",
+            "urn": "urn:intuitem:risk:qualification:material",
+        },
+        {
+            "abbreviation": "Env",
+            "qualification_ordering": 16,
+            "name": "Environmental",
+            "urn": "urn:intuitem:risk:qualification:environmental",
+        },
+        {
+            "abbreviation": "Img",
+            "qualification_ordering": 17,
+            "name": "Image",
+            "urn": "urn:intuitem:risk:qualification:image",
+        },
+        {
+            "abbreviation": "Tru",
+            "qualification_ordering": 18,
+            "name": "Trust",
+            "urn": "urn:intuitem:risk:qualification:trust",
+        },
     ]
 
     abbreviation = models.CharField(
@@ -1384,6 +1435,7 @@ class Asset(
                             "value": {
                                 "type": "integer",
                                 "minimum": 0,
+                                "maximum": 3,
                             },
                             "is_enabled": {
                                 "type": "boolean",
@@ -1494,6 +1546,17 @@ class Asset(
             result.update(x.ancestors_plus_self())
         return set(result)
 
+    def get_children(self):
+        return Asset.objects.filter(parent_assets=self)
+
+    def get_descendants(self) -> set[Self]:
+        children = self.get_children()
+        sub_children = set()
+        for child in children:
+            sub_children.add(child)
+            sub_children.update(child.get_descendants())
+        return sub_children
+
     def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
         Gets the security objectives of a given asset.
@@ -1525,7 +1588,8 @@ class Asset(
                     security_objectives[key] = content
                 else:
                     security_objectives[key]["value"] = max(
-                        security_objectives[key]["value"], content.get("value", 0)
+                        security_objectives[key].get("value", 0),
+                        content.get("value", 0),
                     )
         return {"objectives": security_objectives}
 
@@ -1576,9 +1640,12 @@ class Asset(
             {
                 "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
             }
-            for key, content in security_objectives.get("objectives", {}).items()
+            for key, content in sorted(
+                security_objectives.get("objectives", {}).items(),
+                key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
+            )
             if content.get("is_enabled", False)
-            and content.get("value", -1) in range(0, 5)
+            and content.get("value", -1) in range(0, 4)
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
@@ -1604,9 +1671,10 @@ class Asset(
         disaster_recovery_objectives = self.get_disaster_recovery_objectives()
         return [
             {"str": f"{key}: {format_seconds(content.get('value', 0))}"}
-            for key, content in disaster_recovery_objectives.get(
-                "objectives", {}
-            ).items()
+            for key, content in sorted(
+                disaster_recovery_objectives.get("objectives", {}).items(),
+                key=lambda x: self.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0]),
+            )
             if content.get("value", 0)
         ]
 
@@ -1661,6 +1729,12 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
+
+    @property
+    def attachment_hash(self):
+        if not self.attachment:
+            return None
+        return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
@@ -1840,6 +1914,19 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             requirementassessment__applied_controls=self
         ).count()
 
+    @property
+    def links_count(self):
+        reqs = 0  # compliance requirements
+        scenarios = 0  # risk scenarios
+        sh_actions = 0  # stakeholder tprm actions
+
+        reqs = RequirementNode.objects.filter(
+            requirementassessment__applied_controls=self
+        ).count()
+        scenarios = RiskScenario.objects.filter(applied_controls=self).count()
+
+        return reqs + scenarios + sh_actions
+
     def has_evidences(self):
         return self.evidences.count() > 0
 
@@ -1847,6 +1934,14 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         return (
             self.eta < date.today() and self.status != "active" if self.eta else False
         )
+
+    @property
+    def days_until_eta(self):
+        if not self.eta:
+            return None
+        days_remaining = (self.eta - date.today()).days
+
+        return max(-1, days_remaining)
 
 
 class PolicyManager(models.Manager):
@@ -1905,7 +2000,7 @@ class Vulnerability(
     fields_to_check = ["name"]
 
 
-## historical data
+# historical data
 class HistoricalMetric(models.Model):
     date = models.DateField(verbose_name=_("Date"), db_index=True)
     data = models.JSONField(verbose_name=_("Historical Data"))
@@ -2644,6 +2739,7 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
+    show_documentation_score = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Compliance assessment")
@@ -2704,6 +2800,9 @@ class ComplianceAssessment(Assessment):
                 requirement_assessment.is_scored = (
                     baseline_requirement_assessment.is_scored
                 )
+                requirement_assessment.observation = (
+                    baseline_requirement_assessment.observation
+                )
                 requirement_assessment.evidences.set(
                     baseline_requirement_assessment.evidences.all()
                 )
@@ -2717,7 +2816,6 @@ class ComplianceAssessment(Assessment):
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            .exclude(score=None)
             .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
@@ -2729,12 +2827,18 @@ class ComplianceAssessment(Assessment):
         )
         score = 0
         n = 0
+
         for ras in requirement_assessments_scored:
             if not (ig) or (ig & set(ras.requirement.implementation_groups)):
-                score += ras.score
+                score += ras.score or 0
                 n += 1
+                if self.show_documentation_score:
+                    score += ras.documentation_score or 0
+                    n += 1
         if n > 0:
-            return round(score / n, 1)
+            global_score = score / n
+            # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
+            return int(global_score * 10) / 10
         else:
             return -1
 
@@ -3112,6 +3216,8 @@ class ComplianceAssessment(Assessment):
                     "source_requirement_assessment": {
                         "str": str(ref),
                         "id": str(ref.id),
+                        "is_scored": ref.is_scored,
+                        "score": ref.score,
                         "coverage": mapping.coverage,
                     },
                     # "mappings": [mapping.id for mapping in mappings],
@@ -3157,14 +3263,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         verbose_name=_("Result"),
         default=Result.NOT_ASSESSED,
     )
+    is_scored = models.BooleanField(
+        default=False,
+        verbose_name=_("Is scored"),
+    )
     score = models.IntegerField(
         blank=True,
         null=True,
         verbose_name=_("Score"),
     )
-    is_scored = models.BooleanField(
-        default=False,
-        verbose_name=_("Is scored"),
+    documentation_score = models.IntegerField(
+        blank=True, null=True, verbose_name=_("Documentation Score")
     )
     evidences = models.ManyToManyField(
         Evidence,

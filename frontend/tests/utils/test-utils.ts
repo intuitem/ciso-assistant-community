@@ -112,7 +112,6 @@ export const test = base.extend<Fixtures>({
 		const aPage = new PageContent(page, '/assets', 'Assets', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'business_value', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'type', type: type.SELECT },
 			{ name: 'parent_assets', type: type.SELECT_AUTOCOMPLETE }
@@ -390,14 +389,12 @@ export class TestContent {
 				build: {
 					name: vars.assetName,
 					description: vars.description,
-					business_value: 'Test value',
 					folder: vars.folderName,
 					type: 'Primary'
 				},
 				editParams: {
 					name: '',
 					description: '',
-					business_value: '',
 					type: 'Supporting'
 					//TODO add parent_assets
 				}
@@ -525,6 +522,7 @@ export class TestContent {
 				displayName: 'Risk assessments',
 				dependency: vars.matrix,
 				build: {
+					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					name: vars.riskAssessmentName,
 					description: vars.description,
 					project: vars.folderName + '/' + vars.projectName,

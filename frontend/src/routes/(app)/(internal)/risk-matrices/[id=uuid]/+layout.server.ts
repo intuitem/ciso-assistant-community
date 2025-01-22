@@ -91,5 +91,5 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 			})
 		);
 	}
-	return { data, relatedModels };
+	return { data, relatedModels, title: data.name };
 };

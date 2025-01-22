@@ -2,7 +2,7 @@ from rest_framework import serializers
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import ComplianceAssessment, Framework
 
-from core.serializer_fields import FieldsRelatedField
+from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
@@ -30,6 +30,24 @@ class EntityWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Entity
         exclude = ["owned_folders"]
+
+
+class EntityImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    owned_folders = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+
+    class Meta:
+        model = Entity
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "mission",
+            "reference_link",
+            "owned_folders",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):

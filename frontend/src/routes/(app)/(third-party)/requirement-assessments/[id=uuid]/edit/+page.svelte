@@ -26,29 +26,25 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
 		ProgressRadial,
 		Tab,
 		TabGroup,
 		getModalStore,
-		getToastStore,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore,
-		type ToastStore
+		type ModalStore
 	} from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 
 	import Question from '$lib/components/Forms/Question.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { getRequirementTitle } from '$lib/utils/helpers';
-	import { zod } from 'sveltekit-superforms/adapters';
 	import List from '$lib/components/List/List.svelte';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -57,20 +53,10 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
-		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
-		: getRequirementTitle(data.parent.ref_id, data.parent.name);
-	breadcrumbObject.set({
-		id: data.requirementAssessment.id,
-		name: title ?? 'Requirement assessment',
-		email: ''
-	});
-
 	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
 	const schema = RequirementAssessmentSchema;
 
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	function modalMeasureCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -111,27 +97,6 @@
 		modalStore.trigger(modal);
 	}
 
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
 	let createAppliedControlsLoading = false;
 
 	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
@@ -167,34 +132,6 @@
 	}
 
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
-
-	let { form: measureCreateForm, message: measureCreateMessage } = {
-		form: {},
-		message: {}
-	};
-	let { form: evidenceCreateForm, message: evidenceCreateMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: measureCreateForm, message: measureCreateMessage } = superForm(
-			data.measureCreateForm,
-			{
-				onUpdated: ({ form }) =>
-					handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-			}
-		));
-		({ form: evidenceCreateForm, message: evidenceCreateMessage } = superForm(
-			data.evidenceCreateForm,
-			{
-				onUpdated: ({ form }) =>
-					handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-			}
-		));
-	}
 
 	$: mappingInference = {
 		sourceRequirementAssessment:
@@ -348,6 +285,14 @@
 										{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)}
 									</span>
 								</p>
+								{#if mappingInference.sourceRequirementAssessment.is_scored}
+									<p class="whitespace-pre-line py-1">
+										<span class="italic">{m.scoreSemiColon()}</span>
+										<span class="badge h-fit">
+											{safeTranslate(mappingInference.sourceRequirementAssessment.score)}
+										</span>
+									</p>
+								{/if}
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.suggestionColon()}</span>
 									<span
@@ -376,6 +321,7 @@
 			data={data.form}
 			dataType="json"
 			let:form
+			let:data
 			validators={zod(schema)}
 			action="?/updateRequirementAssessment"
 			{...$$restProps}
@@ -404,8 +350,8 @@
 											type="button"
 											on:click={() => {
 												modalConfirmCreateSuggestedControls(
-													data.requirementAssessment.id,
-													data.requirementAssessment.name,
+													$page.data.requirementAssessment.id,
+													$page.data.requirementAssessment.name,
 													'?/createSuggestedControls'
 												);
 											}}
@@ -435,13 +381,13 @@
 									multiple
 									{form}
 									options={getOptions({
-										objects: data.model.foreignKeys['applied_controls'],
+										objects: $page.data.model.foreignKeys['applied_controls'],
 										extra_fields: [['folder', 'str']]
 									})}
 									field="applied_controls"
 								/>
 								<ModelTable
-									source={data.tables['applied-controls']}
+									source={$page.data.tables['applied-controls']}
 									hideFilters={true}
 									URLModel="applied-controls"
 								/>
@@ -466,13 +412,13 @@
 									multiple
 									{form}
 									options={getOptions({
-										objects: data.model.foreignKeys['evidences'],
+										objects: $page.data.model.foreignKeys['evidences'],
 										extra_fields: [['folder', 'str']]
 									})}
 									field="evidences"
 								/>
 								<ModelTable
-									source={data.tables['evidences']}
+									source={$page.data.tables['evidences']}
 									hideFilters={true}
 									URLModel="evidences"
 								/>
@@ -485,29 +431,58 @@
 			<HiddenInput {form} field="requirement" />
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col my-8 space-y-6">
-				{#if data.requirementAssessment.answer != null && Object.keys(data.requirementAssessment.answer).length !== 0}
+				{#if $page.data.requirementAssessment.answer != null && Object.keys($page.data.requirementAssessment.answer).length !== 0}
 					<Question {form} field="answer" label={m.question()} />
 				{/if}
 				<Select
 					{form}
-					options={data.model.selectOptions['status']}
+					options={$page.data.model.selectOptions['status']}
 					field="status"
 					label={m.status()}
 				/>
 				<Select
 					{form}
-					options={data.model.selectOptions['result']}
+					options={$page.data.model.selectOptions['result']}
 					field="result"
 					label={m.result()}
 				/>
-				<Score
-					{form}
-					min_score={data.compliance_assessment_score.min_score}
-					max_score={data.compliance_assessment_score.max_score}
-					scores_definition={data.compliance_assessment_score.scores_definition}
-					field="score"
-					label="Score"
-				/>
+				<div class="flex flex-col">
+					<Score
+						{form}
+						min_score={$page.data.compliance_assessment_score.min_score}
+						max_score={$page.data.compliance_assessment_score.max_score}
+						scores_definition={$page.data.compliance_assessment_score.scores_definition}
+						field="score"
+						label={$page.data.compliance_assessment_score.show_documentation_score
+							? m.implementationScore()
+							: m.score()}
+						disabled={!data.is_scored || data.result === 'not_applicable'}
+					>
+						<div slot="left">
+							<Checkbox
+								{form}
+								field="is_scored"
+								label={''}
+								helpText={m.scoringHelpText()}
+								checkboxComponent="switch"
+								class="h-full flex flex-row items-center justify-center my-1"
+								classesContainer="h-full flex flex-row items-center space-x-4"
+							/>
+						</div>
+					</Score>
+				</div>
+				{#if $page.data.compliance_assessment_score.show_documentation_score}
+					<Score
+						{form}
+						min_score={$page.data.compliance_assessment_score.min_score}
+						max_score={$page.data.compliance_assessment_score.max_score}
+						scores_definition={$page.data.compliance_assessment_score.scores_definition}
+						field="documentation_score"
+						label={m.documentationScore()}
+						isDoc={true}
+						disabled={!data.is_scored || data.result === 'not_applicable'}
+					/>
+				{/if}
 
 				<TextArea {form} field="observation" label="Observation" />
 				<div class="flex flex-row justify-between space-x-4">

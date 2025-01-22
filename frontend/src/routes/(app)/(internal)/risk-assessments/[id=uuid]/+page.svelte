@@ -4,79 +4,30 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud.js';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import type {
 		ModalComponent,
 		ModalSettings,
 		ModalStore,
-		PopupSettings,
-		ToastStore
+		PopupSettings
 	} from '@skeletonlabs/skeleton';
-	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms';
+	import { getModalStore, popup } from '@skeletonlabs/skeleton';
 
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import { safeTranslate } from '$lib/utils/i18n.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { safeTranslate } from '$lib/utils/i18n.js';
 
 	export let data;
 	const showRisks = true;
 	const risk_assessment = data.risk_assessment;
 
-	breadcrumbObject.set(risk_assessment);
-
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
 	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
-
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
-	let { form: deleteForm, message: deleteMessage } = {
-		form: {},
-		message: {}
-	};
-
-	let { form: createForm, message: createMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: createForm, message: createMessage } = superForm(data.scenarioCreateForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-		({ form: deleteForm, message: deleteMessage } = superForm(data.scenarioDeleteForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-	}
 
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -192,13 +143,25 @@
 			<div class="container w-2/3">
 				<div class="text-sm">
 					<span class="font-semibold" data-testid="risk-matrix-field-title">{m.riskMatrix()}:</span>
-					<a
+					<Anchor
 						href="/risk-matrices/{risk_assessment.risk_matrix.id}"
 						class="anchor"
-						data-testid="risk-matrix-field-value">{risk_assessment.risk_matrix.name}</a
+						data-testid="risk-matrix-field-value">{risk_assessment.risk_matrix.name}</Anchor
 					>
 				</div>
 				<br />
+				{#if risk_assessment.ebios_rm_study}
+					<div class="text-sm">
+						<span class="font-semibold" data-testid="ebios-rm-field-title">{m.ebiosRmStudy()}:</span
+						>
+						<Anchor
+							href="/ebios-rm/{risk_assessment.ebios_rm_study.id}"
+							class="anchor"
+							data-testid="ebios-rm-field-value">{risk_assessment.ebios_rm_study.name}</Anchor
+						>
+					</div>
+					<br />
+				{/if}
 				<div class="text-sm">
 					<span class="font-semibold" data-testid="description-field-title">{m.description()}:</span
 					>
@@ -238,22 +201,24 @@
 						>
 					</div>
 					{#if canEditObject}
-						<a
+						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
+							label={m.edit()}
 							class="btn variant-filled-primary"
 							data-testid="edit-button"
 						>
 							<i class="fa-solid fa-edit mr-2" />
-							{m.edit()}</a
+							{m.edit()}</Anchor
 						>
 					{/if}
 				</div>
-				<a
+				<Anchor
+					label={m.remediationPlan()}
 					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
 					class="btn variant-filled-primary"
-					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</a
+					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</Anchor
 				>
-				<span class="pt-4 font-light text-sm">Power-ups:</span>
+				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
 					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
 					on:click={(_) => modalDuplicateForm()}

@@ -1,13 +1,10 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import * as m from '$paraglide/messages';
-	import { breadcrumbObject } from '$lib/utils/stores';
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
+	import * as m from '$paraglide/messages';
+	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import type { PageData } from './$types';
 
 	export let data: PageData;
-
-	breadcrumbObject.set(data.compliance_assessment);
 
 	const possible_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
@@ -18,8 +15,11 @@
 	];
 
 	// Reactive variable to keep track of the current item index
+	const requirementAssessments = data.requirement_assessments.filter(
+		(requirement) => requirement.name || requirement.description
+	);
 	let currentIndex = 0;
-	$: currentRequirementAssessment = data.requirement_assessments[currentIndex];
+	$: currentRequirementAssessment = requirementAssessments[currentIndex];
 
 	$: color = complianceResultTailwindColorMap[currentRequirementAssessment.result];
 
@@ -37,7 +37,7 @@
 
 	// Function to handle the "Next" button click
 	function nextItem() {
-		if (currentIndex < data.requirement_assessments.length - 1) {
+		if (currentIndex < requirementAssessments.length - 1) {
 			currentIndex += 1;
 		} else {
 			currentIndex = 0;
@@ -49,7 +49,7 @@
 		if (currentIndex > 0) {
 			currentIndex -= 1;
 		} else {
-			currentIndex = data.requirement_assessments.length - 1;
+			currentIndex = requirementAssessments.length - 1;
 		}
 	}
 
@@ -95,12 +95,12 @@
 							<p class="">{m.goBackToAudit()}</p>
 						</a>
 					</div>
-					<div class="font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
+					<div class="font-semibold">{currentIndex + 1}/{requirementAssessments.length}</div>
 				</div>
 				<div class="flex flex-col items-center text-center justify-center">
 					<p class="font-semibold">{title}</p>
 				</div>
-				<div class="flex flex-col items-center justify-center">
+				<div class="flex flex-col items-center justify-center whitespace-pre-wrap leading-relaxed">
 					{#if currentRequirementAssessment.description}
 						{currentRequirementAssessment.description}
 					{/if}
