@@ -180,6 +180,10 @@
 	$: if (form && form.newControl) {
 		$formStore.applied_controls.push(form.newControl);
 	}
+
+	$: if (form && form.newEvidence) {
+		$formStore.evidences.push(form.newEvidence);
+	}
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
