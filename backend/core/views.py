@@ -61,15 +61,13 @@ from rest_framework.decorators import (
 )
 from rest_framework.parsers import (
     FileUploadParser,
-    MultiPartParser,
-    JSONParser,
-    FormParser,
 )
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied
 
 
 from weasyprint import HTML
@@ -2083,13 +2081,29 @@ class FolderViewSet(BaseModelViewSet):
     )
     def import_domain(self, request):
         """Handle file upload and initiate import process."""
+        if "add_folder" not in request.user.permissions:
+            logger.error(
+                "User does not have permission to import domain", user=request.user
+            )
+            return Response(
+                {"error": "userDoesNotHavePermissionToImportDomain"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         try:
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
             parsed_data = self._process_uploaded_file(request.data["file"])
-            result = self._import_objects(parsed_data, domain_name)
+            result = self._import_objects(parsed_data, domain_name, user=request.user)
             return Response(result, status=status.HTTP_200_OK)
+
+        except PermissionDenied as e:
+            logger.error("Error importing domain", exc_info=e)
+            return Response(
+                {"error": "userDoesNotHavePermissionToImportDomain"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         except KeyError as e:
             logger.error("No file provided in the request", exc_info=e)
@@ -2181,7 +2195,7 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    def _import_objects(self, parsed_data: dict, domain_name: str):
+    def _import_objects(self, parsed_data: dict, domain_name: str, user):
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
@@ -2190,6 +2204,7 @@ class FolderViewSet(BaseModelViewSet):
         required_libraries = []
         missing_libraries = []
         link_dump_database_ids = {}
+
         try:
             objects = parsed_data.get("objects", None)
             if not objects:
@@ -2201,6 +2216,14 @@ class FolderViewSet(BaseModelViewSet):
             if Folder in models_map.values():
                 logger.error("Dump contains a domain")
                 raise ValidationError({"error": "Dump contains a domain"})
+
+            # check that user has permission to create all objects to import
+            error_dict = {}
+            for model in models_map.values():
+                if f"add_{model._meta.model_name}" not in user.permissions:
+                    error_dict[model._meta.model_name] = "permission_denied"
+            if error_dict:
+                raise PermissionDenied(detail=error_dict)
 
             # Validation phase (outside transaction since it doesn't modify database)
             creation_order = self._resolve_dependencies(list(models_map.values()))
