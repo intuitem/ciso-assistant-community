@@ -28,13 +28,6 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Get version and Create .meta file
         run: |
           echo "VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
@@ -52,7 +45,6 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           load: true
-          push: false
           tags: |
             ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
           platforms: linux/amd64,linux/arm64
@@ -63,7 +55,6 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           load: true
-          push: false
           tags: |
             ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
           platforms: linux/amd64,linux/arm64
