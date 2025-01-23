@@ -3,9 +3,19 @@
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
 	export let cell;
-	export let bubbleSizeScale: number = 0;
 	export let cellData: Array<any> = [];
 	export let dataItemComponent;
+
+	const bubbleMinCount = 2;
+	const bubbleSizeRanges = [
+		{ max: 3, value: 1.5 },
+		{ max: 5, value: 2 },
+		{ max: 8, value: 2.5 },
+		{ max: 13, value: 3 },
+		{ max: 21, value: 3.5 },
+		{ max: 34, value: 4 },
+		{ max: 55, value: 4.25 }
+	];
 
 	let popupClick: PopupSettings;
 	if (cellData.length) {
@@ -16,16 +26,19 @@
 		};
 	}
 
-	$: classesBubbleSize = (itemNumber: number) => {
-		itemNumber = (itemNumber / bubbleSizeScale) * 9 + 7; // rescaled to 16
-		return `width: ${itemNumber / 4}rem; height: ${itemNumber / 4}rem`;
+	$: classesBubbleSize = (itemCount: number) => {
+		for (const range of bubbleSizeRanges) {
+			if (itemCount <= range.max) {
+				return `width: ${range.value}rem; height: ${range.value}rem`;
+			}
+		}
 	};
 	$: classesCellText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
 	};
 </script>
 
-{#if cellData.length && dataItemComponent}
+{#if cellData.length >= bubbleMinCount && dataItemComponent}
 	<div
 		class="flex flex-wrap items-center space-x-1 justify-center h-full cursor-pointer whitespace-normal overflow-y-scroll hide-scrollbar {classesCellText(
 			cell.level.hexcolor
@@ -58,6 +71,12 @@
 		style="background-color: {cell.level.hexcolor};"
 		data-testid="cell"
 	>
-		<div class="mx-auto text-center">{cellData}</div>
+		{#if cellData.length}
+			{#each cellData as item}
+				<svelte:component this={dataItemComponent} data={item} />
+			{/each}
+		{:else}
+			<div class="mx-auto text-center">{cellData}</div>
+		{/if}
 	</div>
 {/if}

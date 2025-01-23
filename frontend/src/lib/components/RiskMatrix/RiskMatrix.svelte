@@ -41,13 +41,6 @@
 		});
 	}
 
-	let biggestCelldataLength: number;
-	if (displayedData) {
-		biggestCelldataLength = displayedData
-			.flat(1)
-			.reduce((max, e) => (e.length > max.length ? e : max), []).length;
-	}
-
 	$: classesCellText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
 	};
@@ -88,12 +81,7 @@
 			</div>
 			{#each row as cell, j}
 				{#if displayedData}
-					<Cell
-						{cell}
-						cellData={displayedData[i][j]}
-						bubbleSizeScale={biggestCelldataLength}
-						{dataItemComponent}
-					/>
+					<Cell {cell} cellData={displayedData[i][j]} {dataItemComponent} />
 				{:else}
 					<Cell {cell} {dataItemComponent} />
 				{/if}
