@@ -5,8 +5,8 @@ name: "ANSSI - Guide d'hygi\xE8ne informatique - version d\xE9taill\xE9e"
 description: "Renforcer la s\xE9curit\xE9 de son syst\xE8me d\u2019information en\
   \ 42 mesures\nVersion d\xE9taill\xE9e\n https://cyber.gouv.fr/sites/default/files/2017/01/guide_hygiene_informatique_anssi.pdf"
 copyright: Licence Ouverte/Open Licence (Etalab - V1)
-version: 2
-publication_date: 2024-12-08
+version: 3
+publication_date: 2025-01-23
 provider: ANSSI
 packager: intuitem
 dependencies:
@@ -607,6 +607,8 @@ objects:
         s leur d\xE9part, soit au travers du contrat de travail, soit d'un autre contrat\
         \ (NDA).\nV\xE9rifier que la proc\xE9dure de d\xE9part contient bien un rappel\
         \ des r\xE8gles de confidentialit\xE9 s'appliquant apr\xE8s le d\xE9part."
+      implementation_groups:
+      - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1:1
