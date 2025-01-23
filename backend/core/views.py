@@ -2083,13 +2083,18 @@ class FolderViewSet(BaseModelViewSet):
     )
     def import_domain(self, request):
         """Handle file upload and initiate import process."""
-        load_missing_libraries = request.query_params.get("load_missing_libraries", "false").lower() == "true"
+        load_missing_libraries = (
+            request.query_params.get("load_missing_libraries", "false").lower()
+            == "true"
+        )
         try:
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
             parsed_data = self._process_uploaded_file(request.data["file"])
-            result = self._import_objects(parsed_data, domain_name, load_missing_libraries)
+            result = self._import_objects(
+                parsed_data, domain_name, load_missing_libraries
+            )
             return Response(result, status=status.HTTP_200_OK)
 
         except KeyError as e:
@@ -2182,7 +2187,9 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    def _import_objects(self, parsed_data: dict, domain_name: str, load_missing_libraries: bool):
+    def _import_objects(
+        self, parsed_data: dict, domain_name: str, load_missing_libraries: bool
+    ):
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
@@ -2228,9 +2235,18 @@ class FolderViewSet(BaseModelViewSet):
 
             # Check for missing libraries
             for library in required_libraries:
-                if not LoadedLibrary.objects.filter(urn=library).exists():
-                    if StoredLibrary.objects.filter(urn=library).exists() and load_missing_libraries:
-                        StoredLibrary.objects.get(urn=library).load()
+                if not LoadedLibrary.objects.filter(
+                    urn=library["urn"], version=library["version"]
+                ).exists():
+                    if (
+                        StoredLibrary.objects.filter(
+                            urn=library["urn"], version=library["version"]
+                        ).exists()
+                        and load_missing_libraries
+                    ):
+                        StoredLibrary.objects.get(
+                            urn=library["urn"], version=library["version"]
+                        ).load()
                     else:
                         missing_libraries.append(library)
 
@@ -2297,12 +2313,14 @@ class FolderViewSet(BaseModelViewSet):
             try:
                 # Handle library objects
                 if model == LoadedLibrary:
+                    required_libraries.append(
+                        {"urn": fields["urn"], "version": fields["version"]}
+                    )
+                    logger.info(
+                        "Adding library to required libraries", urn=fields["urn"]
+                    )
                     continue
                 if fields.get("library"):
-                    required_libraries.append(fields["library"])
-                    logger.info(
-                        "Adding library to required libraries", urn=fields["library"]
-                    )
                     continue
 
                 # Validate using serializer

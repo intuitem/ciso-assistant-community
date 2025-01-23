@@ -116,8 +116,10 @@ export const actions: Actions = {
 
 		if (!response.ok && res.missing_libraries) {
 			setError(form, 'file', m.missingLibrariesInImport());
-			for (const value of res.missing_libraries) {
-				setError(form, 'non_field_errors', value);
+			for (let i = 0; i < res.missing_libraries.length; i += 2) {
+				const urn = res.missing_libraries[i];
+				const version = res.missing_libraries[i + 1];
+				setError(form, 'non_field_errors', `${urn} v${version}`);
 			}
 			return fail(400, { form });
 		}
