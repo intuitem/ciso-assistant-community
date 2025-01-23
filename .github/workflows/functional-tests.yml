@@ -117,7 +117,7 @@ jobs:
       - name: Set current date as env variable
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
-        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
+        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -223,7 +223,7 @@ jobs:
       - name: Set current date as env variable
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
-        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
+        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: always()
         with:
