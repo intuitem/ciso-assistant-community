@@ -55,7 +55,7 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
             ghcr.io/${{ github.repository }}/frontend:latest
-          platforms: linux/amd64,linux/arm64,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64
 
       - name: Build and Push Backend Docker Image
         uses: docker/build-push-action@v6
@@ -66,4 +66,4 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
             ghcr.io/${{ github.repository }}/backend:latest
-          platforms: linux/amd64,linux/arm64,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64
