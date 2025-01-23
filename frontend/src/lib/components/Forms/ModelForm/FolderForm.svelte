@@ -17,5 +17,10 @@
 		allowedExtensions={['bak', 'zip']}
 		helpText={m.importFolderHelpText()}
 	/>
-	<Checkbox {form} field="load_missing_libraries" label={m.loadMissingLibraries()} helpText={m.loadMissingLibrariesHelpText()}/>
+	<Checkbox
+		{form}
+		field="load_missing_libraries"
+		label={m.loadMissingLibraries()}
+		helpText={m.loadMissingLibrariesHelpText()}
+	/>
 {/if}
