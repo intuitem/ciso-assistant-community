@@ -2829,7 +2829,7 @@ class ComplianceAssessment(Assessment):
         n = 0
 
         for ras in requirement_assessments_scored:
-            if not (ig) or (ig & set(ras.requirement.implementation_groups)):
+            if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
                 score += ras.score or 0
                 n += 1
                 if self.show_documentation_score:
