@@ -2083,12 +2083,13 @@ class FolderViewSet(BaseModelViewSet):
     )
     def import_domain(self, request):
         """Handle file upload and initiate import process."""
+        load_missing_libraries = request.query_params.get("load_missing_libraries", "false").lower() == "true"
         try:
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
             parsed_data = self._process_uploaded_file(request.data["file"])
-            result = self._import_objects(parsed_data, domain_name)
+            result = self._import_objects(parsed_data, domain_name, load_missing_libraries)
             return Response(result, status=status.HTTP_200_OK)
 
         except KeyError as e:
@@ -2181,7 +2182,7 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    def _import_objects(self, parsed_data: dict, domain_name: str):
+    def _import_objects(self, parsed_data: dict, domain_name: str, load_missing_libraries: bool):
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
@@ -2228,7 +2229,10 @@ class FolderViewSet(BaseModelViewSet):
             # Check for missing libraries
             for library in required_libraries:
                 if not LoadedLibrary.objects.filter(urn=library).exists():
-                    missing_libraries.append(library)
+                    if StoredLibrary.objects.filter(urn=library).exists() and load_missing_libraries:
+                        StoredLibrary.objects.get(urn=library).load()
+                    else:
+                        missing_libraries.append(library)
 
             logger.debug("missing_libraries", missing_libraries=missing_libraries)
 

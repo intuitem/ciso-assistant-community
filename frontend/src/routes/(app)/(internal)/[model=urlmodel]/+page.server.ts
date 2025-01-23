@@ -71,6 +71,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			errors: false
 		});
 		model['folderImportForm'] = folderImportForm;
+		model['folderImportModel'] = {urlModel: 'folders-import'};
 	}
 
 	return { createForm, deleteForm, model, URLModel };
@@ -100,7 +101,7 @@ export const actions: Actions = {
 
 		const { file } = formData as { file: File };
 
-		const endpoint = `${BASE_API_URL}/folders/import/`;
+		const endpoint = `${BASE_API_URL}/folders/import/` + (form.data.load_missing_libraries ? `?load_missing_libraries=true` : '');
 
 		const response = await event.fetch(endpoint, {
 			method: 'POST',

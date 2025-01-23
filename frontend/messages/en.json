@@ -1124,5 +1124,7 @@
 	"importVersionNotCompatibleWithCurrentVersion": "The import version is not compatible with the current version of the application",
 	"errorOccuredDuringImport": "An error occurred during the import",
 	"successfullyImportedFolder": "Folder successfully imported",
-	"missingLibrariesInImport": "Some libraries are missing, see the list above"
+	"missingLibrariesInImport": "Some libraries are missing, see the list above",
+	"loadMissingLibraries": "Load missing libraries",
+	"loadMissingLibrariesHelpText": "Load the missing libraries to complete the import if they are available"
 }

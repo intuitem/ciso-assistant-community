@@ -69,7 +69,9 @@ export const FolderSchema = z.object({
 
 export const FolderImportSchema = z.object({
 	name: nameSchema,
-	file: z.instanceof(File)
+	file: z.instanceof(File),
+	load_missing_libraries: z.coerce.boolean().default(false) 
+	//NOTE: coerce is a workaround because without we get an inconsistent error in form validation
 });
 
 export const ProjectSchema = z.object({
