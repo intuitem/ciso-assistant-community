@@ -380,7 +380,7 @@
 	"libraryFileInYaml": "Library file in YAML format",
 	"importBackup": "Import backup",
 	"exportBackup": "Export backup",
-	"confirmImportBackup": "Are you sure you want to import this backup? This will overwrite all existing data.",
+	"confirmImportBackup": "Are you sure you want to import this backup? This will overwrite all existing data inlcuding your actual credentials.",
 	"exportDatabase": "Export database",
 	"upload": "Upload",
 	"add": "Add",
@@ -576,7 +576,7 @@
 	"flashMode": "Flash mode",
 	"goBackToAudit": "Go back to the audit",
 	"exportBackupDescription": "This will serialize and create a backup of the database, including users and RBAC. Evidences and other files are not included in the backup.",
-	"importBackupDescription": "This will deserialize and restore the database from a backup. This will overwrite all existing data, including users and RBAC and cannot be undone.",
+	"importBackupDescription": "This will deserialize and restore the database from a backup. This will overwrite all existing data, including users, RBAC and credentials and cannot be undone.",
 	"riskAssessmentInProgress": "Risk assessment is still in progress",
 	"riskAssessmentNoAuthor": "No author assigned to this risk assessment",
 	"riskAssessmentEmpty": "Risk assessment is empty. No risk scenario declared yet",
@@ -1000,6 +1000,7 @@
 	"noReviewer": "No reviewer assigned",
 	"selectAudit": "Select audit",
 	"errorAssetGraphMustNotContainCycles": "The asset graph must not contain cycles.",
+	"errorFolderGraphMustNotContainCycles": "The domain graph must not contain cycles.",
 	"addStakeholder": "Add stakeholder",
 	"operationalScenario": "Operational scenario",
 	"operationalScenarioRefId": "Operational scenario {refId}",
@@ -1128,5 +1129,8 @@
 	"importVersionNotCompatibleWithCurrentVersion": "The import version is not compatible with the current version of the application",
 	"errorOccuredDuringImport": "An error occurred during the import",
 	"successfullyImportedFolder": "Folder successfully imported",
-	"missingLibrariesInImport": "Some libraries are missing, see the list above"
+	"missingLibrariesInImport": "Some libraries are missing, see the list above",
+	"yes": "Yes",
+	"no": "No",
+	"updateAvailable": "Update available"
 }

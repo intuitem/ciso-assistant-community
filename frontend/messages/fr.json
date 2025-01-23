@@ -380,7 +380,7 @@
 	"libraryFileInYaml": "Fichier de librairie en format YAML",
 	"importBackup": "Importer une sauvegarde",
 	"exportBackup": "Exporter une sauvegarde",
-	"confirmImportBackup": "Êtes-vous sûr de vouloir importer cette sauvegarde ? Cela écrasera toutes les données existantes.",
+	"confirmImportBackup": "Êtes-vous sûr de vouloir importer cette sauvegarde ? Cela écrasera toutes les données existantes avec tous les utilisateurs et leur mot de passe",
 	"exportDatabase": "Exporter la base de données",
 	"upload": "Télécharger",
 	"add": "Ajouter",
@@ -576,7 +576,7 @@
 	"flashMode": "Mode flash",
 	"goBackToAudit": "Retour à l'audit",
 	"exportBackupDescription": "Cela va sérialiser et créer une sauvegarde de la base de données, y compris les utilisateurs et RBAC. Les preuves et autres fichiers ne sont pas inclus dans la sauvegarde.",
-	"importBackupDescription": "Cela va désérialiser et restaurer la base de données à partir d'une sauvegarde. Cela va écraser toutes les données existantes, y compris les utilisateurs et RBAC. Cette action est irréversible.",
+	"importBackupDescription": "Cela va désérialiser et restaurer la base de données à partir d'une sauvegarde. Cela va écraser toutes les données existantes, y compris les utilisateurs, RBAC et les mots de passe. Cette action est irréversible.",
 	"riskAssessmentInProgress": "L'évaluation des risques est toujours en cours",
 	"riskAssessmentNoAuthor": "Aucun auteur affecté à cette évaluation des risques",
 	"riskAssessmentEmpty": "L’évaluation des risques est vide. Aucun scénario de risque déclaré pour l'instant",
@@ -996,6 +996,7 @@
 	"noReviewer": "Aucun relecteur assigné",
 	"selectAudit": "Sélectionner un audit",
 	"errorAssetGraphMustNotContainCycles": "Le graphe des actifs ne doit pas contenir de boucles.",
+	"errorFolderGraphMustNotContainCycles": "Le graphe des domaines ne doit pas contenir de boucles.",
 	"addStakeholder": "Ajouter une partie prenante",
 	"operationalScenario": "Scénario opérationnel",
 	"operationalScenarioRefId": "Scénario opérationnel {refId}",
@@ -1128,5 +1129,7 @@
 	"backupVersionError": "Impossible de charger la sauvegarde, la version de la sauvegarde est invalide",
 	"confirmYes": "Confirmez en écrivant 'oui' puis validez:",
 	"confirmYesPlaceHolder": "Écrivez 'oui' puis validez",
-	"yes": "oui"
+	"yes": "Oui",
+	"no": "Non",
+	"updateAvailable": "Mise à jour disponible"
 }
