@@ -101,9 +101,7 @@ export const actions: Actions = {
 
 		const { file } = formData as { file: File };
 
-		const endpoint =
-			`${BASE_API_URL}/folders/import/` +
-			(form.data.load_missing_libraries ? `?load_missing_libraries=true` : '');
+		const endpoint = `${BASE_API_URL}/folders/import/${form.data.load_missing_libraries ? '?load_missing_libraries=true' : ''}`;
 
 		const response = await event.fetch(endpoint, {
 			method: 'POST',

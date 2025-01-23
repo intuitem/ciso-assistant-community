@@ -1,10 +1,8 @@
 import csv
-import gzip
 import json
 import mimetypes
 import re
 import os
-import tempfile
 import uuid
 import zipfile
 from datetime import date, datetime, timedelta
@@ -15,6 +13,7 @@ from uuid import UUID
 from itertools import cycle
 import django_filters as df
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE, VERSION
+from distutils.util import strtobool
 
 import shutil
 from pathlib import Path
@@ -2137,9 +2136,8 @@ class FolderViewSet(BaseModelViewSet):
     )
     def import_domain(self, request):
         """Handle file upload and initiate import process."""
-        load_missing_libraries = (
-            request.query_params.get("load_missing_libraries", "false").lower()
-            == "true"
+        load_missing_libraries = strtobool(
+            request.query_params.get("load_missing_libraries", "false")
         )
         try:
             domain_name = request.headers.get(

@@ -516,18 +516,22 @@ def get_domain_export_objects(domain: Folder):
         | Q(requirement_assessments__in=requirement_assessments)
     ).distinct()
 
-    initial_loaded_libraries = LoadedLibrary.objects.filter(
+    loaded_libraries = LoadedLibrary.objects.filter(
         Q(folder__in=folders)
         | Q(threats__in=threats)
         | Q(reference_controls__in=reference_controls)
         | Q(risk_matrices__in=risk_matrices)
         | Q(frameworks__in=frameworks)
+        | Q(
+            pk__in=LoadedLibrary.objects.filter(
+                Q(folder__in=folders)
+                | Q(threats__in=threats)
+                | Q(reference_controls__in=reference_controls)
+                | Q(risk_matrices__in=risk_matrices)
+                | Q(frameworks__in=frameworks)
+            ).values_list("dependencies", flat=True)
+        )
     ).distinct()
-    loaded_libraries = initial_loaded_libraries.union(
-        LoadedLibrary.objects.filter(
-            pk__in=initial_loaded_libraries.values_list("dependencies", flat=True)
-        ).distinct()
-    )
 
     return {
         # "folder": folders,

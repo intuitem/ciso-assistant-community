@@ -71,7 +71,8 @@ export const FolderImportSchema = z.object({
 	name: nameSchema,
 	file: z.instanceof(File),
 	load_missing_libraries: z.coerce.boolean().default(false)
-	//NOTE: coerce is a workaround because without we get an inconsistent error in form validation
+	//NOTE: coerce is used to handle checkbox form values which can be strings ('true'/'false')
+	//or booleans (true/false). Without coerce, form validation fails inconsistently.
 });
 
 export const ProjectSchema = z.object({
