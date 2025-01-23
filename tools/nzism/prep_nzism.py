@@ -47,7 +47,7 @@ def process_paragraph(level, paragraph):
             implementation_group = ",".join(groups)
 
     if paragraph.has_attr("cid"):
-        paragraph_cid = f"CID: {paragraph["cid"]}"
+        paragraph_cid = f"CID: {paragraph['cid']}"
         paragraph_name = f"Control -  {paragraph_classification} - {paragraph_compliance} [{paragraph_cid}]"
 
     output_table.append(
@@ -78,8 +78,8 @@ folder_path = args.folderpath
 input_file_name = f"{folder_path}/{args.filename}"
 
 if "." in args.version:
-    major_version = args.version.split('.')[0]
-    minor_version = args.version.split('.')[1]
+    major_version = args.version.split(".")[0]
+    minor_version = args.version.split(".")[1]
 else:
     major_version = args.version
 
@@ -125,7 +125,9 @@ print("generating", output_file_name)
 wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
-ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:nzism-v{major_version}"])
+ws.append(
+    ["library_urn", f"urn:{packager.lower()}:risk:library:nzism-v{major_version}"]
+)
 ws.append(["library_version", 1])
 ws.append(["library_locale", "en"])
 ws.append(["library_ref_id", f"NSIZM-v{major_version}"])
@@ -149,11 +151,16 @@ The NZISM is licensed under the Creative Commons Attribution 4.0 New Zealand lic
 )
 ws.append(["library_provider", "New Zealand Government Communications Security Bureau"])
 ws.append(["library_packager", packager])
-ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:nzism-v{major_version}"])
+ws.append(
+    ["framework_urn", f"urn:{packager.lower()}:risk:framework:nzism-v{major_version}"]
+)
 ws.append(["framework_ref_id", f"NSIZM-v{major_version}"])
 ws.append(["framework_name", f"NZISM v{major_version}"])
 ws.append(
-    ["framework_description", f"New Zealand Information Security Manual v{major_version}"]
+    [
+        "framework_description",
+        f"New Zealand Information Security Manual v{major_version}",
+    ]
 )
 ws.append(["tab", "requirements", "requirements"])
 ws.append(["tab", "scores", "scores"])

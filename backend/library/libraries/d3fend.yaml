@@ -1,0 +1,2224 @@
+urn: urn:intuitem:risk:library:mitre-d3fend
+locale: en
+ref_id: d3fend
+name: Mitre D3FEND
+description: 'A cybersecurity ontology designed to standardize vocabulary for employing
+  techniques to counter malicious cyber threats.
+
+  Version - 1.0.0 - 2024-12-20
+
+  https://d3fend.mitre.org/resources/'
+copyright: "Terms of Use\nLICENSE\nThe MITRE Corporation (MITRE) hereby grants you\
+  \ a non-exclusive, royalty-free license to use D3FEND for research, development,\
+  \ and commercial purposes. Any copy you make for such purposes is authorized provided\
+  \ that you reproduce MITRE\u2019s copyright designation and this license in any\
+  \ such copy.\nDISCLAIMERS\nALL DOCUMENTS AND THE INFORMATION CONTAINED THEREIN ARE\
+  \ PROVIDED ON AN \"AS IS\" BASIS AND THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS\
+  \ OR IS SPONSORED BY (IF ANY), THE MITRE CORPORATION, ITS BOARD OF TRUSTEES, OFFICERS,\
+  \ AGENTS, AND EMPLOYEES, DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING\
+  \ BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION THEREIN WILL NOT\
+  \ INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR\
+  \ A PARTICULAR PURPOSE.\n"
+version: 1
+publication_date: '2025-01-22'
+provider: Mitre D3FEND
+packager: intuitem
+objects:
+  reference_controls:
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-om
+    ref_id: D3-OM
+    name: Organization Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Organization Mapping
+
+      definition: Organization mapping identifies and models the people, roles, and
+      groups with an organization and the relations between them.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ora
+    ref_id: D3-ORA
+    name: Operational Risk Assessment
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Operational Risk Assessment
+
+      definition: Operational risk assessment identifies and models the vulnerabilities
+      of, and risks to, an organization''s activities individually and as a whole.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-odm
+    ref_id: D3-ODM
+    name: Operational Dependency Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Operational Dependency Mapping
+
+      definition: Operational dependency mapping identifies and models the dependencies
+      of the organization''s activities on each other and on the organization''s performers
+      (people, systems, and services.)  This may include modeling the higher- and
+      lower-level activities of an organization forming a hierarchy, or layering,
+      of the dependencies in an organization''s activities.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-am
+    ref_id: D3-AM
+    name: Access Modeling
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Access Modeling
+
+      definition: Access modeling identifies and records the access permissions granted
+      to administrators, users, groups, and systems.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-plm
+    ref_id: D3-PLM
+    name: Physical Link Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Physical Link Mapping
+
+      definition: Physical link mapping identifies and models the link connectivity
+      of the network devices within a physical network.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dplm
+    ref_id: D3-DPLM
+    name: Direct Physical Link Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Physical Link Mapping
+
+      technique level 2: Direct Physical Link Mapping
+
+      definition: Direct physical link mapping creates a physical link map by direct
+      observation and recording of the physical network links.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-aplm
+    ref_id: D3-APLM
+    name: Active Physical Link Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Physical Link Mapping
+
+      technique level 2: Active Physical Link Mapping
+
+      definition: Active physical link mapping sends and receives network traffic
+      as a means to map the physical layer.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-nva
+    ref_id: D3-NVA
+    name: Network Vulnerability Assessment
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Network Vulnerability Assessment
+
+      definition: Network vulnerability assessment relates all the vulnerabilities
+      of a network''s components in the context of their configuration and interdependencies
+      and can also include assessing risk emerging from the network''s design as a
+      whole, not just the sum of individual network node or network segment vulnerabilities.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ntpm
+    ref_id: D3-NTPM
+    name: Network Traffic Policy Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Network Traffic Policy Mapping
+
+      definition: Network traffic policy mapping identifies and models the allowed
+      pathways of data at the network, tranport, and/or application levels.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-llm
+    ref_id: D3-LLM
+    name: Logical Link Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Logical Link Mapping
+
+      definition: Logical link mapping creates a model of existing or previous node-to-node
+      connections using network-layer data or metadata.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pllm
+    ref_id: D3-PLLM
+    name: Passive Logical Link Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Logical Link Mapping
+
+      technique level 2: Passive Logical Link Mapping
+
+      definition: Passive logical link mapping only listens to network traffic as
+      a means to map the the whole data link layer, where the links represent logical
+      data flows rather than physical connections.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-allm
+    ref_id: D3-ALLM
+    name: Active Logical Link Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Logical Link Mapping
+
+      technique level 2: Active Logical Link Mapping
+
+      definition: Active logical link mapping sends and receives network traffic as
+      a means to map the whole data link layer, where the links represent logical
+      data flows rather than physical connection'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-swi
+    ref_id: D3-SWI
+    name: Software Inventory
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Software Inventory
+
+      definition: Software inventorying identifies and records the software items
+      in the organization''s architecture.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-nni
+    ref_id: D3-NNI
+    name: Network Node Inventory
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Network Node Inventory
+
+      definition: Network node inventorying identifies and records all the network
+      nodes (hosts, routers, switches, firewalls, etc.) in the organization''s architecture.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-hci
+    ref_id: D3-HCI
+    name: Hardware Component Inventory
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Hardware Component Inventory
+
+      definition: Hardware component inventorying identifies and records the hardware
+      items in the organization''s architecture.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-di
+    ref_id: D3-DI
+    name: Data Inventory
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Data Inventory
+
+      definition: Data inventorying identifies and records the schemas, formats, volumes,
+      and locations of data stored and used on the organization''s architecture.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ci
+    ref_id: D3-CI
+    name: Configuration Inventory
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Configuration Inventory
+
+      definition: Configuration inventory identifies and records the configuration
+      of software and hardware and their components throughout the organization.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ave
+    ref_id: D3-AVE
+    name: Asset Vulnerability Enumeration
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Asset Vulnerability Enumeration
+
+      definition: Asset vulnerability enumeration enriches inventory items with knowledge
+      identifying their vulnerabilities.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cia
+    ref_id: D3-CIA
+    name: Container Image Analysis
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Asset Vulnerability Enumeration
+
+      technique level 2: Container Image Analysis
+
+      definition: Analyzing a Container Image with respect to a set of policies.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sysva
+    ref_id: D3-SYSVA
+    name: System Vulnerability Assessment
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: System Vulnerability Assessment
+
+      definition: System vulnerability assessment relates all the vulnerabilities
+      of a system''s components in the context of their configuration and internal
+      dependencies and can also include assessing risk emerging from the system''s
+      design as a whole, not just the sum of individual component vulnerabilities.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sysdm
+    ref_id: D3-SYSDM
+    name: System Dependency Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: System Dependency Mapping
+
+      definition: System dependency mapping identifies and models the dependencies
+      of system components on each other to carry out their function.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-svcdm
+    ref_id: D3-SVCDM
+    name: Service Dependency Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Service Dependency Mapping
+
+      definition: Service dependency mapping determines the services on which each
+      given service relies.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dem
+    ref_id: D3-DEM
+    name: Data Exchange Mapping
+    category: technical
+    csf_function: identify
+    description: 'tactic: Model
+
+      technique level 1: Data Exchange Mapping
+
+      definition: Data exchange mapping identifies and models the organization''s
+      intended design for the flows of the data types, formats, and volumes between
+      systems at the application layer.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-vtv
+    ref_id: D3-VTV
+    name: Variable Type Validation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Variable Type Validation
+
+      definition: Ensuring that a variable has the correct type.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-vi
+    ref_id: D3-VI
+    name: Variable Initialization
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Variable Initialization
+
+      definition: Setting variables to a known value before use.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-tl
+    ref_id: D3-TL
+    name: Trusted Library
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Trusted Library
+
+      definition: A trusted library is a collection of pre-verified and secure code
+      modules or components that are used within software applications to perform
+      specific functions. These libraries are considered reliable and have been vetted
+      for security vulnerabilities, ensuring they do not introduce risks into the
+      application.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rn
+    ref_id: D3-RN
+    name: Reference Nullification
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Reference Nullification
+
+      definition: Invalidating all pointers that reference a specific memory block,
+      ensuring that the block cannot be accessed or modified after deallocation.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pv
+    ref_id: D3-PV
+    name: Pointer Validation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Pointer Validation
+
+      definition: Ensuring that a pointer variable has the required properties for
+      use.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-npc
+    ref_id: D3-NPC
+    name: Null Pointer Checking
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Pointer Validation
+
+      technique level 2: Null Pointer Checking
+
+      definition: Checking if a pointer is NULL.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-mbsv
+    ref_id: D3-MBSV
+    name: Memory Block Start Validation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Pointer Validation
+
+      technique level 2: Memory Block Start Validation
+
+      definition: Ensuring that a pointer accurately references the beginning of a
+      designated memory block.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-irv
+    ref_id: D3-IRV
+    name: Integer Range Validation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Integer Range Validation
+
+      definition: Ensuring that an integer is within a valid range.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cs
+    ref_id: D3-CS
+    name: Credential Scrubbing
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Credential Scrubbing
+
+      definition: The systematic removal of hard-coded credentials from source code
+      to prevent accidental exposure and unauthorized access.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-tba
+    ref_id: D3-TBA
+    name: Token-based Authentication
+    category: technical
+    csf_function: protect
+    description: "tactic: Harden\ntechnique level 1: Token-based Authentication\n\
+      definition: Token-based authentication is an authentication protocol where users\
+      \ verify their identity in exchange for a\_unique access token. Users can then\
+      \ access the website, application, or resource for the life of the token without\
+      \ having to re-enter their credentials."
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pwa
+    ref_id: D3-PWA
+    name: Password Authentication
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Password Authentication
+
+      definition: Password authentication is a security mechanism used to verify the
+      identity of a user or entity attempting to access a system or resource by requiring
+      the input of a secret string of characters, known as a password, that is associated
+      with the user or entity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-mfa
+    ref_id: D3-MFA
+    name: Multi-factor Authentication
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Multi-factor Authentication
+
+      definition: Requiring proof of two or more pieces of evidence in order to authenticate
+      a user.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cban
+    ref_id: D3-CBAN
+    name: Certificate-based Authentication
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Certificate-based Authentication
+
+      definition: Requiring a digital certificate in order to authenticate a user.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ban
+    ref_id: D3-BAN
+    name: Biometric Authentication
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Biometric Authentication
+
+      definition: Using biological measures in order to authenticate a user.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-taan
+    ref_id: D3-TAAN
+    name: Transfer Agent Authentication
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Transfer Agent Authentication
+
+      definition: Validating that server components of a messaging infrastructure
+      are authorized to send a particular message.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-mencr
+    ref_id: D3-MENCR
+    name: Message Encryption
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Message Encryption
+
+      definition: Encrypting a message body using a cryptographic key.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-man
+    ref_id: D3-MAN
+    name: Message Authentication
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Message Authentication
+
+      definition: Authenticating the sender of a message and ensuring message integrity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-tb
+    ref_id: D3-TB
+    name: Token Binding
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Token Binding
+
+      definition: Token binding is a security mechanism used to enhance the protection
+      of tokens, such as cookies or OAuth tokens, by binding them to a specific connection.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-spp
+    ref_id: D3-SPP
+    name: Strong Password Policy
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Strong Password Policy
+
+      definition: Modifying system configuration to increase password strength.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cro
+    ref_id: D3-CRO
+    name: Credential Rotation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Credential Rotation
+
+      definition: Credential rotation is a security procedure in which authentication
+      credentials, such as passwords, API keys, or certificates, are regularly changed
+      or replaced to minimize the risk of unauthorized access.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pr
+    ref_id: D3-PR
+    name: Password Rotation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Credential Rotation
+
+      technique level 2: Password Rotation
+
+      definition: Password rotation is a security policy that mandates the periodic
+      change of user account passwords to mitigate the risk of unauthorized access
+      due to compromised credentials.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-otp
+    ref_id: D3-OTP
+    name: One-time Password
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Credential Rotation
+
+      technique level 2: One-time Password
+
+      definition: A one-time password is valid for only one user authentication.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cero
+    ref_id: D3-CERO
+    name: Certificate Rotation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Credential Rotation
+
+      technique level 2: Certificate Rotation
+
+      definition: Certificate rotation involves replacing digital certificates and
+      their private keys to maintain cryptographic integrity and trust, mitigating
+      key compromise risks and ensuring continuous secure communications.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cp
+    ref_id: D3-CP
+    name: Certificate Pinning
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Certificate Pinning
+
+      definition: Persisting either a server''s X.509 certificate or their public
+      key and comparing that to server''s presented identity to allow for greater
+      client confidence in the remote server''s identity for SSL connections.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dencr
+    ref_id: D3-DENCR
+    name: Disk Encryption
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Disk Encryption
+
+      definition: Encrypting a hard disk partition to prevent cleartext access to
+      a file system.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-tbi
+    ref_id: D3-TBI
+    name: TPM Boot Integrity
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: TPM Boot Integrity
+
+      definition: Assuring the integrity of a platform by demonstrating that the boot
+      process starts from a trusted combination of hardware and software and continues
+      until the operating system has fully booted and applications are running.  Sometimes
+      called Static Root of Trust Measurement (STRM).'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rfs
+    ref_id: D3-RFS
+    name: RF Shielding
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: RF Shielding
+
+      definition: Adding physical barriers to a platform to prevent undesired radio
+      interference.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ba
+    ref_id: D3-BA
+    name: Bootloader Authentication
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Bootloader Authentication
+
+      definition: Cryptographically authenticating the bootloader software before
+      system boot.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-scp
+    ref_id: D3-SCP
+    name: System Configuration Permissions
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: System Configuration Permissions
+
+      definition: Restricting system configuration modifications to a specific user
+      or group of users.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fe
+    ref_id: D3-FE
+    name: File Encryption
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: File Encryption
+
+      definition: Encrypting a file using a cryptographic key.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-su
+    ref_id: D3-SU
+    name: Software Update
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Software Update
+
+      definition: Replacing old software on a computer system component.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dlic
+    ref_id: D3-DLIC
+    name: Driver Load Integrity Checking
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Driver Load Integrity Checking
+
+      definition: Ensuring the integrity of drivers loaded during initialization of
+      the operating system.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sfcv
+    ref_id: D3-SFCV
+    name: Stack Frame Canary Validation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Stack Frame Canary Validation
+
+      definition: Comparing a value stored in a stack frame with a known good value
+      in order to prevent or detect a memory segment overwrite.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-saor
+    ref_id: D3-SAOR
+    name: Segment Address Offset Randomization
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Segment Address Offset Randomization
+
+      definition: Randomizing the base (start) address of one or more segments of
+      memory during the initialization of a process.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-psep
+    ref_id: D3-PSEP
+    name: Process Segment Execution Prevention
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Process Segment Execution Prevention
+
+      definition: Preventing execution of any address in a memory region other than
+      the code segment.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pan
+    ref_id: D3-PAN
+    name: Pointer Authentication
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Pointer Authentication
+
+      definition: Comparing the cryptographic hash or derivative of a pointer''s value
+      to an expected value.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ehpv
+    ref_id: D3-EHPV
+    name: Exception Handler Pointer Validation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Exception Handler Pointer Validation
+
+      definition: Validates that a referenced exception handler pointer is a valid
+      exception handler.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dce
+    ref_id: D3-DCE
+    name: Dead Code Elimination
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Dead Code Elimination
+
+      definition: Removing unreachable or "dead code" from compiled source code.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ach
+    ref_id: D3-ACH
+    name: Application Configuration Hardening
+    category: technical
+    csf_function: protect
+    description: 'tactic: Harden
+
+      technique level 1: Application Configuration Hardening
+
+      definition: Modifying an application''s configuration to reduce its attack surface.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rta
+    ref_id: D3-RTA
+    name: RPC Traffic Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: RPC Traffic Analysis
+
+      definition: Monitoring the activity of remote procedure calls in communication
+      traffic to establish standard protocol operations and potential attacker activities.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ipcta
+    ref_id: D3-IPCTA
+    name: IPC Traffic Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: IPC Traffic Analysis
+
+      definition: Analyzing standard inter process communication (IPC) protocols to
+      detect deviations from normal protocol activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rtsd
+    ref_id: D3-RTSD
+    name: Remote Terminal Session Detection
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Remote Terminal Session Detection
+
+      definition: Detection of an unauthorized remote live terminal console session
+      by examining network traffic to a network host.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rpa
+    ref_id: D3-RPA
+    name: Relay Pattern Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Relay Pattern Analysis
+
+      definition: The detection of an internal host relaying traffic between the internal
+      network and the external network.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pmad
+    ref_id: D3-PMAD
+    name: Protocol Metadata Anomaly Detection
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Protocol Metadata Anomaly Detection
+
+      definition: Collecting network communication protocol metadata and identifying
+      statistical outliers.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-phdura
+    ref_id: D3-PHDURA
+    name: Per Host Download-Upload Ratio Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Per Host Download-Upload Ratio Analysis
+
+      definition: Detecting anomalies that indicate malicious activity by comparing
+      the amount of data downloaded versus data uploaded by a host.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dnsta
+    ref_id: D3-DNSTA
+    name: DNS Traffic Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: DNS Traffic Analysis
+
+      definition: Analysis of domain name metadata, including name and DNS records,
+      to determine whether the domain is likely to resolve to an undesirable host.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fc
+    ref_id: D3-FC
+    name: File Carving
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: File Carving
+
+      definition: Identifying and extracting files from network application protocols
+      through the use of network stream reassembly software.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-isva
+    ref_id: D3-ISVA
+    name: Inbound Session Volume Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Inbound Session Volume Analysis
+
+      definition: Analyzing inbound network session or connection attempt volume.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ntcd
+    ref_id: D3-NTCD
+    name: Network Traffic Community Deviation
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Network Traffic Community Deviation
+
+      definition: Establishing baseline communities of network hosts and identifying
+      statistically divergent inter-community communication.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cspp
+    ref_id: D3-CSPP
+    name: Client-server Payload Profiling
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Client-server Payload Profiling
+
+      definition: Comparing client-server request and response payloads to a baseline
+      profile to identify outliers.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-anaa
+    ref_id: D3-ANAA
+    name: Administrative Network Activity Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Administrative Network Activity Analysis
+
+      definition: Detection of unauthorized use of administrative network protocols
+      by analyzing network activity against a baseline.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-caa
+    ref_id: D3-CAA
+    name: Connection Attempt Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Connection Attempt Analysis
+
+      definition: Analyzing failed connections in a network to detect unauthorized
+      activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ntsa
+    ref_id: D3-NTSA
+    name: Network Traffic Signature Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Network Traffic Signature Analysis
+
+      definition: Analyzing network traffic and compares it to known signatures'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-bse
+    ref_id: D3-BSE
+    name: Byte Sequence Emulation
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Byte Sequence Emulation
+
+      definition: Analyzing sequences of bytes and determining if they likely represent
+      malicious shellcode.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ca
+    ref_id: D3-CA
+    name: Certificate Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Certificate Analysis
+
+      definition: Analyzing Public Key Infrastructure certificates to detect if they
+      have been misconfigured or spoofed using both network traffic, certificate fields
+      and third-party logs.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pca
+    ref_id: D3-PCA
+    name: Passive Certificate Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Certificate Analysis
+
+      technique level 2: Passive Certificate Analysis
+
+      definition: Collecting host certificates from network traffic or other passive
+      sources like a certificate transparency log and analyzing them for unauthorized
+      activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-aca
+    ref_id: D3-ACA
+    name: Active Certificate Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Certificate Analysis
+
+      technique level 2: Active Certificate Analysis
+
+      definition: Actively collecting PKI certificates by connecting to the server
+      and downloading its server certificates for analysis.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sra
+    ref_id: D3-SRA
+    name: Sender Reputation Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Sender Reputation Analysis
+
+      definition: Ascertaining sender reputation based on information associated with
+      a message (e.g. email/instant messaging).'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-smra
+    ref_id: D3-SMRA
+    name: Sender MTA Reputation Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Sender MTA Reputation Analysis
+
+      definition: Characterizing the reputation of mail transfer agents (MTA) to determine
+      the security risk in emails.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fapa
+    ref_id: D3-FAPA
+    name: File Access Pattern Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: File Access Pattern Analysis
+
+      definition: Analyzing the files accessed by a process to identify unauthorized
+      activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dqsa
+    ref_id: D3-DQSA
+    name: Database Query String Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Database Query String Analysis
+
+      definition: Analyzing database queries to detect [SQL Injection](https://capec.mitre.org/data/definitions/66.html).'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ssc
+    ref_id: D3-SSC
+    name: Shadow Stack Comparisons
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Shadow Stack Comparisons
+
+      definition: Comparing a call stack in system memory with a shadow call stack
+      maintained by the processor to determine unauthorized shellcode activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sea
+    ref_id: D3-SEA
+    name: Script Execution Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Script Execution Analysis
+
+      definition: Analyzing the execution of a script to detect unauthorized user
+      activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-psa
+    ref_id: D3-PSA
+    name: Process Spawn Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Process Spawn Analysis
+
+      definition: Analyzing spawn arguments or attributes of a process to detect processes
+      that are unauthorized.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pla
+    ref_id: D3-PLA
+    name: Process Lineage Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Process Spawn Analysis
+
+      technique level 2: Process Lineage Analysis
+
+      definition: Identification of suspicious processes executing on an end-point
+      device by examining the ancestry and siblings of a process, and the associated
+      metadata of each node on the tree, such as process execution, duration, and
+      order relative to siblings and ancestors.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ibca
+    ref_id: D3-IBCA
+    name: Indirect Branch Call Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Indirect Branch Call Analysis
+
+      definition: Analyzing vendor specific branch call recording in order to detect
+      ROP style attacks.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sca
+    ref_id: D3-SCA
+    name: System Call Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: System Call Analysis
+
+      definition: Analyzing system calls to determine whether a process is exhibiting
+      unauthorized behavior.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fca
+    ref_id: D3-FCA
+    name: File Creation Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: System Call Analysis
+
+      technique level 2: File Creation Analysis
+
+      definition: Analyzing the properties of file create system call invocations.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-psmd
+    ref_id: D3-PSMD
+    name: Process Self-Modification Detection
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Process Self-Modification Detection
+
+      definition: Detects processes that modify, change, or replace their own code
+      at runtime.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pcsv
+    ref_id: D3-PCSV
+    name: Process Code Segment Verification
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Process Code Segment Verification
+
+      definition: Comparing the "text" or "code" memory segments to a source of truth.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fh
+    ref_id: D3-FH
+    name: File Hashing
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: File Hashing
+
+      definition: Employing file hash comparisons to detect known malware.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fcoa
+    ref_id: D3-FCOA
+    name: File Content Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: File Content Analysis
+
+      definition: Employing a pattern matching algorithm to statically analyze the
+      content of files.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fcr
+    ref_id: D3-FCR
+    name: File Content Rules
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: File Content Analysis
+
+      technique level 2: File Content Rules
+
+      definition: Employing a pattern matching rule language to analyze the content
+      of files.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-efa
+    ref_id: D3-EFA
+    name: Emulated File Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Emulated File Analysis
+
+      definition: Emulating instructions in a file looking for specific patterns.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-da
+    ref_id: D3-DA
+    name: Dynamic Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Dynamic Analysis
+
+      definition: Executing or opening a file in a synthetic "sandbox" environment
+      to determine if the file is a malicious program or if the file exploits another
+      program such as a document reader.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dam
+    ref_id: D3-DAM
+    name: Domain Account Monitoring
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Domain Account Monitoring
+
+      definition: Monitoring the existence of or changes to Domain User Accounts.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sda
+    ref_id: D3-SDA
+    name: Session Duration Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Session Duration Analysis
+
+      definition: Analyzing the duration of user sessions in order to detect unauthorized  activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-uglpa
+    ref_id: D3-UGLPA
+    name: User Geolocation Logon Pattern Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: User Geolocation Logon Pattern Analysis
+
+      definition: Monitoring geolocation data of user logon attempts and comparing
+      it to a baseline user behavior profile to identify anomalies in logon location.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-wsaa
+    ref_id: D3-WSAA
+    name: Web Session Activity Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Web Session Activity Analysis
+
+      definition: Monitoring changes in user web session behavior by comparing current
+      web session activity to a baseline behavior profile or a catalog of predetermined
+      malicious behavior.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-jfapa
+    ref_id: D3-JFAPA
+    name: Job Function Access Pattern Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Job Function Access Pattern Analysis
+
+      definition: Detecting anomalies in user access patterns by comparing user access
+      activity to behavioral profiles that categorize users by role such as job title,
+      function, department.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ccsa
+    ref_id: D3-CCSA
+    name: Credential Compromise Scope Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Credential Compromise Scope Analysis
+
+      definition: Determining which credentials may have been compromised by analyzing
+      the user logon history of a particular system.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-azet
+    ref_id: D3-AZET
+    name: Authorization Event Thresholding
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Authorization Event Thresholding
+
+      definition: Collecting authorization events, creating a baseline user profile,
+      and determining whether authorization events are consistent with the baseline
+      profile.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-anet
+    ref_id: D3-ANET
+    name: Authentication Event Thresholding
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Authentication Event Thresholding
+
+      definition: Collecting authentication events, creating a baseline user profile,
+      and determining whether authentication events are consistent with the baseline
+      profile.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rapa
+    ref_id: D3-RAPA
+    name: Resource Access Pattern Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Resource Access Pattern Analysis
+
+      definition: Analyzing the resources accessed by a user to identify unauthorized
+      activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-lam
+    ref_id: D3-LAM
+    name: Local Account Monitoring
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Local Account Monitoring
+
+      definition: Analyzing local user accounts to detect unauthorized activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-udta
+    ref_id: D3-UDTA
+    name: User Data Transfer Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: User Data Transfer Analysis
+
+      definition: Analyzing the amount of data transferred by a user.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ua
+    ref_id: D3-UA
+    name: URL Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: URL Analysis
+
+      definition: Determining if a URL is benign or malicious by analyzing the URL
+      or its components.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ira
+    ref_id: D3-IRA
+    name: Identifier Reputation Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Identifier Reputation Analysis
+
+      definition: Analyzing the reputation of an identifier.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ura
+    ref_id: D3-URA
+    name: URL Reputation Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Identifier Reputation Analysis
+
+      technique level 2: URL Reputation Analysis
+
+      definition: Analyzing the reputation of a URL.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ipra
+    ref_id: D3-IPRA
+    name: IP Reputation Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Identifier Reputation Analysis
+
+      technique level 2: IP Reputation Analysis
+
+      definition: Analyzing the reputation of an IP address.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fhra
+    ref_id: D3-FHRA
+    name: File Hash Reputation Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Identifier Reputation Analysis
+
+      technique level 2: File Hash Reputation Analysis
+
+      definition: Analyzing the reputation of a file hash.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dnra
+    ref_id: D3-DNRA
+    name: Domain Name Reputation Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Identifier Reputation Analysis
+
+      technique level 2: Domain Name Reputation Analysis
+
+      definition: Analyzing the reputation of a domain name.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-iaa
+    ref_id: D3-IAA
+    name: Identifier Activity Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Identifier Activity Analysis
+
+      definition: Taking known malicious identifiers and determining if they are present
+      in a system.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-hd
+    ref_id: D3-HD
+    name: Homoglyph Detection
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Homoglyph Detection
+
+      definition: Comparing strings using a variety of techniques to determine if
+      a deceptive or malicious string is being presented to a user.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-osm
+    ref_id: D3-OSM
+    name: Operating System Monitoring
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      definition: The operating system software, for D3FEND''s purposes, includes
+      the kernel and its process management functions, hardware drivers, initialization
+      or boot logic. It also includes and other key system daemons and their configuration.
+      The monitoring or analysis of these components for unauthorized activity constitute
+      **Operating System Monitoring**.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-usica
+    ref_id: D3-USICA
+    name: User Session Init Config Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: User Session Init Config Analysis
+
+      definition: Analyzing modifications to user session config files such as .bashrc
+      or .bash_profile.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sica
+    ref_id: D3-SICA
+    name: System Init Config Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: System Init Config Analysis
+
+      definition: Analysis of any system process startup configuration.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sfa
+    ref_id: D3-SFA
+    name: System File Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: System File Analysis
+
+      definition: Monitoring system files such as authentication databases, configuration
+      files, system logs, and system executables for modification or tampering.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sbv
+    ref_id: D3-SBV
+    name: Service Binary Verification
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: Service Binary Verification
+
+      definition: Analyzing changes in service binary files by comparing to a source
+      of truth.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sdm
+    ref_id: D3-SDM
+    name: System Daemon Monitoring
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: System Daemon Monitoring
+
+      definition: Tracking changes to the state or configuration of critical system
+      level processes.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sja
+    ref_id: D3-SJA
+    name: Scheduled Job Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: Scheduled Job Analysis
+
+      definition: Analysis of source files, processes, destination files, or destination
+      servers associated with a scheduled job to detect unauthorized use of job scheduling.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-mbt
+    ref_id: D3-MBT
+    name: Memory Boundary Tracking
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: Memory Boundary Tracking
+
+      definition: Analyzing a call stack for return addresses which point to unexpected  memory
+      locations.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ida
+    ref_id: D3-IDA
+    name: Input Device Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: Input Device Analysis
+
+      definition: Operating system level mechanisms to prevent abusive input device
+      exploitation.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ehb
+    ref_id: D3-EHB
+    name: Endpoint Health Beacon
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Operating System Monitoring
+
+      technique level 2: Endpoint Health Beacon
+
+      definition: Monitoring the security status of an endpoint by sending periodic
+      messages with health status, where absence of a response may indicate that the
+      endpoint has been compromised.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fv
+    ref_id: D3-FV
+    name: Firmware Verification
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Firmware Verification
+
+      definition: Cryptographically verifying firmware integrity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-sfv
+    ref_id: D3-SFV
+    name: System Firmware Verification
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Firmware Verification
+
+      technique level 2: System Firmware Verification
+
+      definition: Cryptographically verifying installed system firmware integrity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pfv
+    ref_id: D3-PFV
+    name: Peripheral Firmware Verification
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Firmware Verification
+
+      technique level 2: Peripheral Firmware Verification
+
+      definition: Cryptographically verifying peripheral firmware integrity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-femc
+    ref_id: D3-FEMC
+    name: Firmware Embedded Monitoring Code
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Firmware Embedded Monitoring Code
+
+      definition: Monitoring code is injected into firmware for integrity monitoring
+      of firmware and firmware data.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fba
+    ref_id: D3-FBA
+    name: Firmware Behavior Analysis
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: Firmware Behavior Analysis
+
+      definition: Analyzing the behavior of embedded code in firmware and looking
+      for anomalous behavior and suspicious activity.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fim
+    ref_id: D3-FIM
+    name: File Integrity Monitoring
+    category: technical
+    csf_function: detect
+    description: 'tactic: Detect
+
+      technique level 1: File Integrity Monitoring
+
+      definition: Detecting any suspicious changes to files in a computer system.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-scf
+    ref_id: D3-SCF
+    name: System Call Filtering
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: System Call Filtering
+
+      definition: Controlling access to local computer system resources with kernel-level
+      capabilities.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-lfam
+    ref_id: D3-LFAM
+    name: Local File Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: System Call Filtering
+
+      technique level 2: Local File Access Mediation
+
+      definition: Restricting access to a local file by configuring operating system
+      functionality.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pam
+    ref_id: D3-PAM
+    name: Physical Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Physical Access Mediation
+
+      definition: Physical access mediation is the process of granting or denying
+      specific requests to enter specific physical facilities (e.g., Federal buildings,
+      military establishments, border crossing entrances.)'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-nram
+    ref_id: D3-NRAM
+    name: Network Resource Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Resource Access Mediation
+
+      definition: Control of access to organizational systems and services by users
+      or processes over a network.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-wsam
+    ref_id: D3-WSAM
+    name: Web Session Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Resource Access Mediation
+
+      technique level 2: Web Session Access Mediation
+
+      definition: Web session access mediation secures user sessions in web applications
+      by employing robust authentication and integrity validation, along with adaptive
+      threat mitigation techniques, to ensure that access to web resources is authorized
+      and protected from session-related attacks.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pbwsam
+    ref_id: D3-PBWSAM
+    name: Proxy-based Web Server Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Resource Access Mediation
+
+      technique level 2: Proxy-based Web Server Access Mediation
+
+      definition: Proxy-based web server access mediation focuses on the regulation
+      of web server access through intermediary proxy servers.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ebwsam
+    ref_id: D3-EBWSAM
+    name: Endpoint-based Web Server Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Resource Access Mediation
+
+      technique level 2: Endpoint-based Web Server Access Mediation
+
+      definition: Endpoint-based web server access mediation regulates web server
+      access directly from user endpoints by implementing mechanisms such as client-side
+      certificates and endpoint security software to authenticate devices and ensure
+      compliant access.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rfam
+    ref_id: D3-RFAM
+    name: Remote File Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Resource Access Mediation
+
+      technique level 2: Remote File Access Mediation
+
+      definition: Remote file access mediation is the process of managing and securing
+      access to file systems over a network to ensure that only authorized users or
+      processes can interact with remote files.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-nam
+    ref_id: D3-NAM
+    name: Network Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Access Mediation
+
+      definition: Network access mediation is the control method for authorizing access
+      to a system by a user (or a process acting on behalf of a user) communicating
+      through a network, including a local area network, a wide area network, and
+      the Internet.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ram
+    ref_id: D3-RAM
+    name: Routing Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Access Mediation
+
+      technique level 2: Routing Access Mediation
+
+      definition: Routing access mediation is a network security approach that manages
+      and controls access at the network layer using VPNs, tunneling protocols, firewall
+      rules, and traffic inspection to ensure secure and efficient data routing.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-lamed
+    ref_id: D3-LAMED
+    name: LAN Access Mediation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Access Mediation
+
+      technique level 2: LAN Access Mediation
+
+      definition: LAN access mediation encompasses the application of strict access
+      control policies, systematic verification of devices, and authentication mechanisms
+      to govern connectivity to a Local Area Network.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-iopr
+    ref_id: D3-IOPR
+    name: IO Port Restriction
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: IO Port Restriction
+
+      definition: Limiting access to computer input/output (IO) ports to restrict
+      unauthorized devices.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cts
+    ref_id: D3-CTS
+    name: Credential Transmission Scoping
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Credential Transmission Scoping
+
+      definition: Limiting the transmission of a credential to a scoped set of relying
+      parties.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-kbpi
+    ref_id: D3-KBPI
+    name: Kernel-based Process Isolation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Kernel-based Process Isolation
+
+      definition: Using kernel-level capabilities to isolate processes.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-hbpi
+    ref_id: D3-HBPI
+    name: Hardware-based Process Isolation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Hardware-based Process Isolation
+
+      definition: Preventing one process from writing to the memory space of another
+      process through hardware based address manager implementations.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-edl
+    ref_id: D3-EDL
+    name: Executable Denylisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Executable Denylisting
+
+      definition: Blocking the execution of files on a host in accordance with defined
+      application policy rules.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-eal
+    ref_id: D3-EAL
+    name: Executable Allowlisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Executable Allowlisting
+
+      definition: Using a digital signature to authenticate a file before opening.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-abpi
+    ref_id: D3-ABPI
+    name: Application-based Process Isolation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Application-based Process Isolation
+
+      definition: Application code which prevents its own subroutines from accessing
+      intra-process / internal memory space.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-uap
+    ref_id: D3-UAP
+    name: User Account Permissions
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: User Account Permissions
+
+      definition: Restricting a user account''s access to resources.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-lfp
+    ref_id: D3-LFP
+    name: Local File Permissions
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Local File Permissions
+
+      definition: Restricting access to a local file by configuring operating system
+      functionality.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dtp
+    ref_id: D3-DTP
+    name: Domain Trust Policy
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Domain Trust Policy
+
+      definition: Restricting inter-domain trust by modifying domain configuration.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ntf
+    ref_id: D3-NTF
+    name: Network Traffic Filtering
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Traffic Filtering
+
+      definition: Restricting network traffic originating from any location.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-otf
+    ref_id: D3-OTF
+    name: Outbound Traffic Filtering
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Traffic Filtering
+
+      technique level 2: Outbound Traffic Filtering
+
+      definition: Restricting network traffic originating from a private host or enclave
+      destined towards untrusted networks.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-itf
+    ref_id: D3-ITF
+    name: Inbound Traffic Filtering
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Traffic Filtering
+
+      technique level 2: Inbound Traffic Filtering
+
+      definition: Restricting network traffic originating from untrusted networks
+      destined towards a private host or enclave.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ef
+    ref_id: D3-EF
+    name: Email Filtering
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Network Traffic Filtering
+
+      technique level 2: Email Filtering
+
+      definition: Filtering incoming email traffic based on specific criteria.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-et
+    ref_id: D3-ET
+    name: Encrypted Tunnels
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Encrypted Tunnels
+
+      definition: Encrypted encapsulation of routable network traffic.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dnsdl
+    ref_id: D3-DNSDL
+    name: DNS Denylisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: DNS Denylisting
+
+      definition: Blocking DNS Network Traffic based on criteria such as IP address,
+      domain name, or DNS query type.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rrid
+    ref_id: D3-RRID
+    name: Reverse Resolution IP Denylisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: DNS Denylisting
+
+      technique level 2: Reverse Resolution IP Denylisting
+
+      definition: Blocking a reverse lookup based on the query''s IP address value.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fridl
+    ref_id: D3-FRIDL
+    name: Forward Resolution IP Denylisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: DNS Denylisting
+
+      technique level 2: Forward Resolution IP Denylisting
+
+      definition: Blocking a DNS lookup''s answer''s IP address value.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-frddl
+    ref_id: D3-FRDDL
+    name: Forward Resolution Domain Denylisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: DNS Denylisting
+
+      technique level 2: Forward Resolution Domain Denylisting
+
+      definition: Blocking a lookup based on the query''s domain name value.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-hdl
+    ref_id: D3-HDL
+    name: Homoglyph Denylisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: DNS Denylisting
+
+      technique level 2: Homoglyph Denylisting
+
+      definition: Blocking DNS queries that are deceptively similar to legitimate
+      domain names.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-hddl
+    ref_id: D3-HDDL
+    name: Hierarchical Domain Denylisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: DNS Denylisting
+
+      technique level 2: Hierarchical Domain Denylisting
+
+      definition: Blocking the resolution of any subdomain of a specified domain name.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dnsal
+    ref_id: D3-DNSAL
+    name: DNS Allowlisting
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: DNS Allowlisting
+
+      definition: Permitting only approved domains and their subdomains to be resolved.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-bdi
+    ref_id: D3-BDI
+    name: Broadcast Domain Isolation
+    category: technical
+    csf_function: protect
+    description: 'tactic: Isolate
+
+      technique level 1: Broadcast Domain Isolation
+
+      definition: Broadcast isolation restricts the number of computers a host can
+      contact on their LAN.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-duc
+    ref_id: D3-DUC
+    name: Decoy User Credential
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Decoy User Credential
+
+      definition: A Credential created for the purpose of deceiving an adversary.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dst
+    ref_id: D3-DST
+    name: Decoy Session Token
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Decoy Session Token
+
+      definition: An authentication token created for the purposes of deceiving an
+      adversary.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dpr
+    ref_id: D3-DPR
+    name: Decoy Public Release
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Decoy Public Release
+
+      definition: Issuing publicly released media to deceive adversaries.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dp
+    ref_id: D3-DP
+    name: Decoy Persona
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Decoy Persona
+
+      definition: Establishing a fake online identity to misdirect, deceive, and or
+      interact with adversaries.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dnr
+    ref_id: D3-DNR
+    name: Decoy Network Resource
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Decoy Network Resource
+
+      definition: Deploying a network resource for the purposes of deceiving an adversary.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-df
+    ref_id: D3-DF
+    name: Decoy File
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Decoy File
+
+      definition: A file created for the purposes of deceiving an adversary.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-shn
+    ref_id: D3-SHN
+    name: Standalone Honeynet
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Standalone Honeynet
+
+      definition: An environment created for the purpose of attracting attackers and
+      eliciting their behaviors that is not connected to any production enterprise
+      systems.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ihn
+    ref_id: D3-IHN
+    name: Integrated Honeynet
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Integrated Honeynet
+
+      definition: The practice of setting decoys in a production environment to entice
+      interaction from attackers.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-chn
+    ref_id: D3-CHN
+    name: Connected Honeynet
+    category: technical
+    csf_function: protect
+    description: 'tactic: Deceive
+
+      technique level 1: Connected Honeynet
+
+      definition: A decoy service, system, or environment, that is connected to the
+      enterprise network, and simulates or emulates certain functionality to the network,
+      without exposing full access to a production system.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-st
+    ref_id: D3-ST
+    name: Session Termination
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Session Termination
+
+      definition: Forcefully end all active sessions associated with compromised accounts
+      or devices.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-pt
+    ref_id: D3-PT
+    name: Process Termination
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Process Termination
+
+      definition: Terminating a running application process on a computer system.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-ps
+    ref_id: D3-PS
+    name: Process Suspension
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Process Suspension
+
+      definition: Suspending a running process on a computer system.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-hs
+    ref_id: D3-HS
+    name: Host Shutdown
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Host Shutdown
+
+      definition: Initiating a host''s shutdown sequence to terminate all running
+      processes.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-hr
+    ref_id: D3-HR
+    name: Host Reboot
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Host Shutdown
+
+      technique level 2: Host Reboot
+
+      definition: Initiating a host''s reboot sequence to terminate all running processes.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-rkd
+    ref_id: D3-RKD
+    name: Registry Key Deletion
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Registry Key Deletion
+
+      definition: Delete a registry key.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-fev
+    ref_id: D3-FEV
+    name: File Eviction
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: File Eviction
+
+      definition: File eviction techniques delete files from system storage.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-er
+    ref_id: D3-ER
+    name: Email Removal
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: File Eviction
+
+      technique level 2: Email Removal
+
+      definition: The email removal technique deletes email files from system storage.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-drt
+    ref_id: D3-DRT
+    name: Domain Registration Takedown
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Domain Registration Takedown
+
+      definition: The process of performing a takedown of the attacker''s domain registration
+      infrastructure.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dkf
+    ref_id: D3-DKF
+    name: Disk Formatting
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Disk Formatting
+
+      definition: Disk Formatting is the process of preparing a data storage device,
+      such as a hard drive, solid-state drive, or USB flash drive, for initial use.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dkp
+    ref_id: D3-DKP
+    name: Disk Partitioning
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Disk Formatting
+
+      technique level 2: Disk Partitioning
+
+      definition: Disk Partitioning is the process of dividing a disk into multiple
+      distinct sections, known as partitions.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dke
+    ref_id: D3-DKE
+    name: Disk Erasure
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Disk Formatting
+
+      technique level 2: Disk Erasure
+
+      definition: Disk Erasure is the process of securely deleting all data on a disk
+      to ensure that it cannot be recovered by any means.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-dnsce
+    ref_id: D3-DNSCE
+    name: DNS Cache Eviction
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: DNS Cache Eviction
+
+      definition: Flushing DNS to clear any IP addresses or other DNS records from
+      the cache.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-cr
+    ref_id: D3-CR
+    name: Credential Revocation
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Credential Revocation
+
+      definition: Deleting a set of credentials permanently to prevent them from being
+      used to authenticate.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-anci
+    ref_id: D3-ANCI
+    name: Authentication Cache Invalidation
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Authentication Cache Invalidation
+
+      definition: Removing tokens or credentials from an authentication cache to prevent
+      further user associated account accesses.'
+  - urn: urn:intuitem:risk:reference-controls:mitre-d3fend:d3-al
+    ref_id: D3-AL
+    name: Account Locking
+    category: technical
+    csf_function: respond
+    description: 'tactic: Evict
+
+      technique level 1: Account Locking
+
+      definition: The process of temporarily disabling user accounts on a system or
+      domain.'
