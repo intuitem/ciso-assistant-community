@@ -45,6 +45,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           load: true
+          push: false
           tags: |
             ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
           platforms: linux/amd64,linux/arm64
@@ -55,6 +56,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           load: true
+          push: false
           tags: |
             ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
           platforms: linux/amd64,linux/arm64
