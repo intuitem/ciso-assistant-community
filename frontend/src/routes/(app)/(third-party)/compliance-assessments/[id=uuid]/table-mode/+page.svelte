@@ -382,7 +382,9 @@
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
 							<Score
-								form={superForm(requirementAssessment.scoreForm, { id: requirementAssessment.id })}
+								form={superForm(requirementAssessment.scoreForm, {
+									id: `requirement-score-${requirementAssessment.id}`
+								})}
 								min_score={data.compliance_assessment.min_score}
 								max_score={data.compliance_assessment.max_score}
 								scores_definition={data.compliance_assessment.scores_definition}
@@ -399,7 +401,7 @@
 								<div slot="left">
 									<Checkbox
 										form={superForm(requirementAssessment.scoreForm, {
-											id: requirementAssessment.id
+											id: `requirement-is-scored-${requirementAssessment.id}`
 										})}
 										field="is_scored"
 										label={''}
@@ -417,7 +419,7 @@
 							{#if data.compliance_assessment.show_documentation_score}
 								<Score
 									form={superForm(requirementAssessment.scoreForm, {
-										id: requirementAssessment.id
+										id: `requirement-documentation-score-${requirementAssessment.id}`
 									})}
 									min_score={data.compliance_assessment.min_score}
 									max_score={data.compliance_assessment.max_score}
