@@ -72,7 +72,7 @@
 						class="btn variant-filled-error"
 						type="submit"
 						on:click={parent.onConfirm}
-						disabled={!userInput || userInput.trim().toLowerCase() !== m.yes()}
+						disabled={!userInput || userInput.trim().toLowerCase() !== m.yes().toLowerCase()}
 					>
 						{m.submit()}
 					</button>
@@ -91,7 +91,7 @@
 					class="btn variant-filled-error"
 					type="button"
 					on:click={parent.onConfirm}
-					disabled={!userInput || userInput.trim().toLowerCase() !== m.yes()}
+					disabled={!userInput || userInput.trim().toLowerCase() !== m.yes().toLowerCase()}
 				>
 					{m.submit()}
 				</button>
