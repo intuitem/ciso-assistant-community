@@ -34,7 +34,7 @@
 		}
 	}
 
-	export const _form = superForm(data, {
+	export let _form = superForm(data, {
 		dataType: dataType,
 		invalidateAll: invalidateAll,
 		applyAction: applyAction,
@@ -68,6 +68,7 @@
 		form={_form}
 		initialData={data.data}
 		data={$form}
+		formData={$form}
 		message={$message}
 		errors={$errors}
 		allErrors={$allErrors}

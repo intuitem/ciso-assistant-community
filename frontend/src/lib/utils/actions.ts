@@ -169,7 +169,7 @@ export async function defaultWriteFormAction({
 	if (redirectToWrittenObject) {
 		return { form, redirect: `/${urlModel}/${writtenObject.id}` };
 	}
-	return { form };
+	return { form, object: writtenObject };
 }
 
 export async function nestedWriteFormAction({
