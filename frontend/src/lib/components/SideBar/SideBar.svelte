@@ -11,6 +11,10 @@
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
 	import { page } from '$app/stores';
+	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
+	import { getFlash } from 'sveltekit-flash-message';
+	import { invalidateAll } from '$app/navigation';
 
 	export let open: boolean;
 
@@ -177,6 +181,52 @@
 		}
 	];
 
+	const modalStore = getModalStore();
+	const flash = getFlash(page);
+
+	function modalFirstLogin(): void {
+		const modalComponent: ModalComponent = {
+			ref: FirstLoginModal,
+			props: {
+				actions: [
+					{
+						label: m.showGuidedTour(),
+						action: triggerVisit,
+						classes: 'variant-filled-surface',
+						btnIcon: 'fa-wand-magic-sparkles'
+					},
+					{
+						label: m.loadDummyData(),
+						action: loadDummyDomain,
+						classes: 'variant-filled-secondary',
+						btnIcon: 'fa-file-import',
+						async: true
+					}
+				]
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.firstTimeLoginModalTitle(),
+			body: m.firstTimeLoginModalDescription()
+		};
+		modalStore.trigger(modal);
+	}
+
+	async function loadDummyDomain() {
+		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
+		if (!response.ok) {
+			console.error('Failed to load dummy data');
+			$flash = { type: 'error', message: m.errorOccuredDuringImport() };
+			return false;
+		}
+		$flash = { type: 'success', message: m.successfullyImportedFolder() };
+		invalidateAll();
+		return true;
+	}
+
 	function triggerVisit() {
 		const translatedSteps = steps;
 		const driverObj = driver({
@@ -185,11 +235,12 @@
 		});
 		$driverInstance = driverObj;
 		driverObj.drive();
+		return true;
 	}
 
 	onMount(() => {
 		if (displayGuidedTour) {
-			triggerVisit();
+			modalFirstLogin();
 			$firstTimeConnection = false; // This will prevent the tour from showing up again on page reload
 		}
 	});

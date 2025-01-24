@@ -1130,5 +1130,9 @@
 	"loadMissingLibrariesHelpText": "Load the missing libraries to complete the import if they are available.",
 	"yes": "Yes",
 	"no": "No",
-	"updateAvailable": "Update available"
+	"updateAvailable": "Update available",
+	"showGuidedTour": "Show guided tour",
+	"loadDummyData": "Load dummy data",
+	"firstTimeLoginModalTitle": "Welcome to CISO Assistant!",
+	"firstTimeLoginModalDescription": "This is your first time logging in. Would you like to take a guided tour to get started?"
 }
