@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages.js';
+	import { page } from '$app/stores';
 
 	// export let name: string;
 
@@ -11,6 +12,11 @@
 	export let title = '';
 	export let name = '';
 	export let data;
+
+	export let max = $page.data.settings.ebios_radar_max;
+	export let greenZoneRadius = $page.data.settings.ebios_radar_green_zone_radius;
+	export let yellowZoneRadius = $page.data.settings.ebios_radar_yellow_zone_radius;
+	export let redZoneRadius = $page.data.settings.ebios_radar_red_zone_radius;
 
 	// data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
 	// x,y, z
@@ -122,7 +128,7 @@
 			},
 			radiusAxis: {
 				type: 'value',
-				max: 6,
+				max: max,
 				inverse: true,
 				axisLabel: { show: true },
 				axisLine: {
@@ -188,50 +194,48 @@
 					}
 				},
 				{
-					name: 'Circle',
+					name: 'CircleR',
 					type: 'line',
 					coordinateSystem: 'polar',
 					itemStyle: { borderJoin: 'round' },
 					symbol: 'none',
 					data: new Array(360).fill(0).map((_, index) => {
-						return [2.5, index];
+						return [redZoneRadius, index];
 					}),
 					lineStyle: {
 						color: '#E73E51',
 						width: 5
 					},
-					// If you don't want this to show up in the legend:
 					showInLegend: false,
 					silent: true,
 					zlevel: -1
 				},
 				{
-					name: 'Circle',
+					name: 'CircleY',
 					type: 'line',
 					coordinateSystem: 'polar',
 					symbol: 'none',
 					data: new Array(360).fill(0).map((_, index) => {
-						return [0.2, index];
-					}),
-					lineStyle: {
-						color: '#00ADA8',
-						width: 5
-					},
-					// If you don't want this to show up in the legend:
-					showInLegend: false,
-					silent: true,
-					zlevel: -1
-				},
-				{
-					name: 'Circle',
-					type: 'line',
-					coordinateSystem: 'polar',
-					symbol: 'none',
-					data: new Array(360).fill(0).map((_, index) => {
-						return [0.9, index];
+						return [yellowZoneRadius, index];
 					}),
 					lineStyle: {
 						color: '#F8EA47',
+						width: 5
+					},
+					showInLegend: false,
+					silent: true,
+					zlevel: -1
+				},
+				{
+					name: 'CircleG',
+					type: 'line',
+					coordinateSystem: 'polar',
+					symbol: 'none',
+					data: new Array(360).fill(0).map((_, index) => {
+						return [greenZoneRadius, index];
+					}),
+					lineStyle: {
+						color: '#00ADA8',
 						width: 5
 					},
 					// If you don't want this to show up in the legend:
@@ -250,7 +254,7 @@
 						color: '#007FB9',
 						borderWidth: 1
 					},
-					data: [[5.999, 0]],
+					data: [[max - 0.001, 0]],
 					silent: true,
 					zlevel: -1,
 					showInLegend: false
@@ -267,7 +271,7 @@
 					},
 					data: mainAngles.flatMap((angle) => [
 						[0, angle],
-						[6, angle],
+						[max, angle],
 						[NaN, NaN]
 					])
 				}

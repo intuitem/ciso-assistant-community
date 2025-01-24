@@ -6,6 +6,7 @@
 	let _class = '';
 	export { _class as class };
 	export let label: string | undefined = undefined;
+	export let step: number = 1;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 	export let cachedValue: string | undefined;
@@ -57,6 +58,7 @@
 	<div class="control">
 		<input
 			type="number"
+			{step}
 			class="{'input ' + _class} {classesTextField($errors)}"
 			data-testid="form-input-{field.replaceAll('_', '-')}"
 			name={field}

@@ -4,6 +4,10 @@ from .models import GlobalSettings
 
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
+    "ebios_radar_max",
+    "ebios_radar_green_zone_radius",
+    "ebios_radar_yellow_zone_radius",
+    "ebios_radar_red_zone_radius",
 ]
 
 
