@@ -100,11 +100,17 @@
 				{m.edit()}
 			</Anchor>
 		</div>
-		<div class="flex justify-center items-center w-full">
+		<div class="flex justify-center items-center w-full gap-5">
 			<span class="text-sm text-gray-500"
 				>{m.referenceEntitySemiColon()}
 				<a class="anchor" href="/entities/{ebiosRmStudy.reference_entity.id}"
 					>{ebiosRmStudy.reference_entity.str}</a
+				>
+			</span>
+			<span class="text-sm text-gray-500"
+				>{m.ebiosRmMatrixHelpText()}
+				<a class="anchor" href="/risk-matrices/{ebiosRmStudy.risk_matrix.id}"
+					>{ebiosRmStudy.risk_matrix.str}</a
 				>
 			</span>
 		</div>
