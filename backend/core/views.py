@@ -2003,6 +2003,21 @@ class FolderViewSet(BaseModelViewSet):
 
         objects = get_domain_export_objects(instance)
 
+        for model in objects.keys():
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=f"view_{model}"),
+                folder=instance,
+            ):
+                logger.error(
+                    "User does not have permission to export object",
+                    user=request.user,
+                    model=model,
+                )
+                raise PermissionDenied(
+                    {"error": "userDoesNotHavePermissionToExportDomain"}
+                )
+
         logger.debug(
             "Retrieved domain objects for export",
             object_types=list(objects.keys()),
