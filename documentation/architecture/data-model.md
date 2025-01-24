@@ -1442,3 +1442,48 @@ erDiagram
 - EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
 - There is no object for "strategic scenarios", as they result directly from attack paths and corresponding feared event (which is the title of the strategic scenario).
 - the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
+
+## Domain import/export
+
+### MVP
+
+- It is possible to export a domain, and reimport it on another instance.
+- The imported domain is created as a new child domain of the global domain.
+- The name of the domain is not exported. The name of the imported domain is selected at import. It shall be unique.
+- Subdomains are not exported, only the domain itself.
+- Objects coming from a library shall be available on the target. If not, an error message is displayed to point to the missing library.
+- Objects not coming from library are created in the target domain, even if they come from an upper domain.
+- The export is a zip file containing a json dump of concerned objects and attached evidences.
+- The import is atomic, any error provokes a rollback.
+- The export function is only available in the PRO version.
+- The version of CISO Assistant is published in the export. The version at import shall be identical.
+
+### Additional features
+
+- It shall be possible to see the list of objects that would be exported, and to select/deselect some of them while keeping consistency. This should include evidences with their size.
+- It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency.  This should include evidences with their size.
+- It shall be possible to optionally export subdomains along with the domain. The import shall be flattened if the target is not a PRO version.
+
+## Asset compliance (draft)
+
+```mermaid
+erDiagram
+
+    COMPLIANCE_INDICATOR          }o--o{ ASSET                : applies_to
+    OBSERVATION                   }o--|| ASSET                : applies_to
+    OBSERVATION                   }o--|| COMPLIANCE_INDICATOR : corresponds_to
+ 
+    COMPLIANCE_INDICATOR {
+        string ref_id
+        string name
+        string description
+        json   tracker_metadata
+    }
+
+    OBSERVATION {
+        datetime when
+        json     tracked_data
+        boolean  compliance_status
+    }
+
+```
