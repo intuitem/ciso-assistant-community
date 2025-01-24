@@ -1128,5 +1128,6 @@
 	"missingLibrariesInImport": "Certaines bibliothèques sont manquantes, voir la liste ci-dessus",
 	"documentationScoreResult": "Score de documentation : ",
 	"implementationScoreResult": "Score d'implémentation : ",
-	"scoreResult": "Score : "
+	"scoreResult": "Score : ",
+	"noEvidences": "Pas de preuves"
 }
