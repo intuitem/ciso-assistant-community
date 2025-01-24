@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     libyaml-cpp-dev \
     libffi-dev \
     libglib2.0-0 \
-    libpango-1.0-0 \
+    pango-1.0 \
     libcairo2 \
     locales \
     tzdata \
