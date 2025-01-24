@@ -38,12 +38,17 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         ):
             return True
         perm = Permission.objects.get(codename=_codename)
+
         # special case of risk acceptance approval
-        if (
-            request.parser_context["request"]._request.resolver_match.url_name
-            == "risk-acceptances-accept"
-        ):
+        if request.parser_context and request.parser_context[
+            "request"
+        ]._request.resolver_match.url_name in [
+            "risk-acceptances-accept",
+            "risk-acceptances-reject",
+            "risk-acceptances-revoke",
+        ]:
             perm = Permission.objects.get(codename="approve_riskacceptance")
+
         return RoleAssignment.is_access_allowed(
             user=request.user,
             perm=perm,
