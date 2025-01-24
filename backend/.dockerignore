@@ -1,8 +1,14 @@
 *.pyc
-*.DS_Store
+**/.DS_Store
 *~$*
 .git*
 .pytest*
 .idea*
 .dockerignore
 Dockerfile
+db
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+static/
+pytest-report.html
