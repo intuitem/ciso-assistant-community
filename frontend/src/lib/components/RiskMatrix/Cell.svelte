@@ -5,8 +5,9 @@
 	export let cell;
 	export let cellData: Array<any> = [];
 	export let dataItemComponent;
+	export let useBubbles = true;
 
-	const bubbleMinCount = 3;
+	const bubbleMinCount = 1;
 	const maxBubbleSize = 4.5;
 	const bubbleSizeRanges = [
 		{ max: 3, value: 1.5 },
@@ -39,7 +40,7 @@
 	};
 </script>
 
-{#if cellData.length >= bubbleMinCount && dataItemComponent}
+{#if useBubbles && cellData.length >= bubbleMinCount && dataItemComponent}
 	<div
 		class="flex flex-wrap items-center space-x-1 justify-center h-full cursor-pointer whitespace-normal overflow-y-scroll hide-scrollbar group {classesCellText(
 			cell.level.hexcolor

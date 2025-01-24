@@ -14,6 +14,7 @@
 	const grid = parsedRiskMatrix.grid;
 	const risk = parsedRiskMatrix.risk;
 	export let showRisks = false;
+	export let useBubbles = false;
 
 	const displayedRiskMatrix = buildRiskMatrix(grid, risk);
 	export let data: Array<any> | undefined = undefined;
@@ -81,7 +82,7 @@
 			</div>
 			{#each row as cell, j}
 				{#if displayedData}
-					<Cell {cell} cellData={displayedData[i][j]} {dataItemComponent} />
+					<Cell {cell} cellData={displayedData[i][j]} {dataItemComponent} {useBubbles} />
 				{:else}
 					<Cell {cell} {dataItemComponent} />
 				{/if}
