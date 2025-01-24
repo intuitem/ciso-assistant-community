@@ -82,7 +82,13 @@
 			</div>
 			{#each row as cell, j}
 				{#if displayedData}
-					<Cell {cell} cellData={displayedData[i][j]} {dataItemComponent} {useBubbles} />
+					<Cell
+						{cell}
+						cellData={displayedData[i][j]}
+						popupTarget={'popupdata-' + i + '-' + j}
+						{dataItemComponent}
+						{useBubbles}
+					/>
 				{:else}
 					<Cell {cell} {dataItemComponent} />
 				{/if}

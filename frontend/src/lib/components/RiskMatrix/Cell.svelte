@@ -6,6 +6,7 @@
 	export let cellData: Array<any> = [];
 	export let dataItemComponent;
 	export let useBubbles = true;
+	export let popupTarget: string | undefined = undefined;
 
 	const bubbleMinCount = 1;
 	const maxBubbleSize = 4.5;
@@ -19,10 +20,10 @@
 	];
 
 	let popupClick: PopupSettings;
-	if (cellData.length) {
+	if (cellData.length && popupTarget) {
 		popupClick = {
 			event: 'click',
-			target: 'popup' + 'data' + '-' + cellData.map((e) => e.ref_id).join('-'),
+			target: popupTarget,
 			placement: 'top'
 		};
 	}
@@ -55,15 +56,13 @@
 		>
 			{cellData.length}
 		</div>
-		<div
-			class="card bg-surface-300 text-black p-4 z-20 max-h-56 overflow-y-scroll"
-			data-popup={'popup' + 'data' + '-' + cellData.map((e) => e.ref_id).join('-')}
-		>
-			{#each cellData as item}
-				<svelte:component this={dataItemComponent} data={item} />
-			{/each}
-			<!-- not displayed because of overflow-y-scroll on parent -->
-			<div class="arrow bg-surface-300" />
+		<div class="card bg-surface-300 text-black z-20" data-popup={popupTarget}>
+			<div class="max-h-56 overflow-y-scroll p-4">
+				{#each cellData as item}
+					<svelte:component this={dataItemComponent} data={item} />
+				{/each}
+				<div class="arrow bg-surface-300" />
+			</div>
 		</div>
 	</div>
 {:else}
