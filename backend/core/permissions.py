@@ -37,17 +37,15 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
             obj, "is_published", False
         ):
             return True
-        perm = Permission.objects.get(codename=_codename)
 
-        # special case of risk acceptance approval
-        if request.parser_context and request.parser_context[
-            "request"
-        ]._request.resolver_match.url_name in [
-            "risk-acceptances-accept",
-            "risk-acceptances-reject",
-            "risk-acceptances-revoke",
-        ]:
-            perm = Permission.objects.get(codename="approve_riskacceptance")
+        # Check for view action permission overrides
+        current_action = getattr(view, "action", None)
+
+        if current_action:
+            permission_overrides = getattr(view, "permission_overrides", {})
+            _codename = permission_overrides.get(current_action, _codename)
+
+        perm = Permission.objects.get(codename=_codename)
 
         return RoleAssignment.is_access_allowed(
             user=request.user,

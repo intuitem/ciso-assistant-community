@@ -1676,6 +1676,12 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     API endpoint that allows risk acceptance to be viewed or edited.
     """
 
+    permission_overrides = {
+        "accept": "approve_riskacceptance",
+        "reject": "approve_riskacceptance",
+        "revoke": "approve_riskacceptance",
+    }
+
     model = RiskAcceptance
     serializer_class = RiskAcceptanceWriteSerializer
     filterset_fields = ["folder", "state", "approver", "risk_scenarios"]
