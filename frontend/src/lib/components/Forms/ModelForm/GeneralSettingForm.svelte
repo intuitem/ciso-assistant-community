@@ -36,7 +36,8 @@
 			<NumberField
 				{form}
 				field="ebios_radar_max"
-				label={m.max()}
+				label={m.maxRadius()}
+				step={0.1}
 				cacheLock={cacheLocks['ebios_radar_max']}
 				bind:cachedValue={formDataCache['ebios_radar_max']}
 			/>
