@@ -66,15 +66,15 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "ebios_radar_yellow_zone_radius": 0.9,
             "ebios_radar_red_zone_radius": 2.5,
         }
-        
+
         settings, created = GlobalSettings.objects.get_or_create(name="general")
-        
+
         if created or not all(key in settings.value for key in default_settings):
             existing_value = settings.value or {}
             updated_value = {**default_settings, **existing_value}
             settings.value = updated_value
             settings.save()
-        
+
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
     @action(detail=True, name="Get security objective scales")
