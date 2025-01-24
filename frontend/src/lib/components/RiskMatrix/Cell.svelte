@@ -7,14 +7,14 @@
 	export let dataItemComponent;
 
 	const bubbleMinCount = 3;
+	const maxBubbleSize = 4.5;
 	const bubbleSizeRanges = [
 		{ max: 3, value: 1.5 },
 		{ max: 5, value: 2 },
 		{ max: 8, value: 2.5 },
 		{ max: 13, value: 3 },
 		{ max: 21, value: 3.5 },
-		{ max: 34, value: 4 },
-		{ max: 55, value: 4.25 }
+		{ max: 34, value: 4 }
 	];
 
 	let popupClick: PopupSettings;
@@ -32,6 +32,7 @@
 				return `width: ${range.value}rem; height: ${range.value}rem`;
 			}
 		}
+		return `width: ${maxBubbleSize}rem; height: ${maxBubbleSize}rem`;
 	};
 	$: classesCellText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
