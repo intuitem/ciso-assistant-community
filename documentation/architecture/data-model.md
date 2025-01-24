@@ -1451,8 +1451,8 @@ erDiagram
 - The imported domain is created as a new child domain of the global domain.
 - The name of the domain is not exported. The name of the imported domain is selected at import. It shall be unique.
 - Subdomains are not exported, only the domain itself.
-- Objects with an URN that are referenced shall be available on the target. If not, an error message is displayed to point to the missing library.
-- Objects without URN that are referenced in the domain are created in the target domain, even if they come from an upper domain.
+- Objects coming from a library shall be available on the target. If not, an error message is displayed to point to the missing library.
+- Objects not coming from library are created in the target domain, even if they come from an upper domain.
 - The export is a zip file containing a json dump of concerned objects and attached evidences.
 - The import is atomic, any error provokes a rollback.
 - The export function is only available in the PRO version.
