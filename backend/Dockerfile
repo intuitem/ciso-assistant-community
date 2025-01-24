@@ -9,8 +9,6 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /code
 
-COPY pyproject.toml poetry.lock ./
-
 RUN apt-get update && apt-get install -y \
     libyaml-cpp-dev \
     libffi-dev \
@@ -40,10 +38,14 @@ RUN apt-get update && apt-get install -y \
     && locale-gen cs_CZ.UTF-8 \
     && locale-gen sv_SE.UTF-8 \
     && locale-gen id_ID.UTF-8 \
-    && pip install --no-cache-dir --upgrade pip poetry==2.0.1 \
-    && poetry install --no-root \
+    && pip install --no-cache-dir --upgrade pip poetry==2.0.1
+
+COPY pyproject.toml poetry.lock ./
+
+RUN apt-get install -y poetry install --no-root \
     && rm -rf $POETRY_CACHE_DIR
 
+#watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
 EXPOSE 8000
