@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
    python3-numpy \
    libjpeg-dev \
    zlib1g-dev \
+   libmagic1 \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* \
    && locale-gen en_US.UTF-8 \
