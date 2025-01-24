@@ -21,7 +21,7 @@ from rest_framework.status import (
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
-from .models import Role, RoleAssignment
+from .models import Folder, Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
@@ -70,6 +70,9 @@ class CurrentUserView(views.APIView):
                 {"error": "You are not logged in. Please ensure you are logged in."},
                 status=HTTP_401_UNAUTHORIZED,
             )
+        accessible_domains = RoleAssignment.get_accessible_folders(
+            Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
+        )
         res_data = {
             "id": request.user.id,
             "email": request.user.email,
@@ -82,6 +85,7 @@ class CurrentUserView(views.APIView):
             "permissions": request.user.permissions,
             "is_third_party": request.user.is_third_party,
             "is_admin": request.user.is_admin(),
+            "accessible_domains": [str(f) for f in accessible_domains],
         }
         return Response(res_data, status=HTTP_200_OK)
 

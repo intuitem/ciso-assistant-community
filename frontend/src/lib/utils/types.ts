@@ -9,6 +9,12 @@ export interface User {
 	last_name: string;
 	is_active: boolean;
 	date_joined: string;
+	user_groups: Record<string, any>[];
+	roles: Record<string, any>[];
+	permissions: Record<string, any>[];
+	is_third_party: boolean;
+	is_admin: boolean;
+	accessible_domains: string[];
 }
 
 export interface GlobalSettings {
