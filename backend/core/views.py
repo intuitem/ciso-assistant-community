@@ -1733,12 +1733,12 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     def reject(self, request, pk):
         if request.user != self.get_object().approver:
             logger.error(
-                "Only the approver can reject the risk rejectance",
+                "Only the approver can reject the risk acceptance",
                 user=request.user,
                 approver=self.get_object().approver,
             )
             raise PermissionDenied(
-                {"error": "Only the approver can reject the risk rejectance"}
+                {"error": "Only the approver can reject the risk acceptance"}
             )
         self.get_object().set_state("rejected")
         return Response({"results": "state updated to rejected"})
@@ -1747,12 +1747,12 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     def revoke(self, request, pk):
         if request.user != self.get_object().approver:
             logger.error(
-                "Only the approver can revoke the risk revokeance",
+                "Only the approver can revoke the risk acceptance",
                 user=request.user,
                 approver=self.get_object().approver,
             )
             raise PermissionDenied(
-                {"error": "Only the approver can revoke the risk revokeance"}
+                {"error": "Only the approver can revoke the risk acceptance"}
             )
         self.get_object().set_state("revoked")
         return Response({"results": "state updated to revoked"})
