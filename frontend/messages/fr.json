@@ -1130,5 +1130,10 @@
 	"loadMissingLibrariesHelpText": "Charger les librairies manquantes pour compléter l'import si elles sont disponibles.",
 	"yes": "Oui",
 	"no": "Non",
-	"updateAvailable": "Mise à jour disponible"
+	"updateAvailable": "Mise à jour disponible",
+	"ebiosRadarParameters": "Paramètres du radar Ebios RM",
+	"maxRadius": "Rayon maximal",
+	"greenZoneRadius": "Rayon de la zone verte",
+	"yellowZoneRadius": "Rayon de la zone jaune",
+	"redZoneRadius": "Rayon de la zone rouge"
 }

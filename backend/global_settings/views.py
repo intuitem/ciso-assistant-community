@@ -59,11 +59,23 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
-        GlobalSettings.objects.get_or_create(
-            name="general",
-            defaults={"value": {"security_objective_scale": "1-4"}},
-        )
-        return Response(GeneralSettingsSerializer(self.get_object()).data.get("value"))
+        default_settings = {
+            "security_objective_scale": "1-4",
+            "ebios_radar_max": 6,
+            "ebios_radar_green_zone_radius": 0.2,
+            "ebios_radar_yellow_zone_radius": 0.9,
+            "ebios_radar_red_zone_radius": 2.5,
+        }
+
+        settings, created = GlobalSettings.objects.get_or_create(name="general")
+
+        if created or not all(key in settings.value for key in default_settings):
+            existing_value = settings.value or {}
+            updated_value = {**default_settings, **existing_value}
+            settings.value = updated_value
+            settings.save()
+
+        return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
@@ -73,6 +85,22 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "FIPS-199": "FIPS-199",
         }
         return Response(choices)
+
+    @action(detail=True, name="Get ebios rm radar parameters")
+    def ebios_radar_parameters(self, request):
+        ebios_rm_parameters = {
+            "ebios_radar_max": self.get_object().value.get("ebios_radar_max"),
+            "ebios_radar_green_zone_radius": self.get_object().value.get(
+                "ebios_radar_green_zone_radius"
+            ),
+            "ebios_radar_yellow_zone_radius": self.get_object().value.get(
+                "ebios_radar_yellow_zone_radius"
+            ),
+            "ebios_radar_red_zone_radius": self.get_object().value.get(
+                "ebios_radar_red_zone_radius"
+            ),
+        }
+        return Response(ebios_rm_parameters)
 
 
 @api_view(["GET"])
