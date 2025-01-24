@@ -54,8 +54,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.model['folderImportForm'],
-				model: data.model,
-				customNameDescription: true,
+				model: data.model['folderImportModel'],
 				importFolder: true,
 				formAction: '?/importFolder',
 				enctype: 'multipart/form-data',

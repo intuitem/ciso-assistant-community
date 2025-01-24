@@ -1126,6 +1126,8 @@
 	"errorOccuredDuringImport": "Une erreur s'est produite lors de l'import",
 	"successfullyImportedFolder": "Domaine importé avec succès",
 	"missingLibrariesInImport": "Certaines bibliothèques sont manquantes, voir la liste ci-dessus",
+	"loadMissingLibraries": "Charger les librairies manquantes",
+	"loadMissingLibrariesHelpText": "Charger les librairies manquantes pour compléter l'import si elles sont disponibles.",
 	"yes": "Oui",
 	"no": "Non",
 	"updateAvailable": "Mise à jour disponible"

@@ -4,7 +4,7 @@
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Checkbox from '../Checkbox.svelte';
 	import FileInput from '../FileInput.svelte';
 
 	export let form: SuperValidated<any>;
@@ -16,15 +16,20 @@
 </script>
 
 {#if importFolder}
-	<TextField
+	<FileInput
 		{form}
-		field="name"
-		label={m.name()}
-		cacheLock={cacheLocks['name']}
-		bind:cachedValue={formDataCache['name']}
-		data-focusindex="0"
+		allowPaste={true}
+		field="file"
+		label={m.file()}
+		allowedExtensions={['bak', 'zip']}
+		helpText={m.importFolderHelpText()}
 	/>
-	<FileInput {form} allowPaste={true} field="file" label={m.file()} allowedExtensions={['bak', 'zip']} />
+	<Checkbox
+		{form}
+		field="load_missing_libraries"
+		label={m.loadMissingLibraries()}
+		helpText={m.loadMissingLibrariesHelpText()}
+	/>
 {:else}
   <AutocompleteSelect
     {form}

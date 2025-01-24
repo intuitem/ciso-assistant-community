@@ -646,7 +646,6 @@ class LibraryImporter:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
-            print(reference_control)
             reference_control.import_reference_control(library_object)
 
         for risk_matrix in self._risk_matrices:

@@ -71,6 +71,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			errors: false
 		});
 		model['folderImportForm'] = folderImportForm;
+		model['folderImportModel'] = { urlModel: 'folders-import' };
 	}
 
 	return { createForm, deleteForm, model, URLModel };
@@ -100,7 +101,7 @@ export const actions: Actions = {
 
 		const { file } = formData as { file: File };
 
-		const endpoint = `${BASE_API_URL}/folders/import/`;
+		const endpoint = `${BASE_API_URL}/folders/import/${form.data.load_missing_libraries ? '?load_missing_libraries=true' : ''}`;
 
 		const response = await event.fetch(endpoint, {
 			method: 'POST',
@@ -115,8 +116,10 @@ export const actions: Actions = {
 
 		if (!response.ok && res.missing_libraries) {
 			setError(form, 'file', m.missingLibrariesInImport());
-			for (const value of res.missing_libraries) {
-				setError(form, 'non_field_errors', value);
+			for (let i = 0; i < res.missing_libraries.length; i += 2) {
+				const urn = res.missing_libraries[i];
+				const version = res.missing_libraries[i + 1];
+				setError(form, 'non_field_errors', `${urn} v${version}`);
 			}
 			return fail(400, { form });
 		}
