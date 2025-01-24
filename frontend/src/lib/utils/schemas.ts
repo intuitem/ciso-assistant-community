@@ -291,10 +291,10 @@ export const EvidenceSchema = z.object({
 
 export const GeneralSettingsSchema = z.object({
 	security_objective_scale: z.string(),
-	ebios_radar_max: z.number().default(6),
-	ebios_radar_green_zone_radius: z.number().default(0.2),
-	ebios_radar_yellow_zone_radius: z.number().default(0.9),
-	ebios_radar_red_zone_radius: z.number().default(2.5)
+	ebios_radar_max: z.number(),
+	ebios_radar_green_zone_radius: z.number(),
+	ebios_radar_yellow_zone_radius: z.number(),
+	ebios_radar_red_zone_radius: z.number()
 });
 
 export const SSOSettingsSchema = z.object({

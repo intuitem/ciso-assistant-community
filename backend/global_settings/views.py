@@ -59,19 +59,23 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
-        GlobalSettings.objects.get_or_create(
-            name="general",
-            defaults={
-                "value": {
-                    "security_objective_scale": "1-4",
-                    "ebios_radar_max": 6,
-                    "ebios_radar_green_zone_radius": 0.2,
-                    "ebios_radar_yellow_zone_radius": 0.9,
-                    "ebios_radar_red_zone_radius": 2.5,
-                }
-            },
-        )
-        return Response(GeneralSettingsSerializer(self.get_object()).data.get("value"))
+        default_settings = {
+            "security_objective_scale": "1-4",
+            "ebios_radar_max": 6,
+            "ebios_radar_green_zone_radius": 0.2,
+            "ebios_radar_yellow_zone_radius": 0.9,
+            "ebios_radar_red_zone_radius": 2.5,
+        }
+        
+        settings, created = GlobalSettings.objects.get_or_create(name="general")
+        
+        if created or not all(key in settings.value for key in default_settings):
+            existing_value = settings.value or {}
+            updated_value = {**default_settings, **existing_value}
+            settings.value = updated_value
+            settings.save()
+        
+        return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
