@@ -194,7 +194,7 @@
 					}
 				},
 				{
-					name: 'Circle',
+					name: 'CircleR',
 					type: 'line',
 					coordinateSystem: 'polar',
 					itemStyle: { borderJoin: 'round' },
@@ -206,13 +206,12 @@
 						color: '#E73E51',
 						width: 5
 					},
-					// If you don't want this to show up in the legend:
 					showInLegend: false,
 					silent: true,
 					zlevel: -1
 				},
 				{
-					name: 'Circle',
+					name: 'CircleY',
 					type: 'line',
 					coordinateSystem: 'polar',
 					symbol: 'none',
@@ -223,13 +222,12 @@
 						color: '#F8EA47',
 						width: 5
 					},
-					// If you don't want this to show up in the legend:
 					showInLegend: false,
 					silent: true,
 					zlevel: -1
 				},
 				{
-					name: 'Circle',
+					name: 'CircleG',
 					type: 'line',
 					coordinateSystem: 'polar',
 					symbol: 'none',
@@ -256,7 +254,7 @@
 						color: '#007FB9',
 						borderWidth: 1
 					},
-					data: [[5.999, 0]],
+					data: [[max - 0.001, 0]],
 					silent: true,
 					zlevel: -1,
 					showInLegend: false
@@ -273,7 +271,7 @@
 					},
 					data: mainAngles.flatMap((angle) => [
 						[0, angle],
-						[6, angle],
+						[max, angle],
 						[NaN, NaN]
 					])
 				}
