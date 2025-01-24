@@ -310,6 +310,20 @@ const OWNER_FILTER: ListViewFilterConfig = {
 	},
 	alwaysDisplay: true
 };
+
+const HAS_UPDATE_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.meta?.has_update ? 'true' : 'false'),
+	extraProps: {
+		defaultOptionName: 'updateAvailable',
+		options: ['true', 'false'],
+		optionLabels: {
+			true: 'yes',
+			false: 'no'
+		}
+	},
+	alwaysDisplay: true
+};
 /* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
   component: CheckboxFilter,
   getColumn: row => {
@@ -560,8 +574,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'is_sso'],
-		body: ['email', 'first_name', 'last_name', 'is_sso']
+		head: ['email', 'firstName', 'lastName', 'is_sso', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'is_sso', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],
@@ -631,7 +645,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		filters: {
 			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
-			objectType: LIBRARY_TYPE_FILTER
+			objectType: LIBRARY_TYPE_FILTER,
+			hasUpdate: HAS_UPDATE_FILTER
 		}
 	},
 	'sso-settings': {

@@ -175,7 +175,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 66. Guide de sécurité des données (CNIL) 🇫🇷
 67. International Traffic in Arms Regulations (ITAR) 🇺🇸
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
-69. OWASP's checklist for LLM governance and security 🌐 
+69. OWASP's checklist for LLM governance and security 🌐
+70. Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (ANSSI) 🇫🇷
 
 ### Community contributions
 

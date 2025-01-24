@@ -476,8 +476,10 @@
 						{form}
 						min_score={$page.data.compliance_assessment_score.min_score}
 						max_score={$page.data.compliance_assessment_score.max_score}
+						scores_definition={$page.data.compliance_assessment_score.scores_definition}
 						field="documentation_score"
 						label={m.documentationScore()}
+						isDoc={true}
 						disabled={!data.is_scored || data.result === 'not_applicable'}
 					/>
 				{/if}
