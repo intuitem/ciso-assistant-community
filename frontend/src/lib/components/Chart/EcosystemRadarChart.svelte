@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages.js';
+	import { page } from '$app/stores';
 
 	// export let name: string;
 
@@ -12,10 +13,10 @@
 	export let name = '';
 	export let data;
 
-	export let max = 6;
-	export let greenZoneRadius = 0.2;
-	export let yellowZoneRadius = 0.9;
-	export let redZoneRadius = 2.5;
+	export let max = $page.data.settings.ebios_radar_max;
+	export let greenZoneRadius = $page.data.settings.ebios_radar_green_zone_radius;
+	export let yellowZoneRadius = $page.data.settings.ebios_radar_yellow_zone_radius;
+	export let redZoneRadius = $page.data.settings.ebios_radar_red_zone_radius;
 
 	// data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
 	// x,y, z
