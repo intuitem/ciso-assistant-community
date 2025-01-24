@@ -1,6 +1,7 @@
 from django.db.models.query import QuerySet
 import math
 import random
+from global_settings.models import GlobalSettings
 
 
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
@@ -35,7 +36,7 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     """
     // data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
     // x,y, z
-    // x: criticité calculée avec cap à 5,5
+    // x: criticité calculée avec cap basé sur le max finalement
     // y: the angle (output of dict to make sure they end up on the right quadrant, min: 45, max:-45) -> done on BE
     // z: the size of item (exposition = dependence x penetration) based on a dict, -> done on BE
     // label: name of the 3rd party entity
@@ -46,6 +47,8 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     r_data = {"clst1": [], "clst2": [], "clst3": [], "clst4": []}
     angle_offset = {"client": 135, "partner": 225, "supplier": 45}
 
+    max_val = GlobalSettings.objects.get(name="general").value.get("ebios_radar_max", 6)
+
     for sh in qs:
         # current
         c_reliability = sh.current_maturity * sh.current_trust
@@ -54,8 +57,8 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
 
         c_criticality = (
             math.floor(sh.current_criticality * 100) / 100.0
-            if sh.current_criticality <= 5
-            else 5.25
+            if sh.current_criticality <= max_val
+            else max_val - 1 + 0.25
         )
 
         angle = angle_offset[sh.category] + (
@@ -74,8 +77,8 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
 
         r_criticality = (
             math.floor(sh.residual_criticality * 100) / 100.0
-            if sh.residual_criticality <= 5
-            else 5.25
+            if sh.residual_criticality <= max_val
+            else max_val - 1 + 0.25
         )
 
         angle = angle_offset[sh.category] + (
