@@ -109,7 +109,7 @@
 			</span>
 			<span class="text-sm text-gray-500"
 				>{m.ebiosRmMatrixHelpText()}
-				<a class="anchor" href="/entities/{ebiosRmStudy.risk_matrix.id}"
+				<a class="anchor" href="/risk-matrices/{ebiosRmStudy.risk_matrix.id}"
 					>{ebiosRmStudy.risk_matrix.str}</a
 				>
 			</span>
