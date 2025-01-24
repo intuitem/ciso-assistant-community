@@ -16,8 +16,8 @@ WORKDIR /code
 RUN apk update
 RUN apk add --no-cache bash yaml-cpp
 RUN apk add --no-cache py3-cffi libc-dev libffi-dev gcc python3-dev glib pango cairo
-RUN apk add --no-cache musl musl-utils musl-locales tzdata lang
-RUN apk add --no-cache gettext fontconfig ttf-freefont font-noto terminus-font
+RUN apk add --no-cache musl musl-utils musl-locales tzdata lang musl-dev libpng-dev
+RUN apk add --no-cache gettext fontconfig ttf-freefont font-noto terminus-font freetype-dev
 RUN apk add --no-cache file-dev gcc g++ zlib-dev make python3-dev py3-numpy jpeg-dev
 
 COPY . /code/

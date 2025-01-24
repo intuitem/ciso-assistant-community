@@ -1129,5 +1129,8 @@
 	"documentationScoreResult": "Documentation score: ",
 	"implementationScoreResult": "Implementation score: ",
 	"scoreResult": "Score: ",
-	"noEvidences": "No evidences"
+	"noEvidences": "No evidences",
+	"yes": "Yes",
+	"no": "No",
+	"updateAvailable": "Update available"
 }

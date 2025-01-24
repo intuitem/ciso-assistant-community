@@ -386,7 +386,7 @@
 							{#if !shallow}
 								<Score
 									form={superForm(requirementAssessment.scoreForm, {
-										id: requirementAssessment.id
+										id: `requirement-documentation-score-${requirementAssessment.id}`
 									})}
 									min_score={data.compliance_assessment.min_score}
 									max_score={data.compliance_assessment.max_score}
