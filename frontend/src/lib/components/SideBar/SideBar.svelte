@@ -15,7 +15,6 @@
 	export let open: boolean;
 
 	const user = $page.data?.user;
-	$firstTimeConnection = $firstTimeConnection && user.accessible_domains.length === 0;
 
 	// id is not needed, just to help us with authoring
 	// this is not great, but couldn't find a way for i18n while separating the file.
@@ -189,13 +188,19 @@
 	}
 
 	onMount(() => {
-		if ($firstTimeConnection) {
+		if (displayGuidedTour) {
 			triggerVisit();
 			$firstTimeConnection = false; // This will prevent the tour from showing up again on page reload
 		}
 	});
 
 	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
+
+	$: $firstTimeConnection = $firstTimeConnection && user.accessible_domains.length === 0;
+
+	// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
+	// Later, we will have tours for domain managers, analysts etc.
+	$: displayGuidedTour = $firstTimeConnection && user.is_admin;
 </script>
 
 <aside
