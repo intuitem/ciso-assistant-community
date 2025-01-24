@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY pyproject.toml poetry.lock ./
 
-RUN apt-get install -y poetry install --no-root \
+RUN poetry install --no-root \
     && rm -rf $POETRY_CACHE_DIR
 
 #watch out for local files during dev and maintenance of .dockerignore
