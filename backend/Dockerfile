@@ -1,35 +1,36 @@
-# syntax=docker/dockerfile:1
-# Based on https://docs.docker.com/samples/django/
+FROM python:3.12-slim-bookworm
 
-FROM python:3.12-alpine
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-
-ENV POETRY_NO_INTERACTION=1 \
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 WORKDIR /code
 
-# Configure locales
-RUN apk update
-RUN apk add --no-cache bash yaml-cpp
-RUN apk add --no-cache py3-cffi libc-dev libffi-dev gcc python3-dev glib pango cairo
-RUN apk add --no-cache musl musl-utils musl-locales tzdata lang musl-dev libpng-dev
-RUN apk add --no-cache gettext fontconfig ttf-freefont font-noto terminus-font freetype-dev
-RUN apk add --no-cache file-dev gcc g++ zlib-dev make python3-dev py3-numpy jpeg-dev
+COPY pyproject.toml poetry.lock ./
 
-COPY . /code/
-COPY pyproject.toml /code/
-COPY poetry.lock /code/
-COPY startup.sh /code/
+RUN apt-get update && apt-get install -y \
+    libyaml-cpp-dev \
+    libffi-dev \
+    libglib2.0-0 \
+    libpango-1.0-0 \
+    libcairo2 \
+    locales \
+    tzdata \
+    gettext \
+    fontconfig \
+    fonts-freefont-ttf \
+    zlib1g-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && locale-gen en_US.UTF-8 \
+    && pip install --no-cache-dir --upgrade pip poetry==2.0.1 \
+    && poetry install --no-root \
+    && rm -rf $POETRY_CACHE_DIR
 
-RUN pip install --upgrade pip && \
-    pip install poetry==2.0.1
-RUN poetry install
-RUN rm -rf $POETRY_CACHE_DIR
+COPY . .
 
-
-ENTRYPOINT ["poetry", "run",  "bash", "startup.sh"]
 EXPOSE 8000
+ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
