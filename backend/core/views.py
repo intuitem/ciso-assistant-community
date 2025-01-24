@@ -70,6 +70,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied
 
 
 from weasyprint import HTML
@@ -1710,20 +1711,44 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], name="Accept risk acceptance")
     def accept(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("accepted")
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can accept the risk acceptance",
+                user=request.user,
+                approver=self.get_object().approver,
+            )
+            raise PermissionDenied(
+                {"error": "Only the approver can accept the risk acceptance"}
+            )
+        self.get_object().set_state("accepted")
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
     def reject(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("rejected")
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can reject the risk rejectance",
+                user=request.user,
+                approver=self.get_object().approver,
+            )
+            raise PermissionDenied(
+                {"error": "Only the approver can reject the risk rejectance"}
+            )
+        self.get_object().set_state("rejected")
         return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
     def revoke(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("revoked")
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can revoke the risk revokeance",
+                user=request.user,
+                approver=self.get_object().approver,
+            )
+            raise PermissionDenied(
+                {"error": "Only the approver can revoke the risk revokeance"}
+            )
+        self.get_object().set_state("revoked")
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
