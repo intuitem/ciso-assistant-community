@@ -2084,7 +2084,11 @@ class FolderViewSet(BaseModelViewSet):
         """Handle file upload and initiate import process."""
 
         try:
-            if "add_folder" not in request.user.permissions:
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="add_folder"),
+                folder=Folder.get_root_folder(),
+            ):
                 raise PermissionDenied()
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
@@ -2219,7 +2223,13 @@ class FolderViewSet(BaseModelViewSet):
             # check that user has permission to create all objects to import
             error_dict = {}
             for model in models_map.values():
-                if f"add_{model._meta.model_name}" not in user.permissions:
+                if not RoleAssignment.is_access_allowed(
+                    user=user,
+                    perm=Permission.objects.get(
+                        codename=f"add_{model._meta.model_name}"
+                    ),
+                    folder=Folder.get_root_folder(),
+                ):
                     error_dict[model._meta.model_name] = "permission_denied"
             if error_dict:
                 raise PermissionDenied()
