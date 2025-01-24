@@ -2292,12 +2292,12 @@ class FolderViewSet(BaseModelViewSet):
                 ).exists():
                     if (
                         StoredLibrary.objects.filter(
-                            urn=library["urn"], version=library["version"]
+                            urn=library["urn"], version__gte=library["version"]
                         ).exists()
                         and load_missing_libraries
                     ):
                         StoredLibrary.objects.get(
-                            urn=library["urn"], version=library["version"]
+                            urn=library["urn"], version__gte=library["version"]
                         ).load()
                     else:
                         missing_libraries.append(library)
