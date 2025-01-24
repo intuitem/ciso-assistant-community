@@ -58,7 +58,7 @@
 	<div class="control">
 		<input
 			type="number"
-			step={step}
+			{step}
 			class="{'input ' + _class} {classesTextField($errors)}"
 			data-testid="form-input-{field.replaceAll('_', '-')}"
 			name={field}
