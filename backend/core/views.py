@@ -2161,6 +2161,30 @@ class FolderViewSet(BaseModelViewSet):
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import-dummy",
+    )
+    def import_dummy_domain(self, request):
+        domain_name = f"Dummy Domain {timezone.now()}"
+
+        try:
+            dummy_fixture_path = (
+                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
+            )
+            parsed_data = self._process_uploaded_file(dummy_fixture_path)
+            result = self._import_objects(
+                parsed_data, domain_name, load_missing_libraries=True
+            )
+            return Response(result, status=status.HTTP_200_OK)
+
+        except json.JSONDecodeError as e:
+            logger.error("Invalid JSON format in uploaded file", exc_info=e)
+            return Response(
+                {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
+            )
+
     def _process_uploaded_file(self, dump_file: str | Path) -> Any:
         """Process the uploaded file and return parsed data."""
         if not zipfile.is_zipfile(dump_file):
