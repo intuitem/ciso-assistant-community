@@ -47,6 +47,8 @@
 				{form}
 				field="ebios_radar_green_zone_radius"
 				label={m.greenZoneRadius()}
+				min={0.1}
+				max={16}
 				step={0.1}
 				cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
 				bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
@@ -55,6 +57,8 @@
 				{form}
 				field="ebios_radar_yellow_zone_radius"
 				label={m.yellowZoneRadius()}
+				min={0.5}
+				max={16}
 				step={0.1}
 				cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
 				bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
@@ -63,6 +67,8 @@
 				{form}
 				field="ebios_radar_red_zone_radius"
 				label={m.redZoneRadius()}
+				min={1}
+				max={16}
 				step={0.1}
 				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
 				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
