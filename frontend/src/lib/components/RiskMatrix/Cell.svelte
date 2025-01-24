@@ -6,7 +6,7 @@
 	export let cellData: Array<any> = [];
 	export let dataItemComponent;
 
-	const bubbleMinCount = 2;
+	const bubbleMinCount = 3;
 	const bubbleSizeRanges = [
 		{ max: 3, value: 1.5 },
 		{ max: 5, value: 2 },
@@ -66,13 +66,13 @@
 	</div>
 {:else}
 	<div
-		class="flex flex-wrap items-center space-x-1 justify-center h-full [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar {classesCellText(
+		class="flex flex-wrap flex-col items-center justify-center h-full [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar {classesCellText(
 			cell.level.hexcolor
 		)}"
 		style="background-color: {cell.level.hexcolor};"
 		data-testid="cell"
 	>
-		{#if cellData.length}
+		{#if dataItemComponent}
 			{#each cellData as item}
 				<svelte:component this={dataItemComponent} data={item} />
 			{/each}
