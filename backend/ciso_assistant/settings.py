@@ -110,7 +110,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
-MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False")
+MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
