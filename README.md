@@ -410,9 +410,8 @@ ln -fs ../../git_hooks/post-merge .
 
 11. for Huey (tasks runner)
 
-- run redis as a broker `docker run -d -p 6379:6379 redis:alpine`. This should make it available on localhost.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
-
+- you can use `MAIL_DEBUG` to have mail on the console for easier debug
 
 ### Running the frontend
 

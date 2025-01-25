@@ -417,16 +417,11 @@ if MAIL_DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
 
-# for dev: docker run -d -p 6379:6379 valkey/valkey:alpine
-# There are reference to redis but we're using valkey which is a drop-in replacement
 ## Huey settings
 HUEY = {
-    # "huey_class": "huey.FileHuey",
     "huey_class": "huey.SqliteHuey",
     "name": "ciso_assistant",
     "filename": BASE_DIR / "db" / "huey.db",
     "results": True,  # would be interesting for debug
-    "immediate": False,  # True for local dev, set to False to run in "live" regardless of DEBUG
-    # "path": BASE_DIR / "db" / "huey-tasks",
-    # "url": os.environ.get("REDIS_URL", "redis://localhost:6379/?db=1"),
+    "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
 }

@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.core.mail import send_mail
 from django.conf import settings
 
-# basic placeholders from the official doc
+# official doc
 # https://huey.readthedocs.io/en/latest/django.html
 
 
@@ -33,6 +33,7 @@ def check_controls_with_expired_eta():
 
 @task()
 def send_notification_email(owner_email, controls):
+    # TODO: check that the mailer is properly set and log an error otherwise
     subject = f"CISO Assistant: You have {len(controls)} expired control(s)"
     message = "Hello,\n\nThe following controls have expired:\n\n"
     for control in controls:
