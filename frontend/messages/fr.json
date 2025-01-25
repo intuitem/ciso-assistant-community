@@ -1111,7 +1111,7 @@
 	"tourRiskAssessmentTitle": "Évaluation des Risques",
 	"tourRiskAssessmentDescription": "Groupez et gérez vos analyses à travers des évaluations des risques.",
 	"tourAnalyticsTitle": "Analyses",
-	"tourAnalyticsDescription": "La section aperçu couvre vos principaux tableaux de bord et analyses.",
+	"tourAnalyticsDescription": "La section aperçu couvre vos principaux tableaux de bord et analyses. <br/><b>Cliquez dessus</b>.",
 	"tourAnalyticsViewDescription": "Consultez ici les analyses et rapports agrégés.",
 	"tourAssignmentsDescription": "ou suivez ici vos tâches et assignations individuelles.",
 	"tourHelpFinalTitle": "Aide & Visite",
