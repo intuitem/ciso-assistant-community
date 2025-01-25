@@ -15,7 +15,8 @@ logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
 
 
-@db_periodic_task(crontab(minute=str(random.randint(0, 59)), hour="21"))
+# @db_periodic_task(crontab(minute='*/1')) for testing
+@db_periodic_task(crontab(hour="6"))
 def check_controls_with_expired_eta():
     expired_controls = (
         AppliedControl.objects.exclude(status="active")
