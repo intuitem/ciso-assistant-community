@@ -34,10 +34,12 @@ def check_controls_with_expired_eta():
 @task()
 def send_notification_email(owner_email, controls):
     subject = f"CISO Assistant: You have {len(controls)} expired control(s)"
-    message = "The following controls have expired:\n\n"
+    message = "Hello,\n\nThe following controls have expired:\n\n"
     for control in controls:
         message += f"- {control.name} (ETA: {control.eta})\n"
     message += "\nThis reminder will stop once the control is marked as active or you update the ETA.\n"
+    message += "Log in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
+    message += "Thank you."
     # think templating and i18n
     send_mail(
         subject=subject,
