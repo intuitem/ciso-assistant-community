@@ -7,43 +7,35 @@ from django.db.models import Q
 
 # basic placeholders from the official doc
 # https://huey.readthedocs.io/en/latest/django.html
-#
-@task()
-def count_beans(number):
-    print("-- counted %s beans --" % number)
-    return "Counted %s beans" % number
 
 
-@task()
-def send_email():
-    print("sending an email")
-    return "email sent"
-
-
-@periodic_task(crontab(minute="*/1"))
-def every_min():
-    print("Every five minutes this will be printed by the consumer")
-
-
-@db_task()
-def do_some_queries():
-    # This task executes queries. Once the task finishes, the connection
-    # will be closed.
-    pass
-
-
-@db_periodic_task(crontab(minute="*/5"))
-def every_five_mins_db():
-    print("Every five minutes this will be printed by the consumer")
-
-
-# unrralistic, just for testing
 @db_periodic_task(crontab(minute="*/1"))
 def check_controls_with_expired_eta():
-    expired_eta_controls = AppliedControl.objects.exclude(status="active").filter(
-        eta__lt=date.today(), eta__isnull=False
+    expired_controls = (
+        AppliedControl.objects.exclude(status="active")
+        .filter(eta__lt=date.today(), eta__isnull=False)
+        .prefetch_related("owner")
     )
-    print(f"Found {expired_eta_controls.count()} expired controls")
-    for ac in expired_eta_controls:
-        print(":: ", ac.name)
-    send_email()
+
+    # Group by individual owner
+    owner_controls = {}
+    for control in expired_controls:
+        for owner in control.owner.all():
+            if owner.email not in owner_controls:
+                owner_controls[owner.email] = []
+            owner_controls[owner.email].append(control)
+
+    # Send personalized email to each owner
+    for owner_email, controls in owner_controls.items():
+        send_notification_email(owner_email, controls)
+
+
+@task()
+def send_notification_email(owner_email, controls):
+    subject = f"You have {len(controls)} expired controls"
+    message = "The following controls have expired:\n\n"
+    for control in controls:
+        message += f"- {control.name} (ETA: {control.eta})\n"
+
+    print(f"Sending email to {owner_email}")
+    print(message)
