@@ -156,7 +156,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
-    # "huey.contrib.djhuey",
+    "huey.contrib.djhuey",
 ]
 
 MIDDLEWARE = [
@@ -378,16 +378,6 @@ SPECTACULAR_SETTINGS = {
     # OTHER SETTINGS
 }
 
-# HUEY = {
-#    "huey_class": "huey.SqliteHuey",  # Huey implementation to use.
-#    "name": "huey-ciso-assistant",  # Use db name for huey.
-#    "results": True,  # Store return values of tasks.
-#    "store_none": False,  # If a task returns None, do not save to results.
-#    "immediate": DEBUG,  # If DEBUG=True, run synchronously.
-#    "utc": True,  # Use UTC for all times internally.
-#    "filename": "db/huey.sqlite3",
-# }
-
 # SSO with allauth
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -420,4 +410,14 @@ SOCIALACCOUNT_PROVIDERS = {
         "EMAIL_AUTHENTICATION": True,
         "VERIFIED_EMAIL": True,
     },
+}
+
+# for dev: docker run -d -p 6379:6379 redis:alpine
+## Huey settings
+HUEY = {
+    "huey_class": "huey.RedisHuey",
+    "name": "ciso_assistant",
+    "results": True,
+    "immediate": False,  # True for local dev, set to False to run in "live" regardless of DEBUG
+    "url": os.environ.get("REDIS_URL", "redis://localhost:6379/?db=1"),
 }

@@ -171,7 +171,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
 63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
 64. NIS2 technical and methodological requirements 2024/2690 🇪🇺
-65. Saudi Arabian Monetary Authority (SAMA) Cybersecurity Framework 🇸🇦 
+65. Saudi Arabian Monetary Authority (SAMA) Cybersecurity Framework 🇸🇦
 66. Guide de sécurité des données (CNIL) 🇫🇷
 67. International Traffic in Arms Regulations (ITAR) 🇺🇸
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
@@ -282,6 +282,7 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 - npm 10.2+
 - pnpm 9.0+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
+- redis 5+
 
 ### Running the backend
 
@@ -406,6 +407,12 @@ cd .git/hooks
 ln -fs ../../git_hooks/post-commit .
 ln -fs ../../git_hooks/post-merge .
 ```
+
+11. for Huey (tasks runner)
+
+- run redis as a broker `docker run -d -p 6379:6379 redis:alpine`. This should make it available on localhost.
+- run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
+
 
 ### Running the frontend
 
@@ -551,6 +558,6 @@ See [LICENSE.md](./LICENSE.md) for details. For more details about the commercia
 
 Unless otherwise noted, all files are © intuitem.
 
-## Activity 
+## Activity
 
 ![Alt](https://repobeats.axiom.co/api/embed/83162c6044da29efd7efa28f746b6bee5a3c6a8a.svg "Repobeats analytics image")
