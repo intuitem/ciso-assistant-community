@@ -110,6 +110,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False")
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
@@ -412,9 +413,9 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
-if DEBUG:
+if MAIL_DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    DEFAULT_FROM_EMAIL = "noreply@example.com"
+    DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
 
 # for dev: docker run -d -p 6379:6379 valkey/valkey:alpine
 # There are reference to redis but we're using valkey which is a drop-in replacement
