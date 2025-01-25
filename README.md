@@ -282,7 +282,6 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 - npm 10.2+
 - pnpm 9.0+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
-- redis 5+
 
 ### Running the backend
 
@@ -410,6 +409,7 @@ ln -fs ../../git_hooks/post-merge .
 
 11. for Huey (tasks runner)
 
+- prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
 - you can use `MAIL_DEBUG` to have mail on the console for easier debug
 
