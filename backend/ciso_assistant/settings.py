@@ -421,10 +421,11 @@ if DEBUG:
 ## Huey settings
 HUEY = {
     # "huey_class": "huey.FileHuey",
-    "huey_class": "huey.RedisHuey",
+    "huey_class": "huey.SqliteHuey",
     "name": "ciso_assistant",
-    "results": False,  # would be interesting for debug
+    "filename": BASE_DIR / "db" / "huey.db",
+    "results": True,  # would be interesting for debug
     "immediate": False,  # True for local dev, set to False to run in "live" regardless of DEBUG
     # "path": BASE_DIR / "db" / "huey-tasks",
-    "url": os.environ.get("REDIS_URL", "redis://localhost:6379/?db=1"),
+    # "url": os.environ.get("REDIS_URL", "redis://localhost:6379/?db=1"),
 }
