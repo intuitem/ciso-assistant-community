@@ -415,9 +415,11 @@ SOCIALACCOUNT_PROVIDERS = {
 # for dev: docker run -d -p 6379:6379 redis:alpine
 ## Huey settings
 HUEY = {
-    "huey_class": "huey.RedisHuey",
+    "huey_class": "huey.FileHuey",
+    # "huey_class": "huey.RedisHuey",
     "name": "ciso_assistant",
     "results": True,
     "immediate": False,  # True for local dev, set to False to run in "live" regardless of DEBUG
-    "url": os.environ.get("REDIS_URL", "redis://localhost:6379/?db=1"),
+    "path": BASE_DIR / "db" / "huey-tasks",
+    # "url": os.environ.get("REDIS_URL", "redis://localhost:6379/?db=1"),
 }
