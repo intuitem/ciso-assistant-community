@@ -412,6 +412,10 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = "noreply@example.com"
+
 # for dev: docker run -d -p 6379:6379 redis:alpine
 ## Huey settings
 HUEY = {
