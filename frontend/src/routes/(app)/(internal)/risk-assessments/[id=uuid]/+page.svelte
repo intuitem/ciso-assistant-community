@@ -21,6 +21,7 @@
 
 	export let data;
 	const showRisks = true;
+	const useBubbles = true;
 	const risk_assessment = data.risk_assessment;
 
 	const modalStore: ModalStore = getModalStore();
@@ -267,6 +268,7 @@
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
+					{useBubbles}
 				/>
 			</div>
 			<div class="flex-1">
@@ -277,6 +279,7 @@
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
+					{useBubbles}
 				/>
 			</div>
 		</div>

@@ -11,7 +11,7 @@ Conventions:
     The first tab shall be named "library_content" and contain the description of the library in the other tabs
         library_urn                     | <urn>
         library_version                 | <version>
-        library_publication_date        | <date>
+        library_publication_date        | <date>   (default value: now)
         library_locale                  | <en/fr/...>
         library_ref_id                  | <ref_id>
         library_name                    | <name>
@@ -112,7 +112,7 @@ import re
 import yaml
 from pprint import pprint
 from collections import defaultdict
-
+import datetime
 
 LIBRARY_VARS = (
     "library_urn",
@@ -160,7 +160,7 @@ parser = argparse.ArgumentParser(
     description="convert an Excel file in a library for CISO Assistant",
 )
 parser.add_argument("input_file_name")
-parser.add_argument("--compat", action='store_true')
+parser.add_argument("--compat", action="store_true")
 args = parser.parse_args()
 
 ref_name = re.sub(r"\.\w+$", "", args.input_file_name).lower()
@@ -477,21 +477,21 @@ for tab in dataframe:
                     )
                     if skip_count:
                         counter_fix += 1
-                        ref_id_urn = f"node{counter-counter_fix}-{counter_fix}"
+                        ref_id_urn = f"node{counter - counter_fix}-{counter_fix}"
                     else:
                         ref_id_urn = (
                             ref_id.lower().replace(" ", "-")
                             if ref_id
-                            else f"node{counter-counter_fix}"
+                            else f"node{counter - counter_fix}"
                         )
                     urn = f"{root_nodes_urn}:{ref_id_urn}"
                 else:
                     if ref_id:
-                        urn = f"{root_nodes_urn}:{ref_id.lower().replace(' ', '-')}" 
+                        urn = f"{root_nodes_urn}:{ref_id.lower().replace(' ', '-')}"
                     else:
                         p = parent_for_depth[depth]
                         c = count_for_depth[depth]
-                        urn =f"{p}:{c}"
+                        urn = f"{p}:{c}"
                         count_for_depth[depth] += 1
                 if urn in urn_unicity_checker:
                     print("URN duplicate:", urn)
@@ -679,7 +679,11 @@ for tab in dataframe:
                 score = row[header["score"]].value
                 name = row[header["name"]].value
                 description = row[header["description"]].value
-                description_doc = row[header["description_doc"]].value if "description_doc" in header else None
+                description_doc = (
+                    row[header["description_doc"]].value
+                    if "description_doc" in header
+                    else None
+                )
                 translations = get_translations(header, row)
                 current_score = {
                     "score": score,
@@ -837,6 +841,9 @@ has_mappings = "mappings" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
 ]
 
+lib_date = library_vars.get("library_publication_date", datetime.datetime.now())
+if type(lib_date) == datetime.datetime:
+    lib_date = lib_date.date()
 library = {
     "urn": library_vars["library_urn"],
     "locale": library_vars["library_locale"],
@@ -845,7 +852,7 @@ library = {
     "description": library_vars["library_description"],
     "copyright": library_vars["library_copyright"],
     "version": library_vars["library_version"],
-    "publication_date": library_vars["library_publication_date"].date(),
+    "publication_date": lib_date,
     "provider": library_vars["library_provider"],
     "packager": library_vars["library_packager"],
 }

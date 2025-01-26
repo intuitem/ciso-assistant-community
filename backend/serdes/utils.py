@@ -522,6 +522,15 @@ def get_domain_export_objects(domain: Folder):
         | Q(reference_controls__in=reference_controls)
         | Q(risk_matrices__in=risk_matrices)
         | Q(frameworks__in=frameworks)
+        | Q(
+            pk__in=LoadedLibrary.objects.filter(
+                Q(folder__in=folders)
+                | Q(threats__in=threats)
+                | Q(reference_controls__in=reference_controls)
+                | Q(risk_matrices__in=risk_matrices)
+                | Q(frameworks__in=frameworks)
+            ).values_list("dependencies", flat=True)
+        )
     ).distinct()
 
     return {
