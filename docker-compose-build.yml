@@ -30,7 +30,7 @@ services:
       - /bin/sh
       - -c
       - |
-        poetry run python manage.py run_huey -w 2 -k process --scheduler-interval 60
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
 
   frontend:
     container_name: frontend
