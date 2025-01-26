@@ -547,7 +547,7 @@ def gen_audit_context(id, doc, tree, lang):
     res_donut = InlineImage(doc, plot_donut(donut_data), width=Cm(15))
     chart_spider = InlineImage(doc, spider_chart_buffer, width=Cm(15))
     ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
-    IGs = ", ".join(audit.get_selected_implementation_groups())
+    IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
         "audit": audit,
         "date": now().strftime("%d/%m/%Y"),
