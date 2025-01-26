@@ -17,6 +17,7 @@ Based on the established documentation around [Conventional Commits](https://www
   - `feat`: New features
   - `chore`: Maintenance tasks or changes that don't affect production code
   - `refactor`: Code changes that neither fix bugs nor add features
+  - `perf`: special refactor commits, that improve performance
   - `docs`: Documentation updates or improvements
   - `test`: Adding or updating tests
   - `ci`: Changes to the CI configuration or scripts
