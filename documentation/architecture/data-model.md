@@ -10,6 +10,7 @@ erDiagram
     USER }o--o{ RISK_SCENARIO  : owns
     USER }o--o{ APPLIED_CONTROL: owns
     USER }o--o{ ASSET          : owns
+    USER }o--o{ EXCEPTION      : owns
 
     USER_GROUP      ||--o{ USER      : contains
     ROLE            }o--|{ PERMISSION: contains
@@ -143,6 +144,11 @@ erDiagram
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
     PERIMETER                    |o--o{ RISK_ASSESSMENT       : contains
+    EXCEPTION                    }o--o{ VULNERABILITY         : concerns
+    EXCEPTION                    }o--o{ REQUIREMENT_ASSESSMENT: concerns
+    EXCEPTION                    }o--o{ ASSET                 : concerns
+    EXCEPTION                    }o--o{ RISK_SCENARIO         : concerns
+    EXCEPTION                    }o--o{ APPLIED_CONTROL       : concerns
 
     FRAMEWORK {
         string  urn
@@ -267,6 +273,14 @@ erDiagram
         string  status
         int     severity
         json    references
+    }
+
+    EXCEPTION {
+        string  ref_id
+        string  name
+        string  description
+        string  status
+        int     severity
     }
 
 
@@ -784,6 +798,20 @@ The state of a risk acceptance can be: created/submitted/accepted/rejected/revok
 The justification field can be edited only by the approver.
 
 Once a risk acceptance is active, the correponding risk assessments are frozen. They shall be cloned to make evolutions.
+
+## Exceptions
+
+Exceptions are used to trace assumed non-compliances, whether for assets, requirement assessments, risk scenarios, applied controls, vulnerabilities, or even something not linked to an existing object.
+
+Exceptions can have zero, one or several owners.
+
+Exceptions also have the following fields:
+- ref_id (defaults to empty string)
+- name
+- description
+- severity within values --/low/medium/high/critical (coded as an integer from -1 to 3)
+- status within values --/active/mitigated/resolved/deprecated
+
 
 ## Libraries
 
@@ -1464,26 +1492,4 @@ erDiagram
 - It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency.  This should include evidences with their size.
 - It shall be possible to optionally export subdomains along with the domain. The import shall be flattened if the target is not a PRO version.
 
-## Asset compliance (draft)
 
-```mermaid
-erDiagram
-
-    COMPLIANCE_INDICATOR          }o--o{ ASSET                : applies_to
-    OBSERVATION                   }o--|| ASSET                : applies_to
-    OBSERVATION                   }o--|| COMPLIANCE_INDICATOR : corresponds_to
- 
-    COMPLIANCE_INDICATOR {
-        string ref_id
-        string name
-        string description
-        json   tracker_metadata
-    }
-
-    OBSERVATION {
-        datetime when
-        json     tracked_data
-        boolean  compliance_status
-    }
-
-```
