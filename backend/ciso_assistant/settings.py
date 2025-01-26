@@ -346,6 +346,7 @@ if "POSTGRES_NAME" in os.environ:
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],
             "HOST": os.environ["DB_HOST"],
             "PORT": os.environ.get("DB_PORT", "5432"),
+            "CONN_MAX_AGE": os.environ.get("CONN_MAX_AGE", 300),
         }
     }
 else:
