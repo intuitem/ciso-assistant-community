@@ -144,10 +144,12 @@
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
 					<strong>{m.dependencies()}</strong>:
-					{#each data.library.dependencies as dependency}
-						<li>{dependency.name}</li>
-					{/each}
 				</p>
+				<ul class="list-disc list-inside">
+				{#each data.library.dependencies as dependency}
+					<li>{dependency.name}</li>
+				{/each}
+				</ul>
 			{/if}
 			{#if data.library.copyright}
 				<p class="text-md leading-5 text-gray-700"><strong>{m.copyright()}</strong>: {data.library.copyright}</p>
