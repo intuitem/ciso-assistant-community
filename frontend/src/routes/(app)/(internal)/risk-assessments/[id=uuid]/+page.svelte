@@ -21,7 +21,7 @@
 
 	export let data;
 	const showRisks = true;
-	const useBubbles = true;
+	const useBubbles = data.useBubbles;
 	const risk_assessment = data.risk_assessment;
 
 	const modalStore: ModalStore = getModalStore();

@@ -65,6 +65,8 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "ebios_radar_green_zone_radius": 0.2,
             "ebios_radar_yellow_zone_radius": 0.9,
             "ebios_radar_red_zone_radius": 2.5,
+            "notifications_enable_mailing": False,
+            "interface_agg_scenario_matrix": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
@@ -101,6 +103,24 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             ),
         }
         return Response(ebios_rm_parameters)
+
+    @action(detail=True, name="Get notifications settings")
+    def notifications_settings(self, request):
+        notifications_settings = {
+            "notifications_enable_mailing": self.get_object().value.get(
+                "notifications_enable_mailing"
+            ),
+        }
+        return Response(notifications_settings)
+
+    @action(detail=True, name="Get interface settings")
+    def interface_settings(self, request):
+        interface_settings = {
+            "interface_agg_scenario_matrix": self.get_object().value.get(
+                "interface_agg_scenario_matrix"
+            ),
+        }
+        return Response(interface_settings)
 
 
 @api_view(["GET"])

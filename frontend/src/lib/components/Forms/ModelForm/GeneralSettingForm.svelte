@@ -5,7 +5,7 @@
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	export let form: SuperForm<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
@@ -14,7 +14,36 @@
 
 <Accordion regionControl="font-bold">
 	<AccordionItem open>
-		<svelte:fragment slot="summary"><i class="fa-solid fa-gem mr-2"></i>{m.asset()}</svelte:fragment
+		<svelte:fragment slot="summary"
+			><i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}</svelte:fragment
+		>
+		<svelte:fragment slot="content">
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="notifications_enable_mailing"
+					label={m.settingsNotificationsMail()}
+				/>
+			</div>
+		</svelte:fragment>
+	</AccordionItem>
+	<AccordionItem open>
+		<svelte:fragment slot="summary">
+			<i class="fa-solid fa-asterisk mr-2" />{m.settingsInterface()}
+		</svelte:fragment>
+		<svelte:fragment slot="content">
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="interface_agg_scenario_matrix"
+					label={m.settingsAggregateMatrix()}
+				/>
+			</div>
+		</svelte:fragment>
+	</AccordionItem>
+	<AccordionItem>
+		<svelte:fragment slot="summary"
+			><i class="fa-solid fa-gem mr-2"></i>{m.assets()}</svelte:fragment
 		>
 		<svelte:fragment slot="content">
 			<Select
@@ -28,7 +57,7 @@
 			/>
 		</svelte:fragment>
 	</AccordionItem>
-	<AccordionItem open>
+	<AccordionItem>
 		<svelte:fragment slot="summary"
 			><i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}</svelte:fragment
 		>
