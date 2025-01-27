@@ -297,7 +297,8 @@ export const GeneralSettingsSchema = z.object({
 	ebios_radar_max: z.number(),
 	ebios_radar_green_zone_radius: z.number(),
 	ebios_radar_yellow_zone_radius: z.number(),
-	ebios_radar_red_zone_radius: z.number()
+	ebios_radar_red_zone_radius: z.number(),
+	notifications_enable_mailing: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

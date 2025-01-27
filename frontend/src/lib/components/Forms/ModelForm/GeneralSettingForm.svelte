@@ -5,7 +5,7 @@
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	export let form: SuperForm<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
@@ -13,7 +13,7 @@
 </script>
 
 <Accordion regionControl="font-bold">
-	<AccordionItem open>
+	<AccordionItem>
 		<svelte:fragment slot="summary"><i class="fa-solid fa-gem mr-2"></i>{m.asset()}</svelte:fragment
 		>
 		<svelte:fragment slot="content">
@@ -28,7 +28,7 @@
 			/>
 		</svelte:fragment>
 	</AccordionItem>
-	<AccordionItem open>
+	<AccordionItem>
 		<svelte:fragment slot="summary"
 			><i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}</svelte:fragment
 		>
@@ -73,6 +73,14 @@
 				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
 				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
 			/>
+		</svelte:fragment>
+	</AccordionItem>
+	<AccordionItem open>
+		<svelte:fragment slot="summary"
+			><i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}</svelte:fragment
+		>
+		<svelte:fragment slot="content">
+			<Checkbox {form} field="notifications_enable_mailing" label={m.settingsNotificationsMail()} />
 		</svelte:fragment>
 	</AccordionItem>
 </Accordion>

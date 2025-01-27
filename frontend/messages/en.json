@@ -606,6 +606,8 @@
 	"secret": "Secret",
 	"key": "Key",
 	"settings": "Settings",
+	"settingsNotifications": "Notifications settings",
+	"settingsNotificationsMail": "Enable mail notifications",
 	"identityProvider": "Identity provider",
 	"identityProviders": "Identity providers",
 	"clientIDHelpText": "App ID, or consumer key",
