@@ -129,10 +129,18 @@
 			</div>
 		</span>
 		<div class="space-y-1">
-			<p class="text-md leading-5 text-gray-700"><strong>{m.description()}</strong>: {data.library.description}</p>
-			<p class="text-md leading-5 text-gray-700"><strong>{m.provider()}</strong>: {data.library.provider}</p>
-			<p class="text-md leading-5 text-gray-700"><strong>{m.packager()}</strong>: {data.library.packager}</p>
-			<p class="text-md leading-5 text-gray-700"><strong>{m.version()}</strong>: {data.library.version}</p>
+			<p class="text-md leading-5 text-gray-700">
+				<strong>{m.description()}</strong>: {data.library.description}
+			</p>
+			<p class="text-md leading-5 text-gray-700">
+				<strong>{m.provider()}</strong>: {data.library.provider}
+			</p>
+			<p class="text-md leading-5 text-gray-700">
+				<strong>{m.packager()}</strong>: {data.library.packager}
+			</p>
+			<p class="text-md leading-5 text-gray-700">
+				<strong>{m.version()}</strong>: {data.library.version}
+			</p>
 			{#if data.library.publication_date}
 				<p class="text-md leading-5 text-gray-700">
 					<strong>{m.publicationDate()}</strong>: {formatDateOrDateTime(
@@ -146,13 +154,15 @@
 					<strong>{m.dependencies()}</strong>:
 				</p>
 				<ul class="list-disc list-inside">
-				{#each data.library.dependencies as dependency}
-					<li>{dependency.name}</li>
-				{/each}
+					{#each data.library.dependencies as dependency}
+						<li>{dependency.name}</li>
+					{/each}
 				</ul>
 			{/if}
 			{#if data.library.copyright}
-				<p class="text-md leading-5 text-gray-700"><strong>{m.copyright()}</strong>: {data.library.copyright}</p>
+				<p class="text-md leading-5 text-gray-700">
+					<strong>{m.copyright()}</strong>: {data.library.copyright}
+				</p>
 			{/if}
 		</div>
 	</div>
