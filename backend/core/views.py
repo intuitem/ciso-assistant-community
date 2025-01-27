@@ -1727,7 +1727,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"], name="Draft risk acceptance")
     def draft(self, request, pk):
         self.get_object().set_state("created")
-        return Response({"results": "state updated to submitted"})
+        return Response({"results": "state updated back to created"})
 
     @action(detail=True, methods=["post"], name="Accept risk acceptance")
     def accept(self, request, pk):

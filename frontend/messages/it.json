@@ -457,7 +457,7 @@
 	"validate": "Convalida",
 	"reject": "Rifiuta",
 	"revoke": "Revoca",
-	"riskAcceptanceValidatedMessage": "L'accettazione di questo rischio è attualmente confermata. Puoi revocarla in qualsiasi momento, ma non puoi rotnare indietro. Si consiglia di duplicarla con una versione diversa se necessario.",
+	"riskAcceptanceValidatedMessage": "L'accettazione di questo rischio è attualmente confermata. Puoi revocarla in qualsiasi momento, ma non puoi tornare indietro. Si consiglia di duplicarla con una versione diversa se necessario.",
 	"confirmModalTitle": "Conferma",
 	"confirmModalMessage": "Sei sicuro? Questa azione modificherà in maniera permanente il seguente oggetto",
 	"submit": "Invia",
