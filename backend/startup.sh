@@ -16,7 +16,7 @@ fi
 
 while ! python manage.py showmigrations iam >/dev/null; do
   echo "database not ready; waiting"
-  sleep 20
+  sleep 15
 done
 
 poetry run python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}"
@@ -25,4 +25,4 @@ if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
   poetry run python manage.py createsuperuser --noinput --settings="${DJANGO_SETTINGS_MODULE}"
 fi
 
-exec gunicorn --chdir ciso_assistant --bind :8000 --timeout 300 --env RUN_MAIN=true ciso_assistant.wsgi:application
+exec gunicorn --chdir ciso_assistant --bind :8000 --timeout 100 --keep-alive 30 --workers=3 --env RUN_MAIN=true ciso_assistant.wsgi:application

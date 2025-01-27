@@ -2829,7 +2829,7 @@ class ComplianceAssessment(Assessment):
         n = 0
 
         for ras in requirement_assessments_scored:
-            if not (ig) or (ig & set(ras.requirement.implementation_groups)):
+            if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
                 score += ras.score or 0
                 n += 1
                 if self.show_documentation_score:
@@ -3228,13 +3228,18 @@ class ComplianceAssessment(Assessment):
         return requirement_assessments
 
     def progress(self) -> int:
-        requirements_all = RequirementAssessment.objects.filter(
-            compliance_assessment=self, requirement__assessable=True
+        requirement_assessments = list(
+            self.get_requirement_assessments(include_non_assessable=False)
         )
-        total_cnt = requirements_all.count()
-        set_cnt = requirements_all.exclude(result="not_assessed").count()
-        value = int((set_cnt / total_cnt) * 100) if total_cnt > 0 else 0
-        return value
+        total_cnt = len(requirement_assessments)
+        assessed_cnt = len(
+            [
+                r
+                for r in requirement_assessments
+                if r.result != RequirementAssessment.Result.NOT_ASSESSED
+            ]
+        )
+        return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
 
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
