@@ -171,7 +171,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
 63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
 64. NIS2 technical and methodological requirements 2024/2690 🇪🇺
-65. Saudi Arabian Monetary Authority (SAMA) Cybersecurity Framework 🇸🇦 
+65. Saudi Arabian Monetary Authority (SAMA) Cybersecurity Framework 🇸🇦
 66. Guide de sécurité des données (CNIL) 🇫🇷
 67. International Traffic in Arms Regulations (ITAR) 🇺🇸
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
@@ -407,6 +407,12 @@ ln -fs ../../git_hooks/post-commit .
 ln -fs ../../git_hooks/post-merge .
 ```
 
+11. for Huey (tasks runner)
+
+- prepare a mailer for testing.
+- run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
+- you can use `MAIL_DEBUG` to have mail on the console for easier debug
+
 ### Running the frontend
 
 1. cd into the frontend directory
@@ -553,6 +559,6 @@ See [LICENSE.md](./LICENSE.md) for details. For more details about the commercia
 
 Unless otherwise noted, all files are © intuitem.
 
-## Activity 
+## Activity
 
 ![Alt](https://repobeats.axiom.co/api/embed/83162c6044da29efd7efa28f746b6bee5a3c6a8a.svg "Repobeats analytics image")
