@@ -1,10 +1,8 @@
 import csv
-import gzip
 import json
 import mimetypes
 import re
 import os
-import tempfile
 import uuid
 import zipfile
 from datetime import date, datetime, timedelta
@@ -70,6 +68,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied
 
 
 from weasyprint import HTML
@@ -507,6 +506,60 @@ class AssetViewSet(BaseModelViewSet):
     @action(detail=False, name="Get disaster recovery objectives")
     def disaster_recovery_objectives(self, request):
         return Response({"results": Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES})
+
+    @action(detail=False, name="Export assets as CSV")
+    def export_csv(self, request):
+        try:
+            (viewable_assets_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Asset
+            )
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = 'attachment; filename="assets_export.csv"'
+
+            writer = csv.writer(response, delimiter=";")
+            columns = [
+                "internal_id",
+                "name",
+                "description",
+                "type",
+                "security_objectives",
+                "disaster_recovery_objectives",
+                "link",
+                "owners",
+                "parent_assets",
+                "labels",
+            ]
+            writer.writerow(columns)
+
+            for asset in Asset.objects.filter(id__in=viewable_assets_ids).iterator():
+                row = [
+                    asset.id,
+                    asset.name,
+                    asset.description,
+                    asset.type,
+                    ",".join(
+                        [i["str"] for i in asset.get_security_objectives_display()]
+                    ),
+                    ",".join(
+                        [
+                            i["str"]
+                            for i in asset.get_disaster_recovery_objectives_display()
+                        ]
+                    ),
+                    asset.reference_link,
+                    ",".join([o.email for o in asset.owner.all()]),
+                    ",".join([o.name for o in asset.parent_assets.all()]),
+                    ",".join([o.label for o in asset.filtering_labels.all()]),
+                ]
+                writer.writerow(row)
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error exporting assets to CSV: {str(e)}")
+            return HttpResponse(
+                status=500, content="An error occurred while generating the CSV export."
+            )
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
@@ -1621,6 +1674,12 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     API endpoint that allows risk acceptance to be viewed or edited.
     """
 
+    permission_overrides = {
+        "accept": "approve_riskacceptance",
+        "reject": "approve_riskacceptance",
+        "revoke": "approve_riskacceptance",
+    }
+
     model = RiskAcceptance
     serializer_class = RiskAcceptanceWriteSerializer
     filterset_fields = ["folder", "state", "approver", "risk_scenarios"]
@@ -1672,36 +1731,45 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], name="Accept risk acceptance")
     def accept(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("accepted")
-            return Response({"results": "state updated to accepted"})
-        else:
-            return Response(
-                {"error": "only approver can accept a risk acceptance"},
-                status=status.HTTP_403_FORBIDDEN,
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can accept the risk acceptance",
+                user=request.user,
+                approver=self.get_object().approver,
             )
+            raise PermissionDenied(
+                {"error": "Only the approver can accept the risk acceptance"}
+            )
+        self.get_object().set_state("accepted")
+        return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
     def reject(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("rejected")
-            return Response({"results": "state updated to rejected"})
-        else:
-            return Response(
-                {"error": "only approver can reject a risk acceptance"},
-                status=status.HTTP_403_FORBIDDEN,
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can reject the risk acceptance",
+                user=request.user,
+                approver=self.get_object().approver,
             )
+            raise PermissionDenied(
+                {"error": "Only the approver can reject the risk acceptance"}
+            )
+        self.get_object().set_state("rejected")
+        return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
     def revoke(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("revoked")
-            return Response({"results": "state updated to revoked"})
-        else:
-            return Response(
-                {"error": "only approver can revoke a risk acceptance"},
-                status=status.HTTP_403_FORBIDDEN,
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can revoke the risk acceptance",
+                user=request.user,
+                approver=self.get_object().approver,
             )
+            raise PermissionDenied(
+                {"error": "Only the approver can revoke the risk acceptance"}
+            )
+        self.get_object().set_state("revoked")
+        return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
     def waiting(self, request):
@@ -2111,12 +2179,18 @@ class FolderViewSet(BaseModelViewSet):
     )
     def import_domain(self, request):
         """Handle file upload and initiate import process."""
+        load_missing_libraries = (
+            request.query_params.get("load_missing_libraries", "false").lower()
+            == "true"
+        )
         try:
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
             parsed_data = self._process_uploaded_file(request.data["file"])
-            result = self._import_objects(parsed_data, domain_name)
+            result = self._import_objects(
+                parsed_data, domain_name, load_missing_libraries
+            )
             return Response(result, status=status.HTTP_200_OK)
 
         except KeyError as e:
@@ -2209,7 +2283,9 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    def _import_objects(self, parsed_data: dict, domain_name: str):
+    def _import_objects(
+        self, parsed_data: dict, domain_name: str, load_missing_libraries: bool
+    ):
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
@@ -2255,8 +2331,20 @@ class FolderViewSet(BaseModelViewSet):
 
             # Check for missing libraries
             for library in required_libraries:
-                if not LoadedLibrary.objects.filter(urn=library).exists():
-                    missing_libraries.append(library)
+                if not LoadedLibrary.objects.filter(
+                    urn=library["urn"], version=library["version"]
+                ).exists():
+                    if (
+                        StoredLibrary.objects.filter(
+                            urn=library["urn"], version__gte=library["version"]
+                        ).exists()
+                        and load_missing_libraries
+                    ):
+                        StoredLibrary.objects.get(
+                            urn=library["urn"], version__gte=library["version"]
+                        ).load()
+                    else:
+                        missing_libraries.append(library)
 
             logger.debug("missing_libraries", missing_libraries=missing_libraries)
 
@@ -2321,12 +2409,14 @@ class FolderViewSet(BaseModelViewSet):
             try:
                 # Handle library objects
                 if model == LoadedLibrary:
+                    required_libraries.append(
+                        {"urn": fields["urn"], "version": fields["version"]}
+                    )
+                    logger.info(
+                        "Adding library to required libraries", urn=fields["urn"]
+                    )
                     continue
                 if fields.get("library"):
-                    required_libraries.append(fields["library"])
-                    logger.info(
-                        "Adding library to required libraries", urn=fields["library"]
-                    )
                     continue
 
                 # Validate using serializer
@@ -3170,12 +3260,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def word_report(self, request, pk):
+        """
+        Word report generation (Exec)
+        """
+        lang = "en"
+        if request.user.preferences.get("lang") is not None:
+            lang = request.user.preferences.get("lang")
+            if lang not in ["fr", "en"]:
+                lang = "en"
         template_path = (
             Path(settings.BASE_DIR)
             / "core"
             / "templates"
             / "core"
-            / "audit_report_template.docx"
+            / f"audit_report_template_{lang}.docx"
         )
         doc = DocxTemplate(template_path)
         _framework = self.get_object().framework
@@ -3188,7 +3286,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         implementation_groups = self.get_object().selected_implementation_groups
         filter_graph_by_implementation_groups(tree, implementation_groups)
-        context = gen_audit_context(pk, doc, tree)
+        context = gen_audit_context(pk, doc, tree, lang)
         doc.render(context)
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)

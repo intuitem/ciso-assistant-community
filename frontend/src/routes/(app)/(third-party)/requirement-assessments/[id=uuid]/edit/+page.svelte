@@ -45,6 +45,8 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import { superForm } from 'sveltekit-superforms';
+	import { invalidateAll } from '$app/navigation';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -131,6 +133,18 @@
 		modalStore.trigger(modal);
 	}
 
+	const requirementAssessmentForm = superForm(data.form, {
+		dataType: 'json',
+		invalidateAll: true,
+		applyAction: true,
+		resetForm: false,
+		validators: zod(schema),
+		taintedMessage: m.taintedFormMessage(),
+		validationMethod: 'auto'
+	});
+
+	const formStore = requirementAssessmentForm.form;
+
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 
 	$: mappingInference = {
@@ -162,6 +176,14 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
 
 	let tabSet = $page.data.user.is_third_party ? 1 : 0;
+
+	$: if (form && form.newControl) {
+		$formStore.applied_controls.push(form.newControl);
+	}
+
+	$: if (form && form.newEvidence) {
+		$formStore.evidences.push(form.newEvidence);
+	}
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
@@ -318,11 +340,10 @@
 	<div class="mt-4">
 		<SuperForm
 			class="flex flex-col"
+			_form={requirementAssessmentForm}
 			data={data.form}
-			dataType="json"
 			let:form
 			let:data
-			validators={zod(schema)}
 			action="?/updateRequirementAssessment"
 			{...$$restProps}
 		>
@@ -476,8 +497,10 @@
 						{form}
 						min_score={$page.data.compliance_assessment_score.min_score}
 						max_score={$page.data.compliance_assessment_score.max_score}
+						scores_definition={$page.data.compliance_assessment_score.scores_definition}
 						field="documentation_score"
 						label={m.documentationScore()}
+						isDoc={true}
 						disabled={!data.is_scored || data.result === 'not_applicable'}
 					/>
 				{/if}

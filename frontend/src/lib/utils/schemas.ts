@@ -69,7 +69,10 @@ export const FolderSchema = z.object({
 
 export const FolderImportSchema = z.object({
 	name: nameSchema,
-	file: z.instanceof(File)
+	file: z.instanceof(File),
+	load_missing_libraries: z.coerce.boolean().default(false)
+	//NOTE: coerce is used to handle checkbox form values which can be strings ('true'/'false')
+	//or booleans (true/false). Without coerce, form validation fails inconsistently.
 });
 
 export const ProjectSchema = z.object({
@@ -290,7 +293,11 @@ export const EvidenceSchema = z.object({
 });
 
 export const GeneralSettingsSchema = z.object({
-	security_objective_scale: z.string()
+	security_objective_scale: z.string(),
+	ebios_radar_max: z.number(),
+	ebios_radar_green_zone_radius: z.number(),
+	ebios_radar_yellow_zone_radius: z.number(),
+	ebios_radar_red_zone_radius: z.number()
 });
 
 export const SSOSettingsSchema = z.object({

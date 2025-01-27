@@ -54,8 +54,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.model['folderImportForm'],
-				model: data.model,
-				customNameDescription: true,
+				model: data.model['folderImportModel'],
 				importFolder: true,
 				formAction: '?/importFolder',
 				enctype: 'multipart/form-data',
@@ -147,10 +146,10 @@
 								on:click={handleClickForGT}
 								><i class="fa-solid fa-file-circle-plus"></i>
 							</button>
-							{#if URLModel === 'applied-controls'}
+							{#if ['applied-controls', 'assets'].includes(URLModel)}
 								<a
 									href="{URLModel}/export/"
-									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 									title={m.exportButton()}
 									data-testid="export-button"><i class="fa-solid fa-download mr-2" /></a
 								>

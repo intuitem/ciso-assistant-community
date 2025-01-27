@@ -175,7 +175,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 66. Guide de sécurité des données (CNIL) 🇫🇷
 67. International Traffic in Arms Regulations (ITAR) 🇺🇸
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
-69. OWASP's checklist for LLM governance and security 🌐 
+69. OWASP's checklist for LLM governance and security 🌐
+70. Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (ANSSI) 🇫🇷
 
 ### Community contributions
 
@@ -437,6 +438,8 @@ pnpm run dev
 All variables in the frontend have handy default values.
 
 If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is <http://localhost:8000/api>.
+
+The PUBLIC_BACKEND_API_EXPOSED_URL is necessary for proper functioning of the SSO. It points to the URL of the API as seen from the browser. It should be equal to the concatenation of CISO_ASSISTANT_URL (in the backend) with "/api".
 
 When you launch "node server" instead of "pnpm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
 

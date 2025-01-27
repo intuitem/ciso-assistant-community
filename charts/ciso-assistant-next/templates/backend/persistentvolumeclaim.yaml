@@ -1,0 +1,37 @@
+{{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "ciso-assistant.fullname" . }}-sqlite
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
+spec:
+  accessModes: 
+    - {{ .Values.backend.persistence.sqlite.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.backend.persistence.sqlite.size }}
+  {{- if .Values.backend.persistence.sqlite.storageClass }}
+  storageClassName: {{ .Values.backend.persistence.sqlite.storageClass }}
+  {{- end }}
+{{- end }}
+---
+{{- if .Values.backend.persistence.localStorage.enabled }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "ciso-assistant.fullname" . }}-localstorage
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
+spec:
+  accessModes: 
+    - {{ .Values.backend.persistence.localStorage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.backend.persistence.localStorage.size }}
+  {{- if .Values.backend.persistence.localStorage.storageClass }}
+  storageClassName: {{ .Values.backend.persistence.localStorage.storageClass }}
+  {{- end }}
+{{- end }}

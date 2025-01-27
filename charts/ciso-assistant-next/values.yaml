@@ -1,0 +1,316 @@
+## CISO Assistant configuration
+## Ref: https://github.com/intuitem/ciso-assistant-community  
+##
+
+# -- Provide a name in place of `ciso-assistant`
+nameOverride: ciso-assistant
+# -- String to fully override `"ciso-assistant.fullname"`
+fullnameOverride: ""
+
+## Globally shared configuration
+global:
+  # -- Default domain used by all components
+  ## Used for ingresses, certificates, environnement vars, etc.
+  domain: octopus.foo.bar
+  # -- Globally enable TLS (Ingress, URLs, etc.)
+  tls: false
+
+  # Default image used by all components
+  image:
+    # -- If defined, a registry applied to all CISO Assistant deployments
+    registry: ghcr.io
+    # -- Overrides the global CISO Assistant image tag whose default is the chart appVersion
+    tag: ""
+    # -- If defined, a imagePullPolicy applied to all CISO Assistant deployments
+    imagePullPolicy: IfNotPresent
+
+  # -- Secrets with credentials to pull images from a private registry
+  imagePullSecrets: []
+
+  # -- Labels to add to all deployed objects
+  commonLabels: {}
+
+  # -- Kubernetes cluster domain name
+  clusterDomain: cluster.local
+
+  # -- Toggle and define pod-level security context
+  # @default -- `{}` 
+  securityContext: {}
+  #  fsGroupChangePolicy: Always
+  #  sysctls: []
+  #  supplementalGroups: []
+  #  fsGroup: 1001
+
+  # -- Default node selector for all components
+  nodeSelector: {}
+
+  # -- Default tolerations for all components
+  tolerations: []
+
+## CISO Assistant backend
+backend:
+  # -- Backend name
+  name: backend
+
+  # -- The number of backend pods to run
+  replicas: 1
+
+  ## Backend specific config
+  config:
+    # -- Admin email for initial configuration
+    emailAdmin: admin@example.net
+  
+    ## SMTP configuration
+    smtp:
+      # -- Default from email address
+      defaultFrom: no-reply@ciso-assistant.net
+      primary:
+        # -- Primary SMTP hostname
+        host: primary.cool-mailer.net
+        # -- Primary SMTP post
+        port: 587
+        # -- Enable TLS for primary SMTP
+        useTls: true
+        # -- Primary SMTP username
+        username: apikey
+        # -- Primary SMTP password
+        password: "primary_password_here"
+      rescue:
+        # -- Rescue SMTP hostname
+        host: smtp.secondary.mailer.cloud
+        # -- Rescue SMTP hostname
+        port: 587
+        # -- Enable TLS for rescue SMTP
+        useTls: true
+        # -- Rescue SMTP hostname
+        username: username
+        # -- Rescue SMTP hostname
+        password: "rescue_password_here"
+
+    # -- Set the database type (sqlite, pgsql or externalPgsql)
+    ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
+    databaseType: sqlite
+
+    # -- Set Django secret key
+    djangoSecretKey: "changeme"
+
+    # -- Enable Django debug mode
+    djangoDebug: false
+
+  ## Backend persistence configuration (used for sqlitedb and local storage)
+  persistence:
+    sqlite:
+      # -- Enable SQLite persistence
+      # Note: only when `backend.config.databaseType` use `sqlite` value
+      enabled: true
+      # -- SQLite persistant volume size
+      size: 5Gi
+      # -- SQLite persistant volume storageClass
+      storageClass: ""
+      # -- SQLite persistant volume accessMode
+      accessMode: ReadWriteOnce
+    localStorage:
+      # -- Enable Local Storage persistence
+      enabled: true
+      # -- Local Storage persistant volume size
+      size: 5Gi
+      # -- Local Storage persistant volume storageClass
+      storageClass: ""
+      # -- Local Storage persistant volume accessMode
+      accessMode: ReadWriteOnce
+
+  ## Backend image
+  image:
+    # -- Registry to use for the backend
+    # @default -- `""` (defaults to global.image.registry)
+    registry: ""
+    # -- Repository to use for the backend
+    repository: intuitem/ciso-assistant-community/backend
+    # -- Tag to use for the backend
+    # @default -- `""` (defaults to global.image.tag)
+    tag: ""
+    # -- Image pull policy for the backend
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Secrets with credentials to pull images from a private registry
+  # @default -- `[]` (defaults to global.imagePullSecrets)
+  imagePullSecrets: []
+
+  # -- Resources for the backend
+  resources: {}
+    #   requests:
+    #     cpu: 100m
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 256m
+    #     memory: 1024Mi
+
+  # -- Environment variables to pass to backend
+  env: []
+
+  # -- Toggle and define container-level security context
+  # @default -- `{}` 
+  containerSecurityContext: {}
+  #  seLinuxOptions: {}
+  #  runAsUser: 1001
+  #  runAsGroup: 1001
+  #  runAsNonRoot: true
+  #  privileged: false
+  #  readOnlyRootFilesystem: true
+  #  allowPrivilegeEscalation: false
+  #  capabilities:
+  #    drop: ["ALL"]
+  #  seccompProfile:
+  #    type: "RuntimeDefault"
+
+  ## Backend service configuration
+  service:
+    # -- Backend service annotations
+    annotations: {}
+    # -- Backend service labels
+    labels: {}
+    # -- Backend service http port
+    port: 80
+    # -- Backend service port name
+    portName: http
+
+
+## CISO Assistant frontend
+frontend:
+  # -- Frontend name
+  name: frontend
+
+  # -- The number of frontend pods to run
+  replicas: 1
+
+  ## Frontend specific config
+  config:
+    # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
+    bodySizeLimit: "50M"
+  
+  ## Frontend image
+  image:
+    # -- Registry to use for the frontend
+    # @default -- `""` (defaults to global.image.registry)
+    registry: ""
+    # -- Repository to use for the frontend
+    repository: intuitem/ciso-assistant-community/frontend
+    # -- Tag to use for the frontend
+    # @default -- `""` (defaults to global.image.tag)
+    tag: ""
+    # -- Image pull policy for the frontend
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Secrets with credentials to pull images from a private registry
+  # @default -- `[]` (defaults to global.imagePullSecrets)
+  imagePullSecrets: []
+
+  # -- Resources for the frontend
+  resources: {}
+    #   requests:
+    #     cpu: 100m
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 256m
+    #     memory: 1024Mi
+
+  # -- Environment variables to pass to frontend
+  env: []
+
+  # -- Toggle and define container-level security context
+  # @default -- `{}` 
+  containerSecurityContext: {}
+  #  seLinuxOptions: {}
+  #  runAsUser: 1001
+  #  runAsGroup: 1001
+  #  runAsNonRoot: true
+  #  privileged: false
+  #  readOnlyRootFilesystem: true
+  #  allowPrivilegeEscalation: false
+  #  capabilities:
+  #    drop: ["ALL"]
+  #  seccompProfile:
+  #    type: "RuntimeDefault"
+
+  ## Frontend service configuration
+  service:
+    # -- Frontend service annotations
+    annotations: {}
+    # -- Frontend service labels
+    labels: {}
+    # -- Frontend service http port
+    port: 80
+    # -- Frontend service port name
+    portName: http
+
+# CISO Assistant ingress configuration
+# Note: host and tls values are inherited from global.domain and global.tls
+ingress:
+  # -- Enable an ingress resource for the CISO Assistant
+  enabled: true
+  # -- Additional ingress labels
+  labels: {}
+  # -- Additional ingress annotations
+  annotations: {}
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # cert-manager.io/cluster-issuer: letsencrypt
+  # -- Defines which ingress controller will implement the resource
+  ingressClassName: ""
+  # -- The path to CISO Assistant
+  path: /
+  # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
+  pathType: Prefix
+  # -- Custom TLS certificate as secret
+  ## Note: 'key' and 'certificate' are expected in PEM format
+  certificateSecret: {}
+    # key: |-
+    #   -----BEGIN RSA PRIVATE KEY-----
+    #   ...
+    #   -----END RSA PRIVATE KEY-----
+    # certificate: |-
+    #   -----BEGIN CERTIFICATE-----
+    #   ...
+    #   -----END CERTIFICATE-----
+
+## Bundeled PostgreSQL database configuration (Bitnami chart)
+## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
+## Note: Don't enable if you use SQLite mode or external PgSQL database
+postgresql:
+  # -- Enable to deploy PostgreSQL.
+  enabled: false
+  global:
+    postgresql:
+      auth:
+        # -- Super-user postgres account password
+        ## Note: if not set, it will be dynamically generated
+        postgresPassword: ""
+        # -- Database name
+        database: ciso-assistant
+        # -- Database username
+        username: ciso-assistant
+        # -- Database user account password
+        ## Note: if not set, it will be dynamically generated
+        password: ""
+  primary:
+    persistence:
+      # -- PostgreSQL persistant volume size (default 8Gi).
+      size: 5Gi
+
+## External PostgreSQL database configuration
+## Note: All of these values are only used when backend.config.databaseType is set to externalPgsql
+externalPgsql:
+  # -- Host of an external PostgreSQL instance to connect
+  host: ""
+  # -- User of an external PostgreSQL instance to connect
+  user: ciso-assistant
+  # -- Password of an external PostgreSQL instance to connect
+  password: ""
+  # -- Secret containing the password of an external PostgreSQL instance to connect
+  ## Name of an existing secret resource containing the DB password in a 'password' key
+  existingSecret: ""
+  # -- Database inside an external PostgreSQL to connect
+  database: ciso-assistant
+  # -- Port of an external PostgreSQL to connect
+  port: 5432

@@ -189,8 +189,8 @@
 	{/if}
 	{#if URLModel === 'projects'}
 		<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-	{:else if URLModel === 'folders'}
-		<FolderForm {form} {model} {cacheLocks} {formDataCache} {initialData} {importFolder} />
+	{:else if URLModel === 'folders' || URLModel === 'folders-import'}
+		<FolderForm {form} {importFolder} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'risk-assessments'}
 		<RiskAssessmentForm
 			{form}
