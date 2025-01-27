@@ -2356,7 +2356,7 @@ class FolderViewSet(BaseModelViewSet):
                     objects_count=len(objects),
                     creation_order=creation_order,
                 )
-                
+
                 # Create all objects within the transaction
                 for model in creation_order:
                     self._create_model_objects(
