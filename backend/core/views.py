@@ -2316,31 +2316,31 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 raise ValidationError({"validation_errors": validation_errors})
 
-            # Check for missing libraries
-            for library in required_libraries:
-                if not LoadedLibrary.objects.filter(
-                    urn=library["urn"], version=library["version"]
-                ).exists():
-                    if (
-                        StoredLibrary.objects.filter(
-                            urn=library["urn"], version__gte=library["version"]
-                        ).exists()
-                        and load_missing_libraries
-                    ):
-                        StoredLibrary.objects.get(
-                            urn=library["urn"], version__gte=library["version"]
-                        ).load()
-                    else:
-                        missing_libraries.append(library)
-
-            logger.debug("missing_libraries", missing_libraries=missing_libraries)
-
             # Creation phase - wrap in transaction
             with transaction.atomic():
                 # Create base folder and store its ID
                 base_folder = Folder.objects.create(
                     name=domain_name, content_type=Folder.ContentType.DOMAIN
                 )
+                # Check for missing libraries
+                for library in required_libraries:
+                    if not LoadedLibrary.objects.filter(
+                        urn=library["urn"], version=library["version"]
+                    ).exists():
+                        if (
+                            StoredLibrary.objects.filter(
+                                urn=library["urn"], version__gte=library["version"]
+                            ).exists()
+                            and load_missing_libraries
+                        ):
+                            StoredLibrary.objects.get(
+                                urn=library["urn"], version__gte=library["version"]
+                            ).load()
+                        else:
+                            missing_libraries.append(library)
+
+                logger.debug("missing_libraries", missing_libraries=missing_libraries)
+
                 link_dump_database_ids["base_folder"] = base_folder
 
                 logger.info(
