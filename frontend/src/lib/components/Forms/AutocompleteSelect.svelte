@@ -73,11 +73,22 @@
 		dispatch('cache', selected);
 	}
 
-	function arraysEqual(arr1: (string | undefined)[], arr2: (string | undefined)[]) {
-		if (arr1?.length !== arr2?.length) return false;
+	function arraysEqual(
+		arr1: string | (string | undefined)[] | null | undefined,
+		arr2: string | (string | undefined)[] | null | undefined
+	): boolean {
+		const normalize = (val: string | (string | undefined)[] | null | undefined) => {
+			if (typeof val === 'string') return [val];
+			return val ?? [];
+		};
 
-		const set1 = new Set(arr1);
-		const set2 = new Set(arr2);
+		const a1 = normalize(arr1);
+		const a2 = normalize(arr2);
+
+		if (a1.length !== a2.length) return false;
+
+		const set1 = new Set(a1);
+		const set2 = new Set(a2);
 
 		for (const value of set1) {
 			if (!set2.has(value)) return false;
