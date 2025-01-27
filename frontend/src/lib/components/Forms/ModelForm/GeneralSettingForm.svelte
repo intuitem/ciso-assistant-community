@@ -13,8 +13,37 @@
 </script>
 
 <Accordion regionControl="font-bold">
+	<AccordionItem open>
+		<svelte:fragment slot="summary"
+			><i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}</svelte:fragment
+		>
+		<svelte:fragment slot="content">
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="notifications_enable_mailing"
+					label={m.settingsNotificationsMail()}
+				/>
+			</div>
+		</svelte:fragment>
+	</AccordionItem>
+	<AccordionItem open>
+		<svelte:fragment slot="summary">
+			<i class="fa-solid fa-asterisk mr-2" />{m.settingsInterface()}
+		</svelte:fragment>
+		<svelte:fragment slot="content">
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="interface_agg_scenario_matrix"
+					label={m.settingsAggregateMatrix()}
+				/>
+			</div>
+		</svelte:fragment>
+	</AccordionItem>
 	<AccordionItem>
-		<svelte:fragment slot="summary"><i class="fa-solid fa-gem mr-2"></i>{m.asset()}</svelte:fragment
+		<svelte:fragment slot="summary"
+			><i class="fa-solid fa-gem mr-2"></i>{m.assets()}</svelte:fragment
 		>
 		<svelte:fragment slot="content">
 			<Select
@@ -73,14 +102,6 @@
 				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
 				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
 			/>
-		</svelte:fragment>
-	</AccordionItem>
-	<AccordionItem open>
-		<svelte:fragment slot="summary"
-			><i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}</svelte:fragment
-		>
-		<svelte:fragment slot="content">
-			<Checkbox {form} field="notifications_enable_mailing" label={m.settingsNotificationsMail()} />
 		</svelte:fragment>
 	</AccordionItem>
 </Accordion>
