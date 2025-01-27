@@ -419,59 +419,7 @@
 										/>
 									</div>
 								</Score>
-							{:else if data.compliance_assessment.show_documentation_score}
-								<div class="flex flex-col items- space-y-2 w-full">
-									{m.implementationScoreResult()}
-									<ProgressRadial
-										stroke={100}
-										meter={displayScoreColor(
-											requirementAssessment.score,
-											data.compliance_assessment.max_score
-										)}
-										font={125}
-										value={(requirementAssessment.score * 100) /
-											data.compliance_assessment.max_score}
-										width="w-12"
-									>
-										{requirementAssessment.score ?? '--'}
-									</ProgressRadial>
-								</div>
-								<div class="flex flex-col items-start space-y-2 w-full">
-									{m.documentationScoreResult()}
-									<ProgressRadial
-										stroke={100}
-										meter={displayScoreColor(
-											requirementAssessment.documentation_score,
-											data.compliance_assessment.max_score
-										)}
-										font={125}
-										value={(requirementAssessment.documentation_score * 100) /
-											data.compliance_assessment.max_score}
-										width="w-12"
-									>
-										{requirementAssessment.documentation_score ?? '--'}
-									</ProgressRadial>
-								</div>
-							{:else}
-								<div class="flex flex-col items-start space-y-2 w-full">
-									{m.scoreResult()}
-									<ProgressRadial
-										stroke={100}
-										meter={displayScoreColor(
-											requirementAssessment.score,
-											data.compliance_assessment.max_score
-										)}
-										font={125}
-										value={(requirementAssessment.score * 100) /
-											data.compliance_assessment.max_score}
-										width="w-12"
-									>
-										{requirementAssessment.score ?? '--'}
-									</ProgressRadial>
-								</div>
-							{/if}
-							{#if data.compliance_assessment.show_documentation_score}
-								{#if !shallow}
+								{#if data.compliance_assessment.show_documentation_score}
 									<Score
 										form={superForm(requirementAssessment.scoreForm, {
 											id: requirementAssessment.id
@@ -487,6 +435,54 @@
 											requirementAssessment.result === 'not_applicable'}
 									/>
 								{/if}
+							{:else if data.compliance_assessment.show_documentation_score && requirementAssessment.is_scored}
+								<div class="flex flex-row items-center space-x-2 w-full">
+									<span>{m.implementationScoreResult()}</span>
+									<ProgressRadial
+										stroke={100}
+										meter={displayScoreColor(
+											requirementAssessment.score,
+											data.compliance_assessment.max_score
+										)}
+										font={150}
+										value={(requirementAssessment.score * 100) /
+											data.compliance_assessment.max_score}
+										width="w-10"
+									>
+										{requirementAssessment.score ?? '--'}
+									</ProgressRadial>
+									<span>{m.documentationScoreResult()}</span>
+									<ProgressRadial
+										stroke={100}
+										meter={displayScoreColor(
+											requirementAssessment.documentation_score,
+											data.compliance_assessment.max_score
+										)}
+										font={150}
+										value={(requirementAssessment.documentation_score * 100) /
+											data.compliance_assessment.max_score}
+										width="w-10"
+									>
+										{requirementAssessment.documentation_score ?? '--'}
+									</ProgressRadial>
+								</div>
+							{:else if requirementAssessment.is_scored}
+								<div class="flex flex-row items-center space-x-2 w-full">
+									<span>{m.scoreResult()}</span>
+									<ProgressRadial
+										stroke={100}
+										meter={displayScoreColor(
+											requirementAssessment.score,
+											data.compliance_assessment.max_score
+										)}
+										font={150}
+										value={(requirementAssessment.score * 100) /
+											data.compliance_assessment.max_score}
+										width="w-10"
+									>
+										{requirementAssessment.score ?? '--'}
+									</ProgressRadial>
+								</div>
 							{/if}
 							<Accordion regionCaret="flex">
 								{#if shallow}
