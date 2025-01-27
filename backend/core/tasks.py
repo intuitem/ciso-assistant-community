@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import logging
 import random
+from global_settings.models import GlobalSettings
 
 import logging.config
 import structlog
@@ -15,7 +16,7 @@ logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
 
 
-# @db_periodic_task(crontab(minute='*/1')) for testing
+# @db_periodic_task(crontab(minute='*/1'))# for testing
 @db_periodic_task(crontab(hour="6"))
 def check_controls_with_expired_eta():
     expired_controls = (
@@ -37,6 +38,16 @@ def check_controls_with_expired_eta():
 
 @task()
 def send_notification_email(owner_email, controls):
+    # TODO this will probably will move to a common section later on.
+    notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
+        "notifications_enable_mailing", False
+    )
+    if not notifications_enable_mailing:
+        logger.warning(
+            "Email notification is disabled. You can enable it under Extra/Settings. Skipping for now."
+        )
+        return
+
     # Check required email settings
     required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
     missing_settings = [
