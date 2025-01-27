@@ -420,43 +420,40 @@
 									</div>
 								</Score>
 							{:else if data.compliance_assessment.show_documentation_score}
-								<div class="flex flex-row items-center justify-between space-x-4 w-2/4">
-									<div class="flex flex-col items-center space-y-2">
-										{m.documentationScoreResult()}
-										<ProgressRadial
-											stroke={100}
-											meter={displayScoreColor(
-												requirementAssessment.documentation_score,
-												data.compliance_assessment.max_score
-											)}
-											font={125}
-											value={(requirementAssessment.documentation_score * 100) /
-												data.compliance_assessment.max_score}
-											width="w-12"
-										>
-											{requirementAssessment.documentation_score ?? 0}
-										</ProgressRadial>
-									</div>
-
-									<div class="flex flex-col items-center space-y-2">
-										{m.implementationScoreResult()}
-										<ProgressRadial
-											stroke={100}
-											meter={displayScoreColor(
-												requirementAssessment.score,
-												data.compliance_assessment.max_score
-											)}
-											font={125}
-											value={(requirementAssessment.score * 100) /
-												data.compliance_assessment.max_score}
-											width="w-12"
-										>
-											{requirementAssessment.score ?? 0}
-										</ProgressRadial>
-									</div>
+								<div class="flex flex-col items- space-y-2 w-full">
+									{m.implementationScoreResult()}
+									<ProgressRadial
+										stroke={100}
+										meter={displayScoreColor(
+											requirementAssessment.score,
+											data.compliance_assessment.max_score
+										)}
+										font={125}
+										value={(requirementAssessment.score * 100) /
+											data.compliance_assessment.max_score}
+										width="w-12"
+									>
+										{requirementAssessment.score ?? '--'}
+									</ProgressRadial>
+								</div>
+								<div class="flex flex-col items-start space-y-2 w-full">
+									{m.documentationScoreResult()}
+									<ProgressRadial
+										stroke={100}
+										meter={displayScoreColor(
+											requirementAssessment.documentation_score,
+											data.compliance_assessment.max_score
+										)}
+										font={125}
+										value={(requirementAssessment.documentation_score * 100) /
+											data.compliance_assessment.max_score}
+										width="w-12"
+									>
+										{requirementAssessment.documentation_score ?? '--'}
+									</ProgressRadial>
 								</div>
 							{:else}
-								<div class="flex flex-col items-center">
+								<div class="flex flex-col items-start space-y-2 w-full">
 									{m.scoreResult()}
 									<ProgressRadial
 										stroke={100}
@@ -469,7 +466,7 @@
 											data.compliance_assessment.max_score}
 										width="w-12"
 									>
-										{requirementAssessment.score ?? 0}
+										{requirementAssessment.score ?? '--'}
 									</ProgressRadial>
 								</div>
 							{/if}
@@ -537,7 +534,7 @@
 										</svelte:fragment>
 									</AccordionItem>
 								{/if}
-								{#if requirementAssessment.evidences.length === 0}
+								{#if requirementAssessment.evidences.length === 0 && shallow}
 									<p class="text-gray-400 italic">{m.noEvidences()}</p>
 								{:else}
 									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
