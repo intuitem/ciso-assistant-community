@@ -18,34 +18,8 @@
 	import type { PageData } from './$types';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	interface Counters {
-		domains: number;
-		projects: number;
-		applied_controls: number;
-		risk_assessments: number;
-		compliance_assessments: number;
-		policies: number;
-	}
 
 	export let data: PageData;
-
-	let metrics;
-	let counters: Counters;
-
-	// Subscribe to the streamed metrics
-	$: {
-		if (data.stream?.metrics) {
-			data.stream.metrics.then((metricsData) => {
-				metrics = metricsData;
-			});
-		}
-
-		if (data.stream?.counters) {
-			data.stream.counters.then((countersData) => {
-				counters = countersData;
-			});
-		}
-	}
 
 	const risk_assessments = data.risk_assessments;
 
@@ -124,15 +98,6 @@
 		$page.url.searchParams.set('tab', index.toString());
 		goto($page.url);
 	}
-
-	const REQUIREMENT_ASSESSMENT_STATUS = [
-		'compliant',
-		'partially_compliant',
-		'in_progress',
-		'non_compliant',
-		'not_applicable',
-		'to_do'
-	] as const;
 </script>
 
 <TabGroup class="">
@@ -153,7 +118,12 @@
 	<svelte:fragment slot="panel">
 		<div class="px-4 pb-4 space-y-8">
 			{#if tabSet === 0}
-				{#if metrics}
+				{#await data.stream.metrics}
+					<div class="col-span-3 lg:col-span-1">
+						<div>Refreshing data ..</div>
+						<LoadingSpinner />
+					</div>
+				{:then metrics}
 					<section id="summary" class=" grid grid-cols-6 gap-2">
 						<Card
 							count={metrics.controls.total}
@@ -332,14 +302,18 @@
 						/>
 						<div class=""></div>
 					</section>
-				{:else}
+				{:catch error}
+					<div class="col-span-3 lg:col-span-1">
+						<p class="text-red-500">Error loading metrics</p>
+					</div>
+				{/await}
+			{:else if tabSet === 1}
+				{#await data.stream.counters}
 					<div class="col-span-3 lg:col-span-1">
 						<div>Refreshing data ..</div>
 						<LoadingSpinner />
 					</div>
-				{/if}
-			{:else if tabSet === 1}
-				{#if counters}
+				{:then counters}
 					<section id="stats">
 						<span class="text-xl font-extrabold">{m.statistics()}</span>
 						<div
@@ -383,9 +357,9 @@
 							/>
 						</div>
 					</section>
-				{:else}
-					<LoadingSpinner />
-				{/if}
+				{:catch error}
+					<div>Data load eror</div>
+				{/await}
 				<section class="space-y-4">
 					<div
 						class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 h-96 lg:h-48 text-sm whitespace-nowrap"
