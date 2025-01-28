@@ -59,9 +59,6 @@ from rest_framework.decorators import (
 )
 from rest_framework.parsers import (
     FileUploadParser,
-    MultiPartParser,
-    JSONParser,
-    FormParser,
 )
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
@@ -2087,6 +2084,21 @@ class FolderViewSet(BaseModelViewSet):
 
         objects = get_domain_export_objects(instance)
 
+        for model in objects.keys():
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=f"view_{model}"),
+                folder=instance,
+            ):
+                logger.error(
+                    "User does not have permission to export object",
+                    user=request.user,
+                    model=model,
+                )
+                raise PermissionDenied(
+                    {"error": "userDoesNotHavePermissionToExportDomain"}
+                )
+
         logger.debug(
             "Retrieved domain objects for export",
             object_types=list(objects.keys()),
@@ -2171,23 +2183,40 @@ class FolderViewSet(BaseModelViewSet):
             == "true"
         )
         try:
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="add_folder"),
+                folder=Folder.get_root_folder(),
+            ):
+                raise PermissionDenied()
             domain_name = request.headers.get(
                 "X-CISOAssistantDomainName", str(uuid.uuid4())
             )
             parsed_data = self._process_uploaded_file(request.data["file"])
             result = self._import_objects(
-                parsed_data, domain_name, load_missing_libraries
+                parsed_data, domain_name, load_missing_libraries, user=request.user
             )
             return Response(result, status=status.HTTP_200_OK)
 
-        except KeyError as e:
-            logger.error("No file provided in the request", exc_info=e)
+        except PermissionDenied:
+            logger.error(
+                "User does not have permission to import domain",
+                user=request.user,
+                exc_info=True,
+            )
+            return Response(
+                {"error": "userDoesNotHavePermissionToImportDomain"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        except KeyError:
+            logger.error("No file provided in the request", exc_info=True)
             return Response(
                 {"errors": ["No file provided"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        except json.JSONDecodeError as e:
-            logger.error("Invalid JSON format in uploaded file", exc_info=e)
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in uploaded file", exc_info=True)
             return Response(
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -2211,10 +2240,10 @@ class FolderViewSet(BaseModelViewSet):
             try:
                 json_dump = json.loads(decompressed_data)
                 import_version = json_dump["meta"]["media_version"]
-            except json.JSONDecodeError as e:
-                logger.error("Invalid JSON format in uploaded file", exc_info=e)
+            except json.JSONDecodeError:
+                logger.error("Invalid JSON format in uploaded file", exc_info=True)
                 raise
-            if not "objects" in json_dump:
+            if "objects" not in json_dump:
                 raise ValidationError("badly formatted json")
             if not import_version == VERSION:
                 logger.error(
@@ -2246,8 +2275,8 @@ class FolderViewSet(BaseModelViewSet):
                                 ):
                                     x["fields"]["attachment"] = new_name
 
-                    except Exception as e:
-                        logger.error("Error extracting attachment", exc_info=e)
+                    except Exception:
+                        logger.error("Error extracting attachment", exc_info=True)
 
         return json_dump
 
@@ -2271,7 +2300,7 @@ class FolderViewSet(BaseModelViewSet):
             raise ValidationError({"error": "Cyclic dependency detected"})
 
     def _import_objects(
-        self, parsed_data: dict, domain_name: str, load_missing_libraries: bool
+        self, parsed_data: dict, domain_name: str, load_missing_libraries: bool, user
     ):
         """
         Import and validate objects using appropriate serializers.
@@ -2281,6 +2310,7 @@ class FolderViewSet(BaseModelViewSet):
         required_libraries = []
         missing_libraries = []
         link_dump_database_ids = {}
+
         try:
             objects = parsed_data.get("objects", None)
             if not objects:
@@ -2292,6 +2322,20 @@ class FolderViewSet(BaseModelViewSet):
             if Folder in models_map.values():
                 logger.error("Dump contains a domain")
                 raise ValidationError({"error": "Dump contains a domain"})
+
+            # check that user has permission to create all objects to import
+            error_dict = {}
+            for model in models_map.values():
+                if not RoleAssignment.is_access_allowed(
+                    user=user,
+                    perm=Permission.objects.get(
+                        codename=f"add_{model._meta.model_name}"
+                    ),
+                    folder=Folder.get_root_folder(),
+                ):
+                    error_dict[model._meta.model_name] = "permission_denied"
+            if error_dict:
+                raise PermissionDenied()
 
             # Validation phase (outside transaction since it doesn't modify database)
             creation_order = self._resolve_dependencies(list(models_map.values()))
@@ -2360,9 +2404,9 @@ class FolderViewSet(BaseModelViewSet):
 
         except ValidationError as e:
             if missing_libraries:
-                logger.warning(f"Missing libraries: {missing_libraries}")
+                logger.warning("Missing libraries", libraries=missing_libraries)
                 raise ValidationError({"missing_libraries": missing_libraries})
-            logger.exception(f"Failed to import objects: {str(e)}")
+            logger.exception("Failed to import objects", objects=str(e))
             raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
 
     def _validate_model_objects(
@@ -2407,8 +2451,8 @@ class FolderViewSet(BaseModelViewSet):
                     continue
 
                 # Validate using serializer
-                SerializerClass = import_export_serializer_class(model)
-                serializer = SerializerClass(data=fields)
+                serializer_class = import_export_serializer_class(model)
+                serializer = serializer_class(data=fields)
 
                 if not serializer.is_valid():
                     validation_errors.append(
@@ -2422,7 +2466,7 @@ class FolderViewSet(BaseModelViewSet):
             except Exception as e:
                 logger.error(
                     f"Error validating object {obj_id} in {model_name}: {str(e)}",
-                    exc_info=e,
+                    exc_info=True,
                 )
                 validation_errors.append(
                     {
@@ -2515,7 +2559,7 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
                 except Exception as e:
-                    logger.error(f"Error creating object {obj_id}: {str(e)}")
+                    logger.error("Error creating object", obj=obj, exc_info=True)
                     # This will trigger a rollback of the entire batch
                     raise ValidationError(
                         f"Error creating {model._meta.model_name}: {str(e)}"
@@ -3373,44 +3417,88 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
+        with optimized database operations for different scenarios.
         """
         baseline = serializer.validated_data.pop("baseline", None)
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
-        instance: ComplianceAssessment = serializer.save()
-        instance.create_requirement_assessments(baseline)
-        if baseline and baseline.framework != instance.framework:
-            mapping_set = RequirementMappingSet.objects.get(
-                target_framework=serializer.validated_data["framework"],
-                source_framework=baseline.framework,
-            )
-            for (
-                requirement_assessment
-            ) in instance.compute_requirement_assessments_results(
-                mapping_set, baseline
-            ):
-                baseline_requirement_assessment = RequirementAssessment.objects.get(
-                    id=requirement_assessment.mapping_inference[
+
+        with transaction.atomic():
+            instance: ComplianceAssessment = serializer.save()
+            instance.create_requirement_assessments(baseline)
+
+            # Handle different framework case
+            if baseline and baseline.framework != instance.framework:
+                # Fetch mapping set and prefetch related data
+                mapping_set = RequirementMappingSet.objects.select_related(
+                    "source_framework", "target_framework"
+                ).get(
+                    target_framework=serializer.validated_data["framework"],
+                    source_framework=baseline.framework,
+                )
+
+                # Compute results and get all affected requirement assessments
+                computed_assessments = instance.compute_requirement_assessments_results(
+                    mapping_set, baseline
+                )
+
+                # Collect all source requirement assessment IDs
+                source_assessment_ids = [
+                    assessment.mapping_inference["source_requirement_assessment"]["id"]
+                    for assessment in computed_assessments
+                ]
+
+                # Fetch all baseline requirement assessments in one query
+                baseline_assessments = {
+                    str(ra.id): ra
+                    for ra in RequirementAssessment.objects.filter(
+                        id__in=source_assessment_ids
+                    ).prefetch_related("evidences", "applied_controls")
+                }
+
+                # Prepare bulk updates
+                updates = []
+                m2m_operations = []
+
+                for requirement_assessment in computed_assessments:
+                    source_id = requirement_assessment.mapping_inference[
                         "source_requirement_assessment"
                     ]["id"]
+                    baseline_ra = baseline_assessments[source_id]
+
+                    # Update observation
+                    requirement_assessment.observation = baseline_ra.observation
+                    updates.append(requirement_assessment)
+
+                    # Store M2M operations for later
+                    m2m_operations.append(
+                        (
+                            requirement_assessment,
+                            baseline_ra.evidences.all(),
+                            baseline_ra.applied_controls.all(),
+                        )
+                    )
+
+                # Bulk update observations
+                if updates:
+                    RequirementAssessment.objects.bulk_update(updates, ["observation"])
+
+                # Handle M2M relationships in bulk
+                for assessment, evidences, controls in m2m_operations:
+                    assessment.evidences.add(*[ev.id for ev in evidences])
+                    assessment.applied_controls.add(*[ac.id for ac in controls])
+
+            # Handle applied controls creation
+            if create_applied_controls:
+                # Prefetch all requirement assessments with their suggestions
+                assessments = instance.requirement_assessments.all().prefetch_related(
+                    "requirement__control_suggestions"
                 )
-                requirement_assessment.observation = (
-                    baseline_requirement_assessment.observation
-                )
-                requirement_assessment.evidences.add(
-                    *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
-                )
-                requirement_assessment.applied_controls.add(
-                    *[
-                        ac.id
-                        for ac in baseline_requirement_assessment.applied_controls.all()
-                    ]
-                )
-                requirement_assessment.save()
-        if create_applied_controls:
-            for requirement_assessment in instance.requirement_assessments.all():
-                requirement_assessment.create_applied_controls_from_suggestions()
+
+                # Create applied controls in bulk for each assessment
+                for requirement_assessment in assessments:
+                    requirement_assessment.create_applied_controls_from_suggestions()
 
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
