@@ -649,6 +649,7 @@
 	"UserDoesNotExist": "User not declared, please contact your administrator",
 	"idPInitiatedSSORejected": "IdP initiated SSO rejected, please contact your administrator",
 	"permissionDenied": "Permission denied",
+	"userDoesNotHavePermissionToImportDomain": "You do not have the permission to import a domain. Please contact your administrator.",
 	"signupClosed": "Signup closed",
 	"loginSSO": "Login with SSO",
 	"or": "or",

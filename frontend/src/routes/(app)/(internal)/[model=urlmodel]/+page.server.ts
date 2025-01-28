@@ -96,7 +96,7 @@ export const actions: Actions = {
 
 		const form = await superValidate(formData, zod(modelSchema('folders-import')));
 		if (!form.valid) {
-			return fail(400, { form });
+			return fail(400, withFiles({ form }));
 		}
 
 		const { file } = formData as { file: File };
@@ -121,18 +121,18 @@ export const actions: Actions = {
 				const version = res.missing_libraries[i + 1];
 				setError(form, 'non_field_errors', `${urn} v${version}`);
 			}
-			return fail(400, { form });
+			return fail(400, withFiles({ form }));
 		}
 
 		if (!response.ok) {
 			if (res.error) {
 				setFlash({ type: 'error', message: safeTranslate(res.error) }, event);
-				return { form };
+				return withFiles({ form });
 			}
 			Object.entries(res).forEach(([key, value]) => {
 				setError(form, key, safeTranslate(value));
 			});
-			return fail(400, { form });
+			return fail(400, withFiles({ form }));
 		}
 
 		setFlash(
