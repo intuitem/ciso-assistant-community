@@ -248,7 +248,7 @@ const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
 
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.current_criticality?.toString(),
+	getColumn: (row) => row.current_criticality.toString(),
 	extraProps: {
 		defaultOptionName: 'current_criticality'
 	},
@@ -257,7 +257,7 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 
 const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.residual_criticality?.toString(),
+	getColumn: (row) => row.residual_criticality.toString(),
 	extraProps: {
 		defaultOptionName: 'residual_criticality'
 	},
