@@ -1854,6 +1854,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         verbose_name=_("Cost"),
     )
 
+    progress_field = models.IntegerField(default=0, verbose_name=_("Progress Field"))
+
     fields_to_check = ["name"]
 
     class Meta:
