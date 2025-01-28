@@ -30,6 +30,7 @@
 	export let data: PageData;
 
 	let metrics;
+	let counters: Counters;
 
 	// Subscribe to the streamed metrics
 	$: {
@@ -38,9 +39,14 @@
 				metrics = metricsData;
 			});
 		}
+
+		if (data.stream?.counters) {
+			data.stream.counters.then((countersData) => {
+				counters = countersData;
+			});
+		}
 	}
 
-	const counters: Counters = data.get_counters;
 	const risk_assessments = data.risk_assessments;
 
 	const cur_rsk_label = m.currentRisk();
@@ -333,49 +339,53 @@
 					</div>
 				{/if}
 			{:else if tabSet === 1}
-				<section id="stats">
-					<span class="text-xl font-extrabold">{m.statistics()}</span>
-					<div
-						class="flex justify-between flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4"
-					>
-						<CounterCard
-							count={counters.domains}
-							label={m.domains()}
-							faIcon="fa-solid fa-diagram-project"
-							href="/folders"
-						/>
-						<CounterCard
-							count={counters.projects}
-							label={m.projects()}
-							faIcon="fa-solid fa-cubes"
-							href="/projects"
-						/>
-						<CounterCard
-							count={counters.applied_controls}
-							label={m.appliedControls()}
-							faIcon="fa-solid fa-fire-extinguisher"
-							href="/applied-controls"
-						/>
-						<CounterCard
-							count={counters.risk_assessments}
-							label={m.riskAssessments()}
-							faIcon="fa-solid fa-magnifying-glass-chart"
-							href="/risk-assessments"
-						/>
-						<CounterCard
-							count={counters.compliance_assessments}
-							label={m.complianceAssessments()}
-							faIcon="fa-solid fa-arrows-to-eye"
-							href="/compliance-assessments"
-						/>
-						<CounterCard
-							count={counters.policies}
-							label={m.policies()}
-							faIcon="fas fa-file-alt"
-							href="/policies"
-						/>
-					</div>
-				</section>
+				{#if counters}
+					<section id="stats">
+						<span class="text-xl font-extrabold">{m.statistics()}</span>
+						<div
+							class="flex justify-between flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4"
+						>
+							<CounterCard
+								count={counters.domains}
+								label={m.domains()}
+								faIcon="fa-solid fa-diagram-project"
+								href="/folders"
+							/>
+							<CounterCard
+								count={counters.projects}
+								label={m.projects()}
+								faIcon="fa-solid fa-cubes"
+								href="/projects"
+							/>
+							<CounterCard
+								count={counters.applied_controls}
+								label={m.appliedControls()}
+								faIcon="fa-solid fa-fire-extinguisher"
+								href="/applied-controls"
+							/>
+							<CounterCard
+								count={counters.risk_assessments}
+								label={m.riskAssessments()}
+								faIcon="fa-solid fa-magnifying-glass-chart"
+								href="/risk-assessments"
+							/>
+							<CounterCard
+								count={counters.compliance_assessments}
+								label={m.complianceAssessments()}
+								faIcon="fa-solid fa-arrows-to-eye"
+								href="/compliance-assessments"
+							/>
+							<CounterCard
+								count={counters.policies}
+								label={m.policies()}
+								faIcon="fas fa-file-alt"
+								href="/policies"
+							/>
+						</div>
+					</section>
+				{:else}
+					<LoadingSpinner />
+				{/if}
 				<section class="space-y-4">
 					<div
 						class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 h-96 lg:h-48 text-sm whitespace-nowrap"

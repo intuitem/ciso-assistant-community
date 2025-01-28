@@ -40,21 +40,25 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		applied_control.state = timeState(applied_control.eta);
 	}
 
-	const req_get_counters = await fetch(`${BASE_API_URL}/get_counters/`);
-	const counters = await req_get_counters.json();
-
-	const getMetrics = () => {
-		return fetch(`${BASE_API_URL}/get_metrics/`)
-			.catch((error) => {
-				console.error('Failed to fetch metrics:', error);
-				return { json: () => ({ results: null }) };
-			})
-			.then((response) => response.json())
-			.catch((error) => {
-				console.error('Failed to parse metrics response:', error);
-				return { results: null };
-			})
-			.then((data) => data.results);
+	const getCounters = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/get_counters/`);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('failed to fetch or parse counters:', error);
+			return null;
+		}
+	};
+	const getMetrics = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/get_metrics/`);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('Failed to fetch or parse metrics:', error);
+			return null;
+		}
 	};
 
 	const usedRiskMatrices: { id: string; name: string; risk_assessments_count: number }[] =
@@ -108,13 +112,13 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		measures_to_review: measures_to_review.results,
 		acceptances_to_review: acceptances_to_review.results,
 		risk_assessments: risk_assessments.results,
-		get_counters: counters.results,
 		measures: ord_applied_controls.results,
 		applied_control_status: applied_control_status.results,
 		user: locals.user,
 		title: m.analytics(),
 		stream: {
-			metrics: getMetrics()
+			metrics: getMetrics(),
+			counters: getCounters()
 		}
 	};
 };
