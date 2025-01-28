@@ -8,7 +8,7 @@
 	} from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
 	// Types
@@ -105,14 +105,18 @@
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
 
-	const data = source.body.map((item: Record<string, any>, index: number) => {
-		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
-	});
+	// const data = source.body.map((item: Record<string, any>, index: number) => {
+	// 	return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
+	// });
 
-	const handler = new DataHandler(data, { rowsPerPage: 10 });
+	const handler = new DataHandler([], { rowsPerPage: 5 });
 	const rows = handler.getRows();
 
 	handler.onChange((state: State) => loadTableData(state, 'threats', '/threats') as Promise<Row[]>);
+
+	onMount(() => {
+		handler.invalidate();
+	});
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 
