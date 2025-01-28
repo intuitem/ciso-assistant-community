@@ -17,7 +17,7 @@
 	import CounterCard from './CounterCard.svelte';
 	import type { PageData } from './$types';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import LoadingSpinner from './LoadingSpinner.svelte';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	interface Counters {
 		domains: number;
 		projects: number;
