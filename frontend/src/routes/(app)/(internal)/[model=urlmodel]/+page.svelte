@@ -164,7 +164,7 @@
 							{/if}
 							{#if URLModel === 'folders'}
 								<button
-									class="inline-block border-e p-3 btn-mini bg-sky-400 text-white w-12 focus:relative"
+									class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
 									data-testid="import-button"
 									title={safeTranslate('importFolder')}
 									on:click={modalFolderImportForm}
