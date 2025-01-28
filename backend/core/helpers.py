@@ -888,20 +888,40 @@ def csf_functions(user):
 
 
 def get_metrics(user: User):
-    def viewable_items(model):
-        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, model
-        )
-        return model.objects.filter(id__in=object_ids)
+    root_folder = Folder.get_root_folder()
 
-    viewable_controls = viewable_items(AppliedControl)
-    controls_count = viewable_controls.count()
-    progress_avg = math.ceil(
-        mean([x.progress() for x in viewable_items(ComplianceAssessment)] or [0])
+    # Fetch accessible object IDs for models
+    accessible_objects = {
+        model: set(
+            RoleAssignment.get_accessible_object_ids(root_folder, user, model)[0]
+        )
+        for model in [
+            AppliedControl,
+            ComplianceAssessment,
+            RiskAssessment,
+            RiskScenario,
+            Threat,
+            RiskAcceptance,
+            Evidence,
+            RequirementAssessment,
+        ]
+    }
+
+    # Fetch viewable controls and compliance assessments
+    viewable_controls = AppliedControl.objects.filter(
+        id__in=accessible_objects[AppliedControl]
     )
-    missed_eta_count = viewable_controls.filter(
-        eta__lt=date.today(),
-    ).count()
+    viewable_compliance = ComplianceAssessment.objects.filter(
+        id__in=accessible_objects[ComplianceAssessment]
+    )
+
+    controls_count = viewable_controls.count()
+    missed_eta_count = viewable_controls.filter(eta__lt=date.today()).count()
+
+    # Efficiently compute the average progress from the method calls
+    progress_sum = sum(comp.progress() for comp in viewable_compliance)
+    progress_count = viewable_compliance.count()
+    progress_avg = math.ceil(progress_sum / progress_count) if progress_count else 0
 
     data = {
         "controls": {
@@ -915,32 +935,33 @@ def get_metrics(user: User):
             "eta_missed": missed_eta_count,
         },
         "risk": {
-            "assessments": viewable_items(RiskAssessment).count(),
-            "scenarios": viewable_items(RiskScenario).count(),
-            "threats": viewable_items(Threat)
-            .filter(risk_scenarios__isnull=False)
+            "assessments": len(accessible_objects[RiskAssessment]),
+            "scenarios": len(accessible_objects[RiskScenario]),
+            "threats": Threat.objects.filter(
+                id__in=accessible_objects[Threat], risk_scenarios__isnull=False
+            )
             .distinct()
             .count(),
-            "acceptances": viewable_items(RiskAcceptance).count(),
+            "acceptances": len(accessible_objects[RiskAcceptance]),
         },
         "compliance": {
-            "used_frameworks": viewable_items(ComplianceAssessment)
-            .values("framework_id")
+            "used_frameworks": viewable_compliance.values("framework_id")
             .distinct()
             .count(),
-            "audits": viewable_items(ComplianceAssessment).count(),
-            "active_audits": viewable_items(ComplianceAssessment)
-            .filter(status__in=["in_progress", "in_review", "done"])
-            .count(),
-            "evidences": viewable_items(Evidence).count(),
-            "non_compliant_items": viewable_items(RequirementAssessment)
-            .filter(result="non_compliant")
-            .count(),
+            "audits": len(accessible_objects[ComplianceAssessment]),
+            "active_audits": viewable_compliance.filter(
+                status__in=["in_progress", "in_review", "done"]
+            ).count(),
+            "evidences": len(accessible_objects[Evidence]),
+            "non_compliant_items": RequirementAssessment.objects.filter(
+                id__in=accessible_objects[RequirementAssessment], result="non_compliant"
+            ).count(),
             "progress_avg": progress_avg,
         },
         "audits_stats": build_audits_stats(user),
         "csf_functions": csf_functions(user),
     }
+
     return data
 
 
