@@ -1141,5 +1141,6 @@
 	"maxRadius": "Max Radius",
 	"greenZoneRadius": "Green zone radius",
 	"yellowZoneRadius": "Yellow zone radius",
-	"redZoneRadius": "Red zone radius"
+	"redZoneRadius": "Red zone radius",
+	"recap": "Recap"
 }
