@@ -9,7 +9,7 @@ export const loadTableData = async (state: State, URLModel: urlModel, endpoint: 
 	const response = await fetch(`${endpoint}/?${getParams(state)}`).then((res) => res.json());
 	state.setTotalRows(response.count);
 
-	const bodyData = tableSourceMapper(response, listViewFields[URLModel as urlModel].body);
+	const bodyData = tableSourceMapper(response.results, listViewFields[URLModel as urlModel].body);
 
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
