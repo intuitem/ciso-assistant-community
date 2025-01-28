@@ -20,7 +20,7 @@
 
 	interface Counters {
 		domains: number;
-		projects: number;
+		perimeters: number;
 		applied_controls: number;
 		risk_assessments: number;
 		compliance_assessments: number;
@@ -328,10 +328,10 @@
 							href="/folders"
 						/>
 						<CounterCard
-							count={counters.projects}
-							label={m.projects()}
+							count={counters.perimeters}
+							label={m.perimeters()}
 							faIcon="fa-solid fa-cubes"
-							href="/projects"
+							href="/perimeters"
 						/>
 						<CounterCard
 							count={counters.applied_controls}

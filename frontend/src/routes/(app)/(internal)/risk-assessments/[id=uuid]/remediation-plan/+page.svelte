@@ -47,10 +47,10 @@
 
 <div class="bg-white p-2 m-2 shadow rounded-lg space-x-2 flex flex-row justify-center">
 	<p class="font-semibold text-lg">
-		{m.project()}:
+		{m.perimeter()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/projects/{data.risk_assessment.project.id}/">{data.risk_assessment.project.str}</a
+			href="/perimeters/{data.risk_assessment.perimeter.id}/">{data.risk_assessment.perimeter.str}</a
 		>
 	</p>
 	<p>/</p>

@@ -3,7 +3,7 @@ import { composerSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import type { Project } from '$lib/utils/types';
+import type { Perimeter } from '$lib/utils/types';
 import { TODAY } from '$lib/utils/constants';
 import * as m from '$paraglide/messages';
 
@@ -28,7 +28,7 @@ interface RequirementAssessmentDonutItem extends Omit<DonutItem, 'name'> {
 	percentage: string;
 }
 
-interface ProjectAnalytics extends Project {
+interface PerimeterAnalytics extends Perimeter {
 	overallCompliance: {
 		values: RequirementAssessmentDonutItem[];
 		total: number;

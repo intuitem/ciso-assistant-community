@@ -563,7 +563,7 @@ class LibraryUpdater:
                         ra = RequirementAssessment.objects.create(
                             compliance_assessment=compliance_assessment,
                             requirement=new_requirement_node,
-                            folder=compliance_assessment.project.folder,
+                            folder=compliance_assessment.perimeter.folder,
                             answer=transform_question_to_answer(
                                 new_requirement_node.question
                             )
@@ -894,8 +894,8 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return RiskAssessment.objects.filter(risk_matrix=self)
 
     @property
-    def projects(self) -> list:
-        return Project.objects.filter(riskassessment__risk_matrix=self).distinct()
+    def perimeters(self) -> list:
+        return Perimeter.objects.filter(riskassessment__risk_matrix=self).distinct()
 
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
@@ -1348,7 +1348,7 @@ class Qualification(ReferentialObjectMixin, I18nObjectMixin):
 ########################### Domain objects #########################
 
 
-class Project(NameDescriptionMixin, FolderMixin):
+class Perimeter(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("Undefined")),
         ("in_design", _("Design")),
@@ -1370,8 +1370,8 @@ class Project(NameDescriptionMixin, FolderMixin):
     fields_to_check = ["name"]
 
     class Meta:
-        verbose_name = _("Project")
-        verbose_name_plural = _("Projects")
+        verbose_name = _("Perimeter")
+        verbose_name_plural = _("Perimeters")
 
     def overall_compliance(self):
         compliance_assessments_list = [
@@ -1876,8 +1876,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         return {scenario.risk_assessment for scenario in self.risk_scenarios}
 
     @property
-    def projects(self):
-        return {risk_assessment.project for risk_assessment in self.risk_assessments}
+    def perimeters(self):
+        return {risk_assessment.perimeter for risk_assessment in self.risk_assessments}
 
     def __str__(self):
         return self.name
@@ -2039,8 +2039,8 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, verbose_name=_("Project")
+    perimeter = models.ForeignKey(
+        Perimeter, on_delete=models.CASCADE, verbose_name=_("Perimeter"), null=True,
     )
     version = models.CharField(
         max_length=100,
@@ -2079,7 +2079,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     def save(self, *args, **kwargs) -> None:
         if not self.folder or self.folder == Folder.get_root_folder():
-            self.folder = self.project.folder
+            self.folder = self.perimeter.folder
         return super().save(*args, **kwargs)
 
 
@@ -2140,7 +2140,7 @@ class RiskAssessment(Assessment):
 
     @property
     def path_display(self) -> str:
-        return f"{self.project.folder}/{self.project}/{self.name} - {self.version}"
+        return f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
 
     def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()
@@ -2596,10 +2596,10 @@ class RiskScenario(NameDescriptionMixin):
         candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
-    def parent_project(self):
-        return self.risk_assessment.project
+    def parent_perimeter(self):
+        return self.risk_assessment.perimeter
 
-    parent_project.short_description = _("Project")
+    parent_perimeter.short_description = _("Perimeter")
 
     def get_matrix(self):
         return self.risk_assessment.risk_matrix.parse_json_translated()
@@ -2700,7 +2700,7 @@ class RiskScenario(NameDescriptionMixin):
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
     def __str__(self):
-        return str(self.parent_project()) + _(": ") + str(self.name)
+        return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
     def save(self, *args, **kwargs):
         if self.current_proba >= 0 and self.current_impact >= 0:

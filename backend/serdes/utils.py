@@ -16,7 +16,7 @@ from core.models import (
     AppliedControl,
     Evidence,
     Framework,
-    Project,
+    Perimeter,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
@@ -45,7 +45,7 @@ from core.serializers import (
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,
     EvidenceImportExportSerializer,
-    ProjectImportExportSerializer,
+    PerimeterImportExportSerializer,
     RiskAssessmentImportExportSerializer,
     RiskScenarioImportExportSerializer,
     ComplianceAssessmentImportExportSerializer,
@@ -77,7 +77,7 @@ from core.models import (
     AppliedControl,
     Evidence,
     Framework,
-    Project,
+    Perimeter,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
@@ -106,7 +106,7 @@ from core.serializers import (
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,
     EvidenceImportExportSerializer,
-    ProjectImportExportSerializer,
+    PerimeterImportExportSerializer,
     RiskAssessmentImportExportSerializer,
     RiskScenarioImportExportSerializer,
     ComplianceAssessmentImportExportSerializer,
@@ -209,7 +209,7 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         Asset: AssetImportExportSerializer,
         AppliedControl: AppliedControlImportExportSerializer,
         Evidence: EvidenceImportExportSerializer,
-        Project: ProjectImportExportSerializer,
+        Perimeter: PerimeterImportExportSerializer,
         RiskAssessment: RiskAssessmentImportExportSerializer,
         RiskScenario: RiskScenarioImportExportSerializer,
         ComplianceAssessment: ComplianceAssessmentImportExportSerializer,
@@ -429,10 +429,10 @@ def get_domain_export_objects(domain: Folder):
         .filter(content_type=Folder.ContentType.DOMAIN)
         .distinct()
     )
-    projects = Project.objects.filter(folder__in=folders).distinct()
+    perimeters = Perimeter.objects.filter(folder__in=folders).distinct()
 
     risk_assessments = RiskAssessment.objects.filter(
-        Q(project__in=projects) | Q(folder__in=folders)
+        Q(perimeter__in=perimeters) | Q(folder__in=folders)
     ).distinct()
     risk_scenarios = RiskScenario.objects.filter(
         risk_assessment__in=risk_assessments
@@ -463,7 +463,7 @@ def get_domain_export_objects(domain: Folder):
     ).distinct()
 
     compliance_assessments = ComplianceAssessment.objects.filter(
-        Q(project__in=projects)
+        Q(perimeter__in=perimeters)
         | Q(folder__in=folders)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
     ).distinct()
@@ -545,7 +545,7 @@ def get_domain_export_objects(domain: Folder):
         "appliedcontrol": applied_controls,
         "entity": entities,
         "evidence": evidences,
-        "project": projects,
+        "perimeter": perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,
         "ebiosrmstudy": ebios_rm_studies,

@@ -243,47 +243,47 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 # Risk Assessment
 
 
-class ProjectViewSet(BaseModelViewSet):
+class PerimeterViewSet(BaseModelViewSet):
     """
-    API endpoint that allows projects to be viewed or edited.
+    API endpoint that allows perimeters to be viewed or edited.
     """
 
-    model = Project
+    model = Perimeter
     filterset_fields = ["folder", "lc_status"]
     search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
-        return Response(dict(Project.PRJ_LC_STATUS))
+        return Response(dict(Perimeter.PRJ_LC_STATUS))
 
     @action(detail=False, methods=["get"])
     def names(self, request):
         uuid_list = request.query_params.getlist("id[]", [])
-        queryset = Project.objects.filter(id__in=uuid_list)
+        queryset = Perimeter.objects.filter(id__in=uuid_list)
 
-        return Response({str(project.id): project.name for project in queryset})
+        return Response({str(perimeter.id): perimeter.name for perimeter in queryset})
 
     @action(detail=False, methods=["get"])
     def quality_check(self, request):
         """
-        Returns the quality check of the projects
+        Returns the quality check of the perimeters
         """
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Project
+            folder=Folder.get_root_folder(), user=request.user, object_type=Perimeter
         )
-        projects = Project.objects.filter(id__in=viewable_objects)
+        perimeters = Perimeter.objects.filter(id__in=viewable_objects)
         res = {
             str(p.id): {
-                "project": ProjectReadSerializer(p).data,
+                "perimeter": PerimeterReadSerializer(p).data,
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
             }
-            for p in projects
+            for p in perimeters
         }
         for compliance_assessment in ComplianceAssessment.objects.filter(
-            project__in=projects
+            perimeter__in=perimeters
         ):
-            res[str(compliance_assessment.project.id)]["compliance_assessments"][
+            res[str(compliance_assessment.perimeter.id)]["compliance_assessments"][
                 "objects"
             ][str(compliance_assessment.id)] = {
                 "object": ComplianceAssessmentReadSerializer(
@@ -291,8 +291,8 @@ class ProjectViewSet(BaseModelViewSet):
                 ).data,
                 "quality_check": compliance_assessment.quality_check(),
             }
-        for risk_assessment in RiskAssessment.objects.filter(project__in=projects):
-            res[str(risk_assessment.project.id)]["risk_assessments"]["objects"][
+        for risk_assessment in RiskAssessment.objects.filter(perimeter__in=perimeters):
+            res[str(risk_assessment.perimeter.id)]["risk_assessments"]["objects"][
                 str(risk_assessment.id)
             ] = {
                 "object": RiskAssessmentReadSerializer(risk_assessment).data,
@@ -303,20 +303,20 @@ class ProjectViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="quality_check")
     def quality_check_detail(self, request, pk):
         """
-        Returns the quality check of the project
+        Returns the quality check of the perimeter
         """
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Project
+            folder=Folder.get_root_folder(), user=request.user, object_type=Perimeter
         )
         if UUID(pk) in viewable_objects:
-            project = self.get_object()
+            perimeter = self.get_object()
             res = {
-                "project": ProjectReadSerializer(project).data,
+                "perimeter": PerimeterReadSerializer(perimeter).data,
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
             }
             for compliance_assessment in ComplianceAssessment.objects.filter(
-                project=project
+                perimeter=perimeter
             ):
                 res["compliance_assessments"]["objects"][
                     str(compliance_assessment.id)
@@ -326,7 +326,7 @@ class ProjectViewSet(BaseModelViewSet):
                     ).data,
                     "quality_check": compliance_assessment.quality_check(),
                 }
-            for risk_assessment in RiskAssessment.objects.filter(project=project):
+            for risk_assessment in RiskAssessment.objects.filter(perimeter=perimeter):
                 res["risk_assessments"]["objects"][str(risk_assessment.id)] = {
                     "object": RiskAssessmentReadSerializer(risk_assessment).data,
                     "quality_check": risk_assessment.quality_check(),
@@ -342,9 +342,9 @@ class ProjectViewSet(BaseModelViewSet):
         (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
-            object_type=Project,
+            object_type=Perimeter,
         )
-        for item in Project.objects.filter(id__in=viewable_items):
+        for item in Perimeter.objects.filter(id__in=viewable_items):
             if my_map.get(item.folder.name) is None:
                 my_map[item.folder.name] = {}
             my_map[item.folder.name].update({item.name: item.id})
@@ -670,8 +670,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     model = RiskAssessment
     filterset_fields = [
-        "project",
-        "project__folder",
+        "perimeter",
+        "perimeter__folder",
         "authors",
         "risk_matrix",
         "status",
@@ -977,7 +977,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data["name"],
                 description=data["description"],
-                project=Project.objects.get(id=data["project"]),
+                perimeter=Perimeter.objects.get(id=data["perimeter"]),
                 version=data["version"],
                 risk_matrix=risk_assessment.risk_matrix,
                 eta=risk_assessment.eta,
@@ -1554,8 +1554,8 @@ class RiskScenarioViewSet(BaseModelViewSet):
     model = RiskScenario
     filterset_fields = [
         "risk_assessment",
-        "risk_assessment__project",
-        "risk_assessment__project__folder",
+        "risk_assessment__perimeter",
+        "risk_assessment__perimeter__folder",
         "treatment",
         "threats",
         "assets",
@@ -1768,7 +1768,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             if not RoleAssignment.is_access_allowed(
                 risk_acceptance.get("approver"),
                 Permission.objects.get(codename="approve_riskacceptance"),
-                scenario.risk_assessment.project.folder,
+                scenario.risk_assessment.perimeter.folder,
             ):
                 raise ValidationError(
                     "The approver is not allowed to approve this risk acceptance"
@@ -1970,7 +1970,7 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
-        Returns the tree of domains and projects
+        Returns the tree of domains and perimeters
         """
         tree = {"name": "Global", "children": []}
 
@@ -2593,8 +2593,8 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "riskassessment":
-                _fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(_fields["project"])
+                _fields["perimeter"] = Perimeter.objects.get(
+                    id=link_dump_database_ids.get(_fields["perimeter"])
                 )
                 _fields["risk_matrix"] = RiskMatrix.objects.get(
                     urn=_fields.get("risk_matrix")
@@ -2608,8 +2608,8 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "complianceassessment":
-                _fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(_fields["project"])
+                _fields["perimeter"] = Perimeter.objects.get(
+                    id=link_dump_database_ids.get(_fields["perimeter"])
                 )
                 _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
 
@@ -3199,7 +3199,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "project", "status", "ebios_rm_studies"]
+    filterset_fields = ["framework", "perimeter", "status", "ebios_rm_studies"]
     search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 

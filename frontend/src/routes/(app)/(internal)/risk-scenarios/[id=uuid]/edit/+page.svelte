@@ -92,10 +92,10 @@
 				<div class="card p-2 bg-white shadow-lg w-1/2">
 					<div class="flex justify-between p-2">
 						<div>
-							<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
+							<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
 							<Anchor
 								class="anchor text-sm font-semibold"
-								href="/projects/{data.scenario.project.id}">{data.scenario.project.str}</Anchor
+								href="/perimeters/{data.scenario.perimeter.id}">{data.scenario.perimeter.str}</Anchor
 							>
 						</div>
 						<div>

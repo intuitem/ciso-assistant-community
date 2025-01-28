@@ -86,9 +86,9 @@
 			<h4 class="h4 font-semibold">{m.scope()}</h4>
 			<div class="flex flex-row justify-between">
 				<span>
-					<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-					<Anchor class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
-						>{data.scenario.project.str}</Anchor
+					<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
+					<Anchor class="anchor text-sm font-semibold" href="/perimeters/{data.scenario.perimeter.id}"
+						>{data.scenario.perimeter.str}</Anchor
 					>
 				</span>
 				<span>

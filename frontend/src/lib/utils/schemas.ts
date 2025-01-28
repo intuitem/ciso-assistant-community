@@ -75,7 +75,7 @@ export const FolderImportSchema = z.object({
 	//or booleans (true/false). Without coerce, form validation fails inconsistently.
 });
 
-export const ProjectSchema = z.object({
+export const PerimeterSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional().nullable(),
@@ -96,7 +96,7 @@ export const LibraryUploadSchema = z.object({
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	project: z.string(),
+	perimeter: z.string(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional().nullable(),
 	risk_matrix: z.string(),
@@ -268,7 +268,7 @@ export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	ref_id: z.string().optional().nullable(),
-	project: z.string(),
+	perimeter: z.string(),
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
@@ -359,7 +359,7 @@ export const EntityAssessmentSchema = z.object({
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
-	project: z.string(),
+	perimeter: z.string(),
 	status: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -491,7 +491,7 @@ export const operationalScenarioSchema = z.object({
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
-	projects: ProjectSchema,
+	perimeters: PerimeterSchema,
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
