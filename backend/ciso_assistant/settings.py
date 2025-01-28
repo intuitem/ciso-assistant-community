@@ -418,11 +418,14 @@ if MAIL_DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
 
+
 ## Huey settings
+HUEY_FILE_PATH = os.environ.get("HUEY_FILE_PATH", BASE_DIR / "db" / "huey.db")
+
 HUEY = {
     "huey_class": "huey.SqliteHuey",
     "name": "ciso_assistant",
-    "filename": BASE_DIR / "db" / "huey.db",
+    "filename": HUEY_FILE_PATH,
     "results": True,  # would be interesting for debug
     "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
 }
