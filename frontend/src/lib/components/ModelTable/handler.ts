@@ -33,9 +33,9 @@ export const loadTableData = async (state: State, URLModel: urlModel, endpoint: 
 const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	let params = `offset=${offset}&limit=${rowsPerPage}`;
 	//
-	// if (search) {
-	// 	params += `&q=${search}`;
-	// }
+	if (search) {
+		params += `&search=${search}`;
+	}
 	if (sort) {
 		params += `&ordering=${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`;
 	}
