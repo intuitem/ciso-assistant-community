@@ -195,6 +195,12 @@ export const navData = {
 					name: 'evidences',
 					fa_icon: 'fa-solid fa-receipt',
 					href: '/evidences'
+				},
+				{
+					name: 'recap',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/recap',
+					permissions: ['view_complianceassessment']
 				}
 			]
 		},
