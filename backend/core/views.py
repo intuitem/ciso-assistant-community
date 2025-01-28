@@ -3417,44 +3417,88 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
+        with optimized database operations for different scenarios.
         """
         baseline = serializer.validated_data.pop("baseline", None)
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
-        instance: ComplianceAssessment = serializer.save()
-        instance.create_requirement_assessments(baseline)
-        if baseline and baseline.framework != instance.framework:
-            mapping_set = RequirementMappingSet.objects.get(
-                target_framework=serializer.validated_data["framework"],
-                source_framework=baseline.framework,
-            )
-            for (
-                requirement_assessment
-            ) in instance.compute_requirement_assessments_results(
-                mapping_set, baseline
-            ):
-                baseline_requirement_assessment = RequirementAssessment.objects.get(
-                    id=requirement_assessment.mapping_inference[
+
+        with transaction.atomic():
+            instance: ComplianceAssessment = serializer.save()
+            instance.create_requirement_assessments(baseline)
+
+            # Handle different framework case
+            if baseline and baseline.framework != instance.framework:
+                # Fetch mapping set and prefetch related data
+                mapping_set = RequirementMappingSet.objects.select_related(
+                    "source_framework", "target_framework"
+                ).get(
+                    target_framework=serializer.validated_data["framework"],
+                    source_framework=baseline.framework,
+                )
+
+                # Compute results and get all affected requirement assessments
+                computed_assessments = instance.compute_requirement_assessments_results(
+                    mapping_set, baseline
+                )
+
+                # Collect all source requirement assessment IDs
+                source_assessment_ids = [
+                    assessment.mapping_inference["source_requirement_assessment"]["id"]
+                    for assessment in computed_assessments
+                ]
+
+                # Fetch all baseline requirement assessments in one query
+                baseline_assessments = {
+                    str(ra.id): ra
+                    for ra in RequirementAssessment.objects.filter(
+                        id__in=source_assessment_ids
+                    ).prefetch_related("evidences", "applied_controls")
+                }
+
+                # Prepare bulk updates
+                updates = []
+                m2m_operations = []
+
+                for requirement_assessment in computed_assessments:
+                    source_id = requirement_assessment.mapping_inference[
                         "source_requirement_assessment"
                     ]["id"]
+                    baseline_ra = baseline_assessments[source_id]
+
+                    # Update observation
+                    requirement_assessment.observation = baseline_ra.observation
+                    updates.append(requirement_assessment)
+
+                    # Store M2M operations for later
+                    m2m_operations.append(
+                        (
+                            requirement_assessment,
+                            baseline_ra.evidences.all(),
+                            baseline_ra.applied_controls.all(),
+                        )
+                    )
+
+                # Bulk update observations
+                if updates:
+                    RequirementAssessment.objects.bulk_update(updates, ["observation"])
+
+                # Handle M2M relationships in bulk
+                for assessment, evidences, controls in m2m_operations:
+                    assessment.evidences.add(*[ev.id for ev in evidences])
+                    assessment.applied_controls.add(*[ac.id for ac in controls])
+
+            # Handle applied controls creation
+            if create_applied_controls:
+                # Prefetch all requirement assessments with their suggestions
+                assessments = instance.requirement_assessments.all().prefetch_related(
+                    "requirement__control_suggestions"
                 )
-                requirement_assessment.observation = (
-                    baseline_requirement_assessment.observation
-                )
-                requirement_assessment.evidences.add(
-                    *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
-                )
-                requirement_assessment.applied_controls.add(
-                    *[
-                        ac.id
-                        for ac in baseline_requirement_assessment.applied_controls.all()
-                    ]
-                )
-                requirement_assessment.save()
-        if create_applied_controls:
-            for requirement_assessment in instance.requirement_assessments.all():
-                requirement_assessment.create_applied_controls_from_suggestions()
+
+                # Create applied controls in bulk for each assessment
+                for requirement_assessment in assessments:
+                    requirement_assessment.create_applied_controls_from_suggestions()
 
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
