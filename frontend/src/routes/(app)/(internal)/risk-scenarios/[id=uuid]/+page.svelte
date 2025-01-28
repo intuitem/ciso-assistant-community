@@ -87,8 +87,9 @@
 			<div class="flex flex-row justify-between">
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
-					<Anchor class="anchor text-sm font-semibold" href="/perimeters/{data.scenario.perimeter.id}"
-						>{data.scenario.perimeter.str}</Anchor
+					<Anchor
+						class="anchor text-sm font-semibold"
+						href="/perimeters/{data.scenario.perimeter.id}">{data.scenario.perimeter.str}</Anchor
 					>
 				</span>
 				<span>

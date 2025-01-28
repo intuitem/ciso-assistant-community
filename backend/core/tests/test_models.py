@@ -428,7 +428,9 @@ class TestRiskScenario:
             risk_assessment=risk_assessment,
         )
 
-        assert scenario.parent_perimeter() == Perimeter.objects.get(name="test perimeter")
+        assert scenario.parent_perimeter() == Perimeter.objects.get(
+            name="test perimeter"
+        )
 
     @pytest.mark.usefixtures("risk_matrix_fixture")
     def test_risk_scenario_is_deleted_when_risk_assessment_is_deleted(self):

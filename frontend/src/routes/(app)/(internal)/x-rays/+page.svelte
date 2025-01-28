@@ -85,7 +85,9 @@
 						>
 					{/if}
 					{#if perimeter.risk_assessments.info.length > 0}
-						<span class="badge variant-soft-secondary">{perimeter.risk_assessments.info.length}</span>
+						<span class="badge variant-soft-secondary"
+							>{perimeter.risk_assessments.info.length}</span
+						>
 					{/if}
 				</Tab>
 				<svelte:fragment slot="panel">

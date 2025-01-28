@@ -25,7 +25,9 @@ def enisa_5g_scm_framework_fixture():
 
 @pytest.mark.django_db
 class TestRequirementAssessment:
-    @pytest.mark.usefixtures("domain_perimeter_fixture", "enisa_5g_scm_framework_fixture")
+    @pytest.mark.usefixtures(
+        "domain_perimeter_fixture", "enisa_5g_scm_framework_fixture"
+    )
     def test_create_applied_controls_from_suggestions(self):
         enisa_5g_scm = Framework.objects.first()
         compliance_assessment = ComplianceAssessment.objects.create(

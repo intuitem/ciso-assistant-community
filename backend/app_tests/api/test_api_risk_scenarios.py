@@ -212,7 +212,9 @@ class TestRiskScenariosAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            perimeter=Perimeter.objects.create(name="testPerimeter", folder=test.folder),
+            perimeter=Perimeter.objects.create(
+                name="testPerimeter", folder=test.folder
+            ),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         threat = Threat.objects.create(name="test", folder=test.folder)

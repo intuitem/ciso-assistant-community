@@ -50,7 +50,8 @@
 		{m.perimeter()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/perimeters/{data.risk_assessment.perimeter.id}/">{data.risk_assessment.perimeter.str}</a
+			href="/perimeters/{data.risk_assessment.perimeter.id}/"
+			>{data.risk_assessment.perimeter.str}</a
 		>
 	</p>
 	<p>/</p>

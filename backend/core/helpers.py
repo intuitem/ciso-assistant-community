@@ -162,7 +162,9 @@ def compile_perimeter_for_composer(user: User, perimeters_list: list):
 
     perimeter_objects = []
     for perimeter in perimeters_list:
-        perimeter_objects.append({"perimeter": get_object_or_404(Perimeter, pk=perimeter)})
+        perimeter_objects.append(
+            {"perimeter": get_object_or_404(Perimeter, pk=perimeter)}
+        )
 
     return {
         "perimeter_objects": perimeter_objects,
@@ -1007,7 +1009,9 @@ def risk_status(user: User, risk_assessment_list):
                 {"value": cnt, "itemStyle": {"color": STATUS_COLOR_MAP[status[0]]}}
             )
 
-        names.append(str(risk_assessment.perimeter) + " " + str(risk_assessment.version))
+        names.append(
+            str(risk_assessment.perimeter) + " " + str(risk_assessment.version)
+        )
 
     y_max_rsk = max(max_tmp, default=0) + 1
 
@@ -1183,7 +1187,9 @@ def get_folder_content(folder: Folder):
                 "children": [
                     {
                         "name": "audits",
-                        "value": ComplianceAssessment.objects.filter(perimeter=p).count(),
+                        "value": ComplianceAssessment.objects.filter(
+                            perimeter=p
+                        ).count(),
                     },
                     {
                         "name": "risk assessments",

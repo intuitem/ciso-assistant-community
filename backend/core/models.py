@@ -2040,7 +2040,10 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DEPRECATED = "deprecated", _("Deprecated")
 
     perimeter = models.ForeignKey(
-        Perimeter, on_delete=models.CASCADE, verbose_name=_("Perimeter"), null=True,
+        Perimeter,
+        on_delete=models.CASCADE,
+        verbose_name=_("Perimeter"),
+        null=True,
     )
     version = models.CharField(
         max_length=100,

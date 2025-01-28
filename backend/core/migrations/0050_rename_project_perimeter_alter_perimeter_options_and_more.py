@@ -5,38 +5,47 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0049_complianceassessment_show_documentation_score_and_more'),
-        ('iam', '0010_user_preferences'),
-        ('tprm', '0003_entityassessment_representatives'),
+        ("core", "0049_complianceassessment_show_documentation_score_and_more"),
+        ("iam", "0010_user_preferences"),
+        ("tprm", "0003_entityassessment_representatives"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Project',
-            new_name='Perimeter',
+            old_name="Project",
+            new_name="Perimeter",
         ),
         migrations.AlterModelOptions(
-            name='perimeter',
-            options={'verbose_name': 'Perimeter', 'verbose_name_plural': 'Perimeters'},
+            name="perimeter",
+            options={"verbose_name": "Perimeter", "verbose_name_plural": "Perimeters"},
         ),
         migrations.RemoveField(
-            model_name='complianceassessment',
-            name='project',
+            model_name="complianceassessment",
+            name="project",
         ),
         migrations.RemoveField(
-            model_name='riskassessment',
-            name='project',
+            model_name="riskassessment",
+            name="project",
         ),
         migrations.AddField(
-            model_name='complianceassessment',
-            name='perimeter',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='core.perimeter', verbose_name='Perimeter'),
+            model_name="complianceassessment",
+            name="perimeter",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.perimeter",
+                verbose_name="Perimeter",
+            ),
         ),
         migrations.AddField(
-            model_name='riskassessment',
-            name='perimeter',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='core.perimeter', verbose_name='Perimeter'),
+            model_name="riskassessment",
+            name="perimeter",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.perimeter",
+                verbose_name="Perimeter",
+            ),
         ),
     ]
