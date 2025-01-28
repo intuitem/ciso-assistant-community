@@ -3,37 +3,8 @@ import { composerSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import type { Project } from '$lib/utils/types';
 import { TODAY } from '$lib/utils/constants';
 import * as m from '$paraglide/messages';
-
-const REQUIREMENT_ASSESSMENT_STATUS = [
-	'compliant',
-	'partially_compliant',
-	'in_progress',
-	'non_compliant',
-	'not_applicable',
-	'to_do'
-] as const;
-
-interface DonutItem {
-	name: string;
-	localName?: string;
-	value: number;
-	itemStyle: Record<string, unknown>;
-}
-
-interface RequirementAssessmentDonutItem extends Omit<DonutItem, 'name'> {
-	name: (typeof REQUIREMENT_ASSESSMENT_STATUS)[number];
-	percentage: string;
-}
-
-interface ProjectAnalytics extends Project {
-	overallCompliance: {
-		values: RequirementAssessmentDonutItem[];
-		total: number;
-	};
-}
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
@@ -72,8 +43,11 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_get_counters = await fetch(`${BASE_API_URL}/get_counters/`);
 	const counters = await req_get_counters.json();
 
-	const req_get_metrics = await fetch(`${BASE_API_URL}/get_metrics/`);
-	const metrics = await req_get_metrics.json();
+	const getMetrics = () => {
+		return fetch(`${BASE_API_URL}/get_metrics/`)
+			.then((response) => response.json())
+			.then((data) => data.results);
+	};
 
 	const usedRiskMatrices: { id: string; name: string; risk_assessments_count: number }[] =
 		await fetch(`${BASE_API_URL}/risk-matrices/used/`)
@@ -130,7 +104,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		measures: ord_applied_controls.results,
 		applied_control_status: applied_control_status.results,
 		user: locals.user,
-		metrics: metrics.results,
-		title: m.analytics()
+		title: m.analytics(),
+		stream: {
+			metrics: getMetrics()
+		}
 	};
 };
