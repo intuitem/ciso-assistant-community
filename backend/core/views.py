@@ -3695,7 +3695,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "compliance_assessment",
         "applied_controls",
     ]
-    search_fields = ["name", "description"]
+    search_fields = ["requirement__name", "requirement__description"]
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
