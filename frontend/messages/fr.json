@@ -1139,5 +1139,6 @@
 	"maxRadius": "Rayon maximal",
 	"greenZoneRadius": "Rayon de la zone verte",
 	"yellowZoneRadius": "Rayon de la zone jaune",
-	"redZoneRadius": "Rayon de la zone rouge"
+	"redZoneRadius": "Rayon de la zone rouge",
+	"progressField": "Progrès"
 }

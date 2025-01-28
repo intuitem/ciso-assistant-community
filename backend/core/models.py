@@ -1867,6 +1867,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             self.category = self.reference_control.category
         if self.reference_control and self.csf_function is None:
             self.csf_function = self.reference_control.csf_function
+        if self.status == "active":
+            self.progress_field = 100
         super(AppliedControl, self).save(*args, **kwargs)
 
     @property
