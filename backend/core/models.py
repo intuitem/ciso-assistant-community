@@ -2779,39 +2779,78 @@ class ComplianceAssessment(Assessment):
     def create_requirement_assessments(
         self, baseline: Self | None = None
     ) -> list["RequirementAssessment"]:
-        requirements = RequirementNode.objects.filter(framework=self.framework)
-        requirement_assessments = []
-        for requirement in requirements:
-            requirement_assessment = RequirementAssessment.objects.create(
+        # Fetch all requirements in a single query
+        requirements = RequirementNode.objects.filter(
+            framework=self.framework
+        ).select_related()
+
+        # If there's a baseline, prefetch all related baseline assessments in one query
+        baseline_assessments = {}
+        if baseline and baseline.framework == self.framework:
+            baseline_assessments = {
+                ra.requirement_id: ra
+                for ra in RequirementAssessment.objects.filter(
+                    compliance_assessment=baseline, requirement__in=requirements
+                ).prefetch_related("evidences", "applied_controls")
+            }
+
+        # Create all RequirementAssessment objects in bulk
+        requirement_assessments = [
+            RequirementAssessment(
                 compliance_assessment=self,
                 requirement=requirement,
-                folder=Folder.objects.get(id=self.folder.id),
+                folder_id=self.folder.id,  # Use foreign key directly
                 answer=transform_question_to_answer(requirement.question)
                 if requirement.question
                 else {},
             )
-            if baseline and baseline.framework == self.framework:
-                baseline_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=baseline, requirement=requirement
+            for requirement in requirements
+        ]
+
+        # Bulk create all assessments
+        created_assessments = RequirementAssessment.objects.bulk_create(
+            requirement_assessments
+        )
+
+        # If there's a baseline, update the created assessments with baseline data
+        if baseline_assessments:
+            updates = []
+            m2m_operations = []
+
+            for assessment in created_assessments:
+                baseline_assessment = baseline_assessments.get(
+                    assessment.requirement_id
                 )
-                requirement_assessment.result = baseline_requirement_assessment.result
-                requirement_assessment.status = baseline_requirement_assessment.status
-                requirement_assessment.score = baseline_requirement_assessment.score
-                requirement_assessment.is_scored = (
-                    baseline_requirement_assessment.is_scored
+                if baseline_assessment:
+                    # Update scalar fields
+                    assessment.result = baseline_assessment.result
+                    assessment.status = baseline_assessment.status
+                    assessment.score = baseline_assessment.score
+                    assessment.is_scored = baseline_assessment.is_scored
+                    assessment.observation = baseline_assessment.observation
+                    updates.append(assessment)
+
+                    # Store M2M operations for later
+                    m2m_operations.append(
+                        (
+                            assessment,
+                            baseline_assessment.evidences.all(),
+                            baseline_assessment.applied_controls.all(),
+                        )
+                    )
+
+            # Bulk update scalar fields
+            if updates:
+                RequirementAssessment.objects.bulk_update(
+                    updates, ["result", "status", "score", "is_scored", "observation"]
                 )
-                requirement_assessment.observation = (
-                    baseline_requirement_assessment.observation
-                )
-                requirement_assessment.evidences.set(
-                    baseline_requirement_assessment.evidences.all()
-                )
-                requirement_assessment.applied_controls.set(
-                    baseline_requirement_assessment.applied_controls.all()
-                )
-                requirement_assessment.save()
-            requirement_assessments.append(requirement_assessment)
-        return requirement_assessments
+
+            # Handle M2M relationships
+            for assessment, evidences, controls in m2m_operations:
+                assessment.evidences.set(evidences)
+                assessment.applied_controls.set(controls)
+
+        return created_assessments
 
     def get_global_score(self):
         requirement_assessments_scored = (
@@ -3210,7 +3249,6 @@ class ComplianceAssessment(Assessment):
                     ref = refs[inferences.index(selected_inference)]
 
                 assign_attributes(requirement_assessment, selected_inference)
-
                 requirement_assessment.mapping_inference = {
                     "result": requirement_assessment.result,
                     "source_requirement_assessment": {
@@ -3222,7 +3260,7 @@ class ComplianceAssessment(Assessment):
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
-
+                requirement_assessment.save()
                 requirement_assessments.append(requirement_assessment)
 
         return requirement_assessments
