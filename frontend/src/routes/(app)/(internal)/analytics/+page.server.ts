@@ -45,7 +45,15 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	const getMetrics = () => {
 		return fetch(`${BASE_API_URL}/get_metrics/`)
+			.catch((error) => {
+				console.error('Failed to fetch metrics:', error);
+				return { json: () => ({ results: null }) };
+			})
 			.then((response) => response.json())
+			.catch((error) => {
+				console.error('Failed to parse metrics response:', error);
+				return { results: null };
+			})
 			.then((data) => data.results);
 	};
 
