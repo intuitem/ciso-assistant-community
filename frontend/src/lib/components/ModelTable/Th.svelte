@@ -15,7 +15,7 @@
 
 <th
 	on:click={update}
-	class:active={$sort?.identifier === identifier}
+	class:active={$sort?.orderBy === identifier}
 	class={_class}
 	data-testid="tableheader"
 >
