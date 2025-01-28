@@ -899,6 +899,7 @@
 	"forgotPassword": "Forgot password",
 	"ssoSettingsUpdated": "SSO settings updated",
 	"score": "Score",
+	"scoreSemiColon": "Score:",
 	"mappingInferenceHelpText": "These variables are fixed and will not change depending on the source.",
 	"priority": "Priority",
 	"p1": "P1",
