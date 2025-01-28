@@ -310,9 +310,16 @@ LANGUAGES = [
     ("es", "Spanish"),
     ("de", "German"),
     ("it", "Italian"),
-    ("nd", "Dutch"),
+    ("nl", "Dutch"),
     ("pl", "Polish"),
     ("pt", "Portuguese"),
+    ("ar", "Arabic"),
+    ("ro", "Romanian"),
+    ("hi", "Hindi"),
+    ("ur", "Urdu"),
+    ("cs", "Czech"),
+    ("sv", "Swedish"),
+    ("id", "Indonesian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
