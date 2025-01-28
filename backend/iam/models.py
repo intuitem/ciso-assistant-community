@@ -679,84 +679,99 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Assumes that object type follows Django conventions for permissions
         Also retrieve published objects in view
         """
+        # Get the permission codenames dynamically for the given object type
         class_name = object_type.__name__.lower()
-        permissions = [
-            Permission.objects.get(codename="view_" + class_name),
-            Permission.objects.get(codename="change_" + class_name),
-            Permission.objects.get(codename="delete_" + class_name),
+        permission_codenames = [
+            f"{action}_{class_name}" for action in ["view", "change", "delete"]
         ]
+        permissions = list(Permission.objects.filter(codename__in=permission_codenames))
 
-        folders_with_local_view = set()
-        permissions_per_object_id = defaultdict(set)
-        ref_permission = Permission.objects.get(codename="view_folder")
+        # Fetch role assignments for the user or related user groups
+        role_assignments = (
+            RoleAssignment.objects.filter(
+                models.Q(user=user) | models.Q(user_group__in=user.user_groups.all())
+            )
+            .select_related("role")
+            .prefetch_related("role__permissions", "perimeter_folders")
+        )
+
+        accessible_folders = set()  # Store all folders accessible by the user
+        permission_per_object = defaultdict(
+            set
+        )  # Map objects to the set of permissions they have
+
+        # Define the search perimeter as the provided folder and its subfolders
+        perimeter = {folder}
+        perimeter.update(folder.get_sub_folders())
+
+        # Preload all objects and map them to their folders
         all_objects = (
             object_type.objects.select_related("folder")
             if hasattr(object_type, "folder")
             else object_type.objects.all()
         )
-        folder_for_object = {x: Folder.get_folder(x) for x in all_objects}
-        perimeter = set()
-        perimeter.add(folder)
-        perimeter.update(folder.get_sub_folders())
-        for ra in [
-            x
-            for x in RoleAssignment.get_role_assignments(user)
-            if ref_permission in x.role.permissions.all()
-        ]:
-            ra_permissions = ra.role.permissions.all()
-            for my_folder in perimeter & set(ra.perimeter_folders.all()):
-                target_folders = (
-                    [my_folder, *my_folder.get_sub_folders()]
-                    if ra.is_recursive
-                    else [my_folder]
-                )
-                for p in [p for p in permissions if p in ra_permissions]:
-                    if p == permissions[0]:
-                        folders_with_local_view.add(my_folder)
-                    for object in [
-                        x for x in all_objects if folder_for_object[x] in target_folders
-                    ]:
-                        # builtins objects cannot be edited or deleted
-                        if not (
-                            hasattr(object, "builtin")
-                            and object.builtin
-                            and p != permissions[0]
-                        ):
-                            permissions_per_object_id[object.id].add(p)
+        folder_for_object = {obj.id: Folder.get_folder(obj) for obj in all_objects}
 
+        # Analyze role assignments to identify accessible folders and object permissions
+        for ra in role_assignments:
+            ra_permissions = set(ra.role.permissions.all())
+            for f in ra.perimeter_folders.all():
+                if f not in perimeter:
+                    continue
+
+                # Consider subfolders if the role assignment allows recursive access
+                target_folders = {f}
+                if ra.is_recursive:
+                    target_folders.update(f.get_sub_folders())
+
+                # Map accessible objects to their granted permissions
+                for folder in target_folders:
+                    accessible_folders.add(folder)
+                    for obj in [
+                        x for x in all_objects if folder_for_object[x.id] == folder
+                    ]:
+                        for perm in permissions:
+                            if perm in ra_permissions:
+                                permission_per_object[obj.id].add(perm.codename)
+
+        # Handle published objects for view access when not in ENCLAVE folders
         if hasattr(object_type, "is_published"):
-            for my_folder in folders_with_local_view:
-                if my_folder.content_type != Folder.ContentType.ENCLAVE:
+            for folder in accessible_folders:
+                if folder.content_type != Folder.ContentType.ENCLAVE:
+                    current_folder = folder
                     target_folders = []
-                    my_folder2 = my_folder
-                    while my_folder2:
-                        if my_folder2 != my_folder:
-                            target_folders.append(my_folder2)
-                        my_folder2 = my_folder2.parent_folder
-                    for object in [
+                    # Traverse parent folders and collect them for published object checks
+                    while current_folder:
+                        if current_folder != folder:
+                            target_folders.append(current_folder)
+                        current_folder = current_folder.parent_folder
+
+                    # Grant view permission for published objects
+                    for obj in [
                         x
                         for x in all_objects
-                        if folder_for_object[x] in target_folders and x.is_published
+                        if folder_for_object[x.id] in target_folders and x.is_published
                     ]:
-                        permissions_per_object_id[object.id].add(permissions[0])
+                        permission_per_object[obj.id].add(permission_codenames[0])
 
-        return (
-            [
-                x
-                for x in permissions_per_object_id
-                if permissions[0] in permissions_per_object_id[x]
-            ],
-            [
-                x
-                for x in permissions_per_object_id
-                if permissions[1] in permissions_per_object_id[x]
-            ],
-            [
-                x
-                for x in permissions_per_object_id
-                if permissions[2] in permissions_per_object_id[x]
-            ],
-        )
+        # Partition object IDs based on permissions (view, change, delete)
+        view_ids = [
+            obj_id
+            for obj_id, perms in permission_per_object.items()
+            if permission_codenames[0] in perms
+        ]
+        change_ids = [
+            obj_id
+            for obj_id, perms in permission_per_object.items()
+            if permission_codenames[1] in perms
+        ]
+        delete_ids = [
+            obj_id
+            for obj_id, perms in permission_per_object.items()
+            if permission_codenames[2] in perms
+        ]
+
+        return view_ids, change_ids, delete_ids
 
     def is_user_assigned(self, user) -> bool:
         """Determines if a user is assigned to the role assignment"""
