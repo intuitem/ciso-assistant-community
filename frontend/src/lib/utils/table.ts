@@ -228,6 +228,24 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const CURRENT_LEVEL_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.current_level.name,
+	extraProps: {
+		defaultOptionName: 'current_level'
+	},
+	alwaysDisplay: true
+};
+
+const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.residual_level.name,
+	extraProps: {
+		defaultOptionName: 'residual_level'
+	},
+	alwaysDisplay: true
+};
+
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.current_criticality.toString(),
@@ -458,7 +476,9 @@ export const listViewFields: ListViewFieldsConfig = {
 			treatment: { ...TREATMENT_FILTER, alwaysDisplay: true },
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
-			assets: ASSET_FILTER
+			assets: ASSET_FILTER,
+			current_level: CURRENT_LEVEL_FILTER,
+			residual_level: RESIDUAL_LEVEL_FILTER
 		}
 	},
 	'risk-acceptances': {
