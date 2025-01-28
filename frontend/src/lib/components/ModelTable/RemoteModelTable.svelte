@@ -109,10 +109,12 @@
 	// 	return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	// });
 
-	const handler = new DataHandler([], { rowsPerPage: 5 });
+	const handler = new DataHandler([], {
+		rowsPerPage: pagination ? numberRowsPerPage : undefined
+	});
 	const rows = handler.getRows();
 
-	handler.onChange((state: State) => loadTableData(state, 'threats', '/threats') as Promise<Row[]>);
+	handler.onChange((state: State) => loadTableData(state, URLModel, `/${URLModel}`));
 
 	onMount(() => {
 		handler.invalidate();
