@@ -1,30 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import {
-		CUSTOM_ACTIONS_COMPONENT,
-		FIELD_COLORED_TAG_MAP,
-		FIELD_COMPONENT_MAP
-	} from '$lib/utils/crud';
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { CUSTOM_ACTIONS_COMPONENT, FIELD_COMPONENT_MAP, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { createEventDispatcher, onMount } from 'svelte';
 
-	import { tableA11y } from './actions';
+	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 	import type { urlModel } from '$lib/utils/types.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
 	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
-	import type { TableSource } from './types';
-	// Event Dispatcher
-	type TableEvent = {
-		selected: string[];
-	};
-	const dispatch = createEventDispatcher<TableEvent>();
 
 	// Props
 	export let source: TableSource;
@@ -84,11 +75,6 @@
 
 	const user = $page.data.user;
 
-	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
-
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import { listViewFields } from '$lib/utils/table';
-
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
 
@@ -97,17 +83,13 @@
 
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { DataHandler, type Row, type State } from '@vincjo/datatables/remote';
+	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-
-	// const data = source.body.map((item: Record<string, any>, index: number) => {
-	// 	return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
-	// });
 
 	const handler = new DataHandler([], {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
@@ -118,14 +100,12 @@
 
 	onMount(() => {
 		handler.invalidate();
+		if (orderBy) {
+			orderBy.direction === 'asc'
+				? handler.sortAsc(orderBy.identifier)
+				: handler.sortDesc(orderBy.identifier);
+		}
 	});
-
-	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-
-	const tagMap = FIELD_COLORED_TAG_MAP[URLModel] ?? {};
-	const taggedKeys = new Set(Object.keys(tagMap));
-
-	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 
 	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
 	const preventDelete = (row: TableSource) =>
@@ -136,6 +116,10 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { isDark } from '$lib/utils/helpers';
 	import { loadTableData } from './handler';
+
+	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
+	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
+	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
