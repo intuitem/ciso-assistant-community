@@ -125,7 +125,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
     ordering = ["created_at"]
-    ordering_fields = ordering
+    ordering_fields = "__all__"
     search_fields = ["name", "description"]
     model: models.Model
 
@@ -1562,7 +1562,6 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "applied_controls",
     ]
     ordering = ["ref_id"]
-    ordering_fields = ordering
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
@@ -1810,7 +1809,6 @@ class UserViewSet(BaseModelViewSet):
 
     model = User
     ordering = ["-is_active", "-is_superuser", "email", "id"]
-    ordering_fields = ordering
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
 
@@ -1853,7 +1851,6 @@ class UserGroupViewSet(BaseModelViewSet):
 
     model = UserGroup
     ordering = ["builtin", "name"]
-    ordering_fields = ordering
     filterset_fields = ["folder"]
 
 
@@ -1864,7 +1861,6 @@ class RoleViewSet(BaseModelViewSet):
 
     model = Role
     ordering = ["builtin", "name"]
-    ordering_fields = ordering
 
 
 class RoleAssignmentViewSet(BaseModelViewSet):
@@ -1874,7 +1870,6 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
     model = RoleAssignment
     ordering = ["builtin", "folder"]
-    ordering_fields = ordering
     filterset_fields = ["folder"]
 
 
@@ -3017,7 +3012,6 @@ class FrameworkViewSet(BaseModelViewSet):
     model = Framework
     filterset_fields = ["folder"]
     search_fields = ["name", "description"]
-    ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @method_decorator(vary_on_cookie)
@@ -3120,7 +3114,6 @@ class EvidenceViewSet(BaseModelViewSet):
     model = Evidence
     filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
     search_fields = ["name"]
-    ordering_fields = ["name", "description"]
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
@@ -3201,7 +3194,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     model = ComplianceAssessment
     filterset_fields = ["framework", "project", "status", "ebios_rm_studies"]
     search_fields = ["name", "description", "ref_id"]
-    ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
