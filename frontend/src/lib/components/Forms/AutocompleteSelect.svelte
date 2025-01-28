@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { formFieldProxy } from 'sveltekit-superforms';
-	import type { CacheLock } from '$lib/utils/types';
-	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import type { CacheLock } from '$lib/utils/types';
+	import { beforeUpdate, onMount } from 'svelte';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Option {
 		label: string;
@@ -22,6 +22,7 @@
 	export let hidden = false;
 	export let translateOptions = true;
 
+	export let options: Option[] = [];
 	export let allowUserOptions: boolean | 'append' = false;
 
 	export let cacheLock: CacheLock = {
@@ -32,57 +33,13 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	export let options: Option[] = [];
-	$: optionHashmap = options.reduce((acc, option) => {
-		acc[option.value] = option;
-		return acc;
-	}, {});
-
-	import MultiSelect from 'svelte-multiselect';
 	import { createEventDispatcher } from 'svelte';
+	import MultiSelect from 'svelte-multiselect';
 
 	let selected: typeof options = options.length === 1 && $constraints?.required ? [options[0]] : [];
-
-	$: cachedValue = selected.map((option) => option.value);
-
-	onMount(async () => {
-		const cacheResult = await cacheLock.promise;
-		if (cacheResult && cacheResult.length > 0) {
-			selected = cacheResult.map((value) => optionHashmap[value]);
-		}
-	});
-
-	if ($value) {
-		selected = options.filter((item) => $value.includes(item.value));
-	}
-
 	let selectedValues: (string | undefined)[] = [];
-
-	$: selectedValues = selected.map((item) => item.value || item.label || item);
-
+	let isInternalUpdate = false;
 	const default_value = nullable ? null : selectedValues[0];
-
-	function arraysEqual(arr1: (string | undefined)[], arr2: (string | undefined)[]) {
-		if (arr1?.length !== arr2?.length) return false;
-
-		const set1 = new Set(arr1);
-		const set2 = new Set(arr2);
-
-		for (const value of set1) {
-			if (!set2.has(value)) return false;
-		}
-
-		return true;
-	}
-
-	$: {
-		if (!arraysEqual(selectedValues, $value)) {
-			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
-			handleSelectChange();
-		}
-	}
-
-	$: disabled = selected.length && options.length === 1 && $constraints?.required;
 
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
@@ -95,10 +52,74 @@
 
 	const dispatch = createEventDispatcher();
 
+	onMount(async () => {
+		const cacheResult = await cacheLock.promise;
+		if (cacheResult && cacheResult.length > 0) {
+			selected = cacheResult.map((value) => optionHashmap[value]);
+		}
+	});
+
+	// Handle external updates to $value
+	beforeUpdate(() => {
+		if (!isInternalUpdate && $value) {
+			selected = options.filter((item) =>
+				Array.isArray($value) ? $value.includes(item.value) : item.value === $value
+			);
+		}
+	});
+
 	function handleSelectChange() {
 		dispatch('change', $value);
 		dispatch('cache', selected);
 	}
+
+	function arraysEqual(
+		arr1: string | (string | undefined)[] | null | undefined,
+		arr2: string | (string | undefined)[] | null | undefined
+	): boolean {
+		const normalize = (val: string | (string | undefined)[] | null | undefined) => {
+			if (typeof val === 'string') return [val];
+			return val ?? [];
+		};
+
+		const a1 = normalize(arr1);
+		const a2 = normalize(arr2);
+
+		if (a1.length !== a2.length) return false;
+
+		const set1 = new Set(a1);
+		const set2 = new Set(a2);
+
+		for (const value of set1) {
+			if (!set2.has(value)) return false;
+		}
+
+		return true;
+	}
+
+	if ($value) {
+		selected = options.filter((item) => $value.includes(item.value));
+	}
+
+	$: optionHashmap = options.reduce((acc, option) => {
+		acc[option.value] = option;
+		return acc;
+	}, {});
+
+	$: cachedValue = selected.map((option) => option.value);
+
+	$: selectedValues = selected.map((item) => item.value || item.label || item);
+
+	$: {
+		if (!isInternalUpdate && !arraysEqual(selectedValues, $value)) {
+			isInternalUpdate = true;
+			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
+			handleSelectChange();
+			isInternalUpdate = false;
+		}
+	}
+
+	$: disabled = selected.length && options.length === 1 && $constraints?.required;
 </script>
 
 <div {hidden}>

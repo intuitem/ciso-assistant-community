@@ -6,9 +6,9 @@ services:
     depends_on:
       - postgres
     environment:
-      - ALLOWED_HOSTS=backend
+      - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
-      - DJANGO_DEBUG=True
+      - DJANGO_DEBUG=False
       - POSTGRES_NAME=ciso_assistant
       - POSTGRES_USER=ciso_assistant
       - POSTGRES_PASSWORD=ciso_assistant
@@ -16,20 +16,27 @@ services:
     volumes:
       - ./db:/code/db
 
-  # huey:
-  #   container_name: huey
-  #   image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
-  #   restart: always
-  #   environment:
-  #     - ALLOWED_HOSTS=backend,localhost
-  #     - DJANGO_DEBUG=False
-  #   volumes:
-  #     - ./db:/code/db
-  #   entrypoint:
-  #     - /bin/sh
-  #     - -c
-  #     - |
-  #       poetry run python manage.py run_huey
+  huey:
+    container_name: huey
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    depends_on:
+      - backend
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=False
+      - POSTGRES_NAME=ciso_assistant
+      - POSTGRES_USER=ciso_assistant
+      - POSTGRES_PASSWORD=ciso_assistant
+      - DB_HOST=postgres
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
 
   frontend:
     container_name: frontend

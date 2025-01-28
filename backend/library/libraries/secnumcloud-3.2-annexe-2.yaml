@@ -8,6 +8,7 @@ description: "Premier ministre\nAgence nationale de la s\xE9curit\xE9 des syst\x
   \ aux commanditaires"
 copyright: ANSSI
 version: 1
+publication_date: 2024-05-09
 provider: ANSSI
 packager: intuitem
 objects:

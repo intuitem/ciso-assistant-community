@@ -242,7 +242,7 @@
 
 	$: classesCaretState = open && $$slots.children && !hideChildren ? caretOpen : caretClosed;
 	$: classesDisabled = disabled ? cDisabled : '';
-	let classProp = ''; // Replacing $$props.class
+	export let classProp = ''; // Replacing $$props.class
 	$: classesBase = `${cBase} ${classProp}`;
 	$: classesSummary = `${cSummary} ${classesDisabled} ${spacing} ${rounded} ${padding} ${hover} ${regionSummary}`;
 	$: classesSymbol = `${cSymbol} ${classesCaret} ${regionSymbol}`;

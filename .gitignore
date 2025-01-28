@@ -1,6 +1,7 @@
 *.DS_Store
 *~$*
 .env
+.venv
 venv
 **/node_modules/
 .vscode
@@ -15,3 +16,4 @@ caddy_data/
 **/dist/
 **/.meta
 charts/custom-values.yaml
+**/charts/*/charts

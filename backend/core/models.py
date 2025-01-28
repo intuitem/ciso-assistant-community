@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import hashlib
 from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
@@ -223,6 +224,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+    publication_date = models.DateField(null=True)
     builtin = models.BooleanField(default=False)
     objects_meta = models.JSONField(default=dict)
     dependencies = models.JSONField(
@@ -320,6 +322,7 @@ class StoredLibrary(LibraryMixin):
             copyright=library_data.get("copyright"),
             provider=library_data.get("provider"),
             packager=library_data.get("packager"),
+            publication_date=library_data.get("publication_date"),
             translations=library_data.get("translations", {}),
             objects_meta=objects_meta,
             dependencies=dependencies,
@@ -442,6 +445,7 @@ class LibraryUpdater:
                 "packager",
                 self.new_library.packager,
             ),  # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
+            ("publication_date", self.new_library.publication_date),
             # Should we even update the ref_id ?
             ("ref_id", self.new_library.ref_id),
             ("description", self.new_library.description),
@@ -1431,6 +1435,7 @@ class Asset(
                             "value": {
                                 "type": "integer",
                                 "minimum": 0,
+                                "maximum": 3,
                             },
                             "is_enabled": {
                                 "type": "boolean",
@@ -1583,7 +1588,8 @@ class Asset(
                     security_objectives[key] = content
                 else:
                     security_objectives[key]["value"] = max(
-                        security_objectives[key]["value"], content.get("value", 0)
+                        security_objectives[key].get("value", 0),
+                        content.get("value", 0),
                     )
         return {"objectives": security_objectives}
 
@@ -1639,7 +1645,7 @@ class Asset(
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
             )
             if content.get("is_enabled", False)
-            and content.get("value", -1) in range(0, 5)
+            and content.get("value", -1) in range(0, 4)
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
@@ -1723,6 +1729,12 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
+
+    @property
+    def attachment_hash(self):
+        if not self.attachment:
+            return None
+        return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
@@ -2727,6 +2739,7 @@ class ComplianceAssessment(Assessment):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
+    show_documentation_score = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Compliance assessment")
@@ -2766,41 +2779,82 @@ class ComplianceAssessment(Assessment):
     def create_requirement_assessments(
         self, baseline: Self | None = None
     ) -> list["RequirementAssessment"]:
-        requirements = RequirementNode.objects.filter(framework=self.framework)
-        requirement_assessments = []
-        for requirement in requirements:
-            requirement_assessment = RequirementAssessment.objects.create(
+        # Fetch all requirements in a single query
+        requirements = RequirementNode.objects.filter(
+            framework=self.framework
+        ).select_related()
+
+        # If there's a baseline, prefetch all related baseline assessments in one query
+        baseline_assessments = {}
+        if baseline and baseline.framework == self.framework:
+            baseline_assessments = {
+                ra.requirement_id: ra
+                for ra in RequirementAssessment.objects.filter(
+                    compliance_assessment=baseline, requirement__in=requirements
+                ).prefetch_related("evidences", "applied_controls")
+            }
+
+        # Create all RequirementAssessment objects in bulk
+        requirement_assessments = [
+            RequirementAssessment(
                 compliance_assessment=self,
                 requirement=requirement,
-                folder=Folder.objects.get(id=self.folder.id),
+                folder_id=self.folder.id,  # Use foreign key directly
                 answer=transform_question_to_answer(requirement.question)
                 if requirement.question
                 else {},
             )
-            if baseline and baseline.framework == self.framework:
-                baseline_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=baseline, requirement=requirement
+            for requirement in requirements
+        ]
+
+        # Bulk create all assessments
+        created_assessments = RequirementAssessment.objects.bulk_create(
+            requirement_assessments
+        )
+
+        # If there's a baseline, update the created assessments with baseline data
+        if baseline_assessments:
+            updates = []
+            m2m_operations = []
+
+            for assessment in created_assessments:
+                baseline_assessment = baseline_assessments.get(
+                    assessment.requirement_id
                 )
-                requirement_assessment.result = baseline_requirement_assessment.result
-                requirement_assessment.status = baseline_requirement_assessment.status
-                requirement_assessment.score = baseline_requirement_assessment.score
-                requirement_assessment.is_scored = (
-                    baseline_requirement_assessment.is_scored
+                if baseline_assessment:
+                    # Update scalar fields
+                    assessment.result = baseline_assessment.result
+                    assessment.status = baseline_assessment.status
+                    assessment.score = baseline_assessment.score
+                    assessment.is_scored = baseline_assessment.is_scored
+                    assessment.observation = baseline_assessment.observation
+                    updates.append(assessment)
+
+                    # Store M2M operations for later
+                    m2m_operations.append(
+                        (
+                            assessment,
+                            baseline_assessment.evidences.all(),
+                            baseline_assessment.applied_controls.all(),
+                        )
+                    )
+
+            # Bulk update scalar fields
+            if updates:
+                RequirementAssessment.objects.bulk_update(
+                    updates, ["result", "status", "score", "is_scored", "observation"]
                 )
-                requirement_assessment.evidences.set(
-                    baseline_requirement_assessment.evidences.all()
-                )
-                requirement_assessment.applied_controls.set(
-                    baseline_requirement_assessment.applied_controls.all()
-                )
-                requirement_assessment.save()
-            requirement_assessments.append(requirement_assessment)
-        return requirement_assessments
+
+            # Handle M2M relationships
+            for assessment, evidences, controls in m2m_operations:
+                assessment.evidences.set(evidences)
+                assessment.applied_controls.set(controls)
+
+        return created_assessments
 
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
-            .exclude(score=None)
             .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
@@ -2812,12 +2866,18 @@ class ComplianceAssessment(Assessment):
         )
         score = 0
         n = 0
+
         for ras in requirement_assessments_scored:
-            if not (ig) or (ig & set(ras.requirement.implementation_groups)):
-                score += ras.score
+            if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
+                score += ras.score or 0
                 n += 1
+                if self.show_documentation_score:
+                    score += ras.documentation_score or 0
+                    n += 1
         if n > 0:
-            return round(score / n, 1)
+            global_score = score / n
+            # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
+            return int(global_score * 10) / 10
         else:
             return -1
 
@@ -3189,29 +3249,35 @@ class ComplianceAssessment(Assessment):
                     ref = refs[inferences.index(selected_inference)]
 
                 assign_attributes(requirement_assessment, selected_inference)
-
                 requirement_assessment.mapping_inference = {
                     "result": requirement_assessment.result,
                     "source_requirement_assessment": {
                         "str": str(ref),
                         "id": str(ref.id),
+                        "is_scored": ref.is_scored,
+                        "score": ref.score,
                         "coverage": mapping.coverage,
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
-
+                requirement_assessment.save()
                 requirement_assessments.append(requirement_assessment)
 
         return requirement_assessments
 
     def progress(self) -> int:
-        requirements_all = RequirementAssessment.objects.filter(
-            compliance_assessment=self, requirement__assessable=True
+        requirement_assessments = list(
+            self.get_requirement_assessments(include_non_assessable=False)
         )
-        total_cnt = requirements_all.count()
-        set_cnt = requirements_all.exclude(result="not_assessed").count()
-        value = int((set_cnt / total_cnt) * 100) if total_cnt > 0 else 0
-        return value
+        total_cnt = len(requirement_assessments)
+        assessed_cnt = len(
+            [
+                r
+                for r in requirement_assessments
+                if r.result != RequirementAssessment.Result.NOT_ASSESSED
+            ]
+        )
+        return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
 
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
@@ -3240,14 +3306,17 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         verbose_name=_("Result"),
         default=Result.NOT_ASSESSED,
     )
+    is_scored = models.BooleanField(
+        default=False,
+        verbose_name=_("Is scored"),
+    )
     score = models.IntegerField(
         blank=True,
         null=True,
         verbose_name=_("Score"),
     )
-    is_scored = models.BooleanField(
-        default=False,
-        verbose_name=_("Is scored"),
+    documentation_score = models.IntegerField(
+        blank=True, null=True, verbose_name=_("Documentation Score")
     )
     evidences = models.ManyToManyField(
         Evidence,

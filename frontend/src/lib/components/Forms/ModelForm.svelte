@@ -60,6 +60,7 @@
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
 	export let duplicate = false;
+	export let importFolder = false;
 	export let customNameDescription = false;
 
 	const URLModel = model.urlModel as urlModel;
@@ -188,8 +189,8 @@
 	{/if}
 	{#if URLModel === 'projects'}
 		<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-	{:else if URLModel === 'folders'}
-		<FolderForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+	{:else if URLModel === 'folders' || URLModel === 'folders-import'}
+		<FolderForm {form} {importFolder} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'risk-assessments'}
 		<RiskAssessmentForm
 			{form}

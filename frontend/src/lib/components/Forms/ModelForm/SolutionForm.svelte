@@ -33,7 +33,6 @@
 	{form}
 	label={m.criticality()}
 	field="criticality"
-	always_enabled={true}
 	inversedColors
 	fullDonut
 	min_score={1}

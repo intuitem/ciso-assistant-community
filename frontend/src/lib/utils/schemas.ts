@@ -67,6 +67,14 @@ export const FolderSchema = z.object({
 	parent_folder: z.string().optional()
 });
 
+export const FolderImportSchema = z.object({
+	name: nameSchema,
+	file: z.instanceof(File),
+	load_missing_libraries: z.coerce.boolean().default(false)
+	//NOTE: coerce is used to handle checkbox form values which can be strings ('true'/'false')
+	//or booleans (true/false). Without coerce, form validation fails inconsistently.
+});
+
 export const ProjectSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -176,7 +184,6 @@ export const ReferenceControlSchema = z.object({
 
 export const AssetSchema = z.object({
 	...NameDescriptionMixin,
-	business_value: z.string().optional(),
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional(),
@@ -219,8 +226,9 @@ export const RequirementAssessmentSchema = z.object({
 	answer: jsonSchema,
 	status: z.string(),
 	result: z.string(),
-	score: z.number().optional().nullable(),
 	is_scored: z.boolean().optional(),
+	score: z.number().optional().nullable(),
+	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
 	requirement: z.string(),
@@ -264,6 +272,7 @@ export const ComplianceAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
+	show_documentation_score: z.boolean().optional().default(false),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -284,7 +293,13 @@ export const EvidenceSchema = z.object({
 });
 
 export const GeneralSettingsSchema = z.object({
-	security_objective_scale: z.string()
+	security_objective_scale: z.string(),
+	ebios_radar_max: z.number(),
+	ebios_radar_green_zone_radius: z.number(),
+	ebios_radar_yellow_zone_radius: z.number(),
+	ebios_radar_red_zone_radius: z.number(),
+	notifications_enable_mailing: z.boolean().optional(),
+	interface_agg_scenario_matrix: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -475,6 +490,7 @@ export const operationalScenarioSchema = z.object({
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
+	'folders-import': FolderImportSchema,
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,

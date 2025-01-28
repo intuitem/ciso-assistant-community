@@ -626,6 +626,7 @@ class LibraryImporter:
                 "version": self._library.version,
                 "provider": self._library.provider,
                 "packager": self._library.packager,
+                "publication_date": self._library.publication_date,
                 "copyright": self._library.copyright,
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
                 "is_published": True,
@@ -645,7 +646,6 @@ class LibraryImporter:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
-            print(reference_control)
             reference_control.import_reference_control(library_object)
 
         for risk_matrix in self._risk_matrices:
