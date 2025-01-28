@@ -681,97 +681,110 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         # Get the permission codenames dynamically for the given object type
         class_name = object_type.__name__.lower()
-        permission_codenames = [
-            f"{action}_{class_name}" for action in ["view", "change", "delete"]
-        ]
-        permissions = list(Permission.objects.filter(codename__in=permission_codenames))
+        permission_codenames = {
+            'view': f"view_{class_name}",
+            'change': f"change_{class_name}",
+            'delete': f"delete_{class_name}"
+        }
 
-        # Fetch role assignments for the user or related user groups
+        # Define the search perimeter
+        perimeter = {folder.id}  # Use IDs instead of objects
+        perimeter.update(f.id for f in folder.get_sub_folders())
+
+        # Use a single efficient query to get all relevant role assignments with permissions
         role_assignments = (
-            RoleAssignment.objects.filter(
-                models.Q(user=user) | models.Q(user_group__in=user.user_groups.all())
+            RoleAssignment.objects
+            .filter(
+                models.Q(user=user) | models.Q(user_group__in=user.user_groups.all()),
+                perimeter_folders__id__in=perimeter
             )
-            .select_related("role")
-            .prefetch_related("role__permissions", "perimeter_folders")
+            .values_list(
+                'role__permissions__codename',
+                'perimeter_folders__id',
+                'is_recursive'
+            )
         )
 
-        accessible_folders = set()  # Store all folders accessible by the user
-        permission_per_object = defaultdict(
-            set
-        )  # Map objects to the set of permissions they have
+        # Map folders to their permissions using sets
+        folder_permissions = defaultdict(set)
+        subfolder_cache = {}  # Cache for subfolder calculations
 
-        # Define the search perimeter as the provided folder and its subfolders
-        perimeter = {folder}
-        perimeter.update(folder.get_sub_folders())
+        # Process role assignments
+        for permission, folder_id, is_recursive in role_assignments:
+            if permission not in permission_codenames.values():
+                continue
+                
+            if is_recursive:
+                if folder_id not in subfolder_cache:
+                    folder = Folder.objects.get(id=folder_id)
+                    subfolder_cache[folder_id] = {f.id for f in folder.get_sub_folders()}
+                target_folders = {folder_id} | subfolder_cache[folder_id]
+            else:
+                target_folders = {folder_id}
+            
+            for target_folder_id in target_folders & perimeter:
+                folder_permissions[target_folder_id].add(permission)
 
-        # Preload all objects and map them to their folders
-        all_objects = (
-            object_type.objects.select_related("folder")
-            if hasattr(object_type, "folder")
-            else object_type.objects.all()
-        )
-        folder_for_object = {obj.id: Folder.get_folder(obj) for obj in all_objects}
+        # Build an efficient query for objects
+        accessible_folder_ids = list(folder_permissions.keys())
+        
+        has_folder_relation = hasattr(object_type, "folder")
+    
+        if has_folder_relation:
+            base_query = object_type.objects.select_related("folder")
+            query = models.Q(folder_id__in=accessible_folder_ids)
+        else:
+            base_query = object_type.objects.all()
+            query = models.Q()  # Empty Q object as we'll filter by folder later
+        
+        # Handle published objects
+        if hasattr(object_type, 'is_published'):
+            non_enclave_folders = Folder.objects.filter(
+                id__in=accessible_folder_ids
+            ).exclude(
+                content_type=Folder.ContentType.ENCLAVE
+            ).values_list('id', flat=True)
+            
+            if non_enclave_folders and has_folder_relation:
+                query |= models.Q(
+                    is_published=True,
+                    folder_id__in=non_enclave_folders
+                )
 
-        # Analyze role assignments to identify accessible folders and object permissions
-        for ra in role_assignments:
-            ra_permissions = set(ra.role.permissions.all())
-            for f in ra.perimeter_folders.all():
-                if f not in perimeter:
-                    continue
+        # Get objects
+        objects = base_query.filter(query)
 
-                # Consider subfolders if the role assignment allows recursive access
-                target_folders = {f}
-                if ra.is_recursive:
-                    target_folders.update(f.get_sub_folders())
+        # Initialize result sets
+        view_ids = set()
+        change_ids = set()
+        delete_ids = set()
 
-                # Map accessible objects to their granted permissions
-                for folder in target_folders:
-                    accessible_folders.add(folder)
-                    for obj in [
-                        x for x in all_objects if folder_for_object[x.id] == folder
-                    ]:
-                        for perm in permissions:
-                            if perm in ra_permissions:
-                                permission_per_object[obj.id].add(perm.codename)
+        # Process objects and their permissions
+        folder_for_object = {}  # Cache for folder lookups
+        
+        for obj in objects:
+            # Get folder ID for the object
+            if has_folder_relation:
+                folder_id = obj.folder_id
+            else:
+                if obj.id not in folder_for_object:
+                    folder_for_object[obj.id] = Folder.get_folder(obj).id
+                folder_id = folder_for_object[obj.id]
+                
+            # Skip if folder is not in our perimeter
+            if folder_id not in perimeter:
+                continue
 
-        # Handle published objects for view access when not in ENCLAVE folders
-        if hasattr(object_type, "is_published"):
-            for folder in accessible_folders:
-                if folder.content_type != Folder.ContentType.ENCLAVE:
-                    current_folder = folder
-                    target_folders = []
-                    # Traverse parent folders and collect them for published object checks
-                    while current_folder:
-                        if current_folder != folder:
-                            target_folders.append(current_folder)
-                        current_folder = current_folder.parent_folder
+            perms = folder_permissions[folder_id]
+            
+            if permission_codenames['view'] in perms:
+                view_ids.add(obj.id)
+            if permission_codenames['change'] in perms:
+                change_ids.add(obj.id)
+            if permission_codenames['delete'] in perms:
+                delete_ids.add(obj.id)
 
-                    # Grant view permission for published objects
-                    for obj in [
-                        x
-                        for x in all_objects
-                        if folder_for_object[x.id] in target_folders and x.is_published
-                    ]:
-                        permission_per_object[obj.id].add(permission_codenames[0])
-
-        # Partition object IDs based on permissions (view, change, delete)
-        view_ids = [
-            obj_id
-            for obj_id, perms in permission_per_object.items()
-            if permission_codenames[0] in perms
-        ]
-        change_ids = [
-            obj_id
-            for obj_id, perms in permission_per_object.items()
-            if permission_codenames[1] in perms
-        ]
-        delete_ids = [
-            obj_id
-            for obj_id, perms in permission_per_object.items()
-            if permission_codenames[2] in perms
-        ]
-
-        return view_ids, change_ids, delete_ids
+        return list(view_ids), list(change_ids), list(delete_ids)
 
     def is_user_assigned(self, user) -> bool:
         """Determines if a user is assigned to the role assignment"""
