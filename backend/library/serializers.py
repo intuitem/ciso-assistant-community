@@ -114,6 +114,7 @@ class LoadedLibrarySerializer(ReferentialSerializer):
             "objects_meta",
             "reference_count",
             "locales",
+            "has_update",
         ]
 
 

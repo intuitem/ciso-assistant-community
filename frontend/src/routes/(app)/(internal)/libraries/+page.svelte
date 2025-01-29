@@ -2,37 +2,37 @@
 	import { LibraryUploadSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
 
+	import { page } from '$app/stores';
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import { page } from '$app/stores';
 
 	export let data;
 
-	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
-	let tabSet: number = data.loadedLibrariesTable.body.length > 0 ? 0 : 1;
-	$: if (data.loadedLibrariesTable.body.length === 0) tabSet = 0;
+	let tabSet: number = data.loadedLibrariesTable.meta.count > 0 ? 0 : 1;
 
 	let fileResetSignal = false;
 
-	$: availableUpdatesCount = Object.values(data.loadedLibrariesTable.meta).filter(
+	$: availableUpdatesCount = Object.values(data.loadedLibrariesTable.meta.results).filter(
 		(lib) => lib.has_update
-	).length;
+	).length; // NOTE: This will not be accurate for server-side pagination. We should add a new endpoint to get the count of libraries with updates.
+
+	$: if (data.loadedLibrariesTable.meta.count === 0) tabSet = 0;
 </script>
 
 <div class="card bg-white shadow">
 	<TabGroup>
-		<!-- data.loadedLibrariesTable.body.length > 0 -->
-		{#if data.loadedLibrariesTable.body.length > 0}
+		{#if data.loadedLibrariesTable.meta.count > 0}
 			<Tab bind:group={tabSet} value={0}
 				>{m.librariesStore()}
-				<span class="badge variant-soft-primary">{data.storedLibrariesTable.body.length}</span></Tab
+				<span class="badge variant-soft-primary">{data.storedLibrariesTable.meta.count}</span></Tab
 			>
 			<Tab bind:group={tabSet} value={1}
 				>{m.loadedLibraries()}
-				<span class="badge variant-soft-primary">{data.loadedLibrariesTable.body.length}</span>
+				<span class="badge variant-soft-primary">{data.loadedLibrariesTable.meta.count}</span>
 				{#if availableUpdatesCount > 0}
 					<span class="badge variant-soft-success"
 						>{availableUpdatesCount} <i class="fa-solid fa-circle-up ml-1" /></span
@@ -55,9 +55,8 @@
 				<ModelTable
 					source={data.storedLibrariesTable}
 					URLModel="libraries"
-					identifierField="id"
-					pagination={true}
 					deleteForm={data.deleteForm}
+					server={false}
 				/>
 			{/if}
 			{#if tabSet === 1}
@@ -65,10 +64,9 @@
 				<ModelTable
 					source={data.loadedLibrariesTable}
 					URLModel="libraries"
-					identifierField="id"
-					pagination={true}
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
+					server={false}
 				/>
 			{/if}
 		</svelte:fragment>

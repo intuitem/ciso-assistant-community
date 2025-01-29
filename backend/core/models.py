@@ -735,6 +735,18 @@ class LoadedLibrary(LibraryMixin):
             + LoadedLibrary.objects.filter(dependencies=self).distinct().count()
         )
 
+    @property
+    def has_update(self) -> bool:
+        last_version = {}
+
+        stored_libraries = StoredLibrary.objects.filter(urn=self.urn)
+
+        for stored_library in stored_libraries:
+            if last_version.get(stored_library.urn, -1) < stored_library.version:
+                last_version[stored_library.urn] = stored_library.version
+
+        return last_version.get(self.urn, -1) > self.version
+
     def delete(self, *args, **kwargs):
         if self.reference_count > 0:
             raise ValueError(

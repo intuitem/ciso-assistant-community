@@ -197,45 +197,45 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     model = LoadedLibrary
     queryset = LoadedLibrary.objects.all()
 
-    def list(self, request, *args, **kwargs):
-        if "view_loadedlibrary" not in request.user.permissions:
-            return Response(status=HTTP_403_FORBIDDEN)
-
-        stored_libraries = [*StoredLibrary.objects.all()]
-        last_version = {}
-        for stored_library in stored_libraries:
-            if last_version.get(stored_library.urn, -1) < stored_library.version:
-                last_version[stored_library.urn] = stored_library.version
-
-        loaded_libraries = []
-        for library in LoadedLibrary.objects.all():
-            loaded_library = {
-                key: getattr(library, key)
-                for key in [
-                    "id",
-                    "name",
-                    "description",
-                    "urn",
-                    "ref_id",
-                    "locale",
-                    "version",
-                    "packager",
-                    "provider",
-                    "publication_date",
-                    "builtin",
-                    "objects_meta",
-                    "reference_count",
-                    "translations",
-                ]
-            }
-            loaded_library["has_update"] = (
-                last_version.get(library.urn, -1) > library.version
-            )
-            loaded_library["locales"] = library.get_locales
-            loaded_libraries.append(update_translations_in_object(loaded_library))
-
-        return Response({"results": loaded_libraries})
-
+    # def list(self, request, *args, **kwargs):
+    # if "view_loadedlibrary" not in request.user.permissions:
+    #     return Response(status=HTTP_403_FORBIDDEN)
+    #
+    # stored_libraries = [*StoredLibrary.objects.all()]
+    # last_version = {}
+    # for stored_library in stored_libraries:
+    #     if last_version.get(stored_library.urn, -1) < stored_library.version:
+    #         last_version[stored_library.urn] = stored_library.version
+    #
+    # loaded_libraries = []
+    # for library in LoadedLibrary.objects.all():
+    #     loaded_library = {
+    #         key: getattr(library, key)
+    #         for key in [
+    #             "id",
+    #             "name",
+    #             "description",
+    #             "urn",
+    #             "ref_id",
+    #             "locale",
+    #             "version",
+    #             "packager",
+    #             "provider",
+    #             "publication_date",
+    #             "builtin",
+    #             "objects_meta",
+    #             "reference_count",
+    #             "translations",
+    #         ]
+    #     }
+    #     loaded_library["has_update"] = (
+    #         last_version.get(library.urn, -1) > library.version
+    #     )
+    #     loaded_library["locales"] = library.get_locales
+    #     loaded_libraries.append(update_translations_in_object(loaded_library))
+    #
+    # return Response({"results": loaded_libraries})
+    #
     def retrieve(self, request, *args, pk, **kwargs):
         if "view_loadedlibrary" not in request.user.permissions:
             return Response(status=HTTP_403_FORBIDDEN)

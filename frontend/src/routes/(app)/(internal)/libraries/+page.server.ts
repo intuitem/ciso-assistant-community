@@ -23,8 +23,8 @@ export const load = (async ({ fetch }) => {
 		fetch(loaded_libaries_endpoint)
 	]);
 
-	const storedLibraries = await stored_libraries_res.json().then((res) => res.results);
-	const loadedLibraries = await loaded_libaries_res.json().then((res) => res.results);
+	const storedLibraries = await stored_libraries_res.json();
+	const loadedLibraries = await loaded_libaries_res.json();
 
 	const prepareRow = (row: Record<string, any>) => {
 		row.overview = [
@@ -36,8 +36,8 @@ export const load = (async ({ fetch }) => {
 			row.reference_count && row.reference_count > 0 ? false : true;
 	};
 
-	storedLibraries.forEach(prepareRow);
-	loadedLibraries.forEach(prepareRow);
+	storedLibraries.results.forEach(prepareRow);
+	loadedLibraries.results.forEach(prepareRow);
 
 	type libraryURLModel = 'stored-libraries' | 'loaded-libraries';
 
@@ -62,10 +62,14 @@ export const load = (async ({ fetch }) => {
 	const storedLibrariesTable = {
 		head: makeHeadData('stored-libraries'),
 		meta: { urlmodel: 'stored-libraries', ...storedLibraries },
-		body: tableSourceMapper(storedLibraries, listViewFields['stored-libraries'].body)
+		body: tableSourceMapper(storedLibraries.results, listViewFields['stored-libraries'].body)
 	};
 
-	const loadedLibrariesTable = makeLibrariesTable(loadedLibraries, 'loaded-libraries');
+	const loadedLibrariesTable = {
+		head: makeHeadData('loaded-libraries'),
+		meta: { urlmodel: 'loaded-libraries', ...loadedLibraries },
+		body: tableSourceMapper(loadedLibraries.results, listViewFields['loaded-libraries'].body)
+	};
 
 	const schema = z.object({ id: z.string() });
 	const deleteForm = await superValidate(zod(schema));
