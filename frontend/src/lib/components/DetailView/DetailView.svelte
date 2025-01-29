@@ -256,7 +256,7 @@
 								>
 									{#if value !== null && value !== undefined && value !== ''}
 										{#if key === 'library'}
-											{@const itemHref = `/libraries/${value.id}?loaded`}
+											{@const itemHref = `/loaded-libraries/${value.id}`}
 											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 												>{value.name}</Anchor
 											>
