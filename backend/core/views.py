@@ -3027,12 +3027,6 @@ class FrameworkViewSet(BaseModelViewSet):
             }
         )
 
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         _framework = Framework.objects.get(id=pk)
