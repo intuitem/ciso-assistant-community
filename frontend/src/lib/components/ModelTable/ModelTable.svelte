@@ -25,4 +25,5 @@
 	<slot />
 	<slot name="addButton" slot="addButton" />
 	<slot name="optButton" slot="optButton" />
+	<slot name="actionsHead" slot="actionsHead" />
 </svelte:component>

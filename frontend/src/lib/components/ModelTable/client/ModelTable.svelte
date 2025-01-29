@@ -428,13 +428,13 @@
 												<slot name="actionsBody" />
 											{/if}
 										</svelte:fragment>
-										<svelte:fragment slot="tail">
+										<slot slot="tail" name="tail">
 											<svelte:component
 												this={actionsComponent}
 												meta={row.meta ?? {}}
 												{actionsURLModel}
 											/>
-										</svelte:fragment>
+										</slot>
 									</TableRowActions>
 								{/if}
 							</slot>
