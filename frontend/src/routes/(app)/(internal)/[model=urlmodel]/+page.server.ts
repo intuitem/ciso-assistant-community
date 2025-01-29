@@ -25,7 +25,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const model: ModelInfo = getModelInfo(params.model!);
 	const selectFields = urlParamModelSelectFields(params.model);
 
-
 	const selectOptions: Record<string, any> = {};
 
 	for (const selectField of selectFields) {

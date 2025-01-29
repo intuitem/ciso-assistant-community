@@ -29,7 +29,7 @@
 	 * endpoint to fetch options from
 	 * @example 'users' -> fetches from /users/
 	 */
-	 export let endpoint: string;
+	export let endpoint: string;
 
 	/**
 	 * Field path to use for option labels (supports dot notation for nested fields)
@@ -105,7 +105,7 @@
 	async function fetchOptions() {
 		isLoading = true;
 		try {
-			const response = await fetch(`/${endpoint}/`);
+			const response = await fetch(`/${endpoint}`);
 			if (response.ok) {
 				const data = await response.json();
 				options = processOptions(data);
@@ -119,36 +119,37 @@
 
 	function processOptions(objects: any[]) {
 		const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
-		
-		return objects.map((object) => {
-			// Process main label
-			const mainLabel = labelField === 'auto'
-				? append(object.ref_id, object.name || object.description)
-				: getNestedValue(object, labelField);
 
-			// Process extra fields
-			const extraParts = extraFields.map((fieldPath) => {
-				const value = getNestedValue(object, fieldPath[0], fieldPath[1]);
-				return value !== undefined ? value.toString() : '';
-			});
+		return objects
+			.map((object) => {
+				// Process main label
+				const mainLabel =
+					labelField === 'auto'
+						? append(object.ref_id, object.name || object.description)
+						: getNestedValue(object, labelField);
 
-			const fullLabel = extraFields.length > 0
-				? `${extraParts.join('/')}/${mainLabel}`
-				: mainLabel;
+				// Process extra fields
+				const extraParts = extraFields.map((fieldPath) => {
+					const value = getNestedValue(object, fieldPath[0], fieldPath[1]);
+					return value !== undefined ? value.toString() : '';
+				});
 
-			return {
-				label: fullLabel,
-				value: getNestedValue(object, valueField),
-				suggested: suggestions?.some(s => 
-					getNestedValue(s, valueField) === getNestedValue(object, valueField)
-				)
-			};
-		}).filter(option => selfSelect || option.value !== getNestedValue(self, valueField));
+				const fullLabel =
+					extraFields.length > 0 ? `${extraParts.join('/')}/${mainLabel}` : mainLabel;
+
+				return {
+					label: fullLabel,
+					value: getNestedValue(object, valueField),
+					suggested: suggestions?.some(
+						(s) => getNestedValue(s, valueField) === getNestedValue(object, valueField)
+					)
+				};
+			})
+			.filter((option) => selfSelect || option.value !== getNestedValue(self, valueField));
 	}
 
-	function getNestedValue(obj: any, path: string, field='') {
-		if (field)
-			return obj[path][field]
+	function getNestedValue(obj: any, path: string, field = '') {
+		if (field) return obj[path][field];
 		return path.split('.').reduce((o, p) => (o || {})[p], obj);
 	}
 
@@ -246,7 +247,10 @@
 			{/each}
 		</div>
 	{/if}
-	<div class="control overflow-x-clip flex items-center space-x-2" data-testid="form-input-{field.replaceAll('_', '-')}">
+	<div
+		class="control overflow-x-clip flex items-center space-x-2"
+		data-testid="form-input-{field.replaceAll('_', '-')}"
+	>
 		<input type="hidden" name={field} value={$value ? $value : ''} />
 		<MultiSelect
 			bind:selected
@@ -268,9 +272,19 @@
 			{/if}
 		</MultiSelect>
 		{#if isLoading}
-			<svg class="animate-spin h-5 w-5 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-				<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+			<svg
+				class="animate-spin h-5 w-5 text-primary-500"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+			>
+				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+				></circle>
+				<path
+					class="opacity-75"
+					fill="currentColor"
+					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+				></path>
 			</svg>
 		{/if}
 	</div>
