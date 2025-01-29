@@ -61,7 +61,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+		endpoint="users"
+		labelField="email"
 		field="owner"
 		cacheLock={cacheLocks['owner']}
 		bind:cachedValue={formDataCache['owner']}
@@ -77,11 +78,9 @@
 	/>
 	<AutocompleteSelect
 		{form}
+		endpoint="evidences"
+		extraFields={[['folder', 'str']]}
 		multiple
-		options={getOptions({
-			objects: model.foreignKeys['evidences'],
-			extra_fields: [['folder', 'str']]
-		})}
 		field="evidences"
 		cacheLock={cacheLocks['evidences']}
 		bind:cachedValue={formDataCache['evidences']}
@@ -152,7 +151,7 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['folder'] })}
+	endpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

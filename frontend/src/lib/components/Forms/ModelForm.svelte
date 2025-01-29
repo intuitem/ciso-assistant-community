@@ -135,12 +135,9 @@
 	{#if shape.reference_control && !duplicate}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({
-				objects: model.foreignKeys['reference_control'],
-				extra_fields: [['folder', 'str']],
-				suggestions: suggestions['reference_control'],
-				label: 'auto' // convention for automatic label calculation
-			})}
+			endpoint="reference-controls"
+			extraFields={[['folder', 'str']]}
+			labelField="auto"
 			field="reference_control"
 			cacheLock={cacheLocks['reference_control']}
 			bind:cachedValue={formDataCache['reference_control']}

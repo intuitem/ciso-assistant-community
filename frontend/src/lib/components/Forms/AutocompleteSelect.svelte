@@ -3,6 +3,8 @@
 	import type { CacheLock } from '$lib/utils/types';
 	import { beforeUpdate, onMount } from 'svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
+	import { createEventDispatcher } from 'svelte';
+	import MultiSelect from 'svelte-multiselect';
 
 	interface Option {
 		label: string;
@@ -23,6 +25,55 @@
 	export let translateOptions = true;
 
 	export let options: Option[] = [];
+	/**
+	 * endpoint to fetch options from
+	 * @example 'users' -> fetches from /users/
+	 */
+	 export let endpoint: string;
+
+	/**
+	 * Field path to use for option labels (supports dot notation for nested fields)
+	 * @default 'name'
+	 * @example 'email' -> object.email
+	 * @example 'profile.full_name' -> object.profile.full_name
+	 * @special 'auto' -> combines ref_id with name/description
+	 */
+	export let labelField: string = 'name';
+
+	/**
+	 * Field path to use for option values (supports dot notation for nested fields)
+	 * @default 'id'
+	 * @example 'uuid' -> object.uuid
+	 * @example 'meta.identifier' -> object.meta.identifier
+	 */
+	export let valueField: string = 'id';
+
+	/**
+	 * Additional fields to display in labels as prefixes
+	 * @format Array of [fieldPath, type] tuples
+	 * @example [['folder.str', 'string']] -> displays "folder_value/name"
+	 * @example [['department', 'string'], ['team', 'string']] -> "department_value/team_value/name"
+	 */
+	export let extraFields: [string, string][] = [];
+
+	/**
+	 * Suggested options to highlight (matches by valueField)
+	 * @example [{id: 1, name: 'Suggested'}]
+	 */
+	export let suggestions: any[] = [];
+
+	/**
+	 * Current user/object to exclude from options (unless selfSelect=true)
+	 * @example Current user object to prevent self-selection
+	 */
+	export let self: any = null;
+
+	/**
+	 * Whether to include the self object in selectable options
+	 * @default false
+	 * @example true -> allows selecting your own user account
+	 */
+	export let selfSelect: boolean = false;
 	export let allowUserOptions: boolean | 'append' = false;
 
 	export let cacheLock: CacheLock = {
@@ -32,9 +83,6 @@
 	export let cachedValue: any[] | undefined = undefined;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
-
-	import { createEventDispatcher } from 'svelte';
-	import MultiSelect from 'svelte-multiselect';
 
 	let selected: typeof options = options.length === 1 && $constraints?.required ? [options[0]] : [];
 	let selectedValues: (string | undefined)[] = [];
@@ -52,7 +100,56 @@
 
 	const dispatch = createEventDispatcher();
 
+	async function fetchOptions() {
+		try {
+			const response = await fetch(`/${endpoint}`);
+			if (response.ok) {
+				const data = await response.json();
+				options = processOptions(data);
+				console.log(data)
+			}
+		} catch (error) {
+			console.error(`Error fetching ${endpoint}:`, error);
+		}
+	}
+
+	function processOptions(objects: any[]) {
+		const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
+		
+		return objects.map((object) => {
+			// Process main label
+			const mainLabel = labelField === 'auto'
+				? append(object.ref_id, object.name || object.description)
+				: getNestedValue(object, labelField);
+
+			// Process extra fields
+			const extraParts = extraFields.map((fieldPath) => {
+				const value = getNestedValue(object, fieldPath[0], fieldPath[1]);
+				return value !== undefined ? value.toString() : '';
+			});
+
+			const fullLabel = extraFields.length > 0
+				? `${extraParts.join('/')}/${mainLabel}`
+				: mainLabel;
+
+			return {
+				label: fullLabel,
+				value: getNestedValue(object, valueField),
+				suggested: suggestions?.some(s => 
+					getNestedValue(s, valueField) === getNestedValue(object, valueField)
+				)
+			};
+		}).filter(option => selfSelect || option.value !== getNestedValue(self, valueField));
+	}
+
+	function getNestedValue(obj: any, path: string, field='') {
+		if (field)
+			return obj[path][field]
+		return path.split('.').reduce((o, p) => (o || {})[p], obj);
+	}
+
 	onMount(async () => {
+		await fetchOptions();
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
 			selected = cacheResult.map((value) => optionHashmap[value]);
