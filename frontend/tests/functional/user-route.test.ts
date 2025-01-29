@@ -256,8 +256,8 @@ test('user usual routine actions are working correctly', async ({
 test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
 	await foldersPage.goto();
 	await foldersPage.deleteItemButton(vars.folderName).click();
-	await foldersPage.deleteModalPromptConfirmText.fill(m.yes());
-	await foldersPage.deleteModalPromptConfirmButton.click();
+	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
+	await foldersPage.deletePromptConfirmButton().click();
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 
 	await usersPage.goto();

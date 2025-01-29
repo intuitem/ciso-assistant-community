@@ -50,7 +50,7 @@
 		<p class="text-red-500 font-bold">{m.confirmYes()}</p>
 		<input
 			type="text"
-			data-test-id="delete-prompt-confirm-text"
+			data-test-id="delete-prompt-confirm-textfield"
 			bind:value={userInput}
 			placeholder={m.confirmYesPlaceHolder()}
 			class="w-full mt-2 p-2 border border-gray-300 rounded"

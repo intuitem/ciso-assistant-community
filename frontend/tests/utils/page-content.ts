@@ -140,6 +140,14 @@ export class PageContent extends BasePage {
 		return this.getRow(value).getByTestId('tablerow-delete-button');
 	}
 
+	deletePromptConfirmTextField() {
+		return this.page.getByTestId('delete-prompt-confirm-textfield');
+	}
+
+	deletePromptConfirmButton() {
+		return this.page.getByTestId('delete-prompt-confirm-button');
+	}
+
 	importItemButton(value: string, language?: string) {
 		return language
 			? this.getRow(value, language).getByTestId('tablerow-import-button')
