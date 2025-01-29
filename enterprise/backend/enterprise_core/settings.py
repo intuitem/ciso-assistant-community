@@ -113,6 +113,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
@@ -157,6 +158,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
+    "huey.contrib.djhuey",
 ]
 
 MIDDLEWARE = [
@@ -308,9 +310,16 @@ LANGUAGES = [
     ("es", "Spanish"),
     ("de", "German"),
     ("it", "Italian"),
-    ("nd", "Dutch"),
+    ("nl", "Dutch"),
     ("pl", "Polish"),
     ("pt", "Portuguese"),
+    ("ar", "Arabic"),
+    ("ro", "Romanian"),
+    ("hi", "Hindi"),
+    ("ur", "Urdu"),
+    ("cs", "Czech"),
+    ("sv", "Swedish"),
+    ("id", "Indonesian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -339,6 +348,7 @@ if "POSTGRES_NAME" in os.environ:
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],
             "HOST": os.environ["DB_HOST"],
             "PORT": os.environ.get("DB_PORT", "5432"),
+            "CONN_MAX_AGE": os.environ.get("CONN_MAX_AGE", 300),
         }
     }
 else:
@@ -427,3 +437,19 @@ LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
 logger.info("License information", seats=LICENSE_SEATS, expiration=LICENSE_EXPIRATION)
 
 INSTALLED_APPS.append("enterprise_core")
+
+if MAIL_DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
+
+
+## Huey settings
+HUEY_FILE_PATH = os.environ.get("HUEY_FILE_PATH", BASE_DIR / "db" / "huey.db")
+
+HUEY = {
+    "huey_class": "huey.SqliteHuey",
+    "name": "ciso_assistant",
+    "filename": HUEY_FILE_PATH,
+    "results": True,  # would be interesting for debug
+    "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
+}
