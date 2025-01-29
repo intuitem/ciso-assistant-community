@@ -2,24 +2,15 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { listViewFields } from '$lib/utils/table';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 
-import { CUSTOM_MODEL_FETCH_MAP, getModelInfo } from '$lib/utils/crud';
+import { getModelInfo } from '$lib/utils/crud';
 import type { ModelInfo, urlModel } from '$lib/utils/types';
 import type { LayoutServerLoad } from './$types';
-import { languageTag } from '$paraglide/runtime';
 
 export const load = (async ({ fetch, params }) => {
-	let data = null;
 	const model: ModelInfo = getModelInfo(params.model!);
-	if (Object.prototype.hasOwnProperty.call(CUSTOM_MODEL_FETCH_MAP, params.model)) {
-		const fetch_function = CUSTOM_MODEL_FETCH_MAP[params.model];
-		data = await fetch_function({ fetch, params }, languageTag());
-	} else {
-		const endpoint = model.endpointUrl
-			? `${BASE_API_URL}/${model.endpointUrl}/${model.listViewUrlParams || ''}`
-			: `${BASE_API_URL}/${params.model}/${model.listViewUrlParams || ''}`;
-		const res = await fetch(endpoint);
-		data = await res.json();
-	}
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? params.model}/${model.listViewUrlParams || ''}`;
+	const res = await fetch(endpoint);
+	const data = await res.json();
 
 	const bodyData = tableSourceMapper(data.results, listViewFields[params.model as urlModel].body);
 
