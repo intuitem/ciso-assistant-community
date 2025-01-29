@@ -54,7 +54,7 @@
 				</div>
 				<ModelTable
 					source={data.storedLibrariesTable}
-					URLModel="libraries"
+					URLModel="stored-libraries"
 					deleteForm={data.deleteForm}
 					server={false}
 				/>
@@ -63,7 +63,7 @@
 				<!-- loadedlibraries -->
 				<ModelTable
 					source={data.loadedLibrariesTable}
-					URLModel="libraries"
+					URLModel="loaded-libraries"
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
 					server={false}

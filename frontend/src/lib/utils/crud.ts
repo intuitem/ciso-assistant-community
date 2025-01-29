@@ -753,18 +753,14 @@ export const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
-	libraries: {
-		locales: LanguageDisplay,
+	'stored-libraries': {
+		locale: LanguageDisplay,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
-	// "stored-libraries": {
-	// 	locale: LanguageDisplay,
-	// 	[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	// },
-	// "loaded-libraries": {
-	// 	locale: LanguageDisplay
-	// 	// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	// },
+	'loaded-libraries': {
+		locale: LanguageDisplay
+		// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
+	},
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
 	}

@@ -15,8 +15,8 @@ import { safeTranslate } from '$lib/utils/i18n';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
 
 export const load = (async ({ fetch }) => {
-	const stored_libraries_endpoint = `${BASE_API_URL}/stored-libraries/`;
-	const loaded_libaries_endpoint = `${BASE_API_URL}/loaded-libraries/`;
+	const stored_libraries_endpoint = `${BASE_API_URL}/stored-libraries/?limit=5000`;
+	const loaded_libaries_endpoint = `${BASE_API_URL}/loaded-libraries/?limit=5000`;
 
 	const [stored_libraries_res, loaded_libaries_res] = await Promise.all([
 		fetch(stored_libraries_endpoint),
