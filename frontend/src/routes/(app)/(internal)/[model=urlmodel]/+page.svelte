@@ -34,18 +34,18 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
-				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
-			};
-		}
+		// if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
+		// 	modalComponent = {
+		// 		ref: MissingConstraintsModal
+		// 	};
+		// 	modal = {
+		// 		type: 'component',
+		// 		component: modalComponent,
+		// 		title: m.warning(),
+		// 		body: safeTranslate('add-' + data.model.localName).toLowerCase(),
+		// 		value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
+		// 	};
+		// }
 		modalStore.trigger(modal);
 	}
 
