@@ -18,9 +18,11 @@
 		});
 	});
 
-	source = { ...source, meta: source.meta.results };
-
-	$: console.debug('server', server);
+	$: _source = { ...source, meta: source.meta.results || source.meta };
 </script>
 
-<svelte:component this={modelTable} {source} {...$$restProps} />
+<svelte:component this={modelTable} source={_source} {...$$restProps}>
+	<slot />
+	<slot name="addButton" slot="addButton" />
+	<slot name="optButton" slot="optButton" />
+</svelte:component>
