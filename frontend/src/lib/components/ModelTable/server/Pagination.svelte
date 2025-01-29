@@ -13,7 +13,6 @@
 		handler.setPage(value);
 		handler.invalidate();
 	};
-	$: console.log('$pages', $pages);
 
 	afterNavigate(() => {
 		if ($page.url) {

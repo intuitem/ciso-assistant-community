@@ -18,10 +18,10 @@ export const load = (async ({ fetch, params }) => {
 			? `${BASE_API_URL}/${model.endpointUrl}/${model.listViewUrlParams || ''}`
 			: `${BASE_API_URL}/${params.model}/${model.listViewUrlParams || ''}`;
 		const res = await fetch(endpoint);
-		data = await res.json().then((res) => res.results);
+		data = await res.json();
 	}
 
-	const bodyData = tableSourceMapper(data, listViewFields[params.model as urlModel].body);
+	const bodyData = tableSourceMapper(data.results, listViewFields[params.model as urlModel].body);
 
 	const headData: Record<string, string> = listViewFields[params.model as urlModel].body.reduce(
 		(obj, key, index) => {
@@ -34,7 +34,7 @@ export const load = (async ({ fetch, params }) => {
 	const table: TableSource = {
 		head: headData,
 		body: bodyData,
-		meta: data // metaData
+		meta: data
 	};
 
 	return { table };
