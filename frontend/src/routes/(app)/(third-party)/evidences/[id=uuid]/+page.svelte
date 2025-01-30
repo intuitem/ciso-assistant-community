@@ -50,11 +50,10 @@
 		const fetchAttachment = async () => {
 			const res = await fetch(`./${data.evidence.id}/attachment`);
 			const blob = await res.blob();
-			const body = JSON.parse(await blob.text());
 			return {
 				type: blob.type,
 				url: URL.createObjectURL(blob),
-				couldFetch: body.message != 'Failed to fetch attachment'
+				couldFetch: res.ok || JSON.parse(await blob.text()).message != 'Failed to fetch attachment'
 			};
 		};
 		attachment = data.evidence.attachment ? await fetchAttachment() : undefined;
@@ -187,11 +186,12 @@
 				{:else if attachment.type === 'application/pdf'}
 					<embed src={attachment.url} type="application/pdf" width="100%" height="600px" />
 				{:else}
-					<div class="flex flex-col items-center justify-center space-x-4">
+					<div class="flex items-center justify-center space-x-4">
 						{#if !attachment.couldFetch}
 							<p class="text-error-500 font-bold">{m.couldNotFindAttachmentMessage()}</p>
+						{:else}
+							<p class="font-bold text-sm">{m.NoPreviewMessage()}</p>
 						{/if}
-						<p class="font-bold text-sm">{m.NoPreviewMessage()}</p>
 					</div>
 				{/if}
 			{:else}
