@@ -8,6 +8,7 @@
 	interface Attachment {
 		type: string;
 		url: string;
+		couldFetch: boolean;
 	}
 
 	let attachment: Attachment | undefined;
@@ -15,7 +16,12 @@
 	const fetchAttachment = async () => {
 		const res = await fetch(`/evidences/${meta.id}/attachment`);
 		const blob = await res.blob();
-		return { type: blob.type, url: URL.createObjectURL(blob) };
+		const body = JSON.parse(await blob.text());
+		return {
+			type: blob.type,
+			url: URL.createObjectURL(blob),
+			couldFetch: body.message != 'Failed to fetch attachment'
+		};
 	};
 
 	let mounted = false;
@@ -42,6 +48,9 @@
 		{:else if attachment.type === 'application/pdf'}
 			<embed src={attachment.url} type="application/pdf" class="h-24" />
 		{:else}
+			{#if !attachment.couldFetch}
+				<p class="text-error-500 font-bold">{m.couldNotFindAttachmentMessage()}</p>
+			{/if}
 			<p>{m.NoPreviewMessage()}</p>
 		{/if}
 	{:else}
