@@ -2311,12 +2311,13 @@ class FolderViewSet(BaseModelViewSet):
         missing_libraries = []
         link_dump_database_ids = {}
 
-        try:
-            objects = parsed_data.get("objects", None)
-            if not objects:
-                logger.error("No objects found in the dump")
-                raise ValidationError({"error": "No objects found in the dump"})
+        # First check if objects exist
+        objects = parsed_data.get("objects")
+        if not objects:
+            logger.error("No objects found in the dump")
+            raise ValidationError({"error": "No objects found in the dump"})
 
+        try:
             # Validate models and check for domain
             models_map = self._get_models_map(objects)
             if Folder in models_map.values():
@@ -2341,9 +2342,9 @@ class FolderViewSet(BaseModelViewSet):
             creation_order = self._resolve_dependencies(list(models_map.values()))
 
             logger.debug("Resolved creation order", creation_order=creation_order)
-
             logger.debug("Starting objects validation", objects_count=len(objects))
 
+            # Validate all objects first
             for model in creation_order:
                 self._validate_model_objects(
                     model=model,
@@ -2354,30 +2355,12 @@ class FolderViewSet(BaseModelViewSet):
 
             logger.debug("required_libraries", required_libraries=required_libraries)
 
+            # If validation errors exist, raise them immediately
             if validation_errors:
                 logger.error(
-                    "Failed to validate objets", validation_errors=validation_errors
+                    "Failed to validate objects", validation_errors=validation_errors
                 )
                 raise ValidationError({"validation_errors": validation_errors})
-
-            # Check for missing libraries
-            for library in required_libraries:
-                if not LoadedLibrary.objects.filter(
-                    urn=library["urn"], version=library["version"]
-                ).exists():
-                    if (
-                        StoredLibrary.objects.filter(
-                            urn=library["urn"], version__gte=library["version"]
-                        ).exists()
-                        and load_missing_libraries
-                    ):
-                        StoredLibrary.objects.get(
-                            urn=library["urn"], version__gte=library["version"]
-                        ).load()
-                    else:
-                        missing_libraries.append(library)
-
-            logger.debug("missing_libraries", missing_libraries=missing_libraries)
 
             # Creation phase - wrap in transaction
             with transaction.atomic():
@@ -2387,11 +2370,36 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 link_dump_database_ids["base_folder"] = base_folder
 
+                # Check for missing libraries after folder creation
+                for library in required_libraries:
+                    if not LoadedLibrary.objects.filter(
+                        urn=library["urn"], version=library["version"]
+                    ).exists():
+                        if (
+                            StoredLibrary.objects.filter(
+                                urn=library["urn"], version__gte=library["version"]
+                            ).exists()
+                            and load_missing_libraries
+                        ):
+                            StoredLibrary.objects.get(
+                                urn=library["urn"], version__gte=library["version"]
+                            ).load()
+                        else:
+                            missing_libraries.append(library)
+
+                logger.debug("missing_libraries", missing_libraries=missing_libraries)
+
+                # If missing libraries exist, raise specific error
+                if missing_libraries:
+                    logger.warning(f"Missing libraries: {missing_libraries}")
+                    raise ValidationError({"missing_libraries": missing_libraries})
+
                 logger.info(
                     "Starting objects creation",
                     objects_count=len(objects),
                     creation_order=creation_order,
                 )
+
                 # Create all objects within the transaction
                 for model in creation_order:
                     self._create_model_objects(
@@ -2403,10 +2411,11 @@ class FolderViewSet(BaseModelViewSet):
             return {"message": "Import successful"}
 
         except ValidationError as e:
-            if missing_libraries:
-                logger.warning("Missing libraries", libraries=missing_libraries)
-                raise ValidationError({"missing_libraries": missing_libraries})
-            logger.exception("Failed to import objects", objects=str(e))
+            logger.error(f"error: {e}")
+            raise
+        except Exception as e:
+            # Handle unexpected errors with a generic message
+            logger.exception(f"Failed to import objects: {str(e)}")
             raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
 
     def _validate_model_objects(
