@@ -1055,6 +1055,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "risk_scenarios_e",
         "requirement_assessments",
         "evidences",
+        "progress_field",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
@@ -1408,6 +1409,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             link=applied_control.link,
             effort=applied_control.effort,
             cost=applied_control.cost,
+            progress_field=applied_control.progress_field,
         )
         duplicate_applied_control.owner.set(applied_control.owner.all())
         if data["duplicate_evidences"]:

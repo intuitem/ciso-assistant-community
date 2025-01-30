@@ -4,6 +4,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
+	import Score from '$lib/components/Forms/Score.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -138,6 +139,14 @@
 		helpText={m.costHelpText()}
 		cacheLock={cacheLocks['cost']}
 		bind:cachedValue={formDataCache['cost']}
+	/>
+	<Score
+		{form}
+		label={m.progress()}
+		field="progress_field"
+		fullDonut
+		min_score={0}
+		max_score={100}
 	/>
 {/if}
 
