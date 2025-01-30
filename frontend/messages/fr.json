@@ -898,6 +898,7 @@
 	"forgotPassword": "Mot de passe oublié",
 	"ssoSettingsUpdated": "Paramètres SSO mis à jour",
 	"score": "Score",
+	"scoreSemiColon": "Score :",
 	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source.",
 	"priority": "Priorité",
 	"p1": "P1",
@@ -1140,5 +1141,7 @@
 	"greenZoneRadius": "Rayon de la zone verte",
 	"yellowZoneRadius": "Rayon de la zone jaune",
 	"redZoneRadius": "Rayon de la zone rouge",
-	"progressField": "Progrès"
+	"progressField": "Progrès",
+	"recap": "Recap",
+	"sectionMoved": "Section déplacée ici"
 }

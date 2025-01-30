@@ -3,37 +3,8 @@ import { composerSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import type { Project } from '$lib/utils/types';
 import { TODAY } from '$lib/utils/constants';
 import * as m from '$paraglide/messages';
-
-const REQUIREMENT_ASSESSMENT_STATUS = [
-	'compliant',
-	'partially_compliant',
-	'in_progress',
-	'non_compliant',
-	'not_applicable',
-	'to_do'
-] as const;
-
-interface DonutItem {
-	name: string;
-	localName?: string;
-	value: number;
-	itemStyle: Record<string, unknown>;
-}
-
-interface RequirementAssessmentDonutItem extends Omit<DonutItem, 'name'> {
-	name: (typeof REQUIREMENT_ASSESSMENT_STATUS)[number];
-	percentage: string;
-}
-
-interface ProjectAnalytics extends Project {
-	overallCompliance: {
-		values: RequirementAssessmentDonutItem[];
-		total: number;
-	};
-}
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
@@ -69,11 +40,26 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		applied_control.state = timeState(applied_control.eta);
 	}
 
-	const req_get_counters = await fetch(`${BASE_API_URL}/get_counters/`);
-	const counters = await req_get_counters.json();
-
-	const req_get_metrics = await fetch(`${BASE_API_URL}/get_metrics/`);
-	const metrics = await req_get_metrics.json();
+	const getCounters = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/get_counters/`);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('failed to fetch or parse counters:', error);
+			return null;
+		}
+	};
+	const getMetrics = async () => {
+		try {
+			const response = await fetch(`${BASE_API_URL}/get_metrics/`);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('Failed to fetch or parse metrics:', error);
+			return null;
+		}
+	};
 
 	const usedRiskMatrices: { id: string; name: string; risk_assessments_count: number }[] =
 		await fetch(`${BASE_API_URL}/risk-matrices/used/`)
@@ -112,111 +98,6 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
 	const risk_assessments = await req_risk_assessments.json();
 
-	const projects: ProjectAnalytics[] = await fetch(`${BASE_API_URL}/projects/`)
-		.then((res) => res.json())
-		.then(async (projects) => {
-			if (projects && Array.isArray(projects.results)) {
-				const projectPromises = projects.results.map(async (project) => {
-					try {
-						const complianceAssessmentsResponse = await fetch(
-							`${BASE_API_URL}/compliance-assessments/?project=${project.id}`
-						);
-						const complianceAssessmentsData = await complianceAssessmentsResponse.json();
-
-						if (complianceAssessmentsData && Array.isArray(complianceAssessmentsData.results)) {
-							const updatedAssessmentsPromises = complianceAssessmentsData.results.map(
-								async (complianceAssessment) => {
-									try {
-										const [donutDataResponse, globalScoreResponse] = await Promise.all([
-											fetch(
-												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/donut_data/`
-											),
-											fetch(
-												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/global_score/`
-											)
-										]);
-
-										const [donutData, globalScoreData] = await Promise.all([
-											donutDataResponse.json(),
-											globalScoreResponse.json()
-										]);
-
-										complianceAssessment.donut = donutData;
-										complianceAssessment.globalScore = globalScoreData;
-										return complianceAssessment;
-									} catch (error) {
-										console.error('Error fetching data for compliance assessment:', error);
-										throw error;
-									}
-								}
-							);
-
-							const updatedAssessments = await Promise.all(updatedAssessmentsPromises);
-							project.compliance_assessments = updatedAssessments;
-							return project;
-						} else {
-							throw new Error('Compliance assessments results not found or not an array');
-						}
-					} catch (error) {
-						console.error('Error fetching compliance assessments:', error);
-						throw error;
-					}
-				});
-
-				return Promise.all(projectPromises);
-			} else {
-				throw new Error('Projects results not found or not an array');
-			}
-		})
-		.catch((error) => {
-			console.error('Failed to load projects:', error);
-			return []; // Ensure always returning an array of Record<string, any>
-		});
-
-	if (projects) {
-		projects.forEach((project) => {
-			// Initialize an object to hold the aggregated donut data
-			const aggregatedDonutData: {
-				values: RequirementAssessmentDonutItem[];
-				total: number;
-			} = {
-				values: [],
-				total: 0
-			};
-
-			// Iterate through each compliance assessment of the project
-			project.compliance_assessments.forEach((compliance_assessment: Record<string, any>) => {
-				// Process the donut data of each assessment
-				compliance_assessment.donut.result.values.forEach(
-					(donutItem: RequirementAssessmentDonutItem) => {
-						// Find the corresponding item in the aggregated data
-						const aggregatedItem: RequirementAssessmentDonutItem | undefined =
-							aggregatedDonutData.values.find((item) => item.name === donutItem.name);
-						if (aggregatedItem) {
-							// If the item already exists, increment its value
-							aggregatedItem.value += donutItem.value;
-						} else {
-							// If it's a new item, add it to the aggregated data
-							aggregatedDonutData.values.push({ ...donutItem });
-						}
-					}
-				);
-			});
-
-			// Calculate the total sum of all values
-			const totalValue = aggregatedDonutData.values.reduce((sum, item) => sum + item.value, 0);
-
-			// Calculate and store the percentage for each item
-			aggregatedDonutData.values = aggregatedDonutData.values.map((item) => ({
-				...item,
-				percentage: totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : '0'
-			}));
-
-			// Assign the aggregated donut data to the project
-			project.overallCompliance = aggregatedDonutData;
-		});
-	}
-
 	const composerForm = await superValidate(zod(composerSchema));
 
 	return {
@@ -231,12 +112,13 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		measures_to_review: measures_to_review.results,
 		acceptances_to_review: acceptances_to_review.results,
 		risk_assessments: risk_assessments.results,
-		get_counters: counters.results,
 		measures: ord_applied_controls.results,
 		applied_control_status: applied_control_status.results,
-		projects,
 		user: locals.user,
-		metrics: metrics.results,
-		title: m.analytics()
+		title: m.analytics(),
+		stream: {
+			metrics: getMetrics(),
+			counters: getCounters()
+		}
 	};
 };
