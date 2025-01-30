@@ -106,6 +106,8 @@
 					label={m.entity()}
 					hidden={initialData.entity}
 					helpText={m.stakeholderEntityHelpText()}
+					required
+					mandatory
 				/>
 			</span>
 
