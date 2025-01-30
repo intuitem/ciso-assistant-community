@@ -277,7 +277,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
-					matrixName={'resiudal'}
+					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}

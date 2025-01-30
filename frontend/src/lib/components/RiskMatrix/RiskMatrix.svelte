@@ -86,7 +86,7 @@
 					<Cell
 						{cell}
 						cellData={displayedData[i][j]}
-						popupTarget={'popupdata-' + matrixName + '-' + i + '-' + j}
+						popupTarget={`popupdata-${matrixName}-${i}-${j}`}
 						{dataItemComponent}
 						{useBubbles}
 					/>
