@@ -1141,6 +1141,7 @@
 	"greenZoneRadius": "Rayon de la zone verte",
 	"yellowZoneRadius": "Rayon de la zone jaune",
 	"redZoneRadius": "Rayon de la zone rouge",
+	"progressField": "Progrès",
 	"recap": "Recap",
 	"sectionMoved": "Section déplacée ici"
 }

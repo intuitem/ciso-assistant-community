@@ -12,7 +12,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, RegexValidator
+from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.db import models, transaction
 from django.db.models import Q
 from django.forms.models import model_to_dict
@@ -1854,6 +1854,15 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         verbose_name=_("Cost"),
     )
 
+    progress_field = models.IntegerField(
+        default=0,
+        verbose_name=_("Progress Field"),
+        validators=[
+            MinValueValidator(0, message="Progress cannot be less than 0"),
+            MaxValueValidator(100, message="Progress cannot be more than 100"),
+        ],
+    )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -1865,6 +1874,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             self.category = self.reference_control.category
         if self.reference_control and self.csf_function is None:
             self.csf_function = self.reference_control.csf_function
+        if self.status == "active":
+            self.progress_field = 100
         super(AppliedControl, self).save(*args, **kwargs)
 
     @property

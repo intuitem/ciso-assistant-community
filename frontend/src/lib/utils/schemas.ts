@@ -153,7 +153,8 @@ export const AppliedControlSchema = z.object({
 	cost: z.number().multipleOf(0.000001).optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
-	owner: z.string().uuid().optional().array().optional()
+	owner: z.string().uuid().optional().array().optional(),
+	progress_field: z.number().optional().default(0)
 });
 
 export const AppliedControlDuplicateSchema = z.object({
