@@ -25,13 +25,69 @@
 	}
 </script>
 
+toto
 {#if !duplicate}
+	<AutocompleteSelect
+		{form}
+		multiple
+		options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+		field="owner"
+		cacheLock={cacheLocks['owner']}
+		bind:cachedValue={formDataCache['owner']}
+		label={m.owner()}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
+	<Score
+		{form}
+		label={m.progress()}
+		field="progress_field"
+		fullDonut
+		min_score={0}
+		max_score={100}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="eta"
+		label={m.eta()}
+		helpText={m.etaHelpText()}
+		cacheLock={cacheLocks['eta']}
+		bind:cachedValue={formDataCache['eta']}
+	/>
+	More
 	<TextField
 		{form}
 		field="ref_id"
 		label={m.refId()}
 		cacheLock={cacheLocks['ref_id']}
 		bind:cachedValue={formDataCache['ref_id']}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['priority']}
+		field="priority"
+		label={m.priority()}
+		cacheLock={cacheLocks['priority']}
+		bind:cachedValue={formDataCache['priority']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		options={getOptions({
+			objects: model.foreignKeys['evidences'],
+			extra_fields: [['folder', 'str']]
+		})}
+		field="evidences"
+		cacheLock={cacheLocks['evidences']}
+		bind:cachedValue={formDataCache['evidences']}
+		label={m.evidences()}
 	/>
 	{#if schema.shape.category}
 		<Select
@@ -51,43 +107,6 @@
 		cacheLock={cacheLocks['csf_function']}
 		bind:cachedValue={formDataCache['csf_function']}
 	/>
-	<Select
-		{form}
-		options={model.selectOptions['priority']}
-		field="priority"
-		label={m.priority()}
-		cacheLock={cacheLocks['priority']}
-		bind:cachedValue={formDataCache['priority']}
-	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
-		field="owner"
-		cacheLock={cacheLocks['owner']}
-		bind:cachedValue={formDataCache['owner']}
-		label={m.owner()}
-	/>
-	<Select
-		{form}
-		options={model.selectOptions['status']}
-		field="status"
-		label={m.status()}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
-	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		options={getOptions({
-			objects: model.foreignKeys['evidences'],
-			extra_fields: [['folder', 'str']]
-		})}
-		field="evidences"
-		cacheLock={cacheLocks['evidences']}
-		bind:cachedValue={formDataCache['evidences']}
-		label={m.evidences()}
-	/>
 	<TextField
 		type="date"
 		{form}
@@ -100,28 +119,11 @@
 	<TextField
 		type="date"
 		{form}
-		field="eta"
-		label={m.eta()}
-		helpText={m.etaHelpText()}
-		cacheLock={cacheLocks['eta']}
-		bind:cachedValue={formDataCache['eta']}
-	/>
-	<TextField
-		type="date"
-		{form}
 		field="expiry_date"
 		label={m.expiryDate()}
 		helpText={m.expiryDateHelpText()}
 		cacheLock={cacheLocks['expiry_date']}
 		bind:cachedValue={formDataCache['expiry_date']}
-	/>
-	<TextField
-		{form}
-		field="link"
-		label={m.link()}
-		helpText={m.linkHelpText()}
-		cacheLock={cacheLocks['link']}
-		bind:cachedValue={formDataCache['link']}
 	/>
 	<Select
 		{form}
@@ -140,13 +142,13 @@
 		cacheLock={cacheLocks['cost']}
 		bind:cachedValue={formDataCache['cost']}
 	/>
-	<Score
+	<TextField
 		{form}
-		label={m.progress()}
-		field="progress_field"
-		fullDonut
-		min_score={0}
-		max_score={100}
+		field="link"
+		label={m.link()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['link']}
+		bind:cachedValue={formDataCache['link']}
 	/>
 {/if}
 
