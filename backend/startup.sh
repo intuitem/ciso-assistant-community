@@ -32,6 +32,6 @@ exec gunicorn --chdir ciso_assistant \
   --timeout $GUNICORN_TIMEOUT \
   --keep-alive $GUNICORN_KEEPALIVE \
   --workers=$GUNICORN_WORKERS \
-  --limit-request-line=$GUNICORN_LIMIT_REQUEST_LINE
+  --limit-request-line=$GUNICORN_LIMIT_REQUEST_LINE \
   --env RUN_MAIN=true \
   ciso_assistant.wsgi:application
