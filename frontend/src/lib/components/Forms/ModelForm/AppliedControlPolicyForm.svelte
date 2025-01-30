@@ -144,7 +144,6 @@
 		{form}
 		label={m.progress()}
 		field="progress_field"
-		inversedColors
 		fullDonut
 		min_score={0}
 		max_score={100}
