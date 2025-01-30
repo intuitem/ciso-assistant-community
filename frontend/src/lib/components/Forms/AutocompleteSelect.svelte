@@ -5,6 +5,7 @@
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
+	import { getContext, onDestroy } from 'svelte';
 
 	interface Option {
 		label: string;
@@ -26,10 +27,10 @@
 
 	export let options: Option[] = [];
 	/**
-	 * endpoint to fetch options from
+	 * optionsEndpoint to fetch options from
 	 * @example 'users' -> fetches from /users/
 	 */
-	export let endpoint: string;
+	export let optionsEndpoint: string;
 
 	/**
 	 * Field path to use for option labels (supports dot notation for nested fields)
@@ -38,7 +39,7 @@
 	 * @example 'profile.full_name' -> object.profile.full_name
 	 * @special 'auto' -> combines ref_id with name/description
 	 */
-	export let labelField: string = 'name';
+	export let optionsLabelField: string = 'name';
 
 	/**
 	 * Field path to use for option values (supports dot notation for nested fields)
@@ -46,7 +47,7 @@
 	 * @example 'uuid' -> object.uuid
 	 * @example 'meta.identifier' -> object.meta.identifier
 	 */
-	export let valueField: string = 'id';
+	export let optionsValueField: string = 'id';
 
 	/**
 	 * Additional fields to display in labels as prefixes
@@ -54,26 +55,26 @@
 	 * @example [['folder.str', 'string']] -> displays "folder_value/name"
 	 * @example [['department', 'string'], ['team', 'string']] -> "department_value/team_value/name"
 	 */
-	export let extraFields: [string, string][] = [];
+	export let optionsExtraFields: [string, string][] = [];
 
 	/**
-	 * Suggested options to highlight (matches by valueField)
+	 * Suggested options to highlight (matches by optionsValueField)
 	 * @example [{id: 1, name: 'Suggested'}]
 	 */
-	export let suggestions: any[] = [];
+	export let optionsSuggestions: any[] = [];
 
 	/**
-	 * Current user/object to exclude from options (unless selfSelect=true)
+	 * Current user/object to exclude from options (unless optionsSelfSelect=true)
 	 * @example Current user object to prevent self-selection
 	 */
-	export let self: any = null;
+	export let optionsSelf: any = null;
 
 	/**
 	 * Whether to include the self object in selectable options
 	 * @default false
 	 * @example true -> allows selecting your own user account
 	 */
-	export let selfSelect: boolean = false;
+	export let optionsSelfSelect: boolean = false;
 	export let allowUserOptions: boolean | 'append' = false;
 
 	export let cacheLock: CacheLock = {
@@ -101,17 +102,25 @@
 	const dispatch = createEventDispatcher();
 	// Add loading state
 	let isLoading = false;
+	// Get context function from parent
+	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 
 	async function fetchOptions() {
 		isLoading = true;
 		try {
-			const response = await fetch(`/${endpoint}`);
+			const response = await fetch(`/${optionsEndpoint}`);
 			if (response.ok) {
 				const data = await response.json();
 				options = processOptions(data);
+				const isRequired = mandatory || $constraints?.required;
+				const hasNoOptions = options.length === 0;
+				const isMissing = isRequired && hasNoOptions;
+				if (updateMissingConstraint) {
+					updateMissingConstraint(field, isMissing);
+				}
 			}
 		} catch (error) {
-			console.error(`Error fetching ${endpoint}:`, error);
+			console.error(`Error fetching ${optionsEndpoint}:`, error);
 		} finally {
 			isLoading = false;
 		}
@@ -124,28 +133,28 @@
 			.map((object) => {
 				// Process main label
 				const mainLabel =
-					labelField === 'auto'
+					optionsLabelField === 'auto'
 						? append(object.ref_id, object.name || object.description)
-						: getNestedValue(object, labelField);
+						: getNestedValue(object, optionsLabelField);
 
 				// Process extra fields
-				const extraParts = extraFields.map((fieldPath) => {
+				const extraParts = optionsExtraFields.map((fieldPath) => {
 					const value = getNestedValue(object, fieldPath[0], fieldPath[1]);
 					return value !== undefined ? value.toString() : '';
 				});
 
 				const fullLabel =
-					extraFields.length > 0 ? `${extraParts.join('/')}/${mainLabel}` : mainLabel;
+					optionsExtraFields.length > 0 ? `${extraParts.join('/')}/${mainLabel}` : mainLabel;
 
 				return {
 					label: fullLabel,
-					value: getNestedValue(object, valueField),
-					suggested: suggestions?.some(
-						(s) => getNestedValue(s, valueField) === getNestedValue(object, valueField)
+					value: getNestedValue(object, optionsValueField),
+					suggested: optionsSuggestions?.some(
+						(s) => getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
 					)
 				};
 			})
-			.filter((option) => selfSelect || option.value !== getNestedValue(self, valueField));
+			.filter((option) => optionsSelfSelect || option.value !== getNestedValue(optionsSelf, optionsValueField));
 	}
 
 	function getNestedValue(obj: any, path: string, field = '') {
@@ -222,6 +231,13 @@
 	}
 
 	$: disabled = selected.length && options.length === 1 && $constraints?.required;
+
+	// Cleanup on component destroy
+	onDestroy(() => {
+		if (updateMissingConstraint) {
+			updateMissingConstraint(field, false);
+		}
+	});
 </script>
 
 <div {hidden}>

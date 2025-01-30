@@ -31,7 +31,7 @@
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect
 		{form}
-		options={getOptions({ objects: model.foreignKeys['folder'] })}
+		optionsEndpoint="folders"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

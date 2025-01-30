@@ -3,7 +3,6 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -29,10 +28,8 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['project'],
-		extra_fields: [['folder', 'str']]
-	})}
+	optionsEndpoint="projects"
+	optionsExtraFields={[['folder', 'str']]}
 	field="project"
 	cacheLock={cacheLocks['project']}
 	bind:cachedValue={formDataCache['project']}
@@ -59,7 +56,7 @@
 	<AutocompleteSelect
 		{form}
 		disabled={object.id}
-		options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
+		optionsEndpoint="risk-matrices"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}
@@ -70,7 +67,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+		optionsEndpoint="users"
+		optionsLabelField="email"
 		field="authors"
 		cacheLock={cacheLocks['authors']}
 		bind:cachedValue={formDataCache['authors']}
@@ -79,7 +77,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+		optionsEndpoint="users"
+		optionsLabelField="email"
 		field="reviewers"
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}
@@ -117,7 +116,7 @@
 			cacheLock={cacheLocks['ebios_rm_study']}
 			bind:cachedValue={formDataCache['ebios_rm_study']}
 			label={m.ebiosRmStudy()}
-			options={getOptions({ objects: model.foreignKeys['ebios_rm_study'] })}
+			optionsEndpoint="ebios-rm"
 			hidden
 		/>
 	{/if}

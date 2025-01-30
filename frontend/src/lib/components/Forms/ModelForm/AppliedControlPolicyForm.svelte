@@ -61,8 +61,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		endpoint="users"
-		labelField="email"
+		optionsEndpoint="users"
+		optionsLabelField="email"
 		field="owner"
 		cacheLock={cacheLocks['owner']}
 		bind:cachedValue={formDataCache['owner']}
@@ -78,8 +78,8 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		endpoint="evidences"
-		extraFields={[['folder', 'str']]}
+		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
 		multiple
 		field="evidences"
 		cacheLock={cacheLocks['evidences']}
@@ -151,7 +151,7 @@
 
 <AutocompleteSelect
 	{form}
-	endpoint="folders?content_type=DO&content_type=GL"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
