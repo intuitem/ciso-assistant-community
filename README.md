@@ -527,7 +527,7 @@ Set DJANGO_DEBUG=False for security reason.
 ## Contributors 🤝
 
 <a href="https://github.com/intuitem/ciso-assistant-community/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=intuitem/ciso-assistant-community&anon=1&columns=9" />
+  <img src="https://contrib.rocks/image?repo=intuitem/ciso-assistant-community&columns=9" />
 </a>
 
 ## Built With 💜
