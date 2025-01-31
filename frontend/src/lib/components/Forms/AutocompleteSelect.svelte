@@ -170,7 +170,13 @@
 			.filter(
 				(option) =>
 					optionsSelfSelect || option.value !== getNestedValue(optionsSelf, optionsValueField)
-			);
+			)
+			.sort((a, b) => {
+            // Show suggested items first
+            if (a.suggested && !b.suggested) return -1;
+            if (!a.suggested && b.suggested) return 1;
+            return 0;
+        });
 	}
 
 	function getNestedValue(obj: any, path: string, field = '') {
