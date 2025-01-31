@@ -141,6 +141,7 @@
 			multiple
 			{form}
 			optionsEndpoint="assets"
+			optionsLabelField="auto"
 			optionsExtraFields={[['folder', 'str']]}
 			field="assets"
 			label={m.assets()}

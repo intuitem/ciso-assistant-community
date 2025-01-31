@@ -64,6 +64,7 @@
 		multiple
 		optionsEndpoint="threats"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
 		field="threats"
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}

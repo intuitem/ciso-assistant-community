@@ -53,6 +53,7 @@
 	{form}
 	optionsEndpoint="assets?type=PR"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
 	field="assets"
 	label={m.assets()}
 	helpText={m.fearedEventAssetHelpText()}

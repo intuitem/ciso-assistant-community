@@ -132,6 +132,7 @@
 		{form}
 		optionsEndpoint="feared-events?is_selected=true"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
 		field="feared_events"
 		label={m.fearedEvents()}
 		helpText={m.roToFearedEventHelpText()}
