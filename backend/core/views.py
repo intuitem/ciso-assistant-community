@@ -3131,11 +3131,9 @@ class EvidenceViewSet(BaseModelViewSet):
         ) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Evidence
         )
-        # print("==> ATTACHEMENT CALLED")
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
-            # print("=============\n",evidence.attachment.name,  evidence.attachment.storage.exists(evidence.attachment.name), "\n========")
             if not evidence.attachment or not evidence.attachment.storage.exists(
                 evidence.attachment.name
             ):

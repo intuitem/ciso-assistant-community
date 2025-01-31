@@ -1723,7 +1723,6 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             self.attachment.name
         ):
             return None
-        # print("===>GET SIZE RAHHHHHHHH", self, self.attachment, self.attachment.size)
         # get the attachment size with the correct unit
         size = self.attachment.size
         if size < 1024:

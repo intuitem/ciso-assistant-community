@@ -8,7 +8,7 @@
 	interface Attachment {
 		type: string;
 		url: string;
-		couldFetch: boolean;
+		fileExists: boolean;
 	}
 
 	let attachment: Attachment | undefined;
@@ -19,7 +19,7 @@
 		return {
 			type: blob.type,
 			url: URL.createObjectURL(blob),
-			couldFetch: res.ok || JSON.parse(await blob.text()).message != 'Failed to fetch attachment'
+			fileExists: res.ok
 		};
 	};
 
@@ -46,7 +46,7 @@
 			<img src={attachment.url} alt="attachment" class="h-24" />
 		{:else if attachment.type === 'application/pdf'}
 			<embed src={attachment.url} type="application/pdf" class="h-24" />
-		{:else if !attachment.couldFetch}
+		{:else if !attachment.fileExists}
 			<p class="text-error-500 font-bold">{m.couldNotFindAttachmentMessage()}</p>
 		{:else}
 			<p>{m.NoPreviewMessage()}</p>
