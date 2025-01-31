@@ -16,7 +16,7 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folder?content_type=DO&content_type=GL"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
