@@ -53,6 +53,7 @@
 	const dispatch = createEventDispatcher();
 
 	onMount(async () => {
+		dispatch('mount', $value);
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
 			selected = cacheResult.map((value) => optionHashmap[value]);
