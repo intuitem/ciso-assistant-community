@@ -449,7 +449,7 @@ export const StakeholderSchema = z.object({
 	ebios_rm_study: z.string(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	category: z.string(),
-	entity: z.string().optional(),
+	entity: z.string(),
 	current_dependency: z.number().min(0).max(4).default(0).optional(),
 	current_penetration: z.number().min(0).max(4).default(0).optional(),
 	current_maturity: z.number().min(1).max(4).default(1).optional(),
