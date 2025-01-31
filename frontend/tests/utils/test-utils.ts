@@ -482,7 +482,7 @@ export class TestContent {
 					name: vars.assessmentName,
 					description: vars.description,
 					project: vars.folderName + '/' + vars.projectName,
-					status: 'Planned',
+					// status: 'Planned',
 					// version: "1.4.2",
 					framework: vars.framework.name
 					// eta: "2025-01-01",
