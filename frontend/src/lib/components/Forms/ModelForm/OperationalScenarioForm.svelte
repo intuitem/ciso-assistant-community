@@ -32,7 +32,6 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['ebios_rm_study'] })}
 	field="ebios_rm_study"
 	cacheLock={cacheLocks['ebios_rm_study']}
 	bind:cachedValue={formDataCache['ebios_rm_study']}
@@ -63,11 +62,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		options={getOptions({
-			objects: model.foreignKeys['threats'],
-			extra_fields: [['folder', 'str']],
-			label: 'auto'
-		})}
+		optionsEndpoint="threats"
+		optionsExtraFields={[['folder', 'str']]}
 		field="threats"
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}
@@ -77,9 +73,7 @@
 	{#if context !== 'edit'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({
-				objects: model.foreignKeys['attack_path']
-			})}
+			optionsEndpoint="attack-paths?is_selected=true&used=false"
 			field="attack_path"
 			label={m.attackPath()}
 		/>

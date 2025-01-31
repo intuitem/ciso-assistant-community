@@ -41,7 +41,7 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		options={getOptions({ objects: model.foreignKeys['user_groups'] })}
+		optionsEndpoint="user-groups"
 		field="user_groups"
 		cacheLock={cacheLocks['user_groups']}
 		bind:cachedValue={formDataCache['user_groups']}

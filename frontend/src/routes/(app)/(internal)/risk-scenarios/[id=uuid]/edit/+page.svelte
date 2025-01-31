@@ -114,7 +114,8 @@
 							<AutocompleteSelect
 								{form}
 								multiple
-								options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
+								optionsEndpoint="users?is_third_party=false"
+								optionsLabelField="email"
 								field="owner"
 								label={m.owner()}
 							/>
@@ -144,11 +145,8 @@
 					<AutocompleteSelect
 						multiple
 						{form}
-						options={getOptions({
-							objects: data.foreignKeys['assets'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="assets"
+						optionsExtraFields={[['folder', 'str']]}
 						field="assets"
 						label={m.assets()}
 						helpText={m.riskScenarioAssetHelpText()}
@@ -156,22 +154,16 @@
 					<AutocompleteSelect
 						{form}
 						multiple
-						options={getOptions({
-							objects: data.foreignKeys['threats'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="threats"
+						optionsExtraFields={[['folder', 'str']]}
 						field="threats"
 						label={m.threats()}
 					/>
 					<AutocompleteSelect
 						multiple
 						{form}
-						options={getOptions({
-							objects: data.foreignKeys['vulnerabilities'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="vulnerabilities"
+						optionsExtraFields={[['folder', 'str']]}
 						field="vulnerabilities"
 						label={m.vulnerabilities()}
 					/>
@@ -188,10 +180,8 @@
 								<AutocompleteSelect
 									multiple
 									{form}
-									options={getOptions({
-										objects: data.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
 									field="existing_applied_controls"
 									label={m.existingControls()}
 									helpText={m.existingControlsHelper()}
@@ -263,10 +253,8 @@
 								<AutocompleteSelect
 									multiple
 									{form}
-									options={getOptions({
-										objects: data.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
 									field="applied_controls"
 									label={m.extraAppliedControls()}
 									helpText={m.extraControlsHelper()}

@@ -39,6 +39,7 @@
 <AutocompleteSelect
 	{form}
 	options={getOptions({ objects: model.foreignKeys['folder'] })}
+	optionsEndpoint="folders?content_type=DO"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
@@ -47,7 +48,8 @@
 />
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['approver'], label: 'email' })}
+	optionsEndpoint="users?is_approver=true"
+	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
@@ -56,13 +58,13 @@
 />
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['risk_scenarios'],
-		extra_fields: [
+	optionsEndpoint="risk-scenarios"
+	optionsExtraFields={
+		[
 			['project', 'str'],
 			['risk_assessment', 'str']
 		]
-	})}
+	}
 	field="risk_scenarios"
 	cacheLock={cacheLocks['risk_scenarios']}
 	bind:cachedValue={formDataCache['risk_scenarios']}

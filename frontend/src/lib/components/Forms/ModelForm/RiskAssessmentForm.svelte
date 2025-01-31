@@ -67,7 +67,7 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users"
+		optionsEndpoint="users?is_third_party=false"
 		optionsLabelField="email"
 		field="authors"
 		cacheLock={cacheLocks['authors']}
@@ -77,7 +77,7 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users"
+		optionsEndpoint="users?is_third_party=false"
 		optionsLabelField="email"
 		field="reviewers"
 		cacheLock={cacheLocks['reviewers']}
@@ -116,7 +116,6 @@
 			cacheLock={cacheLocks['ebios_rm_study']}
 			bind:cachedValue={formDataCache['ebios_rm_study']}
 			label={m.ebiosRmStudy()}
-			optionsEndpoint="ebios-rm"
 			hidden
 		/>
 	{/if}

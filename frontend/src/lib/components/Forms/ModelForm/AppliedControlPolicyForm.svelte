@@ -61,7 +61,7 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users"
+		optionsEndpoint="users?is_third_party=false"
 		optionsLabelField="email"
 		field="owner"
 		cacheLock={cacheLocks['owner']}

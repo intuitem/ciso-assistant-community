@@ -33,7 +33,7 @@
 {:else}
   <AutocompleteSelect
     {form}
-    options={getOptions({ objects: model.foreignKeys['parent_folder'] })}
+    optionsEndpoint="folders?content_type=DO&content_type=GL"
     field="parent_folder"
     cacheLock={cacheLocks['parent_folder']}
     bind:cachedValue={formDataCache['parent_folder']}

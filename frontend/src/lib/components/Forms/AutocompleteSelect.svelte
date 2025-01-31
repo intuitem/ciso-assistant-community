@@ -30,7 +30,7 @@
 	 * optionsEndpoint to fetch options from
 	 * @example 'users' -> fetches from /users/
 	 */
-	export let optionsEndpoint: string;
+	export let optionsEndpoint: string = "";
 
 	/**
 	 * Field path to use for option labels (supports dot notation for nested fields)
@@ -85,9 +85,11 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	let selected: typeof options = options.length === 1 && $constraints?.required ? [options[0]] : [];
+	let selected: typeof options[] = [];
 	let selectedValues: (string | undefined)[] = [];
 	let isInternalUpdate = false;
+	let optionsLoaded = false;
+	let initialValue = $value; // Store initial value
 	const default_value = nullable ? null : selectedValues[0];
 
 	const multiSelectOptions = {
@@ -100,23 +102,33 @@
 	};
 
 	const dispatch = createEventDispatcher();
-	// Add loading state
 	let isLoading = false;
-	// Get context function from parent
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
-
 	async function fetchOptions() {
 		isLoading = true;
 		try {
-			const response = await fetch(`/${optionsEndpoint}`);
-			if (response.ok) {
-				const data = await response.json();
-				options = processOptions(data);
-				const isRequired = mandatory || $constraints?.required;
-				const hasNoOptions = options.length === 0;
-				const isMissing = isRequired && hasNoOptions;
-				if (updateMissingConstraint) {
-					updateMissingConstraint(field, isMissing);
+			if (optionsEndpoint) {
+				const response = await fetch(`/${optionsEndpoint}`);
+				if (response.ok) {
+					const data = await response.json();
+					options = processOptions(data);
+					const isRequired = mandatory || $constraints?.required;
+					const hasNoOptions = options.length === 0;
+					const isMissing = isRequired && hasNoOptions;
+					if (updateMissingConstraint) {
+						updateMissingConstraint(field, isMissing);
+					}
+					
+					// After options are loaded, set initial selection using stored initial value
+					if (initialValue) {
+						selected = options.filter((item) =>
+							Array.isArray(initialValue) ? initialValue.includes(item.value) : item.value === initialValue
+						);
+					} else if (options.length === 1 && $constraints?.required) {
+						selected = [options[0]];
+					}
+					
+					optionsLoaded = true;
 				}
 			}
 		} catch (error) {
@@ -131,13 +143,11 @@
 
 		return objects
 			.map((object) => {
-				// Process main label
 				const mainLabel =
 					optionsLabelField === 'auto'
 						? append(object.ref_id, object.name || object.description)
 						: getNestedValue(object, optionsLabelField);
 
-				// Process extra fields
 				const extraParts = optionsExtraFields.map((fieldPath) => {
 					const value = getNestedValue(object, fieldPath[0], fieldPath[1]);
 					return value !== undefined ? value.toString() : '';
@@ -166,13 +176,12 @@
 		await fetchOptions();
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
-			selected = cacheResult.map((value) => optionHashmap[value]);
+			selected = cacheResult.map((value) => optionHashmap[value]).filter(Boolean);
 		}
 	});
 
-	// Handle external updates to $value
 	beforeUpdate(() => {
-		if (!isInternalUpdate && $value) {
+		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {
 			selected = options.filter((item) =>
 				Array.isArray($value) ? $value.includes(item.value) : item.value === $value
 			);
@@ -208,10 +217,6 @@
 		return true;
 	}
 
-	if ($value) {
-		selected = options.filter((item) => $value.includes(item.value));
-	}
-
 	$: optionHashmap = options.reduce((acc, option) => {
 		acc[option.value] = option;
 		return acc;
@@ -222,7 +227,8 @@
 	$: selectedValues = selected.map((item) => item.value || item.label || item);
 
 	$: {
-		if (!isInternalUpdate && !arraysEqual(selectedValues, $value)) {
+		// Only update value after options are loaded
+		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
 			isInternalUpdate = true;
 			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
 			handleSelectChange();
@@ -232,7 +238,6 @@
 
 	$: disabled = selected.length && options.length === 1 && $constraints?.required;
 
-	// Cleanup on component destroy
 	onDestroy(() => {
 		if (updateMissingConstraint) {
 			updateMissingConstraint(field, false);

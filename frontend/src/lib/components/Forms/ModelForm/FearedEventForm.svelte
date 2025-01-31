@@ -19,7 +19,6 @@
 <p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['ebios_rm_study'] })}
 	field="ebios_rm_study"
 	cacheLock={cacheLocks['ebios_rm_study']}
 	bind:cachedValue={formDataCache['ebios_rm_study']}
@@ -52,11 +51,8 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['assets'],
-		extra_fields: [['folder', 'str']],
-		label: 'auto'
-	})}
+	optionsEndpoint="assets?type=PR"
+	optionsExtraFields={[['folder', 'str']]}
 	field="assets"
 	label={m.assets()}
 	helpText={m.fearedEventAssetHelpText()}
@@ -64,9 +60,7 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['qualifications']
-	})}
+	optionsEndpoint="qualifications"
 	field="qualifications"
 	label={m.qualifications()}
 	helpText={m.fearedEventQualificationHelpText()}

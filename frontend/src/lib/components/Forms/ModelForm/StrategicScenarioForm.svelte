@@ -18,7 +18,8 @@
 {#if context !== 'edit'}
 	<AutocompleteSelect
 		{form}
-		options={getOptions({ objects: model.foreignKeys['ro_to_couple'], label: 'str' })}
+		optionsEndpoint="ro-to?is_selected=true&used=false"
+		optionsLabelField="str"
 		field="ro_to_couple"
 		cacheLock={cacheLocks['ro_to_couple']}
 		bind:cachedValue={formDataCache['ro_to_couple']}

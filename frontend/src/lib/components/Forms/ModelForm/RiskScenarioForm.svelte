@@ -37,11 +37,8 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['risk_assessment'],
-		label: 'str',
-		extra_fields: [['project', 'str']]
-	})}
+	optionsEndpoint="risk-assessments"
+	optionsExtraFields={[['project', 'str']]}
 	field="risk_assessment"
 	cacheLock={cacheLocks['risk_assessment']}
 	bind:cachedValue={formDataCache['risk_assessment']}
@@ -65,11 +62,8 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({
-		objects: model.foreignKeys['threats'],
-		extra_fields: [['folder', 'str']],
-		label: 'auto'
-	})}
+	optionsEndpoint="threats"
+	optionsExtraFields={[['folder', 'str']]}
 	field="threats"
 	cacheLock={cacheLocks['threats']}
 	bind:cachedValue={formDataCache['threats']}

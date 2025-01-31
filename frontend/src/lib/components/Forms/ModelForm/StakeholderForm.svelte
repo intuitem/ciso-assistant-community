@@ -99,7 +99,7 @@
 				/>
 				<AutocompleteSelect
 					{form}
-					options={getOptions({ objects: model.foreignKeys['entity'] })}
+					optionsEndpoint="entities"
 					field="entity"
 					cacheLock={cacheLocks['entity']}
 					bind:cachedValue={formDataCache['entity']}
@@ -227,10 +227,8 @@
 				<AutocompleteSelect
 					multiple
 					{form}
-					options={getOptions({
-						objects: model.foreignKeys['applied_controls'],
-						extra_fields: [['folder', 'str']]
-					})}
+					optionsEndpoint="applied-controls"
+					optionsExtraFields={[['folder', 'str']]}
 					field="applied_controls"
 					label={m.appliedControls()}
 				/>

@@ -401,10 +401,8 @@
 								<AutocompleteSelect
 									multiple
 									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
 									field="applied_controls"
 								/>
 								<ModelTable
@@ -432,10 +430,8 @@
 								<AutocompleteSelect
 									multiple
 									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['evidences'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="evidences"
+									optionsExtraFields={[['folder', 'str']]}
 									field="evidences"
 								/>
 								<ModelTable

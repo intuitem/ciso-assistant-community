@@ -16,9 +16,7 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['strategic_scenario']
-	})}
+	optionsEndpoint="strategic-scenarios"
 	field="strategic_scenario"
 	cacheLock={cacheLocks['strategic_scenario']}
 	bind:cachedValue={formDataCache['strategic_scenario']}
@@ -28,10 +26,8 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({
-		objects: model.foreignKeys['stakeholders'],
-		label: 'str'
-	})}
+	optionsEndpoint="stakeholders"
+	optionsLabelField="str"
 	field="stakeholders"
 	cacheLock={cacheLocks['stakeholders']}
 	bind:cachedValue={formDataCache['stakeholders']}
