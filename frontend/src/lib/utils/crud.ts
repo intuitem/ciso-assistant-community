@@ -254,7 +254,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'eta', type: 'date' },
 			{ field: 'owner' },
 			{ field: 'expiry_date', type: 'date' },
-			{ field: 'link' }
+			{ field: 'link' },
+			{ field: 'progress_field' }
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },

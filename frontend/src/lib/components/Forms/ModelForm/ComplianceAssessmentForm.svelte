@@ -18,6 +18,20 @@
 	export let context: string;
 
 	let suggestions = false;
+
+	async function handleFrameworkChange(id: string) {
+		if (id) {
+			await fetch(`/frameworks/${id}`)
+				.then((r) => r.json())
+				.then((r) => {
+					const implementation_groups = r['implementation_groups_definition'] || [];
+					model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
+						(group) => ({ label: group.name, value: group.ref_id })
+					);
+					suggestions = r['reference_controls'].length > 0;
+				});
+		}
+	}
 </script>
 
 <TextField
@@ -82,19 +96,8 @@
 	cacheLock={cacheLocks['framework']}
 	bind:cachedValue={formDataCache['framework']}
 	label={m.framework()}
-	on:change={async (e) => {
-		if (e.detail) {
-			await fetch(`/frameworks/${e.detail}`)
-				.then((r) => r.json())
-				.then((r) => {
-					const implementation_groups = r['implementation_groups_definition'] || [];
-					model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
-						(group) => ({ label: group.name, value: group.ref_id })
-					);
-					suggestions = r['reference_controls'].length > 0;
-				});
-		}
-	}}
+	on:change={async (e) => handleFrameworkChange(e.detail)}
+	on:mount={async (e) => handleFrameworkChange(e.detail)}
 />
 <Checkbox
 	{form}
