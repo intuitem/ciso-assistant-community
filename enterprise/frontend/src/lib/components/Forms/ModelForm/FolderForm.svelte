@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { getOptions } from '$lib/utils/crud';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';

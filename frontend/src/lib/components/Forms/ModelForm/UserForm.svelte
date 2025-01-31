@@ -5,7 +5,6 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};

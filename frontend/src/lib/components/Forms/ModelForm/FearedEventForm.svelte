@@ -5,7 +5,6 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 

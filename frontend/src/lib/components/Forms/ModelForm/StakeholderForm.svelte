@@ -1,10 +1,9 @@
 <script lang="ts">
-	import type { SuperForm, SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { getModelInfo, getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroupInput from '../RadioGroupInput.svelte';

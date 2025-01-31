@@ -2,10 +2,9 @@
 	import { page } from '$app/stores';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
-	import { getOptions } from '$lib/utils/crud';
+
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';

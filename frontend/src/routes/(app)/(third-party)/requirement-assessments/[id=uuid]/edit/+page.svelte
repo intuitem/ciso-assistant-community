@@ -24,7 +24,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import {
 		ProgressRadial,

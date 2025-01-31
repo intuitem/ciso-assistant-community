@@ -5,9 +5,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
-	import NumberField from '../NumberField.svelte';
 	import { page } from '$app/stores';
 
 	export let form: SuperValidated<any>;

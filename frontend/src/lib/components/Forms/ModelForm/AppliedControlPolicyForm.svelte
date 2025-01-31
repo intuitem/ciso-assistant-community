@@ -5,7 +5,6 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';

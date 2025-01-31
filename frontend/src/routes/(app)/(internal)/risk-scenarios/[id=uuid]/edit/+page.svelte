@@ -5,7 +5,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';

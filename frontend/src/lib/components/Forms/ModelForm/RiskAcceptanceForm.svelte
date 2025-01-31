@@ -2,7 +2,6 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { page } from '$app/stores';
@@ -38,7 +37,6 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['folder'] })}
 	optionsEndpoint="folders?content_type=DO"
 	field="folder"
 	cacheLock={cacheLocks['folder']}

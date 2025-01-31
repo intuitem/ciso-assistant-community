@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';

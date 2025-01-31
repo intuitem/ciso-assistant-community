@@ -4,7 +4,6 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
 	import { page } from '$app/stores';
 
