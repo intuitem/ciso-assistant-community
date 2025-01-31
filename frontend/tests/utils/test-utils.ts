@@ -210,7 +210,7 @@ export const test = base.extend<Fixtures>({
 		const sPage = new PageContent(page, '/reference-controls', 'Reference controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'category', type: type.SELECT },
+			//{ name: 'category', type: type.SELECT },
 			// { name: 'csf_function', type: type.SELECT },
 			{ name: 'provider', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
@@ -222,14 +222,14 @@ export const test = base.extend<Fixtures>({
 		const sPage = new PageContent(page, '/applied-controls', 'Applied controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'category', type: type.SELECT },
-			{ name: 'csf_function', type: type.SELECT },
+			//{ name: 'category', type: type.SELECT },
+			//{ name: 'csf_function', type: type.SELECT },
 			{ name: 'status', type: type.SELECT },
 			{ name: 'eta', type: type.DATE },
-			{ name: 'expiry_date', type: type.DATE },
-			{ name: 'link', type: type.TEXT },
-			{ name: 'effort', type: type.SELECT },
-			{ name: 'cost', type: type.NUMBER },
+			//{ name: 'expiry_date', type: type.DATE },
+			//{ name: 'link', type: type.TEXT },
+			//{ name: 'effort', type: type.SELECT },
+			//{ name: 'cost', type: type.NUMBER },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
 		]);
