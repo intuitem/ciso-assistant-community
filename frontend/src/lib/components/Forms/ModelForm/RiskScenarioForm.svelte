@@ -39,6 +39,7 @@
 	{form}
 	optionsEndpoint="risk-assessments"
 	optionsExtraFields={[['project', 'str']]}
+	optionsLabelField="str"
 	field="risk_assessment"
 	cacheLock={cacheLocks['risk_assessment']}
 	bind:cachedValue={formDataCache['risk_assessment']}
