@@ -117,7 +117,7 @@
 		if (isMissing && !missingConstraints.includes(field)) {
 			missingConstraints = [...missingConstraints, field];
 		} else if (!isMissing) {
-			missingConstraints = missingConstraints.filter(f => f !== field);
+			missingConstraints = missingConstraints.filter((f) => f !== field);
 		}
 	}
 	setContext('updateMissingConstraint', updateMissingConstraint);

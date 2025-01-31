@@ -4,7 +4,7 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
-	const model = getModelInfo(params.model)
+	const model = getModelInfo(params.model);
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ? model.endpointUrl : params.model}/${
 		url.searchParams ? '?' + url.searchParams.toString() : ''
 	}`;

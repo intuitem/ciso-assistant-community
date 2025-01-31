@@ -30,7 +30,7 @@
 	 * optionsEndpoint to fetch options from
 	 * @example 'users' -> fetches from /users/
 	 */
-	export let optionsEndpoint: string = "";
+	export let optionsEndpoint: string = '';
 
 	/**
 	 * Field path to use for option labels (supports dot notation for nested fields)
@@ -85,7 +85,7 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	let selected: typeof options[] = [];
+	let selected: (typeof options)[] = [];
 	let selectedValues: (string | undefined)[] = [];
 	let isInternalUpdate = false;
 	let optionsLoaded = false;
@@ -118,16 +118,18 @@
 					if (updateMissingConstraint) {
 						updateMissingConstraint(field, isMissing);
 					}
-					
+
 					// After options are loaded, set initial selection using stored initial value
 					if (initialValue) {
 						selected = options.filter((item) =>
-							Array.isArray(initialValue) ? initialValue.includes(item.value) : item.value === initialValue
+							Array.isArray(initialValue)
+								? initialValue.includes(item.value)
+								: item.value === initialValue
 						);
 					} else if (options.length === 1 && $constraints?.required) {
 						selected = [options[0]];
 					}
-					
+
 					optionsLoaded = true;
 				}
 			}
@@ -160,11 +162,15 @@
 					label: fullLabel,
 					value: getNestedValue(object, optionsValueField),
 					suggested: optionsSuggestions?.some(
-						(s) => getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
+						(s) =>
+							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
 					)
 				};
 			})
-			.filter((option) => optionsSelfSelect || option.value !== getNestedValue(optionsSelf, optionsValueField));
+			.filter(
+				(option) =>
+					optionsSelfSelect || option.value !== getNestedValue(optionsSelf, optionsValueField)
+			);
 	}
 
 	function getNestedValue(obj: any, path: string, field = '') {
