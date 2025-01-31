@@ -3504,7 +3504,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if create_applied_controls:
                 # Prefetch all requirement assessments with their suggestions
                 assessments = instance.requirement_assessments.all().prefetch_related(
-                    "requirement__control_suggestions"
+                    "requirement__reference_controls"
                 )
 
                 # Create applied controls in bulk for each assessment
