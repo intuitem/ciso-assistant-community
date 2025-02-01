@@ -99,11 +99,11 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'version', type: type.TEXT },
-			{ name: 'status', type: type.SELECT },
+			//{ name: 'version', type: type.TEXT },
+			//{ name: 'status', type: type.SELECT },
 			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'eta', type: type.DATE },
-			{ name: 'due_date', type: type.DATE }
+			{ name: 'eta', type: type.DATE }
+			//{ name: 'due_date', type: type.DATE }
 		]);
 		await use(aPage);
 	},
