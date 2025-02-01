@@ -418,7 +418,7 @@ export class TestContent {
 				build: {
 					name: vars.referenceControlName,
 					description: vars.description,
-					category: 'Technical',
+					//category: 'Technical',
 					// csf_function: 'protect',
 					provider: 'Test provider',
 					folder: vars.folderName
@@ -426,7 +426,7 @@ export class TestContent {
 				editParams: {
 					name: '',
 					description: '',
-					category: 'Physical',
+					//category: 'Physical',
 					// csf_function: 'detect',
 					provider: ''
 				}
@@ -437,7 +437,7 @@ export class TestContent {
 				build: {
 					reference_control: {
 						value: 'Global/' + vars.referenceControl.name,
-						category: vars.referenceControl.category,
+						//category: vars.referenceControl.category,
 						// csf_function: vars.referenceControl.csf_function,
 						request: {
 							url: 'reference-controls'
@@ -446,18 +446,18 @@ export class TestContent {
 					name: vars.appliedControlName,
 					description: vars.description,
 					status: 'To do',
-					eta: '2025-01-01',
-					expiry_date: '2025-05-01',
-					link: 'https://intuitem.com/',
-					effort: 'Large',
-					folder: vars.folderName,
-					category: vars.referenceControl.category
+					//eta: '2025-01-01',
+					//expiry_date: '2025-05-01',
+					//link: 'https://intuitem.com/',
+					//effort: 'Large',
+					folder: vars.folderName
+					//category: vars.referenceControl.category
 					// csf_function: vars.referenceControl.csf_function
 				},
 				editParams: {
 					reference_control: {
 						value: 'Global/' + vars.referenceControl2.name,
-						category: vars.referenceControl2.category,
+						//category: vars.referenceControl2.category,
 						// csf_function: vars.referenceControl2.csf_function,
 						request: {
 							url: 'reference-controls'
@@ -465,12 +465,12 @@ export class TestContent {
 					},
 					name: '',
 					description: '',
-					status: 'Active',
-					eta: '2025-12-31',
-					expiry_date: '2026-02-25',
-					link: 'https://intuitem.com/community/',
-					effort: 'Medium',
-					category: vars.referenceControl2.category
+					status: 'Active'
+					//eta: '2025-12-31',
+					//expiry_date: '2026-02-25',
+					//link: 'https://intuitem.com/community/',
+					//effort: 'Medium',
+					//category: vars.referenceControl2.category
 					// csf_function: vars.referenceControl2.csf_function
 				}
 			},
