@@ -265,6 +265,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
@@ -276,6 +277,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
