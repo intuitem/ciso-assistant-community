@@ -1712,6 +1712,22 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
         return Response({"results": acceptances})
 
+    @action(detail=True, methods=["post"], name="Submit risk acceptance")
+    def submit(self, request, pk):
+        if self.get_object().approver:
+            self.get_object().set_state("submitted")
+            return Response({"results": "state updated to submitted"})
+        else:
+            return Response(
+                {"error": "Missing 'approver' field"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+    # This set back risk acceptance to "Created"
+    @action(detail=True, methods=["post"], name="Draft risk acceptance")
+    def draft(self, request, pk):
+        self.get_object().set_state("created")
+        return Response({"results": "state updated back to created"})
+
     @action(detail=True, methods=["post"], name="Accept risk acceptance")
     def accept(self, request, pk):
         if request.user != self.get_object().approver:
@@ -1761,23 +1777,20 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         ).count()
         return Response({"count": acceptance_count})
 
-    def perform_create(self, serializer):
+    def perform_update(self, serializer):
         risk_acceptance = serializer.validated_data
-        submitted = False
+
         if risk_acceptance.get("approver"):
-            submitted = True
-        for scenario in risk_acceptance.get("risk_scenarios"):
-            if not RoleAssignment.is_access_allowed(
-                risk_acceptance.get("approver"),
-                Permission.objects.get(codename="approve_riskacceptance"),
-                scenario.risk_assessment.project.folder,
-            ):
-                raise ValidationError(
-                    "The approver is not allowed to approve this risk acceptance"
-                )
+            for scenario in risk_acceptance.get("risk_scenarios"):
+                if not RoleAssignment.is_access_allowed(
+                    risk_acceptance.get("approver"),
+                    Permission.objects.get(codename="approve_riskacceptance"),
+                    scenario.risk_assessment.project.folder,
+                ):
+                    raise ValidationError(
+                        "The approver is not allowed to approve this risk acceptance"
+                    )
         risk_acceptance = serializer.save()
-        if submitted:
-            risk_acceptance.set_state("submitted")
 
 
 class UserFilter(df.FilterSet):
