@@ -2,6 +2,7 @@ import json
 from collections.abc import MutableMapping
 from datetime import date, timedelta
 from typing import Optional
+from typing import Dict, List
 
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
@@ -1139,32 +1140,32 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
     }
 
 
-def threats_count_per_name(user: User):
-    labels = list()
-    values = list()
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, Threat)
+def threats_count_per_name(user: User) -> Dict[str, List]:
+    object_ids_view, _, _ = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Threat
+    )
     viewable_scenarios = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, RiskScenario
     )[0]
 
-    # expected by echarts to send the threats names in labels and the count of each threat in values
-
-    for threat in Threat.objects.filter(id__in=object_ids_view).order_by("name"):
-        val = (
-            RiskScenario.objects.filter(threats=threat)
-            .filter(id__in=viewable_scenarios)
-            .count()
+    # Updated field name from 'riskscenario' to 'risk_scenarios'
+    threats_with_counts = (
+        Threat.objects.filter(id__in=object_ids_view)
+        .annotate(
+            scenario_count=Count(
+                "risk_scenarios",
+                filter=models.Q(risk_scenarios__id__in=viewable_scenarios),
+            )
         )
-        if val > 0:
-            labels.append({"name": threat.name})
-            values.append(val)
-    max_offset = max(values, default=0)  # we can add x later on to improve visibility
+        .filter(scenario_count__gt=0)
+        .order_by("name")
+        .values("name", "scenario_count")
+    )
 
-    # update each label to include the max_offset
+    labels = [{"name": threat["name"]} for threat in threats_with_counts]
+    values = [threat["scenario_count"] for threat in threats_with_counts]
+
+    max_offset = max(values, default=0)
     for label in labels:
         label["max"] = max_offset
 

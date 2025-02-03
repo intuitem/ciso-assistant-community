@@ -8,6 +8,8 @@ GENERAL_SETTINGS_KEYS = [
     "ebios_radar_green_zone_radius",
     "ebios_radar_yellow_zone_radius",
     "ebios_radar_red_zone_radius",
+    "interface_agg_scenario_matrix",
+    "notifications_enable_mailing",
 ]
 
 
