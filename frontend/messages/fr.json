@@ -606,6 +606,10 @@
 	"secret": "Secret",
 	"key": "Clé",
 	"settings": "Paramètres",
+	"settingsInterface": "Interface",
+	"settingsAggregateMatrix": "Agréger les scénarios sur les matrices",
+	"settingsNotifications": "Paramètres de notifications",
+	"settingsNotificationsMail": "Activer les emails",
 	"identityProvider": "Fournisseur d'identité",
 	"identityProviders": "Fournisseurs d'identité",
 	"clientIDHelpText": "ID d'application ou clé consommateur",
@@ -894,6 +898,7 @@
 	"forgotPassword": "Mot de passe oublié",
 	"ssoSettingsUpdated": "Paramètres SSO mis à jour",
 	"score": "Score",
+	"scoreSemiColon": "Score :",
 	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source.",
 	"priority": "Priorité",
 	"p1": "P1",
@@ -1135,5 +1140,8 @@
 	"maxRadius": "Rayon maximal",
 	"greenZoneRadius": "Rayon de la zone verte",
 	"yellowZoneRadius": "Rayon de la zone jaune",
-	"redZoneRadius": "Rayon de la zone rouge"
+	"redZoneRadius": "Rayon de la zone rouge",
+	"progressField": "Progrès",
+	"recap": "Recap",
+	"sectionMoved": "Section déplacée ici"
 }
