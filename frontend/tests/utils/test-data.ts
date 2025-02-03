@@ -249,7 +249,7 @@ export default {
 	},
 	referenceControl: {
 		name: 'POL.PHYSICAL - Physical security policy',
-		category: 'policy',
+		// category: 'policy',
 		// csf_function: 'govern',
 		library: {
 			name: 'Usual reference controls',
@@ -260,7 +260,7 @@ export default {
 	},
 	referenceControl2: {
 		name: 'DOC.CONTROLS - Controls accountability matrix',
-		category: 'process',
+		// category: 'process',
 		// csf_function: 'protect',
 		library: {
 			name: 'Usual reference controls',
