@@ -1,6 +1,6 @@
 import { LoginPage } from '../utils/login-page.js';
 import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
-
+import * as m from '$paraglide/messages';
 const vars = TestContent.generateTestVars();
 
 test('user usual routine actions are working correctly', async ({
@@ -256,7 +256,9 @@ test('user usual routine actions are working correctly', async ({
 test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
 	await foldersPage.goto();
 	await foldersPage.deleteItemButton(vars.folderName).click();
-	await foldersPage.deleteModalConfirmButton.click();
+	await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
+	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
+	await foldersPage.deletePromptConfirmButton().click();
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 
 	await usersPage.goto();

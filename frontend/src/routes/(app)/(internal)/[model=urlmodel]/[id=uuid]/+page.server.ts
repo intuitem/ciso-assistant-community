@@ -77,6 +77,7 @@ export const actions: Actions = {
 		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject });
 	},
 	delete: async (event) => {
+		console.log('delete');
 		return nestedDeleteFormAction({ event });
 	},
 	duplicate: async (event) => {

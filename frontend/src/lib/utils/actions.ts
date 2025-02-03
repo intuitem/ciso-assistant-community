@@ -216,33 +216,30 @@ export async function defaultDeleteFormAction({
 		return fail(400, { form: deleteForm });
 	}
 
-	if (formData.has('delete')) {
-		const requestInitOptions: RequestInit = {
-			method: 'DELETE'
-		};
-		const res = await event.fetch(endpoint, requestInitOptions);
-		if (!res.ok) {
-			const response = await res.json();
-			if (response.error) {
-				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
-				return fail(403, { form: deleteForm });
-			}
-			if (response.non_field_errors) {
-				setError(deleteForm, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: deleteForm });
+	const requestInitOptions: RequestInit = {
+		method: 'DELETE'
+	};
+	const res = await event.fetch(endpoint, requestInitOptions);
+	if (!res.ok) {
+		const response = await res.json();
+		if (response.error) {
+			setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
+			return fail(403, { form: deleteForm });
 		}
-		const model: string = urlParamModelVerboseName(urlModel!);
-		setFlash(
-			{
-				type: 'success',
-				message: m.successfullyDeletedObject({
-					object: safeTranslate(model).toLowerCase()
-				})
-			},
-			event
-		);
+		if (response.non_field_errors) {
+			setError(deleteForm, 'non_field_errors', response.non_field_errors);
+		}
+		return fail(400, { form: deleteForm });
 	}
+	setFlash(
+		{
+			type: 'success',
+			message: m.successfullyDeletedObject({
+				object: safeTranslate(model.localName).toLowerCase()
+			})
+		},
+		event
+	);
 
 	return { deleteForm };
 }

@@ -1,6 +1,7 @@
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
+import * as m from '$paraglide/messages';
 
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
@@ -209,6 +210,8 @@ test.afterAll('cleanup', async ({ browser }) => {
 	await loginPage.login();
 	await foldersPage.goto();
 	await foldersPage.deleteItemButton(vars.folderName).click();
-	await foldersPage.deleteModalConfirmButton.click();
+	await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
+	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
+	await foldersPage.deletePromptConfirmButton().click();
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 });

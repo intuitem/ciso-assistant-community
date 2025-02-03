@@ -1,5 +1,7 @@
 import { LoginPage } from '../utils/login-page.js';
 import { SideBar } from '../utils/sidebar.js';
+import * as m from '$paraglide/messages';
+
 import {
 	test,
 	expect,
@@ -221,7 +223,9 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 			await loginPage.login();
 			await foldersPage.goto();
 			await foldersPage.deleteItemButton(vars.folderName).click();
-			await foldersPage.deleteModalConfirmButton.click();
+			await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
+			await foldersPage.deletePromptConfirmTextField().fill(m.yes());
+			await foldersPage.deletePromptConfirmButton().click();
 			await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 			await usersPage.goto();
 			await usersPage.deleteItemButton(vars.user.email).click();
