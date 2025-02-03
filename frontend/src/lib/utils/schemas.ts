@@ -169,7 +169,7 @@ export const RiskAcceptanceSchema = z.object({
 	folder: z.string(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	justification: z.string().optional().nullable(),
-	approver: z.string(),
+	approver: z.string().optional().nullable(),
 	risk_scenarios: z.array(z.string())
 });
 

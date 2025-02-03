@@ -453,7 +453,7 @@
 	"enterYourEmail": "Geben Sie unten Ihre E-Mail-Adresse ein, und wir senden Ihnen Anweisungen zum Festlegen eines neuen Passworts",
 	"send": "Senden",
 	"goBackToLogin": "Zurück zur Anmeldung",
-	"riskAcceptanceReviewMessage": "Diese Risikoakzeptanz wartet auf die Bearbeitung. Denken Sie daran, sie zu überprüfen, bevor Sie sie validieren oder ablehnen, Sie können nicht zurückgehen.",
+	"riskAcceptanceValidatingReviewMessage": "Diese Risikoakzeptanz wartet auf die Bearbeitung. Denken Sie daran, sie zu überprüfen, bevor Sie sie validieren oder ablehnen, Sie können nicht zurückgehen.",
 	"validate": "Validieren",
 	"reject": "Ablehnen",
 	"revoke": "Widerrufen",

@@ -451,7 +451,7 @@
 	"enterYourEmail": "Zadejte svou e-mailovou adresu níže a zašleme vám instrukce pro nastavení nového hesla",
 	"send": "Odeslat",
 	"goBackToLogin": "Vrátit se k přihlášení",
-	"riskAcceptanceReviewMessage": "Toto přijetí rizika čeká na zpracování. Nezapomeňte jej před schválením nebo odmítnutím zkontrolovat, později už to nebudete moci změnit.",
+	"riskAcceptanceValidatingReviewMessage": "Toto přijetí rizika čeká na zpracování. Nezapomeňte jej před schválením nebo odmítnutím zkontrolovat, později už to nebudete moci změnit.",
 	"validate": "Ověřit",
 	"reject": "Odmítnout",
 	"revoke": "Odebrat",

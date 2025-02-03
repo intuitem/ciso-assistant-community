@@ -453,7 +453,7 @@
 	"enterYourEmail": "Digite seu endereço de e-mail abaixo e enviaremos instruções para definir uma nova senha",
 	"send": "Enviar",
 	"goBackToLogin": "Voltar para o login",
-	"riskAcceptanceReviewMessage": "Esta aceitação de risco está aguardando processamento. Lembre-se de revisá-la antes de validá-la ou rejeitá-la, pois você não poderá voltar atrás.",
+	"riskAcceptanceValidatingReviewMessage": "Esta aceitação de risco está aguardando processamento. Lembre-se de revisá-la antes de validá-la ou rejeitá-la, pois você não poderá voltar atrás.",
 	"validate": "Validar",
 	"reject": "Rejeitar",
 	"revoke": "Revogar",

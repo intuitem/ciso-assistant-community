@@ -453,7 +453,7 @@
 	"enterYourEmail": "Voer hieronder je e-mailadres in, en we sturen instructies om een nieuw wachtwoord in te stellen",
 	"send": "Versturen",
 	"goBackToLogin": "Ga terug naar inloggen",
-	"riskAcceptanceReviewMessage": "Deze risicoacceptatie wacht op verwerking. Vergeet niet deze te beoordelen voordat je deze valideert of afwijst, je kunt niet meer terug.",
+	"riskAcceptanceValidatingReviewMessage": "Deze risicoacceptatie wacht op verwerking. Vergeet niet deze te beoordelen voordat je deze valideert of afwijst, je kunt niet meer terug.",
 	"validate": "Valideren",
 	"reject": "Afwijzen",
 	"revoke": "Intrekken",

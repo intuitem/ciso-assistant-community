@@ -15,8 +15,13 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import * as m from '$paraglide/messages.js';
 	import { languageTag } from '$paraglide/runtime.js';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { Tab, TabGroup, getModalStore } from '@skeletonlabs/skeleton';
+	import type {
+		PopupSettings,
+		ModalComponent,
+		ModalSettings,
+		ModalStore
+	} from '@skeletonlabs/skeleton';
+	import { popup, Tab, TabGroup, getModalStore } from '@skeletonlabs/skeleton';
 
 	import { onMount } from 'svelte';
 
@@ -24,6 +29,12 @@
 	const modalStore: ModalStore = getModalStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
+
+	const popupHover: PopupSettings = {
+		event: 'hover',
+		target: 'popupHover',
+		placement: 'left'
+	};
 
 	export let data;
 	export let mailing = false;
@@ -169,7 +180,7 @@
 	$: displayEditButton = function () {
 		return (
 			canEditObject &&
-			!['Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
+			!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
 			!data.data.urn &&
 			!data.data.builtin
 		);
@@ -188,12 +199,12 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === m.submitted() && $page.data.user.id === data.data.approver.id}
+	{#if data.data.state === 'Submitted' && $page.data.user.id === data.data.approver.id}
 		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
+			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 justify-between"
 		>
 			<div class="text-yellow-900">
-				{m.riskAcceptanceReviewMessage()}
+				{m.riskAcceptanceValidatingReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
 				<button
@@ -216,7 +227,7 @@
 				>
 			</div>
 		</div>
-	{:else if data.data.state === m.accept()}
+	{:else if data.data.state === 'Accepted'}
 		<div
 			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container-token shadow-lg px-6 py-2 mt-2 justify-between"
 		>
@@ -367,7 +378,45 @@
 					{m.sendQuestionnaire()}
 				</button>
 			{/if}
+
+			{#if data.data.state === 'Submitted' && canEditObject}
+				<div class="flex flex-col space-y-2 ml-4">
+					<button
+						on:click={(_) => {
+							modalConfirm(data.data.id, data.data.name, '?/draft');
+						}}
+						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/draft')}
+						class="btn variant-filled-primary"
+						disabled={!data.data.approver}
+					>
+						<i class="fas fa-arrow-alt-circle-left mr-2" /> {m.draft()}</button
+					>
+				</div>
+			{/if}
+
 			{#if displayEditButton()}
+				{#if data.data.state === 'Created'}
+					<div class="flex flex-col space-y-2 ml-4">
+						<button
+							on:click={(_) => {
+								modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
+							class="btn variant-filled-primary [&>*]:pointer-events-none"
+							disabled={!data.data.approver}
+							use:popup={popupHover}
+						>
+							<i class="fas fa-paper-plane mr-2" />
+							{m.submit()}
+						</button>
+						{#if !data.data.approver}
+							<div class="card variant-ghost-surface p-4 z-20" data-popup="popupHover">
+								<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
+								<div class="arrow variant-filled-surface" />
+							</div>
+						{/if}
+					</div>
+				{/if}
 				<div class="flex flex-col space-y-2 ml-4">
 					<Anchor
 						breadcrumbAction="push"
