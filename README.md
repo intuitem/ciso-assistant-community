@@ -277,7 +277,7 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 
 - Python 3.11+
 - pip 20.3+
-- poetry 1.8+
+- poetry 2.0+
 - node 18+
 - npm 10.2+
 - pnpm 9.0+
