@@ -453,7 +453,7 @@
 	"enterYourEmail": "Wpisz swój adres e-mail poniżej, a wyślemy instrukcje dotyczące ustawienia nowego hasła",
 	"send": "Wyślij",
 	"goBackToLogin": "Wróć do logowania",
-	"riskAcceptanceReviewMessage": "Ta akceptacja ryzyka oczekuje na przetworzenie. Pamiętaj, aby ją przejrzeć przed zatwierdzeniem lub odrzuceniem, nie będzie można wrócić.",
+	"riskAcceptanceValidatingReviewMessage": "Ta akceptacja ryzyka oczekuje na przetworzenie. Pamiętaj, aby ją przejrzeć przed zatwierdzeniem lub odrzuceniem, nie będzie można wrócić.",
 	"validate": "Zatwierdź",
 	"reject": "Odrzuć",
 	"revoke": "Cofnij",
