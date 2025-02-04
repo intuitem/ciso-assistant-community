@@ -2648,7 +2648,9 @@ class FolderViewSet(BaseModelViewSet):
         def get_mapped_ids(
             ids: List[str], link_dump_database_ids: Dict[str, str]
         ) -> List[str]:
-            return [link_dump_database_ids.get(id, "") for id in ids]
+            return [
+                link_dump_database_ids[id] for id in ids if id in link_dump_database_ids
+            ]
 
         model_name = model._meta.model_name
         _fields = fields.copy()
@@ -2700,6 +2702,7 @@ class FolderViewSet(BaseModelViewSet):
                 _fields.pop("attachment_hash", None)
 
             case "requirementassessment":
+                logger.debug("Looking for requirement", urn=_fields.get("requirement"))
                 _fields["requirement"] = RequirementNode.objects.get(
                     urn=_fields.get("requirement")
                 )
@@ -2859,6 +2862,9 @@ class FolderViewSet(BaseModelViewSet):
         match model_name:
             case "asset":
                 if parent_ids := many_to_many_map_ids.get("parent_ids"):
+                    logger.debug(
+                        "Setting parent assets", asset=obj, parent_ids=parent_ids
+                    )
                     obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
 
             case "appliedcontrol":
