@@ -1145,7 +1145,7 @@
 	"no": "No",
 	"updateAvailable": "Update available",
 	"showGuidedTour": "Show guided tour",
-	"loadDummyData": "Load dummy data",
+	"loadDemoData": "Load demo data",
 	"firstTimeLoginModalTitle": "Welcome to CISO Assistant!",
 	"firstTimeLoginModalDescription": "This is your first time logging in. Would you like to take a guided tour to get started?",
 	"ebiosRadarParameters": "Ebios RM radar parameters",

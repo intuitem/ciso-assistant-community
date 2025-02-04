@@ -197,8 +197,8 @@
 						btnIcon: 'fa-wand-magic-sparkles'
 					},
 					{
-						label: m.loadDummyData(),
-						action: loadDummyDomain,
+						label: m.loadDemoData(),
+						action: loadDemoDomain,
 						classes: 'variant-filled-secondary',
 						btnIcon: 'fa-file-import',
 						async: true
@@ -216,10 +216,10 @@
 		modalStore.trigger(modal);
 	}
 
-	async function loadDummyDomain() {
+	async function loadDemoDomain() {
 		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
 		if (!response.ok) {
-			console.error('Failed to load dummy data');
+			console.error('Failed to load demo data');
 			$flash = { type: 'error', message: m.errorOccuredDuringImport() };
 			return false;
 		}
@@ -241,7 +241,7 @@
 	}
 
 	onMount(() => {
-		if (displayGuidedTour) {
+		if (displayGuidedTour || user.accessible_domains.length === 0) {
 			modalFirstLogin();
 			$firstTimeConnection = false; // This will prevent the tour from showing up again on page reload
 		}
