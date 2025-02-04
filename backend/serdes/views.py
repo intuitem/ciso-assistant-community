@@ -126,7 +126,7 @@ class LoadBackupView(APIView):
         if backup_version is None:
             logger.error("Backup malformed: no version found")
             return Response(
-                {"erroe": "errorBackupNoVersion"},
+                {"error": "errorBackupNoVersion"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
