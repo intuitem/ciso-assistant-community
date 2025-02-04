@@ -281,6 +281,7 @@ erDiagram
         string  description
         string  status
         int     severity
+        date    expiration
     }
 
 
@@ -811,6 +812,7 @@ Exceptions also have the following fields:
 - description
 - severity within values --/low/medium/high/critical (coded as an integer from -1 to 3)
 - status within values --/active/mitigated/resolved/deprecated
+- expiration date
 
 
 ## Libraries
