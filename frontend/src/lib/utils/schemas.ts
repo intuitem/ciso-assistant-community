@@ -63,7 +63,7 @@ const NameDescriptionMixin = {
 
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
-	ref_id: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
 	parent_folder: z.string().optional()
 });
 
@@ -78,7 +78,7 @@ export const FolderImportSchema = z.object({
 export const ProjectSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
-	ref_id: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
 	lc_status: z.string().optional().default('in_design')
 });
 
@@ -98,7 +98,7 @@ export const RiskAssessmentSchema = z.object({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
 	status: z.string().optional().nullable(),
-	ref_id: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -112,7 +112,7 @@ export const ThreatSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	provider: z.string().optional().nullable(),
-	ref_id: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable()
 });
 
@@ -139,7 +139,7 @@ export const RiskScenarioSchema = z.object({
 
 export const AppliedControlSchema = z.object({
 	...NameDescriptionMixin,
-	ref_id: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
 	priority: z.number().optional().nullable(),
@@ -179,7 +179,7 @@ export const ReferenceControlSchema = z.object({
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
 	folder: z.string(),
-	ref_id: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable()
 });
 
@@ -268,7 +268,7 @@ export const SetPasswordSchema = z.object({
 export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	ref_id: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
 	project: z.string(),
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
