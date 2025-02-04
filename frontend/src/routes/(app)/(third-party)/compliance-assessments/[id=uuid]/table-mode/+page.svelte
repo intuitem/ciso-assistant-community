@@ -409,6 +409,7 @@
 										checkboxComponent="switch"
 										class="h-full flex flex-row items-center justify-center my-1"
 										classesContainer="h-full flex flex-row items-center space-x-4"
+										hidden={requirementAssessment.result === 'not_applicable'}
 										on:change={async () => {
 											requirementAssessment.is_scored = !requirementAssessment.is_scored;
 											await update(requirementAssessment, 'is_scored');
