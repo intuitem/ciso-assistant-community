@@ -596,7 +596,7 @@ class LibraryUpdater:
                                 if answer["answer"] not in question["question_choices"]:
                                     answer["answer"] = ""
 
-                        elif question_type != "text":
+                        elif question_type not in ["text", "date"]:
                             raise NotImplementedError(
                                 f"The question type '{question_type}' hasn't been implemented !"
                             )
