@@ -21,7 +21,7 @@
 
 	export let data;
 	const showRisks = true;
-	const useBubbles = true;
+	const useBubbles = data.useBubbles;
 	const risk_assessment = data.risk_assessment;
 
 	const modalStore: ModalStore = getModalStore();
@@ -265,6 +265,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
@@ -276,6 +277,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
