@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "frontend/**"
+  workflow_dispatch:
 
 env:
   GITHUB_WORKFLOW: github_actions
@@ -36,6 +37,9 @@ jobs:
       - name: Install dependencies
         working-directory: ${{env.working-directory}}
         run: pnpm i --frozen-lockfile
+      - name: Prepare sveltekit
+        working-directory: ${{env.working-directory}}
+        run: pnpm run prepare
       - name: Run tests
         working-directory: ${{env.working-directory}}
         run: pnpm run test:ci
