@@ -3467,11 +3467,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
 class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     ACCEPTANCE_STATE = [
-        ("created", _("Created")),
-        ("submitted", _("Submitted")),
-        ("accepted", _("Accepted")),
-        ("rejected", _("Rejected")),
-        ("revoked", _("Revoked")),
+        ("created", "Created"),
+        ("submitted", "Submitted"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
+        ("revoked", "Revoked"),
     ]
 
     risk_scenarios = models.ManyToManyField(

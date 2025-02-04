@@ -453,7 +453,7 @@
 	"enterYourEmail": "Ingrese su dirección de correo electrónico a continuación y le enviaremos instrucciones para establecer una nueva",
 	"send": "Enviar",
 	"goBackToLogin": "Volver al inicio de sesión",
-	"riskAcceptanceReviewMessage": "Esta aceptación de riesgo está pendiente de procesamiento. Recuerde revisarla antes de validarla o rechazarla, no podrá volver atrás.",
+	"riskAcceptanceValidatingReviewMessage": "Esta aceptación de riesgo está pendiente de procesamiento. Recuerde revisarla antes de validarla o rechazarla, no podrá volver atrás.",
 	"validate": "Validar",
 	"reject": "Rechazar",
 	"revoke": "Revocar",

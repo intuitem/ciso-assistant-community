@@ -453,7 +453,7 @@
 	"enterYourEmail": "Ange din e-postadress nedan, så skickar vi instruktioner för att ställa in ett nytt",
 	"send": "Skicka",
 	"goBackToLogin": "Gå tillbaka till inloggning",
-	"riskAcceptanceReviewMessage": "Denna riskacceptans väntar på bearbetning. Kom ihåg att granska den innan du validerar eller avvisar den; du kommer inte att kunna ångra dig.",
+	"riskAcceptanceValidatingReviewMessage": "Denna riskacceptans väntar på bearbetning. Kom ihåg att granska den innan du validerar eller avvisar den; du kommer inte att kunna ångra dig.",
 	"validate": "Validera",
 	"reject": "Avvisa",
 	"revoke": "Återkalla",

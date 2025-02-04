@@ -51,6 +51,7 @@
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
+	nullable={true}
 	label={m.approver()}
 	helpText={m.approverHelpText()}
 />
