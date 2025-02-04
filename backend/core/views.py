@@ -2244,7 +2244,9 @@ class FolderViewSet(BaseModelViewSet):
 
         with zipfile.ZipFile(dump_file, mode="r") as zipf:
             if "data.json" not in zipf.namelist():
-                logger.error("No data.json file found in uploaded file")
+                logger.error(
+                    "No data.json file found in uploaded file", files=zipf.namelist()
+                )
                 raise ValidationError({"file": "noDataJsonFileFound"})
             infolist = zipf.infolist()
             directories = list(set([Path(f.filename).parent.name for f in infolist]))
@@ -2380,7 +2382,9 @@ class FolderViewSet(BaseModelViewSet):
 
             # check that user has permission to create all objects to import
             error_dict = {}
-            for model in models_map.values():
+            for model in filter(
+                lambda x: x not in [RequirementAssessment], models_map.values()
+            ):
                 if not RoleAssignment.is_access_allowed(
                     user=user,
                     perm=Permission.objects.get(
@@ -2390,6 +2394,10 @@ class FolderViewSet(BaseModelViewSet):
                 ):
                     error_dict[model._meta.model_name] = "permission_denied"
             if error_dict:
+                logger.error(
+                    "User does not have permission to import objects",
+                    error_dict=error_dict,
+                )
                 raise PermissionDenied()
 
             # Validation phase (outside transaction since it doesn't modify database)
