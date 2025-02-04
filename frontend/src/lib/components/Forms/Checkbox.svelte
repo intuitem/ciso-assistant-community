@@ -35,10 +35,8 @@
 	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
 </script>
 
-<div class={classesContainer}>
-	<div
-		class="flex flex-row space-x-2 items-center {classesHidden(hidden)} {classesDisabled(disabled)}"
-	>
+<div class="{classesContainer} {classesHidden(hidden)}">
+	<div class="flex flex-row space-x-2 items-center {classesDisabled(disabled)}">
 		{#if label !== undefined}
 			{#if $constraints?.required}
 				<label class="text-sm font-semibold" for={field}
