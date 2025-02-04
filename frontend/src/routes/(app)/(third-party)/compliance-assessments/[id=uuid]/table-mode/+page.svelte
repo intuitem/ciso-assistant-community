@@ -399,21 +399,23 @@
 									requirementAssessment.result === 'not_applicable'}
 							>
 								<div slot="left">
-									<Checkbox
-										form={superForm(requirementAssessment.scoreForm, {
-											id: `requirement-is-scored-${requirementAssessment.id}`
-										})}
-										field="is_scored"
-										label={''}
-										helpText={m.scoringHelpText()}
-										checkboxComponent="switch"
-										class="h-full flex flex-row items-center justify-center my-1"
-										classesContainer="h-full flex flex-row items-center space-x-4"
-										on:change={async () => {
-											requirementAssessment.is_scored = !requirementAssessment.is_scored;
-											await update(requirementAssessment, 'is_scored');
-										}}
-									/>
+									{#if requirementAssessment.result !== 'not_applicable'}
+										<Checkbox
+											form={superForm(requirementAssessment.scoreForm, {
+												id: `requirement-is-scored-${requirementAssessment.id}`
+											})}
+											field="is_scored"
+											label={''}
+											helpText={m.scoringHelpText()}
+											checkboxComponent="switch"
+											class="h-full flex flex-row items-center justify-center my-1"
+											classesContainer="h-full flex flex-row items-center space-x-4"
+											on:change={async () => {
+												requirementAssessment.is_scored = !requirementAssessment.is_scored;
+												await update(requirementAssessment, 'is_scored');
+											}}
+										/>
+									{/if}
 								</div>
 							</Score>
 							{#if data.compliance_assessment.show_documentation_score}
