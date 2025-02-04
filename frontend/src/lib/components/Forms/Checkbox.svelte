@@ -36,7 +36,10 @@
 </script>
 
 <div class="{classesContainer} {classesHidden(hidden)}">
-	<div class="flex flex-row space-x-2 items-center {classesDisabled(disabled)}">
+	<div
+		class="flex flex-row space-x-2 items-center {classesDisabled(disabled)}"
+		aria-disabled={disabled}
+	>
 		{#if label !== undefined}
 			{#if $constraints?.required}
 				<label class="text-sm font-semibold" for={field}
