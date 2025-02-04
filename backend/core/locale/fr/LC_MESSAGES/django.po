@@ -574,11 +574,11 @@ msgstr "Statut"
 #: core/templates/core/action_plan_pdf.html:16
 #: core/templates/snippets/mp_data.html:7
 msgid "Perimeter"
-msgstr "Projet"
+msgstr "Périmètre"
 
 #: core/models.py:1323
 msgid "Perimeters"
-msgstr "Projets"
+msgstr "Périmètres"
 
 #: core/models.py:1358
 msgid "Primary"
