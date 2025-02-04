@@ -10,6 +10,7 @@
 
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
+	import './driver-custom.css';
 	import { page } from '$app/stores';
 	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
@@ -231,7 +232,8 @@
 		const translatedSteps = steps;
 		const driverObj = driver({
 			showProgress: true,
-			steps: translatedSteps
+			steps: translatedSteps,
+			popoverClass: 'custom-driver-theme'
 		});
 		$driverInstance = driverObj;
 		driverObj.drive();

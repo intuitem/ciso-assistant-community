@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { buildRiskMatrix } from './utils';
+	import Cell from './Cell.svelte';
 
 	import * as m from '../../../paraglide/messages';
 	import type { ComponentType } from 'svelte';
@@ -8,11 +9,13 @@
 
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
+	export let matrixName; // used to differentiate bubbles tooltip names
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
 	const grid = parsedRiskMatrix.grid;
 	const risk = parsedRiskMatrix.risk;
 	export let showRisks = false;
+	export let useBubbles = false;
 
 	const displayedRiskMatrix = buildRiskMatrix(grid, risk);
 	export let data: Array<any> | undefined = undefined;
@@ -79,23 +82,17 @@
 				{/if}
 			</div>
 			{#each row as cell, j}
-				<div
-					class="flex flex-wrap items-center space-x-1 justify-center h-full [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar {classesCellText(
-						cell.level.hexcolor
-					)}"
-					style="background-color: {cell.level.hexcolor};"
-					data-testid="cell"
-				>
-					{#if displayedData}
-						{#if dataItemComponent}
-							{#each displayedData[i][j] as item}
-								<svelte:component this={dataItemComponent} data={item} />
-							{/each}
-						{:else}
-							<div class="mx-auto text-center">{displayedData[i][j]}</div>
-						{/if}
-					{/if}
-				</div>
+				{#if displayedData}
+					<Cell
+						{cell}
+						cellData={displayedData[i][j]}
+						popupTarget={`popupdata-${matrixName}-${i}-${j}`}
+						{dataItemComponent}
+						{useBubbles}
+					/>
+				{:else}
+					<Cell {cell} {dataItemComponent} />
+				{/if}
 			{/each}
 		{/each}
 		<div />

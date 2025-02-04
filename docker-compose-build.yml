@@ -12,22 +12,25 @@ services:
     volumes:
       - ./db:/code/db
 
-  # huey:
-  #   container_name: huey
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   environment:
-  #     - ALLOWED_HOSTS=backend,localhost
-  #     - DJANGO_DEBUG=False
-  #   volumes:
-  #     - ./db:/code/db
-  #   entrypoint:
-  #     - /bin/sh
-  #     - -c
-  #     - |
-  #       poetry run python manage.py run_huey
+  huey:
+    container_name: huey
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=False
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
 
   frontend:
     container_name: frontend

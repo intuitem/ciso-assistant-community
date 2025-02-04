@@ -453,7 +453,7 @@
 	"enterYourEmail": "Introduceți adresa dvs. de e-mail mai jos și vă vom trimite instrucțiuni pentru a seta una nouă",
 	"send": "Trimite",
 	"goBackToLogin": "Înapoi la autentificare",
-	"riskAcceptanceReviewMessage": "Această acceptare a riscului așteaptă procesarea. Amintiți-vă să o revizuiți înainte de a o valida sau respinge, nu veți putea reveni.",
+	"riskAcceptanceValidatingReviewMessage": "Această acceptare a riscului așteaptă procesarea. Amintiți-vă să o revizuiți înainte de a o valida sau respinge, nu veți putea reveni.",
 	"validate": "Validați",
 	"reject": "Respingeți",
 	"revoke": "Revocați",
