@@ -2260,9 +2260,48 @@ class FolderViewSet(BaseModelViewSet):
                 raise
             if "objects" not in json_dump:
                 raise ValidationError("badly formatted json")
-            if not import_version == VERSION:
+
+            # Check backup and local version
+
+            VERSION_REGEX = r"^v[0-9]+\.[0-9]+\.[0-9]+"
+            match = re.match(VERSION_REGEX, import_version)
+            if match is None:
                 logger.error(
-                    f"Import version {import_version} not compatible with current version {VERSION}"
+                    "Backup malformed: invalid version",
+                    backup_version=import_version,
+                    current_version=VERSION,
+                )
+                return Response(
+                    {"error": "errorBackupInvalidVersion"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            import_version = match.group()
+            current_version = VERSION.split("-")[0]
+
+            if current_version.lower() == "dev":
+                current_version = "v0.0.0"
+
+            import_version = [int(num) for num in import_version.lstrip("v").split(".")]
+            current_version = [
+                int(num) for num in current_version.lstrip("v").split(".")
+            ]
+            # All versions are composed of 3 numbers (see git tag)
+            for i in range(3):
+                if import_version[i] > current_version[i]:
+                    logger.error(
+                        "Backup version greater than current version",
+                        version=import_version,
+                    )
+                    # Refuse to import the backup and ask to update the instance before importing the backup
+                    return Response(
+                        {"error": "GreaterBackupVersion"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            if not import_version == current_version:
+                logger.error(
+                    f"Import version {import_version} not compatible with current version {current_version}"
                 )
                 raise ValidationError(
                     {"file": "importVersionNotCompatibleWithCurrentVersion"}
