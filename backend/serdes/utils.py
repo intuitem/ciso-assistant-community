@@ -72,66 +72,6 @@ from tprm.serializers import EntityImportExportSerializer
 from django.db import models
 from library.serializers import LoadedLibraryImportExportSerializer
 
-from core.models import (
-    Asset,
-    AppliedControl,
-    Evidence,
-    Framework,
-    Perimeter,
-    RiskAssessment,
-    RiskMatrix,
-    RiskScenario,
-    ComplianceAssessment,
-    RequirementAssessment,
-    Vulnerability,
-    Threat,
-    ReferenceControl,
-    LoadedLibrary,
-)
-
-from ebios_rm.models import (
-    EbiosRMStudy,
-    FearedEvent,
-    RoTo,
-    OperationalScenario,
-    Stakeholder,
-    StrategicScenario,
-    AttackPath,
-)
-
-from tprm.models import Entity
-
-from core.serializers import (
-    FolderImportExportSerializer,
-    AssetImportExportSerializer,
-    AppliedControlImportExportSerializer,
-    EvidenceImportExportSerializer,
-    PerimeterImportExportSerializer,
-    RiskAssessmentImportExportSerializer,
-    RiskScenarioImportExportSerializer,
-    ComplianceAssessmentImportExportSerializer,
-    RequirementAssessmentImportExportSerializer,
-    VulnerabilityImportExportSerializer,
-    ThreatImportExportSerializer,
-    ReferenceControlImportExportSerializer,
-    FrameworkImportExportSerializer,
-    RiskMatrixImportExportSerializer,
-)
-
-from ebios_rm.serializers import (
-    EbiosRMStudyImportExportSerializer,
-    FearedEventImportExportSerializer,
-    RoToImportExportSerializer,
-    OperationalScenarioImportExportSerializer,
-    StakeholderImportExportSerializer,
-    StrategicScenarioImportExportSerializer,
-    AttackPathImportExportSerializer,
-)
-
-from tprm.serializers import EntityImportExportSerializer
-
-from library.serializers import LoadedLibraryImportExportSerializer
-
 import structlog
 
 logger = structlog.get_logger(__name__)
