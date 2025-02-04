@@ -24,7 +24,7 @@ test.describe.configure({ mode: 'serial' });
 for (const key of testPages) {
 	test.describe(`Tests on ${items[key].displayName.toLowerCase()} item`, () => {
 		test.beforeAll(async ({}, testInfo) => {
-			setFilePath(testInfo.perimeter.name, testInfo.retry);
+			setFilePath(testInfo.project.name, testInfo.retry);
 			existsSync(file_path)
 				? (history = JSON.parse(readFileSync(file_path, 'utf8')))
 				: writeFileSync(file_path, JSON.stringify(history));
