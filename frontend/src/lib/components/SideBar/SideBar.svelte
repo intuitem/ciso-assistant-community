@@ -59,16 +59,16 @@
 		},
 		{
 			id: 6,
-			element: '#projects',
+			element: '#perimeters',
 			popover: {
-				description: m.tourProjectsDescription()
+				description: m.tourPerimetersDescription()
 			}
 		},
 		{
 			id: 7,
 			element: '#add-button',
 			popover: {
-				description: m.tourProjectAddDescription()
+				description: m.tourPerimeterAddDescription()
 			}
 		},
 		{
