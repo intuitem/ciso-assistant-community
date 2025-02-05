@@ -15,7 +15,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '@skeletonlabs/skeleton';
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
 
 	import { browser } from '$app/environment';
@@ -26,7 +26,6 @@
 	import * as m from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { invalidateAll } from '$app/navigation';
 
 	export let data: PageData;
 	export let form: ActionData;
