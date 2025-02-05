@@ -28,7 +28,7 @@ interface ListViewFieldsConfig {
 	};
 }
 
-const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
+const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.lc_status,
 	extraProps: {
@@ -68,16 +68,16 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const DOMAIN_FILTER_FROM_PROJECT: ListViewFilterConfig = {
+const DOMAIN_FILTER_FROM_PERIMETER: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.project?.folder.str
+	getColumn: (row) => row.perimeter?.folder.str
 };
 
-const PROJECT_FILTER: ListViewFilterConfig = {
+const PERIMETER_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.project?.str,
+	getColumn: (row) => row.perimeter?.str,
 	extraProps: {
-		defaultOptionName: 'project' // Make translations
+		defaultOptionName: 'perimeter' // Make translations
 	}
 };
 
@@ -383,12 +383,12 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'description', 'parentDomain'],
 		body: ['name', 'description', 'parent_folder']
 	},
-	projects: {
+	perimeters: {
 		head: ['ref_id', 'name', 'description', 'domain'],
 		body: ['ref_id', 'name', 'description', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			lc_status: PROJECT_STATUS_FILTER
+			lc_status: PERIMETER_STATUS_FILTER
 		}
 	},
 	'filtering-labels': {
@@ -430,11 +430,11 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
-		body: ['ref_id', 'str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
+		head: ['ref_id', 'name', 'riskMatrix', 'description', 'riskScenarios', 'perimeter'],
+		body: ['ref_id', 'str', 'risk_matrix', 'description', 'risk_scenarios_count', 'perimeter'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
-			project: PROJECT_FILTER,
+			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true },
+			perimeter: PERIMETER_FILTER,
 			status: { ...STATUS_FILTER, alwaysDisplay: true }
 		}
 	},
@@ -471,8 +471,8 @@ export const listViewFields: ListViewFieldsConfig = {
 			'risk_assessment'
 		],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
-			project: { ...PROJECT_FILTER, alwaysDisplay: true },
+			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true },
+			perimeter: { ...PERIMETER_FILTER, alwaysDisplay: true },
 			treatment: { ...TREATMENT_FILTER, alwaysDisplay: true },
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
@@ -620,11 +620,11 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'description', 'project', 'reviewProgress'],
-		body: ['ref_id', 'name', 'framework', 'description', 'project', 'progress'],
+		head: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'reviewProgress'],
+		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
-			project: PROJECT_FILTER,
+			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
+			perimeter: PERIMETER_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: STATUS_FILTER
 		}
@@ -685,10 +685,10 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'entity-assessments': {
-		head: ['name', 'description', 'project', 'entity'],
-		body: ['name', 'description', 'project', 'entity'],
+		head: ['name', 'description', 'perimeter', 'entity'],
+		body: ['name', 'description', 'perimeter', 'entity'],
 		filters: {
-			project: PROJECT_FILTER,
+			perimeter: PERIMETER_FILTER,
 			status: STATUS_FILTER
 		}
 	},
