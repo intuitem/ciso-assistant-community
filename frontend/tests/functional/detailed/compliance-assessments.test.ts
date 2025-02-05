@@ -12,7 +12,7 @@ test('compliance assessments scoring is working properly', async ({
 	complianceAssessmentsPage,
 	page
 }) => {
-	const testRequirements = ['folders', 'projects', 'complianceAssessments'];
+	const testRequirements = ['folders', 'perimeters', 'complianceAssessments'];
 	const IDAM1Score = {
 		ratio: 0.66,
 		progress: '75',

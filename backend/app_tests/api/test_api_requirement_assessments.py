@@ -7,7 +7,7 @@ from core.models import (
     RequirementAssessment,
     Framework,
 )
-from core.models import Project, AppliedControl
+from core.models import Perimeter, AppliedControl
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
@@ -39,7 +39,7 @@ class TestRequirementAssessmentsUnauthenticated:
                 "folder": folder,
                 "compliance_assessment": ComplianceAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     framework=Framework.objects.all()[0],
                 ),
                 "requirement": RequirementNode.objects.create(
@@ -77,7 +77,7 @@ class TestRequirementAssessmentsUnauthenticated:
                 "folder": folder,
                 "compliance_assessment": ComplianceAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     framework=Framework.objects.all()[0],
                 ),
                 "requirement": RequirementNode.objects.create(
@@ -102,7 +102,7 @@ class TestRequirementAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
 
@@ -177,7 +177,7 @@ class TestRequirementAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
         applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
@@ -213,12 +213,12 @@ class TestRequirementAssessmentsAuthenticated:
         folder = Folder.objects.create(name="test2")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
         compliance_assessment2 = ComplianceAssessment.objects.create(
             name="test2",
-            project=Project.objects.create(name="test2", folder=folder),
+            perimeter=Perimeter.objects.create(name="test2", folder=folder),
             framework=Framework.objects.all()[0],
         )
         applied_control = AppliedControl.objects.create(name="test", folder=folder)

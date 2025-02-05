@@ -29,7 +29,7 @@ export interface LoginRequestBody {
 
 export const URL_MODEL = [
 	'folders',
-	'projects',
+	'perimeters',
 	'risk-matrices',
 	'risk-assessments',
 	'threats',
@@ -102,7 +102,7 @@ export interface RiskMatrix {
 	json_definition: string; // stringified
 }
 
-export interface Project {
+export interface Perimeter {
 	id: string;
 	folder: Record<string, any>;
 	lc_status: string;

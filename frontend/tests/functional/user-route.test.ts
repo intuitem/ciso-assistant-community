@@ -31,20 +31,20 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the domain data are displayed in the table
 	});
 
-	await test.step('user can create a project', async () => {
-		await sideBar.click('Organization', pages.projectsPage.url);
-		await pages.projectsPage.hasUrl();
-		await pages.projectsPage.hasTitle();
+	await test.step('user can create a perimeter', async () => {
+		await sideBar.click('Organization', pages.perimetersPage.url);
+		await pages.perimetersPage.hasUrl();
+		await pages.perimetersPage.hasTitle();
 
-		await pages.projectsPage.createItem({
-			name: vars.projectName,
+		await pages.perimetersPage.createItem({
+			name: vars.perimeterName,
 			description: vars.description,
 			folder: vars.folderName,
 			ref_id: 'R.1234',
 			lc_status: 'Production'
 		});
 
-		//TODO assert that the project data are displayed in the table
+		//TODO assert that the perimeter data are displayed in the table
 	});
 
 	await test.step('user can create an asset', async () => {
@@ -125,7 +125,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.complianceAssessmentsPage.createItem({
 			name: vars.assessmentName,
 			description: vars.description,
-			project: vars.folderName + '/' + vars.projectName,
+			perimeter: vars.folderName + '/' + vars.perimeterName,
 			version: '1.4.2',
 			status: 'Done',
 			framework: vars.framework.name,
@@ -180,7 +180,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskAssessmentsPage.createItem({
 			name: vars.riskAssessmentName,
 			description: vars.description,
-			project: vars.folderName + '/' + vars.projectName,
+			perimeter: vars.folderName + '/' + vars.perimeterName,
 			version: vars.riskAssessmentVersion,
 			status: 'Done',
 			risk_matrix: vars.matrix.displayName,
@@ -214,7 +214,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskScenariosPage.createItem({
 			name: vars.riskScenarioName,
 			description: vars.description,
-			risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+			risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 			threats: [`${vars.folderName}/${vars.threatName}`]
 		});
 
@@ -233,7 +233,7 @@ test('user usual routine actions are working correctly', async ({
 			folder: vars.folderName,
 			approver: LoginPage.defaultEmail,
 			risk_scenarios: [
-				`${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+				`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
 			]
 		});
 

@@ -35,9 +35,10 @@
 	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
 </script>
 
-<div class={classesContainer}>
+<div class="{classesContainer} {classesHidden(hidden)}">
 	<div
-		class="flex flex-row space-x-2 items-center {classesHidden(hidden)} {classesDisabled(disabled)}"
+		class="flex flex-row space-x-2 items-center {classesDisabled(disabled)}"
+		aria-disabled={disabled}
 	>
 		{#if label !== undefined}
 			{#if $constraints?.required}

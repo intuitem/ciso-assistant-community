@@ -21,7 +21,7 @@ type Fixtures = {
 	foldersPage: PageContent;
 	frameworksPage: PageContent;
 	librariesPage: PageContent;
-	projectsPage: PageContent;
+	perimetersPage: PageContent;
 	riskAcceptancesPage: PageContent;
 	riskAssessmentsPage: PageContent;
 	riskMatricesPage: PageContent;
@@ -59,7 +59,7 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
-			projectsPage,
+			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
 			riskMatricesPage,
@@ -78,7 +78,7 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
-			projectsPage,
+			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
 			riskMatricesPage,
@@ -98,7 +98,7 @@ export const test = base.extend<Fixtures>({
 		const aPage = new PageContent(page, '/compliance-assessments', 'Audits', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			//{ name: 'version', type: type.TEXT },
 			//{ name: 'status', type: type.SELECT },
 			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
@@ -145,8 +145,8 @@ export const test = base.extend<Fixtures>({
 		await use(lPage);
 	},
 
-	projectsPage: async ({ page }, use) => {
-		const pPage = new PageContent(page, '/projects', 'Projects', [
+	perimetersPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/perimeters', 'Perimeters', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
@@ -172,7 +172,7 @@ export const test = base.extend<Fixtures>({
 		const rPage = new PageContent(page, '/risk-assessments', 'Risk assessments', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'version', type: type.TEXT },
 			{ name: 'status', type: type.SELECT },
 			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
@@ -368,10 +368,10 @@ export class TestContent {
 					is_active: false
 				}
 			},
-			projectsPage: {
-				displayName: 'Projects',
+			perimetersPage: {
+				displayName: 'Perimeters',
 				build: {
-					name: vars.projectName,
+					name: vars.perimeterName,
 					description: vars.description,
 					folder: vars.folderName,
 					ref_id: 'R.1234',
@@ -481,7 +481,7 @@ export class TestContent {
 				build: {
 					name: vars.assessmentName,
 					description: vars.description,
-					project: vars.folderName + '/' + vars.projectName,
+					perimeter: vars.folderName + '/' + vars.perimeterName,
 					// status: 'Planned',
 					// version: "1.4.2",
 					framework: vars.framework.name
@@ -525,7 +525,7 @@ export class TestContent {
 					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					name: vars.riskAssessmentName,
 					description: vars.description,
-					project: vars.folderName + '/' + vars.projectName,
+					perimeter: vars.folderName + '/' + vars.perimeterName,
 					version: vars.riskAssessmentVersion,
 					status: 'Planned',
 					risk_matrix: vars.matrix.displayName
@@ -547,7 +547,7 @@ export class TestContent {
 				build: {
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+					risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					threats: ['Global/' + vars.threat.name, 'Global/' + vars.threat2.name]
 				},
 				editParams: {
@@ -574,7 +574,7 @@ export class TestContent {
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
 					risk_scenarios: [
-						`${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+						`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
 					]
 				},
 				editParams: {
