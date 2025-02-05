@@ -2250,7 +2250,7 @@ class FolderViewSet(BaseModelViewSet):
             )
             parsed_data = self._process_uploaded_file(dummy_fixture_path)
             result = self._import_objects(
-                parsed_data, domain_name, load_missing_libraries=True
+                parsed_data, domain_name, load_missing_libraries=True, user=request.user
             )
             return Response(result, status=status.HTTP_200_OK)
 
