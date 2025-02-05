@@ -60,14 +60,14 @@
 <AutocompleteSelect
 	{form}
 	options={getOptions({
-		objects: model.foreignKeys['project'],
+		objects: model.foreignKeys['perimeter'],
 		extra_fields: [['folder', 'str']]
 	})}
-	field="project"
-	cacheLock={cacheLocks['project']}
-	bind:cachedValue={formDataCache['project']}
-	label={m.project()}
-	hidden={initialData.project}
+	field="perimeter"
+	cacheLock={cacheLocks['perimeter']}
+	bind:cachedValue={formDataCache['perimeter']}
+	label={m.perimeter()}
+	hidden={initialData.perimeter}
 />
 <AutocompleteSelect
 	{form}

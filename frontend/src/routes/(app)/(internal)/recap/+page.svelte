@@ -21,20 +21,20 @@
 <div class="px-4 pb-4 space-y-8">
 	<span class="text-xl font-extrabold">{m.overallCompliance()}</span>
 	<div class="flex flex-col space-y-2">
-		{#each data.projects as project}
+		{#each data.perimeters as perimeter}
 			<div class="flex flex-col items-center">
-				{#if project.compliance_assessments && project.compliance_assessments.length > 0}
+				{#if perimeter.compliance_assessments && perimeter.compliance_assessments.length > 0}
 					<div
 						class="flex flex-col lg:flex-row lg:space-x-2 w-full mb-2 lg:mb-0 lg:w-1/2 justify-between items-center"
 					>
 						<a
 							class="text-xl font-bold mb-1 hover:underline text-primary-600"
-							href="/projects/{project.id}">{project.folder.str}/{project.name}</a
+							href="/perimeters/{perimeter.id}">{perimeter.folder.str}/{perimeter.name}</a
 						>
 						<div
 							class="flex w-full flex-row lg:flex-1 bg-gray-200 rounded-full overflow-hidden h-4 grow lg:shrink"
 						>
-							{#each project.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
+							{#each perimeter.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
 								<div
 									class="flex flex-col justify-center overflow-hidden text-black text-xs text-center"
 									style="width: {sp.percentage}%; background-color: {sp.itemStyle.color}"
@@ -46,7 +46,7 @@
 					</div>
 				{/if}
 
-				{#each project.compliance_assessments as compliance_assessment}
+				{#each perimeter.compliance_assessments as compliance_assessment}
 					<div
 						class="card w-full bg-white flex flex-row mx-8 p-4 relative flex-wrap lg:flex-nowrap"
 					>

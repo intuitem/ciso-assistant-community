@@ -187,14 +187,14 @@
 	};
 
 	export let orderRelatedModels = [''];
-	if (data.urlModel === 'projects') {
+	if (data.urlModel === 'perimeters') {
 		orderRelatedModels = ['compliance-assessments', 'risk-assessments', 'entity-assessments'];
 	}
 	if (data.urlModel === 'entities') {
 		orderRelatedModels = ['entity-assessments', 'representatives', 'solutions'];
 	}
 	if (data.urlModel === 'folders') {
-		orderRelatedModels = ['projects', 'entities'];
+		orderRelatedModels = ['perimeters', 'entities'];
 	}
 </script>
 
