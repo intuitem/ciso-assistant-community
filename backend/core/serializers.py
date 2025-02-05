@@ -108,7 +108,7 @@ class ReferentialSerializer(BaseModelSerializer):
 
 
 class AssessmentReadSerializer(BaseModelSerializer):
-    project = FieldsRelatedField()
+    perimeter = FieldsRelatedField()
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
 
@@ -205,26 +205,26 @@ class RiskAcceptanceReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class ProjectWriteSerializer(BaseModelSerializer):
+class PerimeterWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = Project
+        model = Perimeter
         exclude = ["created_at"]
 
 
-class ProjectReadSerializer(BaseModelSerializer):
+class PerimeterReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     lc_status = serializers.CharField(source="get_lc_status_display")
 
     class Meta:
-        model = Project
+        model = Perimeter
         fields = "__all__"
 
 
-class ProjectImportExportSerializer(BaseModelSerializer):
+class PerimeterImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
-        model = Project
+        model = Perimeter
         fields = [
             "ref_id",
             "name",
@@ -245,12 +245,12 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "project", "description"]
+        fields = ["name", "version", "perimeter", "description"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
-    project = FieldsRelatedField(["id", "folder"])
+    perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True, fields=["id", "name", "ref_id"])
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
@@ -266,7 +266,7 @@ class RiskAssessmentImportExportSerializer(BaseModelSerializer):
     risk_matrix = serializers.SlugRelatedField(slug_field="urn", read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    project = HashSlugRelatedField(slug_field="pk", read_only=True)
+    perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
@@ -277,7 +277,7 @@ class RiskAssessmentImportExportSerializer(BaseModelSerializer):
             "version",
             "description",
             "folder",
-            "project",
+            "perimeter",
             "eta",
             "due_date",
             "status",
@@ -459,8 +459,8 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     risk_assessment = FieldsRelatedField(["id", "name"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
-    project = FieldsRelatedField(
-        source="risk_assessment.project", fields=["id", "name", "folder"]
+    perimeter = FieldsRelatedField(
+        source="risk_assessment.perimeter", fields=["id", "name", "folder"]
     )
     version = serializers.StringRelatedField(source="risk_assessment.version")
     threats = FieldsRelatedField(many=True)
@@ -861,7 +861,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
-    project = FieldsRelatedField(["id", "folder"])
+    perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     framework = FieldsRelatedField(
         [
@@ -913,7 +913,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
     framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    project = HashSlugRelatedField(slug_field="pk", read_only=True)
+    perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = ComplianceAssessment
@@ -923,7 +923,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "version",
             "description",
             "folder",
-            "project",
+            "perimeter",
             "eta",
             "due_date",
             "status",

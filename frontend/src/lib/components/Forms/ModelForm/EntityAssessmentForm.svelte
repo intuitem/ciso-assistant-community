@@ -20,12 +20,12 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['project'] })}
-	field="project"
-	cacheLock={cacheLocks['project']}
-	bind:cachedValue={formDataCache['project']}
-	label={m.project()}
-	hidden={initialData.project}
+	options={getOptions({ objects: model.foreignKeys['perimeter'] })}
+	field="perimeter"
+	cacheLock={cacheLocks['perimeter']}
+	bind:cachedValue={formDataCache['perimeter']}
+	label={m.perimeter()}
+	hidden={initialData.perimeter}
 />
 {#if !data.compliance_assessment}
 	<Checkbox

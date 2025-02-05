@@ -77,8 +77,8 @@ class AbstractBaseModel(models.Model):
             return self.__class__.objects.filter(risk_scenario=self.risk_scenario)
         if hasattr(self, "risk_assessment") and self.risk_assessment is not None:
             return self.__class__.objects.filter(risk_assessment=self.risk_assessment)
-        if hasattr(self, "project") and self.project is not None:
-            return self.__class__.objects.filter(project=self.project)
+        if hasattr(self, "perimeter") and self.perimeter is not None:
+            return self.__class__.objects.filter(perimeter=self.perimeter)
         if hasattr(self, "folder") and self.folder is not None:
             return self.__class__.objects.filter(folder=self.folder)
         if hasattr(self, "parent_folder") and self.parent_folder is not None:

@@ -11,8 +11,8 @@ import { dirname } from 'path';
 let items: { [k: string]: any } = TestContent.itemBuilder();
 let history: any = {};
 
-function setFilePath(projectName: string, retry: number) {
-	file_path = `./tests/utils/.testhistory/${projectName}/hist${retry}.json`;
+function setFilePath(perimeterName: string, retry: number) {
+	file_path = `./tests/utils/.testhistory/${perimeterName}/hist${retry}.json`;
 	mkdirSync(dirname(file_path), { recursive: true });
 	return file_path;
 }

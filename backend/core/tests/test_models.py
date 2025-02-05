@@ -5,7 +5,7 @@ import pytest
 from ciso_assistant.settings import BASE_DIR
 from core.models import (
     Policy,
-    Project,
+    Perimeter,
     RequirementMapping,
     RequirementMappingSet,
     RiskAssessment,
@@ -98,17 +98,17 @@ class TestRiskAssessment:
             json_definition="{}",
             folder=folder,
         )
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
 
         assert risk_assessment.name == "test risk_assessment"
         assert risk_assessment.description == "test risk_assessment description"
-        assert risk_assessment.project == Project.objects.get(name="test project")
+        assert risk_assessment.perimeter == Perimeter.objects.get(name="test perimeter")
         assert risk_assessment.risk_matrix == RiskMatrix.objects.get(
             name="test risk matrix"
         )
@@ -125,11 +125,11 @@ class TestRiskAssessment:
             json_definition="{}",
             folder=folder,
         )
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
 
@@ -143,11 +143,11 @@ class TestRiskAssessment:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -169,11 +169,11 @@ class TestRiskAssessment:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -199,11 +199,11 @@ class TestRiskAssessment:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -230,17 +230,17 @@ class TestRiskAssessment:
             json_definition="{}",
             folder=folder,
         )
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
 
         assert isinstance(risk_assessment.id, UUID)
 
-    def test_risk_assessment_is_unique_in_project(self):
+    def test_risk_assessment_is_unique_in_perimeter(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
@@ -250,18 +250,18 @@ class TestRiskAssessment:
             json_definition="{}",
             folder=folder,
         )
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         RiskAssessment.objects.create(
             name="test risk assessment",
             description="test risk assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         with pytest.raises(ValidationError):
             RiskAssessment.objects.create(
                 name="test risk assessment",
                 description="test risk assessment description",
-                project=project,
+                perimeter=perimeter,
                 risk_matrix=risk_matrix,
             )
 
@@ -275,23 +275,23 @@ class TestRiskAssessment:
             json_definition="{}",
             folder=folder,
         )
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
             version="1",
         )
         RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
             version="2",
         )
 
-    def test_risk_assessment_can_have_same_name_and_version_in_a_different_project(
+    def test_risk_assessment_can_have_same_name_and_version_in_a_different_perimeter(
         self,
     ):
         folder = Folder.objects.create(
@@ -303,25 +303,25 @@ class TestRiskAssessment:
             json_definition="{}",
             folder=folder,
         )
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
             version="1",
         )
 
-        project2 = Project.objects.create(name="test project 2", folder=folder)
+        perimeter2 = Perimeter.objects.create(name="test perimeter 2", folder=folder)
         RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project2,
+            perimeter=perimeter2,
             risk_matrix=risk_matrix,
             version="1",
         )
 
-    def test_risk_assessment_scope_is_risk_assessments_in_project(self):
+    def test_risk_assessment_scope_is_risk_assessments_in_perimeter(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
@@ -331,37 +331,37 @@ class TestRiskAssessment:
             json_definition="{}",
             folder=folder,
         )
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         risk_assessment2 = RiskAssessment.objects.create(
             name="test risk_assessment 2",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         risk_assessment3 = RiskAssessment.objects.create(
             name="test risk_assessment 3",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
 
-        project2 = Project.objects.create(name="test project 2", folder=folder)
+        perimeter2 = Perimeter.objects.create(name="test perimeter 2", folder=folder)
         RiskAssessment.objects.create(
             name="test risk_assessment 4",
             description="test risk_assessment description",
-            project=project2,
+            perimeter=perimeter2,
             risk_matrix=risk_matrix,
         )
         RiskAssessment.objects.create(
             name="test risk_assessment 5",
             description="test risk_assessment description",
-            project=project2,
+            perimeter=perimeter2,
             risk_matrix=risk_matrix,
         )
 
@@ -382,11 +382,11 @@ class TestRiskScenario:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         threat = Threat.objects.create(
@@ -407,16 +407,16 @@ class TestRiskScenario:
         assert Threat.objects.get(name="test threat") in scenario.threats.all()
 
     @pytest.mark.usefixtures("risk_matrix_fixture")
-    def test_risk_scenario_parent_project(self):
+    def test_risk_scenario_parent_perimeter(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -428,7 +428,9 @@ class TestRiskScenario:
             risk_assessment=risk_assessment,
         )
 
-        assert scenario.parent_project() == Project.objects.get(name="test project")
+        assert scenario.parent_perimeter() == Perimeter.objects.get(
+            name="test perimeter"
+        )
 
     @pytest.mark.usefixtures("risk_matrix_fixture")
     def test_risk_scenario_is_deleted_when_risk_assessment_is_deleted(self):
@@ -436,11 +438,11 @@ class TestRiskScenario:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -466,11 +468,11 @@ class TestRiskScenario:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         threat = Threat.objects.create(
@@ -497,11 +499,11 @@ class TestRiskScenario:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -521,11 +523,11 @@ class TestRiskScenario:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -550,7 +552,7 @@ class TestRiskScenario:
         risk_assessment2 = RiskAssessment.objects.create(
             name="test risk_assessment 2",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         RiskScenario.objects.create(
@@ -572,11 +574,11 @@ class TestRiskScenario:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -706,11 +708,11 @@ class TestRiskAcceptance:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -745,11 +747,11 @@ class TestRiskAcceptance:
             name="test folder 2", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -789,11 +791,11 @@ class TestRiskAcceptance:
             name="test folder", description="test folder description"
         )
         risk_matrix = RiskMatrix.objects.all()[0]
-        project = Project.objects.create(name="test project", folder=folder)
+        perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
         Threat.objects.create(
@@ -948,7 +950,7 @@ class TestLibrary:
         )
         assert library.reference_count == 0
 
-    @pytest.mark.usefixtures("domain_project_fixture")
+    @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_library_reference_count_incremented_when_framework_is_referenced_by_compliance_assessment_and_decremented_when_compliance_assessment_is_deleted(
         self,
     ):
@@ -972,7 +974,7 @@ class TestLibrary:
         compliance_assessment = ComplianceAssessment.objects.create(
             name="ComplianceAssessment",
             description="ComplianceAssessment description",
-            project=Project.objects.last(),
+            perimeter=Perimeter.objects.last(),
             framework=framework,
         )
 
@@ -982,7 +984,7 @@ class TestLibrary:
 
         assert library.reference_count == 0
 
-    @pytest.mark.usefixtures("domain_project_fixture")
+    @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_library_reference_count_incremented_when_reference_control_is_referenced_by_complance_assessment_and_decremented_when_compliance_assessment_is_deleted(
         self,
     ):
@@ -1011,7 +1013,7 @@ class TestLibrary:
         compliance_assessment = ComplianceAssessment.objects.create(
             name="ComplianceAssessment",
             description="ComplianceAssessment description",
-            project=Project.objects.last(),
+            perimeter=Perimeter.objects.last(),
             framework=framework,
         )
 
@@ -1045,7 +1047,7 @@ class TestLibrary:
         self,
     ):
         domain = Folder.objects.create(name="Domain", description="Domain description")
-        project = Project.objects.create(name="Project", folder=domain)
+        perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
 
         library = LoadedLibrary.objects.get()
         risk_matrix = RiskMatrix.objects.get()
@@ -1055,7 +1057,7 @@ class TestLibrary:
         risk_assessment = RiskAssessment.objects.create(
             name="RiskAssessment",
             description="RiskAssessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
 
@@ -1070,7 +1072,7 @@ class TestLibrary:
         self,
     ):
         domain = Folder.objects.create(name="Domain", description="Domain description")
-        project = Project.objects.create(name="Project", folder=domain)
+        perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
 
         risk_matrix = RiskMatrix.objects.get()
 
@@ -1092,7 +1094,7 @@ class TestLibrary:
         risk_assessment = RiskAssessment.objects.create(
             name="RiskAssessment",
             description="RiskAssessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
 
@@ -1116,7 +1118,7 @@ class TestLibrary:
         self,
     ):
         domain = Folder.objects.create(name="Domain", description="Domain description")
-        project = Project.objects.create(name="Project", folder=domain)
+        perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
 
         risk_matrix = RiskMatrix.objects.get()
 
@@ -1144,7 +1146,7 @@ class TestLibrary:
         risk_assessment = RiskAssessment.objects.create(
             name="RiskAssessment",
             description="RiskAssessment description",
-            project=project,
+            perimeter=perimeter,
             risk_matrix=risk_matrix,
         )
 
@@ -1163,7 +1165,7 @@ class TestLibrary:
 
         assert library.reference_count == 0
 
-    @pytest.mark.usefixtures("domain_project_fixture")
+    @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_library_reference_count_must_be_zero_for_library_deletion(
         self,
     ):
@@ -1184,7 +1186,7 @@ class TestLibrary:
         compliance_assessment = ComplianceAssessment.objects.create(
             name="ComplianceAssessment",
             description="ComplianceAssessment description",
-            project=Project.objects.last(),
+            perimeter=Perimeter.objects.last(),
             framework=framework,
         )
 
@@ -1204,7 +1206,7 @@ class TestLibrary:
 
         assert LoadedLibrary.objects.count() == 0
 
-    @pytest.mark.usefixtures("domain_project_fixture")
+    @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_library_cannot_be_deleted_if_it_is_a_dependency_of_other_libraries(self):
         dependency_library = LoadedLibrary.objects.create(
             name="Dependency Library",

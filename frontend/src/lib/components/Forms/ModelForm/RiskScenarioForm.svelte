@@ -40,7 +40,7 @@
 	options={getOptions({
 		objects: model.foreignKeys['risk_assessment'],
 		label: 'str',
-		extra_fields: [['project', 'str']]
+		extra_fields: [['perimeter', 'str']]
 	})}
 	field="risk_assessment"
 	cacheLock={cacheLocks['risk_assessment']}

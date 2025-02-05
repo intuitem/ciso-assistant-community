@@ -18,7 +18,7 @@
 		options = getOptions({
 			objects: riskAssessments,
 			label: 'str',
-			extra_fields: [['project', 'str']]
+			extra_fields: [['perimeter', 'str']]
 		});
 	});
 </script>

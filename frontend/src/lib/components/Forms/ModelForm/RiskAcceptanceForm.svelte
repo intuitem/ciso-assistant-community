@@ -60,7 +60,7 @@
 	options={getOptions({
 		objects: model.foreignKeys['risk_scenarios'],
 		extra_fields: [
-			['project', 'str'],
+			['perimeter', 'str'],
 			['risk_assessment', 'str']
 		]
 	})}

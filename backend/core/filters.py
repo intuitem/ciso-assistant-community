@@ -15,7 +15,7 @@ from django.db.models import Q
 from core.models import *
 from core.forms import SearchableSelect, SearchableCheckboxSelectMultiple
 from iam.models import User, UserGroup, RoleAssignment, Folder
-from core.models import Project, Threat, ReferenceControl, AppliedControl
+from core.models import Perimeter, Threat, ReferenceControl, AppliedControl
 from django.utils.translation import gettext_lazy as _
 
 
@@ -148,7 +148,7 @@ class AppliedControlFilter(GenericFilterSet):
         fields = ["name", "folder", "reference_control"]
 
 
-class ProjectsDomainFilter(GenericFilterSet):
+class PerimetersDomainFilter(GenericFilterSet):
     name = GenericCharFilter(
         widget=TextInput(
             attrs={
@@ -175,12 +175,12 @@ class ProjectsDomainFilter(GenericFilterSet):
         fields = ["name", "description"]
 
 
-class ProjectFilter(GenericFilterSet):
+class PerimeterFilter(GenericFilterSet):
     name = GenericCharFilter(
         widget=TextInput(
             attrs={
                 "class": "h-10 rounded-r-lg border-none focus:ring-0",
-                "placeholder": _("Search project..."),
+                "placeholder": _("Search perimeter..."),
             }
         )
     )
@@ -199,7 +199,7 @@ class ProjectFilter(GenericFilterSet):
     )
 
     class Meta:
-        model = Project
+        model = Perimeter
         fields = "__all__"
         exclude = ["created_at", "locale_data"]
 
@@ -359,7 +359,7 @@ class ComplianceAssessmentFilter(GenericFilterSet):
             }
         )
     )
-    project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
+    perimeter = GenericModelMultipleChoiceFilter(queryset=Perimeter.objects.all())
     framework = GenericModelMultipleChoiceFilter(queryset=Framework.objects.all())
     orderby = GenericOrderingFilter(
         fields=(

@@ -158,13 +158,13 @@ class Folder(NameDescriptionMixin):
         paths = [
             ["folder"],
             ["parent_folder"],
-            ["project", "folder"],
+            ["perimeter", "folder"],
             ["entity", "folder"],
             ["provider_entity", "folder"],
             ["solution", "provider_entity", "folder"],
-            ["risk_assessment", "project", "folder"],
-            ["risk_scenario", "risk_assessment", "project", "folder"],
-            ["compliance_assessment", "project", "folder"],
+            ["risk_assessment", "perimeter", "folder"],
+            ["risk_scenario", "risk_assessment", "perimeter", "folder"],
+            ["compliance_assessment", "perimeter", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.

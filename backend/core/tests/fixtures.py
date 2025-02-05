@@ -1,7 +1,7 @@
 import pytest
 
 from core.models import (
-    Project,
+    Perimeter,
     StoredLibrary,
     FilteringLabel,
     AppliedControl,
@@ -10,15 +10,15 @@ from iam.models import Folder
 
 
 @pytest.fixture
-def domain_project_fixture():
+def domain_perimeter_fixture():
     root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
     folder = Folder.objects.create(
         parent_folder=root_folder,
         name="test folder",
         description="test folder description",
     )
-    project = Project.objects.create(name="test project", folder=folder)
-    return project
+    perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
+    return perimeter
 
 
 @pytest.fixture

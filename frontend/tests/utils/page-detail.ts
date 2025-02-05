@@ -41,10 +41,10 @@ export class PageDetail extends BasePage {
 
 	async verifyItem(values: { [k: string]: any }) {
 		if (this.url.includes('risk-assessments')) {
-			if ('project' in values) {
+			if ('perimeter' in values) {
 				await expect
 					.soft(this.page.getByTestId('name-field-value'))
-					.toHaveText(`${values.project}/${values.name} - ${values.version}`);
+					.toHaveText(`${values.perimeter}/${values.name} - ${values.version}`);
 			} else {
 				await expect
 					.soft(this.page.getByTestId('name-field-value'))

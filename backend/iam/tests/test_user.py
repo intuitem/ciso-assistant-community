@@ -9,7 +9,7 @@ from iam.models import Folder, Role, RoleAssignment, User
 class TestUser:
     pytestmark = pytest.mark.django_db
 
-    @pytest.mark.usefixtures("domain_project_fixture")
+    @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_reader_user_is_not_editor(self):
         user = User.objects.create_user(email="root@example.com", password="password")
         assert user is not None
@@ -18,7 +18,7 @@ class TestUser:
         reader_role = Role.objects.create(name="test reader")
         reader_permissions = Permission.objects.filter(
             codename__in=[
-                "view_project",
+                "view_perimeter",
                 "view_riskassessment",
                 "view_appliedcontrol",
                 "view_riskscenario",
@@ -47,7 +47,7 @@ class TestUser:
         assert len(editors) == 0
         assert user not in editors
 
-    @pytest.mark.usefixtures("domain_project_fixture")
+    @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_editor_user_is_editor(self):
         user = User.objects.create_user(email="root@example.com", password="password")
         assert user is not None
@@ -56,7 +56,7 @@ class TestUser:
         editor_role = Role.objects.create(name="test editor")
         editor_permissions = Permission.objects.filter(
             codename__in=[
-                "view_project",
+                "view_perimeter",
                 "view_riskassessment",
                 "view_appliedcontrol",
                 "view_riskscenario",
@@ -66,9 +66,9 @@ class TestUser:
                 "view_referencecontrol",
                 "view_folder",
                 "view_usergroup",
-                "add_project",
-                "change_project",
-                "delete_project",
+                "add_perimeter",
+                "change_perimeter",
+                "delete_perimeter",
                 "add_riskassessment",
                 "change_riskassessment",
                 "delete_riskassessment",

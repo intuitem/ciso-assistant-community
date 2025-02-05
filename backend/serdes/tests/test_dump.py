@@ -20,7 +20,7 @@ def valid_export_data():
                 },
             },
             {
-                "model": "project",
+                "model": "perimeter",
                 "id": "2",
                 "fields": {
                     "name": "ISMS",
