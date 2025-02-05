@@ -247,7 +247,7 @@
 	}
 
 	onMount(() => {
-		if (displayGuidedTour || user.accessible_domains.length === 0) {
+		if (displayGuidedTour && user.accessible_domains.length === 0 && $modalStore.length === 0) {
 			modalFirstLogin();
 			$firstTimeConnection = false; // This will prevent the tour from showing up again on page reload
 		}
