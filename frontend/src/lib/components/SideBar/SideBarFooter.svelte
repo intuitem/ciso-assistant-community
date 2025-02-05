@@ -140,6 +140,12 @@
 				><i class="fa-solid fa-wand-magic-sparkles mr-2" />{m.guidedTour()}</button
 			>
 			<button
+				on:click={() => dispatch('loadDemoDomain')}
+				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+				data-testid="load-demo-data-button"
+				><i class="fa-solid fa-file-import mr-2" />{m.loadDemoData()}</button
+			>
+			<button
 				on:click={modalBuildInfo}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 				data-testid="about-button"><i class="fa-solid fa-circle-info mr-2" />{m.aboutCiso()}</button

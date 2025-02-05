@@ -16,6 +16,7 @@
 	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { invalidateAll } from '$app/navigation';
+	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
 
 	export let open: boolean;
 
@@ -224,6 +225,11 @@
 			return false;
 		}
 		$flash = { type: 'success', message: m.successfullyImportedFolder() };
+		await goto('/folders', {
+			crumbs: breadcrumbs,
+			label: m.domains(),
+			breadcrumbAction: 'replace'
+		});
 		invalidateAll();
 		return true;
 	}
@@ -264,7 +270,7 @@
 	<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
 		<SideBarHeader />
 		<SideBarNavigation />
-		<SideBarFooter on:triggerGT={triggerVisit} />
+		<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
 	</nav>
 </aside>
 
