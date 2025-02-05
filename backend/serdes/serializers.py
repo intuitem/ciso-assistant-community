@@ -14,7 +14,11 @@ from django.db.models.query import QuerySet
 from rest_framework import serializers
 from hashlib import sha256
 
-from .utils import app_dot_model, import_export_serializer_class
+from .utils import (
+    app_dot_model,
+    import_export_serializer_class,
+    get_last_migrations_per_app,
+)
 
 
 class LoadBackupSerializer(serializers.Serializer):
@@ -38,6 +42,7 @@ class MetaSerializer(serializers.Serializer):
 
     media_version = serializers.CharField()
     exported_at = serializers.CharField()
+    last_migrations = serializers.JSONField()
 
 
 class ObjectSerializer(serializers.Serializer):
@@ -118,6 +123,7 @@ class ExportSerializer(serializers.Serializer):
         meta = {
             "media_version": settings.VERSION,
             "exported_at": timezone.now().isoformat(),
+            "last_migrations": get_last_migrations_per_app(),
         }
 
         objects = []

@@ -3,6 +3,8 @@ from typing import Iterable
 import django.apps
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
+from django.db import connections
+from django.db.migrations.loader import MigrationLoader
 from django.db.models import Model, Q
 from django.db.models.deletion import Collector
 from collections import defaultdict
@@ -132,6 +134,20 @@ def restore_objects(path: str, format: str = "json"):
     for obj in objects:
         obj.save()
     return path
+
+
+def get_last_migrations_per_app() -> dict[str, str]:
+    loader = MigrationLoader(connections["default"])
+    all_applied_migrations = [
+        loader.get_migration(app, name) for app, name in loader.applied_migrations
+    ]
+    app_labels = {m.app_label for m in all_applied_migrations}
+    result = {}
+    for label in app_labels:
+        result[label] = max(
+            [m.name for m in all_applied_migrations if m.app_label == label]
+        )
+    return result
 
 
 def app_dot_model(model: Model) -> str:
