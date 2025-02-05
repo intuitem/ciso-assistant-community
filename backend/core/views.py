@@ -2242,22 +2242,37 @@ class FolderViewSet(BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        domain_name = f"Dummy Domain {timezone.now()}"
+        timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+        domain_name = f"DEMO {timestamp}"
 
         try:
             dummy_fixture_path = (
                 Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
             )
+            if not dummy_fixture_path.exists():
+                logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
+                return Response(
+                    {"error": "dummyDomainFixtureNotFound"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
             parsed_data = self._process_uploaded_file(dummy_fixture_path)
             result = self._import_objects(
                 parsed_data, domain_name, load_missing_libraries=True, user=request.user
             )
+            logger.info("Dummy domain imported successfully", domain_name=domain_name)
             return Response(result, status=status.HTTP_200_OK)
 
-        except json.JSONDecodeError as e:
-            logger.error("Invalid JSON format in uploaded file", exc_info=e)
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in dummy fixture file", exc_info=True)
             return Response(
-                {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
+                {"errors": ["Invalid JSON format"]},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except Exception:
+            logger.error("Error importing dummy domain", exc_info=True)
+            return Response(
+                {"error": "failedToImportDummyDomain"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     def _process_uploaded_file(self, dump_file: str | Path) -> Any:
