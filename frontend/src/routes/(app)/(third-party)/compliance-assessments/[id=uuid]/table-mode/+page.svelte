@@ -24,6 +24,8 @@
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
+	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { displayScoreColor } from '$lib/utils/helpers';
 
 	export let data: PageData;
 	export let form: Actions;
@@ -381,72 +383,121 @@
 							</div>
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
-							<Score
-								form={superForm(requirementAssessment.scoreForm, {
-									id: `requirement-score-${requirementAssessment.id}`
-								})}
-								min_score={data.compliance_assessment.min_score}
-								max_score={data.compliance_assessment.max_score}
-								scores_definition={data.compliance_assessment.scores_definition}
-								field="score"
-								label={data.compliance_assessment.show_documentation_score
-									? m.implementationScore()
-									: m.score()}
-								styles="w-full p-1"
-								bind:score={requirementAssessment.score}
-								on:change={async () => await updateScore(requirementAssessment)}
-								disabled={!requirementAssessment.is_scored ||
-									requirementAssessment.result === 'not_applicable'}
-							>
-								<div slot="left">
-									<Checkbox
-										form={superForm(requirementAssessment.scoreForm, {
-											id: `requirement-is-scored-${requirementAssessment.id}`
-										})}
-										field="is_scored"
-										label={''}
-										helpText={m.scoringHelpText()}
-										checkboxComponent="switch"
-										class="h-full flex flex-row items-center justify-center my-1"
-										classesContainer="h-full flex flex-row items-center space-x-4"
-										hidden={requirementAssessment.result === 'not_applicable'}
-										on:change={async () => {
-											requirementAssessment.is_scored = !requirementAssessment.is_scored;
-											await update(requirementAssessment, 'is_scored');
-										}}
-									/>
-								</div>
-							</Score>
-							{#if data.compliance_assessment.show_documentation_score}
+							{#if !shallow}
 								<Score
 									form={superForm(requirementAssessment.scoreForm, {
-										id: `requirement-documentation-score-${requirementAssessment.id}`
+										id: `requirement-score-${requirementAssessment.id}`
 									})}
 									min_score={data.compliance_assessment.min_score}
 									max_score={data.compliance_assessment.max_score}
-									field="documentation_score"
-									label={m.documentationScore()}
+									scores_definition={data.compliance_assessment.scores_definition}
+									field="score"
+									label={data.compliance_assessment.show_documentation_score
+										? m.implementationScore()
+										: m.score()}
 									styles="w-full p-1"
-									bind:score={requirementAssessment.documentation_score}
+									bind:score={requirementAssessment.score}
 									on:change={async () => await updateScore(requirementAssessment)}
 									disabled={!requirementAssessment.is_scored ||
 										requirementAssessment.result === 'not_applicable'}
-								/>
+								>
+									<div slot="left">
+										<Checkbox
+											form={superForm(requirementAssessment.scoreForm, {
+												id: `requirement-is-scored-${requirementAssessment.id}`
+											})}
+											field="is_scored"
+											label={''}
+											helpText={m.scoringHelpText()}
+											checkboxComponent="switch"
+											class="h-full flex flex-row items-center justify-center my-1"
+											classesContainer="h-full flex flex-row items-center space-x-4"
+											on:change={async () => {
+												requirementAssessment.is_scored = !requirementAssessment.is_scored;
+												await update(requirementAssessment, 'is_scored');
+											}}
+										/>
+									</div>
+								</Score>
+								{#if data.compliance_assessment.show_documentation_score}
+									<Score
+										form={superForm(requirementAssessment.scoreForm, {
+											id: `requirement-documentation-score-${requirementAssessment.id}`
+										})}
+										min_score={data.compliance_assessment.min_score}
+										max_score={data.compliance_assessment.max_score}
+										field="documentation_score"
+										label={m.documentationScore()}
+										styles="w-full p-1"
+										bind:score={requirementAssessment.documentation_score}
+										on:change={async () => await updateScore(requirementAssessment)}
+										disabled={!requirementAssessment.is_scored ||
+											requirementAssessment.result === 'not_applicable'}
+									/>
+								{/if}
+							{:else if data.compliance_assessment.show_documentation_score && requirementAssessment.is_scored}
+								<div class="flex flex-row items-center space-x-2 w-full">
+									<span>{m.implementationScoreResult()}</span>
+									<ProgressRadial
+										stroke={100}
+										meter={displayScoreColor(
+											requirementAssessment.score,
+											data.compliance_assessment.max_score
+										)}
+										font={150}
+										value={(requirementAssessment.score * 100) /
+											data.compliance_assessment.max_score}
+										width="w-10"
+									>
+										{requirementAssessment.score ?? '--'}
+									</ProgressRadial>
+									<span>{m.documentationScoreResult()}</span>
+									<ProgressRadial
+										stroke={100}
+										meter={displayScoreColor(
+											requirementAssessment.documentation_score,
+											data.compliance_assessment.max_score
+										)}
+										font={150}
+										value={(requirementAssessment.documentation_score * 100) /
+											data.compliance_assessment.max_score}
+										width="w-10"
+									>
+										{requirementAssessment.documentation_score ?? '--'}
+									</ProgressRadial>
+								</div>
+							{:else if requirementAssessment.is_scored}
+								<div class="flex flex-row items-center space-x-2 w-full">
+									<span>{m.scoreResult()}</span>
+									<ProgressRadial
+										stroke={100}
+										meter={displayScoreColor(
+											requirementAssessment.score,
+											data.compliance_assessment.max_score
+										)}
+										font={150}
+										value={(requirementAssessment.score * 100) /
+											data.compliance_assessment.max_score}
+										width="w-10"
+									>
+										{requirementAssessment.score ?? '--'}
+									</ProgressRadial>
+								</div>
 							{/if}
 							<Accordion regionCaret="flex">
-								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
-									<svelte:fragment slot="summary"
-										><p class="flex">{m.observation()}</p></svelte:fragment
-									>
-									<svelte:fragment slot="content">
-										<div>
-											{#if shallow}
-												{#if requirementAssessment.observation}
-													<p class="text-primary-500">{requirementAssessment.observation}</p>
-												{:else}
-													<p class="text-gray-400 italic">{m.noObservation()}</p>
-												{/if}
-											{:else}
+								{#if shallow}
+									{#if requirementAssessment.observation}
+										<p class="text-primary-500">{requirementAssessment.observation}</p>
+									{:else}
+										<p class="text-gray-400 italic">{m.noObservation()}</p>
+									{/if}
+								{:else}
+									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
+										<svelte:fragment slot="summary"
+											><p class="flex">{m.observation()}</p></svelte:fragment
+										>
+										<svelte:fragment slot="content">
+											<div>
 												<textarea
 													placeholder=""
 													class="input w-full"
@@ -475,54 +526,59 @@
 														<i class="fa-solid fa-xmark opacity-70"></i>
 													</button>
 												{/if}
-											{/if}
-										</div>
-									</svelte:fragment>
-								</AccordionItem>
-								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
-									<svelte:fragment slot="summary"
-										><p class="flex items-center space-x-2">
-											<span>{m.evidence()}</span>
-											{#key addedEvidence}
-												{#if requirementAssessment.evidences != null}
-													<span class="badge variant-soft-primary"
-														>{requirementAssessment.evidences.length}</span
+											</div>
+										</svelte:fragment>
+									</AccordionItem>
+								{/if}
+								{#if requirementAssessment.evidences.length === 0 && shallow}
+									<p class="text-gray-400 italic">{m.noEvidences()}</p>
+								{:else}
+									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
+										<svelte:fragment slot="summary"
+											><p class="flex items-center space-x-2">
+												<span>{m.evidence()}</span>
+												{#key addedEvidence}
+													{#if requirementAssessment.evidences != null}
+														<span class="badge variant-soft-primary"
+															>{requirementAssessment.evidences.length}</span
+														>
+													{/if}
+												{/key}
+											</p></svelte:fragment
+										>
+										<svelte:fragment slot="content">
+											<div class="flex flex-row space-x-2 items-center">
+												{#if !shallow}
+													<button
+														class="btn variant-filled-primary self-start"
+														on:click={() =>
+															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+														type="button"
+														><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 													>
 												{/if}
-											{/key}
-										</p></svelte:fragment
-									>
-									<svelte:fragment slot="content">
-										<div class="flex flex-row space-x-2 items-center">
-											{#if !shallow}
-												<button
-													class="btn variant-filled-primary self-start"
-													on:click={() =>
-														modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-													type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
-												>
-											{/if}
-											{#key addedEvidence}
-												{#each requirementAssessment.evidences as evidence}
-													<p class="card p-2">
-														<a class="hover:text-primary-500" href="/evidences/{evidence.id}"
-															><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
-														>
-														{#if !shallow}
-															<button
-																class="cursor-pointer"
-																on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
-																type="button"
+												{#key addedEvidence}
+													{#each requirementAssessment.evidences as evidence}
+														<p class="card p-2">
+															<a class="hover:text-primary-500" href="/evidences/{evidence.id}"
+																><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
 															>
-																<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
-															</button>
-														{/if}
-													</p>
-												{/each}
-											{/key}
-										</div>
-									</svelte:fragment>
-								</AccordionItem>
+															{#if !shallow}
+																<button
+																	class="cursor-pointer"
+																	on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
+																	type="button"
+																>
+																	<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
+																</button>
+															{/if}
+														</p>
+													{/each}
+												{/key}
+											</div>
+										</svelte:fragment>
+									</AccordionItem>
+								{/if}
 							</Accordion>
 						</div>
 					</form>
