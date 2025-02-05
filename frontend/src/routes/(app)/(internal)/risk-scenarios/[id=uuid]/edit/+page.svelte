@@ -26,8 +26,10 @@
 	import * as m from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
+	import { invalidateAll } from '$app/navigation';
 
 	export let data: PageData;
+	export let form: ActionData;
 
 	const schema = modelSchema(data.model.urlModel!);
 
@@ -78,10 +80,18 @@
 			title: safeTranslate('add-' + data.measureModel.localName),
 			response: (r: boolean) => {
 				console.log(r);
-				if (r) _form.submit();
+				if (r) {
+					_form.submit();
+				}
 			}
 		};
 		modalStore.trigger(modal);
+	}
+
+	const formStore = _form.form;
+
+	$: if (form && form.newControl) {
+		$formStore[form?.newControl?.field]?.push(form.newControl.appliedControl);
 	}
 
 	const next = getSecureRedirect($page.url.searchParams.get('next'));
