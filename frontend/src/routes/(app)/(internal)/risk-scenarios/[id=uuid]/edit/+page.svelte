@@ -78,7 +78,6 @@
 			// Data
 			title: safeTranslate('add-' + data.measureModel.localName),
 			response: (r: boolean) => {
-				console.log(r);
 				if (r) {
 					_form.submit();
 				}
