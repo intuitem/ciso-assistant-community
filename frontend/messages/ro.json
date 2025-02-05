@@ -186,7 +186,6 @@
 	"statistics": "Statistici",
 	"myPerimeters": "Întinderi mele",
 	"scenarios": "Scenarii",
-	"assignedPerimeters": "Atribuit la {number} {number, plural, one {Întindere} other {Întinderi}}",
 	"currentRiskLevelPerScenario": "Nivelul actual al riscului per scenariu de risc",
 	"residualRiskLevelPerScenario": "Nivelul rezidual al riscului per scenariu de risc",
 	"appliedControlsStatus": "Starea controalelor aplicate",

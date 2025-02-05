@@ -186,7 +186,6 @@
 	"statistics": "Statistieken",
 	"myPerimeters": "Mijn perimeters",
 	"scenarios": "Scenario's",
-	"assignedPerimeters": "Toegewezen aan {number} perimeters",
 	"currentRiskLevelPerScenario": "Huidig risiconiveau per risicoscenario",
 	"residualRiskLevelPerScenario": "Rest risiconiveau per risicoscenario",
 	"appliedControlsStatus": "Status van toegepaste controles",

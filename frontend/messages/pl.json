@@ -186,7 +186,6 @@
 	"statistics": "Statystyki",
 	"myPerimeters": "Moje zakresy",
 	"scenarios": "Scenariusze",
-	"assignedPerimeters": "Przypisane do {number} zakres(y)",
 	"currentRiskLevelPerScenario": "Obecny poziom ryzyka na scenariusz ryzyka",
 	"residualRiskLevelPerScenario": "Resztkowy poziom ryzyka na scenariusz ryzyka",
 	"appliedControlsStatus": "Status zastosowanych kontroli",

@@ -189,7 +189,6 @@
 	"statistics": "Statistik",
 	"myPerimeters": "Lingkup saya",
 	"scenarios": "Skenario",
-	"assignedPerimeters": "Ditugaskan ke {number} lingkup",
 	"currentRiskLevelPerScenario": "Tingkat risiko saat ini per skenario risiko",
 	"residualRiskLevelPerScenario": "Tingkat risiko residu per skenario risiko",
 	"appliedControlsStatus": "Status kontrol yang diterapkan",

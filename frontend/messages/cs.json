@@ -184,7 +184,6 @@
 	"statistics": "Statistiky",
 	"myPerimeters": "Moje obvody",
 	"scenarios": "Scénáře",
-	"assignedPerimeters": "Přiděleno {number} obvody",
 	"currentRiskLevelPerScenario": "Současná úroveň rizika na scénář",
 	"residualRiskLevelPerScenario": "Zbytková úroveň rizika na scénář",
 	"appliedControlsStatus": "Stav aplikovaných kontrol",

@@ -188,7 +188,6 @@
 	"statistics": "Statistik",
 	"myPerimeters": "Mina perimetrar",
 	"scenarios": "Scenarier",
-	"assignedPerimeters": "Tilldelad till {number} {number, plural, one {perimeter} other {perimetrar}}",
 	"currentRiskLevelPerScenario": "Nuvarande risknivå per riskscenario",
 	"residualRiskLevelPerScenario": "Rest risknivå per riskscenario",
 	"appliedControlsStatus": "Status för tillämpade kontroller",

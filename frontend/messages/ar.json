@@ -187,7 +187,6 @@
 	"statistics": "الإحصائيات",
 	"myPerimeters": "محيطاتي",
 	"scenarios": "السيناريوهات",
-	"assignedPerimeters": "مُعين إلى {number} {number, plural, one {محيط} other {محيطات}}",
 	"currentRiskLevelPerScenario": "مستوى المخاطر الحالي لكل سيناريو مخاطر",
 	"residualRiskLevelPerScenario": "مستوى المخاطر المتبقي لكل سيناريو مخاطر",
 	"appliedControlsStatus": "حالة التحكمات المطبقة",

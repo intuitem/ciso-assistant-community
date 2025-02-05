@@ -186,7 +186,6 @@
 	"statistics": "اعداد و شمار",
 	"myPerimeters": "میرے پیریمیٹرز",
 	"scenarios": "منظرنامے",
-	"assignedPerimeters": "{number} پیریمیٹر{s} کے لیے تفویض کیا گیا",
 	"currentRiskLevelPerScenario": "منظرنامے کے مطابق موجودہ خطرے کی سطح",
 	"residualRiskLevelPerScenario": "منظرنامے کے مطابق باقی خطرے کی سطح",
 	"appliedControlsStatus": "لاگو کنٹرول کی حیثیت",
