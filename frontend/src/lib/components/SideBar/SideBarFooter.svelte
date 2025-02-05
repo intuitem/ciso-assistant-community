@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { setCookie } from '$lib/utils/cookies';
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
+	import { availableLanguageTags, languageTag, setLanguageTag } from '$paraglide/runtime';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import * as m from '$paraglide/messages';
-	import { availableLanguageTags, languageTag, setLanguageTag } from '$paraglide/runtime';
-	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton';
-	import { getModalStore, popup } from '@skeletonlabs/skeleton';
+	import { setCookie } from '$lib/utils/cookies';
 
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	const dispatch = createEventDispatcher();
 
 	const language: any = {
@@ -80,6 +81,12 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	let enableMoreBtn = false;
+
+	onMount(() => {
+		enableMoreBtn = true;
+	});
 </script>
 
 <div class="border-t pt-2.5">
@@ -102,12 +109,20 @@
 			{/if}
 		</div>
 		{#key $modalStore}
-			<button
-				class="btn bg-initial"
-				data-testid="sidebar-more-btn"
-				id="sidebar-more-btn"
-				use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical" /></button
-			>
+			{#if enableMoreBtn}
+				<button
+					class="btn bg-initial"
+					data-testid="sidebar-more-btn"
+					id="sidebar-more-btn"
+					use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical" /></button
+				>
+			{:else}
+				<button
+					class="btn bg-initial"
+					data-testid="sidebar-more-btn-disabled"
+					id="sidebar-more-btn-disabled"><i class="fa-solid fa-ellipsis-vertical" /></button
+				>
+			{/if}
 		{/key}
 		<div
 			class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
