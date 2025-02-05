@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { popup } from '@skeletonlabs/skeleton';
-	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { availableLanguageTags, languageTag, setLanguageTag } from '$paraglide/runtime';
+	import { setCookie } from '$lib/utils/cookies';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import * as m from '$paraglide/messages';
-	import { setCookie } from '$lib/utils/cookies';
+	import { availableLanguageTags, languageTag, setLanguageTag } from '$paraglide/runtime';
+	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton';
+	import { getModalStore, popup } from '@skeletonlabs/skeleton';
 
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
@@ -102,12 +101,14 @@
 				</span>
 			{/if}
 		</div>
-		<button
-			class="btn bg-initial"
-			data-testid="sidebar-more-btn"
-			id="sidebar-more-btn"
-			use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical" /></button
-		>
+		{#key $modalStore}
+			<button
+				class="btn bg-initial"
+				data-testid="sidebar-more-btn"
+				id="sidebar-more-btn"
+				use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical" /></button
+			>
+		{/key}
 		<div
 			class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
 			data-testid="sidebar-more-panel"
