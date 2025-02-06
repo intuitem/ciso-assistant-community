@@ -141,13 +141,13 @@ class LoadBackupView(APIView):
                 "Backup version greater than current version",
                 version=backup_version,
             )
-            raise ValidationError({"file": "GreaterBackupVersion"})
+            raise ValidationError({"error": "GreaterBackupVersion"})
         elif cmp_minor != 0:
             logger.error(
                 f"backup version {backup_version} not compatible with current version {current_version}"
             )
             raise ValidationError(
-                {"file": "backupVersionNotCompatibleWithCurrentVersion"}
+                {"error": "backupVersionNotCompatibleWithCurrentVersion"}
             )
 
         decompressed_data = json.dumps(decompressed_data)

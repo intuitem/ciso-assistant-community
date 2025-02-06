@@ -2274,13 +2274,13 @@ class FolderViewSet(BaseModelViewSet):
                     "Backup version greater than current version",
                     version=import_version,
                 )
-                raise ValidationError({"file": "GreaterBackupVersion"})
+                raise ValidationError({"error": "backupGreaterVersionError"})
             elif cmp_minor != 0:
                 logger.error(
                     f"Import version {import_version} not compatible with current version {current_version}"
                 )
                 raise ValidationError(
-                    {"file": "importVersionNotCompatibleWithCurrentVersion"}
+                    {"error": "importVersionNotCompatibleWithCurrentVersion"}
                 )
 
             if "attachments" in directories:
