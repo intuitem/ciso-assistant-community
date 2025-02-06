@@ -1,9 +1,9 @@
-from typing import Literal
-from django.utils.translation import gettext_lazy as _
-from re import sub
-from enum import Enum
 import hashlib
-import re
+from enum import Enum
+from re import sub
+from typing import Literal
+
+from django.utils.translation import gettext_lazy as _
 
 
 def camel_case(s):
