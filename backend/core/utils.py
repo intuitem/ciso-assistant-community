@@ -99,8 +99,8 @@ def parse_version(version: str) -> list[int]:
     parts = version.lstrip("v").split(".")
     try:
         return [int(part) for part in parts]
-    except ValueError:
-        raise VersionFormatError(f"Non-numeric version component in {version}")
+    except ValueError as e:
+        raise VersionFormatError(f"Non-numeric version component in {version}") from e
 
 
 def compare_versions(
