@@ -232,6 +232,6 @@ export const actions: Actions = {
 			},
 			event
 		);
-		return { form };
+		return { form, newControl: { field, appliedControl: measure.id } };
 	}
 };

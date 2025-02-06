@@ -314,7 +314,9 @@
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
 				type="submit"
-				on:click={(event) => {
+				on:click={async (event) => {
+					const result = await form.validateForm(data);
+					if (result.valid) parent.onConfirm(event);
 					createModalCache.deleteCache(model.urlModel);
 				}}>{m.save()}</button
 			>
