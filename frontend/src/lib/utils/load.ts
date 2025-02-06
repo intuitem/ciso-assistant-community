@@ -70,7 +70,17 @@ export const loadDetail = async ({ event, model, id }) => {
 
 				const deleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
 				const createSchema = modelSchema(e.urlModel);
-				initialData[e.field] = data.id;
+				const fieldSchema = createSchema.shape[e.field];
+				let isArrayField = false;
+
+				if (fieldSchema) {
+					let currentSchema = fieldSchema;
+					while (currentSchema instanceof z.ZodOptional || currentSchema instanceof z.ZodNullable) {
+						currentSchema = currentSchema._def.innerType;
+					}
+					isArrayField = currentSchema instanceof z.ZodArray;
+				}
+				initialData[e.field] = isArrayField ? [data.id] : data.id;
 				if (data.folder) {
 					if (!new RegExp(UUID_REGEX).test(data.folder)) {
 						const objectEndpoint = `${endpoint}object/`;

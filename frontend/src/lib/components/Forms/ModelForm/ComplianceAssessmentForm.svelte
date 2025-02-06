@@ -57,13 +57,13 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="projects"
+	optionsEndpoint="perimeters"
 	optionsExtraFields={[['folder', 'str']]}
-	field="project"
-	cacheLock={cacheLocks['project']}
-	bind:cachedValue={formDataCache['project']}
-	label={m.project()}
-	hidden={initialData.project}
+	field="perimeter"
+	cacheLock={cacheLocks['perimeter']}
+	bind:cachedValue={formDataCache['perimeter']}
+	label={m.perimeter()}
+	hidden={initialData.perimeter}
 />
 <AutocompleteSelect
 	{form}

@@ -59,7 +59,7 @@
 	{form}
 	optionsEndpoint="risk-scenarios"
 	optionsExtraFields={[
-		['project', 'str'],
+		['perimeter', 'str'],
 		['risk_assessment', 'str']
 	]}
 	field="risk_scenarios"
