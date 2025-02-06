@@ -20,6 +20,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
 	field="perimeter"
 	cacheLock={cacheLocks['perimeter']}
 	bind:cachedValue={formDataCache['perimeter']}
