@@ -37,6 +37,15 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const REQUIREMENT_RESULT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.result,
+	extraProps: {
+		defaultOptionName: 'result'
+	},
+	alwaysDisplay: true
+};
+
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.folder?.str,
@@ -129,6 +138,13 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.compliance_assessment?.name,
+	extraProps: {
+		defaultOptionName: 'complianceAssessment'
+	}
+};
 const PROVIDER_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => {
@@ -630,9 +646,15 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'requirement-assessments': {
-		head: ['name', 'description', 'complianceAssessment'],
-		body: ['name', 'description', 'compliance_assessment'],
-		breadcrumb_link_disabled: true
+		head: ['name', 'description', 'complianceAssessment', 'result'],
+		body: ['name', 'description', 'compliance_assessment', 'result'],
+		breadcrumb_link_disabled: true,
+		filters: {
+			result: REQUIREMENT_RESULT_FILTER,
+			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true },
+			perimeter: { ...PERIMETER_FILTER, alwaysDisplay: true },
+			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER
+		}
 	},
 	evidences: {
 		head: ['name', 'file', 'size', 'description', 'folder'],
