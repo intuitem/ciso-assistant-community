@@ -11,11 +11,13 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
+	export let additionalInitialData: Record<string, any> = {};
 </script>
 
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="strategic-scenarios"
+	optionsDetailedUrlParameters={[['ebios_rm_study', additionalInitialData.ebios_rm_study]]}
 	field="strategic_scenario"
 	cacheLock={cacheLocks['strategic_scenario']}
 	bind:cachedValue={formDataCache['strategic_scenario']}
@@ -26,6 +28,7 @@
 	{form}
 	multiple
 	optionsEndpoint="stakeholders"
+	optionsDetailedUrlParameters={[['ebios_rm_study', additionalInitialData.ebios_rm_study]]}
 	optionsLabelField="str"
 	field="stakeholders"
 	cacheLock={cacheLocks['stakeholders']}

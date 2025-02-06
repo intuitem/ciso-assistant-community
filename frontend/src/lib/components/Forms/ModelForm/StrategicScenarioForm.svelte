@@ -18,6 +18,7 @@
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="ro-to?is_selected=true&used=false"
+		optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
 		optionsLabelField="str"
 		field="ro_to_couple"
 		cacheLock={cacheLocks['ro_to_couple']}

@@ -129,6 +129,7 @@
 		multiple
 		{form}
 		optionsEndpoint="feared-events?is_selected=true"
+		optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
 		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="feared_events"

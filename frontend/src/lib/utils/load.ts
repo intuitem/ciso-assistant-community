@@ -81,6 +81,9 @@ export const loadDetail = async ({ event, model, id }) => {
 					isArrayField = currentSchema instanceof z.ZodArray;
 				}
 				initialData[e.field] = isArrayField ? [data.id] : data.id;
+				if (data.ebios_rm_study) {
+					initialData['ebios_rm_study'] = data.ebios_rm_study.id;
+				}
 				if (data.folder) {
 					if (!new RegExp(UUID_REGEX).test(data.folder)) {
 						const objectEndpoint = `${endpoint}object/`;
@@ -140,7 +143,8 @@ export const loadDetail = async ({ event, model, id }) => {
 					deleteForm,
 					createForm,
 					foreignKeys,
-					selectOptions
+					selectOptions,
+					initialData
 				};
 			})
 		);

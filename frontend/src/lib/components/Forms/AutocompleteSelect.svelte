@@ -33,6 +33,13 @@
 	export let optionsEndpoint: string = '';
 
 	/**
+	 * Additional endpoint URL parameters with details (ID, urn, ...)
+	 * @format Array of [parameter, identifier] tuples
+	 * @example [['ebios_rm_studies', 'uuid']] -> <endpointUrl>?...&ebios_rm_studies=uuid"
+	 */
+	export let optionsDetailedUrlParameters: [string, string][] = [];
+
+	/**
 	 * Field path to use for option labels (supports dot notation for nested fields)
 	 * @default 'name'
 	 * @example 'email' -> object.email
@@ -108,7 +115,23 @@
 		isLoading = true;
 		try {
 			if (optionsEndpoint) {
-				const response = await fetch(`/${optionsEndpoint}`);
+				let endpoint = `/${optionsEndpoint}`;
+				const urlParams = new URLSearchParams();
+
+				if (Array.isArray(optionsDetailedUrlParameters)) {
+					for (const [param, value] of optionsDetailedUrlParameters) {
+						if (param && value) {
+							urlParams.append(encodeURIComponent(param), encodeURIComponent(value));
+						}
+					}
+				}
+
+				const queryString = urlParams.toString();
+				if (queryString) {
+					endpoint += endpoint.includes('?') ? '&' : '?';
+					endpoint += queryString;
+				}
+				const response = await fetch(endpoint);
 				if (response.ok) {
 					const data = await response.json();
 					options = processOptions(data);

@@ -51,6 +51,7 @@
 	multiple
 	{form}
 	optionsEndpoint="assets?type=PR"
+	optionsDetailedUrlParameters={[['ebios_rm_studies', initialData.ebios_rm_study]]}
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	field="assets"

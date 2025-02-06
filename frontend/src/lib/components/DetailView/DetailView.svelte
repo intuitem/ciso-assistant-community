@@ -81,7 +81,8 @@
 			props: {
 				form: model.createForm,
 				model: model,
-				debug: false
+				debug: false,
+				additionalInitialData: model.initialData
 			}
 		};
 		let modal: ModalSettings = {

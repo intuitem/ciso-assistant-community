@@ -62,6 +62,7 @@
 	export let duplicate = false;
 	export let importFolder = false;
 	export let customNameDescription = false;
+	export let additionalInitialData = {};
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -295,7 +296,14 @@
 	{:else if URLModel === 'strategic-scenarios'}
 		<StrategicScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'attack-paths'}
-		<AttackPathForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		<AttackPathForm
+			{form}
+			{model}
+			{cacheLocks}
+			{formDataCache}
+			{initialData}
+			{additionalInitialData}
+		/>
 	{:else if URLModel === 'operational-scenarios'}
 		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{/if}
