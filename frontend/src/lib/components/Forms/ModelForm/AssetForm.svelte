@@ -104,6 +104,7 @@
 	{form}
 	optionsEndpoint="assets"
 	optionsLabelField="auto"
+	optionsSelf={object}
 	field="parent_assets"
 	cacheLock={cacheLocks['parent_assets']}
 	bind:cachedValue={formDataCache['parent_assets']}
