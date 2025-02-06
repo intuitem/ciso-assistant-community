@@ -140,7 +140,7 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 
 const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.compliance_assessment?.name,
+	getColumn: (row) => row.compliance_assessment?.str,
 	extraProps: {
 		defaultOptionName: 'complianceAssessment'
 	}
@@ -646,14 +646,13 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'requirement-assessments': {
-		head: ['name', 'description', 'complianceAssessment', 'result'],
-		body: ['name', 'description', 'compliance_assessment', 'result'],
+		head: ['name', 'description', 'complianceAssessment', 'result', 'folder'],
+		body: ['name', 'description', 'compliance_assessment', 'result', 'folder'],
 		breadcrumb_link_disabled: true,
 		filters: {
+			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
 			result: REQUIREMENT_RESULT_FILTER,
-			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true },
-			perimeter: { ...PERIMETER_FILTER, alwaysDisplay: true },
-			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER
+			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true }
 		}
 	},
 	evidences: {
