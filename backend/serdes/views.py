@@ -155,7 +155,7 @@ class LoadBackupView(APIView):
         backup_version = [int(num) for num in backup_version.lstrip("v").split(".")]
         current_version = [int(num) for num in current_version.lstrip("v").split(".")]
         # All versions are composed of 3 numbers (see git tag)
-        for i in range(3):
+        for i in range(2):  # check only major and minor version
             if backup_version[i] > current_version[i]:
                 logger.error(
                     "Backup version greater than current version",

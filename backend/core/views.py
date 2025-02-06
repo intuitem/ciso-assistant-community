@@ -2273,9 +2273,8 @@ class FolderViewSet(BaseModelViewSet):
                     backup_version=import_version,
                     current_version=VERSION,
                 )
-                return Response(
-                    {"error": "errorBackupInvalidVersion"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                raise ValidationError(
+                    {"file": "errorBackupInvalidVersion"},
                 )
 
             import_version = match.group()
@@ -2289,19 +2288,16 @@ class FolderViewSet(BaseModelViewSet):
                 int(num) for num in current_version.lstrip("v").split(".")
             ]
             # All versions are composed of 3 numbers (see git tag)
-            for i in range(3):
+            for i in range(2):  # check only major and minor version
                 if import_version[i] > current_version[i]:
                     logger.error(
                         "Backup version greater than current version",
                         version=import_version,
                     )
                     # Refuse to import the backup and ask to update the instance before importing the backup
-                    return Response(
-                        {"error": "GreaterBackupVersion"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
+                    raise ValidationError({"file": "GreaterBackupVersion"})
 
-            if not import_version == current_version:
+            if import_version[:2] != current_version[:2]:
                 logger.error(
                     f"Import version {import_version} not compatible with current version {current_version}"
                 )
