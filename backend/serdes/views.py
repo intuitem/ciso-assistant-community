@@ -9,11 +9,13 @@ from django.core import management
 from django.core.management.commands import dumpdata, loaddata
 from django.http import HttpResponse
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ciso_assistant.settings import VERSION, SQLITE_FILE
+from core.utils import compare_versions
 from serdes.serializers import LoadBackupSerializer
 
 import structlog
@@ -130,42 +132,23 @@ class LoadBackupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if backup_version.lower() == "dev":
-            backup_version = "v0.0.0"
-
-        VERSION_REGEX = r"^v[0-9]+\.[0-9]+\.[0-9]+"
-        match = re.match(VERSION_REGEX, backup_version)
-        if match is None:
-            logger.error(
-                "Backup malformed: invalid version",
-                backup_version=backup_version,
-                current_version=VERSION,
-            )
-            return Response(
-                {"error": "errorBackupInvalidVersion"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        backup_version = match.group()
         current_version = VERSION.split("-")[0]
 
-        if current_version.lower() == "dev":
-            current_version = "v0.0.0"
-
-        backup_version = [int(num) for num in backup_version.lstrip("v").split(".")]
-        current_version = [int(num) for num in current_version.lstrip("v").split(".")]
-        # All versions are composed of 3 numbers (see git tag)
-        for i in range(2):  # check only major and minor version
-            if backup_version[i] > current_version[i]:
-                logger.error(
-                    "Backup version greater than current version",
-                    version=backup_version,
-                )
-                # Refuse to import the backup and ask to update the instance before importing the backup
-                return Response(
-                    {"error": "GreaterBackupVersion"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        # Compare backup and current versions at the 'minor' level
+        cmp_minor = compare_versions(backup_version, current_version, level="minor")
+        if cmp_minor == 1:
+            logger.error(
+                "Backup version greater than current version",
+                version=backup_version,
+            )
+            raise ValidationError({"file": "GreaterBackupVersion"})
+        elif cmp_minor != 0:
+            logger.error(
+                f"backup version {backup_version} not compatible with current version {current_version}"
+            )
+            raise ValidationError(
+                {"file": "backupVersionNotCompatibleWithCurrentVersion"}
+            )
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(

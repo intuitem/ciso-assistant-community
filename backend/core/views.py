@@ -78,7 +78,7 @@ from core.models import (
     RiskAssessment,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
-from core.utils import RoleCodename, UserGroupCodename
+from core.utils import RoleCodename, UserGroupCodename, compare_versions
 
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -2265,45 +2265,24 @@ class FolderViewSet(BaseModelViewSet):
 
             # Check backup and local version
 
-            VERSION_REGEX = r"^v[0-9]+\.[0-9]+\.[0-9]+"
-            match = re.match(VERSION_REGEX, import_version)
-            if match is None:
-                logger.error(
-                    "Backup malformed: invalid version",
-                    backup_version=import_version,
-                    current_version=VERSION,
-                )
-                raise ValidationError(
-                    {"file": "errorBackupInvalidVersion"},
-                )
-
-            import_version = match.group()
             current_version = VERSION.split("-")[0]
 
-            if current_version.lower() == "dev":
-                current_version = "v0.0.0"
-
-            import_version = [int(num) for num in import_version.lstrip("v").split(".")]
-            current_version = [
-                int(num) for num in current_version.lstrip("v").split(".")
-            ]
-            # All versions are composed of 3 numbers (see git tag)
-            for i in range(2):  # check only major and minor version
-                if import_version[i] > current_version[i]:
-                    logger.error(
-                        "Backup version greater than current version",
-                        version=import_version,
-                    )
-                    # Refuse to import the backup and ask to update the instance before importing the backup
-                    raise ValidationError({"file": "GreaterBackupVersion"})
-
-            if import_version[:2] != current_version[:2]:
+            # Compare backup and current versions at the 'minor' level
+            cmp_minor = compare_versions(import_version, current_version, level="minor")
+            if cmp_minor == 1:
+                logger.error(
+                    "Backup version greater than current version",
+                    version=import_version,
+                )
+                raise ValidationError({"file": "GreaterBackupVersion"})
+            elif cmp_minor != 0:
                 logger.error(
                     f"Import version {import_version} not compatible with current version {current_version}"
                 )
                 raise ValidationError(
                     {"file": "importVersionNotCompatibleWithCurrentVersion"}
                 )
+
             if "attachments" in directories:
                 attachments = {
                     f for f in infolist if Path(f.filename).parent.name == "attachments"

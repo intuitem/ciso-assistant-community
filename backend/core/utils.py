@@ -1,7 +1,9 @@
+from typing import Literal
 from django.utils.translation import gettext_lazy as _
 from re import sub
 from enum import Enum
 import hashlib
+import re
 
 
 def camel_case(s):
@@ -78,3 +80,78 @@ LANGUAGES = {
     "fr": _("French"),
     "en": _("English"),
 }
+
+
+class VersionFormatError(Exception):
+    """Raised when a version string is not properly formatted."""
+
+    pass
+
+
+def parse_version(version: str) -> list[int]:
+    """
+    Parses a version string that starts with 'v' and contains dot-separated numbers.
+    Accepts strings like 'v1', 'v1.2', or 'v1.2.3'.
+    """
+    if not version.startswith("v"):
+        raise VersionFormatError(f"Version must start with 'v': {version}")
+    # Remove leading 'v' and split on dots
+    parts = version.lstrip("v").split(".")
+    try:
+        return [int(part) for part in parts]
+    except ValueError:
+        raise VersionFormatError(f"Non-numeric version component in {version}")
+
+
+def compare_versions(
+    version_a: str, version_b: str, level: Literal["major", "minor", "patch"] = "patch"
+) -> int:
+    """
+    Compares two version strings at the specified level of granularity.
+
+    Parameters:
+        version_a (str): A version string (e.g., 'v1.2.3' or 'v1.2').
+        version_b (str): Another version string.
+        level (str): Granularity to compare: 'major' (only the first component),
+                     'minor' (first two components), or 'patch' (all three components).
+                     For example, comparing 'v1.2' with 'v1.2.0' at level='minor' will be equal.
+
+    Returns:
+        int: -1 if version_a is lower than version_b;
+             0 if they are equal (up to the specified level);
+             1 if version_a is greater than version_b.
+
+    Raises:
+        VersionFormatError: if either version string is not formatted correctly.
+        ValueError: if an invalid level is specified.
+
+    Example:
+        >>> compare_versions("v1.2", "v1.2.0", level="minor")
+        0
+        >>> compare_versions("v1.2.1", "v1.2.0", level="patch")
+        1
+        >>> compare_versions("v2", "v1.9.9", level="major")
+        1
+    """
+    level_to_parts = {"major": 1, "minor": 2, "patch": 3}
+    if level not in level_to_parts:
+        raise ValueError(
+            "Invalid level specified; choose 'major', 'minor', or 'patch'."
+        )
+    parts_to_check = level_to_parts[level]
+
+    va = parse_version(version_a)
+    vb = parse_version(version_b)
+
+    # Pad with zeros if necessary
+    while len(va) < parts_to_check:
+        va.append(0)
+    while len(vb) < parts_to_check:
+        vb.append(0)
+
+    # Compare component-wise using tuple comparison
+    if tuple(va[:parts_to_check]) < tuple(vb[:parts_to_check]):
+        return -1
+    elif tuple(va[:parts_to_check]) > tuple(vb[:parts_to_check]):
+        return 1
+    return 0
