@@ -180,7 +180,7 @@
 	}
 
 	function getNestedValue(obj: any, path: string, field = '') {
-		if (field) return obj[path][field];
+		if (field) return obj[path]?.[field];
 		return path.split('.').reduce((o, p) => (o || {})[p], obj);
 	}
 
