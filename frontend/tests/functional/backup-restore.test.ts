@@ -1,8 +1,11 @@
-import { expect, setHttpResponsesListener, test } from '../utils/test-utils.js';
+import { expect, test } from '../utils/test-utils.js';
+import { promisify } from 'node:util';
+import { gunzip } from 'node:zlib';
+
+const gunzipAsync = promisify(gunzip);
 
 test('Database export should generate valid backup file', async ({ logedPage, page }) => {
-	await page.waitForTimeout(1000);
-
+	await page.waitForLoadState('networkidle');
 	const modalBackdrop = page.getByTestId('modal-backdrop');
 
 	await test.step('Dismiss any blocking modals', async () => {
@@ -40,12 +43,31 @@ test('Database export should generate valid backup file', async ({ logedPage, pa
 
 		await test.step('Verify file contents', async () => {
 			const stream = await download.createReadStream();
-			const content: string = await new Promise((resolve) => {
-				let data = '';
-				stream?.on('data', (chunk) => (data += chunk));
-				stream?.on('end', () => resolve(data));
-			});
-			expect(content.length).toBeGreaterThan(0);
+			if (!stream) {
+				throw new Error('Failed to obtain download stream');
+			}
+			// Collect chunks from the stream into a buffer
+			const chunks: Buffer[] = [];
+			for await (const chunk of stream) {
+				chunks.push(chunk as Buffer);
+			}
+			const buffer = Buffer.concat(chunks);
+			expect(buffer.length).toBeGreaterThan(0);
+
+			// Decompress the gzip content to extract the JSON file
+			const decompressedBuffer = await gunzipAsync(buffer);
+			const jsonString = decompressedBuffer.toString('utf-8');
+			expect(jsonString.length).toBeGreaterThan(0);
+
+			// Parse the JSON and assert that it is valid.
+			let jsonData;
+			try {
+				jsonData = JSON.parse(jsonString);
+			} catch (error) {
+				throw new Error('Decompressed content is not valid JSON');
+			}
+			expect(jsonData).toBeDefined();
+			// expect(jsonData).toHaveProperty('meta');
 		});
 
 		await test.step('Save downloaded file', async () => {
@@ -60,10 +82,8 @@ test('Database export should generate valid backup file', async ({ logedPage, pa
 			await page.getByTestId('delete-prompt-confirm-textfield').fill('yes');
 			await page.getByRole('button', { name: 'Submit' }).click();
 
-			await page.waitForTimeout(1000);
-
 			// Sessions are not preserved after importing the backup
-			await expect(page).toHaveURL('/login');
+			await expect(page).toHaveURL('/login?next=/backup-restore', { timeout: 5000 });
 		});
 	});
 });
