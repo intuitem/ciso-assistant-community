@@ -1091,7 +1091,7 @@ class QualificationWriteSerializer(QualificationReadSerializer):
 
 class ExceptionWriteSerializer(BaseModelSerializer):
     requirement_assessments = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=RequirementAssessment.objects.all()
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
 
     class Meta:
