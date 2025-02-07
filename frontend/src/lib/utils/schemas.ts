@@ -488,6 +488,16 @@ export const operationalScenarioSchema = z.object({
 	justification: z.string().optional()
 });
 
+export const ExceptionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	owners: z.array(z.string().optional()).optional(),
+	severity: z.number().default(-1).optional(),
+	status: z.string().optional(),
+	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -520,7 +530,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	stakeholders: StakeholderSchema,
 	'strategic-scenarios': StrategicScenarioSchema,
 	'attack-paths': AttackPathSchema,
-	'operational-scenarios': operationalScenarioSchema
+	'operational-scenarios': operationalScenarioSchema,
+	exceptions: ExceptionSchema,
 };
 
 export const modelSchema = (model: string) => {

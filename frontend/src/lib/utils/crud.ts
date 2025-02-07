@@ -745,6 +745,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
+	},
+	exceptions: {
+		name: 'exception',
+		localName: 'exception',
+		localNamePlural: 'exceptions',
+		verboseName: 'Exception',
+		verboseNamePlural: 'Exceptions',
+		foreignKeyFields: [
+			{ field: 'owners', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' },
+		],
+		selectFields: [{ field: 'severity', valueType: 'number' }, {field: 'status'}]
 	}
 };
 

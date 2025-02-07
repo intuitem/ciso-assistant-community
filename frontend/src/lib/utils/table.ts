@@ -788,5 +788,9 @@ export const listViewFields: ListViewFieldsConfig = {
 			likelihood: LIKELIHOOD_FILTER,
 			is_selected: IS_SELECTED_FILTER
 		}
+	},
+	exceptions: {
+		head: ['ref_id', 'name', 'severity', 'status', "expiration_date"],
+		body: ['ref_id', 'name', 'severity', 'status', "expiration_date"],
 	}
 };

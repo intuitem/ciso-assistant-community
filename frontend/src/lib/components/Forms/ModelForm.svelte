@@ -31,6 +31,7 @@
 	import RoToForm from './ModelForm/RoToForm.svelte';
 	import StakeholderForm from './ModelForm/StakeholderForm.svelte';
 	import AttackPathForm from './ModelForm/AttackPathForm.svelte';
+	import ExceptionForm from './ModelForm/ExceptionForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -279,6 +280,8 @@
 		<AttackPathForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'operational-scenarios'}
 		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'exceptions'}
+		<ExceptionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
