@@ -14,7 +14,7 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ciso_assistant.settings import VERSION, SQLITE_FILE
+from ciso_assistant.settings import VERSION, SQLITE_FILE, SCHEMA_VERSION
 from core.utils import compare_versions
 from serdes.serializers import LoadBackupSerializer
 
@@ -36,7 +36,9 @@ class ExportBackupView(APIView):
         )
 
         buffer = io.StringIO()
-        buffer.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
+        buffer.write(
+            f'[{{"meta": [{{"media_version": "{VERSION}", "schema_version": "{SCHEMA_VERSION}"}}]}},\n'
+        )
         # Here we dump th data to stdout
         # NOTE: We will not be able to dump selected folders with this method.
         management.call_command(
@@ -119,10 +121,14 @@ class LoadBackupView(APIView):
         metadata, decompressed_data = full_decompressed_data
         metadata = metadata["meta"]
 
+        current_version = VERSION.split("-")[0]
         backup_version = None
+        schema_version = 0
+
         for metadata_part in metadata:
             backup_version = metadata_part.get("media_version")
-            if backup_version is not None:
+            schema_version = metadata_part.get("schema_version")
+            if backup_version is not None or schema_version is not None:
                 break
 
         if backup_version is None:
@@ -132,23 +138,40 @@ class LoadBackupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        current_version = VERSION.split("-")[0]
+        if schema_version is not None:
+            logger.info(
+                "Schema version found in backup",
+                backup_schema_version=schema_version,
+            )
+            if int(schema_version) != int(SCHEMA_VERSION):
+                logger.error(
+                    "Backup schema version greater than current schena version",
+                    backup_schema_version=schema_version,
+                    ciso_assistant_schema_version=SCHEMA_VERSION,
+                )
+                raise ValidationError({"error": "backupGreaterVersionError"})
+            logger.info("Schema version in backup matches current schema version")
+        else:
+            logger.info(
+                "Schema version not found in backup, using version instead",
+                import_version=backup_version,
+            )
 
-        # Compare backup and current versions at the 'minor' level
-        cmp_minor = compare_versions(backup_version, current_version, level="minor")
-        if cmp_minor == 1:
-            logger.error(
-                "Backup version greater than current version",
-                version=backup_version,
-            )
-            raise ValidationError({"error": "GreaterBackupVersion"})
-        elif cmp_minor != 0:
-            logger.error(
-                f"backup version {backup_version} not compatible with current version {current_version}"
-            )
-            raise ValidationError(
-                {"error": "backupVersionNotCompatibleWithCurrentVersion"}
-            )
+            # Compare backup and current versions at the 'minor' level
+            cmp_minor = compare_versions(backup_version, current_version, level="minor")
+            if cmp_minor == 1:
+                logger.error(
+                    "Backup version greater than current version",
+                    version=backup_version,
+                )
+                raise ValidationError({"error": "GreaterBackupVersion"})
+            elif cmp_minor != 0:
+                logger.error(
+                    f"backup version {backup_version} not compatible with current version {current_version}"
+                )
+                raise ValidationError(
+                    {"error": "backupVersionNotCompatibleWithCurrentVersion"}
+                )
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(
