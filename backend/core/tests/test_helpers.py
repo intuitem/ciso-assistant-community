@@ -38,17 +38,17 @@ def test_get_rating_options_perm_to_view_matrix():
         builtin=False,
         parent_folder=Folder.objects.get(content_type=Folder.ContentType.ROOT),
     )
-    project = Project.objects.create(name="test", folder=folder)
+    perimeter = Perimeter.objects.create(name="test", folder=folder)
     risk_assessment = RiskAssessment.objects.create(
         name="test",
-        project=project,
+        perimeter=perimeter,
         risk_matrix=RiskMatrix.objects.latest("created_at"),
     )
     RiskScenario.objects.create(name="test", risk_assessment=risk_assessment)
     role = Role.objects.create(name="test")
     reader_permissions = Permission.objects.filter(
         codename__in=[
-            "view_project",
+            "view_perimeter",
             "view_riskassessment",
             "view_appliedcontrol",
             "view_riskscenario",
@@ -103,17 +103,17 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
         builtin=False,
         parent_folder=Folder.objects.get(content_type=Folder.ContentType.ROOT),
     )
-    project = Project.objects.create(name="test", folder=folder)
+    perimeter = Perimeter.objects.create(name="test", folder=folder)
     risk_assessment = RiskAssessment.objects.create(
         name="test",
-        project=project,
+        perimeter=perimeter,
         risk_matrix=RiskMatrix.objects.latest("created_at"),
     )
     RiskScenario.objects.create(name="test", risk_assessment=risk_assessment)
     role = Role.objects.create(name="test")
     reader_permissions = Permission.objects.filter(
         codename__in=[
-            "view_project",
+            "view_perimeter",
             "view_riskassessment",
             "view_appliedcontrol",
             "view_riskscenario",

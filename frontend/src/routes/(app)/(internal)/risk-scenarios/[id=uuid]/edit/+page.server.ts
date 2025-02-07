@@ -136,7 +136,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const measureCreateSchema = modelSchema('applied-controls');
 	const initialData = {
-		folder: scenario.project.folder.id
+		folder: scenario.perimeter.folder.id
 	};
 	const measureCreateForm = await superValidate(initialData, zod(measureCreateSchema), {
 		errors: false
@@ -265,6 +265,6 @@ export const actions: Actions = {
 			},
 			event
 		);
-		return { form };
+		return { form, newControl: { field, appliedControl: measure.id } };
 	}
 };

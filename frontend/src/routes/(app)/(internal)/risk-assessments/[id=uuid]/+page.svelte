@@ -109,7 +109,7 @@
 		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{risk_assessment.project.str}/{risk_assessment.name} - {risk_assessment.version}
+					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
 				</div>
 				<br />
 				<div class="text-sm">
@@ -265,6 +265,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
@@ -276,6 +277,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}

@@ -19,7 +19,7 @@ export const navData = {
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics',
 					permissions: [
-						'view_project',
+						'view_perimeter',
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
@@ -31,7 +31,7 @@ export const navData = {
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
 					permissions: [
-						'view_project',
+						'view_perimeter',
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
@@ -50,9 +50,9 @@ export const navData = {
 					exclude: ['BI-RL-TPR']
 				},
 				{
-					name: 'projects',
+					name: 'perimeters',
 					fa_icon: 'fa-solid fa-cubes',
-					href: '/projects'
+					href: '/perimeters'
 				},
 				{
 					name: 'users',

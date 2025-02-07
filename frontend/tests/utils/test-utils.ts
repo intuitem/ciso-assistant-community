@@ -21,7 +21,7 @@ type Fixtures = {
 	foldersPage: PageContent;
 	frameworksPage: PageContent;
 	librariesPage: PageContent;
-	projectsPage: PageContent;
+	perimetersPage: PageContent;
 	riskAcceptancesPage: PageContent;
 	riskAssessmentsPage: PageContent;
 	riskMatricesPage: PageContent;
@@ -59,7 +59,7 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
-			projectsPage,
+			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
 			riskMatricesPage,
@@ -78,7 +78,7 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
-			projectsPage,
+			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
 			riskMatricesPage,
@@ -98,12 +98,12 @@ export const test = base.extend<Fixtures>({
 		const aPage = new PageContent(page, '/compliance-assessments', 'Audits', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'version', type: type.TEXT },
-			{ name: 'status', type: type.SELECT },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			//{ name: 'version', type: type.TEXT },
+			//{ name: 'status', type: type.SELECT },
 			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'eta', type: type.DATE },
-			{ name: 'due_date', type: type.DATE }
+			{ name: 'eta', type: type.DATE }
+			//{ name: 'due_date', type: type.DATE }
 		]);
 		await use(aPage);
 	},
@@ -145,8 +145,8 @@ export const test = base.extend<Fixtures>({
 		await use(lPage);
 	},
 
-	projectsPage: async ({ page }, use) => {
-		const pPage = new PageContent(page, '/projects', 'Projects', [
+	perimetersPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/perimeters', 'Perimeters', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
@@ -172,7 +172,7 @@ export const test = base.extend<Fixtures>({
 		const rPage = new PageContent(page, '/risk-assessments', 'Risk assessments', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'version', type: type.TEXT },
 			{ name: 'status', type: type.SELECT },
 			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
@@ -210,7 +210,7 @@ export const test = base.extend<Fixtures>({
 		const sPage = new PageContent(page, '/reference-controls', 'Reference controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'category', type: type.SELECT },
+			//{ name: 'category', type: type.SELECT },
 			// { name: 'csf_function', type: type.SELECT },
 			{ name: 'provider', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
@@ -222,14 +222,14 @@ export const test = base.extend<Fixtures>({
 		const sPage = new PageContent(page, '/applied-controls', 'Applied controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'category', type: type.SELECT },
-			{ name: 'csf_function', type: type.SELECT },
+			//{ name: 'category', type: type.SELECT },
+			//{ name: 'csf_function', type: type.SELECT },
 			{ name: 'status', type: type.SELECT },
 			{ name: 'eta', type: type.DATE },
-			{ name: 'expiry_date', type: type.DATE },
-			{ name: 'link', type: type.TEXT },
-			{ name: 'effort', type: type.SELECT },
-			{ name: 'cost', type: type.NUMBER },
+			//{ name: 'expiry_date', type: type.DATE },
+			//{ name: 'link', type: type.TEXT },
+			//{ name: 'effort', type: type.SELECT },
+			//{ name: 'cost', type: type.NUMBER },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
 		]);
@@ -368,10 +368,10 @@ export class TestContent {
 					is_active: false
 				}
 			},
-			projectsPage: {
-				displayName: 'Projects',
+			perimetersPage: {
+				displayName: 'Perimeters',
 				build: {
-					name: vars.projectName,
+					name: vars.perimeterName,
 					description: vars.description,
 					folder: vars.folderName,
 					ref_id: 'R.1234',
@@ -418,7 +418,7 @@ export class TestContent {
 				build: {
 					name: vars.referenceControlName,
 					description: vars.description,
-					category: 'Technical',
+					//category: 'Technical',
 					// csf_function: 'protect',
 					provider: 'Test provider',
 					folder: vars.folderName
@@ -426,7 +426,7 @@ export class TestContent {
 				editParams: {
 					name: '',
 					description: '',
-					category: 'Physical',
+					//category: 'Physical',
 					// csf_function: 'detect',
 					provider: ''
 				}
@@ -437,7 +437,7 @@ export class TestContent {
 				build: {
 					reference_control: {
 						value: 'Global/' + vars.referenceControl.name,
-						category: vars.referenceControl.category,
+						//category: vars.referenceControl.category,
 						// csf_function: vars.referenceControl.csf_function,
 						request: {
 							url: 'reference-controls'
@@ -446,18 +446,18 @@ export class TestContent {
 					name: vars.appliedControlName,
 					description: vars.description,
 					status: 'To do',
-					eta: '2025-01-01',
-					expiry_date: '2025-05-01',
-					link: 'https://intuitem.com/',
-					effort: 'Large',
-					folder: vars.folderName,
-					category: vars.referenceControl.category
+					//eta: '2025-01-01',
+					//expiry_date: '2025-05-01',
+					//link: 'https://intuitem.com/',
+					//effort: 'Large',
+					folder: vars.folderName
+					//category: vars.referenceControl.category
 					// csf_function: vars.referenceControl.csf_function
 				},
 				editParams: {
 					reference_control: {
 						value: 'Global/' + vars.referenceControl2.name,
-						category: vars.referenceControl2.category,
+						//category: vars.referenceControl2.category,
 						// csf_function: vars.referenceControl2.csf_function,
 						request: {
 							url: 'reference-controls'
@@ -465,12 +465,12 @@ export class TestContent {
 					},
 					name: '',
 					description: '',
-					status: 'Active',
-					eta: '2025-12-31',
-					expiry_date: '2026-02-25',
-					link: 'https://intuitem.com/community/',
-					effort: 'Medium',
-					category: vars.referenceControl2.category
+					status: 'Active'
+					//eta: '2025-12-31',
+					//expiry_date: '2026-02-25',
+					//link: 'https://intuitem.com/community/',
+					//effort: 'Medium',
+					//category: vars.referenceControl2.category
 					// csf_function: vars.referenceControl2.csf_function
 				}
 			},
@@ -481,8 +481,8 @@ export class TestContent {
 				build: {
 					name: vars.assessmentName,
 					description: vars.description,
-					project: vars.folderName + '/' + vars.projectName,
-					status: 'Planned',
+					perimeter: vars.folderName + '/' + vars.perimeterName,
+					// status: 'Planned',
 					// version: "1.4.2",
 					framework: vars.framework.name
 					// eta: "2025-01-01",
@@ -525,7 +525,7 @@ export class TestContent {
 					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					name: vars.riskAssessmentName,
 					description: vars.description,
-					project: vars.folderName + '/' + vars.projectName,
+					perimeter: vars.folderName + '/' + vars.perimeterName,
 					version: vars.riskAssessmentVersion,
 					status: 'Planned',
 					risk_matrix: vars.matrix.displayName
@@ -547,7 +547,7 @@ export class TestContent {
 				build: {
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+					risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					threats: ['Global/' + vars.threat.name, 'Global/' + vars.threat2.name]
 				},
 				editParams: {
@@ -574,7 +574,7 @@ export class TestContent {
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
 					risk_scenarios: [
-						`${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+						`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
 					]
 				},
 				editParams: {

@@ -277,7 +277,7 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 
 - Python 3.11+
 - pip 20.3+
-- poetry 1.8+
+- poetry 2.0+
 - node 18+
 - npm 10.2+
 - pnpm 9.0+
@@ -487,12 +487,13 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance <http://127.0.0.1:8000/api/schema/swagger/>
+- The API is available only on dev mode. To get that, you need to switch on the backend, for instance, `export DJANGO_DEBUG=True`
+- The API documentation will be available on `<backend_endpoint>/api/schema/swagger/`, for instance <http://127.0.0.1:8000/api/schema/swagger/>
 
 To interact with it:
 
 - call `/api/iam/login/` with your credentials in the body to get the token
-- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's Token not Bearer.
+- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's `Token` not `Bearer`.
 
 ## Setting CISO Assistant for production
 
@@ -527,7 +528,7 @@ Set DJANGO_DEBUG=False for security reason.
 ## Contributors 🤝
 
 <a href="https://github.com/intuitem/ciso-assistant-community/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=intuitem/ciso-assistant-community" />
+  <img src="https://contrib.rocks/image?repo=intuitem/ciso-assistant-community&columns=9" />
 </a>
 
 ## Built With 💜

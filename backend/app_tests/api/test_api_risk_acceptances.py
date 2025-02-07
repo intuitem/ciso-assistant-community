@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from core.models import User
 from core.models import (
-    Project,
+    Perimeter,
     RiskAcceptance,
     RiskScenario,
     RiskMatrix,
@@ -139,7 +139,7 @@ class TestRiskAcceptanceAuthenticated:
             description="test description",
             risk_assessment=RiskAssessment.objects.create(
                 name="test",
-                project=Project.objects.create(name="test", folder=test.folder),
+                perimeter=Perimeter.objects.create(name="test", folder=test.folder),
                 risk_matrix=RiskMatrix.objects.create(name="test", folder=test.folder),
             ),
         )
@@ -191,7 +191,7 @@ class TestRiskAcceptanceAuthenticated:
             description="test description",
             risk_assessment=RiskAssessment.objects.create(
                 name="test",
-                project=Project.objects.create(name="test", folder=folder),
+                perimeter=Perimeter.objects.create(name="test", folder=folder),
                 risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
             ),
         )
