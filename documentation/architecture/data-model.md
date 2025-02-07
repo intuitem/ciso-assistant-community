@@ -149,6 +149,7 @@ erDiagram
     EXCEPTION                    }o--o{ ASSET                 : concerns
     EXCEPTION                    }o--o{ RISK_SCENARIO         : concerns
     EXCEPTION                    }o--o{ APPLIED_CONTROL       : concerns
+    APPLIED_CONTROL              }o--o{ EXCEPTION             : mitigates
 
     FRAMEWORK {
         string  urn
@@ -280,6 +281,7 @@ erDiagram
         string  name
         string  description
         string  status
+        string  approver
         int     severity
         date    expiration
     }
@@ -805,14 +807,22 @@ Once a risk acceptance is active, the correponding risk assessments are frozen. 
 Exceptions are used to trace assumed non-compliances, whether for assets, requirement assessments, risk scenarios, applied controls, vulnerabilities, or even something not linked to an existing object.
 
 Exceptions can have zero, one or several owners.
+Exceptions can have zero, or one approver.
+
+Exceptions can be mitigated by applied controls.
 
 Exceptions also have the following fields:
 - ref_id (defaults to empty string)
 - name
 - description
 - severity within values --/low/medium/high/critical (coded as an integer from -1 to 3)
-- status within values --/active/mitigated/resolved/deprecated
+- status within values draft/in_review/approved/resolved/expired/deprecated
 - expiration date
+- approver
+
+Exceptions are located in the governance menu.
+
+The performance of the UX shall be optimized, by avoiding to preload all possible targets for the exception.
 
 
 ## Libraries
