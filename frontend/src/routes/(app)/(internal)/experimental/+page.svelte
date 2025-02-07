@@ -25,9 +25,9 @@
 		tags={['analysis', 'tprm']}
 	/>
 	<Article
-		title="Unitary requirements assessments"
-		desc="Table view for requirements assessments"
+		title="Individual requirements assessments"
+		desc="Requirements assessments"
 		link="requirement-assessments/"
-		tags={['analysis', 'tprm']}
+		tags={['analysis', 'audit']}
 	/>
 </div>

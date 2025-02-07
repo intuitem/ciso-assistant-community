@@ -956,6 +956,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             ]
 
     name = serializers.CharField(source="__str__")
+    ref_id = serializers.CharField(source="requirement.ref_id")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()

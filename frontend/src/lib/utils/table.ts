@@ -654,8 +654,24 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'requirement-assessments': {
-		head: ['assessable', 'name', 'description', 'complianceAssessment', 'result', 'folder'],
-		body: ['assessable', 'name', 'description', 'compliance_assessment', 'result', 'folder'],
+		head: [
+			'complianceAssessment',
+			'ref_id',
+			'name',
+			'description',
+			'result',
+			'folder',
+			'assessable'
+		],
+		body: [
+			'compliance_assessment',
+			'ref_id',
+			'name',
+			'description',
+			'result',
+			'folder',
+			'assessable'
+		],
 		breadcrumb_link_disabled: true,
 		filters: {
 			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
