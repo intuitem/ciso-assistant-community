@@ -6,7 +6,6 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
-from rest_framework.renderers import status
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -1394,6 +1393,47 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
+class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    class Severity(models.IntegerChoices):
+        UNDEFINED = -1, "undefined"
+        LOW = 0, "low"
+        MEDIUM = 1, "medium"
+        HIGH = 2, "high"
+        CRITICAL = 3, "critical"
+    
+    class Status(models.TextChoices):
+        UNDEFINED = "undefined", "undefined"
+        ACTIVE = "active", "active"
+        MITIGATED = "mitigated", "mitigated"
+        RESOLVED = "resolved", "resolved"
+        DEPRECATED = "deprecated", "deprecated"
+        
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
+    severity = models.SmallIntegerField(
+        verbose_name="Severity",
+        choices=Severity.choices,
+        default=Severity.UNDEFINED
+    )
+    status = models.CharField(
+        verbose_name="Status",
+        choices=Status.choices,
+        default=Status.UNDEFINED
+    )
+    expiration_date = models.DateField(
+        help_text="Specify when the exception will no longer apply",
+        null=True,
+        verbose_name="Expiration date",
+    )
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name="Owner",
+        related_name="exceptions",
+    )
+
+
 class Asset(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
@@ -1517,6 +1557,13 @@ class Asset(
         verbose_name=_("Owner"),
         related_name="assets",
     )
+    exceptions = models.ManyToManyField(
+        Exception,
+        blank=True,
+        verbose_name="Exceptions",
+        related_name="assets",
+    )
+    
     fields_to_check = ["name"]
 
     class Meta:
@@ -1853,7 +1900,6 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         help_text=_("Cost of the measure (using globally-chosen currency)"),
         verbose_name=_("Cost"),
     )
-
     progress_field = models.IntegerField(
         default=0,
         verbose_name=_("Progress Field"),
@@ -1861,6 +1907,12 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             MinValueValidator(0, message="Progress cannot be less than 0"),
             MaxValueValidator(100, message="Progress cannot be more than 100"),
         ],
+    )
+    exceptions = models.ManyToManyField(
+        Exception,
+        blank=True,
+        verbose_name="Exceptions",
+        related_name="applied_controls",
     )
 
     fields_to_check = ["name"]
@@ -2005,6 +2057,12 @@ class Vulnerability(
         AppliedControl,
         blank=True,
         verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
+    exceptions = models.ManyToManyField(
+        Exception,
+        blank=True,
+        verbose_name="Exceptions",
         related_name="vulnerabilities",
     )
 
@@ -2590,6 +2648,12 @@ class RiskScenario(NameDescriptionMixin):
     )
     justification = models.CharField(
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
+    )
+    exceptions = models.ManyToManyField(
+        Exception,
+        blank=True,
+        verbose_name="Exceptions",
+        related_name="risk_scenarios",
     )
 
     fields_to_check = ["name"]
@@ -3366,6 +3430,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         blank=True,
         null=True,
         verbose_name=_("Answer"),
+    )
+    exceptions = models.ManyToManyField(
+        Exception,
+        blank=True,
+        verbose_name="Exceptions",
+        related_name="requirement_assessments",
     )
 
     def __str__(self) -> str:

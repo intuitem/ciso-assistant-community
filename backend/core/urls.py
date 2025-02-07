@@ -71,6 +71,11 @@ router.register(
     QualificationViewSet,
     basename="qualifications",
 )
+router.register(
+    r"exceptions",
+    ExceptionViewSet,
+    basename="exceptions",
+)
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()

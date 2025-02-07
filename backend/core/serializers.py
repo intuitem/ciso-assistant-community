@@ -1082,3 +1082,13 @@ class QualificationReadSerializer(ReferentialSerializer):
 
 class QualificationWriteSerializer(QualificationReadSerializer):
     pass
+
+
+class ExceptionWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Exception
+        fields = "__all__"
+
+
+class ExceptionReadSerializer(ExceptionWriteSerializer):
+    folder = FieldsRelatedField()

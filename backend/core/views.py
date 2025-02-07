@@ -4151,3 +4151,19 @@ def export_mp_csv(request):
         writer.writerow(row)
 
     return response
+
+
+class ExceptionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows exceptions to be viewed or edited.
+    """
+    
+    model = Exception
+    
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Exception.Severity.choices))
+    
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Exception.Status.choices))
