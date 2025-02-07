@@ -94,6 +94,8 @@ jobs:
           echo EMAIL_HOST_USER=user@tests.com >> .env
           echo EMAIL_HOST_PASSWORD=password >> .env
           echo EMAIL_PORT=1025 >> .env
+          echo CISO_ASSISTANT_VERSION=$(git describe --tags --always) >> .env
+          echo CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD) >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
