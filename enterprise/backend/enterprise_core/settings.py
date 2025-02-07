@@ -11,7 +11,6 @@ else it is sqlite, and no env variable is required
 
 from pathlib import Path
 import os
-import json
 from dotenv import load_dotenv
 from datetime import timedelta
 import logging.config
