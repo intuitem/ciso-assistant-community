@@ -1150,5 +1150,9 @@
 	"progressField": "Progrès",
 	"recap": "Recap",
 	"sectionMoved": "Section déplacée ici",
-	"more": "Plus"
+	"more": "Plus",
+	"exception": "Exception",
+	"exceptions": "Exceptions",
+	"addException": "Ajouter une exception",
+	"expirationDate": "Date d'expiration"
 }
