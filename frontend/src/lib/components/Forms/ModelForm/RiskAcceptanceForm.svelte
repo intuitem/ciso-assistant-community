@@ -51,6 +51,7 @@
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
+	nullable={true}
 	label={m.approver()}
 	helpText={m.approverHelpText()}
 />
@@ -59,7 +60,7 @@
 	options={getOptions({
 		objects: model.foreignKeys['risk_scenarios'],
 		extra_fields: [
-			['project', 'str'],
+			['perimeter', 'str'],
 			['risk_assessment', 'str']
 		]
 	})}

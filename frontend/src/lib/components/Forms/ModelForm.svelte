@@ -6,7 +6,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
-	import ProjectForm from './ModelForm/ProjectForm.svelte';
+	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
@@ -187,8 +187,8 @@
 			data-focusindex="1"
 		/>
 	{/if}
-	{#if URLModel === 'projects'}
-		<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+	{#if URLModel === 'perimeters'}
+		<PerimeterForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'folders' || URLModel === 'folders-import'}
 		<FolderForm {form} {importFolder} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'risk-assessments'}
@@ -295,7 +295,9 @@
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
 				type="submit"
-				on:click={(event) => {
+				on:click={async (event) => {
+					const result = await form.validateForm(data);
+					if (result.valid) parent.onConfirm(event);
 					createModalCache.deleteCache(model.urlModel);
 				}}>{m.save()}</button
 			>

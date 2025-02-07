@@ -12,7 +12,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, RegexValidator
+from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.db import models, transaction
 from django.db.models import Q
 from django.forms.models import model_to_dict
@@ -563,7 +563,7 @@ class LibraryUpdater:
                         ra = RequirementAssessment.objects.create(
                             compliance_assessment=compliance_assessment,
                             requirement=new_requirement_node,
-                            folder=compliance_assessment.project.folder,
+                            folder=compliance_assessment.perimeter.folder,
                             answer=transform_question_to_answer(
                                 new_requirement_node.question
                             )
@@ -596,7 +596,7 @@ class LibraryUpdater:
                                 if answer["answer"] not in question["question_choices"]:
                                     answer["answer"] = ""
 
-                        elif question_type != "text":
+                        elif question_type not in ["text", "date"]:
                             raise NotImplementedError(
                                 f"The question type '{question_type}' hasn't been implemented !"
                             )
@@ -906,8 +906,8 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return RiskAssessment.objects.filter(risk_matrix=self)
 
     @property
-    def projects(self) -> list:
-        return Project.objects.filter(riskassessment__risk_matrix=self).distinct()
+    def perimeters(self) -> list:
+        return Perimeter.objects.filter(riskassessment__risk_matrix=self).distinct()
 
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
@@ -1360,7 +1360,7 @@ class Qualification(ReferentialObjectMixin, I18nObjectMixin):
 ########################### Domain objects #########################
 
 
-class Project(NameDescriptionMixin, FolderMixin):
+class Perimeter(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("Undefined")),
         ("in_design", _("Design")),
@@ -1382,8 +1382,8 @@ class Project(NameDescriptionMixin, FolderMixin):
     fields_to_check = ["name"]
 
     class Meta:
-        verbose_name = _("Project")
-        verbose_name_plural = _("Projects")
+        verbose_name = _("Perimeter")
+        verbose_name_plural = _("Perimeters")
 
     def overall_compliance(self):
         compliance_assessments_list = [
@@ -1866,6 +1866,15 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         verbose_name=_("Cost"),
     )
 
+    progress_field = models.IntegerField(
+        default=0,
+        verbose_name=_("Progress Field"),
+        validators=[
+            MinValueValidator(0, message="Progress cannot be less than 0"),
+            MaxValueValidator(100, message="Progress cannot be more than 100"),
+        ],
+    )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -1877,6 +1886,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             self.category = self.reference_control.category
         if self.reference_control and self.csf_function is None:
             self.csf_function = self.reference_control.csf_function
+        if self.status == "active":
+            self.progress_field = 100
         super(AppliedControl, self).save(*args, **kwargs)
 
     @property
@@ -1888,8 +1899,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         return {scenario.risk_assessment for scenario in self.risk_scenarios}
 
     @property
-    def projects(self):
-        return {risk_assessment.project for risk_assessment in self.risk_assessments}
+    def perimeters(self):
+        return {risk_assessment.perimeter for risk_assessment in self.risk_assessments}
 
     def __str__(self):
         return self.name
@@ -2051,8 +2062,11 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, verbose_name=_("Project")
+    perimeter = models.ForeignKey(
+        Perimeter,
+        on_delete=models.CASCADE,
+        verbose_name=_("Perimeter"),
+        null=True,
     )
     version = models.CharField(
         max_length=100,
@@ -2091,7 +2105,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     def save(self, *args, **kwargs) -> None:
         if not self.folder or self.folder == Folder.get_root_folder():
-            self.folder = self.project.folder
+            self.folder = self.perimeter.folder
         return super().save(*args, **kwargs)
 
 
@@ -2152,7 +2166,7 @@ class RiskAssessment(Assessment):
 
     @property
     def path_display(self) -> str:
-        return f"{self.project.folder}/{self.project}/{self.name} - {self.version}"
+        return f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
 
     def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()
@@ -2608,10 +2622,10 @@ class RiskScenario(NameDescriptionMixin):
         candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
-    def parent_project(self):
-        return self.risk_assessment.project
+    def parent_perimeter(self):
+        return self.risk_assessment.perimeter
 
-    parent_project.short_description = _("Project")
+    parent_perimeter.short_description = _("Perimeter")
 
     def get_matrix(self):
         return self.risk_assessment.risk_matrix.parse_json_translated()
@@ -2712,7 +2726,7 @@ class RiskScenario(NameDescriptionMixin):
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
     def __str__(self):
-        return str(self.parent_project()) + _(": ") + str(self.name)
+        return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
     def save(self, *args, **kwargs):
         if self.current_proba >= 0 and self.current_impact >= 0:
@@ -3465,11 +3479,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
 class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     ACCEPTANCE_STATE = [
-        ("created", _("Created")),
-        ("submitted", _("Submitted")),
-        ("accepted", _("Accepted")),
-        ("rejected", _("Rejected")),
-        ("revoked", _("Revoked")),
+        ("created", "Created"),
+        ("submitted", "Submitted"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
+        ("revoked", "Revoked"),
     ]
 
     risk_scenarios = models.ManyToManyField(

@@ -9,6 +9,7 @@
 
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
+	export let matrixName; // used to differentiate bubbles tooltip names
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
 	const grid = parsedRiskMatrix.grid;
@@ -85,7 +86,7 @@
 					<Cell
 						{cell}
 						cellData={displayedData[i][j]}
-						popupTarget={'popupdata-' + i + '-' + j}
+						popupTarget={`popupdata-${matrixName}-${i}-${j}`}
 						{dataItemComponent}
 						{useBubbles}
 					/>

@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
-import type { Project } from '$lib/utils/types';
+import type { Perimeter } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 
 const REQUIREMENT_ASSESSMENT_STATUS = [
@@ -24,7 +24,7 @@ interface RequirementAssessmentDonutItem extends Omit<DonutItem, 'name'> {
 	percentage: string;
 }
 
-interface ProjectAnalytics extends Project {
+interface PerimeterAnalytics extends Perimeter {
 	overallCompliance: {
 		values: RequirementAssessmentDonutItem[];
 		total: number;
@@ -32,14 +32,14 @@ interface ProjectAnalytics extends Project {
 }
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-	const projects: ProjectAnalytics[] = await fetch(`${BASE_API_URL}/projects/`)
+	const perimeters: PerimeterAnalytics[] = await fetch(`${BASE_API_URL}/perimeters/`)
 		.then((res) => res.json())
-		.then(async (projects) => {
-			if (projects && Array.isArray(projects.results)) {
-				const projectPromises = projects.results.map(async (project) => {
+		.then(async (perimeters) => {
+			if (perimeters && Array.isArray(perimeters.results)) {
+				const perimeterPromises = perimeters.results.map(async (perimeter) => {
 					try {
 						const complianceAssessmentsResponse = await fetch(
-							`${BASE_API_URL}/compliance-assessments/?project=${project.id}`
+							`${BASE_API_URL}/compliance-assessments/?perimeter=${perimeter.id}`
 						);
 						const complianceAssessmentsData = await complianceAssessmentsResponse.json();
 
@@ -72,8 +72,8 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 							);
 
 							const updatedAssessments = await Promise.all(updatedAssessmentsPromises);
-							project.compliance_assessments = updatedAssessments;
-							return project;
+							perimeter.compliance_assessments = updatedAssessments;
+							return perimeter;
 						} else {
 							throw new Error('Compliance assessments results not found or not an array');
 						}
@@ -83,18 +83,18 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 					}
 				});
 
-				return Promise.all(projectPromises);
+				return Promise.all(perimeterPromises);
 			} else {
-				throw new Error('Projects results not found or not an array');
+				throw new Error('Perimeters results not found or not an array');
 			}
 		})
 		.catch((error) => {
-			console.error('Failed to load projects:', error);
+			console.error('Failed to load perimeters:', error);
 			return []; // Ensure always returning an array of Record<string, any>
 		});
 
-	if (projects) {
-		projects.forEach((project) => {
+	if (perimeters) {
+		perimeters.forEach((perimeter) => {
 			// Initialize an object to hold the aggregated donut data
 			const aggregatedDonutData: {
 				values: RequirementAssessmentDonutItem[];
@@ -104,8 +104,8 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 				total: 0
 			};
 
-			// Iterate through each compliance assessment of the project
-			project.compliance_assessments.forEach((compliance_assessment: Record<string, any>) => {
+			// Iterate through each compliance assessment of the perimeter
+			perimeter.compliance_assessments.forEach((compliance_assessment: Record<string, any>) => {
 				// Process the donut data of each assessment
 				compliance_assessment.donut.result.values.forEach(
 					(donutItem: RequirementAssessmentDonutItem) => {
@@ -132,13 +132,13 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 				percentage: totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : '0'
 			}));
 
-			// Assign the aggregated donut data to the project
-			project.overallCompliance = aggregatedDonutData;
+			// Assign the aggregated donut data to the perimeter
+			perimeter.overallCompliance = aggregatedDonutData;
 		});
 	}
 
 	return {
-		projects,
+		perimeters,
 		user: locals.user,
 		title: m.recap()
 	};
