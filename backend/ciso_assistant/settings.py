@@ -11,18 +11,26 @@ else it is sqlite, and no env variable is required
 
 from pathlib import Path
 import os
+import json
 from dotenv import load_dotenv
 from datetime import timedelta
 import logging.config
 import structlog
 from django.core.management.utils import get_random_secret_key
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".meta")
 
+
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
 BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
+
+META = {}
+with open(BASE_DIR / "ciso_assistant" / "meta.json") as f:
+    META = json.load(f)
+SCHEMA_VERSION = META.get("schema_version", "unset")
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
@@ -99,6 +107,7 @@ MODULES = {}
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
 logger.info("BUILD: %s", BUILD)
+logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 
 # TODO: multiple paths are explicit, it should use path join to be more generic
 
