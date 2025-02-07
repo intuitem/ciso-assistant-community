@@ -235,7 +235,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'exceptions', urlModel: 'exceptions'}
 		],
 		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
@@ -264,13 +265,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' },
-			{ field: 'progress_field' }
+			{ field: 'progress_field' },
+			{ field: 'exceptions', urlModel: 'exceptions'}
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'exceptions', urlModel: 'exceptions'}
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
@@ -339,7 +342,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'exceptions', urlModel: 'exceptions'}
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
@@ -391,7 +395,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' }
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
+			{ field: 'exceptions', urlModel: 'exceptions'}
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [
@@ -493,7 +498,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
+			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
+			{ field: 'exceptions', urlModel: 'exceptions'}
 		]
 	},
 	'stored-libraries': {

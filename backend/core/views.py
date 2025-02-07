@@ -4159,6 +4159,7 @@ class ExceptionViewSet(BaseModelViewSet):
     """
     
     model = Exception
+    filterset_fields = ["requirement_assessments", "risk_scenarios"]
     
     @action(detail=False, name="Get severity choices")
     def severity(self, request):

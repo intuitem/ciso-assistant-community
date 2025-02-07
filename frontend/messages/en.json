@@ -1157,6 +1157,7 @@
 	"sectionMoved": "Section moved here",
 	"more": "More",
 	"exception": "Exception",
+	"exceptions": "Exceptions",
 	"addException": "Add exception",
 	"expirationDate": "Expiration date"
 }

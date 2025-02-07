@@ -1432,6 +1432,11 @@ class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name="Owner",
         related_name="exceptions",
     )
+    
+    fields_to_check = ["name"]
+    
+    def __str__(self):
+        return self.name
 
 
 class Asset(

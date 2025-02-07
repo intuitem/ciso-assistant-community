@@ -99,6 +99,25 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalExceptionCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.exceptionCreateForm,
+				formAction: '?/createException',
+				model: data.exceptionModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + data.exceptionModel.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
 	let createAppliedControlsLoading = false;
 
 	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
@@ -183,6 +202,10 @@
 
 	$: if (form && form.newEvidence) {
 		$formStore.evidences.push(form.newEvidence);
+	}
+
+	$: if (form && form.newException) {
+		$formStore.exceptions.push(form.newException);
 	}
 </script>
 
@@ -354,7 +377,8 @@
 							>{m.appliedControls()}
 						</Tab>
 					{/if}
-					<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
+					<Tab bind:group={tabSet} name="evidences_tab" value={1}>{m.evidences()}</Tab>
+					<Tab bind:group={tabSet} name="exceptions_tab" value={2}>{m.exceptions()}</Tab>
 					<svelte:fragment slot="panel">
 						{#if tabSet === 0 && !$page.data.user.is_third_party}
 							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
@@ -444,6 +468,33 @@
 									URLModel="evidences"
 								/>
 							</div>
+						{/if}
+						{#if tabSet === 2 && !$page.data.user.is_third_party}
+						<div
+							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+						>
+							<span class="flex flex-row justify-end items-center">
+								<button
+									class="btn variant-filled-primary self-end"
+									on:click={modalExceptionCreateForm}
+									type="button"><i class="fa-solid fa-plus mr-2" />{m.addException()}</button
+								>
+							</span>
+							<AutocompleteSelect
+								multiple
+								{form}
+								options={getOptions({
+									objects: $page.data.model.foreignKeys['exceptions'],
+									extra_fields: [['folder', 'str']]
+								})}
+								field="exceptions"
+							/>
+							<ModelTable
+								source={$page.data.tables['exceptions']}
+								hideFilters={true}
+								URLModel="exceptions"
+							/>
+						</div>
 						{/if}
 					</svelte:fragment>
 				</TabGroup>

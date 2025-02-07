@@ -133,21 +133,29 @@
 		</div>
 	</div>
 	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg w-2/5 max-h-96 overflow-y-scroll">
+		<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
 			<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 		</div>
-		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5 max-h-96 overflow-y-scroll">
+		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.threats()}</h4>
 			<ModelTable source={data.tables['threats']} hideFilters={true} URLModel="threats" />
 		</div>
 	</div>
-	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-scroll">
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
 		<h4 class="h4 font-semibold">{m.vulnerabilities()}</h4>
 		<ModelTable
 			source={data.tables['vulnerabilities']}
 			hideFilters={true}
 			URLModel="vulnerabilities"
+		/>
+	</div>
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
+		<h4 class="h4 font-semibold">{m.exceptions()}</h4>
+		<ModelTable
+			source={data.tables['exceptions']}
+			hideFilters={true}
+			URLModel="exceptions"
 		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">

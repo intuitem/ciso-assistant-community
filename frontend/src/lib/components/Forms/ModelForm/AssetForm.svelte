@@ -108,6 +108,15 @@
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	options={getOptions({ objects: model.foreignKeys['exceptions'] })}
+	field="exceptions"
+	cacheLock={cacheLocks['exceptions']}
+	bind:cachedValue={formDataCache['exceptions']}
+	label={m.exceptions()}
+/>
 <TextField
 	{form}
 	field="reference_link"

@@ -89,6 +89,15 @@
 			bind:cachedValue={formDataCache['evidences']}
 			label={m.evidences()}
 		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['exceptions'] })}
+			field="exceptions"
+			cacheLock={cacheLocks['exceptions']}
+			bind:cachedValue={formDataCache['exceptions']}
+			label={m.exceptions()}
+		/>
 		{#if schema.shape.category}
 			<Select
 				{form}

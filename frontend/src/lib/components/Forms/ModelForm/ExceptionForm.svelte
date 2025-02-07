@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import HiddenInput from '../HiddenInput.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
 	import { getOptions } from '$lib/utils/crud';
@@ -14,6 +15,7 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
+<HiddenInput {form} field="requirement_assessments" />
 <AutocompleteSelect
 	{form}
 	options={getOptions({ objects: model.foreignKeys['folder'] })}

@@ -164,7 +164,7 @@
 					</span>
 					<TextArea form={_form} field="description" rows={6} label={m.description()} />
 				</div>
-				<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-scroll">
+				<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-auto">
 					<AutocompleteSelect
 						multiple
 						form={_form}
@@ -175,7 +175,6 @@
 						})}
 						field="assets"
 						label={m.assets()}
-						helpText={m.riskScenarioAssetHelpText()}
 					/>
 					<AutocompleteSelect
 						form={_form}
@@ -198,6 +197,13 @@
 						})}
 						field="vulnerabilities"
 						label={m.vulnerabilities()}
+					/>
+					<AutocompleteSelect
+						multiple
+						form={_form}
+						options={getOptions({ objects: data.foreignKeys['exceptions'] })}
+						field="exceptions"
+						label={m.exceptions()}
 					/>
 				</div>
 			</div>

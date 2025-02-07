@@ -134,6 +134,7 @@ export const RiskScenarioSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
+	exceptions: z.string().uuid().optional().array().optional(),
 	ref_id: z.string().max(8).optional()
 });
 
@@ -154,6 +155,7 @@ export const AppliedControlSchema = z.object({
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
+	exceptions: z.string().uuid().optional().array().optional(),
 	progress_field: z.number().optional().default(0)
 });
 
@@ -216,7 +218,8 @@ export const AssetSchema = z.object({
 	reference_link: z.string().url().optional().or(z.literal('')),
 	owner: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
-	ebios_rm_studies: z.string().uuid().optional().array().optional()
+	ebios_rm_studies: z.string().uuid().optional().array().optional(),
+	exceptions: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({
@@ -236,7 +239,8 @@ export const RequirementAssessmentSchema = z.object({
 	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	exceptions: z.string().uuid().optional().array().optional()
 });
 
 export const UserEditSchema = z.object({
@@ -404,6 +408,7 @@ export const vulnerabilitySchema = z.object({
 	status: z.string().default('--'),
 	severity: z.number().default(-1),
 	applied_controls: z.string().uuid().optional().array().optional(),
+	exceptions: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
@@ -495,7 +500,8 @@ export const ExceptionSchema = z.object({
 	owners: z.array(z.string().optional()).optional(),
 	severity: z.number().default(-1).optional(),
 	status: z.string().optional(),
-	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	requirement_assessments: z.string().optional().array().optional(),
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
