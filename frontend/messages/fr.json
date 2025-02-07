@@ -1150,5 +1150,6 @@
 	"progressField": "Progrès",
 	"recap": "Recap",
 	"sectionMoved": "Section déplacée ici",
-	"more": "Plus"
+	"more": "Plus",
+	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur."
 }
