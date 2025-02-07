@@ -1,22 +1,23 @@
 <script lang="ts" type="module">
+	import { onMount } from 'svelte';
 	import SideBarFooter from './SideBarFooter.svelte';
 	import SideBarHeader from './SideBarHeader.svelte';
 	import SideBarNavigation from './SideBarNavigation.svelte';
 	import SideBarToggle from './SideBarToggle.svelte';
-	import { onMount } from 'svelte';
 
-	import { driverInstance, firstTimeConnection } from '$lib/utils/stores';
+	import { getCookie, setCookie } from '$lib/utils/cookies';
+	import { driverInstance } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 
+	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
+	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
+	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
+	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
-	import './driver-custom.css';
-	import { page } from '$app/stores';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
-	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { invalidateAll } from '$app/navigation';
-	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
+	import './driver-custom.css';
 
 	export let open: boolean;
 
@@ -247,19 +248,17 @@
 	}
 
 	onMount(() => {
-		if (displayGuidedTour && user.accessible_domains.length === 0 && $modalStore.length === 0) {
+		const showFirstLoginModal =
+			getCookie('show_first_login_modal') === 'true' && user.accessible_domains.length === 0;
+		// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
+		// Later, we will have tours for domain managers, analysts etc.
+		if (showFirstLoginModal && user.is_admin) {
 			modalFirstLogin();
-			$firstTimeConnection = false; // This will prevent the tour from showing up again on page reload
 		}
+		setCookie('show_first_login_modal', 'false');
 	});
 
 	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
-
-	$: $firstTimeConnection = $firstTimeConnection && user.accessible_domains.length === 0;
-
-	// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
-	// Later, we will have tours for domain managers, analysts etc.
-	$: displayGuidedTour = $firstTimeConnection && user.is_admin;
 </script>
 
 <aside
