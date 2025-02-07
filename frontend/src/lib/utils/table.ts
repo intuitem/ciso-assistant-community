@@ -46,6 +46,14 @@ const REQUIREMENT_RESULT_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const REQUIREMENT_ASSESSABLE_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.assessable ? 'true' : 'false'),
+	extraProps: {
+		defaultOptionName: 'assessable'
+	},
+	alwaysDisplay: true
+};
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.folder?.str,
@@ -646,13 +654,14 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'requirement-assessments': {
-		head: ['name', 'description', 'complianceAssessment', 'result', 'folder'],
-		body: ['name', 'description', 'compliance_assessment', 'result', 'folder'],
+		head: ['assessable', 'name', 'description', 'complianceAssessment', 'result', 'folder'],
+		body: ['assessable', 'name', 'description', 'compliance_assessment', 'result', 'folder'],
 		breadcrumb_link_disabled: true,
 		filters: {
 			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
 			result: REQUIREMENT_RESULT_FILTER,
-			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true }
+			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
+			assessable: REQUIREMENT_ASSESSABLE_FILTER
 		}
 	},
 	evidences: {
