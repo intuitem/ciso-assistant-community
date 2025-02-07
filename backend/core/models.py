@@ -1415,7 +1415,10 @@ class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
     status = models.CharField(
-        verbose_name="Status", choices=Status.choices, default=Status.UNDEFINED
+        verbose_name="Status",
+        choices=Status.choices,
+        default=Status.UNDEFINED,
+        max_length=10,
     )
     expiration_date = models.DateField(
         help_text="Specify when the exception will no longer apply",
