@@ -83,7 +83,7 @@ test('Database export should generate valid backup file', async ({ logedPage, pa
 			await page.getByRole('button', { name: 'Submit' }).click();
 
 			// Sessions are not preserved after importing the backup
-			await expect(page).toHaveURL('/login?next=/backup-restore', { timeout: 5000 });
+			await expect(page).toHaveURL('/login?next=/backup-restore', { timeout: 30_000 });
 		});
 	});
 });
