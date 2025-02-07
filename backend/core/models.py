@@ -1426,7 +1426,7 @@ class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         null=True,
         verbose_name="Expiration date",
     )
-    owner = models.ManyToManyField(
+    owners = models.ManyToManyField(
         User,
         blank=True,
         verbose_name="Owner",

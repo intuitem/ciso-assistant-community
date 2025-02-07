@@ -1092,3 +1092,4 @@ class ExceptionWriteSerializer(BaseModelSerializer):
 
 class ExceptionReadSerializer(ExceptionWriteSerializer):
     folder = FieldsRelatedField()
+    owners = FieldsRelatedField(many=True)
