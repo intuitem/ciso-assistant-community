@@ -1103,7 +1103,7 @@ class ExceptionReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owners = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display")
-    
+
     class Meta:
         model = Exception
         fields = "__all__"

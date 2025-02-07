@@ -150,7 +150,7 @@ export const navData = {
 				},
 				{
 					name: 'exceptions',
-					fa_icon: 'fa-solid fa-signature',
+					fa_icon: "fa-solid fa-circle-exclamation",
 					href: '/exceptions'
 				}
 			]
