@@ -501,7 +501,7 @@ export const ExceptionSchema = z.object({
 	severity: z.number().default(-1).optional(),
 	status: z.string().optional(),
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	requirement_assessments: z.string().optional().array().optional(),
+	requirement_assessments: z.string().optional().array().optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -537,7 +537,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'strategic-scenarios': StrategicScenarioSchema,
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema,
-	exceptions: ExceptionSchema,
+	exceptions: ExceptionSchema
 };
 
 export const modelSchema = (model: string) => {

@@ -42,12 +42,12 @@
 	label={m.owner()}
 />
 <Select
-    {form}
-    options={model.selectOptions['severity']}
-    field="severity"
-    label={m.severity()}
-    cacheLock={cacheLocks['severity']}
-    bind:cachedValue={formDataCache['severity']}
+	{form}
+	options={model.selectOptions['severity']}
+	field="severity"
+	label={m.severity()}
+	cacheLock={cacheLocks['severity']}
+	bind:cachedValue={formDataCache['severity']}
 />
 <Select
 	{form}
@@ -58,10 +58,10 @@
 	bind:cachedValue={formDataCache['status']}
 />
 <TextField
-    type="date"
-    {form}
-    field="expiration_date"
-    label={m.expirationDate()}
-    cacheLock={cacheLocks['expiration_date']}
-    bind:cachedValue={formDataCache['expiration_date']}
+	type="date"
+	{form}
+	field="expiration_date"
+	label={m.expirationDate()}
+	cacheLock={cacheLocks['expiration_date']}
+	bind:cachedValue={formDataCache['expiration_date']}
 />

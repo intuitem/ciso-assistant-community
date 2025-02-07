@@ -470,31 +470,31 @@
 							</div>
 						{/if}
 						{#if tabSet === 2 && !$page.data.user.is_third_party}
-						<div
-							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
-						>
-							<span class="flex flex-row justify-end items-center">
-								<button
-									class="btn variant-filled-primary self-end"
-									on:click={modalExceptionCreateForm}
-									type="button"><i class="fa-solid fa-plus mr-2" />{m.addException()}</button
-								>
-							</span>
-							<AutocompleteSelect
-								multiple
-								{form}
-								options={getOptions({
-									objects: $page.data.model.foreignKeys['exceptions'],
-									extra_fields: [['folder', 'str']]
-								})}
-								field="exceptions"
-							/>
-							<ModelTable
-								source={$page.data.tables['exceptions']}
-								hideFilters={true}
-								URLModel="exceptions"
-							/>
-						</div>
+							<div
+								class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+							>
+								<span class="flex flex-row justify-end items-center">
+									<button
+										class="btn variant-filled-primary self-end"
+										on:click={modalExceptionCreateForm}
+										type="button"><i class="fa-solid fa-plus mr-2" />{m.addException()}</button
+									>
+								</span>
+								<AutocompleteSelect
+									multiple
+									{form}
+									options={getOptions({
+										objects: $page.data.model.foreignKeys['exceptions'],
+										extra_fields: [['folder', 'str']]
+									})}
+									field="exceptions"
+								/>
+								<ModelTable
+									source={$page.data.tables['exceptions']}
+									hideFilters={true}
+									URLModel="exceptions"
+								/>
+							</div>
 						{/if}
 					</svelte:fragment>
 				</TabGroup>

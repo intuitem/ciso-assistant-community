@@ -152,11 +152,7 @@
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
 		<h4 class="h4 font-semibold">{m.exceptions()}</h4>
-		<ModelTable
-			source={data.tables['exceptions']}
-			hideFilters={true}
-			URLModel="exceptions"
-		/>
+		<ModelTable source={data.tables['exceptions']} hideFilters={true} URLModel="exceptions" />
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
 		<div class="flex flex-col w-1/2">

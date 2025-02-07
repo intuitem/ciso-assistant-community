@@ -1400,26 +1400,22 @@ class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         MEDIUM = 1, "medium"
         HIGH = 2, "high"
         CRITICAL = 3, "critical"
-    
+
     class Status(models.TextChoices):
         UNDEFINED = "undefined", "undefined"
         ACTIVE = "active", "active"
         MITIGATED = "mitigated", "mitigated"
         RESOLVED = "resolved", "resolved"
         DEPRECATED = "deprecated", "deprecated"
-        
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
     )
     severity = models.SmallIntegerField(
-        verbose_name="Severity",
-        choices=Severity.choices,
-        default=Severity.UNDEFINED
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
     status = models.CharField(
-        verbose_name="Status",
-        choices=Status.choices,
-        default=Status.UNDEFINED
+        verbose_name="Status", choices=Status.choices, default=Status.UNDEFINED
     )
     expiration_date = models.DateField(
         help_text="Specify when the exception will no longer apply",
@@ -1432,9 +1428,9 @@ class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name="Owner",
         related_name="exceptions",
     )
-    
+
     fields_to_check = ["name"]
-    
+
     def __str__(self):
         return self.name
 
@@ -1568,7 +1564,7 @@ class Asset(
         verbose_name="Exceptions",
         related_name="assets",
     )
-    
+
     fields_to_check = ["name"]
 
     class Meta:
