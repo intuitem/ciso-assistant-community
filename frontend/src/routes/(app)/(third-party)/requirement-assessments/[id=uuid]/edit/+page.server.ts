@@ -115,7 +115,7 @@ export const load = (async ({ fetch, params }) => {
 	const tables: Record<string, any> = {};
 
 	await Promise.all(
-		['applied-controls', 'evidences', 'security_exceptions'].map(async (key) => {
+		['applied-controls', 'evidences', 'security-exceptions'].map(async (key) => {
 			const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
 			const response = await fetch(keyEndpoint);
 
@@ -192,11 +192,11 @@ export const load = (async ({ fetch, params }) => {
 	}
 	evidenceModel.foreignKeys = evidenceForeignKeys;
 
-	const securityExceptionModel = getModelInfo('security_exceptions');
-	const securityExceptionCreateSchema = modelSchema('security_exceptions');
+	const securityExceptionModel = getModelInfo('security-exceptions');
+	const securityExceptionCreateSchema = modelSchema('security-exceptions');
 	const securityExceptionCreateForm = await superValidate(
 		{ requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
-		zod(exceptionCreateSchema),
+		zod(securityExceptionCreateSchema),
 		{ errors: false }
 	);
 

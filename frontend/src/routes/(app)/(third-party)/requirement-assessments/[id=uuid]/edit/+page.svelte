@@ -493,7 +493,7 @@
 									field="security_exceptions"
 								/>
 								<ModelTable
-									source={$page.data.tables['security_exceptions']}
+									source={$page.data.tables['security-exceptions']}
 									hideFilters={true}
 									URLModel="security-exceptions"
 								/>
