@@ -1157,5 +1157,6 @@
 	"securityException": "Exception",
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Ajouter une exception",
-	"expirationDate": "Date d'expiration"
+	"expirationDate": "Date d'expiration",
+	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur."
 }

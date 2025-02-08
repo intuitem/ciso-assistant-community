@@ -1772,7 +1772,9 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
-        if not self.attachment:
+        if not self.attachment or not self.attachment.storage.exists(
+            self.attachment.name
+        ):
             return None
         # get the attachment size with the correct unit
         size = self.attachment.size
