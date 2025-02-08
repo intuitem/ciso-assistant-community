@@ -197,7 +197,7 @@
 	"watchlist": "Volglijst",
 	"watchlistDescription": "Items die zijn verlopen of binnen de komende 30 dagen verlopen",
 	"measuresToReview": "Te beoordelen toegepaste controles",
-	"exceptionsToReview": "Te beoordelen acceptaties",
+	"acceptancesToReview": "Te beoordelen acceptaties",
 	"expired": "Verlopen",
 	"upcoming": "Aankomend",
 	"today": "Vandaag",
