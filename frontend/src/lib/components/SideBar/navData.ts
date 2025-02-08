@@ -149,9 +149,9 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
-					name: 'exceptions',
+					name: 'securityExceptions',
 					fa_icon: 'fa-solid fa-circle-exclamation',
-					href: '/exceptions'
+					href: '/security-exceptions'
 				}
 			]
 		},

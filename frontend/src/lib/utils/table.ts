@@ -789,7 +789,7 @@ export const listViewFields: ListViewFieldsConfig = {
 			is_selected: IS_SELECTED_FILTER
 		}
 	},
-	exceptions: {
+	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date']
 	}

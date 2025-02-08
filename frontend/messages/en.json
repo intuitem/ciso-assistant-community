@@ -484,6 +484,8 @@
 	"toDo": "To do",
 	"inProgress": "In progress",
 	"inReview": "In review",
+	"approved": "Approved",
+	"resolved": "Resolved",
 	"deprecated": "Deprecated",
 	"onHold": "On hold",
 	"done": "Done",
@@ -1157,8 +1159,8 @@
 	"recap": "Recap",
 	"sectionMoved": "Section moved here",
 	"more": "More",
-	"exception": "Exception",
-	"exceptions": "Exceptions",
-	"addException": "Add exception",
+	"securityException": "Exception",
+	"securityExceptions": "Exceptions",
+	"addSecurityException": "Add exception",
 	"expirationDate": "Expiration date"
 }

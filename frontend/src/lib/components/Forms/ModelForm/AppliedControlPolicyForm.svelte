@@ -92,11 +92,11 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			options={getOptions({ objects: model.foreignKeys['exceptions'] })}
-			field="exceptions"
-			cacheLock={cacheLocks['exceptions']}
-			bind:cachedValue={formDataCache['exceptions']}
-			label={m.exceptions()}
+			options={getOptions({ objects: model.foreignKeys['security_exceptions'] })}
+			field="security_exceptions"
+			cacheLock={cacheLocks['security_exceptions']}
+			bind:cachedValue={formDataCache['security_exceptions']}
+			label={m.securityExceptions()}
 		/>
 		{#if schema.shape.category}
 			<Select

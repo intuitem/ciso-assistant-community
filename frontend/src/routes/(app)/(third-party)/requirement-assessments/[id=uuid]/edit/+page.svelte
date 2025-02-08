@@ -99,13 +99,13 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalExceptionCreateForm(): void {
+	function modalSecurityExceptionCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: data.exceptionCreateForm,
-				formAction: '?/createException',
-				model: data.exceptionModel,
+				form: data.securityExceptionCreateForm,
+				formAction: '?/createSecurityException',
+				model: data.securityExceptionModel,
 				debug: false
 			}
 		};
@@ -113,7 +113,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add-' + data.exceptionModel.localName)
+			title: safeTranslate('add-' + data.securityExceptionModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -204,8 +204,8 @@
 		$formStore.evidences.push(form.newEvidence);
 	}
 
-	$: if (form && form.newException) {
-		$formStore.exceptions.push(form.newException);
+	$: if (form && form.newSecurityException) {
+		$formStore.security_exceptions.push(form.newSecurityException);
 	}
 </script>
 
@@ -378,7 +378,7 @@
 						</Tab>
 					{/if}
 					<Tab bind:group={tabSet} name="evidences_tab" value={1}>{m.evidences()}</Tab>
-					<Tab bind:group={tabSet} name="exceptions_tab" value={2}>{m.exceptions()}</Tab>
+					<Tab bind:group={tabSet} name="security_exceptions_tab" value={2}>{m.securityExceptions()}</Tab>
 					<svelte:fragment slot="panel">
 						{#if tabSet === 0 && !$page.data.user.is_third_party}
 							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
@@ -476,23 +476,23 @@
 								<span class="flex flex-row justify-end items-center">
 									<button
 										class="btn variant-filled-primary self-end"
-										on:click={modalExceptionCreateForm}
-										type="button"><i class="fa-solid fa-plus mr-2" />{m.addException()}</button
+										on:click={modalSecurityExceptionCreateForm}
+										type="button"><i class="fa-solid fa-plus mr-2" />{m.addSecurityException()}</button
 									>
 								</span>
 								<AutocompleteSelect
 									multiple
 									{form}
 									options={getOptions({
-										objects: $page.data.model.foreignKeys['exceptions'],
+										objects: $page.data.model.foreignKeys['security_exceptions'],
 										extra_fields: [['folder', 'str']]
 									})}
-									field="exceptions"
+									field="security_exceptions"
 								/>
 								<ModelTable
-									source={$page.data.tables['exceptions']}
+									source={$page.data.tables['security_exceptions']}
 									hideFilters={true}
-									URLModel="exceptions"
+									URLModel="security-exceptions"
 								/>
 							</div>
 						{/if}

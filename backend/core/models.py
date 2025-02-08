@@ -1393,7 +1393,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Severity(models.IntegerChoices):
         UNDEFINED = -1, "undefined"
         LOW = 0, "low"
@@ -1402,10 +1402,11 @@ class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         CRITICAL = 3, "critical"
 
     class Status(models.TextChoices):
-        UNDEFINED = "undefined", "undefined"
-        ACTIVE = "active", "active"
-        MITIGATED = "mitigated", "mitigated"
+        DRAFT = "draft", "draft"
+        IN_REVIEW = "in review", "in review"
+        APPROVED = "approved", "approved"
         RESOLVED = "resolved", "resolved"
+        EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
 
     ref_id = models.CharField(
@@ -1417,11 +1418,12 @@ class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     status = models.CharField(
         verbose_name="Status",
         choices=Status.choices,
-        default=Status.UNDEFINED,
+        null=False,
+        default=Status.DRAFT,
         max_length=10,
     )
     expiration_date = models.DateField(
-        help_text="Specify when the exception will no longer apply",
+        help_text="Specify when the security exception will no longer apply",
         null=True,
         verbose_name="Expiration date",
     )
@@ -1429,7 +1431,7 @@ class Exception(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         User,
         blank=True,
         verbose_name="Owner",
-        related_name="exceptions",
+        related_name="security_exceptions",
     )
 
     fields_to_check = ["name"]
@@ -1561,10 +1563,10 @@ class Asset(
         verbose_name=_("Owner"),
         related_name="assets",
     )
-    exceptions = models.ManyToManyField(
-        Exception,
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
         blank=True,
-        verbose_name="Exceptions",
+        verbose_name="Security exceptions",
         related_name="assets",
     )
 
@@ -1912,10 +1914,10 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             MaxValueValidator(100, message="Progress cannot be more than 100"),
         ],
     )
-    exceptions = models.ManyToManyField(
-        Exception,
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
         blank=True,
-        verbose_name="Exceptions",
+        verbose_name="Security exceptions",
         related_name="applied_controls",
     )
 
@@ -2063,10 +2065,10 @@ class Vulnerability(
         verbose_name=_("Applied controls"),
         related_name="vulnerabilities",
     )
-    exceptions = models.ManyToManyField(
-        Exception,
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
         blank=True,
-        verbose_name="Exceptions",
+        verbose_name="Security exceptions",
         related_name="vulnerabilities",
     )
 
@@ -2653,10 +2655,10 @@ class RiskScenario(NameDescriptionMixin):
     justification = models.CharField(
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
     )
-    exceptions = models.ManyToManyField(
-        Exception,
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
         blank=True,
-        verbose_name="Exceptions",
+        verbose_name="Security exceptions",
         related_name="risk_scenarios",
     )
 
@@ -3435,10 +3437,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         null=True,
         verbose_name=_("Answer"),
     )
-    exceptions = models.ManyToManyField(
-        Exception,
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
         blank=True,
-        verbose_name="Exceptions",
+        verbose_name="Security exceptions",
         related_name="requirement_assessments",
     )
 

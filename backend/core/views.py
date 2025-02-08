@@ -4153,18 +4153,18 @@ def export_mp_csv(request):
     return response
 
 
-class ExceptionViewSet(BaseModelViewSet):
+class SecurityExceptionViewSet(BaseModelViewSet):
     """
-    API endpoint that allows exceptions to be viewed or edited.
+    API endpoint that allows security exceptions to be viewed or edited.
     """
 
-    model = Exception
+    model = SecurityException
     filterset_fields = ["requirement_assessments", "risk_scenarios"]
 
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
-        return Response(dict(Exception.Severity.choices))
+        return Response(dict(SecurityException.Severity.choices))
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
-        return Response(dict(Exception.Status.choices))
+        return Response(dict(SecurityException.Status.choices))

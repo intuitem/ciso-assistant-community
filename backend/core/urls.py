@@ -72,9 +72,9 @@ router.register(
     basename="qualifications",
 )
 router.register(
-    r"exceptions",
-    ExceptionViewSet,
-    basename="exceptions",
+    r"security_exceptions",
+    SecurityExceptionViewSet,
+    basename="security-exceptions",
 )
 
 ROUTES = settings.ROUTES

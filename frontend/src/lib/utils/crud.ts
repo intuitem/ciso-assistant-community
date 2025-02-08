@@ -236,7 +236,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' },
 			{ field: 'owner', urlModel: 'users' },
-			{ field: 'exceptions', urlModel: 'exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
@@ -266,14 +266,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' },
 			{ field: 'progress_field' },
-			{ field: 'exceptions', urlModel: 'exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' },
-			{ field: 'exceptions', urlModel: 'exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
@@ -343,7 +343,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'exceptions', urlModel: 'exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
@@ -396,7 +396,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'exceptions', urlModel: 'exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [
@@ -499,7 +499,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
-			{ field: 'exceptions', urlModel: 'exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		]
 	},
 	'stored-libraries': {
@@ -752,12 +752,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
 	},
-	exceptions: {
-		name: 'exception',
-		localName: 'exception',
-		localNamePlural: 'exceptions',
-		verboseName: 'Exception',
-		verboseNamePlural: 'Exceptions',
+	'security-exceptions': {
+		name: 'securityException',
+		localName: 'securityException',
+		localNamePlural: 'securityExceptions',
+		verboseName: 'Security exception',
+		verboseNamePlural: 'Security exceptions',
 		foreignKeyFields: [
 			{ field: 'owners', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders' }

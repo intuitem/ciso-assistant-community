@@ -201,9 +201,9 @@
 					<AutocompleteSelect
 						multiple
 						form={_form}
-						options={getOptions({ objects: data.foreignKeys['exceptions'] })}
-						field="exceptions"
-						label={m.exceptions()}
+						options={getOptions({ objects: data.foreignKeys['security_exceptions'] })}
+						field="security_exceptions"
+						label={m.securityExceptions()}
 					/>
 				</div>
 			</div>
