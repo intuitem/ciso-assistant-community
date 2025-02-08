@@ -62,7 +62,7 @@ def check_deprecated_controls():
 
 @task()
 def send_notification_email_expired_eta(owner_email, controls):
-    if not check_email_configuration:
+    if not check_email_configuration(owner_email, controls):
         return
 
     subject = f"CISO Assistant: You have {len(controls)} expired control(s)"
@@ -77,7 +77,7 @@ def send_notification_email_expired_eta(owner_email, controls):
 
 @task()
 def send_notification_email_deprecated_control(owner_email, controls):
-    if not check_email_configuration:
+    if not check_email_configuration(owner_email, controls):
         return
 
     subject = f"CISO Assistant: You have {len(controls)} deprecated control(s)"
