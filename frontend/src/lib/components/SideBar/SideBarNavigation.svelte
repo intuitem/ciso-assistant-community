@@ -22,7 +22,6 @@
 					);
 				} else if (Object.hasOwn(URL_MODEL_MAP, subItem.href.split('/')[1])) {
 					const model = URL_MODEL_MAP[subItem.href.split('/')[1]];
-					console.log("coucou " + model.name)
 					const canViewObject =
 						user?.permissions && Object.hasOwn(user.permissions, `view_${model.name}`);
 					return canViewObject;

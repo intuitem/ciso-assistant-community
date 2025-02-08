@@ -378,7 +378,9 @@
 						</Tab>
 					{/if}
 					<Tab bind:group={tabSet} name="evidences_tab" value={1}>{m.evidences()}</Tab>
-					<Tab bind:group={tabSet} name="security_exceptions_tab" value={2}>{m.securityExceptions()}</Tab>
+					<Tab bind:group={tabSet} name="security_exceptions_tab" value={2}
+						>{m.securityExceptions()}</Tab
+					>
 					<svelte:fragment slot="panel">
 						{#if tabSet === 0 && !$page.data.user.is_third_party}
 							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
@@ -477,7 +479,8 @@
 									<button
 										class="btn variant-filled-primary self-end"
 										on:click={modalSecurityExceptionCreateForm}
-										type="button"><i class="fa-solid fa-plus mr-2" />{m.addSecurityException()}</button
+										type="button"
+										><i class="fa-solid fa-plus mr-2" />{m.addSecurityException()}</button
 									>
 								</span>
 								<AutocompleteSelect

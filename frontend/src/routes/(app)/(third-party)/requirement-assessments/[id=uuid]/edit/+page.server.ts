@@ -46,7 +46,9 @@ export const load = (async ({ fetch, params }) => {
 
 	const schema = modelSchema(URLModel);
 	object.evidences = object.evidences.map((evidence) => evidence.id);
-	object.security_exceptions = object.security_exceptions.map((security_exception) => security_exception.id);
+	object.security_exceptions = object.security_exceptions.map(
+		(security_exception) => security_exception.id
+	);
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const foreignKeys: Record<string, any> = {};
@@ -205,10 +207,12 @@ export const load = (async ({ fetch, params }) => {
 				const url = `${baseUrl}/security-exceptions/${selectField.field}/`;
 				const data = await fetchJson(url);
 				if (data) {
-					securityExceptionSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}));
+					securityExceptionSelectOptions[selectField.field] = Object.entries(data).map(
+						([key, value]) => ({
+							label: value,
+							value: selectField.valueType === 'number' ? parseInt(key) : key
+						})
+					);
 				}
 			})
 		);
