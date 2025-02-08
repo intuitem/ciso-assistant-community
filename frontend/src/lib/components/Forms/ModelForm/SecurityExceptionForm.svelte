@@ -55,7 +55,7 @@
 	field="status"
 	label={m.status()}
 	cacheLock={cacheLocks['status']}
-	disableDoubleDash=true
+	disableDoubleDash="true"
 	bind:cachedValue={formDataCache['status']}
 />
 <TextField
