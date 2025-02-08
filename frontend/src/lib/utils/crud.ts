@@ -753,7 +753,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
 	},
 	'security-exceptions': {
-		name: 'securityException',
+		name: 'securityexception',
 		localName: 'securityException',
 		localNamePlural: 'securityExceptions',
 		verboseName: 'Security exception',

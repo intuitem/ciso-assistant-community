@@ -72,7 +72,7 @@ router.register(
     basename="qualifications",
 )
 router.register(
-    r"security_exceptions",
+    r"security-exceptions",
     SecurityExceptionViewSet,
     basename="security-exceptions",
 )

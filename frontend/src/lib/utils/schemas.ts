@@ -493,7 +493,7 @@ export const operationalScenarioSchema = z.object({
 	justification: z.string().optional()
 });
 
-export const securityExceptionSchema = z.object({
+export const SecurityExceptionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
@@ -537,7 +537,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'strategic-scenarios': StrategicScenarioSchema,
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema,
-	'security-exceptions': securityExceptionSchema
+	'security-exceptions': SecurityExceptionSchema
 };
 
 export const modelSchema = (model: string) => {
