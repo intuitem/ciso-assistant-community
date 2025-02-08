@@ -144,12 +144,12 @@ erDiagram
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
     PERIMETER                    |o--o{ RISK_ASSESSMENT       : contains
-    EXCEPTION                    }o--o{ VULNERABILITY         : concerns
-    EXCEPTION                    }o--o{ REQUIREMENT_ASSESSMENT: concerns
-    EXCEPTION                    }o--o{ ASSET                 : concerns
-    EXCEPTION                    }o--o{ RISK_SCENARIO         : concerns
-    EXCEPTION                    }o--o{ APPLIED_CONTROL       : concerns
-    APPLIED_CONTROL              }o--o{ EXCEPTION             : mitigates
+    SECURITY_EXCEPTION           }o--o{ VULNERABILITY         : concerns
+    SECURITY_EXCEPTION           }o--o{ REQUIREMENT_ASSESSMENT: concerns
+    SECURITY_EXCEPTION           }o--o{ ASSET                 : concerns
+    SECURITY_EXCEPTION           }o--o{ RISK_SCENARIO         : concerns
+    SECURITY_EXCEPTION           }o--o{ APPLIED_CONTROL       : concerns
+    APPLIED_CONTROL              }o--o{ SECURITY_EXCEPTION    : mitigates
 
     FRAMEWORK {
         string  urn
@@ -276,7 +276,7 @@ erDiagram
         json    references
     }
 
-    EXCEPTION {
+    SECURITY_EXCEPTION {
         string  ref_id
         string  name
         string  description
@@ -802,16 +802,16 @@ The justification field can be edited only by the approver.
 
 Once a risk acceptance is active, the correponding risk assessments are frozen. They shall be cloned to make evolutions.
 
-## Exceptions
+## Security exceptions
 
-Exceptions are used to trace assumed non-compliances, whether for assets, requirement assessments, risk scenarios, applied controls, vulnerabilities, or even something not linked to an existing object.
+Security exceptions are used to trace assumed non-compliances, whether for assets, requirement assessments, risk scenarios, applied controls, vulnerabilities, or even something not linked to an existing object.
 
-Exceptions can have zero, one or several owners.
-Exceptions can have zero, or one approver.
+Security exceptions can have zero, one or several owners.
+Security exceptions can have zero, or one approver.
 
-Exceptions can be mitigated by applied controls.
+Security exceptions can be mitigated by applied controls.
 
-Exceptions also have the following fields:
+Security exceptions also have the following fields:
 - ref_id (defaults to empty string)
 - name
 - description
@@ -820,9 +820,11 @@ Exceptions also have the following fields:
 - expiration date
 - approver
 
-Exceptions are located in the governance menu.
+Only the approver shall be able to set the status to approved.
 
-The performance of the UX shall be optimized, by avoiding to preload all possible targets for the exception.
+Security exceptions are located in the governance menu.
+
+The performance of the UX shall be optimized, by avoiding to preload all possible targets for the security exception.
 
 
 ## Libraries
