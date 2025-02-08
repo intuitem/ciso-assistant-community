@@ -16,7 +16,7 @@ export const load = (async ({ fetch, params }) => {
 	const tables: Record<string, any> = {};
 
 	await Promise.all(
-		['assets', 'threats', 'vulnerabilities', 'security_exceptions'].map(async (key) => {
+		['assets', 'threats', 'vulnerabilities', 'security-exceptions'].map(async (key) => {
 			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
 			const response = await fetch(keyEndpoint);
 			if (response.ok) {
