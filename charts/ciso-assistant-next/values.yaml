@@ -1,5 +1,5 @@
 ## CISO Assistant configuration
-## Ref: https://github.com/intuitem/ciso-assistant-community  
+## Ref: https://github.com/intuitem/ciso-assistant-community
 ##
 
 # -- Provide a name in place of `ciso-assistant`
@@ -34,7 +34,7 @@ global:
   clusterDomain: cluster.local
 
   # -- Toggle and define pod-level security context
-  # @default -- `{}` 
+  # @default -- `{}`
   securityContext: {}
   #  fsGroupChangePolicy: Always
   #  sysctls: []
@@ -59,7 +59,7 @@ backend:
   config:
     # -- Admin email for initial configuration
     emailAdmin: admin@example.net
-  
+
     ## SMTP configuration
     smtp:
       # -- Default from email address
@@ -74,7 +74,9 @@ backend:
         # -- Primary SMTP username
         username: apikey
         # -- Primary SMTP password
-        password: "primary_password_here"
+        password: ""
+        # -- Name of an existing secret resource containing the SMTP password in a 'email-primary-password' key
+        existingSecret: ""
       rescue:
         # -- Rescue SMTP hostname
         host: smtp.secondary.mailer.cloud
@@ -85,7 +87,9 @@ backend:
         # -- Rescue SMTP hostname
         username: username
         # -- Rescue SMTP hostname
-        password: "rescue_password_here"
+        password: ""
+        # -- Name of an existing secret resource containing the SMTP password in a 'email-rescue-password' key
+        existingSecret: ""
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
     ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
@@ -93,6 +97,8 @@ backend:
 
     # -- Set Django secret key
     djangoSecretKey: "changeme"
+    # -- Name of an existing secret resource containing the django secret in a 'django-secret-key' key
+    djangoExistingSecretKey: ""
 
     # -- Enable Django debug mode
     djangoDebug: false
@@ -150,7 +156,7 @@ backend:
   env: []
 
   # -- Toggle and define container-level security context
-  # @default -- `{}` 
+  # @default -- `{}`
   containerSecurityContext: {}
   #  seLinuxOptions: {}
   #  runAsUser: 1001
@@ -188,7 +194,7 @@ frontend:
   config:
     # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
     bodySizeLimit: "50M"
-  
+
   ## Frontend image
   image:
     # -- Registry to use for the frontend
@@ -220,7 +226,7 @@ frontend:
   env: []
 
   # -- Toggle and define container-level security context
-  # @default -- `{}` 
+  # @default -- `{}`
   containerSecurityContext: {}
   #  seLinuxOptions: {}
   #  runAsUser: 1001
