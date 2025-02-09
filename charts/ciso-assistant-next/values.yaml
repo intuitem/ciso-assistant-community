@@ -64,6 +64,9 @@ backend:
     smtp:
       # -- Default from email address
       defaultFrom: no-reply@ciso-assistant.net
+      # -- Name of an existing secret resource containing the primary SMTP password in a 'email-primary-password' key
+      # -- and the rescue SMTP username in a 'email-rescue-username' key
+      existingSecret: ""
       primary:
         # -- Primary SMTP hostname
         host: primary.cool-mailer.net
@@ -74,10 +77,10 @@ backend:
         # -- Primary SMTP username
         username: apikey
         # -- Primary SMTP password
-        password: ""
-        # -- Name of an existing secret resource containing the SMTP password in a 'email-primary-password' key
-        existingSecret: ""
+        password: "primary_password_here"
       rescue:
+        # -- Rescue SMTP hostname
+        enabled: true
         # -- Rescue SMTP hostname
         host: smtp.secondary.mailer.cloud
         # -- Rescue SMTP hostname
@@ -87,9 +90,7 @@ backend:
         # -- Rescue SMTP hostname
         username: username
         # -- Rescue SMTP hostname
-        password: ""
-        # -- Name of an existing secret resource containing the SMTP password in a 'email-rescue-password' key
-        existingSecret: ""
+        password: "rescue_password_here"
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
     ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
