@@ -1516,3 +1516,25 @@ erDiagram
 - It shall be possible to see the list of objects that would be exported, and to select/deselect some of them while keeping consistency. This should include evidences with their size.
 - It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency.  This should include evidences with their size.
 - It shall be possible to optionally export subdomains along with the domain. The import shall be flattened if the target is not a PRO version.
+
+## Asset compliance (draft)
+
+```mermaid
+erDiagram
+
+    COMPLIANCE_INDICATOR          }o--o{ ASSET                : applies_to
+    OBSERVATION                   }o--|| ASSET                : applies_to
+    OBSERVATION                   }o--|| COMPLIANCE_INDICATOR : corresponds_to
+ 
+    COMPLIANCE_INDICATOR {
+        string ref_id
+        string name
+        string description
+        json   tracker_metadata
+    }
+
+    OBSERVATION {
+        datetime when
+        json     tracked_data
+        boolean  compliance_status
+    }
