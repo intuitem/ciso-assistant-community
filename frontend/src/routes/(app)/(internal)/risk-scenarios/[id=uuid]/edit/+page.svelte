@@ -5,7 +5,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
@@ -138,7 +137,8 @@
 							<AutocompleteSelect
 								form={_form}
 								multiple
-								options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
+								optionsEndpoint="users?is_third_party=false"
+								optionsLabelField="email"
 								field="owner"
 								label={m.owner()}
 							/>
@@ -168,11 +168,9 @@
 					<AutocompleteSelect
 						multiple
 						form={_form}
-						options={getOptions({
-							objects: data.foreignKeys['assets'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="assets"
+						optionsLabelField="auto"
+						optionsExtraFields={[['folder', 'str']]}
 						field="assets"
 						label={m.assets()}
 						helpText={m.riskScenarioAssetHelpText()}
@@ -180,22 +178,17 @@
 					<AutocompleteSelect
 						form={_form}
 						multiple
-						options={getOptions({
-							objects: data.foreignKeys['threats'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="threats"
+						optionsExtraFields={[['folder', 'str']]}
+						optionsLabelField="auto"
 						field="threats"
 						label={m.threats()}
 					/>
 					<AutocompleteSelect
 						multiple
 						form={_form}
-						options={getOptions({
-							objects: data.foreignKeys['vulnerabilities'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="vulnerabilities"
+						optionsExtraFields={[['folder', 'str']]}
 						field="vulnerabilities"
 						label={m.vulnerabilities()}
 					/>
@@ -212,10 +205,8 @@
 								<AutocompleteSelect
 									multiple
 									form={_form}
-									options={getOptions({
-										objects: data.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
 									field="existing_applied_controls"
 									label={m.existingControls()}
 									helpText={m.existingControlsHelper()}
@@ -287,10 +278,8 @@
 								<AutocompleteSelect
 									multiple
 									form={_form}
-									options={getOptions({
-										objects: data.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
 									field="applied_controls"
 									label={m.extraAppliedControls()}
 									helpText={m.extraControlsHelper()}
