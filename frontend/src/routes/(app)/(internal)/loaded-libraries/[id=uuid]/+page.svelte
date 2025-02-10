@@ -1,16 +1,19 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import * as m from '$paraglide/messages';
+	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
+	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	export let data;
-	let loading = { form: false, library: '' };
+
 	const showRisks = true;
+
 	interface LibraryObjects {
 		[key: string]: any;
 	}
@@ -31,11 +34,6 @@
 			};
 		});
 	}
-
-	import { enhance } from '$app/forms';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { ProgressRadial, tableSourceMapper } from '@skeletonlabs/skeleton';
 
 	const riskMatricesTable: TableSource = {
 		head: { name: 'name', description: 'description' },
@@ -74,58 +72,12 @@
 		}
 		return riskMatricesDumps;
 	}
-
-	$: displayImportButton = !(data.library.is_loaded ?? true);
-
-	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
-		const data = new FormData(event.currentTarget);
-
-		const response = await fetch(event.currentTarget.action, {
-			method: 'POST',
-			body: data
-		});
-
-		const result: ActionResult = deserialize(await response.text());
-
-		if (result.type === 'success') {
-			await invalidateAll();
-		}
-		applyAction(result);
-	}
 </script>
 
 <div class="card bg-white p-4 shadow space-y-4">
 	<div class="flex flex-col space-y-2">
 		<span class="w-full flex flex-row justify-between">
 			<h1 class="font-medium text-xl">{data.library.name}</h1>
-			<div>
-				{#if displayImportButton}
-					{#if loading.form}
-						<ProgressRadial width="w-6" meter="stroke-primary-500" />
-					{:else}
-						<form
-							method="post"
-							action="/libraries/{data.library.id}?/load"
-							use:enhance={() => {
-								loading.form = true;
-								loading.library = data.library.urn;
-								return async ({ update }) => {
-									loading.form = false;
-									loading.library = '';
-									update();
-								};
-							}}
-							on:submit={handleSubmit}
-						>
-							{#if $page.data.user.is_admin}
-								<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
-									<i class="fa-solid fa-file-import" />
-								</button>
-							{/if}
-						</form>
-					{/if}
-				{/if}
-			</div>
 		</span>
 		<div class="space-y-1">
 			<p class="text-md leading-5 text-gray-700">
