@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import ClientModelTable from './client/ModelTable.svelte';
+	import ServerModelTable from './server/ModelTable.svelte';
 	import type { TableSource } from './types';
 
 	export let source: TableSource;
@@ -12,10 +14,7 @@
 	let modelTable: ConstructorOfATypedSvelteComponent;
 
 	onMount(async () => {
-		const modulePath = server ? './server/ModelTable.svelte' : './client/ModelTable.svelte';
-		await import(modulePath).then((module) => {
-			modelTable = module.default;
-		});
+		modelTable = server ? ServerModelTable : ClientModelTable;
 	});
 
 	$: _source = { ...source, meta: source.meta?.results || source.meta };
