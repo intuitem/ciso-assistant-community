@@ -821,10 +821,10 @@ class EvidenceReadSerializer(BaseModelSerializer):
 
 class EvidenceWriteSerializer(BaseModelSerializer):
     applied_controls = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=AppliedControl.objects.all()
+        many=True, queryset=AppliedControl.objects.all(), required=False
     )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=RequirementAssessment.objects.all()
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
 
     class Meta:

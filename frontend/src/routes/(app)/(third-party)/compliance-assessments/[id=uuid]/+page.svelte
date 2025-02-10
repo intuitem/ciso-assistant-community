@@ -14,7 +14,6 @@
 	} from '@skeletonlabs/skeleton';
 
 	import { goto } from '$app/navigation';
-	import { getSecureRedirect } from '$lib/utils/helpers';
 
 	import { getModalStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
@@ -41,7 +40,6 @@
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
-	import { nodeIsDragged } from '@unovis/ts/components/graph/modules/node/style';
 
 	$: tree = data.tree;
 
@@ -220,10 +218,6 @@
 			}
 		};
 		modalStore.trigger(modal);
-	}
-
-	$: if (form && form.redirect) {
-		goto(getSecureRedirect(form.redirect));
 	}
 
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
