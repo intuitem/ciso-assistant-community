@@ -6,7 +6,15 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
 	const library = await fetch(`${endpoint}?${queryParams}`).then((res) => res.json());
 
 	return {
-		tree: fetch(`${endpoint}/tree?${queryParams}`).then((res) => res.json()) ?? {},
+		tree: fetch(`${endpoint}/tree?${queryParams}`)
+			.then((res) => {
+				if (!res.ok) throw new Error(`Failed to fetch tree: ${res.status}`);
+				return res.json();
+			})
+			.catch((error) => {
+				console.error('Error fetching tree:', error);
+				return {};
+			}),
 		library,
 		title: library.name
 	};
