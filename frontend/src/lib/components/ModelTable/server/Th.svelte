@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DataHandler } from '@vincjo/datatables';
+	import type { DataHandler } from '@vincjo/datatables/remote';
 	export let handler: DataHandler;
 	export let orderBy = '';
 	export let _class = `${$$restProps.class} cursor-pointer select-none`;
@@ -18,6 +18,12 @@
 	class:active={$sort?.orderBy === identifier}
 	class={_class}
 	data-testid="tableheader"
+	role="columnheader"
+	aria-sort={$sort?.orderBy === identifier
+		? $sort?.direction === 'asc'
+			? 'ascending'
+			: 'descending'
+		: 'none'}
 >
 	<div class="flex items-center h-full">
 		<slot />
@@ -25,6 +31,7 @@
 			class="pl-2"
 			class:asc={$sort?.direction === 'asc'}
 			class:desc={$sort?.direction === 'desc'}
+			aria-hidden="true"
 		/>
 	</div>
 </th>

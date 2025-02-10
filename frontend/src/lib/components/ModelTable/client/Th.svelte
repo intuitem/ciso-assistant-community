@@ -5,21 +5,28 @@
 	export let _class = `${$$restProps.class} cursor-pointer select-none`;
 
 	const identifier = orderBy?.toString();
-	const sorted = handler.getSort();
+	const sort = handler.getSort();
 </script>
 
 <th
 	on:click={() => handler.sort(orderBy)}
-	class:active={$sorted.identifier === identifier}
+	class:active={$sort.identifier === identifier}
 	class={_class}
 	data-testid="tableheader"
+	role="columnheader"
+	aria-sort={$sort?.identifier === identifier
+		? $sort?.direction === 'asc'
+			? 'ascending'
+			: 'descending'
+		: 'none'}
 >
 	<div class="flex items-center h-full">
 		<slot />
 		<span
 			class="pl-2"
-			class:asc={$sorted.direction === 'asc'}
-			class:desc={$sorted.direction === 'desc'}
+			class:asc={$sort.direction === 'asc'}
+			class:desc={$sort.direction === 'desc'}
+			aria-hidden="true"
 		/>
 	</div>
 </th>

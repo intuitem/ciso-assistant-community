@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DataHandler } from '@vincjo/datatables';
+	import type { DataHandler } from '@vincjo/datatables/remote';
 	import * as m from '$paraglide/messages';
 	export let handler: DataHandler;
 	const rowsPerPage = handler.getRowsPerPage();
