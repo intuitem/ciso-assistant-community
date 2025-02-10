@@ -96,24 +96,6 @@ export const loadDetail = async ({ event, model, id }) => {
 				}
 				const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 
-				const foreignKeys: Record<string, any> = {};
-
-				if (info.foreignKeyFields) {
-					for (const keyField of info.foreignKeyFields) {
-						let queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-						if (keyField.detail === true) {
-							queryParams += `${data.ebios_rm_study.id}`; // used only for ebios for now
-						}
-						const url = `${BASE_API_URL}/${keyField.endpointUrl || keyField.urlModel}/${queryParams}`;
-						const response = await event.fetch(url);
-						if (response.ok) {
-							foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-						} else {
-							console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-						}
-					}
-				}
-
 				const selectOptions: Record<string, any> = {};
 
 				if (info.selectFields) {
@@ -142,7 +124,6 @@ export const loadDetail = async ({ event, model, id }) => {
 					table,
 					deleteForm,
 					createForm,
-					foreignKeys,
 					selectOptions,
 					initialData
 				};
