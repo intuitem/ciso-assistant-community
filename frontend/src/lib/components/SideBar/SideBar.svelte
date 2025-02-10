@@ -1,17 +1,23 @@
 <script lang="ts" type="module">
+	import { onMount } from 'svelte';
 	import SideBarFooter from './SideBarFooter.svelte';
 	import SideBarHeader from './SideBarHeader.svelte';
 	import SideBarNavigation from './SideBarNavigation.svelte';
 	import SideBarToggle from './SideBarToggle.svelte';
-	import { onMount } from 'svelte';
 
-	import { driverInstance, firstTimeConnection } from '$lib/utils/stores';
+	import { getCookie, setCookie } from '$lib/utils/cookies';
+	import { driverInstance } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 
+	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
+	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
+	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
+	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
+	import { getFlash } from 'sveltekit-flash-message';
 	import './driver-custom.css';
-	import { page } from '$app/stores';
 
 	export let open: boolean;
 
@@ -178,6 +184,57 @@
 		}
 	];
 
+	const modalStore = getModalStore();
+	const flash = getFlash(page);
+
+	function modalFirstLogin(): void {
+		const modalComponent: ModalComponent = {
+			ref: FirstLoginModal,
+			props: {
+				actions: [
+					{
+						label: m.showGuidedTour(),
+						action: triggerVisit,
+						classes: 'variant-filled-surface',
+						btnIcon: 'fa-wand-magic-sparkles'
+					},
+					{
+						label: m.loadDemoData(),
+						action: loadDemoDomain,
+						classes: 'variant-filled-secondary',
+						btnIcon: 'fa-file-import',
+						async: true
+					}
+				]
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.firstTimeLoginModalTitle(),
+			body: m.firstTimeLoginModalDescription()
+		};
+		modalStore.trigger(modal);
+	}
+
+	async function loadDemoDomain() {
+		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
+		if (!response.ok) {
+			console.error('Failed to load demo data');
+			$flash = { type: 'error', message: m.errorOccuredDuringImport() };
+			return false;
+		}
+		$flash = { type: 'success', message: m.successfullyImportedFolder() };
+		await goto('/folders', {
+			crumbs: breadcrumbs,
+			label: m.domains(),
+			breadcrumbAction: 'replace'
+		});
+		invalidateAll();
+		return true;
+	}
+
 	function triggerVisit() {
 		const translatedSteps = steps;
 		const driverObj = driver({
@@ -187,22 +244,21 @@
 		});
 		$driverInstance = driverObj;
 		driverObj.drive();
+		return true;
 	}
 
 	onMount(() => {
-		if (displayGuidedTour) {
-			triggerVisit();
-			$firstTimeConnection = false; // This will prevent the tour from showing up again on page reload
+		const showFirstLoginModal =
+			getCookie('show_first_login_modal') === 'true' && user.accessible_domains.length === 0;
+		// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
+		// Later, we will have tours for domain managers, analysts etc.
+		if (showFirstLoginModal && user.is_admin) {
+			modalFirstLogin();
 		}
+		setCookie('show_first_login_modal', 'false');
 	});
 
 	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
-
-	$: $firstTimeConnection = $firstTimeConnection && user.accessible_domains.length === 0;
-
-	// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
-	// Later, we will have tours for domain managers, analysts etc.
-	$: displayGuidedTour = $firstTimeConnection && user.is_admin;
 </script>
 
 <aside
@@ -213,7 +269,7 @@
 	<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
 		<SideBarHeader />
 		<SideBarNavigation />
-		<SideBarFooter on:triggerGT={triggerVisit} />
+		<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
 	</nav>
 </aside>
 

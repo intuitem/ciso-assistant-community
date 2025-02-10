@@ -16,8 +16,6 @@ export const clientSideToast = writable(undefined);
 
 const requirementAssessmentsList: string[] = [];
 
-export const firstTimeConnection = persisted('firstTimeConnection', true);
-
 export const hideSuggestions = persisted('hideSuggestions', requirementAssessmentsList, {
 	storage: 'session'
 });
