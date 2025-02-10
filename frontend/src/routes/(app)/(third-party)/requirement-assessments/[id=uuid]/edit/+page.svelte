@@ -178,17 +178,17 @@
 
 	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = false;
-	function forceRefresh(){
+	function forceRefresh() {
 		refreshKey = !refreshKey;
 	}
 
 	$: if (form && form.newControl) {
-		forceRefresh()
+		forceRefresh();
 		$formStore.applied_controls.push(form.newControl);
 	}
 
 	$: if (form && form.newEvidence) {
-		forceRefresh()
+		forceRefresh();
 		$formStore.evidences.push(form.newEvidence);
 	}
 </script>
