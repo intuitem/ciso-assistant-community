@@ -125,7 +125,6 @@
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
-			console.log('form', form);
 			createModalCache.deleteCache(model.urlModel);
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
@@ -136,7 +135,6 @@
 			}
 		}
 	});
-	$: console.log('form', form);
 </script>
 
 <SuperForm
