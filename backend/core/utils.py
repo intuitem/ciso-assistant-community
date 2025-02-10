@@ -213,13 +213,20 @@ def compare_schema_versions(
             "Schema version found in backup",
             backup_schema_version=schema_ver_a,
         )
-        if schema_ver_a != schema_ver_b:
+        if schema_ver_a > schema_ver_b:
             logger.error(
                 "Backup schema version greater than current schema version",
                 backup_schema_version=schema_ver_a,
                 ciso_assistant_schema_version=schema_ver_b,
             )
             raise ValidationError({"error": "backupGreaterVersionError"})
+        elif schema_ver_a < schema_ver_b:
+            logger.info(
+                "Backup schema version less than current schema version",
+                backup_schema_version=schema_ver_a,
+                ciso_assistant_schema_version=schema_ver_b,
+            )
+            raise ValidationError({"error": "backupLowerVersionError"})
         logger.info("Schema version in backup matches current schema version")
     else:
         logger.info(
