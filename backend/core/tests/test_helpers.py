@@ -331,5 +331,5 @@ def test_invalid_semver_format():
         "invalid_version"  # This should trigger a formatting error in compare_versions.
     )
     version_b = "1.2.3"
-    with pytest.raises(Exception):
+    with pytest.raises(VersionFormatError):
         compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b=1)
