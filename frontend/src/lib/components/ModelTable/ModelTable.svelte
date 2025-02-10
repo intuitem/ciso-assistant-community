@@ -6,18 +6,21 @@
 
 	export let source: TableSource;
 
-	const next = source.meta?.next;
-	const previous = source.meta?.previous;
+	const { next, previous } = source.meta ?? {};
 
 	export let server = Boolean(next || previous);
 
 	let modelTable: ConstructorOfATypedSvelteComponent;
 
-	onMount(async () => {
-		modelTable = server ? ServerModelTable : ClientModelTable;
+	onMount(() => {
+		const selectedComponent = server ? ServerModelTable : ClientModelTable;
+		modelTable = selectedComponent;
 	});
 
-	$: _source = { ...source, meta: source.meta?.results || source.meta };
+	$: _source = {
+		...source,
+		meta: source.meta?.results ?? source.meta
+	};
 </script>
 
 <svelte:component this={modelTable} source={_source} {...$$restProps}>
