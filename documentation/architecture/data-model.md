@@ -1538,3 +1538,4 @@ erDiagram
         json     tracked_data
         boolean  compliance_status
     }
+```
