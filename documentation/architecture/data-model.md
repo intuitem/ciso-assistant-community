@@ -1,4 +1,4 @@
-# tionCISO Assistant Data Model
+# CISO Assistant Data Model
 
 ## Entity-relationship diagram
 
