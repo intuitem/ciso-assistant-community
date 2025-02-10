@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Permission
 import pytest
 from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError
 
 from core.helpers import get_rating_options, get_rating_options_abbr
 from core.models import (
@@ -10,7 +11,12 @@ from core.models import (
     RiskScenario,
     StoredLibrary,
 )
-from core.utils import VersionFormatError, compare_versions, parse_version
+from core.utils import (
+    VersionFormatError,
+    compare_versions,
+    parse_version,
+    compare_schema_versions,
+)
 from iam.models import Folder, Role, RoleAssignment, User
 
 
@@ -237,3 +243,93 @@ def test_compare_versions_different_levels():
     # Even if patch level distinguishes, at minor level they might be equal.
     assert compare_versions("v1.2.1", "v1.2.0", level="patch") == 1
     assert compare_versions("v1.2.1", "v1.2.0", level="minor") == 0
+
+
+# NOTE: These tests rely on the behavior defined in compare_schema_versions.
+#       When schema_ver_a is provided (not None):
+#         - If schema_ver_a equals schema_ver_b, the function succeeds.
+#         - Otherwise, it raises a ValidationError with {"error": "backupGreaterVersionError"}.
+#       When schema_ver_a is None (fallback to semantic version check):
+#         - It uses compare_versions(version_a, version_b, level="minor").
+#         - If the backup version (version_a) is greater than the current (version_b), it
+#           raises a ValidationError with {"error": "backupGreaterVersionError"}.
+#         - If version_a is less than version_b, it raises a ValidationError with
+#           {"error": "importVersionNotCompatibleWithCurrentVersion"}.
+#         - If they compare equal at the minor level, the function succeeds.
+
+
+# Test case 1: Happy path – schema version provided and matches current schema version.
+def test_schema_version_match():
+    schema_ver_a = 2
+    schema_ver_b = 2
+    version_a = "v1.2.3"
+    version_b = "v1.2.3"
+    # Should not raise any error
+    compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b)
+
+
+# Test case 2: Unhappy path – schema version provided but does not match current schema version.
+def test_schema_version_mismatch():
+    schema_ver_a = 3
+    schema_ver_b = 2
+    version_a = "v1.2.3"
+    version_b = "v1.2.3"
+    with pytest.raises(ValidationError) as excinfo:
+        compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b)
+    # Verify that the error message corresponds to the backup version being greater.
+    assert excinfo.value.args[0]["error"] == "backupGreaterVersionError"
+
+
+# Test case 3: Happy path – no schema version provided and backup version equals current version.
+def test_semver_equal_no_schema():
+    schema_ver_a = None
+    # Using versions that are equal at the 'minor' level.
+    version_a = "v1.2.0"
+    version_b = "v1.2"  # compare_versions pads "v1.2" to "v1.2.0" for a 'minor' check
+    # Should not raise an error because compare_versions("v1.2.0", "v1.2", level="minor") returns 0.
+    compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b=1)
+
+
+# Test case 4: Unhappy path – no schema version provided and backup version is greater than current version.
+def test_semver_backup_greater():
+    schema_ver_a = None
+    # At 'minor' level, [1, 3] > [1, 2]
+    version_a = "v1.3.0"
+    version_b = "v1.2.9"
+    with pytest.raises(ValidationError) as excinfo:
+        compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b=1)
+    assert excinfo.value.args[0]["error"] == "backupGreaterVersionError"
+
+
+# Test case 5: Unhappy path – no schema version provided and backup version is lower than current version.
+def test_semver_backup_less():
+    schema_ver_a = None
+    # At 'minor' level, [1, 1] < [1, 2]
+    version_a = "v1.1.0"
+    version_b = "v1.2.0"
+    with pytest.raises(ValidationError) as excinfo:
+        compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b=1)
+    assert (
+        excinfo.value.args[0]["error"] == "importVersionNotCompatibleWithCurrentVersion"
+    )
+
+
+# Test case 6: Edge case – version strings missing the patch version.
+def test_version_edge_case_padding():
+    schema_ver_a = None
+    # "1.2" should be padded to "1.2.0" for comparison
+    version_a = "v1.2"
+    version_b = "v1.2.0"
+    # They are equal at the 'minor' level (i.e. [1, 2] == [1, 2]).
+    compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b=1)
+
+
+# Test case 7: Edge case – invalid semantic version string.
+def test_invalid_semver_format():
+    schema_ver_a = None
+    version_a = (
+        "invalid_version"  # This should trigger a formatting error in compare_versions.
+    )
+    version_b = "1.2.3"
+    with pytest.raises(Exception):
+        compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b=1)
