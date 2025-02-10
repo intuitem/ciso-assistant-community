@@ -118,15 +118,15 @@
 	const _form = superForm(form, {
 		dataType: shape?.attachment ? 'form' : 'json',
 		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
-		invalidateAll: $$props.invalidateAll,
-		applyAction: $$props.applyAction,
-		resetForm: $$props.resetForm,
+		invalidateAll,
+		applyAction: $$props.applyAction ?? true,
+		resetForm: $$props.resetForm ?? false,
 		validators: zod(schema),
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
-			createModalCache.deleteCache(model.urlModel);
 			console.log('form', form);
+			createModalCache.deleteCache(model.urlModel);
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
@@ -136,6 +136,7 @@
 			}
 		}
 	});
+	$: console.log('form', form);
 </script>
 
 <SuperForm
