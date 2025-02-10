@@ -47,6 +47,7 @@ from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, UserGroup
 from rest_framework import filters, permissions, status, viewsets
@@ -132,6 +133,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     serializers_module = "core.serializers"
 
     def get_queryset(self):
+        """ the scope_folder_id query_param allows scoping the objects to retrieve"""
         if not self.model:
             return None
         object_ids_view = None
@@ -146,8 +148,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 if RoleAssignment.is_object_readable(self.request.user, self.model, id):
                     object_ids_view = [id]
         if not object_ids_view:
+            scope_folder_id = self.request.query_params.get("scope_folder_id")
+            scope_folder= get_object_or_404(Folder, id=scope_folder_id) if scope_folder_id else Folder.get_root_folder()
             object_ids_view = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, self.model
+                scope_folder, self.request.user, self.model
             )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
