@@ -215,7 +215,7 @@ def compare_schema_versions(
         )
         if schema_ver_a != schema_ver_b:
             logger.error(
-                "Backup schema version greater than current schena version",
+                "Backup schema version greater than current schema version",
                 backup_schema_version=schema_ver_a,
                 ciso_assistant_schema_version=schema_ver_b,
             )
