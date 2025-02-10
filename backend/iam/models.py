@@ -691,29 +691,44 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         ref_permission = Permission.objects.get(codename="view_folder")
         perimeter = {folder} | set(folder.get_sub_folders())
         # Process role assignments
-        role_assignments = [ra for ra in RoleAssignment.get_role_assignments(user) if 
-                            ref_permission in ra.role.permissions.all()]
+        role_assignments = [
+            ra
+            for ra in RoleAssignment.get_role_assignments(user)
+            if ref_permission in ra.role.permissions.all()
+        ]
         result_folders = defaultdict(set)
         for ra in role_assignments:
             ra_permissions = set(ra.role.permissions.all())
             ra_perimeter = set(ra.perimeter_folders.all())
             if ra.is_recursive:
-                ra_perimeter.update(*[folder.get_sub_folders() for folder in ra_perimeter])
+                ra_perimeter.update(
+                    *[folder.get_sub_folders() for folder in ra_perimeter]
+                )
             target_folders = perimeter & ra_perimeter
             for p in permissions & ra_permissions:
                 for f in target_folders:
                     result_folders[f].add(p)
         for f in result_folders:
             if hasattr(object_type, "folder"):
-                objects_ids = object_type.objects.filter(folder=f).values_list("id", flat=True)
+                objects_ids = object_type.objects.filter(folder=f).values_list(
+                    "id", flat=True
+                )
             elif hasattr(object_type, "risk_assessment"):
-                objects_ids = object_type.objects.filter(risk_assessment__folder=f).values_list("id", flat=True)
+                objects_ids = object_type.objects.filter(
+                    risk_assessment__folder=f
+                ).values_list("id", flat=True)
             elif hasattr(object_type, "entity"):
-                objects_ids = object_type.objects.filter(entity__folder=f).values_list("id", flat=True)
+                objects_ids = object_type.objects.filter(entity__folder=f).values_list(
+                    "id", flat=True
+                )
             elif hasattr(object_type, "provider_entity"):
-                objects_ids = object_type.objects.filter(provider_entity__folder=f).values_list("id", flat=True)
+                objects_ids = object_type.objects.filter(
+                    provider_entity__folder=f
+                ).values_list("id", flat=True)
             elif hasattr(object_type, "parent_folder"):
-                objects_ids = object_type.objects.filter(parent_folder=f).values_list("id", flat=True)
+                objects_ids = object_type.objects.filter(parent_folder=f).values_list(
+                    "id", flat=True
+                )
             else:
                 raise NotImplementedError("type not supported")
             if permission_view in result_folders[f]:
@@ -722,17 +737,23 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 result_change.update(objects_ids)
             if permission_delete in result_folders[f]:
                 result_delete.update(objects_ids)
-        
+
         if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
             # we assume only objects with a folder attribute are worth publishing
-            folders_with_local_view = [f for f in result_folders if permission_view in result_folders[f]]
+            folders_with_local_view = [
+                f for f in result_folders if permission_view in result_folders[f]
+            ]
             for my_folder in folders_with_local_view:
                 if my_folder.content_type != Folder.ContentType.ENCLAVE:
                     my_folder2 = my_folder.parent_folder
                     while my_folder2:
-                        result_view.update(object_type.objects.filter(folder=f, is_published=True).values_list("id", flat=True))
+                        result_view.update(
+                            object_type.objects.filter(
+                                folder=f, is_published=True
+                            ).values_list("id", flat=True)
+                        )
                         my_folder2 = my_folder2.parent_folder
- 
+
         return (list(result_view), list(result_change), list(result_delete))
 
     def is_user_assigned(self, user) -> bool:

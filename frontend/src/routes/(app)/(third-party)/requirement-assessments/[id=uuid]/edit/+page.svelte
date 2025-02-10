@@ -410,7 +410,9 @@
 										multiple
 										{form}
 										optionsEndpoint="applied-controls"
-										optionsDetailedUrlParameters={[['scope_folder_id', $page.data.requirementAssessment.folder.id]]}
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', $page.data.requirementAssessment.folder.id]
+										]}
 										optionsExtraFields={[['folder', 'str']]}
 										field="applied_controls"
 									/>
@@ -443,7 +445,9 @@
 										{form}
 										optionsEndpoint="evidences"
 										optionsExtraFields={[['folder', 'str']]}
-										optionsDetailedUrlParameters={[['scope_folder_id', $page.data.requirementAssessment.folder.id]]}
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', $page.data.requirementAssessment.folder.id]
+										]}
 										field="evidences"
 									/>
 								{/key}

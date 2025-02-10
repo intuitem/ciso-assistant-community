@@ -133,7 +133,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     serializers_module = "core.serializers"
 
     def get_queryset(self):
-        """ the scope_folder_id query_param allows scoping the objects to retrieve"""
+        """the scope_folder_id query_param allows scoping the objects to retrieve"""
         if not self.model:
             return None
         object_ids_view = None
@@ -149,7 +149,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     object_ids_view = [id]
         if not object_ids_view:
             scope_folder_id = self.request.query_params.get("scope_folder_id")
-            scope_folder= get_object_or_404(Folder, id=scope_folder_id) if scope_folder_id else Folder.get_root_folder()
+            scope_folder = (
+                get_object_or_404(Folder, id=scope_folder_id)
+                if scope_folder_id
+                else Folder.get_root_folder()
+            )
             object_ids_view = RoleAssignment.get_accessible_object_ids(
                 scope_folder, self.request.user, self.model
             )[0]
