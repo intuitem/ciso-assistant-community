@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
@@ -147,10 +145,6 @@
 			title: safeTranslate('add-' + data.riskModel.localName)
 		};
 		modalStore.trigger(modal);
-	}
-
-	$: if (form && form.redirect) {
-		goto(getSecureRedirect(form.redirect));
 	}
 </script>
 

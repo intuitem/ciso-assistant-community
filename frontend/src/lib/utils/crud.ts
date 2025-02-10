@@ -48,8 +48,9 @@ export const getOptions = ({
 		.map((object) => {
 			const my_label =
 				label != 'auto'
-					? object[label]
-					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
+					? (object[label] ?? '')
+					: (append(object['ref_id'], object['name'] ? object['name'] : object['description']) ??
+						'');
 			return {
 				label:
 					extra_fields.length > 0

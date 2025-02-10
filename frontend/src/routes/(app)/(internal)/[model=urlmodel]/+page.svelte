@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { driverInstance } from '$lib/utils/stores';
+	import * as m from '$paraglide/messages';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
-	import * as m from '$paraglide/messages';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { goto } from '$app/navigation';
-	import { driverInstance } from '$lib/utils/stores';
 
 	import { onMount } from 'svelte';
 
@@ -98,10 +96,6 @@
 			window.removeEventListener('keydown', handleKeyDown);
 		};
 	});
-
-	$: if (form && form.redirect) {
-		goto(getSecureRedirect(form.redirect));
-	}
 </script>
 
 {#if data.table}
