@@ -15,8 +15,6 @@ import django_filters as df
 from ciso_assistant.settings import (
     EMAIL_HOST,
     EMAIL_HOST_RESCUE,
-    VERSION,
-    SCHEMA_VERSION,
 )
 
 import shutil
@@ -83,7 +81,11 @@ from core.models import (
     RiskAssessment,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
-from core.utils import RoleCodename, UserGroupCodename, compare_versions
+from core.utils import (
+    RoleCodename,
+    UserGroupCodename,
+    compare_schema_versions,
+)
 
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -2271,43 +2273,7 @@ class FolderViewSet(BaseModelViewSet):
 
             # Check backup and local version
 
-            if schema_version is not None:
-                logger.info(
-                    "Schema version found in backup",
-                    backup_schema_version=schema_version,
-                )
-                if schema_version != SCHEMA_VERSION:
-                    logger.error(
-                        "Backup schema version greater than current schena version",
-                        backup_schema_version=schema_version,
-                        ciso_assistant_schema_version=SCHEMA_VERSION,
-                    )
-                    raise ValidationError({"error": "backupGreaterVersionError"})
-                logger.info("Schema version in backup matches current schema version")
-            else:
-                logger.info(
-                    "Schema version not found in backup, using version instead",
-                    import_version=import_version,
-                )
-                current_version = VERSION.split("-")[0]
-
-                # Compare backup and current versions at the 'minor' level
-                cmp_minor = compare_versions(
-                    import_version, current_version, level="minor"
-                )
-                if cmp_minor == 1:
-                    logger.error(
-                        "Backup version greater than current version",
-                        version=import_version,
-                    )
-                    raise ValidationError({"error": "backupGreaterVersionError"})
-                elif cmp_minor != 0:
-                    logger.error(
-                        f"Import version {import_version} not compatible with current version {current_version}"
-                    )
-                    raise ValidationError(
-                        {"error": "importVersionNotCompatibleWithCurrentVersion"}
-                    )
+            compare_schema_versions(schema_version, import_version)
 
             if "attachments" in directories:
                 attachments = {

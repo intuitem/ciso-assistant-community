@@ -2,7 +2,6 @@ import gzip
 import io
 import json
 import sys
-import re
 from datetime import datetime
 
 from django.core import management
@@ -15,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ciso_assistant.settings import VERSION, SQLITE_FILE, SCHEMA_VERSION
-from core.utils import compare_versions
+from core.utils import compare_schema_versions
 from serdes.serializers import LoadBackupSerializer
 
 import structlog
@@ -131,47 +130,7 @@ class LoadBackupView(APIView):
             if backup_version is not None or schema_version is not None:
                 break
 
-        if backup_version is None:
-            logger.error("Backup malformed: no version found")
-            return Response(
-                {"error": "errorBackupNoVersion"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if schema_version is not None:
-            logger.info(
-                "Schema version found in backup",
-                backup_schema_version=schema_version,
-            )
-            if int(schema_version) != int(SCHEMA_VERSION):
-                logger.error(
-                    "Backup schema version greater than current schena version",
-                    backup_schema_version=schema_version,
-                    ciso_assistant_schema_version=SCHEMA_VERSION,
-                )
-                raise ValidationError({"error": "backupGreaterVersionError"})
-            logger.info("Schema version in backup matches current schema version")
-        else:
-            logger.info(
-                "Schema version not found in backup, using version instead",
-                import_version=backup_version,
-            )
-
-            # Compare backup and current versions at the 'minor' level
-            cmp_minor = compare_versions(backup_version, current_version, level="minor")
-            if cmp_minor == 1:
-                logger.error(
-                    "Backup version greater than current version",
-                    version=backup_version,
-                )
-                raise ValidationError({"error": "GreaterBackupVersion"})
-            elif cmp_minor != 0:
-                logger.error(
-                    f"backup version {backup_version} not compatible with current version {current_version}"
-                )
-                raise ValidationError(
-                    {"error": "backupVersionNotCompatibleWithCurrentVersion"}
-                )
+        compare_schema_versions(schema_version, backup_version)
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(

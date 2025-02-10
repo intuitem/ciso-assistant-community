@@ -4,6 +4,12 @@ from re import sub
 from typing import Literal
 
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+
+from rest_framework.exceptions import ValidationError
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 def camel_case(s):
@@ -155,3 +161,85 @@ def compare_versions(
     elif tuple(va[:parts_to_check]) > tuple(vb[:parts_to_check]):
         return 1
     return 0
+
+
+def compare_schema_versions(
+    schema_ver_a: int | None,
+    version_a: str | None,
+    version_b: str = settings.VERSION.split("-")[0],
+    schema_ver_b: int = settings.SCHEMA_VERSION,
+    level: Literal["major", "minor", "patch"] = "patch",
+):
+    """
+    Compares the schema version in a backup with the current schema version,
+    falling back to a semantic version comparison if no schema version is provided.
+
+    Parameters:
+        schema_ver_a (int): The schema version stored in the backup.
+        version_a (str): The application version stored in the backup (e.g., '1.2.3').
+        version_b (str, optional): The current application version. Defaults to
+                                   `settings.VERSION.split("-")[0]`.
+        schema_ver_b (int, optional): The current schema version. Defaults to
+                                      `settings.SCHEMA_VERSION`.
+        level (str, optional): Granularity to compare for the semantic version check:
+                               'major' (first component), 'minor' (first two components),
+                               or 'patch' (all three components). Defaults to 'patch'.
+
+    Raises:
+        ValidationError: If the backup's schema version is greater than the current schema version,
+                        or if the backup's version is not compatible with the current version.
+
+    Logs:
+        - Logs an info message if a schema version is found in the backup.
+        - Logs an error and raises a `ValidationError` if the backup's schema version
+          is greater than the current schema version.
+        - Logs an info message if no schema version is found and falls back to a
+          semantic version comparison.
+        - Logs an error and raises a `ValidationError` if the backup version is
+          greater than or incompatible with the current version.
+
+    Example:
+        >>> compare_schema_versions(3, "1.2.0", "1.3.0", schema_ver_b=3, level="minor")
+        # No error raised, schema versions match, versions are not checked.
+
+        >>> compare_schema_versions(4, schema_ver_b=3, level="minor")
+        ValidationError: {'error': 'backupGreaterVersionError'}
+
+        >>> compare_schema_versions(None, "1.4.0", "1.3.0", level="minor")
+        ValidationError: {'error': 'backupGreaterVersionError'}
+    """
+    if schema_ver_a is not None:
+        logger.info(
+            "Schema version found in backup",
+            backup_schema_version=schema_ver_a,
+        )
+        if schema_ver_a != schema_ver_b:
+            logger.error(
+                "Backup schema version greater than current schena version",
+                backup_schema_version=schema_ver_a,
+                ciso_assistant_schema_version=schema_ver_b,
+            )
+            raise ValidationError({"error": "backupGreaterVersionError"})
+        logger.info("Schema version in backup matches current schema version")
+    else:
+        logger.info(
+            "Schema version not found in backup, using version instead",
+            import_version=version_a,
+        )
+        current_version = version_b
+
+        # Compare backup and current versions at the 'minor' level
+        cmp_minor = compare_versions(version_a, current_version, level="minor")
+        if cmp_minor == 1:
+            logger.error(
+                "Backup version greater than current version",
+                version=version_a,
+            )
+            raise ValidationError({"error": "backupGreaterVersionError"})
+        elif cmp_minor != 0:
+            logger.error(
+                f"Import version {version_a} not compatible with current version {current_version}"
+            )
+            raise ValidationError(
+                {"error": "importVersionNotCompatibleWithCurrentVersion"}
+            )
