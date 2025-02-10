@@ -41,6 +41,14 @@
 	bind:cachedValue={formDataCache['owners']}
 	label={m.owner()}
 />
+<AutocompleteSelect
+	{form}
+	options={getOptions({ objects: model.foreignKeys['approver'], label: 'email' })}
+	field="approver"
+	cacheLock={cacheLocks['approver']}
+	bind:cachedValue={formDataCache['approver']}
+	label={m.approver()}
+/>
 <Select
 	{form}
 	options={model.selectOptions['severity']}

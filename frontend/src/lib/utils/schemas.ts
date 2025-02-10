@@ -498,6 +498,7 @@ export const SecurityExceptionSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	owners: z.array(z.string().optional()).optional(),
+	approver: z.string().optional().nullable(),
 	severity: z.number().default(-1).optional(),
 	status: z.string().default('draft'),
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),

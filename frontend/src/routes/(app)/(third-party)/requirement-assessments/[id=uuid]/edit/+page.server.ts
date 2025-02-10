@@ -221,13 +221,20 @@ export const load = (async ({ fetch, params }) => {
 
 	const securityExceptionForeignKeys: Record<string, any> = {};
 	if (securityExceptionModel.foreignKeyFields) {
-		securityExceptionModel.foreignKeyFields.forEach((keyField) => {
-			if (keyField.field === 'folder') {
-				securityExceptionForeignKeys[keyField.field] = [requirementAssessment.folder];
-			} else {
-				securityExceptionForeignKeys[keyField.field] = [];
-			}
-		});
+		await Promise.all(
+			securityExceptionModel.foreignKeyFields.map(async (keyField) => {
+				if (keyField.field === 'folder') {
+					securityExceptionForeignKeys[keyField.field] = [requirementAssessment.folder];
+				} else {
+					const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+					const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
+					const data = await fetchJson(url);
+					if (data) {
+						securityExceptionForeignKeys[keyField.field] = data.results;
+					}
+				}
+			})
+		);
 	}
 	securityExceptionModel.foreignKeys = securityExceptionForeignKeys;
 

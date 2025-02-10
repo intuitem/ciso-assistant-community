@@ -760,6 +760,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Security exceptions',
 		foreignKeyFields: [
 			{ field: 'owners', urlModel: 'users' },
+			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]

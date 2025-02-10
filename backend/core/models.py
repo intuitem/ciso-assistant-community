@@ -1403,7 +1403,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
 
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
-        IN_REVIEW = "in review", "in review"
+        IN_REVIEW = "in_review", "in review"
         APPROVED = "approved", "approved"
         RESOLVED = "resolved", "resolved"
         EXPIRED = "expired", "expired"
@@ -1420,7 +1420,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         choices=Status.choices,
         null=False,
         default=Status.DRAFT,
-        max_length=10,
+        max_length=20,
     )
     expiration_date = models.DateField(
         help_text="Specify when the security exception will no longer apply",
@@ -1433,11 +1433,26 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         verbose_name="Owner",
         related_name="security_exceptions",
     )
+    approver = models.ForeignKey(
+        User,
+        max_length=200,
+        verbose_name=_("Approver"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     fields_to_check = ["name"]
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        super().clean()
+        if self.expiration_date and self.expiration_date < now().date():
+            raise ValidationError(
+                {"expiration_date": "Expiration date must be in the future"}
+            )
 
 
 class Asset(

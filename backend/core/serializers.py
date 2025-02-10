@@ -1102,6 +1102,7 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
 class SecurityExceptionReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owners = FieldsRelatedField(many=True)
+    approver = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
 
     class Meta:
