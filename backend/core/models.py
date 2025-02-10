@@ -737,15 +737,13 @@ class LoadedLibrary(LibraryMixin):
 
     @property
     def has_update(self) -> bool:
-        last_version = {}
-
-        stored_libraries = StoredLibrary.objects.filter(urn=self.urn)
-
-        for stored_library in stored_libraries:
-            if last_version.get(stored_library.urn, -1) < stored_library.version:
-                last_version[stored_library.urn] = stored_library.version
-
-        return last_version.get(self.urn, -1) > self.version
+        max_version = (
+            StoredLibrary.objects.filter(urn=self.urn)
+            .values_list("version", flat=True)
+            .order_by("-version")
+            .first()
+        )
+        return max_version > self.version if max_version is not None else False
 
     def delete(self, *args, **kwargs):
         if self.reference_count > 0:
