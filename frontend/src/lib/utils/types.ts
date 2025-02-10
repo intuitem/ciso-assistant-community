@@ -63,7 +63,8 @@ export const URL_MODEL = [
 	'stakeholders',
 	'strategic-scenarios',
 	'attack-paths',
-	'operational-scenarios'
+	'operational-scenarios',
+	'qualifications'
 	// 'ebios-rm',
 ] as const;
 

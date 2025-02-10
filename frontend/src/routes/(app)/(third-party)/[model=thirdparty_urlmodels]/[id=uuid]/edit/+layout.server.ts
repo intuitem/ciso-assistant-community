@@ -16,10 +16,7 @@ export const load: LayoutServerLoad = async (event) => {
 	const object = await event.fetch(objectEndpoint).then((res) => res.json());
 	const form = await superValidate(object, zod(schema), { errors: false });
 	const model = getModelInfo(event.params.model!);
-	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
-
-	const foreignKeys: Record<string, any> = {};
 
 	if (model.urlModel === 'risk-acceptances') {
 		const riskAcceptance = await event
@@ -39,19 +36,6 @@ export const load: LayoutServerLoad = async (event) => {
 				getSecureRedirect(event.url.searchParams.get('next')) ||
 					`/${model.urlModel}/${riskAcceptance.id}`
 			);
-		}
-	}
-
-	if (foreignKeyFields) {
-		for (const keyField of foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await event.fetch(url);
-			if (response.ok) {
-				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
 		}
 	}
 
@@ -75,8 +59,7 @@ export const load: LayoutServerLoad = async (event) => {
 			}
 		}
 	}
-	model.foreignKeys = foreignKeys;
 	model.selectOptions = selectOptions;
 
-	return { form, model, object, foreignKeys, selectOptions, URLModel };
+	return { form, model, object, selectOptions, URLModel };
 };

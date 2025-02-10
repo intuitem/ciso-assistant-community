@@ -12,7 +12,6 @@
 		action="?/updateStakeholder&next={$page.url.searchParams.get('next')}"
 		object={data.object}
 		selectOptions={data.selectOptions}
-		foreignKeys={data.foreignKeys}
 		model={data.model}
 		context="edit"
 	/>

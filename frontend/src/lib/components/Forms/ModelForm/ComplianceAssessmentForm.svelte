@@ -3,7 +3,6 @@
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -42,7 +41,7 @@
 		cacheLock={cacheLocks['baseline']}
 		bind:cachedValue={formDataCache['baseline']}
 		label={m.baseline()}
-		options={getOptions({ objects: model.foreignKeys['baseline'] })}
+		optionsEndpoint="compliance-assessments"
 	/>
 {/if}
 {#if initialData.ebios_rm_studies}
@@ -53,16 +52,13 @@
 		cacheLock={cacheLocks['ebios_rm_studies']}
 		bind:cachedValue={formDataCache['ebios_rm_studies']}
 		label={m.ebiosRmStudies()}
-		options={getOptions({ objects: model.foreignKeys['ebios_rm_studies'] })}
 		hidden
 	/>
 {/if}
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['perimeter'],
-		extra_fields: [['folder', 'str']]
-	})}
+	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
 	field="perimeter"
 	cacheLock={cacheLocks['perimeter']}
 	bind:cachedValue={formDataCache['perimeter']}
@@ -72,7 +68,7 @@
 <AutocompleteSelect
 	{form}
 	disabled={object.id}
-	options={getOptions({ objects: model.foreignKeys['framework'] })}
+	optionsEndpoint="frameworks"
 	field="framework"
 	cacheLock={cacheLocks['framework']}
 	bind:cachedValue={formDataCache['framework']}
@@ -95,7 +91,8 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
 	field="authors"
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
@@ -154,7 +151,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+		optionsEndpoint="users?is_third_party=false"
+		optionsLabelField="email"
 		field="reviewers"
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}

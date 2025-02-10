@@ -11,7 +11,6 @@
 	form={data.form}
 	object={data.object}
 	selectOptions={data.selectOptions}
-	foreignKeys={data.foreignKeys}
 	model={data.model}
 	{customNameDescription}
 	context="edit"

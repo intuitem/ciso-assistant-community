@@ -1,7 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -26,7 +25,7 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['entity'] })}
+	optionsEndpoint="entities"
 	field="entity"
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}
