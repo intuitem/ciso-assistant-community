@@ -7,7 +7,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 export const actions: Actions = {
 	load: async (event) => {
 		const endpoint = `${BASE_API_URL}/stored-libraries/${event.params.id}/import/`;
-		const res = await event.fetch(endpoint); // We will have to make this a POST later (we should use POST when creating a new object)
+		const res = await event.fetch(endpoint, { method: 'POST' });
 		if (!res.ok) {
 			const response = await res.json();
 			console.error('server response:', response);

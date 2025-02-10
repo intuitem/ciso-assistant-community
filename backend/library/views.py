@@ -99,7 +99,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
         lib.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["get"], url_path="import")
+    @action(detail=True, methods=["post"], url_path="import")
     def import_library(self, request, pk):
         if not RoleAssignment.is_access_allowed(
             user=request.user,
