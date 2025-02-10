@@ -1,23 +1,17 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { checkConstraints } from '$lib/utils/crud';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import * as m from '$paraglide/messages';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import type { PageData, ActionData } from './$types';
-	import * as m from '$paraglide/messages';
-	import { checkConstraints } from '$lib/utils/crud';
-	import { goto } from '$app/navigation';
-	import { getSecureRedirect } from '$lib/utils/helpers';
+	import type { ActionData, PageData } from './$types';
 
 	export let data: PageData;
 	export let form: ActionData;
 	$: URLModel = data.URLModel;
-
-	$: if (form && form.redirect) {
-		goto(getSecureRedirect(form.redirect));
-	}
 
 	const modalStore: ModalStore = getModalStore();
 
