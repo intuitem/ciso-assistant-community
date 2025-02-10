@@ -19,7 +19,6 @@ from django.core.management.utils import get_random_secret_key
 from ciso_assistant import meta
 
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
-COMMUNITY_BACKEND_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 load_dotenv(BASE_DIR / ".meta")
 
