@@ -66,11 +66,10 @@
 
 	function riskMatricesPreview(riskMatrices: []) {
 		let riskMatricesDumps = [];
-		let riskMatrixDump = {
-			json_definition: ''
-		};
 		for (const riskMatrix of riskMatrices) {
-			riskMatrixDump['json_definition'] = JSON.stringify(riskMatrix);
+			const riskMatrixDump = {
+				json_definition: JSON.stringify(riskMatrix)
+			};
 			riskMatricesDumps.push(riskMatrixDump);
 		}
 		return riskMatricesDumps;
