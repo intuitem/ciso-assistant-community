@@ -37,7 +37,7 @@
 	import { getOptions } from '$lib/utils/crud';
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import { superForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
@@ -114,6 +114,28 @@
 	onDestroy(() => {
 		createModalCache.garbageCollect();
 	});
+
+	const _form = superForm(form, {
+		dataType: shape?.attachment ? 'form' : 'json',
+		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
+		invalidateAll: $$props.invalidateAll,
+		applyAction: $$props.applyAction,
+		resetForm: $$props.resetForm,
+		validators: zod(schema),
+		taintedMessage: m.taintedFormMessage(),
+		validationMethod: 'auto',
+		onUpdated: async ({ form }) => {
+			createModalCache.deleteCache(model.urlModel);
+			console.log('form', form);
+			if (form.message?.redirect) {
+				goto(getSecureRedirect(form.message.redirect));
+			}
+			if (form.valid) {
+				parent.onConfirm();
+				createModalCache.deleteCache(model.urlModel);
+			}
+		}
+	});
 </script>
 
 <SuperForm
@@ -121,6 +143,7 @@
 	dataType={shape.attachment ? 'form' : 'json'}
 	enctype={shape.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded'}
 	data={form}
+	{_form}
 	{invalidateAll}
 	let:form
 	let:data
@@ -294,12 +317,7 @@
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit"
-				on:click={async (event) => {
-					const result = await form.validateForm(data);
-					if (result.valid) parent.onConfirm(event);
-					createModalCache.deleteCache(model.urlModel);
-				}}>{m.save()}</button
+				type="submit">{m.save()}</button
 			>
 		{:else}
 			{#if cancelButton}
