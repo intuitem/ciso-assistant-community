@@ -71,23 +71,6 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 
 	const scenarioModel = getModelInfo('risk-scenarios');
 
-	const foreignKeys: Record<string, any> = {};
-
-	if (scenarioModel.foreignKeyFields) {
-		for (const keyField of scenarioModel.foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await fetch(url);
-			if (response.ok) {
-				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
-		}
-	}
-
-	scenarioModel.foreignKeys = foreignKeys;
-
 	const selectOptions: Record<string, any> = {};
 
 	if (scenarioModel.selectFields) {
@@ -126,6 +109,8 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	);
 
 	const riskAssessmentModel = getModelInfo('risk-assessments');
+
+	const foreignKeys: Record<string, any> = {};
 
 	if (riskAssessmentModel.foreignKeyFields) {
 		for (const keyField of riskAssessmentModel.foreignKeyFields) {
