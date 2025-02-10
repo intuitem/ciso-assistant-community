@@ -31,13 +31,15 @@ export const loadTableData = async (state: State, URLModel: urlModel, endpoint: 
 };
 
 const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
-	let params = `offset=${offset}&limit=${rowsPerPage}`;
+	const params = new URLSearchParams();
+	params.set('offset', offset.toString());
+	params.set('limit', rowsPerPage.toString());
 	//
 	if (search) {
-		params += `&search=${search}`;
+		params.set('search', search);
 	}
 	if (sort) {
-		params += `&ordering=${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`;
+		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`);
 	}
 	// if (filters) {
 	// 	params += filters.map(({ filterBy, value }) => `&${filterBy}=${value}`).join('');
