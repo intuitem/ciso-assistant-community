@@ -25,7 +25,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);
-	const foreignKeyFields = urlParamModelForeignKeyFields(URLModel);
 
 	const selectOptions: Record<string, any> = {};
 
@@ -44,26 +43,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	}
 
 	model['selectOptions'] = selectOptions;
-
-	const foreignKeys: Record<string, any> = {};
-
-	for (const keyField of foreignKeyFields) {
-		const model = getModelInfo(keyField.urlModel);
-		const queryParams = keyField.urlParams
-			? `?${keyField.urlParams}${keyField.detail ? params.id : ''}`
-			: '';
-		let url = model.endpointUrl
-			? `${BASE_API_URL}/${model.endpointUrl}/${queryParams}`
-			: `${BASE_API_URL}/${model.urlModel}/${queryParams}`;
-		const response = await fetch(url);
-		if (response.ok) {
-			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-		} else {
-			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-		}
-	}
-
-	model['foreignKeys'] = foreignKeys;
 
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_study=${params.id}`;
 	const res = await fetch(endpoint);

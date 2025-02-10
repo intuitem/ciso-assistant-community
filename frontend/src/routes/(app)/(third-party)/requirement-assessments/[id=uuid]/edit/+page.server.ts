@@ -48,21 +48,6 @@ export const load = (async ({ fetch, params }) => {
 	object.evidences = object.evidences.map((evidence) => evidence.id);
 	const form = await superValidate(object, zod(schema), { errors: true });
 
-	const foreignKeys: Record<string, any> = {};
-	if (model.foreignKeyFields) {
-		await Promise.all(
-			model.foreignKeyFields.map(async (keyField) => {
-				const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-				const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-				const data = await fetchJson(url);
-				if (data) {
-					foreignKeys[keyField.field] = data.results;
-				}
-			})
-		);
-	}
-	model.foreignKeys = foreignKeys;
-
 	const selectOptions: Record<string, any> = {};
 	if (model.selectFields) {
 		await Promise.all(
@@ -133,25 +118,6 @@ export const load = (async ({ fetch, params }) => {
 		})
 	);
 
-	const measureForeignKeys: Record<string, any> = {};
-	if (measureModel.foreignKeyFields) {
-		await Promise.all(
-			measureModel.foreignKeyFields.map(async (keyField) => {
-				if (keyField.field === 'folder') {
-					measureForeignKeys[keyField.field] = [requirementAssessment.folder];
-				} else {
-					const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-					const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-					const data = await fetchJson(url);
-					if (data) {
-						measureForeignKeys[keyField.field] = data.results;
-					}
-				}
-			})
-		);
-	}
-	measureModel.foreignKeys = measureForeignKeys;
-
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
 	const evidenceCreateForm = await superValidate(
@@ -176,18 +142,6 @@ export const load = (async ({ fetch, params }) => {
 		);
 	}
 	evidenceModel.selectOptions = evidenceSelectOptions;
-
-	const evidenceForeignKeys: Record<string, any> = {};
-	if (evidenceModel.foreignKeyFields) {
-		evidenceModel.foreignKeyFields.forEach((keyField) => {
-			if (keyField.field === 'folder') {
-				evidenceForeignKeys[keyField.field] = [requirementAssessment.folder];
-			} else {
-				evidenceForeignKeys[keyField.field] = [];
-			}
-		});
-	}
-	evidenceModel.foreignKeys = evidenceForeignKeys;
 
 	return {
 		URLModel,
