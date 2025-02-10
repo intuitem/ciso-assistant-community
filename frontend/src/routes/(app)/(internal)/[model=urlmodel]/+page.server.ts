@@ -8,7 +8,7 @@ import {
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
-import { fail, superValidate, withFiles, setError } from 'sveltekit-superforms';
+import { fail, superValidate, withFiles, setError, message } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
@@ -121,7 +121,7 @@ export const actions: Actions = {
 				const version = res.missing_libraries[i + 1];
 				setError(form, 'non_field_errors', `${urn} v${version}`);
 			}
-			return fail(400, withFiles({ form }));
+			return message(form, { status: response.status });
 		}
 
 		if (!response.ok) {
