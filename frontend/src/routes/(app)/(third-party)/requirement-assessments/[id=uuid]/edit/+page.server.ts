@@ -46,9 +46,8 @@ export const load = (async ({ fetch, params }) => {
 
 	const schema = modelSchema(URLModel);
 	object.evidences = object.evidences.map((evidence) => evidence.id);
-	object.security_exceptions = object.security_exceptions?.map(
-		(security_exception) => security_exception.id
-	) ?? [];
+	object.security_exceptions =
+		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const selectOptions: Record<string, any> = {};
