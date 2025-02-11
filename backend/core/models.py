@@ -2958,16 +2958,31 @@ class ComplianceAssessment(Assessment):
 
     def get_requirements_result_count(self):
         requirements_result_count = []
-        for rs in RequirementAssessment.Result:
-            requirements_result_count.append(
-                (
-                    RequirementAssessment.objects.filter(result=rs)
-                    .filter(compliance_assessment=self)
-                    .filter(requirement__assessable=True)
-                    .count(),
-                    rs,
-                )
-            )
+        selected_implementation_groups_set = (
+            set(self.selected_implementation_groups)
+            if self.selected_implementation_groups
+            else None
+        )
+
+        requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        ).select_related("requirement")
+
+        if selected_implementation_groups_set is not None:
+            result_groups = {}
+            for req in requirements:
+                req_groups = set(req.requirement.implementation_groups or [])
+                if selected_implementation_groups_set & req_groups:
+                    result_groups.setdefault(req.result, []).append(req)
+
+            for rs in RequirementAssessment.Result:
+                count = len(result_groups.get(rs, []))
+                requirements_result_count.append((count, rs))
+        else:
+            for rs in RequirementAssessment.Result:
+                count = requirements.filter(result=rs).count()
+                requirements_result_count.append((count, rs))
+
         return requirements_result_count
 
     def get_measures_status_count(self):
