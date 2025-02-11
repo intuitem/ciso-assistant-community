@@ -12,7 +12,10 @@ import pytz
 from uuid import UUID
 from itertools import cycle
 import django_filters as df
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE, VERSION
+from ciso_assistant.settings import (
+    EMAIL_HOST,
+    EMAIL_HOST_RESCUE,
+)
 
 import shutil
 from pathlib import Path
@@ -78,7 +81,11 @@ from core.models import (
     RiskAssessment,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
-from core.utils import RoleCodename, UserGroupCodename
+from core.utils import (
+    RoleCodename,
+    UserGroupCodename,
+    compare_schema_versions,
+)
 
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -2236,6 +2243,45 @@ class FolderViewSet(BaseModelViewSet):
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import-dummy",
+    )
+    def import_dummy_domain(self, request):
+        timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+        domain_name = f"DEMO {timestamp}"
+
+        try:
+            dummy_fixture_path = (
+                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
+            )
+            if not dummy_fixture_path.exists():
+                logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
+                return Response(
+                    {"error": "dummyDomainFixtureNotFound"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            parsed_data = self._process_uploaded_file(dummy_fixture_path)
+            result = self._import_objects(
+                parsed_data, domain_name, load_missing_libraries=True, user=request.user
+            )
+            logger.info("Dummy domain imported successfully", domain_name=domain_name)
+            return Response(result, status=status.HTTP_200_OK)
+
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in dummy fixture file", exc_info=True)
+            return Response(
+                {"errors": ["Invalid JSON format"]},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except Exception:
+            logger.error("Error importing dummy domain", exc_info=True)
+            return Response(
+                {"error": "failedToImportDummyDomain"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
     def _process_uploaded_file(self, dump_file: str | Path) -> Any:
         """Process the uploaded file and return parsed data."""
         if not zipfile.is_zipfile(dump_file):
@@ -2257,6 +2303,7 @@ class FolderViewSet(BaseModelViewSet):
             try:
                 json_dump = json.loads(decompressed_data)
                 import_version = json_dump["meta"]["media_version"]
+                schema_version = json_dump["meta"].get("schema_version")
             except json.JSONDecodeError:
                 logger.error("Invalid JSON format in uploaded file", exc_info=True)
                 raise
@@ -2265,49 +2312,8 @@ class FolderViewSet(BaseModelViewSet):
 
             # Check backup and local version
 
-            VERSION_REGEX = r"^v[0-9]+\.[0-9]+\.[0-9]+"
-            match = re.match(VERSION_REGEX, import_version)
-            if match is None:
-                logger.error(
-                    "Backup malformed: invalid version",
-                    backup_version=import_version,
-                    current_version=VERSION,
-                )
-                return Response(
-                    {"error": "errorBackupInvalidVersion"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            compare_schema_versions(schema_version, import_version)
 
-            import_version = match.group()
-            current_version = VERSION.split("-")[0]
-
-            if current_version.lower() == "dev":
-                current_version = "v0.0.0"
-
-            import_version = [int(num) for num in import_version.lstrip("v").split(".")]
-            current_version = [
-                int(num) for num in current_version.lstrip("v").split(".")
-            ]
-            # All versions are composed of 3 numbers (see git tag)
-            for i in range(3):
-                if import_version[i] > current_version[i]:
-                    logger.error(
-                        "Backup version greater than current version",
-                        version=import_version,
-                    )
-                    # Refuse to import the backup and ask to update the instance before importing the backup
-                    return Response(
-                        {"error": "GreaterBackupVersion"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-            if not import_version == current_version:
-                logger.error(
-                    f"Import version {import_version} not compatible with current version {current_version}"
-                )
-                raise ValidationError(
-                    {"file": "importVersionNotCompatibleWithCurrentVersion"}
-                )
             if "attachments" in directories:
                 attachments = {
                     f for f in infolist if Path(f.filename).parent.name == "attachments"
@@ -3211,7 +3217,9 @@ class EvidenceViewSet(BaseModelViewSet):
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
-            if not evidence.attachment:
+            if not evidence.attachment or not evidence.attachment.storage.exists(
+                evidence.attachment.name
+            ):
                 return Response(status=status.HTTP_404_NOT_FOUND)
             if request.method == "GET":
                 content_type = mimetypes.guess_type(evidence.filename())[0]

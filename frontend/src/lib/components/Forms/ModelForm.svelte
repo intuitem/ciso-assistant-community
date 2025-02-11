@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { setContext, onDestroy } from 'svelte';
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
@@ -34,10 +34,9 @@
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
-	import { getOptions } from '$lib/utils/crud';
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import { superForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
@@ -49,6 +48,7 @@
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
 	import { goto } from '$lib/utils/breadcrumbs';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -62,6 +62,7 @@
 	export let duplicate = false;
 	export let importFolder = false;
 	export let customNameDescription = false;
+	export let additionalInitialData = {};
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -111,16 +112,59 @@
 		}
 	}
 
+	let missingConstraints: string[] = [];
+	// Context function to update missing constraints
+	function updateMissingConstraint(field: string, isMissing: boolean) {
+		if (isMissing && !missingConstraints.includes(field)) {
+			missingConstraints = [...missingConstraints, field];
+		} else if (!isMissing) {
+			missingConstraints = missingConstraints.filter((f) => f !== field);
+		}
+	}
+	setContext('updateMissingConstraint', updateMissingConstraint);
+
 	onDestroy(() => {
+		missingConstraints = [];
 		createModalCache.garbageCollect();
+	});
+
+	const _form = superForm(form, {
+		dataType: shape?.attachment ? 'form' : 'json',
+		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
+		invalidateAll,
+		applyAction: $$props.applyAction ?? true,
+		resetForm: $$props.resetForm ?? false,
+		validators: zod(schema),
+		taintedMessage: m.taintedFormMessage(),
+		validationMethod: 'auto',
+		onUpdated: async ({ form }) => {
+			createModalCache.deleteCache(model.urlModel);
+			if (form.message?.redirect) {
+				goto(getSecureRedirect(form.message.redirect));
+			}
+			if (form.valid) {
+				parent.onConfirm();
+				createModalCache.deleteCache(model.urlModel);
+			}
+		}
 	});
 </script>
 
+{#if missingConstraints.length > 0}
+	<div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+		{m.missingMandatoyObjects1({ model: safeTranslate(model.localName) })}:
+		{#each missingConstraints as key}
+			<li class="font-bold">{safeTranslate(key)}</li>
+		{/each}
+		{m.missingMandatoyObjects2()}
+	</div>
+{/if}
 <SuperForm
 	class="flex flex-col space-y-3"
 	dataType={shape.attachment ? 'form' : 'json'}
 	enctype={shape.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded'}
 	data={form}
+	{_form}
 	{invalidateAll}
 	let:form
 	let:data
@@ -135,12 +179,10 @@
 	{#if shape.reference_control && !duplicate}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({
-				objects: model.foreignKeys['reference_control'],
-				extra_fields: [['folder', 'str']],
-				suggestions: suggestions['reference_control'],
-				label: 'auto' // convention for automatic label calculation
-			})}
+			optionsEndpoint="reference-controls"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsLabelField="auto"
+			optionsSuggestions={suggestions['reference_control']}
 			field="reference_control"
 			cacheLock={cacheLocks['reference_control']}
 			bind:cachedValue={formDataCache['reference_control']}
@@ -190,7 +232,7 @@
 	{#if URLModel === 'perimeters'}
 		<PerimeterForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'folders' || URLModel === 'folders-import'}
-		<FolderForm {form} {importFolder} {model} {cacheLocks} {formDataCache} {initialData} />
+		<FolderForm {form} {importFolder} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 	{:else if URLModel === 'risk-assessments'}
 		<RiskAssessmentForm
 			{form}
@@ -276,7 +318,14 @@
 	{:else if URLModel === 'strategic-scenarios'}
 		<StrategicScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'attack-paths'}
-		<AttackPathForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		<AttackPathForm
+			{form}
+			{model}
+			{cacheLocks}
+			{formDataCache}
+			{initialData}
+			{additionalInitialData}
+		/>
 	{:else if URLModel === 'operational-scenarios'}
 		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{/if}
@@ -294,12 +343,7 @@
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit"
-				on:click={async (event) => {
-					const result = await form.validateForm(data);
-					if (result.valid) parent.onConfirm(event);
-					createModalCache.deleteCache(model.urlModel);
-				}}>{m.save()}</button
+				type="submit">{m.save()}</button
 			>
 		{:else}
 			{#if cancelButton}

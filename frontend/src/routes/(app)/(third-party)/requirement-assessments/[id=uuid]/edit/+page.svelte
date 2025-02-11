@@ -24,7 +24,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import {
 		ProgressRadial,
@@ -177,11 +176,19 @@
 
 	let tabSet = $page.data.user.is_third_party ? 1 : 0;
 
+	// Refresh AutompleteSelect to assign created applied control/evidence
+	let refreshKey = false;
+	function forceRefresh() {
+		refreshKey = !refreshKey;
+	}
+
 	$: if (form && form.newControl) {
+		forceRefresh();
 		$formStore.applied_controls.push(form.newControl);
 	}
 
 	$: if (form && form.newEvidence) {
+		forceRefresh();
 		$formStore.evidences.push(form.newEvidence);
 	}
 </script>
@@ -398,15 +405,15 @@
 										type="button"><i class="fa-solid fa-plus mr-2" />{m.addAppliedControl()}</button
 									>
 								</span>
-								<AutocompleteSelect
-									multiple
-									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
-									field="applied_controls"
-								/>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="applied-controls"
+										optionsExtraFields={[['folder', 'str']]}
+										field="applied_controls"
+									/>
+								{/key}
 								<ModelTable
 									source={$page.data.tables['applied-controls']}
 									hideFilters={true}
@@ -429,15 +436,15 @@
 										type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 									>
 								</span>
-								<AutocompleteSelect
-									multiple
-									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['evidences'],
-										extra_fields: [['folder', 'str']]
-									})}
-									field="evidences"
-								/>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="evidences"
+										optionsExtraFields={[['folder', 'str']]}
+										field="evidences"
+									/>
+								{/key}
 								<ModelTable
 									source={$page.data.tables['evidences']}
 									hideFilters={true}
