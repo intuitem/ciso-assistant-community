@@ -95,7 +95,7 @@
 	let selected: (typeof options)[] = [];
 	let selectedValues: (string | undefined)[] = [];
 	let isInternalUpdate = false;
-	let optionsLoaded = false;
+	let optionsLoaded = options.length ? true: false;
 	let initialValue = $value; // Store initial value
 	const default_value = nullable ? null : selectedValues[0];
 
@@ -141,20 +141,18 @@
 					if (updateMissingConstraint) {
 						updateMissingConstraint(field, isMissing);
 					}
-
-					// After options are loaded, set initial selection using stored initial value
-					if (initialValue) {
-						selected = options.filter((item) =>
-							Array.isArray(initialValue)
-								? initialValue.includes(item.value)
-								: item.value === initialValue
-						);
-					} else if (options.length === 1 && $constraints?.required) {
-						selected = [options[0]];
-					}
-
 					optionsLoaded = true;
 				}
+			}
+			// After options are loaded, set initial selection using stored initial value
+			if (initialValue) {
+				selected = options.filter((item) =>
+					Array.isArray(initialValue)
+						? initialValue.includes(item.value)
+						: item.value === initialValue
+				);
+			} else if (options.length === 1 && $constraints?.required) {
+				selected = [options[0]];
 			}
 		} catch (error) {
 			console.error(`Error fetching ${optionsEndpoint}:`, error);
