@@ -747,7 +747,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     while my_folder2:
                         result_view.update(
                             object_type.objects.filter(
-                                folder=f, is_published=True
+                                folder=my_folder2, is_published=True
                             ).values_list("id", flat=True)
                         )
                         my_folder2 = my_folder2.parent_folder
