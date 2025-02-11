@@ -2,18 +2,19 @@ import gzip
 import io
 import json
 import sys
-import re
 from datetime import datetime
 
 from django.core import management
 from django.core.management.commands import dumpdata, loaddata
 from django.http import HttpResponse
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ciso_assistant.settings import VERSION, SQLITE_FILE
+from ciso_assistant.settings import VERSION, SQLITE_FILE, SCHEMA_VERSION
+from core.utils import compare_schema_versions
 from serdes.serializers import LoadBackupSerializer
 
 import structlog
@@ -34,7 +35,9 @@ class ExportBackupView(APIView):
         )
 
         buffer = io.StringIO()
-        buffer.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
+        buffer.write(
+            f'[{{"meta": [{{"media_version": "{VERSION}", "schema_version": "{SCHEMA_VERSION}"}}]}},\n'
+        )
         # Here we dump th data to stdout
         # NOTE: We will not be able to dump selected folders with this method.
         management.call_command(
@@ -117,55 +120,17 @@ class LoadBackupView(APIView):
         metadata, decompressed_data = full_decompressed_data
         metadata = metadata["meta"]
 
+        current_version = VERSION.split("-")[0]
         backup_version = None
+        schema_version = 0
+
         for metadata_part in metadata:
             backup_version = metadata_part.get("media_version")
-            if backup_version is not None:
+            schema_version = metadata_part.get("schema_version")
+            if backup_version is not None or schema_version is not None:
                 break
 
-        if backup_version is None:
-            logger.error("Backup malformed: no version found")
-            return Response(
-                {"error": "errorBackupNoVersion"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if backup_version.lower() == "dev":
-            backup_version = "v0.0.0"
-
-        VERSION_REGEX = r"^v[0-9]+\.[0-9]+\.[0-9]+"
-        match = re.match(VERSION_REGEX, backup_version)
-        if match is None:
-            logger.error(
-                "Backup malformed: invalid version",
-                backup_version=backup_version,
-                current_version=VERSION,
-            )
-            return Response(
-                {"error": "errorBackupInvalidVersion"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        backup_version = match.group()
-        current_version = VERSION.split("-")[0]
-
-        if current_version.lower() == "dev":
-            current_version = "v0.0.0"
-
-        backup_version = [int(num) for num in backup_version.lstrip("v").split(".")]
-        current_version = [int(num) for num in current_version.lstrip("v").split(".")]
-        # All versions are composed of 3 numbers (see git tag)
-        for i in range(3):
-            if backup_version[i] > current_version[i]:
-                logger.error(
-                    "Backup version greater than current version",
-                    version=backup_version,
-                )
-                # Refuse to import the backup and ask to update the instance before importing the backup
-                return Response(
-                    {"error": "GreaterBackupVersion"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        compare_schema_versions(schema_version, backup_version)
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(
