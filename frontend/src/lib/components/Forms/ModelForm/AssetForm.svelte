@@ -113,7 +113,8 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['security_exceptions'] })}
+	optionsEndpoint="security-exceptions"
+	optionsExtraFields={[['folder', 'str']]}
 	field="security_exceptions"
 	cacheLock={cacheLocks['security_exceptions']}
 	bind:cachedValue={formDataCache['security_exceptions']}

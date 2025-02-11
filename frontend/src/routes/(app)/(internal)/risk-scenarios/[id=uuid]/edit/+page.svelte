@@ -194,7 +194,8 @@
 					<AutocompleteSelect
 						multiple
 						form={_form}
-						options={getOptions({ objects: data.foreignKeys['security_exceptions'] })}
+						optionsEndpoint="security-exceptions"
+						optionsExtraFields={[['folder', 'str']]}
 						field="security_exceptions"
 						label={m.securityExceptions()}
 					/>

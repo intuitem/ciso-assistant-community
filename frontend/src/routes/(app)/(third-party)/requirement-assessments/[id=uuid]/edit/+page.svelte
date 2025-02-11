@@ -493,10 +493,8 @@
 								<AutocompleteSelect
 									multiple
 									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['security_exceptions'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="security-exceptions"
+									optionsExtraFields={[['folder', 'str']]}
 									field="security_exceptions"
 								/>
 								<ModelTable
