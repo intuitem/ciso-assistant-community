@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -18,7 +17,9 @@
 {#if context !== 'edit'}
 	<AutocompleteSelect
 		{form}
-		options={getOptions({ objects: model.foreignKeys['ro_to_couple'], label: 'str' })}
+		optionsEndpoint="ro-to?is_selected=true&used=false"
+		optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
+		optionsLabelField="str"
 		field="ro_to_couple"
 		cacheLock={cacheLocks['ro_to_couple']}
 		bind:cachedValue={formDataCache['ro_to_couple']}

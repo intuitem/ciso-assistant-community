@@ -23,23 +23,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const createSchema = modelSchema(params.model!);
 	const createForm = await superValidate(zod(createSchema));
 	const model: ModelInfo = getModelInfo(params.model!);
-	const foreignKeyFields = urlParamModelForeignKeyFields(params.model);
 	const selectFields = urlParamModelSelectFields(params.model);
-
-	const foreignKeys: Record<string, any> = {};
-
-	for (const keyField of foreignKeyFields) {
-		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-		const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-		const response = await fetch(url);
-		if (response.ok) {
-			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-		} else {
-			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-		}
-	}
-
-	model['foreignKeys'] = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
 

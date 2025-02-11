@@ -4,10 +4,9 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { URL_MODEL_MAP, checkConstraints } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
@@ -82,7 +81,8 @@
 			props: {
 				form: model.createForm,
 				model: model,
-				debug: false
+				debug: false,
+				additionalInitialData: model.initialData
 			}
 		};
 		let modal: ModalSettings = {
@@ -91,18 +91,6 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + model.info.localName).toLowerCase(),
-				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 
