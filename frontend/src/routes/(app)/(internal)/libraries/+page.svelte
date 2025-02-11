@@ -16,9 +16,7 @@
 
 	let fileResetSignal = false;
 
-	$: availableUpdatesCount = Object.values(data.loadedLibrariesTable.meta.results).filter(
-		(lib) => lib.has_update
-	).length; // NOTE: This will not be accurate for server-side pagination. We should add a new endpoint to get the count of libraries with updates.
+	$: availableUpdatesCount = data?.updatableLibraries?.length;
 
 	$: if (data.loadedLibrariesTable.meta.count === 0) tabSet = 0;
 </script>
