@@ -18,7 +18,7 @@
 		[key: string]: any;
 	}
 
-	const libraryObjects: LibraryObjects = data.library.objects ?? [];
+	const libraryObjects: LibraryObjects = data?.library?.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
