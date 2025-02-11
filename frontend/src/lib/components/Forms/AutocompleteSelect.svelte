@@ -133,7 +133,7 @@
 				}
 				const response = await fetch(endpoint);
 				if (response.ok) {
-					const data = await response.json();
+					const data = await response.json().then((res) => res?.results ?? res);
 					options = processOptions(data);
 					const isRequired = mandatory || $constraints?.required;
 					const hasNoOptions = options.length === 0;
