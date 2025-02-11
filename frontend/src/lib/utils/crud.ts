@@ -747,11 +747,11 @@ export const FIELD_COMPONENT_MAP = {
 		attachment: EvidenceFilePreview
 	},
 	'stored-libraries': {
-		locale: LanguageDisplay,
+		locales: LanguageDisplay,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'loaded-libraries': {
-		locale: LanguageDisplay,
+		locales: LanguageDisplay,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	'user-groups': {
