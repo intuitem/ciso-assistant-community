@@ -95,7 +95,7 @@
 	let selected: (typeof options)[] = [];
 	let selectedValues: (string | undefined)[] = [];
 	let isInternalUpdate = false;
-	let optionsLoaded = options.length ? true: false;
+	let optionsLoaded = Boolean(options.length);
 	let initialValue = $value; // Store initial value
 	const default_value = nullable ? null : selectedValues[0];
 
