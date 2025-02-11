@@ -46,25 +46,10 @@ export const load = (async ({ fetch, params }) => {
 
 	const schema = modelSchema(URLModel);
 	object.evidences = object.evidences.map((evidence) => evidence.id);
-	object.security_exceptions = object.security_exceptions.map(
+	object.security_exceptions = object.security_exceptions?.map(
 		(security_exception) => security_exception.id
-	);
+	) ?? [];
 	const form = await superValidate(object, zod(schema), { errors: true });
-
-	const foreignKeys: Record<string, any> = {};
-	if (model.foreignKeyFields) {
-		await Promise.all(
-			model.foreignKeyFields.map(async (keyField) => {
-				const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-				const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-				const data = await fetchJson(url);
-				if (data) {
-					foreignKeys[keyField.field] = data.results;
-				}
-			})
-		);
-	}
-	model.foreignKeys = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
 	if (model.selectFields) {
@@ -136,25 +121,6 @@ export const load = (async ({ fetch, params }) => {
 		})
 	);
 
-	const measureForeignKeys: Record<string, any> = {};
-	if (measureModel.foreignKeyFields) {
-		await Promise.all(
-			measureModel.foreignKeyFields.map(async (keyField) => {
-				if (keyField.field === 'folder') {
-					measureForeignKeys[keyField.field] = [requirementAssessment.folder];
-				} else {
-					const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-					const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-					const data = await fetchJson(url);
-					if (data) {
-						measureForeignKeys[keyField.field] = data.results;
-					}
-				}
-			})
-		);
-	}
-	measureModel.foreignKeys = measureForeignKeys;
-
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
 	const evidenceCreateForm = await superValidate(
@@ -179,18 +145,6 @@ export const load = (async ({ fetch, params }) => {
 		);
 	}
 	evidenceModel.selectOptions = evidenceSelectOptions;
-
-	const evidenceForeignKeys: Record<string, any> = {};
-	if (evidenceModel.foreignKeyFields) {
-		evidenceModel.foreignKeyFields.forEach((keyField) => {
-			if (keyField.field === 'folder') {
-				evidenceForeignKeys[keyField.field] = [requirementAssessment.folder];
-			} else {
-				evidenceForeignKeys[keyField.field] = [];
-			}
-		});
-	}
-	evidenceModel.foreignKeys = evidenceForeignKeys;
 
 	const securityExceptionModel = getModelInfo('security-exceptions');
 	const securityExceptionCreateSchema = modelSchema('security-exceptions');
@@ -218,25 +172,6 @@ export const load = (async ({ fetch, params }) => {
 		);
 	}
 	securityExceptionModel.selectOptions = securityExceptionSelectOptions;
-
-	const securityExceptionForeignKeys: Record<string, any> = {};
-	if (securityExceptionModel.foreignKeyFields) {
-		await Promise.all(
-			securityExceptionModel.foreignKeyFields.map(async (keyField) => {
-				if (keyField.field === 'folder') {
-					securityExceptionForeignKeys[keyField.field] = [requirementAssessment.folder];
-				} else {
-					const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-					const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-					const data = await fetchJson(url);
-					if (data) {
-						securityExceptionForeignKeys[keyField.field] = data.results;
-					}
-				}
-			})
-		);
-	}
-	securityExceptionModel.foreignKeys = securityExceptionForeignKeys;
 
 	return {
 		URLModel,

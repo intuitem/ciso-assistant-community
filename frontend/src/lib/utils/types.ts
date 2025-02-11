@@ -64,6 +64,7 @@ export const URL_MODEL = [
 	'strategic-scenarios',
 	'attack-paths',
 	'operational-scenarios',
+	'qualifications',
 	// 'ebios-rm',
 	'security-exceptions'
 ] as const;

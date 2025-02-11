@@ -2,7 +2,6 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -16,7 +15,7 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['folder'] })}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
@@ -50,10 +49,8 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['applied_controls'],
-		extra_fields: [['folder', 'str']]
-	})}
+	optionsEndpoint="applied-controls"
+	optionsExtraFields={[['folder', 'str']]}
 	field="applied_controls"
 	label={m.appliedControls()}
 />
@@ -77,7 +74,8 @@
 	multiple
 	{form}
 	createFromSelection={true}
-	options={getOptions({ objects: model.foreignKeys['filtering_labels'], label: 'label' })}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
