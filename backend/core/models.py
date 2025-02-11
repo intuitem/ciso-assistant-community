@@ -14,7 +14,7 @@ from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import F, Q, OuterRef, Subquery
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -744,6 +744,20 @@ class LoadedLibrary(LibraryMixin):
             .first()
         )
         return max_version > self.version if max_version is not None else False
+
+    @classmethod
+    def updatable_libraries(cls):
+        # Create a subquery to get the highest version in StoredLibrary for the same urn.
+        latest_version_qs = (
+            StoredLibrary.objects.filter(urn=OuterRef("urn"))
+            .order_by("-version")
+            .values("version")[:1]
+        )
+
+        # Annotate each LoadedLibrary with the latest stored version and filter.
+        return cls.objects.annotate(
+            latest_stored_version=Subquery(latest_version_qs)
+        ).filter(latest_stored_version__gt=F("version"))
 
     def delete(self, *args, **kwargs):
         if self.reference_count > 0:

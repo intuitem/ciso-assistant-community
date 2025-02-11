@@ -287,3 +287,9 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         return Response(
             error_msg, status=HTTP_422_UNPROCESSABLE_ENTITY
         )  # We must make at least one error message
+
+    @action(methods=("get",), detail=False, url_path="available-updates")
+    def available_updates(self, request):
+        return Response(
+            LoadedLibrarySerializer(LoadedLibrary.updatable_libraries(), many=True).data
+        )
