@@ -2,10 +2,11 @@ urn: urn:kantox:risk:library:FCA-UK-SYSC15A
 locale: en
 ref_id: SYSC 15A
 name: FCA UK - Chapter 15A Operational resilience (SYSC 15A)
-description: Regulation of the FCA UK dedicated to operational resilience
+description: 'Regulation of the FCA UK dedicated to operational resilience. See reference
+  : https://www.handbook.fca.org.uk/handbook/SYSC/15A/'
 copyright: Financial Conduct Authority United Kingdom
 version: 1
-publication_date: 2025-02-03
+publication_date: 2025-02-12
 provider: Financial Conduct Authority United Kingdom
 packager: Kantox EU
 objects:
@@ -13,7 +14,8 @@ objects:
     urn: urn:kantox:risk:framework:FCA-UK-SYSC15A
     ref_id: FCA-UK-SYSC15A
     name: FCA UK - Chapter 15A Operational resilience
-    description: Regulation of the FCA UK dedicated to operational resilience
+    description: 'Regulation of the FCA UK dedicated to operational resilience. See
+      reference : https://www.handbook.fca.org.uk/handbook/SYSC/15A/'
     min_score: 1
     max_score: 5
     scores_definition:
@@ -57,16 +59,6 @@ objects:
 
         Minimal target for metrics has been established and continually improving.
         Less than 1% of process exceptions.'
-    implementation_groups_definition:
-    - ref_id: B
-      name: Basic
-      description: null
-    - ref_id: I
-      name: Intermediate
-      description: null
-    - ref_id: A
-      name: Advanced
-      description: null
     requirement_nodes:
     - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
       assessable: false
