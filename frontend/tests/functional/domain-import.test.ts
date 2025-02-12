@@ -34,6 +34,8 @@ test('Database export should generate valid backup file', async ({ logedPage, pa
 
 		const file = new URL('../utils/sample-domain-schema-1.bak', import.meta.url).pathname;
 
+		console.debug('file', file);
+
 		await page.getByTestId('import-button').click();
 		await page.getByTestId('form-input-name').fill('foobar');
 		await page.getByTestId('form-input-file').click();
