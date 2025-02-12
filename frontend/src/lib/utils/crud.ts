@@ -99,6 +99,7 @@ interface ForeignKeyField {
 	urlParams?: string;
 	detail?: boolean;
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
+	disableAddDeleteButtons?: boolean;
 }
 
 interface Field {
@@ -755,7 +756,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
-		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
+		reverseForeignKeyFields: [
+			{ field: 'security_exceptions', urlModel: 'applied-controls', disableAddDeleteButtons: true }
+		]
 	}
 };
 
