@@ -399,6 +399,7 @@ class AssetViewSet(BaseModelViewSet):
         "type",
         "risk_scenarios",
         "ebios_rm_studies",
+        "security_exceptions",
     ]
     search_fields = ["name", "description", "business_value"]
 
@@ -643,6 +644,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "severity",
         "risk_scenarios",
         "applied_controls",
+        "security_exceptions",
     ]
     search_fields = ["name", "description"]
 
@@ -1056,6 +1058,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "requirement_assessments",
         "evidences",
         "progress_field",
+        "security_exceptions",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
@@ -1562,6 +1565,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "threats",
         "assets",
         "applied_controls",
+        "security_exceptions",
     ]
     ordering = ["ref_id"]
     ordering_fields = ordering
@@ -3812,6 +3816,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "compliance_assessment",
         "applied_controls",
+        "security_exceptions",
     ]
     search_fields = ["name", "description"]
 

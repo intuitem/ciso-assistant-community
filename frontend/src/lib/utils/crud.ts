@@ -758,7 +758,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		reverseForeignKeyFields: [
-			{ field: 'security_exceptions', urlModel: 'applied-controls', disableAddDeleteButtons: true }
+			{ field: 'security_exceptions', urlModel: 'applied-controls', disableAddDeleteButtons: true },
+			{ field: 'security_exceptions', urlModel: 'assets', disableAddDeleteButtons: true },
+			{ field: 'security_exceptions', urlModel: 'vulnerabilities', disableAddDeleteButtons: true },
+			{
+				field: 'security_exceptions',
+				urlModel: 'requirement-assessments',
+				disableAddDeleteButtons: true
+			},
+			{ field: 'security_exceptions', urlModel: 'risk-scenarios', disableAddDeleteButtons: true }
 		]
 	}
 };
