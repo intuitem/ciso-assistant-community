@@ -1,54 +1,100 @@
 import { expect, test } from '../utils/test-utils.js';
-import { promisify } from 'node:util';
-import { gunzip } from 'node:zlib';
+import type { Page } from '@playwright/test';
 
-test('Database export should generate valid backup file', async ({ logedPage, page }) => {
-	await page.waitForLoadState('networkidle');
+// Helper to dismiss any modal/popover that might block interactions.
+async function dismissBlockingModals(page: Page) {
 	const modalBackdrop = page.getByTestId('modal-backdrop');
+	if (await modalBackdrop.isVisible()) {
+		await modalBackdrop.press('Escape');
+		await expect(modalBackdrop).toBeHidden();
+	}
+	const dummyElement = page.locator('#driver-dummy-element');
+	if (await dummyElement.isVisible()) {
+		await page.locator('.driver-popover-close-btn').first().click();
+		await expect(dummyElement).toBeHidden();
+	}
+	// Ensure no lingering modals remain.
+	await page.locator('body').press('Escape');
+}
+
+// Helper to navigate to the folders list page.
+async function navigateToFolders(page: Page) {
+	await page.getByRole('button', { name: 'Organization' }).click();
+	await page.getByTestId('accordion-item-folders').click();
+	await expect(page).toHaveURL('/folders');
+	await expect(page.getByTestId('import-button')).toBeVisible();
+}
+
+// Helper to extract the row count from the UI.
+// Assumes the row count element contains at least one number.
+async function getRowCount(page: Page) {
+	const rowCountText = await page.getByTestId('row-count').innerText();
+	const match = rowCountText.match(/\d+$/);
+	return match ? parseInt(match[0], 10) : 0;
+}
+
+test('User can import a domain from a .bak file', async ({ logedPage, page }) => {
+	await page.waitForLoadState('networkidle');
 
 	await test.step('Dismiss any blocking modals', async () => {
-		if (await modalBackdrop.isVisible()) {
-			await modalBackdrop.press('Escape');
-			await expect(modalBackdrop).not.toBeVisible();
-		}
-
-		if (await page.locator('#driver-dummy-element').isVisible()) {
-			await page.locator('.driver-popover-close-btn').first().click();
-		}
+		await dismissBlockingModals(page);
 	});
 
-	// Attempt to close any remaining modals
-	await page.locator('body').press('Escape');
-
 	await test.step('Navigate to folders list page', async () => {
-		await page.getByRole('button', { name: 'Organization' }).click();
-		await page.getByTestId('accordion-item-folders').click();
-		await expect(page).toHaveURL('/folders');
-		await expect(page.getByTestId('import-button')).toBeVisible();
+		await navigateToFolders(page);
 	});
 
 	await test.step('Import sample domain', async () => {
-		const initialRowCountText = await page.getByTestId('row-count').innerText();
-		const initialLastChar = initialRowCountText[initialRowCountText.length - 1];
-		const initialRowCount = parseInt(initialLastChar.match(/\d+/) ? initialLastChar : '0');
+		const initialRowCount = await getRowCount(page);
 
-		const file = new URL('../utils/sample-domain-schema-1.bak', import.meta.url).pathname;
+		// Build a unique domain name for this import
+		const domainName = `imported_domain_${Date.now()}`;
+		const filePath = new URL('../utils/sample-domain-schema-1.bak', import.meta.url).pathname;
 
-		console.debug('file', file);
-
+		// Open the import dialog and fill in the form.
 		await page.getByTestId('import-button').click();
-		await page.getByTestId('form-input-name').fill('foobar');
+		await page.getByTestId('form-input-name').fill(domainName);
 		await page.getByTestId('form-input-file').click();
-		await page.getByTestId('form-input-file').setInputFiles(file);
+		await page.getByTestId('form-input-file').setInputFiles(filePath);
 		await page.getByTestId('form-input-load-missing-libraries').check();
 		await page.getByTestId('save-button').click();
 
-		await expect(page.getByTestId('toast')).toBeVisible();
+		// Verify that a success toast appears with expected text.
+		const toast = page.getByTestId('toast');
+		await expect(toast).toBeVisible();
+		await expect(toast).toHaveText(/successfully imported/i);
 
-		const newRowCountText = await page.getByTestId('row-count').innerText();
-		const newLastChar = newRowCountText[newRowCountText.length - 1];
-		const newRowCount = parseInt(newLastChar.match(/\d+/) ? newLastChar : '0');
+		// Confirm that the number of rows has increased.
+		const newRowCount = await getRowCount(page);
+		expect(newRowCount).toBeGreaterThan(initialRowCount);
+	});
+});
 
+test('User can load demo data', async ({ logedPage, page }) => {
+	await page.waitForLoadState('networkidle');
+
+	await test.step('Dismiss any blocking modals', async () => {
+		await dismissBlockingModals(page);
+	});
+
+	await test.step('Navigate to folders list page', async () => {
+		await navigateToFolders(page);
+	});
+
+	await test.step('Load demo data', async () => {
+		const initialRowCount = await getRowCount(page);
+
+		// Trigger loading demo data via the sidebar.
+		await page.getByTestId('sidebar-more-btn').click();
+		await page.getByTestId('load-demo-data-button').click();
+
+		// Verify that a toast with demo data success message appears.
+		const toast = page.getByTestId('toast');
+		await expect(toast).toBeVisible();
+		await expect(toast).toHaveText(/successfully imported/i);
+
+		// Confirm that the new row count is greater than the initial.
+		const newRowCount = await getRowCount(page);
 		expect(newRowCount).toBeGreaterThan(initialRowCount);
 	});
 });
