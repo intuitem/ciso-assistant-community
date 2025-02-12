@@ -184,7 +184,7 @@ export EMAIL_PORT=$MAILER_SMTP_SERVER_PORT
 export CISO_ASSISTANT_VERSION=$(git describe --tags --always)
 export CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)
 
-cd $APP_DIR/backend/
+cd $APP_DIR/backend/ || exit 1
 if [[ -z $KEEP_DATABASE_SNAPSHOT ]]; then
   poetry run python3 manage.py makemigrations
   poetry run python3 manage.py migrate
