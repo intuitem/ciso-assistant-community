@@ -16,7 +16,7 @@ export default {
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
 	user: {
-		email: 'User@tests.com',
+		email: 'user@tests.com',
 		password: 'pass123wordTest',
 		firstName: 'Test',
 		lastName: 'User'
