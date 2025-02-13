@@ -2320,7 +2320,16 @@ class FolderViewSet(BaseModelViewSet):
 
             # Check backup and local version
 
-            compare_schema_versions(schema_version, import_version)
+            try:
+                schema_version_int = int(schema_version)
+            except (ValueError, TypeError) as e:
+                logger.error(
+                    "Invalid schema version format",
+                    schema_version=schema_version,
+                    exc_info=e,
+                )
+                raise ValidationError({"error": "invalidSchemaVersionFormat"})
+            compare_schema_versions(schema_version_int, import_version)
 
             if "attachments" in directories:
                 attachments = {

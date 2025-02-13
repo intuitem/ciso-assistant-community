@@ -171,6 +171,8 @@ fi
 echo "Starting backend server..."
 unset POSTGRES_NAME POSTGRES_USER POSTGRES_PASSWORD
 export CISO_ASSISTANT_URL=http://localhost:4173
+export CISO_ASSISTANT_VERSION=$(git describe --tags --always)
+export CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)
 export ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 export DJANGO_DEBUG=True
 export DJANGO_SUPERUSER_EMAIL=admin@tests.com
