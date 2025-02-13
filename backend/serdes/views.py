@@ -94,7 +94,6 @@ class LoadBackupView(APIView):
 
         try:
             management.call_command("flush", interactive=False)
-            raise Exception("Test")
             management.call_command(
                 "loaddata",
                 "-",
