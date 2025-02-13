@@ -164,7 +164,18 @@ class LoadBackupView(APIView):
             if backup_version is not None or schema_version is not None:
                 break
 
-        compare_schema_versions(int(schema_version), backup_version)
+        try:
+            schema_version_int = int(schema_version)
+        except (ValueError, TypeError) as e:
+            logger.error(
+                "Invalid schema version format",
+                schema_version=schema_version,
+                exc_info=e,
+            )
+            return Response(
+                {"error": "InvalidSchemaVersion"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        compare_schema_versions(schema_version_int, backup_version)
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(
