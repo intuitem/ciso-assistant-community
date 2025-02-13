@@ -72,7 +72,7 @@ export const actions: Actions = {
 		return defaultDeleteFormAction({ event, urlModel: event.params.model! });
 	},
 	importFolder: async (event) => {
-		const formData = Object.fromEntries(await event.request.formData());
+		const formData = await event.request.formData();
 		if (!formData) return fail(400, { error: 'No form data' });
 
 		const form = await superValidate(formData, zod(modelSchema('folders-import')));
@@ -80,7 +80,7 @@ export const actions: Actions = {
 			return fail(400, withFiles({ form }));
 		}
 
-		const { file } = formData as { file: File };
+		const { file } = Object.fromEntries(formData) as { file: File };
 
 		const endpoint = `${BASE_API_URL}/folders/import/${form.data.load_missing_libraries ? '?load_missing_libraries=true' : ''}`;
 

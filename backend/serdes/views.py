@@ -4,20 +4,18 @@ import json
 import sys
 from datetime import datetime
 
+import structlog
 from django.core import management
-from django.core.management.commands import dumpdata, loaddata
+from django.core.management.commands import dumpdata
 from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ciso_assistant.settings import VERSION, SQLITE_FILE, SCHEMA_VERSION
+from ciso_assistant.settings import SCHEMA_VERSION, VERSION
 from core.utils import compare_schema_versions
 from serdes.serializers import LoadBackupSerializer
-
-import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -65,16 +63,39 @@ class LoadBackupView(APIView):
     serializer_class = LoadBackupSerializer
 
     def load_backup(self, request, decompressed_data, backup_version, current_version):
-        with open(SQLITE_FILE, "rb") as database_file:
-            database_recover_data = database_file.read()
+        # Back up current database state using dumpdata into an in-memory string.
+        backup_buffer = io.StringIO()
+        try:
+            management.call_command(
+                "dumpdata",
+                stdout=backup_buffer,
+                format="json",
+                verbosity=0,
+                exclude=[
+                    "contenttypes",
+                    "auth.permission",
+                    "sessions.session",
+                    "iam.ssosettings",
+                    "knox.authtoken",
+                ],
+            )
+        except Exception as e:
+            logger.error("Error dumping current DB state", exc_info=e)
+            return Response(
+                {"error": "BackupDumpFailed"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        current_backup = backup_buffer.getvalue()
 
+        # Prepare to load the uploaded backup.
+        # Reset sys.stdin so loaddata reads from our provided backup data.
         sys.stdin = io.StringIO(decompressed_data)
         request.session.flush()
-        management.call_command("flush", interactive=False)
+
         try:
-            # Here we load the data from stdin
+            management.call_command("flush", interactive=False)
             management.call_command(
-                loaddata.Command(),
+                "loaddata",
                 "-",
                 format="json",
                 verbosity=0,
@@ -88,14 +109,27 @@ class LoadBackupView(APIView):
             )
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)
-            with open(SQLITE_FILE, "wb") as database_file:
-                database_file.write(database_recover_data)
+            # On failure, restore the original data.
+            try:
+                sys.stdin = io.StringIO(current_backup)
+                management.call_command("flush", interactive=False)
+                management.call_command(
+                    "loaddata",
+                    "-",
+                    format="json",
+                    verbosity=0,
+                )
+            except Exception as restore_error:
+                logger.error("Error restoring original backup", exc_info=restore_error)
+                return Response(
+                    {"error": "RestoreFailed"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
 
             if backup_version != current_version:
                 logger.error("Backup version different than current version")
                 return Response(
-                    {"error": "LowerBackupVersion"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {"error": "LowerBackupVersion"}, status=status.HTTP_400_BAD_REQUEST
                 )
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         return Response({}, status=status.HTTP_200_OK)
@@ -130,7 +164,18 @@ class LoadBackupView(APIView):
             if backup_version is not None or schema_version is not None:
                 break
 
-        compare_schema_versions(schema_version, backup_version)
+        try:
+            schema_version_int = int(schema_version)
+        except (ValueError, TypeError) as e:
+            logger.error(
+                "Invalid schema version format",
+                schema_version=schema_version,
+                exc_info=e,
+            )
+            return Response(
+                {"error": "InvalidSchemaVersion"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        compare_schema_versions(schema_version_int, backup_version)
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(
