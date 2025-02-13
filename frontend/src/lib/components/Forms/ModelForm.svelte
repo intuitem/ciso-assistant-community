@@ -138,7 +138,6 @@
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
-			createModalCache.deleteCache(model.urlModel);
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}

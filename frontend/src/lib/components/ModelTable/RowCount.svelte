@@ -5,7 +5,7 @@
 	const rowCount = handler.getRowCount();
 </script>
 
-<aside class="text-sm">
+<aside class="text-sm" data-testid="row-count">
 	{#if $rowCount.total > 0}
 		{m.rowCount({ start: $rowCount.start, end: $rowCount.end, total: $rowCount.total })}
 	{:else}
