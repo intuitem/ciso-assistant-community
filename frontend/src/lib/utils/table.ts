@@ -1,17 +1,16 @@
 // description of the columns for each ListView
 
-import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
 import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+import type { Option } from 'svelte-multiselect';
 
 interface ListViewFilterConfig {
 	component: ComponentType;
 	filter?: (columnValue: any, value: any) => boolean;
-	getColumn?: (row: Row) => Row[keyof Row];
 	filterProps?: (rows: any[], field: string) => { [key: string]: any };
-	extraProps?: { label: string; optionsEndpoint: string; multiple?: boolean };
+	extraProps?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
 	alwaysDisplay?: boolean;
 	alwaysDefined?: boolean;
 	hide?: boolean;
@@ -29,18 +28,23 @@ interface ListViewFieldsConfig {
 	};
 }
 
+const YES_NO_OPTIONS = [
+	{ label: 'yes', value: 'true' },
+	{ label: 'no', value: 'false' }
+];
+
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.lc_status,
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'status'
+		optionsEndpoint: 'perimeters/lc_status',
+		label: 'status',
+		multiple: true
 	},
 	alwaysDisplay: true
 };
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	alwaysDefined: true,
 	extraProps: {
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
 		label: 'domain',
@@ -49,43 +53,34 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 };
 
 const LABELS_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => {
-		return row.filtering_labels && row.filtering_labels.length > 0
-			? row.filtering_labels?.map((filtering_label) => filtering_label.str)
-			: [''];
-	},
+	component: AutocompleteSelect,
 	alwaysDefined: true,
 	extraProps: {
-		label: 'filtering_labels'
+		optionsEndpoint: 'filtering-labels',
+		label: 'filtering_labels',
+		multiple: true
 	}
 };
 
 const PRIORITY_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.priority,
+	component: AutocompleteSelect,
 	alwaysDisplay: true,
 	extraProps: {
 		label: 'priority'
 	}
 };
 
-const DOMAIN_FILTER_FROM_PERIMETER: ListViewFilterConfig = {
-	...DOMAIN_FILTER,
-	getColumn: (row) => row.perimeter?.folder.str
-};
-
 const PERIMETER_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.perimeter?.str,
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'perimeter' // Make translations
+		label: 'perimeter',
+		optionsEndpoint: 'perimeters',
+		multiple: true
 	}
 };
 
 const STATUS_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.status,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'status'
 	},
@@ -94,8 +89,7 @@ const STATUS_FILTER: ListViewFilterConfig = {
 
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	// I could make a function just make the code less repeatitive and long for nothing
-	component: SelectFilter,
-	getColumn: (row) => row.treatment,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'treatment'
 	}
@@ -103,64 +97,53 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 
 const STATE_FILTER: ListViewFilterConfig = {
 	// I could make a function just make the code less repeatitive and long for nothing
-	component: SelectFilter,
-	getColumn: (row) => row.state,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'state'
 	}
 };
 
 const APPROVER_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => {
-		if (row.first_name && row.last_name) {
-			return `${row.first_name} ${row.last_name}`;
-		}
-		return row.approver?.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
-	},
-	extraProps: {
-		label: 'approver'
-	}
+	component: AutocompleteSelect
 };
 
 const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.risk_assessment?.name,
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'riskAssessment'
+		label: 'riskAssessment',
+		optionsEndpoint: 'risk-assessments',
+		multiple: true
 	}
 };
 
 const PROVIDER_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => {
-		return row.provider;
-	},
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'provider'
 	}
 };
 
 const THREAT_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => (row.threats?.length ? row.threats.map((t) => t.str) : null),
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'threat'
+		optionsEndpoint: 'threats',
+		label: 'threat',
+		multiple: true
 	}
 };
 
 const ASSET_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => (row.assets?.length ? row.assets.map((t) => t.str) : null),
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'asset'
+		optionsEndpoint: 'assets',
+		label: 'asset',
+		multiple: true
 	},
 	alwaysDisplay: true
 };
 
 const QUALIFICATION_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => (row.qualifications?.length ? row.qualifications.map((t) => t.str) : null),
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'qualification'
 	},
@@ -168,8 +151,7 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 };
 
 const GRAVITY_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.gravity.name,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'gravity'
 	},
@@ -177,8 +159,7 @@ const GRAVITY_FILTER: ListViewFilterConfig = {
 };
 
 const LIKELIHOOD_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.likelihood.name,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'likelihood'
 	},
@@ -186,8 +167,7 @@ const LIKELIHOOD_FILTER: ListViewFilterConfig = {
 };
 
 const IS_SELECTED_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => (row.is_selected ? 'true' : 'false'),
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'is_selected'
 	},
@@ -195,8 +175,7 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 };
 
 const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.risk_origin,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'risk_origin'
 	},
@@ -204,17 +183,17 @@ const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 };
 
 const FEARED_EVENT_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => (row.feared_events?.length ? row.feared_events.map((t) => t.str) : null),
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'feared_event'
+		label: 'feared_event',
+		optionsEndpoint: 'ebios-rm/feared-events',
+		multiple: true
 	},
 	alwaysDisplay: true
 };
 
 const PERTINENCE_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.pertinence,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'pertinence'
 	},
@@ -222,17 +201,17 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 };
 
 const ENTITY_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.entity.str,
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'entity'
+		label: 'entity',
+		optionsEndpoint: 'entities',
+		multiple: true
 	},
 	alwaysDisplay: true
 };
 
 const CURRENT_LEVEL_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.current_level.name,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'current_level'
 	},
@@ -240,8 +219,7 @@ const CURRENT_LEVEL_FILTER: ListViewFilterConfig = {
 };
 
 const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.residual_level.name,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'residual_level'
 	},
@@ -249,8 +227,7 @@ const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
 };
 
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.current_criticality.toString(),
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'current_criticality'
 	},
@@ -258,8 +235,7 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 };
 
 const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.residual_criticality.toString(),
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'residual_criticality'
 	},
@@ -267,25 +243,26 @@ const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 };
 
 const STAKEHOLDER_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => (row.stakeholders?.length ? row.stakeholders.map((t) => t.str) : null),
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'stakeholder'
+		label: 'stakeholder',
+		optionsEndpoint: 'stakeholders',
+		multiple: true
 	},
 	alwaysDisplay: true
 };
 
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.framework?.ref_id,
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'framework' // Make translations
+		label: 'framework',
+		optionsEndpoint: 'frameworks',
+		multiple: true
 	}
 };
 
 const LANGUAGE_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.locales,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'language', // Make translations
 		optionLabels: LOCALE_DISPLAY_MAP
@@ -293,17 +270,20 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 };
 
 const ASSET_TYPE_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.type,
+	component: AutocompleteSelect,
 	extraProps: {
-		label: 'type' // Make translations
+		label: 'type',
+		options: [
+			{ label: 'primary', value: 'PR' },
+			{ label: 'support', value: 'SP' }
+		],
+		multiple: true
 	},
 	alwaysDisplay: true
 };
 
 const CATEGORY_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.category,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'category' // Make translations
 	},
@@ -311,8 +291,7 @@ const CATEGORY_FILTER: ListViewFilterConfig = {
 };
 
 const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.csf_function,
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'csfFunction' // Make translations
 	},
@@ -320,11 +299,7 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 };
 
 const OWNER_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => {
-		const owner = row?.meta?.owner;
-		return owner && owner.length ? owner.map((o) => o.str) : null;
-	},
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'owner'
 	},
@@ -332,25 +307,16 @@ const OWNER_FILTER: ListViewFilterConfig = {
 };
 
 const HAS_UPDATE_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => (row.meta?.has_update ? 'true' : 'false'),
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'updateAvailable',
-		options: ['true', 'false'],
-		optionLabels: {
-			true: 'yes',
-			false: 'no'
-		}
+		options: YES_NO_OPTIONS,
+		multiple: true
 	},
 	alwaysDisplay: true
 };
 /* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
   component: CheckboxFilter,
-  getColumn: row => {
-    return !row.overview.some(
-      line => line.startsWith("risk_matrix")
-    ); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
-  },
   filterProps: (rows: any[],field: string) => new Object(),
   filter: (builtin: boolean, value: boolean): boolean => {
     return value ? !builtin : true;
@@ -361,19 +327,7 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 }; */
 
 const LIBRARY_TYPE_FILTER = {
-	component: SelectFilter,
-	getColumn: (row) => {
-		const overviewKeys = new Set(row.overview?.map((overviewRow) => overviewRow.split(':')[0]));
-		const libraryDatatypeSet = new Set([
-			'framework',
-			'risk_matrix',
-			'threats',
-			'requirement_mapping_set',
-			'reference_controls'
-		]);
-		const datatypes = [...libraryDatatypeSet].filter((datatype) => overviewKeys.has(datatype));
-		return datatypes;
-	},
+	component: AutocompleteSelect,
 	extraProps: {
 		label: 'objectType'
 	},
@@ -389,8 +343,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref_id', 'name', 'description', 'domain'],
 		body: ['ref_id', 'name', 'description', 'folder'],
 		filters: {
-			folder: DOMAIN_FILTER
-			// lc_status: PERIMETER_STATUS_FILTER
+			folder: DOMAIN_FILTER,
+			lc_status: PERIMETER_STATUS_FILTER
 		}
 	},
 	'filtering-labels': {
@@ -435,7 +389,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref_id', 'name', 'riskMatrix', 'description', 'riskScenarios', 'perimeter'],
 		body: ['ref_id', 'str', 'risk_matrix', 'description', 'risk_scenarios_count', 'perimeter'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true },
+			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
 			perimeter: PERIMETER_FILTER,
 			status: { ...STATUS_FILTER, alwaysDisplay: true }
 		}
@@ -474,11 +428,11 @@ export const listViewFields: ListViewFieldsConfig = {
 		],
 		filters: {
 			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
-			// perimeter: { ...PERIMETER_FILTER, alwaysDisplay: true },
+			perimeter: { ...PERIMETER_FILTER, alwaysDisplay: true },
 			// treatment: { ...TREATMENT_FILTER, alwaysDisplay: true },
-			// risk_assessment: RISK_ASSESSMENT_FILTER,
-			// threats: THREAT_FILTER,
-			// assets: ASSET_FILTER,
+			risk_assessment: RISK_ASSESSMENT_FILTER,
+			threats: THREAT_FILTER,
+			assets: ASSET_FILTER,
 			current_level: CURRENT_LEVEL_FILTER
 			// residual_level: RESIDUAL_LEVEL_FILTER
 		}
@@ -591,8 +545,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			type: ASSET_TYPE_FILTER,
-			filtering_labels: LABELS_FILTER
+			type: ASSET_TYPE_FILTER
+			// filtering_labels: LABELS_FILTER
 		}
 	},
 	users: {
@@ -625,7 +579,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'reviewProgress'],
 		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
+			folder: { ...DOMAIN_FILTER, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			perimeter: PERIMETER_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: STATUS_FILTER
