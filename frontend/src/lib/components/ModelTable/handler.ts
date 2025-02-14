@@ -33,7 +33,6 @@ const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	const params = new URLSearchParams();
 	params.set('offset', offset.toString());
 	params.set('limit', rowsPerPage.toString());
-	//
 	if (search) {
 		params.set('search', search);
 	}
@@ -42,9 +41,9 @@ const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	}
 	if (filters) {
 		for (const filter of filters) {
-			console.log('filter', filter);
-			if (filter.value) {
-				params.set(filter.filterBy.toString(), filter.value.toString());
+			const value = filter.value?.toString();
+			if (value) {
+				params.set(filter.filterBy.toString(), value);
 			}
 		}
 	}
