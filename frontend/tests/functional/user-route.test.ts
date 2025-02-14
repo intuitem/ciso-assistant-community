@@ -117,6 +117,23 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the applied control data are displayed in the table
 	});
 
+	await test.step('user can create a security exception', async () => {
+		await sideBar.click('Governance', pages.securityExceptionsPage.url);
+		await pages.securityExceptionsPage.hasUrl();
+		await pages.securityExceptionsPage.hasTitle();
+
+		await pages.securityExceptionsPage.createItem({
+			name: vars.securityExceptionName,
+			description: vars.description,
+			ref_id: '123456',
+			status: 'Active',
+			expiration_date: '2025-01-01',
+			folder: vars.folderName,
+			owners: [LoginPage.defaultEmail],
+			approver: LoginPage.defaultEmail
+		});
+	});
+
 	await test.step('user can create a compliance assessment', async () => {
 		await sideBar.click('Compliance', pages.complianceAssessmentsPage.url);
 		await pages.complianceAssessmentsPage.hasUrl();

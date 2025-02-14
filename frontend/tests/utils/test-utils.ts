@@ -67,6 +67,7 @@ export const test = base.extend<Fixtures>({
 			riskScenariosPage,
 			referenceControlsPage,
 			appliedControlsPage,
+			securityExceptionsPage,
 			threatsPage,
 			usersPage
 		},
@@ -86,6 +87,7 @@ export const test = base.extend<Fixtures>({
 			riskScenariosPage,
 			referenceControlsPage,
 			appliedControlsPage,
+			securityExceptionsPage,
 			threatsPage,
 			usersPage
 		});
