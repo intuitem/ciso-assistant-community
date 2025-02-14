@@ -40,7 +40,7 @@
 	field="owners"
 	cacheLock={cacheLocks['owners']}
 	bind:cachedValue={formDataCache['owners']}
-	label={m.owner()}
+	label={m.owners()}
 />
 <AutocompleteSelect
 	{form}

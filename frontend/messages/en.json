@@ -746,7 +746,7 @@
 	"observationSemiColon": "Observation:",
 	"tableMode": "Table mode",
 	"owner": "Owner",
-	"owners": "Owner",
+	"owners": "Owners",
 	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the risk tab.",
 	"licenseSeats": "License seats",
 	"licenseExpiration": "License expiration",
