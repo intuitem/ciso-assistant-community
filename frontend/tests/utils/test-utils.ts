@@ -607,8 +607,8 @@ export class TestContent {
 					name: vars.securityExceptionName,
 					description: vars.description,
 					ref_id: '123456',
-					status: 'Active',
-					expiration_date: '2025-01-01',
+					status: 'Draft',
+					expiration_date: '2100-01-01',
 					folder: vars.folderName,
 					owners: [LoginPage.defaultEmail],
 					approver: LoginPage.defaultEmail
@@ -617,8 +617,8 @@ export class TestContent {
 					name: '',
 					description: '',
 					ref_id: '',
-					status: 'Inactive',
-					expiration_date: '2025-12-31'
+					status: 'In review',
+					expiration_date: '2100-12-31'
 				}
 			}
 		};
