@@ -25,8 +25,10 @@ export const loadTableData = async (state: State, URLModel: urlModel, endpoint: 
 		meta: response // metaData
 	};
 
+	console.debug(table);
+
 	return table.body.map((item: Record<string, any>, index: number) => {
-		return { ...item, meta: table.meta ? { ...table.meta[index] } : undefined };
+		return { ...item, meta: table?.meta?.results ? { ...table.meta.results[index] } : undefined };
 	});
 };
 
@@ -41,8 +43,13 @@ const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	if (sort) {
 		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`);
 	}
-	// if (filters) {
-	// 	params += filters.map(({ filterBy, value }) => `&${filterBy}=${value}`).join('');
-	// }
+	if (filters) {
+		for (const filter of filters) {
+			console.log('filter', filter);
+			if (filter.value) {
+				params.set(filter.filterBy.toString(), filter.value.toString());
+			}
+		}
+	}
 	return params;
 };
