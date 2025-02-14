@@ -414,6 +414,7 @@ class AssetViewSet(BaseModelViewSet):
         "type",
         "risk_scenarios",
         "ebios_rm_studies",
+        "security_exceptions",
     ]
     search_fields = ["name", "description", "business_value"]
 
@@ -658,6 +659,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "severity",
         "risk_scenarios",
         "applied_controls",
+        "security_exceptions",
     ]
     search_fields = ["name", "description"]
 
@@ -1071,6 +1073,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "requirement_assessments",
         "evidences",
         "progress_field",
+        "security_exceptions",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
@@ -1577,6 +1580,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "threats",
         "assets",
         "applied_controls",
+        "security_exceptions",
     ]
     ordering = ["ref_id"]
 
@@ -3782,6 +3786,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "compliance_assessment",
         "applied_controls",
+        "security_exceptions",
     ]
     search_fields = ["requirement__name", "requirement__description"]
 
@@ -4162,3 +4167,20 @@ def export_mp_csv(request):
         writer.writerow(row)
 
     return response
+
+
+class SecurityExceptionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows security exceptions to be viewed or edited.
+    """
+
+    model = SecurityException
+    filterset_fields = ["requirement_assessments", "risk_scenarios"]
+
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(SecurityException.Severity.choices))
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(SecurityException.Status.choices))

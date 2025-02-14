@@ -66,8 +66,9 @@ export const URL_MODEL = [
 	'strategic-scenarios',
 	'attack-paths',
 	'operational-scenarios',
-	'qualifications'
+	'qualifications',
 	// 'ebios-rm',
+	'security-exceptions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

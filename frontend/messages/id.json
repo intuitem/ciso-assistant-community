@@ -200,7 +200,7 @@
 	"watchlist": "Daftar pantauan",
 	"watchlistDescription": "Item yang telah kadaluarsa atau akan kadaluarsa dalam 30 hari ke depan",
 	"measuresToReview": "Kontrol yang diterapkan untuk ditinjau",
-	"exceptionsToReview": "Penerimaan untuk ditinjau",
+	"acceptancesToReview": "Penerimaan untuk ditinjau",
 	"expired": "Kadaluarsa",
 	"upcoming": "Akan datang",
 	"today": "Hari ini",
