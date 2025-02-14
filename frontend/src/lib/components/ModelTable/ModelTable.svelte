@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
@@ -6,11 +7,17 @@
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount } from 'svelte';
-	import { goto as _goto } from '$app/navigation';
 
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
+	import { browser } from '$app/environment';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
+	import { goto } from '$lib/utils/breadcrumbs';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { isDark } from '$lib/utils/helpers';
+	import { listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
@@ -20,8 +27,16 @@
 		type PopupSettings,
 		type SvelteEvent
 	} from '@skeletonlabs/skeleton';
+	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
 	import { z, type AnyZodObject } from 'zod';
+	import { loadTableData } from './handler';
+	import Pagination from './Pagination.svelte';
+	import RowCount from './RowCount.svelte';
+	import RowsPerPage from './RowsPerPage.svelte';
+	import Search from './Search.svelte';
+	import Th from './Th.svelte';
 
 	// Props
 	export let source: TableSource;
@@ -50,6 +65,13 @@
 
 	export let displayActions = true;
 
+	export let identifierField = 'id';
+	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
+	export let URLModel: urlModel | undefined = undefined;
+	export let detailQueryParameter: string | undefined = undefined;
+
+	export let hideFilters = false;
+
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
 		rowIndex: number
@@ -73,19 +95,7 @@
 		if (['Enter', 'Space'].includes(event.code)) onRowClick(event, rowIndex);
 	}
 
-	export let identifierField = 'id';
-	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
-	export let URLModel: urlModel | undefined = undefined;
-	export let detailQueryParameter: string | undefined = undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
-
-	export let hideFilters = false;
-
-	$: hideFilters =
-		hideFilters ||
-		!Object.entries(filters).some(([key, filter]) => {
-			if (!filter.hide) return true;
-		});
 
 	const user = $page.data.user;
 
@@ -94,17 +104,6 @@
 
 	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
-
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { DataHandler, type State } from '@vincjo/datatables/remote';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import Pagination from './Pagination.svelte';
-	import RowCount from './RowCount.svelte';
-	import RowsPerPage from './RowsPerPage.svelte';
-	import Search from './Search.svelte';
-	import Th from './Th.svelte';
-	import ThFilter from './ThFilter.svelte';
 
 	const handler = new DataHandler([], {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
@@ -127,13 +126,6 @@
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
-
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { isDark } from '$lib/utils/helpers';
-	import { loadTableData } from './handler';
-	import { browser } from '$app/environment';
-	import { listViewFields } from '$lib/utils/table';
-	import { zod } from 'sveltekit-superforms/adapters';
 
 	const _form = superForm(defaults(zod(z.object({}))), {
 		SPA: true,
@@ -169,26 +161,11 @@
 	for (const field of filteredFields)
 		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
 
-	const filterProps: {
-		[key: string]: { [key: string]: any };
-	} = {};
-
-	// async function defaultFilterProps(rows, field: string) {
-	// 	// const getColumn = filters[field].getColumn ?? ((row) => row[field]);
-	// 	const options = await fetch('/folders')
-	// 		.then((res) => res.json())
-	// 		.then((res) => res.results);
-	// 	return { options };
-	// }
-	//
-	// $: {
-	// 	for (const key of filteredFields) {
-	// 		filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(
-	// 			Object.values(source.meta),
-	// 			key
-	// 		);
-	// 	}
-	// }
+	$: hideFilters =
+		hideFilters ||
+		!Object.entries(filters).some(([key, filter]) => {
+			if (!filter.hide) return true;
+		});
 
 	$: {
 		for (const field of filteredFields) {
@@ -209,11 +186,6 @@
 		}
 	}
 
-	$: {
-		// handler.filter('80706d1d-3015-4b1c-bf33-b88cf52c0657', 'folder');
-		console.log('$rows', $rows);
-	}
-
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
@@ -226,7 +198,7 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if true}
+		{#if filteredFields.length > 0 && !hideFilters}
 			<button
 				use:popup={popupFilter}
 				class="btn variant-filled-primary self-end relative"
@@ -248,11 +220,10 @@
 							this={filters[field].component}
 							{form}
 							{field}
-							{...filterProps[field]}
 							{...filters[field].extraProps}
+							label={safeTranslate(filters[field].extraProps?.label)}
 							on:change={(e) => {
 								const value = e.detail;
-								// handler.filter(value, field);
 								filterValues[field] = value.map((v) => ({ value: v }));
 							}}
 						/>
