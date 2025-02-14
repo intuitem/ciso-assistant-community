@@ -4,13 +4,14 @@ import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
+import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 
 interface ListViewFilterConfig {
 	component: ComponentType;
 	filter?: (columnValue: any, value: any) => boolean;
 	getColumn?: (row: Row) => Row[keyof Row];
 	filterProps?: (rows: any[], field: string) => { [key: string]: any };
-	extraProps?: { [key: string]: any };
+	extraProps?: { label: string; optionsEndpoint: string; multiple?: boolean };
 	alwaysDisplay?: boolean;
 	alwaysDefined?: boolean;
 	hide?: boolean;
@@ -32,17 +33,18 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.lc_status,
 	extraProps: {
-		defaultOptionName: 'status'
+		label: 'status'
 	},
 	alwaysDisplay: true
 };
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
-	component: SelectFilter,
-	getColumn: (row) => row.folder?.str,
+	component: AutocompleteSelect,
 	alwaysDefined: true,
 	extraProps: {
-		defaultOptionName: 'domain'
+		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
+		label: 'domain',
+		multiple: true
 	}
 };
 
@@ -55,7 +57,7 @@ const LABELS_FILTER: ListViewFilterConfig = {
 	},
 	alwaysDefined: true,
 	extraProps: {
-		defaultOptionName: 'filtering_labels'
+		label: 'filtering_labels'
 	}
 };
 
@@ -64,7 +66,7 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 	getColumn: (row) => row.priority,
 	alwaysDisplay: true,
 	extraProps: {
-		defaultOptionName: 'priority'
+		label: 'priority'
 	}
 };
 
@@ -77,7 +79,7 @@ const PERIMETER_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.perimeter?.str,
 	extraProps: {
-		defaultOptionName: 'perimeter' // Make translations
+		label: 'perimeter' // Make translations
 	}
 };
 
@@ -85,7 +87,7 @@ const STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.status,
 	extraProps: {
-		defaultOptionName: 'status'
+		label: 'status'
 	},
 	alwaysDisplay: true
 };
@@ -95,7 +97,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.treatment,
 	extraProps: {
-		defaultOptionName: 'treatment'
+		label: 'treatment'
 	}
 };
 
@@ -104,7 +106,7 @@ const STATE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.state,
 	extraProps: {
-		defaultOptionName: 'state'
+		label: 'state'
 	}
 };
 
@@ -117,7 +119,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 		return row.approver?.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
 	},
 	extraProps: {
-		defaultOptionName: 'approver'
+		label: 'approver'
 	}
 };
 
@@ -125,7 +127,7 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.risk_assessment?.name,
 	extraProps: {
-		defaultOptionName: 'riskAssessment'
+		label: 'riskAssessment'
 	}
 };
 
@@ -135,7 +137,7 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 		return row.provider;
 	},
 	extraProps: {
-		defaultOptionName: 'provider'
+		label: 'provider'
 	}
 };
 
@@ -143,7 +145,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.threats?.length ? row.threats.map((t) => t.str) : null),
 	extraProps: {
-		defaultOptionName: 'threat'
+		label: 'threat'
 	}
 };
 
@@ -151,7 +153,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.assets?.length ? row.assets.map((t) => t.str) : null),
 	extraProps: {
-		defaultOptionName: 'asset'
+		label: 'asset'
 	},
 	alwaysDisplay: true
 };
@@ -160,7 +162,7 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.qualifications?.length ? row.qualifications.map((t) => t.str) : null),
 	extraProps: {
-		defaultOptionName: 'qualification'
+		label: 'qualification'
 	},
 	alwaysDisplay: true
 };
@@ -169,7 +171,7 @@ const GRAVITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.gravity.name,
 	extraProps: {
-		defaultOptionName: 'gravity'
+		label: 'gravity'
 	},
 	alwaysDisplay: true
 };
@@ -178,7 +180,7 @@ const LIKELIHOOD_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.likelihood.name,
 	extraProps: {
-		defaultOptionName: 'likelihood'
+		label: 'likelihood'
 	},
 	alwaysDisplay: true
 };
@@ -187,7 +189,7 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.is_selected ? 'true' : 'false'),
 	extraProps: {
-		defaultOptionName: 'is_selected'
+		label: 'is_selected'
 	},
 	alwaysDisplay: true
 };
@@ -196,7 +198,7 @@ const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.risk_origin,
 	extraProps: {
-		defaultOptionName: 'risk_origin'
+		label: 'risk_origin'
 	},
 	alwaysDisplay: true
 };
@@ -205,7 +207,7 @@ const FEARED_EVENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.feared_events?.length ? row.feared_events.map((t) => t.str) : null),
 	extraProps: {
-		defaultOptionName: 'feared_event'
+		label: 'feared_event'
 	},
 	alwaysDisplay: true
 };
@@ -214,7 +216,7 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.pertinence,
 	extraProps: {
-		defaultOptionName: 'pertinence'
+		label: 'pertinence'
 	},
 	alwaysDisplay: true
 };
@@ -223,7 +225,7 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.entity.str,
 	extraProps: {
-		defaultOptionName: 'entity'
+		label: 'entity'
 	},
 	alwaysDisplay: true
 };
@@ -232,7 +234,7 @@ const CURRENT_LEVEL_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.current_level.name,
 	extraProps: {
-		defaultOptionName: 'current_level'
+		label: 'current_level'
 	},
 	alwaysDisplay: true
 };
@@ -241,7 +243,7 @@ const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.residual_level.name,
 	extraProps: {
-		defaultOptionName: 'residual_level'
+		label: 'residual_level'
 	},
 	alwaysDisplay: true
 };
@@ -250,7 +252,7 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.current_criticality.toString(),
 	extraProps: {
-		defaultOptionName: 'current_criticality'
+		label: 'current_criticality'
 	},
 	alwaysDisplay: true
 };
@@ -259,7 +261,7 @@ const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.residual_criticality.toString(),
 	extraProps: {
-		defaultOptionName: 'residual_criticality'
+		label: 'residual_criticality'
 	},
 	alwaysDisplay: true
 };
@@ -268,7 +270,7 @@ const STAKEHOLDER_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.stakeholders?.length ? row.stakeholders.map((t) => t.str) : null),
 	extraProps: {
-		defaultOptionName: 'stakeholder'
+		label: 'stakeholder'
 	},
 	alwaysDisplay: true
 };
@@ -277,7 +279,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework?.ref_id,
 	extraProps: {
-		defaultOptionName: 'framework' // Make translations
+		label: 'framework' // Make translations
 	}
 };
 
@@ -285,7 +287,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.locales,
 	extraProps: {
-		defaultOptionName: 'language', // Make translations
+		label: 'language', // Make translations
 		optionLabels: LOCALE_DISPLAY_MAP
 	}
 };
@@ -294,7 +296,7 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.type,
 	extraProps: {
-		defaultOptionName: 'type' // Make translations
+		label: 'type' // Make translations
 	},
 	alwaysDisplay: true
 };
@@ -303,7 +305,7 @@ const CATEGORY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.category,
 	extraProps: {
-		defaultOptionName: 'category' // Make translations
+		label: 'category' // Make translations
 	},
 	alwaysDisplay: true
 };
@@ -312,7 +314,7 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.csf_function,
 	extraProps: {
-		defaultOptionName: 'csfFunction' // Make translations
+		label: 'csfFunction' // Make translations
 	},
 	alwaysDisplay: true
 };
@@ -324,7 +326,7 @@ const OWNER_FILTER: ListViewFilterConfig = {
 		return owner && owner.length ? owner.map((o) => o.str) : null;
 	},
 	extraProps: {
-		defaultOptionName: 'owner'
+		label: 'owner'
 	},
 	alwaysDisplay: true
 };
@@ -333,7 +335,7 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.meta?.has_update ? 'true' : 'false'),
 	extraProps: {
-		defaultOptionName: 'updateAvailable',
+		label: 'updateAvailable',
 		options: ['true', 'false'],
 		optionLabels: {
 			true: 'yes',
@@ -373,7 +375,7 @@ const LIBRARY_TYPE_FILTER = {
 		return datatypes;
 	},
 	extraProps: {
-		defaultOptionName: 'objectType'
+		label: 'objectType'
 	},
 	alwaysDisplay: true
 };
@@ -387,8 +389,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref_id', 'name', 'description', 'domain'],
 		body: ['ref_id', 'name', 'description', 'folder'],
 		filters: {
-			folder: DOMAIN_FILTER,
-			lc_status: PERIMETER_STATUS_FILTER
+			folder: DOMAIN_FILTER
+			// lc_status: PERIMETER_STATUS_FILTER
 		}
 	},
 	'filtering-labels': {
@@ -471,14 +473,14 @@ export const listViewFields: ListViewFieldsConfig = {
 			'risk_assessment'
 		],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true },
-			perimeter: { ...PERIMETER_FILTER, alwaysDisplay: true },
-			treatment: { ...TREATMENT_FILTER, alwaysDisplay: true },
-			risk_assessment: RISK_ASSESSMENT_FILTER,
-			threats: THREAT_FILTER,
-			assets: ASSET_FILTER,
-			current_level: CURRENT_LEVEL_FILTER,
-			residual_level: RESIDUAL_LEVEL_FILTER
+			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
+			// perimeter: { ...PERIMETER_FILTER, alwaysDisplay: true },
+			// treatment: { ...TREATMENT_FILTER, alwaysDisplay: true },
+			// risk_assessment: RISK_ASSESSMENT_FILTER,
+			// threats: THREAT_FILTER,
+			// assets: ASSET_FILTER,
+			current_level: CURRENT_LEVEL_FILTER
+			// residual_level: RESIDUAL_LEVEL_FILTER
 		}
 	},
 	'risk-acceptances': {

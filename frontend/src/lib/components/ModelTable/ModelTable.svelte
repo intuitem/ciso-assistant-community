@@ -14,9 +14,14 @@
 	import type { urlModel } from '$lib/utils/types.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import {
+		popup,
+		type CssClasses,
+		type PopupSettings,
+		type SvelteEvent
+	} from '@skeletonlabs/skeleton';
+	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
+	import { z, type AnyZodObject } from 'zod';
 
 	// Props
 	export let source: TableSource;
@@ -74,6 +79,14 @@
 	export let detailQueryParameter: string | undefined = undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
+	export let hideFilters = false;
+
+	$: hideFilters =
+		hideFilters ||
+		!Object.entries(filters).some(([key, filter]) => {
+			if (!filter.hide) return true;
+		});
+
 	const user = $page.data.user;
 
 	// Replace $$props.class with classProp for compatibility
@@ -85,6 +98,7 @@
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
+	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
@@ -119,6 +133,25 @@
 	import { loadTableData } from './handler';
 	import { browser } from '$app/environment';
 	import { listViewFields } from '$lib/utils/table';
+	import { zod } from 'sveltekit-superforms/adapters';
+
+	const _form = superForm(defaults(zod(z.object({}))), {
+		SPA: true,
+		validators: zod(z.object({})),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
+
+	const popupFilter: PopupSettings = {
+		event: 'click',
+		target: 'popupFilter',
+		placement: 'bottom-start',
+		closeQuery: 'li'
+	};
 
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
 	const filters =
@@ -136,9 +169,29 @@
 	for (const field of filteredFields)
 		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
 
+	const filterProps: {
+		[key: string]: { [key: string]: any };
+	} = {};
+
+	// async function defaultFilterProps(rows, field: string) {
+	// 	// const getColumn = filters[field].getColumn ?? ((row) => row[field]);
+	// 	const options = await fetch('/folders')
+	// 		.then((res) => res.json())
+	// 		.then((res) => res.results);
+	// 	return { options };
+	// }
+	//
+	// $: {
+	// 	for (const key of filteredFields) {
+	// 		filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(
+	// 			Object.values(source.meta),
+	// 			key
+	// 		);
+	// 	}
+	// }
+
 	$: {
 		for (const field of filteredFields) {
-			console.log('filterValues', field, filterValues[field]);
 			handler.filter(
 				filterValues[field] ? filterValues[field].map((v: Record<string, any>) => v.value) : [],
 				field
@@ -150,7 +203,10 @@
 				}
 			}
 		}
-		if (browser) _goto($page.url);
+		if (browser) {
+			handler.invalidate();
+			_goto($page.url);
+		}
 	}
 
 	$: {
@@ -161,6 +217,7 @@
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
+	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
@@ -169,6 +226,40 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
+		{#if true}
+			<button
+				use:popup={popupFilter}
+				class="btn variant-filled-primary self-end relative"
+				id="filters"
+			>
+				<i class="fa-solid fa-filter mr-2" />
+				{m.filters()}
+				{#if filterCount}
+					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
+				{/if}
+			</button>
+			<div
+				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+				data-popup="popupFilter"
+			>
+				<SuperForm {_form} validators={zod(z.object({}))} let:form>
+					{#each filteredFields as field}
+						<svelte:component
+							this={filters[field].component}
+							{form}
+							{field}
+							{...filterProps[field]}
+							{...filters[field].extraProps}
+							on:change={(e) => {
+								const value = e.detail;
+								// handler.filter(value, field);
+								filterValues[field] = value.map((v) => ({ value: v }));
+							}}
+						/>
+					{/each}
+				</SuperForm>
+			</div>
+		{/if}
 		{#if search}
 			<Search {handler} />
 		{/if}
@@ -198,16 +289,6 @@
 					<th class="{regionHeadCell} select-none text-end"></th>
 				{/if}
 			</tr>
-			{#if thFiler}
-				<tr>
-					{#each Object.keys(source.head) as key}
-						<ThFilter class={regionHeadCell} {handler} filterBy={key} />
-					{/each}
-					{#if displayActions}
-						<th class="{regionHeadCell} select-none"></th>
-					{/if}
-				</tr>
-			{/if}
 		</thead>
 		<tbody class="table-body {regionBody}">
 			{#each $rows as row, rowIndex}
