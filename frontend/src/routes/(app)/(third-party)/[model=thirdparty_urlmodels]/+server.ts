@@ -12,7 +12,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());
 	}
-	const data = await res.json().then((res) => res.results);
+	const data = await res.json();
 
 	return new Response(JSON.stringify(data), {
 		status: res.status,
