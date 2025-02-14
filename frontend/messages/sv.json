@@ -199,7 +199,7 @@
 	"watchlist": "Bevakningslista",
 	"watchlistDescription": "Objekt som har löpt ut eller kommer att löpa ut inom 30 dagar",
 	"measuresToReview": "Tillämpade kontroller att granska",
-	"exceptionsToReview": "Undantag att granska",
+	"acceptancesToReview": "Undantag att granska",
 	"expired": "Utgånget",
 	"upcoming": "Kommande",
 	"today": "Idag",

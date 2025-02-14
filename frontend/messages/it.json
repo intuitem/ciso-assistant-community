@@ -197,7 +197,7 @@
 	"watchlist": "Lista di controllo",
 	"watchlistDescription": "Elementi scaduti o in scadenza entro i prossimi 30 giorni",
 	"measuresToReview": "Controlli applicati da revisionare",
-	"exceptionsToReview": "Eccezioni da rivisionare",
+	"acceptancesToReview": "Eccezioni da rivisionare",
 	"expired": "Scaduto",
 	"upcoming": "Imminente",
 	"today": "Oggi",

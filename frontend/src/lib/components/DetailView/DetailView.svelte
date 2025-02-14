@@ -457,7 +457,7 @@
 								{safeTranslate('associated-' + model.info.localNamePlural)}
 							</h4>
 						</div>
-						{#if model.table}
+						{#if model.table && !model.disableAddDeleteButtons}
 							<ModelTable source={model.table} deleteForm={model.deleteForm} URLModel={urlmodel}>
 								<button
 									slot="addButton"
@@ -468,6 +468,8 @@
 									)}</button
 								>
 							</ModelTable>
+						{:else if model.table}
+							<ModelTable source={model.table} URLModel={urlmodel} />
 						{/if}
 					{/if}
 				{/each}

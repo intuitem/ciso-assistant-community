@@ -200,7 +200,7 @@
 	"watchlist": "Watch list",
 	"watchlistDescription": "Items that have expired or will expire in the next 30 days",
 	"measuresToReview": "Applied controls to review",
-	"exceptionsToReview": "Acceptances to review",
+	"acceptancesToReview": "Acceptances to review",
 	"expired": "Expired",
 	"upcoming": "Upcoming",
 	"today": "Today",
@@ -484,6 +484,8 @@
 	"toDo": "To do",
 	"inProgress": "In progress",
 	"inReview": "In review",
+	"approved": "Approved",
+	"resolved": "Resolved",
 	"deprecated": "Deprecated",
 	"onHold": "On hold",
 	"done": "Done",
@@ -744,6 +746,7 @@
 	"observationSemiColon": "Observation:",
 	"tableMode": "Table mode",
 	"owner": "Owner",
+	"owners": "Owner",
 	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the risk tab.",
 	"licenseSeats": "License seats",
 	"licenseExpiration": "License expiration",
@@ -1160,5 +1163,9 @@
 	"progressField": "Progress",
 	"recap": "Recap",
 	"sectionMoved": "Section moved here",
-	"more": "More"
+	"more": "More",
+	"securityException": "Exception",
+	"securityExceptions": "Exceptions",
+	"addSecurityException": "Add exception",
+	"expirationDate": "Expiration date"
 }

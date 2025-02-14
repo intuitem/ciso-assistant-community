@@ -197,7 +197,7 @@
 	"watchlist": "Lista de supraveghere",
 	"watchlistDescription": "Elemente care au expirat sau vor expira în următoarele 30 de zile",
 	"measuresToReview": "Controale aplicate de revizuit",
-	"exceptionsToReview": "Acceptări de revizuit",
+	"acceptancesToReview": "Acceptări de revizuit",
 	"expired": "Expirat",
 	"upcoming": "Viitoare",
 	"today": "Astăzi",
