@@ -141,8 +141,7 @@
 	const popupFilter: PopupSettings = {
 		event: 'click',
 		target: 'popupFilter',
-		placement: 'bottom-start',
-		closeQuery: 'li'
+		placement: 'bottom-start'
 	};
 
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
