@@ -30,6 +30,7 @@ type Fixtures = {
 	appliedControlsPage: PageContent;
 	threatsPage: PageContent;
 	usersPage: PageContent;
+	securityExceptionsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -244,6 +245,20 @@ export const test = base.extend<Fixtures>({
 			{ name: 'provider', type: type.TEXT }
 		]);
 		await use(tPage);
+	},
+
+	securityExceptionsPage: async ({ page }, use) => {
+		const sPage = new PageContent(page, '/security-exceptions', 'Security exceptions', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'status', type: type.SELECT },
+			{ name: 'expiration_date', type: type.DATE },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'owners', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'approver', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(sPage);
 	},
 
 	usersPage: async ({ page }, use) => {
@@ -582,6 +597,26 @@ export class TestContent {
 					description: '',
 					expiry_date: '2025-12-31'
 					//TODO add approver & risk_scenarios
+				}
+			},
+			securityExceptionsPage: {
+				displayName: 'Security exceptions',
+				build: {
+					name: vars.securityExceptionName,
+					description: vars.description,
+					ref_id: '123456',
+					status: 'Active',
+					expiration_date: '2025-01-01',
+					folder: vars.folderName,
+					owners: [LoginPage.defaultEmail],
+					approver: LoginPage.defaultEmail
+				},
+				editParams: {
+					name: '',
+					description: '',
+					ref_id: '',
+					status: 'Inactive',
+					expiration_date: '2025-12-31'
 				}
 			}
 		};
