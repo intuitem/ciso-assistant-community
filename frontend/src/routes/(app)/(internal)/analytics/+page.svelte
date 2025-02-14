@@ -444,7 +444,7 @@
 							/>
 						</div>
 						<div class="w-full">
-							<span class="text-md font-semibold">{m.exceptionsToReview()}</span>
+							<span class="text-md font-semibold">{m.acceptancesToReview()}</span>
 							<ModelTable
 								source={riskAcceptanceWatchlistTable}
 								URLModel="risk-acceptances"

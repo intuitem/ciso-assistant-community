@@ -87,6 +87,16 @@
 			bind:cachedValue={formDataCache['evidences']}
 			label={m.evidences()}
 		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="security-exceptions"
+			optionsExtraFields={[['folder', 'str']]}
+			field="security_exceptions"
+			cacheLock={cacheLocks['security_exceptions']}
+			bind:cachedValue={formDataCache['security_exceptions']}
+			label={m.securityExceptions()}
+		/>
 		{#if schema.shape.category}
 			<Select
 				{form}

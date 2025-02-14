@@ -71,6 +71,11 @@ router.register(
     QualificationViewSet,
     basename="qualifications",
 )
+router.register(
+    r"security-exceptions",
+    SecurityExceptionViewSet,
+    basename="security-exceptions",
+)
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()

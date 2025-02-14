@@ -198,7 +198,7 @@
 	"watchlist": "قائمة المراقبة",
 	"watchlistDescription": "العناصر التي انتهت صلاحيتها أو ستنتهي صلاحيتها في غضون الثلاثين يومًا القادمة",
 	"measuresToReview": "التحكمات المطبقة للمراجعة",
-	"exceptionsToReview": "قبول المخاطر للمراجعة",
+	"acceptancesToReview": "قبول المخاطر للمراجعة",
 	"expired": "منتهي الصلاحية",
 	"upcoming": "القادمة",
 	"today": "اليوم",

@@ -197,7 +197,7 @@
 	"watchlist": "Beobachtungsliste",
 	"watchlistDescription": "Elemente, die abgelaufen sind oder in den nächsten 30 Tagen ablaufen",
 	"measuresToReview": "Zu überprüfende angewendete Kontrollen",
-	"exceptionsToReview": "Zu überprüfende Akzeptanzen",
+	"acceptancesToReview": "Zu überprüfende Akzeptanzen",
 	"expired": "Abgelaufen",
 	"upcoming": "Bevorstehend",
 	"today": "Heute",

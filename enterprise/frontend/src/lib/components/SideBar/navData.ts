@@ -177,6 +177,11 @@ export const navData = {
 					name: 'riskAcceptances',
 					fa_icon: 'fa-solid fa-signature',
 					href: '/risk-acceptances'
+				},
+				{
+					name: 'securityExceptions',
+					fa_icon: 'fa-solid fa-circle-exclamation',
+					href: '/security-exceptions'
 				}
 			]
 		},

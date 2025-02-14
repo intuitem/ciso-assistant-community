@@ -54,6 +54,16 @@
 	field="applied_controls"
 	label={m.appliedControls()}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="security-exceptions"
+	optionsExtraFields={[['folder', 'str']]}
+	field="security_exceptions"
+	cacheLock={cacheLocks['security_exceptions']}
+	bind:cachedValue={formDataCache['security_exceptions']}
+	label={m.securityExceptions()}
+/>
 <TextField
 	{form}
 	field="ref_id"

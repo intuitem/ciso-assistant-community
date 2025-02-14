@@ -125,7 +125,8 @@ export const loadDetail = async ({ event, model, id }) => {
 					deleteForm,
 					createForm,
 					selectOptions,
-					initialData
+					initialData,
+					disableAddDeleteButtons: e.disableAddDeleteButtons
 				};
 			})
 		);
