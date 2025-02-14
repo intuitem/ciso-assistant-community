@@ -197,7 +197,7 @@
 	"watchlist": "Lista de seguimiento",
 	"watchlistDescription": "Elementos que han caducado o caducarán en los próximos 30 días",
 	"measuresToReview": "Controles aplicados a revisar",
-	"exceptionsToReview": "Aceptaciones a revisar",
+	"acceptancesToReview": "Aceptaciones a revisar",
 	"expired": "Caducado",
 	"upcoming": "Próximo",
 	"today": "Hoy",

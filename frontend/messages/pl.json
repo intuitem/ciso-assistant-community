@@ -197,7 +197,7 @@
 	"watchlist": "Lista obserwacyjna",
 	"watchlistDescription": "Elementy, które wygasły lub wygasną w ciągu najbliższych 30 dni",
 	"measuresToReview": "Kontrole do przeglądu",
-	"exceptionsToReview": "Akceptacje do przeglądu",
+	"acceptancesToReview": "Akceptacje do przeglądu",
 	"expired": "Wygasłe",
 	"upcoming": "Nadchodzące",
 	"today": "Dzisiaj",
