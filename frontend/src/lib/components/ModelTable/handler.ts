@@ -41,9 +41,13 @@ const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	}
 	if (filters) {
 		for (const filter of filters) {
-			const value = filter.value?.toString();
-			if (value) {
-				params.set(filter.filterBy.toString(), value);
+			const filterKey = filter.filterBy.toString();
+			if (Array.isArray(filter.value)) {
+				for (const val of filter.value) {
+					params.append(filterKey, val.toString());
+				}
+			} else if (filter.value) {
+				params.append(filterKey, filter.value.toString());
 			}
 		}
 	}
