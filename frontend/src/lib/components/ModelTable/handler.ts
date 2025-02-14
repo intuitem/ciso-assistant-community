@@ -1,4 +1,3 @@
-import { BASE_API_URL } from '$lib/utils/constants';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import { tableSourceMapper } from '@skeletonlabs/skeleton';
@@ -24,8 +23,6 @@ export const loadTableData = async (state: State, URLModel: urlModel, endpoint: 
 		body: bodyData,
 		meta: response // metaData
 	};
-
-	console.debug(table);
 
 	return table.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: table?.meta?.results ? { ...table.meta.results[index] } : undefined };
