@@ -224,10 +224,9 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const popupFilter: PopupSettings = {
-		event: 'focus-click',
+		event: 'click',
 		target: 'popupFilter',
 		placement: 'bottom-start',
-		closeQuery: 'li'
 	};
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
