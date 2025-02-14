@@ -399,15 +399,7 @@ poetry run python manage.py createsuperuser
 poetry run python manage.py runserver
 ```
 
-10. Configure the git hooks for generating the build name.
-
-```sh
-cd .git/hooks
-ln -fs ../../git_hooks/post-commit .
-ln -fs ../../git_hooks/post-merge .
-```
-
-11. for Huey (tasks runner)
+10. for Huey (tasks runner)
 
 - prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
