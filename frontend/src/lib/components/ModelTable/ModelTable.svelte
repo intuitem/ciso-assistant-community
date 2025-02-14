@@ -226,7 +226,7 @@
 	const popupFilter: PopupSettings = {
 		event: 'click',
 		target: 'popupFilter',
-		placement: 'bottom-start',
+		placement: 'bottom-start'
 	};
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {

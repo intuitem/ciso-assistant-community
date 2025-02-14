@@ -43,4 +43,3 @@ You can preview the production build with `pnpm run preview`.
 Safari requires https. To test it, the simplest solution is to use a local instance of caddy. To have it work properly, it is necessary to trick vite by sending it the Origin variable, as vite does not handle environment variables. The Caddyfile provided here is working properly, and can be launched by simply typing "caddy run".
 
 In this setup, it is necessary to launch the backend with an adjusted CISO_ASSISTANT_URL=https://localhost.
-
