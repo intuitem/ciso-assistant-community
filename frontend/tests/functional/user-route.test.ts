@@ -126,8 +126,8 @@ test('user usual routine actions are working correctly', async ({
 			name: vars.securityExceptionName,
 			description: vars.description,
 			ref_id: '123456',
-			status: 'Active',
-			expiration_date: '2025-01-01',
+			status: 'Draft',
+			expiration_date: '2100-01-01',
 			folder: vars.folderName,
 			owners: [LoginPage.defaultEmail],
 			approver: LoginPage.defaultEmail
