@@ -327,7 +327,7 @@
 							/>
 							<CounterCard
 								count={counters.projects}
-								label={m.projects()}
+								label={m.perimeters()}
 								faIcon="fa-solid fa-cubes"
 								href="/projects"
 							/>
