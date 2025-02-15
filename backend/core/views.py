@@ -258,13 +258,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 # Risk Assessment
 
 
+class PerimeterFilter(df.FilterSet):
+    folder = df.ModelMultipleChoiceFilter(
+        queryset=Folder.objects.all(),
+    )
+    lc_status = df.MultipleChoiceFilter(
+        choices=Perimeter.PRJ_LC_STATUS, lookup_expr="icontains"
+    )
+
+    class Meta:
+        model = Perimeter
+        fields = ["folder", "lc_status"]
+
+
 class PerimeterViewSet(BaseModelViewSet):
     """
     API endpoint that allows perimeters to be viewed or edited.
     """
 
     model = Perimeter
-    filterset_fields = ["folder", "lc_status"]
+    filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
