@@ -24,4 +24,10 @@
 		link="experimental/ecosystem"
 		tags={['analysis', 'tprm']}
 	/>
+	<Article
+		title="Individual requirements assessments"
+		desc="Requirements assessments"
+		link="requirement-assessments/"
+		tags={['analysis', 'audit']}
+	/>
 </div>
