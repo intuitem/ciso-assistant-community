@@ -326,10 +326,10 @@
 								href="/folders"
 							/>
 							<CounterCard
-								count={counters.projects}
+								count={counters.perimeters}
 								label={m.perimeters()}
 								faIcon="fa-solid fa-cubes"
-								href="/projects"
+								href="/perimeters"
 							/>
 							<CounterCard
 								count={counters.applied_controls}
