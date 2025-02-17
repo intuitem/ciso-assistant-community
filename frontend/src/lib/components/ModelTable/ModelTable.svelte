@@ -216,6 +216,7 @@
 							{form}
 							{field}
 							{...filters[field].extraProps}
+							fieldContext="filter"
 							label={safeTranslate(filters[field].extraProps?.label)}
 							on:change={(e) => {
 								const value = e.detail;
