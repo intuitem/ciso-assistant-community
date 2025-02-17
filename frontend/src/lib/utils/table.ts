@@ -315,16 +315,6 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	},
 	alwaysDisplay: true
 };
-/* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
-  component: CheckboxFilter,
-  filterProps: (rows: any[],field: string) => new Object(),
-  filter: (builtin: boolean, value: boolean): boolean => {
-    return value ? !builtin : true;
-  },
-  extraProps: {
-    title: "Only display matrix libraries" // Make translations
-  }
-}; */
 
 const LIBRARY_TYPE_FILTER = {
 	component: AutocompleteSelect,
@@ -334,7 +324,7 @@ const LIBRARY_TYPE_FILTER = {
 	alwaysDisplay: true
 };
 
-export const listViewFields: ListViewFieldsConfig = {
+export const listViewFields = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
 		body: ['name', 'description', 'parent_folder']
@@ -749,4 +739,10 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date']
 	}
-};
+} as const satisfies ListViewFieldsConfig;
+
+export type FilterKeys = {
+	[K in keyof typeof listViewFields]: (typeof listViewFields)[K] extends { filters: infer F }
+		? keyof F
+		: never;
+}[keyof typeof listViewFields];
