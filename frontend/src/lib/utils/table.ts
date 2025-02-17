@@ -2,7 +2,6 @@
 
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
-import type { Row } from '@vincjo/datatables';
 import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 import type { Option } from 'svelte-multiselect';
 
@@ -37,6 +36,8 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
 		optionsEndpoint: 'perimeters/lc_status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
 		label: 'status',
 		multiple: true
 	},
@@ -82,9 +83,12 @@ const PERIMETER_FILTER: ListViewFilterConfig = {
 const STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
-		label: 'status'
-	},
-	alwaysDisplay: true
+		optionsEndpoint: 'risk-assessments/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		multiple: true
+	}
 };
 
 const TREATMENT_FILTER: ListViewFilterConfig = {
@@ -293,9 +297,12 @@ const CATEGORY_FILTER: ListViewFilterConfig = {
 const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
-		label: 'csfFunction' // Make translations
-	},
-	alwaysDisplay: true
+		optionsEndpoint: 'reference-controls/csf_function',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'csfFunction',
+		multiple: true
+	}
 };
 
 const OWNER_FILTER: ListViewFilterConfig = {

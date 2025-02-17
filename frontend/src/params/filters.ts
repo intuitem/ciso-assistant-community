@@ -10,8 +10,6 @@ export const match = ((param) => {
 		}
 	});
 
-	console.log(filterKeys);
-
 	// Example output: ["folder", "lc_status", "filtering_labels"]
 
 	return filterKeys.has(param);

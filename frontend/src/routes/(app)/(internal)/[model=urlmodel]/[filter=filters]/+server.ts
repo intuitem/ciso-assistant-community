@@ -11,9 +11,16 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());
 	}
-	const data = await res.json();
+	const optionsResponse = await res.json();
 
-	return new Response(JSON.stringify(data), {
+	const options = Object.keys(optionsResponse)
+		.map((key) => ({
+			label: optionsResponse[key],
+			value: key
+		}))
+		.sort((a, b) => a.label.localeCompare(b.label));
+
+	return new Response(JSON.stringify(options), {
 		headers: {
 			'Content-Type': 'application/json'
 		}
