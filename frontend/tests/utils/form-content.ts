@@ -76,10 +76,10 @@ export class FormContent {
 								(resp) => resp.url().includes(values[key].request.url) && resp.status() === 200
 							);
 							await expect(
-								this.page.getByRole('option', { name: values[key].value, exact: true }).first()
+								field.locator.getByRole('option', { name: values[key], exact: true }).first()
 							).toBeVisible();
-							await this.page
-								.getByRole('option', { name: values[key].value, exact: true })
+							await field.locator
+								.getByRole('option', { name: values[key], exact: true })
 								.first()
 								.click();
 
@@ -99,9 +99,9 @@ export class FormContent {
 					await field.locator.click();
 					for (const val of values[key]) {
 						await expect(
-							this.page.getByRole('option', { name: val, exact: true }).first()
+							field.locator.getByRole('option', { name: val, exact: true }).first()
 						).toBeVisible();
-						await this.page.getByRole('option', { name: val, exact: true }).first().click();
+						await field.locator.getByRole('option', { name: val, exact: true }).first().click();
 					}
 					if (
 						(await field.locator.isEnabled()) &&
