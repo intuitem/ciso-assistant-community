@@ -135,7 +135,7 @@ export const RiskScenarioSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	ref_id: z.string().max(8).optional()
+	ref_id: z.string().max(100).optional()
 });
 
 export const AppliedControlSchema = z.object({
@@ -220,7 +220,7 @@ export const AssetSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	ref_id: z.string().max(8).optional()
+	ref_id: z.string().max(100).optional()
 });
 
 export const FilteringLabelSchema = z.object({
