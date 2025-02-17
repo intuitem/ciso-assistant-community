@@ -257,7 +257,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'status', type: type.SELECT },
 			{ name: 'expiration_date', type: type.DATE },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'owners', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'owners', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'approver', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(sPage);
