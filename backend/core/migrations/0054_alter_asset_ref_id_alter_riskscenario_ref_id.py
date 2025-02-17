@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0053_asset_ref_id'),
+        ("core", "0053_asset_ref_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='asset',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, verbose_name='Reference ID'),
+            model_name="asset",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, verbose_name="Reference ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='riskscenario',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, verbose_name='Reference ID'),
+            model_name="riskscenario",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, verbose_name="Reference ID"
+            ),
         ),
     ]
