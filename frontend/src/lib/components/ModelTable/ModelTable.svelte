@@ -160,11 +160,7 @@
 	for (const field of filteredFields)
 		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
 
-	$: hideFilters =
-		hideFilters ||
-		!Object.entries(filters).some(([key, filter]) => {
-			if (!filter.hide) return true;
-		});
+	$: hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
 
 	$: {
 		for (const field of filteredFields) {
