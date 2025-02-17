@@ -1164,8 +1164,8 @@
 	"recap": "Recap",
 	"sectionMoved": "Section moved here",
 	"more": "More",
-	"securityException": "Exception",
-	"securityExceptions": "Exceptions",
-	"addSecurityException": "Add exception",
+	"securityException": "Security exception",
+	"securityExceptions": "Security exceptions",
+	"addSecurityException": "Add security exception",
 	"expirationDate": "Expiration date"
 }
