@@ -219,7 +219,8 @@ export const AssetSchema = z.object({
 	owner: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
-	security_exceptions: z.string().uuid().optional().array().optional()
+	security_exceptions: z.string().uuid().optional().array().optional(),
+	ref_id: z.string().max(8).optional()
 });
 
 export const FilteringLabelSchema = z.object({
