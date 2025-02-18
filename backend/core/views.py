@@ -1841,6 +1841,10 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                     )
         risk_acceptance = serializer.save()
 
+    @action(detail=False, name="Get state choices")
+    def state(self, request):
+        return Response(dict(RiskAcceptance.ACCEPTANCE_STATE))
+
 
 class UserFilter(df.FilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
