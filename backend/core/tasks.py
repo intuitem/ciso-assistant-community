@@ -35,13 +35,12 @@ def check_controls_with_expired_eta():
     for owner_email, controls in owner_controls.items():
         send_notification_email_expired_eta(owner_email, controls)
 
+
 # @db_periodic_task(crontab(minute='*/1'))# for testing
 @db_periodic_task(crontab(hour="5", minute="30"))
 def check_deprecated_controls():
-    deprecated_controls_list = (
-        AppliedControl.objects
-        .filter(status="active")
-        .filter(expiry_date__lte=date.today(), expiry_date__isnull=False)
+    deprecated_controls_list = AppliedControl.objects.filter(status="active").filter(
+        expiry_date__lte=date.today(), expiry_date__isnull=False
     )
 
     deprecated_controls = deprecated_controls_list.prefetch_related("owner")
@@ -56,9 +55,10 @@ def check_deprecated_controls():
 
     # Update the status of each expired control
     deprecated_controls_list.update(status="deprecated")
- 
+
     for owner_email, controls in owner_controls.items():
         send_notification_email_deprecated_control(owner_email, controls)
+
 
 @task()
 def send_notification_email_expired_eta(owner_email, controls):
@@ -75,13 +75,16 @@ def send_notification_email_expired_eta(owner_email, controls):
 
     send_notification_email(subject, message, owner_email)
 
+
 @task()
 def send_notification_email_deprecated_control(owner_email, controls):
     if not check_email_configuration(owner_email, controls):
         return
 
     subject = f"CISO Assistant: You have {len(controls)} deprecated control(s)"
-    message = "Hello,\n\nThe following controls have the expiracy date set to today:\n\n"
+    message = (
+        "Hello,\n\nThe following controls have the expiracy date set to today:\n\n"
+    )
     for control in controls:
         message += f"- {control.name} (Set to: deprecated)\n"
     message += "\nThis control(s) will be set to deprecated.\n"
@@ -89,6 +92,7 @@ def send_notification_email_deprecated_control(owner_email, controls):
     message += "Thank you."
 
     send_notification_email(subject, message, owner_email)
+
 
 @task()
 def send_notification_email(subject, message, owner_email):
@@ -105,9 +109,9 @@ def send_notification_email(subject, message, owner_email):
     except Exception as e:
         logger.error(f"Failed to send notification email to {owner_email}: {str(e)}")
 
+
 @task()
 def check_email_configuration(owner_email, controls):
-    # TODO this will probably will move to a common section later on.
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
     )
@@ -133,5 +137,5 @@ def check_email_configuration(owner_email, controls):
     if not owner_email:
         logger.error("Cannot send email notification: No recipient email provided")
         return False
-    
+
     return True
