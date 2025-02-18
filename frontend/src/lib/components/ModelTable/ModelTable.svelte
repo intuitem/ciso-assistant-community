@@ -150,10 +150,7 @@
 			? listViewFields[tableURLModel].filters
 			: {};
 
-	const columnFields = new Set(source.body.length === 0 ? [] : Object.keys(source.body[0]));
-	const filteredFields = Object.keys(filters).filter(
-		(key) => columnFields.has(key) || filters[key].alwaysDisplay
-	);
+	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = {};
 
 	// Initialize filter values from URL search params
