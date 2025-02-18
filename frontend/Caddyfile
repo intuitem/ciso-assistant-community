@@ -1,0 +1,5 @@
+https://localhost {
+	reverse_proxy localhost:5173 {
+		header_up Origin http://localhost
+	}
+}

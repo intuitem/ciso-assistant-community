@@ -729,7 +729,7 @@
 	"observationSemiColon": "अवलोकन:",
 	"tableMode": "टेबल मोड",
 	"owner": "मालिक",
-	"waitingRiskAcceptances": "नमस्ते! आपके पास वर्तमान में {number} जोखिम स्वीकृति{s} लंबित हैं। आप उन्हें जोखिम टैब में पा सकते हैं।",
+	"waitingRiskAcceptances": "नमस्ते! आपके पास वर्तमान में {number} जोखिम स्वीकृति{s} लंबित हैं। आप उन्हें शासन मेनू में पा सकते हैं।",
 	"licenseSeats": "लाइसेंस सीटें",
 	"licenseExpiration": "लाइसेंस समाप्ति",
 	"answer": "उत्तर",
