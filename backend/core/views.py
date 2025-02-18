@@ -3533,9 +3533,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
+            
+            if baseline and baseline.framework == instance.framework:
+                instance.show_documentation_score = baseline.show_documentation_score
+                instance.save()
 
             # Handle different framework case
-            if baseline and baseline.framework != instance.framework:
+            elif baseline and baseline.framework != instance.framework:
                 # Fetch mapping set and prefetch related data
                 mapping_set = RequirementMappingSet.objects.select_related(
                     "source_framework", "target_framework"
