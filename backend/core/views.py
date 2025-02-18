@@ -3533,7 +3533,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
-            
+
             if baseline and baseline.framework == instance.framework:
                 instance.show_documentation_score = baseline.show_documentation_score
                 instance.save()
