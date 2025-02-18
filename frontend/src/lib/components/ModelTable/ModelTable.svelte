@@ -193,7 +193,7 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if filteredFields.length > 0 && !hideFilters}
+		{#if !hideFilters}
 			<button
 				use:popup={popupFilter}
 				class="btn variant-filled-primary self-end relative"
