@@ -93,8 +93,7 @@ def send_notification_email_deprecated_control(owner_email, controls):
 @task()
 def send_notification_email(subject, message, owner_email):
     try:
-        logger.warning("subject = " + subject)
-        logger.warning("message = " + message)
+        logger.debug("Sending notification email", subject=subject, message=message)
         send_mail(
             subject=subject,
             message=message,
