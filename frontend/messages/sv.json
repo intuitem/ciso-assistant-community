@@ -730,7 +730,7 @@
 	"observationSemiColon": "Observation:",
 	"tableMode": "Tabelläge",
 	"owner": "Ägare",
-	"waitingRiskAcceptances": "Hej! Du har för närvarande {number} riskacceptans(er) som väntar. Du kan hitta dem i riskfliken.",
+	"waitingRiskAcceptances": "Hej! Du har för närvarande {number} riskacceptans(er) som väntar. Du kan hitta dem i menyn för styrning.",
 	"licenseSeats": "Licensplatser",
 	"licenseExpiration": "Licensens utgångsdatum",
 	"answer": "Svar",
