@@ -8,6 +8,7 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
+from django_filters.filterset import filterset_factory
 import pytz
 from uuid import UUID
 from itertools import cycle
@@ -126,6 +127,22 @@ SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
 
+class GenericFilterSet(df.FilterSet):
+    class Meta:
+        model = None  # This will be set dynamically via filterset_factory.
+        fields = "__all__"
+        filter_overrides = {
+            models.CharField: {
+                "filter_class": df.MultipleChoiceFilter,
+                "extra": lambda f: {
+                    "lookup_expr": "icontains",
+                    # If your model field defines choices, they will be used:
+                    "choices": f.choices if hasattr(f, "choices") else None,
+                },
+            },
+        }
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -135,9 +152,21 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     ordering = ["created_at"]
     ordering_fields = "__all__"
     search_fields = ["name", "description"]
-    model: models.Model
+    filterset_fields = []
+    model = None
 
     serializers_module = "core.serializers"
+
+    @property
+    def filterset_class(self):
+        # If you have defined filterset_fields, build the FilterSet on the fly.
+        if self.filterset_fields:
+            return filterset_factory(
+                model=self.model,
+                filterset=GenericFilterSet,
+                fields=self.filterset_fields,
+            )
+        return None
 
     def get_queryset(self):
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
@@ -673,6 +702,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "risk_scenarios",
         "applied_controls",
         "security_exceptions",
+        "filtering_labels",
     ]
     search_fields = ["name", "description"]
 
@@ -1144,18 +1174,6 @@ class AppliedControlViewSet(BaseModelViewSet):
             key=lambda mtg: mtg.get_ranking_score(),
             reverse=True,
         )
-
-        """measures = [{
-            key: getattr(mtg,key)
-            for key in [
-                "id","folder","reference_control","type","status","effort", "cost", "name","description","eta","link","created_at","updated_at"
-            ]
-        } for mtg in measures]
-        for i in range(len(measures)) :
-            measures[i]["id"] = str(measures[i]["id"])
-            measures[i]["folder"] = str(measures[i]["folder"].name)
-            for key in ["created_at","updated_at","eta"] :
-                measures[i][key] = str(measures[i][key])"""
 
         ranking_scores = {str(mtg.id): mtg.get_ranking_score() for mtg in measures}
 

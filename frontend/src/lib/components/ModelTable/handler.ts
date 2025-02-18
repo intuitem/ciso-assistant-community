@@ -5,7 +5,7 @@ import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';
 
 export const loadTableData = async (state: State, URLModel: urlModel, endpoint: string) => {
-	const response = await fetch(`${endpoint}/?${getParams(state)}`).then((res) => res.json());
+	const response = await fetch(`${endpoint}?${getParams(state)}`).then((res) => res.json());
 	state.setTotalRows(response.count);
 
 	const bodyData = tableSourceMapper(response.results, listViewFields[URLModel as urlModel].body);
