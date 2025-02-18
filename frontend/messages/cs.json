@@ -727,7 +727,7 @@
 	"observationSemiColon": "Pozorování:",
 	"tableMode": "Tabulkový režim",
 	"owner": "Vlastník",
-	"waitingRiskAcceptances": "Ahoj! Momentálně máte {number} čekající přijetí rizika. Najdete je na kartě rizika.",
+	"waitingRiskAcceptances": "Ahoj! Momentálně máte {number} čekající přijetí rizika. Najdete je v nabídce „řízení“.",
 	"licenseSeats": "Licenční místa",
 	"licenseExpiration": "Expirace licence",
 	"answer": "Odpověď",

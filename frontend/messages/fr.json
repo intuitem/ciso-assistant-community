@@ -744,7 +744,7 @@
 	"tableMode": "Mode tableau",
 	"owner": "Propriétaire",
 	"owners": "Propriétaires",
-	"waitingRiskAcceptances": "Bonjour ! Vous avez actuellement {number} risque{s} en attente d'acceptation. Vous pouvez les retrouver dans l'onglet risque.",
+	"waitingRiskAcceptances": "Bonjour ! Vous avez actuellement {number} risque{s} en attente d'acceptation. Vous pouvez les retrouver dans l'onglet gouvernance.",
 	"licenseSeats": "Sièges de licence",
 	"licenseExpiration": "Expiration de la licence",
 	"answer": "Répondre",

@@ -729,7 +729,7 @@
 	"observationSemiColon": "Observatie:",
 	"tableMode": "Tabelmodus",
 	"owner": "Eigenaar",
-	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het tabblad risico.",
+	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het bestuursmenu.",
 	"licenseSeats": "Licentieplaatsen",
 	"licenseExpiration": "Licentie verloopt",
 	"answer": "Antwoord",

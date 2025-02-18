@@ -730,7 +730,7 @@
 	"observationSemiColon": "ملاحظة:",
 	"tableMode": "وضع الجدول",
 	"owner": "مالك",
-	"waitingRiskAcceptances": "مرحبًا! لديك حاليًا {number} مخاطرة معلقة .يمكنك العثور عليها في علامة التبويب المخاطر.",
+	"waitingRiskAcceptances": "مرحبًا! لديك حاليًا {number} مخاطرة معلقة. يمكنك العثور عليها في قائمة الحوكمة.",
 	"licenseSeats": "مقاعد الترخيص",
 	"licenseExpiration": "انتهاء صلاحية الترخيص",
 	"answer": "إجابة",

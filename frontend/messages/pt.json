@@ -729,7 +729,7 @@
 	"observationSemiColon": "Observação:",
 	"tableMode": "Modo de tabela",
 	"owner": "Proprietário",
-	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los na aba de risco.",
+	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los no menu de governança.",
 	"licenseSeats": "Assentos de licença",
 	"licenseExpiration": "Expiração da licença",
 	"answer": "Responder",

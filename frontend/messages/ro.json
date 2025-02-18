@@ -729,7 +729,7 @@
 	"observationSemiColon": "Observare:",
 	"tableMode": "Modul de masă",
 	"owner": "Proprietar",
-	"waitingRiskAcceptances": "Buna ziua! În prezent, aveți {number} riscul{s} în așteptare. Le puteți găsi în fila de riscuri.",
+	"waitingRiskAcceptances": "Buna ziua! În prezent, aveți {number} riscul{s} în așteptare. Le puteți găsi în meniul de guvernanță.",
 	"licenseSeats": "Scaune de licență",
 	"licenseExpiration": "Expirarea licenței",
 	"answer": "Răspuns",

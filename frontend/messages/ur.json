@@ -729,7 +729,7 @@
 	"observationSemiColon": "مشاہدہ:",
 	"tableMode": "ٹیبل موڈ",
 	"owner": "مالک",
-	"waitingRiskAcceptances": "ہیلو! آپ کے پاس فی الحال {number} خطرے کی منظوری {s} زیر التواء ہیں۔ آپ انہیں خطرے والے ٹیب میں پا سکتے ہیں۔",
+	"waitingRiskAcceptances": "ہیلو! آپ کے پاس فی الحال {number} خطرے کی منظوری {s} زیر التواء ہیں۔ آپ انہیں گورننس مینو میں پا سکتے ہیں۔",
 	"licenseSeats": "لائسنس نشستیں",
 	"licenseExpiration": "لائسنس کی میعاد ختم",
 	"answer": "جواب دیں۔",
