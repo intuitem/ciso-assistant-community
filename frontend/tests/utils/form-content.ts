@@ -86,9 +86,9 @@ export class FormContent {
 							await responsePromise;
 						} else {
 							await expect(
-								field.locator.getByRole('option', { name: values[key], exact: true }).first()
+								this.page.getByRole('option', { name: values[key], exact: true }).first()
 							).toBeVisible();
-							await field.locator
+							await this.page
 								.getByRole('option', { name: values[key], exact: true })
 								.first()
 								.click();
@@ -99,9 +99,9 @@ export class FormContent {
 					await field.locator.click();
 					for (const val of values[key]) {
 						await expect(
-							field.locator.getByRole('option', { name: val, exact: true }).first()
+							this.page.getByRole('option', { name: val, exact: true }).first()
 						).toBeVisible();
-						await field.locator.getByRole('option', { name: val, exact: true }).first().click();
+						await this.page.getByRole('option', { name: val, exact: true }).first().click();
 					}
 					if (
 						(await field.locator.isEnabled()) &&
