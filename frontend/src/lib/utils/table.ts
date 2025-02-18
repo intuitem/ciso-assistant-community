@@ -568,6 +568,7 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	assets: {
 		head: [
+			'ref_id',
 			'name',
 			'type',
 			'description',
@@ -578,6 +579,7 @@ export const listViewFields: ListViewFieldsConfig = {
 			'labels'
 		],
 		body: [
+			'ref_id',
 			'name',
 			'type',
 			'description',
