@@ -1,16 +1,10 @@
-// description of the columns for each ListView
-
-import type { ComponentType } from 'svelte';
 import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
 interface ListViewFilterConfig {
 	component: ComponentType;
-	filter?: (columnValue: any, value: any) => boolean;
-	filterProps?: (rows: any[], field: string) => { [key: string]: any };
 	extraProps?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
-	alwaysDisplay?: boolean;
-	alwaysDefined?: boolean;
 	hide?: boolean;
 }
 
@@ -39,8 +33,7 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'status',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
@@ -54,7 +47,6 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 
 const LABELS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	alwaysDefined: true,
 	extraProps: {
 		optionsEndpoint: 'filtering-labels',
 		label: 'filtering_labels',
@@ -65,7 +57,6 @@ const LABELS_FILTER: ListViewFilterConfig = {
 
 const PRIORITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	alwaysDisplay: true,
 	extraProps: {
 		optionsEndpoint: 'applied-controls/priority',
 		optionsLabelField: 'label',
@@ -118,7 +109,6 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 };
 
 const TREATMENT_FILTER: ListViewFilterConfig = {
-	// I could make a function just make the code less repeatitive and long for nothing
 	component: AutocompleteSelect,
 	extraProps: {
 		optionsEndpoint: 'risk-scenarios/treatment',
@@ -130,7 +120,6 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 };
 
 const STATE_FILTER: ListViewFilterConfig = {
-	// I could make a function just make the code less repeatitive and long for nothing
 	component: AutocompleteSelect,
 	extraProps: {
 		optionsEndpoint: 'risk-acceptances/state',
@@ -186,8 +175,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'assets',
 		label: 'asset',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const QUALIFICATION_FILTER: ListViewFilterConfig = {
@@ -206,8 +194,7 @@ const GRAVITY_FILTER: ListViewFilterConfig = {
 		label: 'gravity',
 		optionsEndpoint: 'risk-matrices/impact',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 // TODO: TEST THIS
@@ -217,8 +204,7 @@ const LIKELIHOOD_FILTER: ListViewFilterConfig = {
 		label: 'likelihood',
 		optionsEndpoint: 'risk-matrices/probability',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const IS_SELECTED_FILTER: ListViewFilterConfig = {
@@ -227,8 +213,7 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 		label: 'is_selected',
 		options: YES_NO_OPTIONS,
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
@@ -239,8 +224,7 @@ const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const FEARED_EVENT_FILTER: ListViewFilterConfig = {
@@ -249,8 +233,7 @@ const FEARED_EVENT_FILTER: ListViewFilterConfig = {
 		label: 'feared_event',
 		optionsEndpoint: 'feared-events',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const PERTINENCE_FILTER: ListViewFilterConfig = {
@@ -261,8 +244,7 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const ENTITY_FILTER: ListViewFilterConfig = {
@@ -271,8 +253,7 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 		label: 'entity',
 		optionsEndpoint: 'entities',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 // TODO: TEST THIS
@@ -282,8 +263,7 @@ const CURRENT_LEVEL_FILTER: ListViewFilterConfig = {
 		label: 'current_level',
 		optionsEndpoint: 'risk-matrices/risk',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 // TODO: TEST THIS
@@ -293,8 +273,7 @@ const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
 		label: 'residual_level',
 		optionsEndpoint: 'risk-matrices/risk',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 // TODO: TEST THIS
@@ -304,8 +283,7 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 		label: 'current_criticality',
 		options: [1, 2, 3, 4],
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 // TODO: TEST THIS
@@ -315,8 +293,7 @@ const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 		label: 'residual_criticality',
 		options: [1, 2, 3, 4],
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const STAKEHOLDER_FILTER: ListViewFilterConfig = {
@@ -326,8 +303,7 @@ const STAKEHOLDER_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'stakeholders',
 		optionsLabelField: 'str',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
@@ -358,8 +334,7 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
@@ -370,8 +345,7 @@ const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 		multiple: true,
 		optionsLabelField: 'label',
 		optionsValueField: 'value'
-	},
-	alwaysDisplay: true
+	}
 };
 
 const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
@@ -382,8 +356,7 @@ const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 		multiple: true,
 		optionsLabelField: 'label',
 		optionsValueField: 'value'
-	},
-	alwaysDisplay: true
+	}
 };
 
 const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
@@ -415,8 +388,7 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 		label: 'updateAvailable',
 		options: YES_NO_OPTIONS,
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 const LIBRARY_TYPE_FILTER = {
@@ -427,8 +399,7 @@ const LIBRARY_TYPE_FILTER = {
 		optionsLabelField: 'label',
 		optionsValueField: 'label',
 		multiple: true
-	},
-	alwaysDisplay: true
+	}
 };
 
 export const listViewFields = {
@@ -613,7 +584,7 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
+			folder: DOMAIN_FILTER,
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
 			provider: PROVIDER_FILTER,
 			csf_function: CSF_FUNCTION_FILTER
@@ -644,8 +615,8 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			type: ASSET_TYPE_FILTER
-			// filtering_labels: LABELS_FILTER
+			type: ASSET_TYPE_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	users: {
@@ -678,7 +649,7 @@ export const listViewFields = {
 		head: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'reviewProgress'],
 		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress'],
 		filters: {
-			folder: { ...DOMAIN_FILTER, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
+			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER
@@ -693,7 +664,7 @@ export const listViewFields = {
 		head: ['name', 'file', 'size', 'description', 'folder'],
 		body: ['name', 'attachment', 'size', 'description', 'folder'],
 		filters: {
-			folder: { ...DOMAIN_FILTER, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
+			folder: DOMAIN_FILTER
 		}
 	},
 	requirements: {
@@ -720,8 +691,8 @@ export const listViewFields = {
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
-			contains: LIBRARY_TYPE_FILTER,
-			object_type: HAS_UPDATE_FILTER
+			object_type: LIBRARY_TYPE_FILTER,
+			has_update: HAS_UPDATE_FILTER
 		}
 	},
 	'sso-settings': {
