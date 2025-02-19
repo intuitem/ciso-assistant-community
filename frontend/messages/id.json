@@ -736,7 +736,7 @@
 	"observationSemiColon": "Observasi:",
 	"tableMode": "Mode tabel",
 	"owner": "Pemilik",
-	"waitingRiskAcceptances": "Halo! Saat ini Anda memiliki {number} penerimaan risiko yang tertunda. Anda dapat menemukannya di tab risiko.",
+	"waitingRiskAcceptances": "Halo! Saat ini Anda memiliki {number} penerimaan risiko yang tertunda. Anda dapat menemukannya di menu tata kelola.",
 	"licenseSeats": "Jumlah lisensi",
 	"licenseExpiration": "Kedaluwarsa lisensi",
 	"answer": "Jawaban",

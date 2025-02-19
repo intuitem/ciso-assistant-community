@@ -729,7 +729,7 @@
 	"observationSemiColon": "Monitoraggio:",
 	"tableMode": "Visualizzazione come tabella",
 	"owner": "Proprietario",
-	"waitingRiskAcceptances": "Benvenuto! Al momento hai {number} rischi{s} in attesa di accettazione. Puoi trovarli nella scheda rischi.",
+	"waitingRiskAcceptances": "Benvenuto! Al momento hai {number} rischi{s} in attesa di accettazione. Li puoi trovare nel menu governance.",
 	"licenseSeats": "Numero di licenze",
 	"licenseExpiration": "Scadenza delle licenze",
 	"answer": "Risposta",
