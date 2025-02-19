@@ -190,7 +190,6 @@ const ASSET_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
@@ -222,7 +221,6 @@ const LIKELIHOOD_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
@@ -233,40 +231,40 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
 		label: 'risk_origin',
 		optionsEndpoint: 'ro-to/risk-origin',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
 		multiple: true
 	},
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const FEARED_EVENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
 		label: 'feared_event',
-		optionsEndpoint: 'ebios-rm/feared-events',
+		optionsEndpoint: 'feared-events',
 		multiple: true
 	},
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const PERTINENCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
 		label: 'pertinence',
 		optionsEndpoint: 'ro-to/pertinence',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
 		multiple: true
 	},
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
@@ -321,12 +319,12 @@ const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const STAKEHOLDER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
 		label: 'stakeholder',
 		optionsEndpoint: 'stakeholders',
+		optionsLabelField: 'str',
 		multiple: true
 	},
 	alwaysDisplay: true
@@ -376,13 +374,14 @@ const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	extraProps: {
 		label: 'category',
 		optionsEndpoint: 'stakeholders/category',
-		multiple: true
+		multiple: true,
+		optionsLabelField: 'label',
+		optionsValueField: 'value'
 	},
 	alwaysDisplay: true
 };
