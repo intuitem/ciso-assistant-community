@@ -1,6 +1,7 @@
 from itertools import chain
 import json
 from django.db import IntegrityError
+from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.status import (
     HTTP_200_OK,
@@ -14,13 +15,14 @@ from rest_framework.parsers import FileUploadParser
 
 from django.http import HttpResponse
 
+import django_filters as df
 from core.helpers import get_sorted_requirement_nodes
 from core.models import StoredLibrary, LoadedLibrary
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
 from .helpers import update_translations, update_translations_in_object
-from .utils import preview_library
+from .utils import LibraryImporter, preview_library
 
 
 from rest_framework.decorators import action
@@ -37,15 +39,41 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
+class StoredLibraryFilterSet(df.FilterSet):
+    object_type = df.MultipleChoiceFilter(
+        choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
+        method="filter_object_type",
+    )
+
+    def filter_object_type(self, queryset, name, value: list[str]):
+        union_qs = Q()
+        _value = {f"content__{v}__isnull": False for v in value}
+        for item in _value:
+            union_qs |= Q(**{item: _value[item]})
+
+        return queryset.filter(union_qs)
+
+    class Meta:
+        model = StoredLibrary
+        fields = [
+            "urn",
+            "locale",
+            "version",
+            "packager",
+            "provider",
+            "object_type",
+        ]
+
+
 class StoredLibraryViewSet(BaseModelViewSet):
     parser_classes = [FileUploadParser]
+    filterset_class = StoredLibraryFilterSet
 
     # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
     lookup_value_regex = r"[\w.:-]+"
     model = StoredLibrary
     queryset = StoredLibrary.objects.all()
 
-    filterset_fields = ["urn", "locale", "version", "packager", "provider"]
     search_fields = ["name", "description", "urn"]
 
     def get_serializer_class(self):
@@ -199,6 +227,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
             chain.from_iterable([l.get_locales for l in StoredLibrary.objects.all()])
         )
         return Response({l: l for l in locales})
+
+    @action(detail=False, name="Get all library objects types")
+    def object_type(self, request):
+        return Response(LibraryImporter.OBJECT_FIELDS)
 
 
 class LoadedLibraryViewSet(viewsets.ModelViewSet):

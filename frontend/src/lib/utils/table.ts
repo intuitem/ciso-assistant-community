@@ -419,12 +419,13 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-// TODO: TEST THIS
 const LIBRARY_TYPE_FILTER = {
 	component: AutocompleteSelect,
 	extraProps: {
 		label: 'objectType',
-		optionsEndpoint: 'stored-libraries/type',
+		optionsEndpoint: 'stored-libraries/object_type',
+		optionsLabelField: 'label',
+		optionsValueField: 'label',
 		multiple: true
 	},
 	alwaysDisplay: true
@@ -710,7 +711,7 @@ export const listViewFields = {
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
-			objectType: LIBRARY_TYPE_FILTER
+			object_type: LIBRARY_TYPE_FILTER
 		}
 	},
 	'loaded-libraries': {
@@ -719,8 +720,8 @@ export const listViewFields = {
 		filters: {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
-			objectType: LIBRARY_TYPE_FILTER,
-			hasUpdate: HAS_UPDATE_FILTER
+			contains: LIBRARY_TYPE_FILTER,
+			object_type: HAS_UPDATE_FILTER
 		}
 	},
 	'sso-settings': {
