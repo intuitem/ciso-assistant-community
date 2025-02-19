@@ -867,5 +867,6 @@
 	"documentationScore": "Documentatie score",
 	"useDocumentationScore": "Documentatiescore gebruiken",
 	"useDocumentationScoreHelpText": "Een tweede score (documentatiescore) zal beschikbaar zijn om de vereisten te beoordelen.",
-	"publicationDate": "Publicatiedatum"
+	"publicationDate": "Publicatiedatum",
+	"filterBy": "Filteren op"
 }

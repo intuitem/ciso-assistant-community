@@ -1169,5 +1169,6 @@
 	"securityException": "Exception",
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Add exception",
-	"expirationDate": "Expiration date"
+	"expirationDate": "Expiration date",
+	"filterBy": "Filter by"
 }

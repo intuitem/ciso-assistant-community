@@ -130,6 +130,13 @@
 		}
 		return false;
 	}
+
+	function areAllChildrenHiddenRecursive(node: TreeViewNode): boolean {
+		if (!node.children || node.children.length === 0) return false;
+		return node.children.every(
+			(child) => child.contentProps.hidden || areAllChildrenHiddenRecursive(child)
+		);
+	}
 </script>
 
 {#if nodes && nodes.length > 0}
@@ -140,7 +147,9 @@
 			bind:group
 			bind:name
 			bind:value={node.id}
-			classProp={node.contentProps.hidden === true ? 'hidden' : ''}
+			classProp={node.contentProps.hidden === true || areAllChildrenHiddenRecursive(node)
+				? 'hidden'
+				: ''}
 			mappingInference={hasMappingInference(node)}
 			hideLead={!node.lead}
 			hideChildren={!node.children || node.children.length === 0}
