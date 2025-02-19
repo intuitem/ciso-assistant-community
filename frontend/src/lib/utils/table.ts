@@ -4,7 +4,7 @@ import type { Option } from 'svelte-multiselect';
 
 interface ListViewFilterConfig {
 	component: ComponentType;
-	extraProps?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
+	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
 	hide?: boolean;
 }
 
@@ -27,7 +27,7 @@ const YES_NO_OPTIONS = [
 
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'perimeters/lc_status',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -38,7 +38,7 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
 		label: 'domain',
 		multiple: true
@@ -47,7 +47,7 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 
 const LABELS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'filtering-labels',
 		label: 'filtering_labels',
 		optionsLabelField: 'label',
@@ -57,7 +57,7 @@ const LABELS_FILTER: ListViewFilterConfig = {
 
 const PRIORITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'applied-controls/priority',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -68,7 +68,7 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 
 const PERIMETER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'perimeter',
 		optionsEndpoint: 'perimeters',
 		multiple: true
@@ -77,7 +77,7 @@ const PERIMETER_FILTER: ListViewFilterConfig = {
 
 const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'risk-assessments/status',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -88,7 +88,7 @@ const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 
 const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'compliance-assessments/status',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -99,7 +99,7 @@ const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 
 const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'applied-controls/status',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -110,7 +110,7 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'risk-scenarios/treatment',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -121,7 +121,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 
 const STATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'risk-acceptances/state',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -132,7 +132,7 @@ const STATE_FILTER: ListViewFilterConfig = {
 
 const APPROVER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'approver',
 		optionsEndpoint: 'users?is_approver=true',
 		optionsLabelField: 'email',
@@ -142,7 +142,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 
 const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'riskAssessment',
 		optionsEndpoint: 'risk-assessments',
 		multiple: true
@@ -151,7 +151,7 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 
 const PROVIDER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'provider',
 		optionsEndpoint: 'stored-libraries/provider',
 		optionsLabelField: 'label',
@@ -162,7 +162,7 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'threats',
 		label: 'threat',
 		multiple: true
@@ -171,7 +171,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 
 const ASSET_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'assets',
 		label: 'asset',
 		multiple: true
@@ -180,7 +180,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 
 const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'qualification',
 		optionsEndpoint: 'qualifications',
 		multiple: true
@@ -190,7 +190,7 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 // TODO: TEST THIS
 const GRAVITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'gravity',
 		optionsEndpoint: 'risk-matrices/impact',
 		multiple: true
@@ -200,7 +200,7 @@ const GRAVITY_FILTER: ListViewFilterConfig = {
 // TODO: TEST THIS
 const LIKELIHOOD_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'likelihood',
 		optionsEndpoint: 'risk-matrices/probability',
 		multiple: true
@@ -209,7 +209,7 @@ const LIKELIHOOD_FILTER: ListViewFilterConfig = {
 
 const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'is_selected',
 		options: YES_NO_OPTIONS,
 		multiple: true
@@ -218,7 +218,7 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 
 const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'risk_origin',
 		optionsEndpoint: 'ro-to/risk-origin',
 		optionsLabelField: 'label',
@@ -229,7 +229,7 @@ const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 
 const FEARED_EVENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'feared_event',
 		optionsEndpoint: 'feared-events',
 		multiple: true
@@ -238,7 +238,7 @@ const FEARED_EVENT_FILTER: ListViewFilterConfig = {
 
 const PERTINENCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'pertinence',
 		optionsEndpoint: 'ro-to/pertinence',
 		optionsLabelField: 'label',
@@ -249,7 +249,7 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 
 const ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'entity',
 		optionsEndpoint: 'entities',
 		multiple: true
@@ -259,7 +259,7 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 // TODO: TEST THIS
 const CURRENT_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'current_level',
 		optionsEndpoint: 'risk-matrices/risk',
 		multiple: true
@@ -269,7 +269,7 @@ const CURRENT_LEVEL_FILTER: ListViewFilterConfig = {
 // TODO: TEST THIS
 const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'residual_level',
 		optionsEndpoint: 'risk-matrices/risk',
 		multiple: true
@@ -279,7 +279,7 @@ const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
 // TODO: TEST THIS
 const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'current_criticality',
 		options: [1, 2, 3, 4],
 		multiple: true
@@ -289,7 +289,7 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 // TODO: TEST THIS
 const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'residual_criticality',
 		options: [1, 2, 3, 4],
 		multiple: true
@@ -298,7 +298,7 @@ const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 
 const STAKEHOLDER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'stakeholder',
 		optionsEndpoint: 'stakeholders',
 		optionsLabelField: 'str',
@@ -308,7 +308,7 @@ const STAKEHOLDER_FILTER: ListViewFilterConfig = {
 
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'framework',
 		optionsEndpoint: 'frameworks',
 		multiple: true
@@ -317,7 +317,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 
 const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'language',
 		optionsEndpoint: 'stored-libraries/locale',
 		optionsLabelField: 'label',
@@ -328,7 +328,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 
 const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'type',
 		optionsEndpoint: 'assets/type',
 		optionsLabelField: 'label',
@@ -339,7 +339,7 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'category',
 		optionsEndpoint: 'reference-controls/category',
 		multiple: true,
@@ -350,7 +350,7 @@ const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 
 const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'category',
 		optionsEndpoint: 'stakeholders/category',
 		multiple: true,
@@ -361,7 +361,7 @@ const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 
 const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		optionsEndpoint: 'reference-controls/csf_function',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -372,7 +372,7 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 
 const OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'owner',
 		optionsLabelField: 'email',
 		optionsValueField: 'id',
@@ -384,7 +384,7 @@ const OWNER_FILTER: ListViewFilterConfig = {
 // TODO: TEST THIS
 const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'updateAvailable',
 		options: YES_NO_OPTIONS,
 		multiple: true
@@ -393,7 +393,7 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 
 const LIBRARY_TYPE_FILTER = {
 	component: AutocompleteSelect,
-	extraProps: {
+	props: {
 		label: 'objectType',
 		optionsEndpoint: 'stored-libraries/object_type',
 		optionsLabelField: 'label',

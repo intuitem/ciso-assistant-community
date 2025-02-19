@@ -216,9 +216,9 @@
 							this={filters[field].component}
 							{form}
 							{field}
-							{...filters[field].extraProps}
+							{...filters[field].props}
 							fieldContext="filter"
-							label={safeTranslate(filters[field].extraProps?.label)}
+							label={safeTranslate(filters[field].props?.label)}
 							on:change={(e) => {
 								const value = e.detail;
 								filterValues[field] = value.map((v) => ({ value: v }));
