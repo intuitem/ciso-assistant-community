@@ -76,10 +76,10 @@ export class FormContent {
 								(resp) => resp.url().includes(values[key].request.url) && resp.status() === 200
 							);
 							await expect(
-								field.locator.getByRole('option', { name: values[key].values, exact: true }).first()
+								field.locator.getByRole('option', { name: values[key].value, exact: true }).first()
 							).toBeVisible();
 							await field.locator
-								.getByRole('option', { name: values[key].values, exact: true })
+								.getByRole('option', { name: values[key].value, exact: true })
 								.first()
 								.click();
 
