@@ -381,7 +381,6 @@ const OWNER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-// TODO: TEST THIS
 const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {

@@ -1,7 +1,7 @@
 from itertools import chain
 import json
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import F, Q, IntegerField, OuterRef, Subquery
 from rest_framework import viewsets, status
 from rest_framework.status import (
     HTTP_200_OK,
@@ -238,6 +238,27 @@ class LoadedLibraryFilterSet(df.FilterSet):
         choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
         method="filter_object_type",
     )
+    has_update = df.BooleanFilter(method="filter_has_update")
+
+    def filter_has_update(self, queryset, name, value):
+        # Build a subquery to get the highest version for the given urn.
+        max_version_subquery = (
+            StoredLibrary.objects.filter(urn=OuterRef("urn"))
+            .order_by("-version")
+            .values("version")[:1]
+        )
+        # Annotate each LoadedLibrary with max_version from StoredLibrary.
+        qs = queryset.annotate(
+            max_version=Subquery(max_version_subquery, output_field=IntegerField())
+        )
+        if value:
+            # Filter for libraries that have an update: max_version > version.
+            return qs.filter(max_version__gt=F("version"))
+        else:
+            # Filter for libraries that do not have an update.
+            return qs.filter(
+                Q(max_version__isnull=True) | Q(max_version__lte=F("version"))
+            )
 
     def filter_object_type(self, queryset, name, value: list[str]):
         union_qs = Q()
@@ -262,6 +283,7 @@ class LoadedLibraryFilterSet(df.FilterSet):
             "packager",
             "provider",
             "object_type",
+            "has_update",
         ]
 
 
