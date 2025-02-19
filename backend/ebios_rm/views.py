@@ -94,7 +94,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
 
-    filterset_fields = ["ebios_rm_study", "ro_to_couples", "is_selected"]
+    filterset_fields = [
+        "ebios_rm_study",
+        "ro_to_couples",
+        "is_selected",
+        "assets",
+        "gravity",
+        "qualifications",
+    ]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
@@ -126,7 +133,14 @@ class RoToFilter(df.FilterSet):
 
     class Meta:
         model = RoTo
-        fields = ["ebios_rm_study", "is_selected", "used"]
+        fields = [
+            "ebios_rm_study",
+            "is_selected",
+            "used",
+            "risk_origin",
+            "motivation",
+            "feared_events",
+        ]
 
 
 class RoToViewSet(BaseModelViewSet):
@@ -150,11 +164,15 @@ class RoToViewSet(BaseModelViewSet):
     def activity(self, request):
         return Response(dict(RoTo.Activity.choices))
 
+    @action(detail=False, name="Get pertinence choices")
+    def pertinence(self, request):
+        return Response(dict(RoTo.Pertinence.choices))
+
 
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
 
-    filterset_fields = ["ebios_rm_study", "is_selected", "applied_controls"]
+    filterset_fields = ["ebios_rm_study", "is_selected", "applied_controls", "category"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -183,7 +201,13 @@ class AttackPathFilter(df.FilterSet):
 
     class Meta:
         model = AttackPath
-        fields = ["ebios_rm_study", "is_selected", "used", "strategic_scenario"]
+        fields = [
+            "ebios_rm_study",
+            "is_selected",
+            "used",
+            "strategic_scenario",
+            "stakeholders",
+        ]
 
 
 class AttackPathViewSet(BaseModelViewSet):
