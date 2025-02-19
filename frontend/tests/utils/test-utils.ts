@@ -257,7 +257,8 @@ export const test = base.extend<Fixtures>({
 			{ name: 'status', type: type.SELECT },
 			{ name: 'expiration_date', type: type.DATE },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'owners', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
+			{ name: 'owners', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'approver', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(sPage);
 	},
@@ -609,7 +610,8 @@ export class TestContent {
 					status: 'Draft',
 					expiration_date: '2100-01-01',
 					folder: vars.folderName,
-					owners: [LoginPage.defaultEmail]
+					owners: [LoginPage.defaultEmail],
+					approver: LoginPage.defaultEmail
 				},
 				editParams: {
 					name: '',
