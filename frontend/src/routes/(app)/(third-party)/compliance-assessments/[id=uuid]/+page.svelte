@@ -37,7 +37,7 @@
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { displayScoreColor } from '$lib/utils/helpers';
+	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 
@@ -106,7 +106,14 @@
 		return resultCounts;
 	};
 
-	const filterStatus = ['done', 'to_do'];
+	let filterStatus = ['done', 'to_do', 'in_progress', 'in_review'];
+	function toggleStatus(status: (typeof filterStatus)[number]) {
+		if (filterStatus.includes(status)) {
+			filterStatus = filterStatus.filter((s) => s !== status);
+		} else {
+			filterStatus = [...filterStatus, status];
+		}
+	}
 
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
@@ -432,6 +439,24 @@
 					{assessableNodesCount(treeViewNodes)}
 				{/if}
 			</span>
+			<div
+				class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md"
+			>
+				{#each Object.entries(complianceStatusColorMap) as [status, color]}
+					<button
+						type="button"
+						on:click={() => toggleStatus(status)}
+						class="px-2 py-1 rounded-md font-bold"
+						style="background-color: {filterStatus.includes(status)
+							? color + '44'
+							: 'grey'}; color: {filterStatus.includes(status)
+							? darkenColor(color, 0.3)
+							: 'black'}; opacity: {filterStatus.includes(status) ? 1 : 0.5};"
+					>
+						{safeTranslate(status)}
+					</button>
+				{/each}
+			</div>
 			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
 				{#if $displayOnlyAssessableNodes}
 					<p class="font-bold">{m.ShowAllNodesMessage()}</p>
@@ -460,7 +485,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key $displayOnlyAssessableNodes}
+			{#key $displayOnlyAssessableNodes || filterStatus}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes
