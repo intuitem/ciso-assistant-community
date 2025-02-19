@@ -106,11 +106,15 @@
 		return resultCounts;
 	};
 
+	const filterStatus = ['done', 'to_do'];
+
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
 			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
-			const hidden = !(!$displayOnlyAssessableNodes || node.assessable || hasAssessableChildren);
+			const hidden =
+				!(!$displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
+				(!filterStatus.includes(node.status) && node.assessable);
 
 			return {
 				id: id,
@@ -118,7 +122,8 @@
 				contentProps: {
 					...node,
 					canEditRequirementAssessment,
-					hidden
+					hidden,
+					filterStatus
 				},
 				lead: TreeViewItemLead,
 				leadProps: {
