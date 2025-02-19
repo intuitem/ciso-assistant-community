@@ -242,7 +242,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
 class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
-    content = models.TextField()
+    content = models.JSONField()
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
