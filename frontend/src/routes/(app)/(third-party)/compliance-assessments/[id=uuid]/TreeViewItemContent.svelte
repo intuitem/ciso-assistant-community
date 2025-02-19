@@ -19,7 +19,7 @@
 	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
-	export let selectedStatus: string[][];
+	export let selectedStatus: string[];
 	export let resultCounts: Record<string, number> | undefined;
 	export let assessable: boolean;
 	export let max_score: number;

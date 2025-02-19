@@ -129,14 +129,20 @@
 	function toggleResult(result) {
 		selectedResults = toggleItem(result, selectedResults);
 	}
+
+	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
+		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
+		return (
+			!(!displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
+			((!selectedStatus.includes(node.status) || !selectedResults.includes(node.result)) &&
+				node.assessable)
+		);
+	}
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
 			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
-			const hidden =
-				!(!$displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
-				((!selectedStatus.includes(node.status) || !selectedResults.includes(node.result)) &&
-					node.assessable);
+			const hidden = isNodeHidden(node, $displayOnlyAssessableNodes);
 
 			return {
 				id: id,
