@@ -233,14 +233,52 @@ class StoredLibraryViewSet(BaseModelViewSet):
         return Response(LibraryImporter.OBJECT_FIELDS)
 
 
-class LoadedLibraryViewSet(viewsets.ModelViewSet):
-    serializer_class = LoadedLibrarySerializer
-    # parser_classes = [FileUploadParser]
+class LoadedLibraryFilterSet(df.FilterSet):
+    object_type = df.MultipleChoiceFilter(
+        choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
+        method="filter_object_type",
+    )
 
-    # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
+    def filter_object_type(self, queryset, name, value: list[str]):
+        union_qs = Q()
+        _value = {
+            k: v
+            for v in value
+            for k, v in zip(
+                (f"objects_meta__{v}__isnull", f"objects_meta__{v}__gte"), (False, 1)
+            )
+        }
+        for item in _value:
+            union_qs |= Q(**{item: _value[item]})
+
+        return queryset.filter(union_qs)
+
+    class Meta:
+        model = LoadedLibrary
+        fields = [
+            "urn",
+            "locale",
+            "version",
+            "packager",
+            "provider",
+            "object_type",
+        ]
+
+
+class LoadedLibraryViewSet(BaseModelViewSet):
+    serializer_class = LoadedLibrarySerializer
+    filterset_class = LoadedLibraryFilterSet
+
     lookup_value_regex = r"[\w.:-]+"
     model = LoadedLibrary
     queryset = LoadedLibrary.objects.all()
+
+    search_fields = ["name", "description", "urn"]
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return LoadedLibrarySerializer
+        return LoadedLibraryDetailedSerializer
 
     def retrieve(self, request, *args, pk, **kwargs):
         if "view_loadedlibrary" not in request.user.permissions:
