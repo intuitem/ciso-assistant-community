@@ -454,7 +454,7 @@
 					{assessableNodesCount(treeViewNodes)}
 				{/if}
 			</span>
-			<span class="text-xs ml-2 text-gray-500">{m.filters()}</span>
+			<span class="text-xs ml-2 text-gray-500">{m.filterBy()}</span>
 			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
 				{#each Object.entries(complianceStatusColorMap) as [status, color]}
 					<button
