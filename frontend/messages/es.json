@@ -729,7 +729,7 @@
 	"observationSemiColon": "Observación:",
 	"tableMode": "Modo de tabla",
 	"owner": "Titular",
-	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puedes encontrarlos en la pestaña de riesgo.",
+	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puede encontrarlas en el menú de gobernanza.",
 	"licenseSeats": "Asientos de licencia",
 	"licenseExpiration": "Caducidad de la licencia",
 	"answer": "Respuesta",

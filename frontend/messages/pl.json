@@ -729,7 +729,7 @@
 	"observationSemiColon": "Obserwacja:",
 	"tableMode": "Tryb tabeli",
 	"owner": "Właściciel",
-	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko.",
+	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Można je znaleźć w menu zarządzanie.",
 	"licenseSeats": "Miejsca na licencję",
 	"licenseExpiration": "Wygaśnięcie licencji",
 	"answer": "Odpowiedź",

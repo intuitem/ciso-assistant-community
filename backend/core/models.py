@@ -1596,6 +1596,9 @@ class Asset(
             JSONSchemaInstanceValidator(DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA)
         ],
     )
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
     owner = models.ManyToManyField(
         User,
         blank=True,
@@ -2684,7 +2687,9 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    ref_id = models.CharField(max_length=8, blank=True, verbose_name=_("Reference ID"))
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
 
     qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 

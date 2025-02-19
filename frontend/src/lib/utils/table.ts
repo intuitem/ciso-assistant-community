@@ -621,6 +621,7 @@ export const listViewFields = {
 	},
 	assets: {
 		head: [
+			'ref_id',
 			'name',
 			'type',
 			'description',
@@ -631,6 +632,7 @@ export const listViewFields = {
 			'labels'
 		],
 		body: [
+			'ref_id',
 			'name',
 			'type',
 			'description',
