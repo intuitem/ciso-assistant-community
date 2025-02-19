@@ -12,5 +12,5 @@ export const match = ((param) => {
 
 	// Example output: ["folder", "lc_status", "filtering_labels"]
 
-	return filterKeys.has(param);
+	return filterKeys.has(param.toLowerCase().replace(/-/g, '_'));
 }) satisfies ParamMatcher;
