@@ -31,8 +31,8 @@ export const loadTableData = async (state: State, URLModel: urlModel, endpoint: 
 
 const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	const params = new URLSearchParams();
-	params.set('offset', offset.toString());
-	params.set('limit', rowsPerPage.toString());
+	params.set('offset', offset.toString() ?? '0');
+	params.set('limit', rowsPerPage.toString() ?? '10');
 	if (search) {
 		params.set('search', search);
 	}

@@ -39,7 +39,7 @@
 	import Th from './Th.svelte';
 
 	// Props
-	export let source: TableSource;
+	export let source: TableSource = { head: [], body: [] };
 	export let interactive = true;
 
 	export let search = true;
@@ -47,7 +47,6 @@
 	export let rowCount = true;
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
-	export let thFiler = false;
 
 	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
@@ -105,15 +104,20 @@
 	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
-	const handler = new DataHandler([], {
-		rowsPerPage: pagination ? numberRowsPerPage : undefined
-	});
+	const handler = new DataHandler(
+		source.body.map((item: Record<string, any>, index: number) => {
+			return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
+		}),
+		{
+			rowsPerPage: pagination ? numberRowsPerPage : undefined,
+			totalRows: source.meta.count
+		}
+	);
 	const rows = handler.getRows();
 
 	handler.onChange((state: State) => loadTableData(state, URLModel, `/${URLModel}`));
 
 	onMount(() => {
-		handler.invalidate();
 		if (orderBy) {
 			orderBy.direction === 'asc'
 				? handler.sortAsc(orderBy.identifier)
@@ -121,7 +125,7 @@
 		}
 	});
 
-	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
+	const actionsURLModel = URLModel;
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
@@ -144,7 +148,7 @@
 		placement: 'bottom-start'
 	};
 
-	const tableURLModel = source.meta?.urlmodel ?? URLModel;
+	const tableURLModel = URLModel;
 	const filters =
 		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
@@ -172,14 +176,14 @@
 				}
 			}
 		}
-		if (browser) {
+		if (browser && $page.url.searchParams.size > 0) {
 			handler.invalidate();
 			_goto($page.url);
 		}
 	}
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
+	$: model = URL_MODEL_MAP[URLModel];
 	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
 	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
 
@@ -352,7 +356,7 @@
 							<slot name="actions" meta={row.meta}>
 								{#if row.meta[identifierField]}
 									{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
-									{@const actionsURLModel = source.meta.urlmodel ?? URLModel}
+									{@const actionsURLModel = URLModel}
 									<TableRowActions
 										{deleteForm}
 										{model}
