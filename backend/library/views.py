@@ -1,3 +1,4 @@
+from itertools import chain
 import json
 from django.db import IntegrityError
 from rest_framework import viewsets, status
@@ -186,6 +187,18 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(StoredLibrary.objects.all().values_list("provider", flat=True))
+        return Response({p: p for p in providers})
+
+    @action(detail=False, name="Get locale choices")
+    def locale(self, request):
+        locales = set(
+            chain.from_iterable([l.get_locales for l in StoredLibrary.objects.all()])
+        )
+        return Response({l: l for l in locales})
 
 
 class LoadedLibraryViewSet(viewsets.ModelViewSet):

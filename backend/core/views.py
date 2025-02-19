@@ -11,7 +11,7 @@ import time
 from django_filters.filterset import filterset_factory
 import pytz
 from uuid import UUID
-from itertools import cycle
+from itertools import chain, cycle
 import django_filters as df
 from ciso_assistant.settings import (
     EMAIL_HOST,
@@ -157,16 +157,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     serializers_module = "core.serializers"
 
-    @property
-    def filterset_class(self):
-        # If you have defined filterset_fields, build the FilterSet on the fly.
-        if self.filterset_fields:
-            return filterset_factory(
-                model=self.model,
-                filterset=GenericFilterSet,
-                fields=self.filterset_fields,
-            )
-        return None
+    # @property
+    # def filterset_class(self):
+    #     # If you have defined filterset_fields, build the FilterSet on the fly.
+    #     if self.filterset_fields:
+    #         return filterset_factory(
+    #             model=self.model,
+    #             filterset=GenericFilterSet,
+    #             fields=self.filterset_fields,
+    #         )
+    #     return None
 
     def get_queryset(self):
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
@@ -649,6 +649,36 @@ class RiskMatrixViewSet(BaseModelViewSet):
     def colors(self, request):
         return Response({"results": get_risk_color_ordered_list(request.user)})
 
+    @action(detail=False, name="Get risk level choices")
+    def risk(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        risk_levels = [
+            m.risk for m in RiskMatrix.objects.filter(id__in=viewable_matrices)
+        ]
+        return Response(chain.from_iterable(risk_levels))
+
+    @action(detail=False, name="Get impact choices")
+    def impact(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        impacts = [
+            m.impact for m in RiskMatrix.objects.filter(id__in=viewable_matrices)
+        ]
+        return Response(chain.from_iterable(impacts))
+
+    @action(detail=False, name="Get probability choices")
+    def probability(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        probabilities = [
+            m.probability for m in RiskMatrix.objects.filter(id__in=viewable_matrices)
+        ]
+        return Response(chain.from_iterable(probabilities))
+
     @action(detail=False, name="Get used risk matrices")
     def used(self, request):
         viewable_matrices = RoleAssignment.get_accessible_object_ids(
@@ -1117,6 +1147,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "evidences",
         "progress_field",
         "security_exceptions",
+        "owner",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
@@ -1144,6 +1175,14 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
         return Response(dict(AppliedControl.EFFORT))
+
+    @action(detail=False, name="Get all applied controls owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(applied_controls__isnull=False), many=True
+            ).data
+        )
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
@@ -1848,6 +1887,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
 class UserFilter(df.FilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
+    is_applied_control_owner = df.BooleanFilter(
+        method="filter_applied_control_owner", label="Applied control owner"
+    )
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -1858,6 +1900,9 @@ class UserFilter(df.FilterSet):
         if value:
             return queryset.filter(id__in=approvers_id)
         return queryset.exclude(id__in=approvers_id)
+
+    def filter_applied_control_owner(self, queryset, name, value):
+        return queryset.filter(applied_controls__isnull=not value)
 
     class Meta:
         model = User
