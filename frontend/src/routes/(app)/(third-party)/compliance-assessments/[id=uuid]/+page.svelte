@@ -106,22 +106,37 @@
 		return resultCounts;
 	};
 
-	let filterStatus = ['done', 'to_do', 'in_progress', 'in_review'];
-	function toggleStatus(status: (typeof filterStatus)[number]) {
-		if (filterStatus.includes(status)) {
-			filterStatus = filterStatus.filter((s) => s !== status);
+	let selectedStatus = ['done', 'to_do', 'in_progress', 'in_review'];
+	let selectedResults = [
+		'compliant',
+		'non_compliant',
+		'partially_compliant',
+		'not_assessed',
+		'not_applicable'
+	];
+	function toggleItem(item, selectedItems) {
+		if (selectedItems.includes(item)) {
+			return selectedItems.filter((s) => s !== item);
 		} else {
-			filterStatus = [...filterStatus, status];
+			return [...selectedItems, item];
 		}
 	}
 
+	function toggleStatus(status) {
+		selectedStatus = toggleItem(status, selectedStatus);
+	}
+
+	function toggleResult(result) {
+		selectedResults = toggleItem(result, selectedResults);
+	}
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
 			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 			const hidden =
 				!(!$displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
-				(!filterStatus.includes(node.status) && node.assessable);
+				((!selectedStatus.includes(node.status) || !selectedResults.includes(node.result)) &&
+					node.assessable);
 
 			return {
 				id: id,
@@ -130,7 +145,7 @@
 					...node,
 					canEditRequirementAssessment,
 					hidden,
-					filterStatus
+					selectedStatus
 				},
 				lead: TreeViewItemLead,
 				leadProps: {
@@ -439,21 +454,36 @@
 					{assessableNodesCount(treeViewNodes)}
 				{/if}
 			</span>
-			<div
-				class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md"
-			>
+			<span class="text-xs ml-2 text-gray-500">{m.filters()}</span>
+			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
 				{#each Object.entries(complianceStatusColorMap) as [status, color]}
 					<button
 						type="button"
 						on:click={() => toggleStatus(status)}
 						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {filterStatus.includes(status)
+						style="background-color: {selectedStatus.includes(status)
 							? color + '44'
-							: 'grey'}; color: {filterStatus.includes(status)
+							: 'grey'}; color: {selectedStatus.includes(status)
 							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {filterStatus.includes(status) ? 1 : 0.5};"
+							: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.5};"
 					>
 						{safeTranslate(status)}
+					</button>
+				{/each}
+			</div>
+			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+				{#each Object.entries(complianceResultColorMap) as [result, color]}
+					<button
+						type="button"
+						on:click={() => toggleResult(result)}
+						class="px-2 py-1 rounded-md font-bold"
+						style="background-color: {selectedResults.includes(result)
+							? color + '44'
+							: 'grey'}; color: {selectedResults.includes(result)
+							? darkenColor(color, 0.3)
+							: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.5};"
+					>
+						{safeTranslate(result)}
 					</button>
 				{/each}
 			</div>
@@ -485,7 +515,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key $displayOnlyAssessableNodes || filterStatus}
+			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes

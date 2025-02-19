@@ -19,7 +19,7 @@
 	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
-	export let filterStatus: string[][];
+	export let selectedStatus: string[][];
 	export let resultCounts: Record<string, number> | undefined;
 	export let assessable: boolean;
 	export let max_score: number;
@@ -157,7 +157,7 @@
 				<div>
 					{#if hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}
-							{#if resultCounts[status] && filterStatus.includes(status)}
+							{#if resultCounts[status] && selectedStatus.includes(status)}
 								<span
 									class="badge mr-1"
 									style="background-color: {color + '44'}; color: {darkenColor(color, 0.3)}"
