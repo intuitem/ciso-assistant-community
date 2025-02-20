@@ -752,7 +752,7 @@
 	"mailFailedToSend": "E-mailul nu a putut fi trimis",
 	"questionOrQuestions": "Întrebare(e)",
 	"successfullyUpdatedClientSettings": "Setările clientului au fost actualizate cu succes, vă rugăm să reîmprospătați pagina.",
-	"xRaysEmptyMessage": "Trebuie să creați cel puțin un proiect pentru a utiliza raze X.",
+	"xRaysEmptyMessage": "Trebuie să creați cel puțin o întindere pentru a utiliza raze X.",
 	"suggestControls": "Sugerați controale",
 	"createAppliedControlsFromSuggestionsHelpText": "Creați controale aplicate din controalele de referință sugerate de cerințele cadrului",
 	"createAppliedControlsFromSuggestionsSuccess": "Controalele aplicate create cu succes din controalele de referință sugerate",
