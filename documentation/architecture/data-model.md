@@ -465,7 +465,7 @@ The perimeter has the following fields:
 
 An assessment can only be attached to a perimeter that is in the same domain as the assessment.
 
-Note: perimeters where previously named "projects", but this was misleading.
+Note: perimeters were previously named "projects", but this was misleading.
 
 ### Project objects
 
