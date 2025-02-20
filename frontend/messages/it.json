@@ -752,7 +752,7 @@
 	"mailFailedToSend": "Non è stato possibile inviare l'email",
 	"questionOrQuestions": "Domanda/e",
 	"successfullyUpdatedClientSettings": "Impostazioni client aggiornate correttamente. Ricaricare la pagina.",
-	"xRaysEmptyMessage": "Per utilizzare la funzione X-Ray è necessario creare almeno un progetto.",
+	"xRaysEmptyMessage": "Per utilizzare la funzione X-Ray è necessario creare almeno un ambito.",
 	"suggestControls": "Suggerisci controlli",
 	"createAppliedControlsFromSuggestionsHelpText": "Creare controlli partendo dai controlli di riferimento suggeriti e dai requisiti del framework",
 	"createAppliedControlsFromSuggestionsSuccess": "Controlli creati correttamente dai controlli di riferimento suggeriti",

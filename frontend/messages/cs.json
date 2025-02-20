@@ -750,7 +750,7 @@
 	"mailFailedToSend": "E-mail se nepodařilo odeslat",
 	"questionOrQuestions": "Otázka(y)",
 	"successfullyUpdatedClientSettings": "Nastavení klienta úspěšně aktualizováno, prosím obnovte stránku.",
-	"xRaysEmptyMessage": "Musíte vytvořit alespoň jeden projekt, abyste mohli používat X-ray.",
+	"xRaysEmptyMessage": "Musíte vytvořit alespoň jeden obvod, abyste mohli používat X-ray.",
 	"suggestControls": "Navrhnout kontroly",
 	"createAppliedControlsFromSuggestionsHelpText": "Vytvořte aplikované kontroly z navrhovaných referenčních kontrol požadavků rámce",
 	"createAppliedControlsFromSuggestionsSuccess": "Aplikované kontroly byly úspěšně vytvořeny z navrhovaných referenčních kontrol",

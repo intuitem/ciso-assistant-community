@@ -752,7 +752,7 @@
 	"mailFailedToSend": "El correo no se pudo enviar",
 	"questionOrQuestions": "Preguntas)",
 	"successfullyUpdatedClientSettings": "La configuración del cliente se actualizó correctamente, actualice la página.",
-	"xRaysEmptyMessage": "Debes crear al menos un proyecto para poder utilizar rayos X.",
+	"xRaysEmptyMessage": "Debes crear al menos un alcance para poder utilizar rayos X.",
 	"suggestControls": "Sugerir controles",
 	"createAppliedControlsFromSuggestionsHelpText": "Crear controles aplicados a partir de los controles de referencia sugeridos por los requisitos del marco",
 	"createAppliedControlsFromSuggestionsSuccess": "Controles aplicados creados exitosamente a partir de los controles de referencia sugeridos",

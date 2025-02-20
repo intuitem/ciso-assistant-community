@@ -759,7 +759,7 @@
 	"mailFailedToSend": "Email gagal dikirim",
 	"questionOrQuestions": "Pertanyaan",
 	"successfullyUpdatedClientSettings": "Pengaturan klien berhasil diperbarui, silakan muat ulang halaman.",
-	"xRaysEmptyMessage": "Anda harus membuat setidaknya satu proyek untuk menggunakan X-rays.",
+	"xRaysEmptyMessage": "Anda harus membuat setidaknya satu lingkup untuk menggunakan sinar-X.",
 	"suggestControls": "Sarankan kontrol",
 	"createAppliedControlsFromSuggestionsHelpText": "Buat kontrol yang diterapkan dari kontrol referensi yang disarankan untuk persyaratan kerangka kerja",
 	"createAppliedControlsFromSuggestionsSuccess": "Kontrol yang diterapkan berhasil dibuat dari kontrol referensi yang disarankan",

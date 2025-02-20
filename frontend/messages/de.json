@@ -752,7 +752,7 @@
 	"mailFailedToSend": "Die E-Mail konnte nicht gesendet werden",
 	"questionOrQuestions": "Frage(n)",
 	"successfullyUpdatedClientSettings": "Clienteinstellungen erfolgreich aktualisiert, bitte aktualisieren Sie die Seite.",
-	"xRaysEmptyMessage": "Um Röntgenstrahlen verwenden zu können, müssen Sie mindestens ein Projekt erstellen.",
+	"xRaysEmptyMessage": "Um Röntgenstrahlen verwenden zu können, müssen Sie mindestens ein Bereich erstellen.",
 	"suggestControls": "Steuerelemente vorschlagen",
 	"createAppliedControlsFromSuggestionsHelpText": "Erstellen Sie angewandte Kontrollen aus den vorgeschlagenen Referenzkontrollen der Framework-Anforderungen",
 	"createAppliedControlsFromSuggestionsSuccess": "Angewandte Kontrollen erfolgreich aus den vorgeschlagenen Referenzkontrollen erstellt",
