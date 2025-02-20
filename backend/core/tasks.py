@@ -16,8 +16,8 @@ logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
 
 
-@db_periodic_task(crontab(minute="*/1"))  # for testing
-# @db_periodic_task(crontab(hour="6", minute="0"))
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="0"))
 def check_controls_with_expired_eta():
     expired_controls = (
         AppliedControl.objects.exclude(status="active")
@@ -36,8 +36,8 @@ def check_controls_with_expired_eta():
         send_notification_email_expired_eta(owner_email, controls)
 
 
-@db_periodic_task(crontab(minute="*/1"))  # for testing
-# @db_periodic_task(crontab(hour="6", minute="5"))
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="5"))
 def check_deprecated_controls():
     deprecated_controls = AppliedControl.objects.filter(
         status="deprecated"
