@@ -270,11 +270,11 @@ export const actions: Actions = {
 	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
-		return { form: result.form, newEvidence: result.object.id };
+		return { form: result.form, newEvidence: result.form.message.object.id };
 	},
 	createSecurityException: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
-		return { form: result.form, newSecurityException: result.object.id };
+		return { form: result.form, newSecurityException: result.form.message.object.id };
 	},
 	createSuggestedControls: async (event) => {
 		const formData = await event.request.formData();
