@@ -1,0 +1,694 @@
+urn: urn:kantox:risk:library:FCA-UK-SYSC15A
+locale: en
+ref_id: SYSC 15A
+name: FCA UK - Chapter 15A Operational resilience (SYSC 15A)
+description: 'Regulation of the FCA UK dedicated to operational resilience. See reference
+  : https://www.handbook.fca.org.uk/handbook/SYSC/15A/'
+copyright: Financial Conduct Authority United Kingdom
+version: 1
+publication_date: 2025-02-12
+provider: Financial Conduct Authority United Kingdom
+packager: Kantox EU
+objects:
+  framework:
+    urn: urn:kantox:risk:framework:FCA-UK-SYSC15A
+    ref_id: FCA-UK-SYSC15A
+    name: FCA UK - Chapter 15A Operational resilience
+    description: 'Regulation of the FCA UK dedicated to operational resilience. See
+      reference : https://www.handbook.fca.org.uk/handbook/SYSC/15A/'
+    min_score: 1
+    max_score: 5
+    scores_definition:
+    - score: 1
+      name: Initial
+      description: 'No Process documentation or not formally approved by management.
+
+        Standard process does not exist.'
+    - score: 2
+      name: Repeatable
+      description: 'Formally approved Process documentation exists but not reviewed
+        in the previous 2 years.
+
+        Ad-hoc process exists and is done informally.'
+    - score: 3
+      name: Defined
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 5% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for most activities.
+        Less than 10% process exceptions.'
+    - score: 4
+      name: Managed
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 3% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for all activities.
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established. Less than 5% of process exceptions.'
+    - score: 5
+      name: Optimizing
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 0,5% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for all activities.
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established and continually improving.
+        Less than 1% of process exceptions.'
+    requirement_nodes:
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      assessable: false
+      depth: 1
+      ref_id: 15A.1
+      name: Application
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.1
+      name: Application
+      description: 'This chapter applies to:
+
+        (1) a firm that is:
+
+        (a) an enhanced scope SMCR firm; (b) a bank;
+
+        (c) a designated investment firm; (d) a building society;
+
+        (e) a Solvency II firm,
+
+        (2) a UK RIE;
+
+        (3) an electronic money institution, a payment institution or a registered
+
+        account information service provider; and
+
+        (4) a consolidated tape provider.'
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.2
+      name: Application
+      description: 'In this chapter, a reference to a firm includes a UK RIE, an electronic
+        money institution, a payment institution, a registered account information
+        service provider and a consolidated tape provider.
+
+        '
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.3
+      name: Application
+      description: This chapter does not apply to a TP firm, a TA PI firm, TA RAISP
+        firm or a TA EMI firm.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.4
+      name: Application
+      description: This chapter does not apply to a firm which has its registered
+        office (or, if it has no registered office, its head office) outside the United
+        Kingdom.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.5
+      name: Application
+      description: "In this chapter, a reference to a client in relation to a UK RIE\
+        \ includes a person who is entitled, under an arrangement or agreement between\
+        \ them and that UK RIE, to use the UK RIE\u2019s facilities."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.5a
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.5A
+      name: Application
+      description: "This chapter applies in relation to a consolidated tape provider\
+        \ as if a reference to a client includes a person who purchases a consolidated\
+        \ tape for bonds from: \n(a) a consolidated tape provider; or \n(b) a data\
+        \ vendor."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.6
+      name: Application
+      description: 'In this chapter, a reference to a client in relation to a firm
+        carrying on the activity of managing a UK UCITS or managing an AIF includes:
+
+        (1) a unitholder; and
+
+        (2) an investor in an AIF.'
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.7
+      name: Application
+      description: 'The requirements in this chapter apply with respect to:
+
+        (1) regulated activities;
+
+        (2) activities that constitute dealing in investments as principal, disregarding
+        the exclusion in article 15 of the Regulated Activities Order (Absence of
+        holding out etc.);
+
+        (3) ancillary activities;
+
+        (4) in relation to MiFID or equivalent third country business, ancillary
+
+        services;
+
+        (5) collective portfolio management;
+
+        (6) the provision of payment services and the issuance of electronic money,
+        and activities connected to the provision of payment services and to the issuing
+        of electronic money (whether or not the activity of issuing electronic money
+        is specified in article 9B of the Regulated Activities Order);
+
+        (7) any other unregulated activities, but only in a prudential context; and
+
+        (8) data reporting services provided by a consolidated tape provider.'
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.8
+      name: Application
+      description: "Notwithstanding \u25A0 SYSC 15A.1.7R, where the requirements in\
+        \ this chapter apply to a firm only as a result of \u25A0 SYSC 15A.1.1R(3),\
+        \ the requirements only apply to the provision of payment services and the\
+        \ issuance of electronic money by the firm, and activities connected to the\
+        \ provision of payment services and to the issuing of electronic money (whether\
+        \ or not the activity of issuing electronic money is specified in article\
+        \ 9B of the Regulated Activities Order)."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.1
+      ref_id: 15A.1.9
+      name: Application
+      description: There is no territorial limitation on the application of this chapter.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      assessable: false
+      depth: 1
+      ref_id: 15A.2
+      name: Important business services
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.1
+      name: Important business identification
+      description: A firm must identify its important business services.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.2
+      name: Important business identification
+      description: "A firm must keep its compliance with \u25A0 SYSC 15A.2.1R under\
+        \ review and, in\nparticular, consider its compliance in the following circumstances:\n\
+        (1) if there is a material change to the firm\u2019s business or the market\
+        \ in which it operates; and\n(2) in any event, no later than 1 year after\
+        \ it last carried out the relevant assessment."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.3
+      name: Important business identification
+      description: "In the course of identifying its important business services under\n\
+        \u25A0 SYSC 15A.2.1R, a firm should treat each distinct relevant service separately,\
+        \ and should not identify a collection of services as a single important business\
+        \ service."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.4
+      name: Important business identification
+      description: "The factors that a firm should consider when identifying its important\
+        \ business services include, but are not limited to:\n(1) the nature of the\
+        \ client base, including any vulnerabilities that would make the person more\
+        \ susceptible to harm from a disruption;\n(2) the ability of clients to obtain\
+        \ the service from other providers (substitutability, availability and accessibility);\n\
+        (3) the time criticality for clients receiving the service;\n(4) the number\
+        \ of clients to whom the service is provided;\n(5) the sensitivity of data\
+        \ held;\n(6) potential to inhibit the functioning of the UK financial system;\n\
+        (7) the firm\u2019s potential to impact the soundness, stability or resilience\
+        \ of the UK financial system;\n(8) the possible impact on the firm\u2019s\
+        \ financial position and potential to threaten the firm\u2019s viability where\
+        \ this could harm the firm\u2019s clients or pose a risk to the soundness,\
+        \ stability or resilience of the UK financial system or the orderly operation\
+        \ of the financial markets;\n(9) the potential to cause reputational damage\
+        \ to the firm, where this could harm the firm\u2019s clients or pose a risk\
+        \ to the soundness, stability or resilience of the UK financial system or\
+        \ the orderly operation of the financial markets;\n(10) whether disruption\
+        \ to the services could amount to a breach of a legal or regulatory obligation;\n\
+        (11) the level of inherent conduct and market risk;\n(12) the potential to\
+        \ cause knock-on effects for other market participants, particularly those\
+        \ that provide financial market infrastructure or critical national infrastructure;\
+        \ and\n(13) the importance of that service to the UK financial system, which\
+        \ may include market share, client concentration and sensitive clients (for\
+        \ example, governments or pension funds).\n\n"
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.5
+      name: Impact tolerance
+      description: A firm must, for each of its important business services, set an
+        impact tolerance.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.6
+      name: Impact tolerance
+      description: "A firm must keep its compliance with \u25A0 SYSC 15A.2.5R under\
+        \ review and, in particular, consider its compliance in the following circumstances:\n\
+        (1) if there is a material change to the firm\u2019s business or the market\
+        \ in which it operates; and\n(2) in any event, no later than 1 year after\
+        \ it last carried out the relevant assessment."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.7
+      name: Impact tolerance
+      description: "The factors that a firm should consider when setting its impact\
+        \ tolerance include, but are not limited to:\n(1) the nature of the client\
+        \ base, including any vulnerabilities that would make the person more susceptible\
+        \ to harm from a disruption;\n(2) the number of clients that may be adversely\
+        \ impacted and the nature of the impact;\n(3) the potential financial loss\
+        \ to clients;\n(4) the potential financial loss to the firm where this could\
+        \ harm the firm\u2019s clients or pose a risk to the soundness, stability\
+        \ or resilience of the UK financial system or the orderly operation of the\
+        \ financial markets;\n(5) the potential level of reputational damage to the\
+        \ firm where this could harm the firm\u2019s clients or pose a risk to the\
+        \ soundness, stability or resilience of the UK financial system or the orderly\
+        \ operation of the financial markets;\n(6) the potential impact on market\
+        \ or consumer confidence;\n(7) potential spread of risks to their other business\
+        \ services, other firms\nor the UK financial system;\n(8) the potential loss\
+        \ of functionality or access for clients;\n(9) any potential loss of confidentiality,\
+        \ integrity or availability of data;\n(10) the potential aggregate impact\
+        \ of disruptions to multiple important business services, in particular where\
+        \ such services rely on common operational resources as identified by the\
+        \ firm\u2019s mapping exercise under \u25A0 SYSC 15A.4.1R."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.8
+      name: Impact tolerance
+      description: When setting its impact tolerance, a firm should take account of
+        the fluctuations in demand for its important business service at different
+        times of the day and throughout the year in order to ensure that its impact
+        tolerance reflects these fluctuations and is appropriate in light of the peak
+        demand for the important business service.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.9
+      name: Impact tolerance
+      description: A firm must ensure it can remain within its impact tolerance for
+        each important business service in the event of a severe but plausible disruption
+        to its operations.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.10
+      name: Impact tolerance
+      description: "While under \u25A0 SYSC 15A.2.9R a firm must ensure it is able\
+        \ to remain within its impact tolerance, it should generally not do so if\
+        \ this would put the firm in breach of another regulatory obligation, conflict\
+        \ with the proper exercise of a discretion granted to it under any rule or\
+        \ regulation, or result in increased risk of harm to its clients or the soundness,\
+        \ stability or resilience of the UK financial system or the orderly operation\
+        \ of the financial markets. Under certain circumstances, a firm may wish to\
+        \ resume a degraded service. This is usually only appropriate if having regard\
+        \ to the interest of the firm\u2019s clients, the soundness, stability and\
+        \ resilience of the UK financial system and the orderly operation of the financial\
+        \ markets, the benefits of resuming a degraded service outweigh the negatives\
+        \ of keeping the service unavailable until the issues have been fully remediated\
+        \ and the service is able to be fully restored to its pre-disruption levels."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.11
+      name: Impact tolerance
+      description: Under Principle 11 (Relations with regulators), the FCA expects
+        to be notified of any failure by a firm to meet an impact tolerance.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.12
+      name: Impact tolerance
+      description: "When setting impact tolerances under \u25A0 SYSC 15A.2.5R a payment\
+        \ services provider should have regard to its obligations under the EBA Guidelines\
+        \ on ICT and security risk management."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.2
+      ref_id: 15A.2.13
+      name: Impact tolerance
+      description: "Payment service providers should have regard to the impact tolerance\
+        \ set under \u25A0 SYSC 15A.2.5R when complying with the EBA Guidelines on\
+        \ ICT and security risk management. In particular, they should, as part of\
+        \ their continuity planning and testing, consider their ability to remain\
+        \ within their impact tolerance through a range of severe but plausible disruption\
+        \ scenarios."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.3
+      assessable: false
+      depth: 1
+      ref_id: 15A.3
+      name: Strategies, processes and systems
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.3
+      ref_id: 15A.3.1
+      name: Strategies, processes and systems
+      description: A firm must have in place sound, effective and comprehensive strategies,
+        processes and systems to enable it to comply with its obligations under this
+        chapter.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.3
+      ref_id: 15A.3.2
+      name: Strategies, processes and systems
+      description: "The strategies, processes and systems required under \u25A0 SYSC\
+        \ 15A.3.1R must be comprehensive and proportionate to the nature, scale and\
+        \ complexity of the firm\u2019s activities."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.4
+      assessable: false
+      depth: 1
+      ref_id: 15A.4
+      name: Mapping
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.4
+      ref_id: 15A.4.1
+      name: Mapping
+      description: A firm must identify and document the people, processes, technology,
+        facilities and information necessary to deliver each of its important business
+        services. This must be sufficient to allow the firm to identify vulnerabilities
+        and remedy these as appropriate.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.4
+      ref_id: 15A.4.2
+      name: Mapping
+      description: "Where a firm relies on a third party for the delivery of an important\
+        \ business service, we would expect the firm to have sufficient understanding\
+        \ of the people, processes, technology, facilities, and information that support\
+        \ the provision by the third party of its services to or on behalf of the\
+        \ firm so as to allow the firm to comply with its obligations under \u25A0\
+        \ SYSC 15A.4.1R."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.4
+      ref_id: 15A.4.3
+      name: Mapping
+      description: "A firm must keep its compliance with \u25A0 SYSC 15A.4.1R under\
+        \ review and, in particular, review its compliance in the following circumstances:\n\
+        (1) if there is a material change to the firm\u2019s business, the important\
+        \ business services identified in accordance with \u25A0 SYSC 15A.2.1R or\
+        \ impact tolerances set in accordance with \u25A0 SYSC 15A.2.5R; and\n(2)\
+        \ in any event, no later than 1 year after it last carried out the relevant\
+        \ assessment."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      assessable: false
+      depth: 1
+      ref_id: 15A.5
+      name: Scenario testing
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.1
+      name: Testing plan
+      description: A firm must develop and keep up to date a testing plan that appropriately
+        details how it will gain assurance that it can remain within the impact tolerances
+        for each of its important business services.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.2
+      name: Testing plan
+      description: 'Firms should ensure that the testing plan takes account of a number
+        of factors, including but not limited to:
+
+        (1) the type of scenario testing undertaken. For example, whether it is paper
+        based, simulations or through the use of live-systems;
+
+        (2) the scenarios which the firm expects to be able to remain within their
+        impact tolerances and which ones they may not;
+
+        (3) the frequency of the testing;
+
+        (4) the number of important business services tested;
+
+        (5) the availability and integrity of supporting assets;
+
+        (6) how the firm would communicate with internal and external stakeholders
+        effectively to reduce the harm caused by operational disruptions.'
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.3
+      name: Testing
+      description: A firm must carry out scenario testing, to assess its ability to
+        remain within its impact tolerance for each of its important business services
+        in the event of a severe but plausible disruption of its operations.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.4
+      name: Testing
+      description: "In carrying out the scenario testing, a firm must identify an\
+        \ appropriate range of adverse circumstances of varying nature, severity and\
+        \ duration relevant to its business and risk profile and consider the risks\
+        \ to the delivery of the firm\u2019s important business services in those\
+        \ circumstances."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.5
+      name: Testing
+      description: "Where a firm relies on a third party for the delivery of its important\
+        \ business services, we would expect the firm to work with the third party\
+        \ to ensure the validity of the firm\u2019s scenario testing under \u25A0\
+        \ SYSC 15A.5.3R. To the extent that the firm relies on the third party to\
+        \ carry out testing of the services provided by the third party to or on behalf\
+        \ of the firm, the firm should ensure the suitability of the methodologies,\
+        \ scenarios and considerations adopted by the third party in carrying out\
+        \ testing. The firm is ultimately responsible for the quality and accuracy\
+        \ of any testing carried out, whether by the firm or by a third party."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.6
+      name: Testing
+      description: 'In carrying out the scenario testing, a firm should, among other
+        things, consider the following scenarios:
+
+        (1) corruption, deletion or manipulation of data critical to the delivery
+        of its important business services;
+
+        (2) unavailability of facilities or key people;
+
+        (3) unavailability of third party services, which are critical to the delivery
+
+        of its important business services;
+
+        (4) disruption to other market participants, where applicable; and
+
+        (5) loss or reduced provision of technology underpinning the delivery of important
+        business services.'
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.7
+      name: Testing
+      description: "A firm must carry out the scenario testing:\n(1) if there is a\
+        \ material change to the firm\u2019s business, the important business services\
+        \ identified in accordance with \u25A0 SYSC 15A.2.1R or impact tolerances\
+        \ set in accordance with \u25A0 SYSC 15A.2.5R;\n(2) following improvements\
+        \ made by the firm in response to a previous test; and\n(3) in any event,\
+        \ on a regular basis."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.8
+      name: Lessons learned
+      description: A firm must, following scenario testing or, in the event of an
+        operational disruption, after such event, conduct a lessons learned exercise
+        that allows the firm to identify weaknesses and take action to improve its
+        ability to effectively respond and recover from future disruptions.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.5
+      ref_id: 15A.5.9
+      name: Lessons learned
+      description: "Following the lessons learned exercise, a firm must make necessary\
+        \ improvements to address weaknesses identified to ensure that it can remain\
+        \ within its impact tolerances in accordance with \u25A0 SYSC 15A.2.9R."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.6
+      assessable: false
+      depth: 1
+      ref_id: 15A.6
+      name: Self-assessment and lessons learned exercise documentation
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.6
+      ref_id: 15A.6.1
+      name: Self-assessment and lessons learned exercise documentation
+      description: "A firm must make, and keep up to date, a written record of its\
+        \ assessment of its compliance with the requirements in this chapter, including,\
+        \ but not limited to, a written record of:\n(1) important business services\
+        \ identified by the firm and the justification for the determination made;\n\
+        (2) the firm\u2019s impact tolerances and the justification for the level\
+        \ at which they have been set by the firm;\n(3) the firm\u2019s approach to\
+        \ mapping under \u25A0 SYSC 15A.4.1R, including how the firm has used mapping\
+        \ to:\n(a) identify the people, processes, technology, facilities and information\
+        \ necessary to deliver each of its important business services;\n(b) identify\
+        \ vulnerabilities; and\n(c) support scenario testing;\n(4) the firm\u2019\
+        s testing plan and a justification for the plan adopted;\n(5) details of the\
+        \ scenario testing carried out as part of its obligations under \u25A0 SYSC\
+        \ 15A.5, including a description and justification of the assumptions made\
+        \ in relation to scenario design and any identified risks to the firm\u2019\
+        s ability to meet its impact tolerances;\n(6) any lessons learned exercise\
+        \ conducted under \u25A0 SYSC 15A.5.8R;\n(7) an identification of the vulnerabilities\
+        \ that threaten the firm\u2019s ability to deliver its important business\
+        \ services within the impact tolerances set, including the actions taken or\
+        \ planned and justifications for their completion time;\n(8) its communication\
+        \ strategy under \u25A0 SYSC 15A.8.1R and an explanation of how it will enable\
+        \ it to reduce the anticipated harm caused by operational disruptions; and\n\
+        (9) the methodologies used to undertake the above activities."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.6
+      ref_id: 15A.6.2
+      name: Self-assessment and lessons learned exercise documentation
+      description: "A firm must retain each version of the records referred to in\
+        \ \u25A0 SYSC 15A.6.1R\nfor at least 6 years and, on request, provide these\
+        \ to the FCA."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.7
+      assessable: false
+      depth: 1
+      ref_id: 15A.7
+      name: Governance
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.7
+      ref_id: 15A.7.1
+      name: Governance
+      description: "A firm must ensure that its governing body approves and regularly\
+        \ reviews the written records required under \u25A0 SYSC 15A.6 (Self-assessment\
+        \ and lessons learned exercise documentation)."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.8
+      assessable: false
+      depth: 1
+      ref_id: 15A.8
+      name: Communications
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.8
+      ref_id: 15A.8.1
+      name: Communications
+      description: A firm must maintain an internal and external communication strategy
+        to act quickly and effectively to reduce the anticipated harm caused by operational
+        disruptions.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.8
+      ref_id: 15A.8.2
+      name: Communications
+      description: "As part of a firm\u2019s communications strategy, the FCA expects\
+        \ the firm to:\n(1) consider, in advance of a disruption, how it would provide\
+        \ important warnings or advice quickly to clients and other stakeholders,\
+        \ including where there is no direct line of communication;\n(2) use effective\
+        \ communication to gather information about the cause, extent, and impact\
+        \ of operational incidents; and\n(3) ensure that their choice of communication\
+        \ method takes account of the circumstances, needs and vulnerabilities of\
+        \ their clients and other stakeholders."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.8
+      ref_id: 15A.8.3
+      name: Communications
+      description: A firm must provide clear, timely and relevant communications to
+        stakeholders in the event of an operational disruption.
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.9
+      assessable: false
+      depth: 1
+      ref_id: 15A.9
+      name: Supervisory review and feedback
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.9
+      ref_id: 15A.9.1
+      name: Supervisory review and feedback
+      description: "The FCA may provide individual guidance as to whether a firm\u2019\
+        s compliance with this chapter is adequate and, if necessary, require a firm\
+        \ to take the necessary actions or steps to address any failure to meet the\
+        \ requirements in this chapter."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.9
+      ref_id: 15A.9.2
+      name: Supervisory review and feedback
+      description: "A firm should have regard to the views provided by the FCA in\
+        \ relation to the firm\u2019s compliance. If a firm considers that any individual\
+        \ guidance given to it is inappropriate to its circumstances it should, consistent\
+        \ with Principle 11 (Relations with regulators), inform the FCA that it disagrees\
+        \ with that guidance. The FCA may reissue the individual guidance if, after\
+        \ discussion with the firm, the FCA concludes that the appropriate actions\
+        \ or steps a firm should take is different from that initially suggested by\
+        \ the FCA."
+    - urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:kantox:risk:req_node:FCA-UK-SYSC15A:15a.9
+      ref_id: 15A.9.3
+      name: Supervisory review and feedback
+      description: "If, after discussion, the FCA and a firm still do not agree, the\
+        \ FCA may consider other tools available to it, including its powers under\
+        \ sections 55J and 55L of the Act on its own initiative to require the firm\
+        \ to take specific steps in line with the FCA\u2019s view to comply with the\
+        \ requirements in this chapter."
