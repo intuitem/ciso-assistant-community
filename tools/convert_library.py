@@ -706,7 +706,7 @@ for tab in dataframe:
                 assert "name" in header
                 assert "description" in header
             elif any([c.value for c in row]):
-                ref_id = row[header["ref_id"]].value
+                ref_id = str(row[header["ref_id"]].value).strip()
                 name = row[header["name"]].value
                 description = row[header["description"]].value
                 translations = get_translations(header, row)
