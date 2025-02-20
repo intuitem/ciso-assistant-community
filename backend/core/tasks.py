@@ -16,7 +16,7 @@ logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
 
 
-# @db_periodic_task(crontab(minute='*/1'))# for testing
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="0"))
 def check_controls_with_expired_eta():
     expired_controls = (
@@ -36,14 +36,12 @@ def check_controls_with_expired_eta():
         send_notification_email_expired_eta(owner_email, controls)
 
 
-# @db_periodic_task(crontab(minute='*/1'))# for testing
-@db_periodic_task(crontab(hour="5", minute="30"))
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="5"))
 def check_deprecated_controls():
-    deprecated_controls_list = AppliedControl.objects.filter(status="active").filter(
-        expiry_date__lte=date.today(), expiry_date__isnull=False
-    )
-
-    deprecated_controls = deprecated_controls_list.prefetch_related("owner")
+    deprecated_controls = AppliedControl.objects.filter(
+        status="deprecated"
+    ).prefetch_related("owner")
 
     # Group by individual owner
     owner_controls = {}
@@ -54,7 +52,9 @@ def check_deprecated_controls():
             owner_controls[owner.email].append(control)
 
     # Update the status of each expired control
-    deprecated_controls_list.update(status="deprecated")
+    # deprecated_controls_list.update(status="deprecated")
+    # we should avoid this for now and have this as part of the model logic somehow.
+    # This will be done differently later and consistently.
 
     for owner_email, controls in owner_controls.items():
         send_notification_email_deprecated_control(owner_email, controls)
@@ -82,13 +82,10 @@ def send_notification_email_deprecated_control(owner_email, controls):
         return
 
     subject = f"CISO Assistant: You have {len(controls)} deprecated control(s)"
-    message = (
-        "Hello,\n\nThe following controls have the expiracy date set to today:\n\n"
-    )
+    message = "Hello,\n\nThe following controls are identified as deprecated:\n\n"
     for control in controls:
-        message += f"- {control.name} (Set to: deprecated)\n"
-    message += "\nThis control(s) will be set to deprecated.\n"
-    message += "Log in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
+        message += f"- {control.name}\n"
+    message += "\nLog in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
     message += "Thank you."
 
     send_notification_email(subject, message, owner_email)
