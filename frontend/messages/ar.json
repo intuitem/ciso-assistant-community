@@ -753,7 +753,7 @@
 	"mailFailedToSend": "فشل في إرسال البريد",
 	"questionOrQuestions": "أسئلة)",
 	"successfullyUpdatedClientSettings": "تم تحديث إعدادات العميل بنجاح، يرجى تحديث الصفحة.",
-	"xRaysEmptyMessage": "يتعين عليك إنشاء مشروع واحد على الأقل لاستخدام الأشعة السينية.",
+	"xRaysEmptyMessage": "يتعين عليك إنشاء محيط واحد على الأقل لاستخدام الأشعة السينية.",
 	"suggestControls": "اقتراح الضوابط",
 	"createAppliedControlsFromSuggestionsHelpText": "إنشاء عناصر تحكم تطبيقية من عناصر التحكم المرجعية المقترحة لمتطلبات الإطار",
 	"createAppliedControlsFromSuggestionsSuccess": "تم تطبيق عناصر التحكم بنجاح من عناصر التحكم المرجعية المقترحة",
