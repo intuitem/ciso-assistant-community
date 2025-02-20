@@ -2,6 +2,7 @@ from allauth.headless.base.views import APIView
 from allauth.headless.socialaccount.forms import RedirectToProviderForm
 from allauth.socialaccount import providers
 from allauth.socialaccount.providers.saml.views import render_authentication_error
+from django.core.exceptions import ValidationError
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
