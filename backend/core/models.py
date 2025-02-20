@@ -2847,6 +2847,8 @@ class ComplianceAssessment(Assessment):
     )
     show_documentation_score = models.BooleanField(default=False)
 
+    fields_to_check = ["name", "version"]
+
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
