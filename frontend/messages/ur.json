@@ -752,7 +752,7 @@
 	"mailFailedToSend": "میل بھیجنے میں ناکام رہا۔",
 	"questionOrQuestions": "سوال (سوال)",
 	"successfullyUpdatedClientSettings": "کلائنٹ کی ترتیبات کو کامیابی کے ساتھ اپ ڈیٹ کیا گیا، براہ کرم صفحہ کو ریفریش کریں۔",
-	"xRaysEmptyMessage": "ایکس رے استعمال کرنے کے لیے آپ کو کم از کم ایک پروجیکٹ بنانا ہوگا۔",
+	"xRaysEmptyMessage": "ایکسرے استعمال کرنے کے لیے آپ کو کم از کم ایک پیریمیٹرز بنانا ہوگا۔",
 	"suggestControls": "کنٹرولز تجویز کریں۔",
 	"createAppliedControlsFromSuggestionsHelpText": "فریم ورک کی ضروریات کے تجویز کردہ حوالہ کنٹرول سے لاگو کنٹرولز بنائیں",
 	"createAppliedControlsFromSuggestionsSuccess": "تجویز کردہ حوالہ کنٹرولز سے کامیابی کے ساتھ بنائے گئے لاگو کنٹرولز",
