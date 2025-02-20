@@ -30,12 +30,12 @@ objects:
       \ du label EBIOS Risk Manager.\nUne annexe donne des recommandations relatives\
       \ \xE0 l\u2019application et \xE0 son ergonomie.\nLien: https://cyber.gouv.fr/label-ebios-risk-manager"
     implementation_groups_definition:
-    - ref_id: 'Standalone '
+    - ref_id: Standalone
       name: Standalone
       description: "Le logiciel fonctionnant de mani\xE8re autonome sur une station\
         \ de travail est soumis aux\nexigences relevant du mode \xAB standalone \xBB\
         ."
-    - ref_id: 'Client-Serveur '
+    - ref_id: Client-Serveur
       name: Client-Serveur
       description: "Le logiciel fonctionnant au sein d\u2019une infrastructure r\xE9\
         seau priv\xE9e et dans un\nenvironnement client\u2013serveur est soumis aux\
