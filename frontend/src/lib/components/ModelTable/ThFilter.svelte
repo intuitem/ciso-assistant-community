@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DataHandler } from '@vincjo/datatables';
+	import type { DataHandler } from '@vincjo/datatables/remote';
 	export let handler: DataHandler;
 	export let filterBy = '';
 	let value = '';
@@ -10,8 +10,15 @@
 	<input
 		type="text"
 		class="input variant-form-material placeholder:text-xs bg-transparent p-0"
-		placeholder="Filter"
+		placeholder="Filter {filterBy}..."
+		aria-label="Filter by {filterBy}"
+		role="searchbox"
 		bind:value
-		on:input={() => handler.filter(value, filterBy)}
+		on:input={() => {
+			const debounceTimeout = setTimeout(() => {
+				handler.filter(value, filterBy);
+			}, 300);
+			return () => clearTimeout(debounceTimeout);
+		}}
 	/>
 </th>
