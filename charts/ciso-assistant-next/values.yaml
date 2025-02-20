@@ -1,5 +1,5 @@
 ## CISO Assistant configuration
-## Ref: https://github.com/intuitem/ciso-assistant-community  
+## Ref: https://github.com/intuitem/ciso-assistant-community
 ##
 
 # -- Provide a name in place of `ciso-assistant`
@@ -34,7 +34,7 @@ global:
   clusterDomain: cluster.local
 
   # -- Toggle and define pod-level security context
-  # @default -- `{}` 
+  # @default -- `{}`
   securityContext: {}
   #  fsGroupChangePolicy: Always
   #  sysctls: []
@@ -59,11 +59,14 @@ backend:
   config:
     # -- Admin email for initial configuration
     emailAdmin: admin@example.net
-  
+
     ## SMTP configuration
     smtp:
       # -- Default from email address
       defaultFrom: no-reply@ciso-assistant.net
+      # -- Name of an existing secret resource containing the primary SMTP password in a 'email-primary-password' key
+      # -- and the rescue SMTP username in a 'email-rescue-username' key
+      existingSecret: ""
       primary:
         # -- Primary SMTP hostname
         host: primary.cool-mailer.net
@@ -76,6 +79,8 @@ backend:
         # -- Primary SMTP password
         password: "primary_password_here"
       rescue:
+        # -- Rescue SMTP hostname
+        enabled: true
         # -- Rescue SMTP hostname
         host: smtp.secondary.mailer.cloud
         # -- Rescue SMTP hostname
@@ -93,6 +98,8 @@ backend:
 
     # -- Set Django secret key
     djangoSecretKey: "changeme"
+    # -- Name of an existing secret resource containing the django secret in a 'django-secret-key' key
+    djangoExistingSecretKey: ""
 
     # -- Enable Django debug mode
     djangoDebug: false
@@ -150,7 +157,7 @@ backend:
   env: []
 
   # -- Toggle and define container-level security context
-  # @default -- `{}` 
+  # @default -- `{}`
   containerSecurityContext: {}
   #  seLinuxOptions: {}
   #  runAsUser: 1001
@@ -188,7 +195,7 @@ frontend:
   config:
     # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
     bodySizeLimit: "50M"
-  
+
   ## Frontend image
   image:
     # -- Registry to use for the frontend
@@ -220,7 +227,7 @@ frontend:
   env: []
 
   # -- Toggle and define container-level security context
-  # @default -- `{}` 
+  # @default -- `{}`
   containerSecurityContext: {}
   #  seLinuxOptions: {}
   #  runAsUser: 1001

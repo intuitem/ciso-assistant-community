@@ -79,7 +79,11 @@ spec:
           - name: DJANGO_SECRET_KEY
             valueFrom:
               secretKeyRef:
+                {{- if .Values.backend.config.djangoExistingSecretKey }}
+                name: {{ .Values.backend.config.djangoExistingSecretKey }}
+                {{- else }}
                 name: {{ include "ciso-assistant.fullname" . }}-backend
+                {{- end }}
                 key: django-secret-key
           - name: CISO_ASSISTANT_SUPERUSER_EMAIL
             value: {{ .Values.backend.config.emailAdmin }}
@@ -99,13 +103,20 @@ spec:
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.primary.username | quote }}
           {{- end }}
-          {{- if .Values.backend.config.smtp.primary.password }}
+          {{- if .Values.backend.config.smtp.existingSecret }}
+          - name: EMAIL_HOST_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.backend.config.smtp.existingSecret }}
+                key: email-primary-password
+          {{- else if .Values.backend.config.smtp.primary.password }}
           - name: EMAIL_HOST_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-primary-password
           {{- end }}
+          {{- if .Values.backend.config.smtp.rescue.enabled }}          -
           - name: EMAIL_HOST_RESCUE
             value: {{ .Values.backend.config.smtp.rescue.host | quote }}
           - name: EMAIL_PORT_RESCUE
@@ -116,16 +127,23 @@ spec:
           - name: EMAIL_HOST_USER_RESCUE
             value: {{ .Values.backend.config.smtp.rescue.username | quote }}
           {{- end }}
-          {{- if .Values.backend.config.smtp.rescue.password }}
+          {{- if .Values.backend.config.smtp.existingSecret }}
+          - name: EMAIL_HOST_PASSWORD_RESCUE
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.backend.config.smtp.existingSecret }}
+                key: email-rescue-password
+          {{- else if .Values.backend.config.smtp.rescue.password }}
           - name: EMAIL_HOST_PASSWORD_RESCUE
             valueFrom:
               secretKeyRef:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-rescue-password
           {{- end }}
+          {{- end }}
         volumeMounts:
         - name: tmp-data
-          mountPath: /tmp 
+          mountPath: /tmp
         {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
         - name: sqlite-data
           mountPath: /ciso/db
