@@ -16,8 +16,8 @@ logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
 
 
-# @db_periodic_task(crontab(minute='*/1'))# for testing
-@db_periodic_task(crontab(hour="6"))
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="0"))
 def check_controls_with_expired_eta():
     expired_controls = (
         AppliedControl.objects.exclude(status="active")
@@ -33,12 +33,82 @@ def check_controls_with_expired_eta():
             owner_controls[owner.email].append(control)
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
-        send_notification_email(owner_email, controls)
+        send_notification_email_expired_eta(owner_email, controls)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="5"))
+def check_deprecated_controls():
+    deprecated_controls = AppliedControl.objects.filter(
+        status="deprecated"
+    ).prefetch_related("owner")
+
+    # Group by individual owner
+    owner_controls = {}
+    for control in deprecated_controls:
+        for owner in control.owner.all():
+            if owner.email not in owner_controls:
+                owner_controls[owner.email] = []
+            owner_controls[owner.email].append(control)
+
+    # Update the status of each expired control
+    # deprecated_controls_list.update(status="deprecated")
+    # we should avoid this for now and have this as part of the model logic somehow.
+    # This will be done differently later and consistently.
+
+    for owner_email, controls in owner_controls.items():
+        send_notification_email_deprecated_control(owner_email, controls)
 
 
 @task()
-def send_notification_email(owner_email, controls):
-    # TODO this will probably will move to a common section later on.
+def send_notification_email_expired_eta(owner_email, controls):
+    if not check_email_configuration(owner_email, controls):
+        return
+
+    subject = f"CISO Assistant: You have {len(controls)} expired control(s)"
+    message = "Hello,\n\nThe following controls have expired:\n\n"
+    for control in controls:
+        message += f"- {control.name} (ETA: {control.eta})\n"
+    message += "\nThis reminder will stop once the control is marked as active or you update the ETA.\n"
+    message += "Log in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
+    message += "Thank you."
+
+    send_notification_email(subject, message, owner_email)
+
+
+@task()
+def send_notification_email_deprecated_control(owner_email, controls):
+    if not check_email_configuration(owner_email, controls):
+        return
+
+    subject = f"CISO Assistant: You have {len(controls)} deprecated control(s)"
+    message = "Hello,\n\nThe following controls are identified as deprecated:\n\n"
+    for control in controls:
+        message += f"- {control.name}\n"
+    message += "\nLog in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
+    message += "Thank you."
+
+    send_notification_email(subject, message, owner_email)
+
+
+@task()
+def send_notification_email(subject, message, owner_email):
+    try:
+        logger.debug("Sending notification email", subject=subject, message=message)
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[owner_email],
+            fail_silently=False,
+        )
+        logger.info(f"Successfully sent notification email to {owner_email}")
+    except Exception as e:
+        logger.error(f"Failed to send notification email to {owner_email}: {str(e)}")
+
+
+@task()
+def check_email_configuration(owner_email, controls):
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
     )
@@ -46,7 +116,7 @@ def send_notification_email(owner_email, controls):
         logger.warning(
             "Email notification is disabled. You can enable it under Extra/Settings. Skipping for now."
         )
-        return
+        return False
 
     # Check required email settings
     required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
@@ -59,28 +129,10 @@ def send_notification_email(owner_email, controls):
     if missing_settings:
         error_msg = f"Cannot send email notification: Missing email settings: {', '.join(missing_settings)}"
         logger.error(error_msg)
-        return
+        return False
 
     if not owner_email:
         logger.error("Cannot send email notification: No recipient email provided")
-        return
+        return False
 
-    subject = f"CISO Assistant: You have {len(controls)} expired control(s)"
-    message = "Hello,\n\nThe following controls have expired:\n\n"
-    for control in controls:
-        message += f"- {control.name} (ETA: {control.eta})\n"
-    message += "\nThis reminder will stop once the control is marked as active or you update the ETA.\n"
-    message += "Log in to your CISO Assistant portal and check 'my assignments' section to get to your controls directly.\n\n"
-    message += "Thank you."
-
-    try:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[owner_email],
-            fail_silently=False,
-        )
-        logger.info(f"Successfully sent notification email to {owner_email}")
-    except Exception as e:
-        logger.error(f"Failed to send notification email to {owner_email}: {str(e)}")
+    return True

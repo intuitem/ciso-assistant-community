@@ -4,9 +4,9 @@
     {# Header Section #}
     <div class="bg-white p-4 mb-4 shadow rounded-lg">
         <div class="flex flex-row justify-center space-x-3">
-            <p class="font-semibold text-lg">{% trans "Domain" %}: {{ risk_assessment.project.folder }}</p>
+            <p class="font-semibold text-lg">{% trans "Domain" %}: {{ risk_assessment.perimeter.folder }}</p>
             <span class="text-gray-500">/</span>
-            <p class="font-semibold text-lg">{% trans "Project" %}: {{ risk_assessment.project }}</p>
+            <p class="font-semibold text-lg">{% trans "Perimeter" %}: {{ risk_assessment.perimeter }}</p>
             <span class="text-gray-500">/</span>
             <p class="font-semibold text-lg">{% trans "Risk assessment" %}: {{ risk_assessment.name }} - {{ risk_assessment.version }}</p>
         </div>

@@ -21,7 +21,7 @@ READER_PERMISSIONS_LIST = [
     "view_framework",
     "view_loadedlibrary",
     "view_policy",
-    "view_project",
+    "view_perimeter",
     "view_referencecontrol",
     "view_representative",
     "view_requirementassessment",
@@ -47,10 +47,11 @@ READER_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "view_qualification",
     "view_globalsettings",
+    "view_securityexception",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
-    "view_project",
+    "view_perimeter",
     "view_riskassessment",
     "view_appliedcontrol",
     "view_policy",
@@ -83,6 +84,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "view_qualification",
     "view_globalsettings",
+    "view_securityexception",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -93,7 +95,7 @@ ANALYST_PERMISSIONS_LIST = [
     "add_complianceassessment",
     "add_evidence",
     "add_policy",
-    "add_project",
+    "add_perimeter",
     "add_riskacceptance",
     "add_riskassessment",
     "add_riskscenario",
@@ -107,7 +109,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_entityassessment",
     "change_evidence",
     "change_policy",
-    "change_project",
+    "change_perimeter",
     "change_referencecontrol",
     "change_vulnerability",
     "change_representative",
@@ -124,7 +126,7 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_entityassessment",
     "delete_evidence",
     "delete_policy",
-    "delete_project",
+    "delete_perimeter",
     "delete_referencecontrol",
     "delete_vulnerability",
     "delete_representative",
@@ -143,7 +145,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_framework",
     "view_loadedlibrary",
     "view_policy",
-    "view_project",
+    "view_perimeter",
     "view_referencecontrol",
     "view_vulnerability",
     "view_representative",
@@ -190,6 +192,10 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_operationalscenario",
     "view_qualification",
     "view_globalsettings",
+    "view_securityexception",
+    "add_securityexception",
+    "change_securityexception",
+    "delete_securityexception",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -203,7 +209,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_evidence",
     "add_folder",
     "add_policy",
-    "add_project",
+    "add_perimeter",
     "add_riskacceptance",
     "add_riskassessment",
     "add_riskmatrix",
@@ -218,7 +224,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_evidence",
     "change_folder",
     "change_policy",
-    "change_project",
+    "change_perimeter",
     "change_referencecontrol",
     "change_representative",
     "change_requirementassessment",
@@ -236,7 +242,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_evidence",
     "delete_folder",
     "delete_policy",
-    "delete_project",
+    "delete_perimeter",
     "delete_referencecontrol",
     "delete_representative",
     "delete_riskacceptance",
@@ -259,7 +265,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_framework",
     "view_loadedlibrary",
     "view_policy",
-    "view_project",
+    "view_perimeter",
     "view_referencecontrol",
     "view_representative",
     "view_requirementassessment",
@@ -305,6 +311,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_operationalscenario",
     "view_qualification",
     "view_globalsettings",
+    "view_securityexception",
+    "add_securityexception",
+    "change_securityexception",
+    "delete_securityexception",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -340,10 +350,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_folder",
     "view_folder",
     "delete_folder",
-    "add_project",
-    "change_project",
-    "delete_project",
-    "view_project",
+    "add_perimeter",
+    "change_perimeter",
+    "delete_perimeter",
+    "view_perimeter",
     "add_riskassessment",
     "view_riskassessment",
     "change_riskassessment",
@@ -451,6 +461,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_qualification",
     "change_qualification",
     "delete_qualification",
+    "view_securityexception",
+    "add_securityexception",
+    "change_securityexception",
+    "delete_securityexception",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

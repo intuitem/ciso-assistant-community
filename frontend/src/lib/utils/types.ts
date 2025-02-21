@@ -29,7 +29,7 @@ export interface LoginRequestBody {
 
 export const URL_MODEL = [
 	'folders',
-	'projects',
+	'perimeters',
 	'risk-matrices',
 	'risk-assessments',
 	'threats',
@@ -63,8 +63,10 @@ export const URL_MODEL = [
 	'stakeholders',
 	'strategic-scenarios',
 	'attack-paths',
-	'operational-scenarios'
+	'operational-scenarios',
+	'qualifications',
 	// 'ebios-rm',
+	'security-exceptions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
@@ -102,7 +104,7 @@ export interface RiskMatrix {
 	json_definition: string; // stringified
 }
 
-export interface Project {
+export interface Perimeter {
 	id: string;
 	folder: Record<string, any>;
 	lc_status: string;

@@ -7,7 +7,7 @@ import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
+import { message, setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { getSecureRedirect } from './helpers';
@@ -76,16 +76,16 @@ export async function handleErrorResponse({
 	}
 	if (res.warning) {
 		setFlash({ type: 'warning', message: safeTranslate(res.warning) }, event);
-		return { form };
+		return message(form, { warning: res.warning });
 	}
 	if (res.error) {
 		setFlash({ type: 'error', message: safeTranslate(res.error) }, event);
-		return { form };
+		return message(form, { error: res.error });
 	}
 	Object.entries(res).forEach(([key, value]) => {
 		setError(form, key, safeTranslate(value));
 	});
-	return fail(400, { form });
+	return message(form, { status: response.status });
 }
 
 export async function defaultWriteFormAction({
@@ -111,7 +111,7 @@ export async function defaultWriteFormAction({
 
 	if (!form.valid) {
 		console.error(form.errors);
-		return fail(400, { form: form });
+		return message(form, { status: 400 });
 	}
 
 	const endpoint = getEndpoint({ action, urlModel, event });
@@ -149,7 +149,8 @@ export async function defaultWriteFormAction({
 				body: file
 			};
 			const fileUploadRes = await event.fetch(fileUploadEndpoint, fileUploadRequestInitOptions);
-			if (!fileUploadRes.ok) return handleErrorResponse({ event, response: fileUploadRes, form });
+			if (!fileUploadRes.ok)
+				return await handleErrorResponse({ event, response: fileUploadRes, form });
 		}
 	}
 
@@ -167,9 +168,9 @@ export async function defaultWriteFormAction({
 	if (next && doRedirect) redirect(302, next);
 
 	if (redirectToWrittenObject) {
-		return { form, redirect: `/${urlModel}/${writtenObject.id}` };
+		return message(form, { redirect: `/${urlModel}/${writtenObject.id}` });
 	}
-	return { form, object: writtenObject };
+	return message(form, { object: writtenObject });
 }
 
 export async function nestedWriteFormAction({
@@ -213,7 +214,7 @@ export async function defaultDeleteFormAction({
 
 	if (!deleteForm.valid) {
 		console.error(deleteForm.errors);
-		return fail(400, { form: deleteForm });
+		return message(deleteForm, { status: 400 });
 	}
 
 	const requestInitOptions: RequestInit = {
@@ -224,12 +225,12 @@ export async function defaultDeleteFormAction({
 		const response = await res.json();
 		if (response.error) {
 			setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
-			return fail(403, { form: deleteForm });
+			return message(deleteForm, { status: res.status });
 		}
 		if (response.non_field_errors) {
 			setError(deleteForm, 'non_field_errors', response.non_field_errors);
 		}
-		return fail(400, { form: deleteForm });
+		return message(deleteForm, { status: res.status });
 	}
 	setFlash(
 		{
@@ -241,7 +242,7 @@ export async function defaultDeleteFormAction({
 		event
 	);
 
-	return { deleteForm };
+	return message(deleteForm, { status: res.status });
 }
 
 export async function nestedDeleteFormAction({ event }: { event: RequestEvent }) {

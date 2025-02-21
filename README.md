@@ -399,15 +399,7 @@ poetry run python manage.py createsuperuser
 poetry run python manage.py runserver
 ```
 
-10. Configure the git hooks for generating the build name.
-
-```sh
-cd .git/hooks
-ln -fs ../../git_hooks/post-commit .
-ln -fs ../../git_hooks/post-merge .
-```
-
-11. for Huey (tasks runner)
+10. for Huey (tasks runner)
 
 - prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
@@ -437,7 +429,7 @@ pnpm run dev
 4. Reach the frontend on <http://localhost:5173>
 
 > [!NOTE]
-> Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
+> Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. Please see the [readme file](frontend/README.md) in frontend directory for more information on this.
 
 5. Environment variables
 

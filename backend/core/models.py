@@ -6,7 +6,6 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
-from rest_framework.renderers import status
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -243,7 +242,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
 class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
-    content = models.TextField()
+    content = models.JSONField()
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
@@ -563,7 +562,7 @@ class LibraryUpdater:
                         ra = RequirementAssessment.objects.create(
                             compliance_assessment=compliance_assessment,
                             requirement=new_requirement_node,
-                            folder=compliance_assessment.project.folder,
+                            folder=compliance_assessment.perimeter.folder,
                             answer=transform_question_to_answer(
                                 new_requirement_node.question
                             )
@@ -596,7 +595,7 @@ class LibraryUpdater:
                                 if answer["answer"] not in question["question_choices"]:
                                     answer["answer"] = ""
 
-                        elif question_type != "text":
+                        elif question_type not in ["text", "date"]:
                             raise NotImplementedError(
                                 f"The question type '{question_type}' hasn't been implemented !"
                             )
@@ -759,6 +758,7 @@ class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
         blank=True,
         related_name="threats",
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -807,7 +807,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         blank=True,
         related_name="reference_controls",
     )
-
     category = models.CharField(
         max_length=20,
         null=True,
@@ -815,7 +814,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         choices=CATEGORY,
         verbose_name=_("Category"),
     )
-
     csf_function = models.CharField(
         max_length=20,
         null=True,
@@ -823,10 +821,10 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         choices=CSF_FUNCTION,
         verbose_name=_("CSF Function"),
     )
-
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -894,8 +892,8 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return RiskAssessment.objects.filter(risk_matrix=self)
 
     @property
-    def projects(self) -> list:
-        return Project.objects.filter(riskassessment__risk_matrix=self).distinct()
+    def perimeters(self) -> list:
+        return Perimeter.objects.filter(riskassessment__risk_matrix=self).distinct()
 
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
@@ -1348,7 +1346,7 @@ class Qualification(ReferentialObjectMixin, I18nObjectMixin):
 ########################### Domain objects #########################
 
 
-class Project(NameDescriptionMixin, FolderMixin):
+class Perimeter(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("Undefined")),
         ("in_design", _("Design")),
@@ -1370,8 +1368,8 @@ class Project(NameDescriptionMixin, FolderMixin):
     fields_to_check = ["name"]
 
     class Meta:
-        verbose_name = _("Project")
-        verbose_name_plural = _("Projects")
+        verbose_name = _("Perimeter")
+        verbose_name_plural = _("Perimeters")
 
     def overall_compliance(self):
         compliance_assessments_list = [
@@ -1392,6 +1390,69 @@ class Project(NameDescriptionMixin, FolderMixin):
 
     def __str__(self):
         return self.folder.name + "/" + self.name
+
+
+class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    class Severity(models.IntegerChoices):
+        UNDEFINED = -1, "undefined"
+        LOW = 0, "low"
+        MEDIUM = 1, "medium"
+        HIGH = 2, "high"
+        CRITICAL = 3, "critical"
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", "draft"
+        IN_REVIEW = "in_review", "in review"
+        APPROVED = "approved", "approved"
+        RESOLVED = "resolved", "resolved"
+        EXPIRED = "expired", "expired"
+        DEPRECATED = "deprecated", "deprecated"
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
+    severity = models.SmallIntegerField(
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
+    )
+    status = models.CharField(
+        verbose_name="Status",
+        choices=Status.choices,
+        null=False,
+        default=Status.DRAFT,
+        max_length=20,
+    )
+    expiration_date = models.DateField(
+        help_text="Specify when the security exception will no longer apply",
+        null=True,
+        verbose_name="Expiration date",
+    )
+    owners = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name="Owner",
+        related_name="security_exceptions",
+    )
+    approver = models.ForeignKey(
+        User,
+        max_length=200,
+        verbose_name=_("Approver"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    fields_to_check = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        super().clean()
+        if self.expiration_date and self.expiration_date < now().date():
+            raise ValidationError(
+                {"expiration_date": "Expiration date must be in the future"}
+            )
 
 
 class Asset(
@@ -1511,12 +1572,23 @@ class Asset(
             JSONSchemaInstanceValidator(DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA)
         ],
     )
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
     owner = models.ManyToManyField(
         User,
         blank=True,
         verbose_name=_("Owner"),
         related_name="assets",
     )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="assets",
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -1700,6 +1772,7 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -1719,7 +1792,9 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
-        if not self.attachment:
+        if not self.attachment or not self.attachment.storage.exists(
+            self.attachment.name
+        ):
             return None
         # get the attachment size with the correct unit
         size = self.attachment.size
@@ -1853,7 +1928,6 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         help_text=_("Cost of the measure (using globally-chosen currency)"),
         verbose_name=_("Cost"),
     )
-
     progress_field = models.IntegerField(
         default=0,
         verbose_name=_("Progress Field"),
@@ -1862,6 +1936,13 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             MaxValueValidator(100, message="Progress cannot be more than 100"),
         ],
     )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="applied_controls",
+    )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -1887,8 +1968,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         return {scenario.risk_assessment for scenario in self.risk_scenarios}
 
     @property
-    def projects(self):
-        return {risk_assessment.project for risk_assessment in self.risk_assessments}
+    def perimeters(self):
+        return {risk_assessment.perimeter for risk_assessment in self.risk_assessments}
 
     def __str__(self):
         return self.name
@@ -2007,6 +2088,13 @@ class Vulnerability(
         verbose_name=_("Applied controls"),
         related_name="vulnerabilities",
     )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="vulnerabilities",
+    )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -2050,8 +2138,11 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, verbose_name=_("Project")
+    perimeter = models.ForeignKey(
+        Perimeter,
+        on_delete=models.CASCADE,
+        verbose_name=_("Perimeter"),
+        null=True,
     )
     version = models.CharField(
         max_length=100,
@@ -2090,7 +2181,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     def save(self, *args, **kwargs) -> None:
         if not self.folder or self.folder == Folder.get_root_folder():
-            self.folder = self.project.folder
+            self.folder = self.perimeter.folder
         return super().save(*args, **kwargs)
 
 
@@ -2151,7 +2242,7 @@ class RiskAssessment(Assessment):
 
     @property
     def path_display(self) -> str:
-        return f"{self.project.folder}/{self.project}/{self.name} - {self.version}"
+        return f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
 
     def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()
@@ -2576,7 +2667,9 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    ref_id = models.CharField(max_length=8, blank=True, verbose_name=_("Reference ID"))
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
 
     qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 
@@ -2587,6 +2680,12 @@ class RiskScenario(NameDescriptionMixin):
     )
     justification = models.CharField(
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="risk_scenarios",
     )
 
     fields_to_check = ["name"]
@@ -2607,10 +2706,10 @@ class RiskScenario(NameDescriptionMixin):
         candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
-    def parent_project(self):
-        return self.risk_assessment.project
+    def parent_perimeter(self):
+        return self.risk_assessment.perimeter
 
-    parent_project.short_description = _("Project")
+    parent_perimeter.short_description = _("Perimeter")
 
     def get_matrix(self):
         return self.risk_assessment.risk_matrix.parse_json_translated()
@@ -2711,7 +2810,7 @@ class RiskScenario(NameDescriptionMixin):
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
     def __str__(self):
-        return str(self.parent_project()) + _(": ") + str(self.name)
+        return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
     def save(self, *args, **kwargs):
         if self.current_proba >= 0 and self.current_impact >= 0:
@@ -2751,6 +2850,8 @@ class ComplianceAssessment(Assessment):
         blank=True, null=True, verbose_name=_("Score definition")
     )
     show_documentation_score = models.BooleanField(default=False)
+
+    fields_to_check = ["name", "version"]
 
     class Meta:
         verbose_name = _("Compliance assessment")
@@ -2953,16 +3054,31 @@ class ComplianceAssessment(Assessment):
 
     def get_requirements_result_count(self):
         requirements_result_count = []
-        for rs in RequirementAssessment.Result:
-            requirements_result_count.append(
-                (
-                    RequirementAssessment.objects.filter(result=rs)
-                    .filter(compliance_assessment=self)
-                    .filter(requirement__assessable=True)
-                    .count(),
-                    rs,
-                )
-            )
+        selected_implementation_groups_set = (
+            set(self.selected_implementation_groups)
+            if self.selected_implementation_groups
+            else None
+        )
+
+        requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        ).select_related("requirement")
+
+        if selected_implementation_groups_set is not None:
+            result_groups = {}
+            for req in requirements:
+                req_groups = set(req.requirement.implementation_groups or [])
+                if selected_implementation_groups_set & req_groups:
+                    result_groups.setdefault(req.result, []).append(req)
+
+            for rs in RequirementAssessment.Result:
+                count = len(result_groups.get(rs, []))
+                requirements_result_count.append((count, rs))
+        else:
+            for rs in RequirementAssessment.Result:
+                count = requirements.filter(result=rs).count()
+                requirements_result_count.append((count, rs))
+
         return requirements_result_count
 
     def get_measures_status_count(self):
@@ -3363,6 +3479,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         blank=True,
         null=True,
         verbose_name=_("Answer"),
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="requirement_assessments",
     )
 
     def __str__(self) -> str:

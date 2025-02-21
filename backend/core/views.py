@@ -12,7 +12,10 @@ import pytz
 from uuid import UUID
 from itertools import cycle
 import django_filters as df
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE, VERSION
+from ciso_assistant.settings import (
+    EMAIL_HOST,
+    EMAIL_HOST_RESCUE,
+)
 
 import shutil
 from pathlib import Path
@@ -47,6 +50,7 @@ from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, UserGroup
 from rest_framework import filters, permissions, status, viewsets
@@ -78,7 +82,11 @@ from core.models import (
     RiskAssessment,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
-from core.utils import RoleCodename, UserGroupCodename
+from core.utils import (
+    RoleCodename,
+    UserGroupCodename,
+    compare_schema_versions,
+)
 
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -132,6 +140,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     serializers_module = "core.serializers"
 
     def get_queryset(self):
+        """the scope_folder_id query_param allows scoping the objects to retrieve"""
         if not self.model:
             return None
         object_ids_view = None
@@ -146,8 +155,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 if RoleAssignment.is_object_readable(self.request.user, self.model, id):
                     object_ids_view = [id]
         if not object_ids_view:
+            scope_folder_id = self.request.query_params.get("scope_folder_id")
+            scope_folder = (
+                get_object_or_404(Folder, id=scope_folder_id)
+                if scope_folder_id
+                else Folder.get_root_folder()
+            )
             object_ids_view = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, self.model
+                scope_folder, self.request.user, self.model
             )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
@@ -243,47 +258,47 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 # Risk Assessment
 
 
-class ProjectViewSet(BaseModelViewSet):
+class PerimeterViewSet(BaseModelViewSet):
     """
-    API endpoint that allows projects to be viewed or edited.
+    API endpoint that allows perimeters to be viewed or edited.
     """
 
-    model = Project
+    model = Perimeter
     filterset_fields = ["folder", "lc_status"]
     search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
-        return Response(dict(Project.PRJ_LC_STATUS))
+        return Response(dict(Perimeter.PRJ_LC_STATUS))
 
     @action(detail=False, methods=["get"])
     def names(self, request):
         uuid_list = request.query_params.getlist("id[]", [])
-        queryset = Project.objects.filter(id__in=uuid_list)
+        queryset = Perimeter.objects.filter(id__in=uuid_list)
 
-        return Response({str(project.id): project.name for project in queryset})
+        return Response({str(perimeter.id): perimeter.name for perimeter in queryset})
 
     @action(detail=False, methods=["get"])
     def quality_check(self, request):
         """
-        Returns the quality check of the projects
+        Returns the quality check of the perimeters
         """
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Project
+            folder=Folder.get_root_folder(), user=request.user, object_type=Perimeter
         )
-        projects = Project.objects.filter(id__in=viewable_objects)
+        perimeters = Perimeter.objects.filter(id__in=viewable_objects)
         res = {
             str(p.id): {
-                "project": ProjectReadSerializer(p).data,
+                "perimeter": PerimeterReadSerializer(p).data,
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
             }
-            for p in projects
+            for p in perimeters
         }
         for compliance_assessment in ComplianceAssessment.objects.filter(
-            project__in=projects
+            perimeter__in=perimeters
         ):
-            res[str(compliance_assessment.project.id)]["compliance_assessments"][
+            res[str(compliance_assessment.perimeter.id)]["compliance_assessments"][
                 "objects"
             ][str(compliance_assessment.id)] = {
                 "object": ComplianceAssessmentReadSerializer(
@@ -291,8 +306,8 @@ class ProjectViewSet(BaseModelViewSet):
                 ).data,
                 "quality_check": compliance_assessment.quality_check(),
             }
-        for risk_assessment in RiskAssessment.objects.filter(project__in=projects):
-            res[str(risk_assessment.project.id)]["risk_assessments"]["objects"][
+        for risk_assessment in RiskAssessment.objects.filter(perimeter__in=perimeters):
+            res[str(risk_assessment.perimeter.id)]["risk_assessments"]["objects"][
                 str(risk_assessment.id)
             ] = {
                 "object": RiskAssessmentReadSerializer(risk_assessment).data,
@@ -303,20 +318,20 @@ class ProjectViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="quality_check")
     def quality_check_detail(self, request, pk):
         """
-        Returns the quality check of the project
+        Returns the quality check of the perimeter
         """
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Project
+            folder=Folder.get_root_folder(), user=request.user, object_type=Perimeter
         )
         if UUID(pk) in viewable_objects:
-            project = self.get_object()
+            perimeter = self.get_object()
             res = {
-                "project": ProjectReadSerializer(project).data,
+                "perimeter": PerimeterReadSerializer(perimeter).data,
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
             }
             for compliance_assessment in ComplianceAssessment.objects.filter(
-                project=project
+                perimeter=perimeter
             ):
                 res["compliance_assessments"]["objects"][
                     str(compliance_assessment.id)
@@ -326,7 +341,7 @@ class ProjectViewSet(BaseModelViewSet):
                     ).data,
                     "quality_check": compliance_assessment.quality_check(),
                 }
-            for risk_assessment in RiskAssessment.objects.filter(project=project):
+            for risk_assessment in RiskAssessment.objects.filter(perimeter=perimeter):
                 res["risk_assessments"]["objects"][str(risk_assessment.id)] = {
                     "object": RiskAssessmentReadSerializer(risk_assessment).data,
                     "quality_check": risk_assessment.quality_check(),
@@ -342,9 +357,9 @@ class ProjectViewSet(BaseModelViewSet):
         (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
-            object_type=Project,
+            object_type=Perimeter,
         )
-        for item in Project.objects.filter(id__in=viewable_items):
+        for item in Perimeter.objects.filter(id__in=viewable_items):
             if my_map.get(item.folder.name) is None:
                 my_map[item.folder.name] = {}
             my_map[item.folder.name].update({item.name: item.id})
@@ -399,6 +414,7 @@ class AssetViewSet(BaseModelViewSet):
         "type",
         "risk_scenarios",
         "ebios_rm_studies",
+        "security_exceptions",
     ]
     search_fields = ["name", "description", "business_value"]
 
@@ -643,6 +659,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "severity",
         "risk_scenarios",
         "applied_controls",
+        "security_exceptions",
     ]
     search_fields = ["name", "description"]
 
@@ -670,8 +687,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     model = RiskAssessment
     filterset_fields = [
-        "project",
-        "project__folder",
+        "perimeter",
+        "perimeter__folder",
         "authors",
         "risk_matrix",
         "status",
@@ -977,7 +994,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data["name"],
                 description=data["description"],
-                project=Project.objects.get(id=data["project"]),
+                perimeter=Perimeter.objects.get(id=data["perimeter"]),
                 version=data["version"],
                 risk_matrix=risk_assessment.risk_matrix,
                 eta=risk_assessment.eta,
@@ -1056,6 +1073,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "requirement_assessments",
         "evidences",
         "progress_field",
+        "security_exceptions",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
@@ -1556,12 +1574,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
     model = RiskScenario
     filterset_fields = [
         "risk_assessment",
-        "risk_assessment__project",
-        "risk_assessment__project__folder",
+        "risk_assessment__perimeter",
+        "risk_assessment__perimeter__folder",
         "treatment",
         "threats",
         "assets",
         "applied_controls",
+        "security_exceptions",
     ]
     ordering = ["ref_id"]
     ordering_fields = ordering
@@ -1785,7 +1804,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 if not RoleAssignment.is_access_allowed(
                     risk_acceptance.get("approver"),
                     Permission.objects.get(codename="approve_riskacceptance"),
-                    scenario.risk_assessment.project.folder,
+                    scenario.risk_assessment.perimeter.folder,
                 ):
                     raise ValidationError(
                         "The approver is not allowed to approve this risk acceptance"
@@ -1985,7 +2004,7 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
-        Returns the tree of domains and projects
+        Returns the tree of domains and perimeters
         """
         tree = {"name": "Global", "children": []}
 
@@ -2236,6 +2255,45 @@ class FolderViewSet(BaseModelViewSet):
                 {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
             )
 
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import-dummy",
+    )
+    def import_dummy_domain(self, request):
+        timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+        domain_name = f"DEMO {timestamp}"
+
+        try:
+            dummy_fixture_path = (
+                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
+            )
+            if not dummy_fixture_path.exists():
+                logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
+                return Response(
+                    {"error": "dummyDomainFixtureNotFound"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            parsed_data = self._process_uploaded_file(dummy_fixture_path)
+            result = self._import_objects(
+                parsed_data, domain_name, load_missing_libraries=True, user=request.user
+            )
+            logger.info("Dummy domain imported successfully", domain_name=domain_name)
+            return Response(result, status=status.HTTP_200_OK)
+
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in dummy fixture file", exc_info=True)
+            return Response(
+                {"errors": ["Invalid JSON format"]},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except Exception:
+            logger.error("Error importing dummy domain", exc_info=True)
+            return Response(
+                {"error": "failedToImportDummyDomain"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
     def _process_uploaded_file(self, dump_file: str | Path) -> Any:
         """Process the uploaded file and return parsed data."""
         if not zipfile.is_zipfile(dump_file):
@@ -2244,7 +2302,9 @@ class FolderViewSet(BaseModelViewSet):
 
         with zipfile.ZipFile(dump_file, mode="r") as zipf:
             if "data.json" not in zipf.namelist():
-                logger.error("No data.json file found in uploaded file")
+                logger.error(
+                    "No data.json file found in uploaded file", files=zipf.namelist()
+                )
                 raise ValidationError({"file": "noDataJsonFileFound"})
             infolist = zipf.infolist()
             directories = list(set([Path(f.filename).parent.name for f in infolist]))
@@ -2255,18 +2315,26 @@ class FolderViewSet(BaseModelViewSet):
             try:
                 json_dump = json.loads(decompressed_data)
                 import_version = json_dump["meta"]["media_version"]
+                schema_version = json_dump["meta"].get("schema_version")
             except json.JSONDecodeError:
                 logger.error("Invalid JSON format in uploaded file", exc_info=True)
                 raise
             if "objects" not in json_dump:
                 raise ValidationError("badly formatted json")
-            if not import_version == VERSION:
+
+            # Check backup and local version
+
+            try:
+                schema_version_int = int(schema_version)
+            except (ValueError, TypeError) as e:
                 logger.error(
-                    f"Import version {import_version} not compatible with current version {VERSION}"
+                    "Invalid schema version format",
+                    schema_version=schema_version,
+                    exc_info=e,
                 )
-                raise ValidationError(
-                    {"file": "importVersionNotCompatibleWithCurrentVersion"}
-                )
+                raise ValidationError({"error": "invalidSchemaVersionFormat"})
+            compare_schema_versions(schema_version_int, import_version)
+
             if "attachments" in directories:
                 attachments = {
                     f for f in infolist if Path(f.filename).parent.name == "attachments"
@@ -2341,7 +2409,9 @@ class FolderViewSet(BaseModelViewSet):
 
             # check that user has permission to create all objects to import
             error_dict = {}
-            for model in models_map.values():
+            for model in filter(
+                lambda x: x not in [RequirementAssessment], models_map.values()
+            ):
                 if not RoleAssignment.is_access_allowed(
                     user=user,
                     perm=Permission.objects.get(
@@ -2351,6 +2421,10 @@ class FolderViewSet(BaseModelViewSet):
                 ):
                     error_dict[model._meta.model_name] = "permission_denied"
             if error_dict:
+                logger.error(
+                    "User does not have permission to import objects",
+                    error_dict=error_dict,
+                )
                 raise PermissionDenied()
 
             # Validation phase (outside transaction since it doesn't modify database)
@@ -2601,7 +2675,9 @@ class FolderViewSet(BaseModelViewSet):
         def get_mapped_ids(
             ids: List[str], link_dump_database_ids: Dict[str, str]
         ) -> List[str]:
-            return [link_dump_database_ids.get(id, "") for id in ids]
+            return [
+                link_dump_database_ids[id] for id in ids if id in link_dump_database_ids
+            ]
 
         model_name = model._meta.model_name
         _fields = fields.copy()
@@ -2617,8 +2693,8 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "riskassessment":
-                _fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(_fields["project"])
+                _fields["perimeter"] = Perimeter.objects.get(
+                    id=link_dump_database_ids.get(_fields["perimeter"])
                 )
                 _fields["risk_matrix"] = RiskMatrix.objects.get(
                     urn=_fields.get("risk_matrix")
@@ -2632,8 +2708,8 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "complianceassessment":
-                _fields["project"] = Project.objects.get(
-                    id=link_dump_database_ids.get(_fields["project"])
+                _fields["perimeter"] = Perimeter.objects.get(
+                    id=link_dump_database_ids.get(_fields["perimeter"])
                 )
                 _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
 
@@ -2653,6 +2729,7 @@ class FolderViewSet(BaseModelViewSet):
                 _fields.pop("attachment_hash", None)
 
             case "requirementassessment":
+                logger.debug("Looking for requirement", urn=_fields.get("requirement"))
                 _fields["requirement"] = RequirementNode.objects.get(
                     urn=_fields.get("requirement")
                 )
@@ -2812,6 +2889,9 @@ class FolderViewSet(BaseModelViewSet):
         match model_name:
             case "asset":
                 if parent_ids := many_to_many_map_ids.get("parent_ids"):
+                    logger.debug(
+                        "Setting parent assets", asset=obj, parent_ids=parent_ids
+                    )
                     obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
 
             case "appliedcontrol":
@@ -3033,13 +3113,37 @@ def get_composer_data(request):
 # Compliance Assessment
 
 
+class FrameworkFilter(df.FilterSet):
+    baseline = df.ModelChoiceFilter(
+        queryset=ComplianceAssessment.objects.all(),
+        method="filter_framework",
+        label="Baseline",
+    )
+
+    def filter_framework(self, queryset, name, value):
+        if not value:
+            return queryset
+        source_framework = value.framework
+        target_framework_ids = list(
+            RequirementMappingSet.objects.filter(
+                source_framework=source_framework
+            ).values_list("target_framework__id", flat=True)
+        )
+        target_framework_ids.append(source_framework.id)
+        return queryset.filter(id__in=target_framework_ids)
+
+    class Meta:
+        model = Framework
+        fields = ["folder", "baseline"]
+
+
 class FrameworkViewSet(BaseModelViewSet):
     """
     API endpoint that allows frameworks to be viewed or edited.
     """
 
     model = Framework
-    filterset_fields = ["folder"]
+    filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
     ordering_fields = ["name", "description"]
 
@@ -3158,7 +3262,9 @@ class EvidenceViewSet(BaseModelViewSet):
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
-            if not evidence.attachment:
+            if not evidence.attachment or not evidence.attachment.storage.exists(
+                evidence.attachment.name
+            ):
                 return Response(status=status.HTTP_404_NOT_FOUND)
             if request.method == "GET":
                 content_type = mimetypes.guess_type(evidence.filename())[0]
@@ -3223,7 +3329,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "project", "status", "ebios_rm_studies"]
+    filterset_fields = ["framework", "perimeter", "status", "ebios_rm_studies"]
     search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 
@@ -3718,6 +3824,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "compliance_assessment",
         "applied_controls",
+        "security_exceptions",
     ]
     search_fields = ["name", "description"]
 
@@ -4098,3 +4205,20 @@ def export_mp_csv(request):
         writer.writerow(row)
 
     return response
+
+
+class SecurityExceptionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows security exceptions to be viewed or edited.
+    """
+
+    model = SecurityException
+    filterset_fields = ["requirement_assessments", "risk_scenarios"]
+
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(SecurityException.Severity.choices))
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(SecurityException.Status.choices))

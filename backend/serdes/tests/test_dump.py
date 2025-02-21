@@ -7,7 +7,11 @@ from serdes.serializers import ExportSerializer
 @pytest.fixture
 def valid_export_data():
     return {
-        "meta": {"media_version": "1.0.0", "exported_at": datetime.now().isoformat()},
+        "meta": {
+            "media_version": "1.0.0",
+            "schema_version": 1,
+            "exported_at": datetime.now().isoformat(),
+        },
         "objects": [
             {
                 "model": "folder",
@@ -20,7 +24,7 @@ def valid_export_data():
                 },
             },
             {
-                "model": "project",
+                "model": "perimeter",
                 "id": "2",
                 "fields": {
                     "name": "ISMS",
@@ -69,6 +73,7 @@ class TestExportSerializer:
         data = {
             "meta": {
                 "media_version": "1.0.0",
+                "schema_version": 1,
                 "exported_at": datetime.now().isoformat(),
             },
             "objects": [],
@@ -117,6 +122,7 @@ class TestExportSerializer:
         data = {
             "meta": {
                 "media_version": "1.0.0",
+                "schema_version": 1,
                 "exported_at": datetime.now().isoformat(),
             },
             "objects": [

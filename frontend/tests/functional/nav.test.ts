@@ -102,6 +102,9 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 
 test('sidebar component tests', async ({ logedPage, sideBar }) => {
 	await test.step('sidebar can be collapsed and expanded', async () => {
+		if (await logedPage.page.locator('#driver-dummy-element').isVisible()) {
+			await logedPage.page.locator('.driver-popover-close-btn').first().click();
+		}
 		sideBar.toggleButton.click();
 		await expect(sideBar.toggleButton).toHaveClass(/rotate-180/);
 		sideBar.toggleButton.click();
