@@ -782,6 +782,7 @@ class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
         blank=True,
         related_name="threats",
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -830,7 +831,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         blank=True,
         related_name="reference_controls",
     )
-
     category = models.CharField(
         max_length=20,
         null=True,
@@ -838,7 +838,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         choices=CATEGORY,
         verbose_name=_("Category"),
     )
-
     csf_function = models.CharField(
         max_length=20,
         null=True,
@@ -846,10 +845,10 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         choices=CSF_FUNCTION,
         verbose_name=_("CSF Function"),
     )
-
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -1465,6 +1464,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         null=True,
         blank=True,
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -1611,6 +1611,7 @@ class Asset(
         verbose_name="Security exceptions",
         related_name="assets",
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -1795,6 +1796,7 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -1964,6 +1966,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         verbose_name="Security exceptions",
         related_name="applied_controls",
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -2115,6 +2118,7 @@ class Vulnerability(
         verbose_name="Security exceptions",
         related_name="vulnerabilities",
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
