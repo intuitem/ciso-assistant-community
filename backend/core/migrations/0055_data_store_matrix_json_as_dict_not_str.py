@@ -15,7 +15,7 @@ def make_matrix_json_definition_dict(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0053_asset_ref_id_alter_riskscenario_ref_id"),
+        ("core", "0054_alter_storedlibrary_content"),
     ]
 
     operations = [migrations.RunPython(make_matrix_json_definition_dict)]
