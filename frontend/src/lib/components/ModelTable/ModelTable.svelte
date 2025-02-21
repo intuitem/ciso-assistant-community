@@ -106,7 +106,14 @@
 
 	const handler = new DataHandler(
 		source.body.map((item: Record<string, any>, index: number) => {
-			return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
+			return {
+				...item,
+				meta: source.meta
+					? source.meta.results
+						? { ...source.meta.results[index] }
+						: { ...source.meta[index] }
+					: undefined
+			};
 		}),
 		{
 			rowsPerPage: pagination ? numberRowsPerPage : undefined,
@@ -114,6 +121,7 @@
 		}
 	);
 	const rows = handler.getRows();
+	let invalidateTable = false;
 
 	handler.onChange((state: State) => loadTableData(state, URLModel, `/${URLModel}`));
 
@@ -176,9 +184,10 @@
 				}
 			}
 		}
-		if (browser && $page.url.searchParams.size > 0) {
+		if (browser || invalidateTable) {
 			handler.invalidate();
 			_goto($page.url);
+			invalidateTable = false;
 		}
 	}
 
@@ -222,6 +231,7 @@
 							on:change={(e) => {
 								const value = e.detail;
 								filterValues[field] = value.map((v) => ({ value: v }));
+								invalidateTable = true;
 							}}
 						/>
 					{/each}
