@@ -1,3 +1,4 @@
+#! python3
 import questionary
 from rich import print
 import yaml
@@ -46,12 +47,14 @@ if need_mailer:
         "Default from email: ", default="ciso-assistant@company.com"
     ).ask()
 db = questionary.select("Choose a database", choices=["sqlite", "postgresql"]).ask()
+proxy = questionary.select("Choose a proxy", choices=["Caddy", "Traefik", "None"]).ask()
 ic(
     mode,
     fqdn,
     port,
     db,
     need_mailer,
+    proxy,
     EMAIL_HOST,
     EMAIL_PORT,
     EMAIL_USE_TLS,
