@@ -3,8 +3,9 @@ import json
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery
 from rest_framework import viewsets, status
+
 from rest_framework.status import (
-    HTTP_200_OK,
+    HTTP_201_CREATED,
     HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
@@ -196,7 +197,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
             content = attachment.read()  # Should we read it chunck by chunck or ensure that the file size of the library content is reasonnable before reading ?
 
             try:
-                StoredLibrary.store_library_content(content)
+                library = StoredLibrary.store_library_content(content)
+                return Response(
+                    StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
+                )
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
                 return HttpResponse(
@@ -204,7 +208,6 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     status=HTTP_422_UNPROCESSABLE_ENTITY,
                 )
 
-            return HttpResponse(json.dumps({}), status=HTTP_200_OK)
         except IntegrityError:
             return HttpResponse(
                 json.dumps({"error": "libraryAlreadyLoadedError"}),
@@ -381,7 +384,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             library = LoadedLibrary.objects.get(**{key: pk})
-        except Exception as e:
+        except Exception:
             return Response(
                 data="libraryNotFound", status=HTTP_404_NOT_FOUND
             )  # Error messages could be returned as JSON instead

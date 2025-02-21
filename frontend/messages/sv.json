@@ -753,7 +753,7 @@
 	"mailFailedToSend": "E-postmeddelandet kunde inte skickas",
 	"questionOrQuestions": "Fråga(or)",
 	"successfullyUpdatedClientSettings": "Klientinställningar uppdaterades framgångsrikt, vänligen uppdatera sidan.",
-	"xRaysEmptyMessage": "Du måste skapa minst ett projekt för att använda röntgen.",
+	"xRaysEmptyMessage": "Du måste skapa minst ett perimeter för att använda röntgen.",
 	"suggestControls": "Föreslå kontroller",
 	"createAppliedControlsFromSuggestionsHelpText": "Skapa tillämpade kontroller från kravens föreslagna referenskontroller i ramverket",
 	"createAppliedControlsFromSuggestionsSuccess": "Tillämpade kontroller skapades framgångsrikt från de föreslagna referenskontrollerna",
