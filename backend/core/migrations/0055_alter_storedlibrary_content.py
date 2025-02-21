@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0054_alter_appliedcontrol_is_published_and_more'),
+        ("core", "0054_alter_appliedcontrol_is_published_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='storedlibrary',
-            name='content',
+            model_name="storedlibrary",
+            name="content",
             field=models.JSONField(),
         ),
     ]
