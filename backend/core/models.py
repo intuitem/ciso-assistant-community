@@ -799,7 +799,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         ("respond", _("Respond")),
         ("recover", _("Recover")),
     ]
-    
+
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,

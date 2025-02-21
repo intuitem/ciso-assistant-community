@@ -2,14 +2,15 @@
 
 from django.db import migrations, models
 
+
 def update_is_published(apps, schema_editor):
-    AppliedControl = apps.get_model('core', 'AppliedControl')
-    Asset = apps.get_model('core', 'Asset')
-    Evidence = apps.get_model('core', 'Evidence')
-    ReferenceControl = apps.get_model('core', 'ReferenceControl')
-    SecurityException = apps.get_model('core', 'SecurityException')
-    Threat = apps.get_model('core', 'Threat')
-    Vulnerability = apps.get_model('core', 'Vulnerability')
+    AppliedControl = apps.get_model("core", "AppliedControl")
+    Asset = apps.get_model("core", "Asset")
+    Evidence = apps.get_model("core", "Evidence")
+    ReferenceControl = apps.get_model("core", "ReferenceControl")
+    SecurityException = apps.get_model("core", "SecurityException")
+    Threat = apps.get_model("core", "Threat")
+    Vulnerability = apps.get_model("core", "Vulnerability")
 
     AppliedControl.objects.update(is_published=True)
     Asset.objects.update(is_published=True)
@@ -19,47 +20,47 @@ def update_is_published(apps, schema_editor):
     Threat.objects.update(is_published=True)
     Vulnerability.objects.update(is_published=True)
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0053_asset_ref_id_alter_riskscenario_ref_id'),
+        ("core", "0053_asset_ref_id_alter_riskscenario_ref_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='appliedcontrol',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="appliedcontrol",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
         migrations.AlterField(
-            model_name='asset',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="asset",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
         migrations.AlterField(
-            model_name='evidence',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="evidence",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
         migrations.AlterField(
-            model_name='referencecontrol',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="referencecontrol",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
         migrations.AlterField(
-            model_name='securityexception',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="securityexception",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
         migrations.AlterField(
-            model_name='threat',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="threat",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
         migrations.AlterField(
-            model_name='vulnerability',
-            name='is_published',
-            field=models.BooleanField(default=True, verbose_name='published'),
+            model_name="vulnerability",
+            name="is_published",
+            field=models.BooleanField(default=True, verbose_name="published"),
         ),
         migrations.RunPython(update_is_published),
     ]
