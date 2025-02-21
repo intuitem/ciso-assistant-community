@@ -394,22 +394,20 @@ def get_parsed_matrices(user: User, risk_assessments: list | None = None):
     ) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, RiskScenario
     )
-    risk_matrices = list()
     if risk_assessments is None:
-        risk_matrices = (
+        risk_matrices = list(
             RiskScenario.objects.filter(id__in=object_ids_view)
             .values_list("risk_assessment__risk_matrix__json_definition", flat=True)
             .distinct()
         )
     else:
-        risk_matrices = (
+        risk_matrices = list(
             RiskScenario.objects.filter(id__in=object_ids_view)
             .filter(risk_assessment__in=risk_assessments)
             .values_list("risk_assessment__risk_matrix__json_definition", flat=True)
             .distinct()
         )
-    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
-    return sorted(parsed_matrices, key=lambda m: len(m["risk"]), reverse=True)
+    return sorted(risk_matrices, key=lambda m: len(m["risk"]), reverse=True)
 
 
 def get_risk_field(user: User, field: str):

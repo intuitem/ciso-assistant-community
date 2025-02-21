@@ -3188,13 +3188,37 @@ def get_composer_data(request):
 # Compliance Assessment
 
 
+class FrameworkFilter(df.FilterSet):
+    baseline = df.ModelChoiceFilter(
+        queryset=ComplianceAssessment.objects.all(),
+        method="filter_framework",
+        label="Baseline",
+    )
+
+    def filter_framework(self, queryset, name, value):
+        if not value:
+            return queryset
+        source_framework = value.framework
+        target_framework_ids = list(
+            RequirementMappingSet.objects.filter(
+                source_framework=source_framework
+            ).values_list("target_framework__id", flat=True)
+        )
+        target_framework_ids.append(source_framework.id)
+        return queryset.filter(id__in=target_framework_ids)
+
+    class Meta:
+        model = Framework
+        fields = ["folder", "baseline"]
+
+
 class FrameworkViewSet(BaseModelViewSet):
     """
     API endpoint that allows frameworks to be viewed or edited.
     """
 
     model = Framework
-    filterset_fields = ["folder"]
+    filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

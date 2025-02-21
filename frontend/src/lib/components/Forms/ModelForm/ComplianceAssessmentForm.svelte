@@ -69,6 +69,7 @@
 	{form}
 	disabled={object.id}
 	optionsEndpoint="frameworks"
+	optionsDetailedUrlParameters={[['baseline', initialData.baseline]]}
 	field="framework"
 	cacheLock={cacheLocks['framework']}
 	bind:cachedValue={formDataCache['framework']}
