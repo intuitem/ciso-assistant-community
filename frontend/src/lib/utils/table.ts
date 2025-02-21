@@ -15,7 +15,7 @@ interface ListViewFieldsConfig {
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
 		filters?: {
-			[key: string]: ListViewFilterConfig;
+			[key: string]: ListViewFilterConfig | undefined;
 		};
 	};
 }
@@ -187,22 +187,24 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	}
 };
 
-// TODO: TEST THIS
-const GRAVITY_FILTER: ListViewFilterConfig = {
+const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'gravity',
 		optionsEndpoint: 'risk-matrices/impact',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
 		multiple: true
 	}
 };
 
-// TODO: TEST THIS
-const LIKELIHOOD_FILTER: ListViewFilterConfig = {
+const RISK_PROBABILITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'likelihood',
 		optionsEndpoint: 'risk-matrices/probability',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
 		multiple: true
 	}
 };
@@ -256,22 +258,13 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-// TODO: TEST THIS
-const CURRENT_LEVEL_FILTER: ListViewFilterConfig = {
+const RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'current_level',
 		optionsEndpoint: 'risk-matrices/risk',
-		multiple: true
-	}
-};
-
-// TODO: TEST THIS
-const RESIDUAL_LEVEL_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'residual_level',
-		optionsEndpoint: 'risk-matrices/risk',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
 		multiple: true
 	}
 };
@@ -281,6 +274,8 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'current_criticality',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
 		options: [1, 2, 3, 4],
 		multiple: true
 	}
@@ -292,6 +287,8 @@ const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'residual_criticality',
 		options: [1, 2, 3, 4],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
 		multiple: true
 	}
 };
@@ -500,8 +497,8 @@ export const listViewFields = {
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
-			current_level: CURRENT_LEVEL_FILTER,
-			residual_level: RESIDUAL_LEVEL_FILTER
+			current_level: RISK_LEVEL_FILTER,
+			residual_level: RISK_LEVEL_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -735,7 +732,7 @@ export const listViewFields = {
 		filters: {
 			assets: ASSET_FILTER,
 			qualifications: QUALIFICATION_FILTER,
-			gravity: GRAVITY_FILTER,
+			gravity: RISK_IMPACT_FILTER,
 			is_selected: IS_SELECTED_FILTER
 		}
 	},
@@ -778,7 +775,7 @@ export const listViewFields = {
 		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
 		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
 		filters: {
-			gravity: GRAVITY_FILTER
+			gravity: RISK_IMPACT_FILTER
 		}
 	},
 	'attack-paths': {
@@ -810,13 +807,22 @@ export const listViewFields = {
 		body: ['is_selected', 'operating_modes_description', 'threats', 'likelihood'],
 		filters: {
 			threats: THREAT_FILTER,
-			likelihood: LIKELIHOOD_FILTER,
+			likelihood: RISK_PROBABILITY_FILTER,
 			is_selected: IS_SELECTED_FILTER
 		}
 	},
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date']
+	},
+	extra: {
+		filters: {
+			risk: undefined,
+			probability: undefined,
+			impact: undefined,
+			likelihood: undefined,
+			gravity: undefined
+		}
 	}
 } as const satisfies ListViewFieldsConfig;
 

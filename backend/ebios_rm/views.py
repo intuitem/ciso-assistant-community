@@ -219,9 +219,7 @@ class AttackPathViewSet(BaseModelViewSet):
 class OperationalScenarioViewSet(BaseModelViewSet):
     model = OperationalScenario
 
-    filterset_fields = [
-        "ebios_rm_study",
-    ]
+    filterset_fields = ["ebios_rm_study", "likelihood"]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):

@@ -654,10 +654,20 @@ class RiskMatrixViewSet(BaseModelViewSet):
         viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
-        risk_levels = [
-            m.risk for m in RiskMatrix.objects.filter(id__in=viewable_matrices)
-        ]
-        return Response(chain.from_iterable(risk_levels))
+        undefined = {-1: "--"}
+        options = []
+        for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
+            _choices = {
+                i: name
+                for i, name in enumerate(
+                    x["name"] for x in matrix.json_definition["risk"]
+                )
+            }
+            choices = undefined | _choices
+            options = options | choices.items()
+        return Response(
+            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
+        )
 
     @action(detail=False, name="Get impact choices")
     def impact(self, request):
@@ -674,10 +684,20 @@ class RiskMatrixViewSet(BaseModelViewSet):
         viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
-        probabilities = [
-            m.probability for m in RiskMatrix.objects.filter(id__in=viewable_matrices)
-        ]
-        return Response(chain.from_iterable(probabilities))
+        undefined = {-1: "--"}
+        options = []
+        for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
+            _choices = {
+                i: name
+                for i, name in enumerate(
+                    x["name"] for x in matrix.json_definition["probability"]
+                )
+            }
+            choices = undefined | _choices
+            options = options | choices.items()
+        return Response(
+            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
+        )
 
     @action(detail=False, name="Get used risk matrices")
     def used(self, request):
@@ -1646,6 +1666,12 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "risk_assessment",
         "risk_assessment__perimeter",
         "risk_assessment__perimeter__folder",
+        "current_impact",
+        "current_proba",
+        "current_level",
+        "residual_impact",
+        "residual_proba",
+        "residual_level",
         "treatment",
         "threats",
         "assets",
