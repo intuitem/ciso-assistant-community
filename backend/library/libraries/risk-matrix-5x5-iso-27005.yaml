@@ -4,7 +4,7 @@ ref_id: risk-matrix-5x5-iso27005
 name: 5x5 ISO-27005
 description: 5x5 matrix from ISO 27005 Annex A
 copyright: ISO
-version: 3
+version: 4
 publication_date: 2025-02-21
 provider: intuitem
 packager: intuitem
