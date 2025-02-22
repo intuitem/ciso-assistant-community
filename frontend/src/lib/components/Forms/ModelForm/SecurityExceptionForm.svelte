@@ -40,16 +40,18 @@
 	field="owners"
 	cacheLock={cacheLocks['owners']}
 	bind:cachedValue={formDataCache['owners']}
-	label={m.owner()}
+	label={m.owners()}
 />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="users?is_third_party=false"
+	optionsEndpoint="users?is_approver=true"
 	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
+	nullable={true}
 	label={m.approver()}
+	helpText={m.approverHelpText()}
 />
 <Select
 	{form}
