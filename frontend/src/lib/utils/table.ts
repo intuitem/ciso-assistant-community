@@ -792,7 +792,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'security-exceptions': {
-		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date'],
-		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date']
+		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
+		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder']
 	}
 };
