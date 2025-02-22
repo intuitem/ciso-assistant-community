@@ -15,7 +15,8 @@ def get_config():
 
     # FQDN/hostname selection
     config["fqdn"] = questionary.text(
-        "Expected FQDN/hostname", default="localhost"
+        "Expected FQDN/hostname.\nIf you are planning to host this on a VM/remote host and access it elsewhere, make sure to set this accordingly and handle the DNS resolution (eg. /etc/hosts)",
+        default="localhost",
     ).ask()
 
     config["port"] = questionary.text("Port to use", default="8443").ask()
