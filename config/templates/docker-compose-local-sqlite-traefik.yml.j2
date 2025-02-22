@@ -1,0 +1,84 @@
+services:
+  backend:
+    container_name: backend
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:{{ port }}
+      - DJANGO_DEBUG={{ enable_debug }}
+      - AUTH_TOKEN_TTL=7200
+      {% if need_mailer %}
+      - EMAIL_HOST={{ email.host }}
+      - EMAIL_PORT={{ email.port }}
+      - EMAIL_USE_TLS={{ email.use_tls }}
+      - EMAIL_HOST_USER={{ email.user }}
+      - EMAIL_HOST_PASSWORD={{ email.password }}
+      - DEFAULT_FROM_EMAIL={{ email.from_email }}
+      {% endif %}
+    volumes:
+      - ./db:/code/db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.backend.tls=true"
+
+  huey:
+    container_name: huey
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    depends_on:
+      - backend
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:{{ port }}
+      - DJANGO_DEBUG=False
+      - AUTH_TOKEN_TTL=7200
+      {% if need_mailer %}
+      - EMAIL_HOST={{ email.host }}
+      - EMAIL_PORT={{ email.port }}
+      - EMAIL_USE_TLS={{ email.use_tls }}
+      - EMAIL_HOST_USER={{ email.user }}
+      - EMAIL_HOST_PASSWORD={{ email.password }}
+      - DEFAULT_FROM_EMAIL={{ email.from_email }}
+      {% endif %}
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:{{ port }}/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend.tls=true"
+
+  traefik:
+    container_name: traefik
+    image: traefik:v3
+    restart: unless-stopped
+    ports:
+      - {{ port }}:{{ port }}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik_data:/etc/traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:{{ port }}"
+      - "--entrypoints.websecure.http.tls=true"

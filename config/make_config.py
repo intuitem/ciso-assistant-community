@@ -12,6 +12,12 @@ def get_config():
 
     # For local deployment, we only need limited configuration
     config["mode"] = "local"  # Fixed to local for now
+
+    # FQDN/hostname selection
+    config["fqdn"] = questionary.text(
+        "Expected FQDN/hostname", default="localhost"
+    ).ask()
+
     config["port"] = questionary.text("Port to use", default="8443").ask()
 
     # Database selection and configuration
@@ -27,6 +33,11 @@ def get_config():
                 "Database password: ", default="ciso_assistant"
             ).ask(),
         }
+
+    # Proxy selection
+    config["proxy"] = questionary.select(
+        "Choose a proxy", choices=["caddy", "traefik"], default="caddy"
+    ).ask()
 
     # Email configuration
     config["need_mailer"] = questionary.confirm(
@@ -58,8 +69,8 @@ def generate_compose_file(config):
     """Generate docker-compose.yml based on configuration"""
     env = Environment(loader=FileSystemLoader("templates"))
 
-    # Get template name based on database choice
-    template_name = f"docker-compose-local-{config['db']}-caddy.yml.j2"
+    # Get template name based on database and proxy choice
+    template_name = f"docker-compose-local-{config['db']}-{config['proxy']}.yml.j2"
 
     try:
         template = env.get_template(template_name)
@@ -69,6 +80,11 @@ def generate_compose_file(config):
             f"[yellow]Please ensure you have the following template file in your templates directory:[/yellow]"
         )
         print(f"[yellow]templates/{template_name}[/yellow]")
+        print(
+            f"[yellow]Expected template name format: docker-compose-local-<db>-<proxy>.yml.j2[/yellow]"
+        )
+        print(f"[yellow]Where <db> is one of: sqlite, postgresql[/yellow]")
+        print(f"[yellow]And <proxy> is one of: caddy, traefik[/yellow]")
         raise e
 
     # Render template with configuration
@@ -97,6 +113,7 @@ def main():
     if config["need_mailer"]:
         print("3. Verify email configuration settings")
     print(f"4. Run 'docker compose up -d' to start the services")
+    print(f"5. Access the application at https://{config['fqdn']}:{config['port']}")
 
 
 if __name__ == "__main__":
