@@ -2938,6 +2938,9 @@ class ComplianceAssessment(Assessment):
                     assessment.result = baseline_assessment.result
                     assessment.status = baseline_assessment.status
                     assessment.score = baseline_assessment.score
+                    assessment.documentation_score = (
+                        baseline_assessment.documentation_score
+                    )
                     assessment.is_scored = baseline_assessment.is_scored
                     assessment.observation = baseline_assessment.observation
                     updates.append(assessment)
@@ -2954,7 +2957,15 @@ class ComplianceAssessment(Assessment):
             # Bulk update scalar fields
             if updates:
                 RequirementAssessment.objects.bulk_update(
-                    updates, ["result", "status", "score", "is_scored", "observation"]
+                    updates,
+                    [
+                        "result",
+                        "status",
+                        "score",
+                        "documentation_score",
+                        "is_scored",
+                        "observation",
+                    ],
                 )
 
             # Handle M2M relationships
