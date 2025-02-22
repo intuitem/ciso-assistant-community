@@ -419,7 +419,7 @@ class RiskMatrixImporter:
             urn=self.risk_matrix_data["urn"].lower(),
             provider=library_object.provider,
             ref_id=self.risk_matrix_data.get("ref_id"),
-            json_definition=json.dumps(matrix_data),
+            json_definition=matrix_data,
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?

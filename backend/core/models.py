@@ -896,10 +896,10 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return Perimeter.objects.filter(riskassessment__risk_matrix=self).distinct()
 
     def parse_json(self) -> dict:
-        return json.loads(self.json_definition)
+        return self.json_definition
 
     def parse_json_translated(self) -> dict:
-        return update_translations_in_object(json.loads(self.json_definition))
+        return update_translations_in_object(self.json_definition)
 
     @property
     def grid(self) -> list:
@@ -2519,7 +2519,7 @@ class RiskAssessment(Assessment):
 
 
 def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
-    fields = json.loads(risk_matrix.json_definition)
+    fields = risk_matrix.json_definition
     risk_index = fields["grid"][probability][impact]
     return risk_index
 
