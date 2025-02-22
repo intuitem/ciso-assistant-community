@@ -1156,9 +1156,9 @@
 	"recap": "Recap",
 	"sectionMoved": "Section déplacée ici",
 	"more": "Plus",
-	"securityException": "Exception de sécurité",
-	"securityExceptions": "Exceptions de sécurité",
-	"addSecurityException": "Ajouter une exception de sécurité",
+	"securityException": "Exception",
+	"securityExceptions": "Exceptions",
+	"addSecurityException": "Ajouter une exception",
 	"expirationDate": "Date d'expiration",
 	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur."
 }
