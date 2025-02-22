@@ -2,6 +2,7 @@ services:
   backend:
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    pull_policy: always
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -22,6 +23,7 @@ services:
   huey:
     container_name: huey
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    pull_policy: always
     depends_on:
       - backend
     restart: always
@@ -54,6 +56,7 @@ services:
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    pull_policy: always
     depends_on:
       - backend
 
