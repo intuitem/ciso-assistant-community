@@ -5,111 +5,99 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 from icecream import ic
 
-mode = questionary.select(
-    "What is your deployment mode?", choices=["local", "VM/remote"], default="local"
-).ask()
 
-fqdn = "localhost"
-port = "8443"
-if mode != "local":
-    fqdn = questionary.text(
-        "Expected FQDN/hostname", default="ciso.assistant.local"
-    ).ask()
-port = questionary.text("Port to use", default="8443").ask()
+def get_config():
+    """Collect all configuration parameters from user"""
+    config = {}
 
-need_mailer = questionary.confirm(
-    "Do you need email notifications? Mailer settings will be required", default=False
-).ask()
+    # For local deployment, we only need limited configuration
+    config["mode"] = "local"  # Fixed to local for now
+    config["port"] = questionary.text("Port to use", default="8443").ask()
 
-EMAIL_HOST = ""
-EMAIL_PORT = ""
-EMAIL_USE_TLS = ""
-EMAIL_HOST_USER = ""
-EMAIL_HOST_PASSWORD = ""
-DEFAULT_FROM_EMAIL = ""
-
-if need_mailer:
-    EMAIL_HOST = questionary.text("Mailer host: ", default="localhost").ask()
-    EMAIL_PORT = questionary.text("Mailer port: ", default="1025").ask()
-    EMAIL_USE_TLS = questionary.confirm("Use TLS? ", default=False).ask()
-    EMAIL_HOST_USER = questionary.text("Mailer username: ").ask()
-    EMAIL_HOST_PASSWORD = questionary.password("Mailer password: ").ask()
-    DEFAULT_FROM_EMAIL = questionary.text(
-        "Default from email: ", default="ciso-assistant@company.com"
+    # Database selection and configuration
+    config["db"] = questionary.select(
+        "Choose a database", choices=["sqlite", "postgresql"], default="sqlite"
     ).ask()
 
-db = questionary.select(
-    "Choose a database", choices=["sqlite", "postgresql"], default="sqlite"
-).ask()
+    if config["db"] == "postgresql":
+        config["postgres"] = {
+            "name": questionary.text("Database name: ", default="ciso_assistant").ask(),
+            "user": questionary.text("Database user: ", default="ciso_assistant").ask(),
+            "password": questionary.password(
+                "Database password: ", default="ciso_assistant"
+            ).ask(),
+        }
 
-# PostgreSQL configuration
-POSTGRES_NAME = ""
-POSTGRES_USER = ""
-POSTGRES_PASSWORD = ""
-DB_HOST = ""
-DB_PORT = ""
-POSTGRES_PASSWORD_FILE = None
-
-if db == "postgresql":
-    POSTGRES_NAME = questionary.text("Database name: ", default="ciso-assistant").ask()
-    POSTGRES_USER = questionary.text(
-        "Database user: ", default="ciso-assistantuser"
-    ).ask()
-    use_password_file = questionary.confirm(
-        "Use password file instead of direct password?", default=False
+    # Email configuration
+    config["need_mailer"] = questionary.confirm(
+        "Do you need email notifications? Mailer settings will be required",
+        default=False,
     ).ask()
 
-    if use_password_file:
-        POSTGRES_PASSWORD_FILE = questionary.path(
-            "Path to PostgreSQL password file: "
-        ).ask()
-    else:
-        POSTGRES_PASSWORD = questionary.password("Database password: ").ask()
+    if config["need_mailer"]:
+        config["email"] = {
+            "host": questionary.text("Mailer host: ", default="localhost").ask(),
+            "port": questionary.text("Mailer port: ", default="1025").ask(),
+            "use_tls": questionary.confirm("Use TLS? ", default=False).ask(),
+            "user": questionary.text("Mailer username: ").ask(),
+            "password": questionary.password("Mailer password: ").ask(),
+            "from_email": questionary.text(
+                "Default from email: ", default="ciso-assistant@company.com"
+            ).ask(),
+        }
 
-    DB_HOST = questionary.text("Database host: ", default="localhost").ask()
-    DB_PORT = questionary.text("Database port: ", default="5432").ask()
+    # Debug mode for local development
+    config["enable_debug"] = questionary.confirm(
+        "Enable debug mode?", default=True if config["db"] == "sqlite" else False
+    ).ask()
 
-proxy = questionary.select(
-    "Choose a proxy", choices=["Caddy", "Traefik"], default="Caddy"
-).ask()
+    return config
 
-custom_certificate = questionary.confirm(
-    "Do you need to include custom certificate? Paths will be needed", default=False
-).ask()
 
-cert_file = None
-key_file = None
-if custom_certificate:
-    cert_file = questionary.path("Path to cert file").ask()
-    key_file = questionary.path("Path to key file").ask()
+def generate_compose_file(config):
+    """Generate docker-compose.yml based on configuration"""
+    env = Environment(loader=FileSystemLoader("templates"))
 
-enable_debug = questionary.confirm("Enable debug mode?", default=False).ask()
+    # Get template name based on database choice
+    template_name = f"docker-compose-local-{config['db']}-caddy.yml.j2"
 
-ic(
-    mode,
-    fqdn,
-    port,
-    db,
-    need_mailer,
-    proxy,
-    custom_certificate,
-    cert_file,
-    key_file,
-    enable_debug,
-    EMAIL_HOST,
-    EMAIL_PORT,
-    EMAIL_USE_TLS,
-    EMAIL_HOST_USER,
-    EMAIL_HOST_PASSWORD,
-    DEFAULT_FROM_EMAIL,
-)
+    try:
+        template = env.get_template(template_name)
+    except Exception as e:
+        print(f"[red]Error: Template {template_name} not found![/red]")
+        print(
+            f"[yellow]Please ensure you have the following template file in your templates directory:[/yellow]"
+        )
+        print(f"[yellow]templates/{template_name}[/yellow]")
+        raise e
 
-if db == "postgresql":
-    ic(
-        POSTGRES_NAME,
-        POSTGRES_USER,
-        POSTGRES_PASSWORD_FILE,
-        POSTGRES_PASSWORD,
-        DB_HOST,
-        DB_PORT,
-    )
+    # Render template with configuration
+    compose_content = template.render(config)
+
+    # Write to docker-compose.yml
+    with open("docker-compose.yml", "w") as f:
+        f.write(compose_content)
+
+
+def main():
+    print("[blue]CISO Assistant Docker Compose Configuration Builder[/blue]")
+    print("[yellow]Local Deployment Configuration[/yellow]")
+
+    config = get_config()
+    ic(config)  # Debug output
+    generate_compose_file(config)
+
+    print("[green]Successfully generated docker-compose.yml[/green]")
+
+    # Show next steps
+    print("\n[yellow]Next steps:[/yellow]")
+    print("1. Review the generated docker-compose.yml file")
+    if config["db"] == "postgresql":
+        print("2. Make sure PostgreSQL passwords are properly set")
+    if config["need_mailer"]:
+        print("3. Verify email configuration settings")
+    print(f"4. Run 'docker compose up -d' to start the services")
+
+
+if __name__ == "__main__":
+    main()
