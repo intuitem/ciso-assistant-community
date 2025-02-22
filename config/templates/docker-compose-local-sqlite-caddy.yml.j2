@@ -19,6 +19,12 @@ services:
       {% endif %}
     volumes:
       - ./db:/code/db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/build || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 50s
 
   huey:
     container_name: huey
@@ -58,7 +64,8 @@ services:
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     pull_policy: always
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
   caddy:
     container_name: caddy
@@ -66,7 +73,8 @@ services:
     environment:
       - CISO_ASSISTANT_URL=https://localhost:{{ port }}
     depends_on:
-      - frontend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
     ports:
       - {{ port }}:{{ port }}
