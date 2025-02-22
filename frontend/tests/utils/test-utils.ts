@@ -250,7 +250,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	securityExceptionsPage: async ({ page }, use) => {
-		const sPage = new PageContent(page, '/security-exceptions', 'Security exceptions', [
+		const sPage = new PageContent(page, '/security-exceptions', 'Exceptions', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'ref_id', type: type.TEXT },
@@ -602,7 +602,7 @@ export class TestContent {
 				}
 			},
 			securityExceptionsPage: {
-				displayName: 'Security exceptions',
+				displayName: 'Exceptions',
 				build: {
 					name: vars.securityExceptionName,
 					description: vars.description,

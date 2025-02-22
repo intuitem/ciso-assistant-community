@@ -11,7 +11,7 @@ export default {
 	riskScenarioName: 'Test risk scenario',
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
-	securityExceptionName: 'Test security exception',
+	securityExceptionName: 'Test exception',
 	threatName: 'Test threat',
 	description: 'Test description',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
