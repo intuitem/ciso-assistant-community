@@ -767,7 +767,7 @@
 	"mailFailedToSend": "Le courrier n'a pas pu être envoyé",
 	"questionOrQuestions": "Question(s)",
 	"successfullyUpdatedClientSettings": "Paramètres du client mis à jour avec succès. Vous pouvez rafraîchir la page.",
-	"xRaysEmptyMessage": "Vous devez créer au moins un projet pour utiliser X-rays.",
+	"xRaysEmptyMessage": "Vous devez créer au moins un périmètre pour utiliser X-rays.",
 	"suggestControls": "Mesures recommandées",
 	"createAppliedControlsFromSuggestionsHelpText": "Créer des mesures appliquées à partir des mesures de référence suggérées",
 	"createAppliedControlsFromSuggestionsSuccess": "Mesures appliquées créées avec succès à partir des suggestions",
@@ -1160,5 +1160,6 @@
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Ajouter une exception",
 	"expirationDate": "Date d'expiration",
-	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur."
+	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur.",
+	"filterBy": "Filtrer par"
 }

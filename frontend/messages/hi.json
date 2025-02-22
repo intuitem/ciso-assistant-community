@@ -752,7 +752,7 @@
 	"mailFailedToSend": "मेल भेजा जाना विफल रहा",
 	"questionOrQuestions": "प्रश्न",
 	"successfullyUpdatedClientSettings": "क्लाइंट सेटिंग्स सफलतापूर्वक अपडेट हो गई हैं, कृपया पेज को रीफ्रेश करें।",
-	"xRaysEmptyMessage": "एक्स-रे का उपयोग करने के लिए आपको कम से कम एक प्रोजेक्ट बनाना होगा।",
+	"xRaysEmptyMessage": "एक्स-रे का उपयोग करने के लिए आपको कम से कम एक परिधि बनाना होगा।",
 	"suggestControls": "नियंत्रण सुझाएँ",
 	"createAppliedControlsFromSuggestionsHelpText": "फ़्रेमवर्क की आवश्यकताओं के सुझाए गए संदर्भ नियंत्रणों से लागू नियंत्रण बनाएँ",
 	"createAppliedControlsFromSuggestionsSuccess": "सुझाए गए संदर्भ नियंत्रणों से सफलतापूर्वक लागू किए गए नियंत्रण बनाए गए",
