@@ -31,7 +31,8 @@ services:
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
