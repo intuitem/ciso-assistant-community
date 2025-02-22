@@ -650,7 +650,8 @@ export function getSingularName(pluralName: string) {
 		Domains: 'Folder',
 		Libraries: 'Library',
 		'Risk matrices': 'Risk matrix',
-		Policies: 'Policy'
+		Policies: 'Policy',
+		Exceptions: 'Security exception'
 	};
 	return (
 		exceptions[pluralName] ??
