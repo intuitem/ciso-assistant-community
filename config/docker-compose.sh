@@ -1,6 +1,11 @@
 #! /bin/bash
 set -euo pipefail
 
+if [ ! -f ./docker-compose.yml ]; then
+  echo "Docker compose file doesn't exist. Run 'python3 make_config.py' first."
+  exit 1
+fi
+
 if [ -f db/ciso-assistant.sqlite3 ]; then
   echo "The database seems already created. You should launch 'docker compose up -d' instead."
   echo "\nFor a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over"
