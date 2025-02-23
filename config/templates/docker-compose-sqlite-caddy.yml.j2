@@ -36,7 +36,7 @@ services:
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
-      - CISO_ASSISTANT_URL=https://localhost:{{ port }}
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG=False
       - AUTH_TOKEN_TTL=7200
       {% if need_mailer %}
