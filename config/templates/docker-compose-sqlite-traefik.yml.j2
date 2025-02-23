@@ -78,7 +78,7 @@ services:
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontend.tls=true"
 
-  traefik:
+traefik:
     container_name: traefik
     image: traefik:v3
     restart: unless-stopped
@@ -90,9 +90,18 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik_data:/etc/traefik
+      {% if not can_do_tls and use_custom_cert %}
+      - {{ cert_config.cert_path }}:/etc/traefik/cert.pem:ro
+      - {{ cert_config.key_path }}:/etc/traefik/key.pem:ro
+      {% endif %}
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.websecure.address=:{{ port }}"
       - "--entrypoints.websecure.http.tls=true"
+      {% if not can_do_tls and use_custom_cert %}
+      - "--entrypoints.websecure.http.tls.certResolver=default"
+      - "--tls.certificates.certFile=/etc/traefik/cert.pem"
+      - "--tls.certificates.keyFile=/etc/traefik/key.pem"
+      {% endif %}

@@ -17,6 +17,26 @@ def get_config():
         "Is the host internet-facing and can solve an ACME challenge for TLS?",
         default=False,
     ).ask()
+
+    # Add custom certificate configuration
+    if not config["can_do_tls"]:
+        config["use_custom_cert"] = questionary.confirm(
+            "Would you like to use custom certificates instead of self-signed?",
+            default=False,
+        ).ask()
+
+        if config["use_custom_cert"]:
+            config["cert_config"] = {
+                "cert_path": questionary.path(
+                    "Path to certificate file (relative to compose file): ",
+                    default="./certs/cert.pem",
+                ).ask(),
+                "key_path": questionary.path(
+                    "Path to private key file (relative to compose file): ",
+                    default="./certs/key.pem",
+                ).ask(),
+            }
+
     # FQDN/hostname selection
     config["fqdn"] = questionary.text(
         "Expected FQDN/hostname.\nIf you are planning to host this on a VM/remote host and access it elsewhere, make sure to set this accordingly and handle the DNS resolution (eg. /etc/hosts)",
@@ -102,7 +122,6 @@ def generate_compose_file(config):
 
 def main():
     print("[blue]CISO Assistant Docker Compose Configuration Builder[/blue]")
-    print("[yellow]Local Deployment Configuration[/yellow]")
 
     config = get_config()
     ic(config)  # Debug output
