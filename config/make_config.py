@@ -1,7 +1,6 @@
 #! python3
 import questionary
 from rich import print
-import yaml
 from jinja2 import Environment, FileSystemLoader
 from icecream import ic
 
@@ -76,7 +75,7 @@ def generate_compose_file(config):
     env = Environment(loader=FileSystemLoader("templates"))
 
     # Get template name based on database and proxy choice
-    template_name = f"docker-compose-local-{config['db']}-{config['proxy']}.yml.j2"
+    template_name = f"docker-compose-{config['db']}-{config['proxy']}.yml.j2"
 
     try:
         template = env.get_template(template_name)
