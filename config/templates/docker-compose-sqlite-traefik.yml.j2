@@ -87,8 +87,8 @@ services:
       - {{ port }}:{{ port }}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik_data:/etc/traefik
-      - ./certificates.yaml:/etc/traefik/certificates.yaml:ro{% if not can_do_tls and use_custom_cert %}
+      - ./traefik_data:/etc/traefik{% if not can_do_tls and use_custom_cert %}
+      - ./certificates.yaml:/etc/traefik/certificates.yaml:ro
       - {{ cert_config.cert_path }}:/etc/traefik/cert.pem:ro
       - {{ cert_config.key_path }}:/etc/traefik/key.pem:ro{% endif %}
     command:
