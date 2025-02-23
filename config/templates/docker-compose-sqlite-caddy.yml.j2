@@ -68,7 +68,7 @@ services:
       backend:
         condition: service_healthy
 
-caddy:
+  caddy:
     container_name: caddy
     image: caddy:2.8.4
     environment:
@@ -80,20 +80,13 @@ caddy:
     ports:
       - {{ port }}:{{ port }}
     volumes:
-      - ./caddy_data:/data
-      {% if not can_do_tls and use_custom_cert %}
+      - ./caddy_data:/data{% if not can_do_tls and use_custom_cert %}
       - {{ cert_config.cert_path }}:/etc/caddy/cert.pem:ro
-      - {{ cert_config.key_path }}:/etc/caddy/key.pem:ro
-      {% endif %}
+      - {{ cert_config.key_path }}:/etc/caddy/key.pem:ro{% endif %}
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
-      reverse_proxy /* frontend:3000
-      {% if not can_do_tls %}
-      {% if use_custom_cert %}
-      tls /etc/caddy/cert.pem /etc/caddy/key.pem
-      {% else %}
-      tls internal
-      {% endif %}
-      {% endif %}
+      reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
+      tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
+      tls internal{% endif %}{% endif %}
       }" > Caddyfile && caddy run'

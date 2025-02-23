@@ -3,6 +3,7 @@ import questionary
 from rich import print
 from jinja2 import Environment, FileSystemLoader
 from icecream import ic
+import os
 
 
 def get_config():
@@ -120,11 +121,35 @@ def generate_compose_file(config):
         f.write(compose_content)
 
 
+def validate_cert_paths(config):
+    """Validate that certificate files exist if custom certs are enabled"""
+    if not config.get("can_do_tls") and config.get("use_custom_cert"):
+        cert_path = config["cert_config"]["cert_path"]
+        key_path = config["cert_config"]["key_path"]
+
+        if not os.path.exists(cert_path):
+            print(f"[red]Error: Certificate file not found at {cert_path}[/red]")
+            return False
+
+        if not os.path.exists(key_path):
+            print(f"[red]Error: Private key file not found at {key_path}[/red]")
+            return False
+
+    return True
+
+
 def main():
     print("[blue]CISO Assistant Docker Compose Configuration Builder[/blue]")
 
     config = get_config()
     ic(config)  # Debug output
+
+    if not validate_cert_paths(config):
+        print(
+            "[red]Certificate validation failed. Please check the paths and try again.[/red]"
+        )
+        return
+
     generate_compose_file(config)
 
     print("[green]Successfully generated docker-compose.yml[/green]")
@@ -132,14 +157,18 @@ def main():
     # Show next steps
     print("\n[yellow]Next steps:[/yellow]")
     print("1. Review the generated docker-compose.yml file, and adjust it if needed")
+    if config.get("use_custom_cert"):
+        print("2. Ensure your certificate files are in place:")
+        print(f"   - Certificate: {config['cert_config']['cert_path']}")
+        print(f"   - Private key: {config['cert_config']['key_path']}")
     if config["db"] == "postgresql":
-        print("2. Make sure PostgreSQL passwords are properly set")
+        print("3. Make sure PostgreSQL passwords are properly set")
     if config["need_mailer"]:
-        print("3. Verify email configuration settings")
+        print("4. Verify email configuration settings")
     print(
-        f"4. Run './docker-compose.sh' and follow the instructions to create the first admin user"
+        f"5. Run './docker-compose.sh' and follow the instructions to create the first admin user"
     )
-    print(f"5. Access the application at https://{config['fqdn']}:{config['port']}")
+    print(f"6. Access the application at https://{config['fqdn']}:{config['port']}")
 
 
 if __name__ == "__main__":

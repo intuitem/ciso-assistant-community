@@ -30,7 +30,6 @@ services:
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
       - "traefik.http.routers.backend.tls=true"
-
   huey:
     container_name: huey
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
@@ -59,7 +58,6 @@ services:
       - -c
       - |
         poetry run python manage.py run_huey -w 2 --scheduler-interval 60
-
   frontend:
     container_name: frontend
     environment:
@@ -77,8 +75,7 @@ services:
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontend.tls=true"
-
-traefik:
+  traefik:
     container_name: traefik
     image: traefik:v3
     restart: unless-stopped
@@ -90,18 +87,19 @@ traefik:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik_data:/etc/traefik
-      {% if not can_do_tls and use_custom_cert %}
+      - ./certificates.yaml:/etc/traefik/certificates.yaml:ro{% if not can_do_tls and use_custom_cert %}
       - {{ cert_config.cert_path }}:/etc/traefik/cert.pem:ro
-      - {{ cert_config.key_path }}:/etc/traefik/key.pem:ro
-      {% endif %}
+      - {{ cert_config.key_path }}:/etc/traefik/key.pem:ro{% endif %}
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.websecure.address=:{{ port }}"
-      - "--entrypoints.websecure.http.tls=true"
-      {% if not can_do_tls and use_custom_cert %}
-      - "--entrypoints.websecure.http.tls.certResolver=default"
-      - "--tls.certificates.certFile=/etc/traefik/cert.pem"
-      - "--tls.certificates.keyFile=/etc/traefik/key.pem"
-      {% endif %}
+      - "--entrypoints.websecure.address=:{{ port }}"{% if can_do_tls %}
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email={{ email.from_email if need_mailer else 'admin@example.com' }}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme.json"
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"{% elif use_custom_cert %}
+      - "--providers.file.directory=/etc/traefik"
+      - "--providers.file.watch=true"{% else %}
+      - "--experimental.localPlugins.selfsigned.moduleName=traefik.tls"{% endif %}
