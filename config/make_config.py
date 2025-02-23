@@ -11,8 +11,13 @@ def get_config():
     config = {}
 
     # For local deployment, we only need limited configuration
-    config["mode"] = "local"  # Fixed to local for now
-
+    config["mode"] = questionary.select(
+        "Deployment mode", choices=["local", "VM/Remote"], default="local"
+    ).ask()
+    config["can_do_tls"] = questionary.confirm(
+        "Is the host internet-facing and can solve an ACME challenge for TLS?",
+        default=False,
+    ).ask()
     # FQDN/hostname selection
     config["fqdn"] = questionary.text(
         "Expected FQDN/hostname.\nIf you are planning to host this on a VM/remote host and access it elsewhere, make sure to set this accordingly and handle the DNS resolution (eg. /etc/hosts)",
@@ -108,12 +113,14 @@ def main():
 
     # Show next steps
     print("\n[yellow]Next steps:[/yellow]")
-    print("1. Review the generated docker-compose.yml file")
+    print("1. Review the generated docker-compose.yml file, and adjust it if needed")
     if config["db"] == "postgresql":
         print("2. Make sure PostgreSQL passwords are properly set")
     if config["need_mailer"]:
         print("3. Verify email configuration settings")
-    print(f"4. Run 'docker compose up -d' to start the services")
+    print(
+        f"4. Run './docker-compose.sh' and follow the instructions to create the first admin user"
+    )
     print(f"5. Access the application at https://{config['fqdn']}:{config['port']}")
 
 

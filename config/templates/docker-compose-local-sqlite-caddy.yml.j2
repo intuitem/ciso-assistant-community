@@ -5,8 +5,12 @@ services:
     pull_policy: always
     restart: always
     environment:
+      {% if mode == 'local' %}
       - ALLOWED_HOSTS=backend,localhost
-      - CISO_ASSISTANT_URL=https://localhost:{{ port }}
+      {% else %}
+      - ALLOWED_HOSTS=backend,localhost,{{ fqdn }}
+      {% endif %}
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG={{ enable_debug }}
       - AUTH_TOKEN_TTL=7200
       {% if need_mailer %}
@@ -59,7 +63,7 @@ services:
     container_name: frontend
     environment:
       - PUBLIC_BACKEND_API_URL=http://backend:8000/api
-      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:{{ port }}/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
@@ -72,7 +76,7 @@ services:
     container_name: caddy
     image: caddy:2.8.4
     environment:
-      - CISO_ASSISTANT_URL=https://localhost:{{ port }}
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
     depends_on:
       backend:
         condition: service_healthy
@@ -85,4 +89,7 @@ services:
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
+      {% if not can_do_tls %}
+      tls internal
+      {% endif %}
       }" > Caddyfile && caddy run'
