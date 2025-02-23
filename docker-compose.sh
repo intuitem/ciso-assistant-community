@@ -1,7 +1,7 @@
 #! /bin/bash
 set -euo pipefail
 
-if [ -f db/ciso-assistant.sqlite3 ]; then
+if [ -d ./db ]; then
   echo "The database seems already created. You should launch 'docker compose up -d' instead."
   echo "\nFor a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over"
   exit 1
