@@ -13,7 +13,7 @@ services:
     volumes:
       - ./db:/code/db
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/build || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -71,4 +71,5 @@ services:
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
+      tls internal
       }" > Caddyfile && caddy run'
