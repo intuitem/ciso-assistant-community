@@ -73,7 +73,9 @@ def get_config():
 
     if config["need_mailer"]:
         config["email"] = {
-            "host": questionary.text("Mailer host: ", default="localhost").ask(),
+            "host": questionary.text(
+                "Mailer host: ", default="host.docker.internal"
+            ).ask(),
             "port": questionary.text("Mailer port: ", default="1025").ask(),
             "use_tls": questionary.confirm("Use TLS? ", default=False).ask(),
             "user": questionary.text("Mailer username: ").ask(),
