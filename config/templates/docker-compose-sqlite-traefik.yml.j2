@@ -27,9 +27,11 @@ services:
       start_period: 50s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=Host(`{{ fqdn }}`) && PathPrefix(`/api`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
-      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"{% if can_do_tls %}
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"{% endif %}
   huey:
     container_name: huey
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
@@ -72,9 +74,11 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.rule=Host(`{{ fqdn }}`) && PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"{% if can_do_tls %}
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"{% endif %}
   traefik:
     container_name: traefik
     image: traefik:v3
@@ -95,15 +99,16 @@ services:
       {% if enable_debug %}- "--api.insecure=true"{% endif %}
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"{% if can_do_tls %}
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"{% endif %}
       - "--entrypoints.websecure.address=:{{ port }}"{% if can_do_tls %}
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.email={{ email.from_email if need_mailer else 'admin@example.com' }}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme.json"
-      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"{% elif use_custom_cert %}
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"{% elif use_custom_cert %}
       - "--providers.file.directory=/etc/traefik"
       - "--providers.file.watch=true"{% else %}
       - "--experimental.localPlugins.selfsigned.moduleName=traefik.tls"{% endif %}

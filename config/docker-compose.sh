@@ -2,6 +2,7 @@
 
 echo "Starting CISO Assistant services..."
 docker compose -f ./docker-compose.yml pull
+echo "Initializing the database. This can take a minute, please wait.."
 docker compose -f ./docker-compose.yml up -d
 
 echo "Waiting for CISO Assistant backend to be ready..."
