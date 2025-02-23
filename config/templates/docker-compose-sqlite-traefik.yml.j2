@@ -83,6 +83,7 @@ services:
       backend:
         condition: service_healthy
     ports:
+      {% if can_do_tls %}- "80:80"{% endif %}
       - {{ port }}:{{ port }}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -91,9 +92,12 @@ services:
       - {{ cert_config.cert_path }}:/etc/traefik/cert.pem:ro
       - {{ cert_config.key_path }}:/etc/traefik/key.pem:ro{% endif %}
     command:
-      - "--api.insecure=true"
+      {% if enable_debug %}- "--api.insecure=true"{% endif %}
       - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.exposedbydefault=false"{% if can_do_tls %}
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"{% endif %}
       - "--entrypoints.websecure.address=:{{ port }}"{% if can_do_tls %}
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
