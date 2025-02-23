@@ -28,8 +28,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - ALLOWED_HOSTS=backend,localhost
-      - CISO_ASSISTANT_URL=https://localhost:{{ port }}
+      - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG={{ enable_debug }}
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
@@ -48,7 +48,7 @@ services:
     volumes:
       - ./db:/code/db
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/build || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -92,7 +92,7 @@ services:
     container_name: frontend
     environment:
       - PUBLIC_BACKEND_API_URL=http://backend:8000/api
-      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:{{ port }}/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
@@ -104,9 +104,8 @@ services:
   caddy:
     container_name: caddy
     image: caddy:2.8.4
-    pull_policy: always
     environment:
-      - CISO_ASSISTANT_URL=https://localhost:{{ port }}
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
     depends_on:
       backend:
         condition: service_healthy
@@ -119,4 +118,5 @@ services:
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
+      {% if not can_do_tls %}tls internal{% endif %}
       }" > Caddyfile && caddy run'
