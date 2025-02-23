@@ -15,4 +15,4 @@ echo "Creating superuser..."
 docker compose -f ./docker-compose.yml exec backend poetry run python manage.py createsuperuser
 
 echo -e "\nInitialization complete!"
-echo "You can now access CISO Assistant at https://localhost:8443 (or the port you've specified)"
+echo "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)"

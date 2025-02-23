@@ -5,11 +5,7 @@ services:
     pull_policy: always
     restart: always
     environment:
-      {% if mode == 'local' %}
-      - ALLOWED_HOSTS=backend,localhost
-      {% else %}
-      - ALLOWED_HOSTS=backend,localhost,{{ fqdn }}
-      {% endif %}
+      - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG={{ enable_debug }}
       - AUTH_TOKEN_TTL=7200
@@ -24,7 +20,7 @@ services:
     volumes:
       - ./db:/code/db
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/build || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -89,7 +85,5 @@ services:
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
-      {% if not can_do_tls %}
-      tls internal
-      {% endif %}
+      {% if not can_do_tls %}tls internal{% endif %}
       }" > Caddyfile && caddy run'
