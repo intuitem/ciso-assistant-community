@@ -93,7 +93,7 @@ def get_config():
 
 def generate_compose_file(config):
     """Generate docker-compose.yml based on configuration"""
-    env = Environment(loader=FileSystemLoader("templates"))
+    env = Environment(loader=FileSystemLoader("templates"), autoescape=True)
 
     # Get template name based on database and proxy choice
     template_name = f"docker-compose-{config['db']}-{config['proxy']}.yml.j2"
