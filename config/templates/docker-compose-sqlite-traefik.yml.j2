@@ -23,8 +23,8 @@ services:
       test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 50s
+      retries: 10
+      start_period: 60s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`{{ fqdn }}`) && PathPrefix(`/api`)"
