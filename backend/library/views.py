@@ -140,7 +140,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
-        library_objects = json.loads(lib.content)  # We may need caching for this
+        library_objects = lib.content  # We may need caching for this
         if not (framework := library_objects.get("framework")):
             return Response(
                 data="This library does not include a framework.",
