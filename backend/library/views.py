@@ -75,7 +75,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
     model = StoredLibrary
     queryset = StoredLibrary.objects.all()
 
-    search_fields = ["name", "description", "urn"]
+    search_fields = ["name", "description", "urn", "ref_id"]
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -298,7 +298,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
     model = LoadedLibrary
     queryset = LoadedLibrary.objects.all()
 
-    search_fields = ["name", "description", "urn"]
+    search_fields = ["name", "description", "urn", "ref_id"]
 
     def get_serializer_class(self):
         if self.action == "list":
