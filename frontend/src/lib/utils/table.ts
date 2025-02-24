@@ -622,8 +622,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'reviewProgress'],
-		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress'],
+		head: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'reviewProgress'],
+		body: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'progress'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_PERIMETER, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			perimeter: PERIMETER_FILTER,
