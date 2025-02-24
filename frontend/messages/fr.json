@@ -1161,5 +1161,6 @@
 	"addSecurityException": "Ajouter une exception",
 	"expirationDate": "Date d'expiration",
 	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur.",
-	"filterBy": "Filtrer par"
+	"filterBy": "Filtrer par",
+	"demoDataAlreadyImported": "Les données de démonstration ont déjà été importées"
 }
