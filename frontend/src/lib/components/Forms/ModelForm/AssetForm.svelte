@@ -110,7 +110,7 @@
 	hidden={data.type === 'PR'}
 	multiple
 	{form}
-	optionsEndpoint="assets"
+	optionsEndpoint="assets?type=PR"
 	optionsLabelField="auto"
 	optionsSelf={object}
 	field="parent_assets"
