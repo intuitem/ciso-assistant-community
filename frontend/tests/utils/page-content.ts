@@ -83,6 +83,7 @@ export class PageContent extends BasePage {
 			}
 		}
 		// If the library is not visible, it might have already been loaded
+		await this.page.waitForTimeout(3000);
 		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
 			if (await this.tab('Loaded libraries').isVisible()) {
 				await this.tab('Loaded libraries').click();
@@ -150,7 +151,7 @@ export class PageContent extends BasePage {
 
 	importItemButton(value: string, language?: string) {
 		return language
-			? this.getRow(value, language).getByTestId('tablerow-import-button', { timeout: 3000 })
-			: this.getRow(value).getByTestId('tablerow-import-button', { timeout: 3000 });
+			? this.getRow(value, language).getByTestId('tablerow-import-button')
+			: this.getRow(value).getByTestId('tablerow-import-button');
 	}
 }
