@@ -888,6 +888,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         source="get_selected_implementation_groups"
     )
     progress = serializers.ReadOnlyField()
+    assets = FieldsRelatedField(many=True)
 
     class Meta:
         model = ComplianceAssessment
