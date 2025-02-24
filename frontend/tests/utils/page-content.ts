@@ -150,7 +150,7 @@ export class PageContent extends BasePage {
 
 	importItemButton(value: string, language?: string) {
 		return language
-			? this.getRow(value, language).getByTestId('tablerow-import-button')
-			: this.getRow(value).getByTestId('tablerow-import-button');
+			? this.getRow(value, language).getByTestId('tablerow-import-button', { timeout: 3000 })
+			: this.getRow(value).getByTestId('tablerow-import-button', { timeout: 3000 });
 	}
 }
