@@ -4,9 +4,6 @@ set -euo pipefail
 DB_FILE="db/ciso-assistant.sqlite3"
 BACKUP_FILE="ciso-assistant-backup.sqlite3"
 
-BACKEND_IMAGE="ghcr.io/intuitem/ciso-assistant-community/backend:latest"
-FRONTEND_IMAGE="ghcr.io/intuitem/ciso-assistant-community/frontend:latest"
-
 # Backup the database
 if [ ! -f "$DB_FILE" ]; then
   echo "Error: No database found, please initialize CISO Assistant first"
