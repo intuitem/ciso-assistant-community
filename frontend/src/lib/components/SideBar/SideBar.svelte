@@ -4,6 +4,7 @@
 	import SideBarHeader from './SideBarHeader.svelte';
 	import SideBarNavigation from './SideBarNavigation.svelte';
 	import SideBarToggle from './SideBarToggle.svelte';
+	import { writable } from 'svelte/store';
 
 	import { getCookie, setCookie } from '$lib/utils/cookies';
 	import { driverInstance } from '$lib/utils/stores';
@@ -218,20 +219,31 @@
 		modalStore.trigger(modal);
 	}
 
+	let loading = writable(false);
+
 	async function loadDemoDomain() {
+		loading.set(true); // Start loading animation
 		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
 		if (!response.ok) {
+			if (response.status === 500) {
+				flash.set({ type: 'error', message: m.demoDataAlreadyImported() });
+			} else {
+				flash.set({ type: 'error', message: m.errorOccuredDuringImport() });
+			}
 			console.error('Failed to load demo data');
-			$flash = { type: 'error', message: m.errorOccuredDuringImport() };
+			loading.set(false); // Stop loading
 			return false;
 		}
-		$flash = { type: 'success', message: m.successfullyImportedFolder() };
+		flash.set({ type: 'success', message: m.successfullyImportedFolder() });
+
 		await goto('/folders', {
 			crumbs: breadcrumbs,
 			label: m.domains(),
 			breadcrumbAction: 'replace'
 		});
+
 		invalidateAll();
+		loading.set(false); // Stop loading
 		return true;
 	}
 
@@ -272,5 +284,13 @@
 		<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
 	</nav>
 </aside>
+{#if $loading}
+	<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50">
+		<div class="flex flex-col items-center space-y-2">
+			<div class="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-900"></div>
+			<span class="text-gray-700 text-lg">{m.loading()}</span>
+		</div>
+	</div>
+{/if}
 
 <SideBarToggle bind:open />
