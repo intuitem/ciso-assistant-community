@@ -1,21 +1,29 @@
 <script lang="ts">
+	import { applyAction, deserialize, enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import * as m from '$paraglide/messages';
+	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
+	import { ProgressRadial, tableSourceMapper } from '@skeletonlabs/skeleton';
+	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	export let data;
+
 	let loading = { form: false, library: '' };
 	const showRisks = true;
+
 	interface LibraryObjects {
 		[key: string]: any;
 	}
 
-	const libraryObjects: LibraryObjects = data.library.objects ?? [];
+	const libraryObjects: LibraryObjects = data?.library?.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
@@ -31,11 +39,6 @@
 			};
 		});
 	}
-
-	import { enhance } from '$app/forms';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { ProgressRadial, tableSourceMapper } from '@skeletonlabs/skeleton';
 
 	const riskMatricesTable: TableSource = {
 		head: { name: 'name', description: 'description' },
@@ -66,17 +69,14 @@
 
 	function riskMatricesPreview(riskMatrices: []) {
 		let riskMatricesDumps = [];
-		let riskMatrixDump = {
-			json_definition: ''
-		};
 		for (const riskMatrix of riskMatrices) {
-			riskMatrixDump['json_definition'] = JSON.stringify(riskMatrix);
+			const riskMatrixDump = {
+				json_definition: JSON.stringify(riskMatrix)
+			};
 			riskMatricesDumps.push(riskMatrixDump);
 		}
 		return riskMatricesDumps;
 	}
-
-	$: displayImportButton = !(data.library.is_loaded ?? true);
 
 	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
 		const data = new FormData(event.currentTarget);
@@ -93,6 +93,8 @@
 		}
 		applyAction(result);
 	}
+
+	$: displayImportButton = !(data.library.is_loaded ?? true);
 </script>
 
 <div class="card bg-white p-4 shadow space-y-4">
@@ -106,7 +108,7 @@
 					{:else}
 						<form
 							method="post"
-							action="/libraries/{data.library.id}?/load"
+							action="?/load"
 							use:enhance={() => {
 								loading.form = true;
 								loading.library = data.library.urn;

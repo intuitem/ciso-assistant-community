@@ -48,6 +48,8 @@ export const URL_MODEL = [
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
+	'stored-libraries',
+	'loaded-libraries',
 	'libraries',
 	'sso-settings',
 	'general-settings',

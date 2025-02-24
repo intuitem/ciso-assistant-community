@@ -327,7 +327,7 @@ class EndpointTestsQueries:
         url = urn or EndpointTestsUtils.get_object_urn(verbose_name)
 
         # Uses the API endpoint to import an object without authentication
-        response = client.get(url + "import/")
+        response = client.post(url + "import/")
 
         # Asserts that the object was imported successfully
         assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
@@ -985,7 +985,7 @@ class EndpointTestsQueries:
             url = urn or EndpointTestsUtils.get_object_urn(verbose_name)
 
             # Uses the API endpoint to import an object with authentication
-            response = authenticated_client.get(url + "import/")
+            response = authenticated_client.post(url + "import/")
 
             # Asserts that the object was imported successfully
             if not user_group or user_perm_expected_status == status.HTTP_200_OK:

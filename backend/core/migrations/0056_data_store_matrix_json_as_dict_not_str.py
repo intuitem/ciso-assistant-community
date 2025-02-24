@@ -7,8 +7,13 @@ def make_matrix_json_definition_dict(apps, schema_editor):
     RiskMatrix = apps.get_model("core", "RiskMatrix")
 
     for matrix in RiskMatrix.objects.all():
-        matrix.json_definition = json.loads(matrix.json_definition)
-        matrix.save()
+        try:
+            matrix.json_definition = json.loads(matrix.json_definition)
+            matrix.save()
+        except Exception as e:
+            if type(matrix.json_definition) is dict:
+                continue
+            print(f"Error converting matrix {matrix.id} to dict: {e}")
 
 
 class Migration(migrations.Migration):

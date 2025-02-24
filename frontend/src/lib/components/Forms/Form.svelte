@@ -66,7 +66,7 @@
 	{/if}
 	<slot
 		form={_form}
-		initialData={data.data}
+		initialData={data?.data}
 		data={$form}
 		formData={$form}
 		message={$message}

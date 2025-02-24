@@ -1,60 +1,50 @@
 <script lang="ts">
-	import type { DataHandler } from '@vincjo/datatables';
+	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import * as m from '$paraglide/messages';
-
+	import { afterNavigate } from '$app/navigation';
 	export let handler: DataHandler;
+
 	const pageNumber = handler.getPageNumber();
 	const pageCount = handler.getPageCount();
 	const pages = handler.getPages({ ellipsis: true });
-	let urlModel: string | undefined;
-	let _sessionStorage = null;
 
-	onMount(() => {
-		_sessionStorage = sessionStorage;
+	const setPage = (value: 'previous' | 'next' | number) => {
+		handler.setPage(value);
+		handler.invalidate();
+	};
+
+	afterNavigate(() => {
+		if ($page.url) {
+			handler.setPage(1);
+		}
 	});
-
-	$: if ($page.url && _sessionStorage) {
-		const pageData = JSON.parse(_sessionStorage.getItem('model_table_page_data') ?? '{}');
-		urlModel = `${$page.url}`.replace('//+$/', '').split('/').pop();
-
-		const currentPage = pageData[urlModel] ?? 1;
-		handler.setPage(currentPage);
-		pageData[urlModel] = currentPage;
-
-		_sessionStorage.setItem('model_table_page_data', JSON.stringify(pageData));
-	}
-
-	$: if ($pageNumber && urlModel && _sessionStorage) {
-		const pageData = JSON.parse(_sessionStorage.getItem('model_table_page_data') ?? '{}');
-		pageData[urlModel] = $pageNumber;
-		_sessionStorage.setItem('model_table_page_data', JSON.stringify(pageData));
-	}
 </script>
 
 <section class="flex">
-	<button
-		type="button"
-		class:disabled={$pageNumber === 1}
-		on:click={() => handler.setPage('previous')}
-	>
+	<button type="button" class:disabled={$pageNumber === 1} on:click={() => setPage('previous')}>
 		{m.previous()}
 	</button>
-	{#each $pages as page}
-		<button
-			type="button"
-			class:active={$pageNumber === page}
-			class:ellipse={page === null}
-			on:click={() => handler.setPage(page)}
-		>
-			{page ?? '...'}
+	{#if $pages === undefined}
+		<button type="button" on:click={() => setPage($pageNumber)}>
+			{$pageNumber}
 		</button>
-	{/each}
+	{:else}
+		{#each $pages as page}
+			<button
+				type="button"
+				class:active={$pageNumber === page}
+				class:ellipse={page === null}
+				on:click={() => setPage(page)}
+			>
+				{page ?? '...'}
+			</button>
+		{/each}
+	{/if}
 	<button
 		type="button"
 		class:disabled={$pageNumber === $pageCount}
-		on:click={() => handler.setPage('next')}
+		on:click={() => setPage('next')}
 	>
 		{m.next()}
 	</button>

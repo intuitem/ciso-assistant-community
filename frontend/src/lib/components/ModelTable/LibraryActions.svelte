@@ -51,7 +51,7 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.id}?/load"
+				action="/stored-libraries/{library.id}?/load"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
@@ -101,7 +101,7 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.id}?/update"
+				action="/loaded-libraries/{library.id}?/update"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
