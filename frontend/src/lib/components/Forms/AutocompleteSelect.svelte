@@ -13,6 +13,10 @@
 		suggested?: boolean;
 	}
 
+	type FieldContext = 'form-input' | 'filter-input';
+
+	export let fieldContext: FieldContext = 'form-input';
+
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
@@ -133,7 +137,7 @@
 				}
 				const response = await fetch(endpoint);
 				if (response.ok) {
-					const data = await response.json();
+					const data = await response.json().then((res) => res?.results ?? res);
 					options = processOptions(data);
 					const isRequired = mandatory || $constraints?.required;
 					const hasNoOptions = options.length === 0;
@@ -304,7 +308,7 @@
 	{/if}
 	<div
 		class="control overflow-x-clip flex items-center space-x-2"
-		data-testid="form-input-{field.replaceAll('_', '-')}"
+		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
 	>
 		<input type="hidden" name={field} value={$value ? $value : ''} />
 		<MultiSelect
