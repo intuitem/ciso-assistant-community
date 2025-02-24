@@ -222,7 +222,7 @@
 	let loading = writable(false);
 
 	async function loadDemoDomain() {
-		loading.set(true); // Start loading animation
+		loading.set(true);
 		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
 		if (!response.ok) {
 			if (response.status === 500) {
@@ -231,7 +231,7 @@
 				flash.set({ type: 'error', message: m.errorOccuredDuringImport() });
 			}
 			console.error('Failed to load demo data');
-			loading.set(false); // Stop loading
+			loading.set(false);
 			return false;
 		}
 		flash.set({ type: 'success', message: m.successfullyImportedFolder() });
@@ -243,7 +243,7 @@
 		});
 
 		invalidateAll();
-		loading.set(false); // Stop loading
+		loading.set(false);
 		return true;
 	}
 
