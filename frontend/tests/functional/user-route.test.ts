@@ -12,6 +12,23 @@ test('user usual routine actions are working correctly', async ({
 }) => {
 	test.slow();
 
+	await page.waitForLoadState('networkidle');
+	const modalBackdrop = page.getByTestId('modal-backdrop');
+
+	await test.step('Dismiss any blocking modals', async () => {
+		if (await modalBackdrop.isVisible()) {
+			await modalBackdrop.press('Escape');
+			await expect(modalBackdrop).not.toBeVisible();
+		}
+
+		if (await page.locator('#driver-dummy-element').isVisible()) {
+			await page.locator('.driver-popover-close-btn').first().click();
+		}
+	});
+
+	// Attempt to close any remaining modals
+	await page.locator('body').press('Escape');
+
 	await test.step('proper redirection to the analytics page after login', async () => {
 		await analyticsPage.hasUrl();
 		await analyticsPage.hasTitle();
