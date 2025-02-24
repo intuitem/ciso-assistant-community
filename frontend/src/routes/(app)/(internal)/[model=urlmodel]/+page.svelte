@@ -156,7 +156,7 @@
 							>
 						{:else if URLModel === 'frameworks'}
 							<a
-								href="/libraries?object_type=framework"
+								href="/libraries"
 								on:click={handleClickForGT}
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
