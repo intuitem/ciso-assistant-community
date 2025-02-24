@@ -49,4 +49,3 @@ docker compose exec backend python manage.py migrate
 
 echo "Connect to CISO Assistant on https://localhost:8443"
 echo "For successive runs, you can now use 'docker compose up'."
-
