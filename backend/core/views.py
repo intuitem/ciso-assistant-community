@@ -8,9 +8,10 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
+from django_filters.filterset import filterset_factory
 import pytz
 from uuid import UUID
-from itertools import cycle
+from itertools import chain, cycle
 import django_filters as df
 from ciso_assistant.settings import (
     EMAIL_HOST,
@@ -126,6 +127,22 @@ SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
 
+class GenericFilterSet(df.FilterSet):
+    class Meta:
+        model = None  # This will be set dynamically via filterset_factory.
+        fields = "__all__"
+        filter_overrides = {
+            models.CharField: {
+                "filter_class": df.MultipleChoiceFilter,
+                "extra": lambda f: {
+                    "lookup_expr": "icontains",
+                    # If your model field defines choices, they will be used:
+                    "choices": f.choices if hasattr(f, "choices") else None,
+                },
+            },
+        }
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -133,11 +150,23 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
     ordering = ["created_at"]
-    ordering_fields = ordering
+    ordering_fields = "__all__"
     search_fields = ["name", "description"]
-    model: models.Model
+    filterset_fields = []
+    model = None
 
     serializers_module = "core.serializers"
+
+    # @property
+    # def filterset_class(self):
+    #     # If you have defined filterset_fields, build the FilterSet on the fly.
+    #     if self.filterset_fields:
+    #         return filterset_factory(
+    #             model=self.model,
+    #             filterset=GenericFilterSet,
+    #             fields=self.filterset_fields,
+    #         )
+    #     return None
 
     def get_queryset(self):
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
@@ -258,13 +287,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 # Risk Assessment
 
 
+class PerimeterFilter(df.FilterSet):
+    folder = df.ModelMultipleChoiceFilter(
+        queryset=Folder.objects.all(),
+    )
+    lc_status = df.MultipleChoiceFilter(
+        choices=Perimeter.PRJ_LC_STATUS, lookup_expr="icontains"
+    )
+
+    class Meta:
+        model = Perimeter
+        fields = ["folder", "lc_status"]
+
+
 class PerimeterViewSet(BaseModelViewSet):
     """
     API endpoint that allows perimeters to be viewed or edited.
     """
 
     model = Perimeter
-    filterset_fields = ["folder", "lc_status"]
+    filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
@@ -607,6 +649,56 @@ class RiskMatrixViewSet(BaseModelViewSet):
     def colors(self, request):
         return Response({"results": get_risk_color_ordered_list(request.user)})
 
+    @action(detail=False, name="Get risk level choices")
+    def risk(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        undefined = {-1: "--"}
+        options = []
+        for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
+            _choices = {
+                i: name
+                for i, name in enumerate(
+                    x["name"] for x in matrix.json_definition["risk"]
+                )
+            }
+            choices = undefined | _choices
+            options = options | choices.items()
+        return Response(
+            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
+        )
+
+    @action(detail=False, name="Get impact choices")
+    def impact(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        impacts = [
+            m.impact for m in RiskMatrix.objects.filter(id__in=viewable_matrices)
+        ]
+        return Response(chain.from_iterable(impacts))
+
+    @action(detail=False, name="Get probability choices")
+    def probability(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        undefined = {-1: "--"}
+        options = []
+        for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
+            _choices = {
+                i: name
+                for i, name in enumerate(
+                    x["name"] for x in matrix.json_definition["probability"]
+                )
+            }
+            choices = undefined | _choices
+            options = options | choices.items()
+        return Response(
+            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
+        )
+
     @action(detail=False, name="Get used risk matrices")
     def used(self, request):
         viewable_matrices = RoleAssignment.get_accessible_object_ids(
@@ -660,6 +752,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "risk_scenarios",
         "applied_controls",
         "security_exceptions",
+        "filtering_labels",
     ]
     search_fields = ["name", "description"]
 
@@ -1074,6 +1167,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "evidences",
         "progress_field",
         "security_exceptions",
+        "owner",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
@@ -1101,6 +1195,14 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
         return Response(dict(AppliedControl.EFFORT))
+
+    @action(detail=False, name="Get all applied controls owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(applied_controls__isnull=False), many=True
+            ).data
+        )
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
@@ -1131,18 +1233,6 @@ class AppliedControlViewSet(BaseModelViewSet):
             key=lambda mtg: mtg.get_ranking_score(),
             reverse=True,
         )
-
-        """measures = [{
-            key: getattr(mtg,key)
-            for key in [
-                "id","folder","reference_control","type","status","effort", "cost", "name","description","eta","link","created_at","updated_at"
-            ]
-        } for mtg in measures]
-        for i in range(len(measures)) :
-            measures[i]["id"] = str(measures[i]["id"])
-            measures[i]["folder"] = str(measures[i]["folder"].name)
-            for key in ["created_at","updated_at","eta"] :
-                measures[i][key] = str(measures[i][key])"""
 
         ranking_scores = {str(mtg.id): mtg.get_ranking_score() for mtg in measures}
 
@@ -1576,6 +1666,12 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "risk_assessment",
         "risk_assessment__perimeter",
         "risk_assessment__perimeter__folder",
+        "current_impact",
+        "current_proba",
+        "current_level",
+        "residual_impact",
+        "residual_proba",
+        "residual_level",
         "treatment",
         "threats",
         "assets",
@@ -1583,7 +1679,6 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "security_exceptions",
     ]
     ordering = ["ref_id"]
-    ordering_fields = ordering
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
@@ -1811,9 +1906,16 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                     )
         risk_acceptance = serializer.save()
 
+    @action(detail=False, name="Get state choices")
+    def state(self, request):
+        return Response(dict(RiskAcceptance.ACCEPTANCE_STATE))
+
 
 class UserFilter(df.FilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
+    is_applied_control_owner = df.BooleanFilter(
+        method="filter_applied_control_owner", label="Applied control owner"
+    )
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -1824,6 +1926,9 @@ class UserFilter(df.FilterSet):
         if value:
             return queryset.filter(id__in=approvers_id)
         return queryset.exclude(id__in=approvers_id)
+
+    def filter_applied_control_owner(self, queryset, name, value):
+        return queryset.filter(applied_controls__isnull=not value)
 
     class Meta:
         model = User
@@ -1844,7 +1949,6 @@ class UserViewSet(BaseModelViewSet):
 
     model = User
     ordering = ["-is_active", "-is_superuser", "email", "id"]
-    ordering_fields = ordering
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
 
@@ -1887,7 +1991,6 @@ class UserGroupViewSet(BaseModelViewSet):
 
     model = UserGroup
     ordering = ["builtin", "name"]
-    ordering_fields = ordering
     filterset_fields = ["folder"]
 
 
@@ -1898,7 +2001,6 @@ class RoleViewSet(BaseModelViewSet):
 
     model = Role
     ordering = ["builtin", "name"]
-    ordering_fields = ordering
 
 
 class RoleAssignmentViewSet(BaseModelViewSet):
@@ -1908,7 +2010,6 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
     model = RoleAssignment
     ordering = ["builtin", "folder"]
-    ordering_fields = ordering
     filterset_fields = ["folder"]
 
 
@@ -3145,7 +3246,6 @@ class FrameworkViewSet(BaseModelViewSet):
     model = Framework
     filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
-    ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @method_decorator(vary_on_cookie)
@@ -3160,12 +3260,6 @@ class FrameworkViewSet(BaseModelViewSet):
                 for framework in queryset
             }
         )
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
@@ -3248,7 +3342,6 @@ class EvidenceViewSet(BaseModelViewSet):
     model = Evidence
     filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
     search_fields = ["name"]
-    ordering_fields = ["name", "description"]
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
@@ -3331,7 +3424,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     model = ComplianceAssessment
     filterset_fields = ["framework", "perimeter", "status", "ebios_rm_studies"]
     search_fields = ["name", "description", "ref_id"]
-    ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -3830,7 +3922,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "applied_controls",
         "security_exceptions",
     ]
-    search_fields = ["name", "description"]
+    search_fields = ["requirement__name", "requirement__description"]
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
