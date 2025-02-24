@@ -61,12 +61,13 @@
 	hidden={initialData.folder}
 />
 <AutocompleteSelect
-	{form}
 	multiple
+	{form}
+	createFromSelection={true}
 	optionsEndpoint="filtering-labels"
 	optionsLabelField="label"
-	field="label"
-	cacheLock={cacheLocks['filtering-labels']}
-	bind:cachedValue={formDataCache['filtering-labels']}
-	label={m.filteringLabel()}
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	allowUserOptions="append"
 />
