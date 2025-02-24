@@ -365,7 +365,7 @@ class LibraryUpdater:
             *old_library.risk_matrices.all(),
         ]
         self.new_library = new_library
-        new_library_content = json.loads(self.new_library.content)
+        new_library_content = self.new_library.content
         self.dependencies = self.new_library.dependencies
         if self.dependencies is None:
             self.dependencies = []
