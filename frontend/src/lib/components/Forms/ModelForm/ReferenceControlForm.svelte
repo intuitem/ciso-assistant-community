@@ -60,3 +60,13 @@
 	label={m.domain()}
 	hidden={initialData.folder}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
+	field="label"
+	cacheLock={cacheLocks['filtering-labels']}
+	bind:cachedValue={formDataCache['filtering-labels']}
+	label={m.filteringLabel()}
+/>
