@@ -307,7 +307,7 @@ class StoredLibrary(LibraryMixin):
             "dependencies", []
         )  # I don't want whitespaces in URN anymore nontheless
 
-        library_objects = json.dumps(library_data["objects"])
+        library_objects = library_data["objects"]
         return StoredLibrary.objects.create(
             name=library_data["name"],
             is_published=True,
