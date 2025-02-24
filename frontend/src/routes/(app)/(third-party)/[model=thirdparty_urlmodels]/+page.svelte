@@ -64,7 +64,7 @@
 							>
 						{:else if URLModel === 'frameworks'}
 							<a
-								href="/libraries"
+								href="/libraries?object_type=framework"
 								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"
