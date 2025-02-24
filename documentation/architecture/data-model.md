@@ -52,6 +52,8 @@ erDiagram
     DOMAIN                ||--o{ PROJECT_OBJECT              : contains
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
+    DOMAIN                ||--o{ FOLLOW_UP_ASSESSMENT        : contains
+    DOMAIN                ||--o{ FINDING                     : contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
     ROOT_FOLDER           ||--o{ STORED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ LOADED_LIBRARY              : contains
@@ -152,6 +154,13 @@ erDiagram
     SECURITY_EXCEPTION           }o--o{ RISK_SCENARIO         : concerns
     SECURITY_EXCEPTION           }o--o{ APPLIED_CONTROL       : concerns
     APPLIED_CONTROL              }o--o{ SECURITY_EXCEPTION    : mitigates
+    FOLLOW_UP_ASSESSMENT         ||--o{ FINDING               : contains
+    PERIMETER                    |o--o{ FOLLOW_UP_ASSESSMENT  : contains
+    USER                         }o--o{ FOLLOW_UP_ASSESSMENT  : owns
+    FINDING                      }o--o{ VULNERABILITY         : relates
+    FINDING                      }o--o{ REFERENCE_CONTROL     : is_mitigated_by
+    FINDING                      }o--o{ APPLIED_CONTROL       : is_mitigated_by
+    USER                         }o--o{ FINDING               : owns
 
     FRAMEWORK {
         string  urn
@@ -201,7 +210,6 @@ erDiagram
         principal[] author
         principal[] reviewer
         string      observation
-        boolean     embedded
     }
 
     PERIMETER {
@@ -391,6 +399,30 @@ erDiagram
         int value
     }
 
+    FOLLOW_UP_ASSESSMENT {
+        string      ref_id
+        string      name
+        string      description
+
+        string      version
+        date        eta
+        date        due_date
+        string      status
+        principal[] author
+        principal[] reviewer
+        string      observation
+
+        string      category
+    }
+
+    FINDING {
+        string ref_id
+        string name
+        string description
+        int    severity
+        string status
+    }
+
 ```
 
 ### Requirement mappings
@@ -432,7 +464,7 @@ erDiagram
 
 In all views and analytics, a filter on label shall be displayed.
 
-Note: in MVP, labels are attached only to vulnerabilities.
+Note: For now, labels are attached to the following objects: vulnerabilities, assets, findings, threats, reference controls, applied controls.
 
 ## Global fields
 
@@ -1516,6 +1548,21 @@ erDiagram
 - It shall be possible to see the list of objects that would be exported, and to select/deselect some of them while keeping consistency. This should include evidences with their size.
 - It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency.  This should include evidences with their size.
 - It shall be possible to optionally export subdomains along with the domain. The import shall be flattened if the target is not a PRO version.
+
+## Follow-up assessments
+
+This new type of assessments is intended to gather and manage findinds.
+
+A follow-up assessment has the following specific fields:
+- category: --/pentest/audit/internal
+
+A finding has the following fields:
+- ref_id/name/description
+- severity, like for vulnerabilities
+- a status among: --/draft/In Review/Accepted/Dismissed/Action Planned/In Progress/Pending Validation/Resolved/Overdue/Deprecated
+
+A finding can have related reference controls, applied controls, vulnerabilities.
+
 
 ## Asset compliance (draft)
 
