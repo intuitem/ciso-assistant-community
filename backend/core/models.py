@@ -758,6 +758,14 @@ class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
         blank=True,
         related_name="threats",
     )
+
+    label = models.ManyToManyField(
+        FilteringLabel,
+        verbose_name=_("Labels"),
+        blank=True,
+        related_name="threats",
+    )
+
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
@@ -799,6 +807,13 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         ("respond", _("Respond")),
         ("recover", _("Recover")),
     ]
+
+    label = models.ManyToManyField(
+        FilteringLabel,
+        verbose_name=_("Labels"),
+        blank=True,
+        related_name="reference_controls",
+    )
 
     library = models.ForeignKey(
         LoadedLibrary,
@@ -1861,6 +1876,12 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         Evidence,
         blank=True,
         verbose_name=_("Evidences"),
+        related_name="applied_controls",
+    )
+    label = models.ManyToManyField(
+        FilteringLabel,
+        verbose_name=_("Labels"),
+        blank=True,
         related_name="applied_controls",
     )
     category = models.CharField(

@@ -363,6 +363,7 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 class ReferenceControlReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
+    label = FieldsRelatedField(many=True)
 
     class Meta:
         model = ReferenceControl
@@ -418,6 +419,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
 class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
+    label = FieldsRelatedField(many=True)
 
     class Meta:
         model = Threat
@@ -545,6 +547,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    label = FieldsRelatedField(many=True)
     # These properties shouldn't be displayed in the frontend detail view as they are simple derivations from fields already displayed in the detail view.
     # has_evidences = serializers.BooleanField()
     # eta_missed = serializers.BooleanField()

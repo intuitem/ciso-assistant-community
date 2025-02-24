@@ -61,6 +61,16 @@
 		cacheLock={cacheLocks['eta']}
 		bind:cachedValue={formDataCache['eta']}
 	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="label"
+		cacheLock={cacheLocks['filtering-labels']}
+		bind:cachedValue={formDataCache['filtering-labels']}
+		label={m.filteringLabel()}
+	/>
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 		<TextField
 			{form}
