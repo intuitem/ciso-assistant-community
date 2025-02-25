@@ -2,15 +2,63 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import { defaults, type SuperForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { getModelInfo } from '$lib/utils/crud';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { AppliedControlSchema } from '$lib/utils/schemas';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
-	export let form: SuperValidated<any>;
+	export let form: SuperForm<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
+	export let context = 'default';
+
+	const modalStore = getModalStore();
+
+	let appliedControlModel: ModelInfo;
+	onMount(async () => {
+		appliedControlModel = getModelInfo('applied-controls');
+		const selectOptions = {
+			status: await fetch('/applied-controls/status').then((r) => r.json()),
+			priority: await fetch('/applied-controls/priority').then((r) => r.json()),
+			category: await fetch('/applied-controls/category').then((r) => r.json()),
+			csf_function: await fetch('/applied-controls/csf_function').then((r) => r.json()),
+			effort: await fetch('/applied-controls/effort').then((r) => r.json())
+		};
+		appliedControlModel.selectOptions = selectOptions;
+	});
+
+	function modalAppliedControlCreateForm(field: string): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: defaults(zod(AppliedControlSchema)),
+				formAction: '/applied-controls?/create',
+				model: appliedControlModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + appliedControlModel.localName),
+			response: (r: boolean) => {
+				if (r) {
+					form.submit();
+				}
+			}
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <AutocompleteSelect
@@ -80,11 +128,27 @@
 	field="vulnerabilities"
 	label={m.vulnerabilities()}
 />
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="applied-controls"
-	optionsExtraFields={[['folder', 'str']]}
-	field="applied_controls"
-	label={m.appliedControls()}
-/>
+<div class="flex flex-row space-x-2">
+	<div class="w-full">
+		<AutocompleteSelect
+			multiple
+			{form}
+			optionsEndpoint="applied-controls"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsDetailedUrlParameters={[['scope_folder_id', $page.data.object.folder.id]]}
+			field="applied_controls"
+			label={m.appliedControls()}
+		/>
+	</div>
+	{#if context !== 'create'}
+		<div class="flex items-center justify-center">
+			<div>
+				<button
+					class="btn bg-gray-300 h-10 w-10"
+					on:click={(_) => modalAppliedControlCreateForm('applied_controls')}
+					type="button"><i class="fa-solid fa-plus text-sm" /></button
+				>
+			</div>
+		</div>
+	{/if}
+</div>
