@@ -48,7 +48,7 @@ services:
       {% if need_mailer %}
       - EMAIL_HOST={{ email.host }}
       - EMAIL_PORT={{ email.port }}
-      - EMAIL_USE_TLS={{ email.use_tls }}
+      {% if email.use_tls %}- EMAIL_USE_TLS={{ email.use_tls }}{% endif %}
       - EMAIL_HOST_USER={{ email.user }}
       - EMAIL_HOST_PASSWORD={{ email.password }}
       - DEFAULT_FROM_EMAIL={{ email.from_email }}
