@@ -3654,13 +3654,22 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
     )
     vulnerabilities = models.ManyToManyField(
-        Vulnerability, verbose_name=_("Vulnerabilities"), related_name="findings"
+        Vulnerability,
+        verbose_name=_("Vulnerabilities"),
+        related_name="findings",
+        blank=True,
     )
     reference_controls = models.ManyToManyField(
-        ReferenceControl, verbose_name=_("Reference controls"), related_name="findings"
+        ReferenceControl,
+        verbose_name=_("Reference controls"),
+        related_name="findings",
+        blank=True,
     )
     applied_controls = models.ManyToManyField(
-        AppliedControl, verbose_name=_("Applied controls"), related_name="findings"
+        AppliedControl,
+        verbose_name=_("Applied controls"),
+        related_name="findings",
+        blank=True,
     )
     owner = models.ManyToManyField(
         User,
