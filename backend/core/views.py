@@ -4433,7 +4433,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = ["owner", "folder", "status"]
+    filterset_fields = ["owner", "folder", "status", "findings_assessment"]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
