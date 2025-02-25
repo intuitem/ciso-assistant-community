@@ -189,13 +189,14 @@ objects:
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-019
     ref_id: ICT-019
     name: Data Breach, Leak and Shadow IT
-    description: Unauthorized data exposure through applications or services used
-      by employees without the organisation approval
+    description: Unauthorized data exposure due to an attack, mistake or through applications
+      or services used by employees without the organisation approval
     translations:
       fr:
         name: "Violation de Donn\xE9es, Fuites et Informatique de l'ombre"
-        description: "Exposition non autoris\xE9e de donn\xE9es via des applications\
-          \ ou services utilis\xE9s par les employ\xE9s sans l'approbation de l'organisation."
+        description: "Exposition non autoris\xE9e de donn\xE9es \xE0 cause d'une attaque,\
+          \ erreur ou via des applications ou services utilis\xE9s par les employ\xE9\
+          s sans l'approbation de l'organisation."
   - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-020
     ref_id: ICT-020
     name: Physical Security Threats (Manipulation and Theft)
