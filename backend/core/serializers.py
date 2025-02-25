@@ -1146,6 +1146,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     vulnerabilities = FieldsRelatedField(many=True)
     reference_controls = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
 
     class Meta:
         model = Finding
