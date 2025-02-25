@@ -91,7 +91,6 @@
 		});
 
 	const user = $page.data.user;
-	console.log(source);
 
 	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
 
