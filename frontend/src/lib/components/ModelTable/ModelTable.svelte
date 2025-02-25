@@ -99,7 +99,6 @@
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	const user = $page.data.user;
-	console.log(source);
 
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class

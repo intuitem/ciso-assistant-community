@@ -383,6 +383,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assets',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
+		reverseForeignKeyFields: [
+			{ field: 'asset', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
+		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
