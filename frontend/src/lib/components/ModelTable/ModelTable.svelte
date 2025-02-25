@@ -67,7 +67,7 @@
 	export let identifierField = 'id';
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
-	export let baseEndpoint: string | undefined = `/${URLModel}`;
+	export let baseEndpoint: string = `/${URLModel}`;
 	export let detailQueryParameter: string | undefined = undefined;
 	export let fields: string[] = [];
 
