@@ -75,8 +75,8 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="vulnerabilities"
+	optionsEndpoint="applied-controls"
 	optionsExtraFields={[['folder', 'str']]}
-	field="vulnerabilities"
-	label={m.vulnerabilities()}
+	field="applied_controls"
+	label={m.appliedControls()}
 />
