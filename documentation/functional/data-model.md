@@ -264,3 +264,4 @@ Writing docstrings is a good practice, but some docstrings are optionnal while o
 There are 2 kinds of test data:
 - `Global test data` (stored in `./core/test-data.ts`).
 - `Local test data` which represents all data required for a specific test, the **local test data** must be stored same test file as the test which uses it.
+
