@@ -788,7 +788,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' }],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'status' }, { field: 'category' }]
 	},
 	findings: {
 		name: 'finding',
@@ -801,7 +801,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings', urlModel: 'vulnerabilities' },
 			{ field: 'findings', urlModel: 'reference-controls' },
 			{ field: 'findings', urlModel: 'applied-controls' }
-		]
+		],
+		selectFields: [{ field: 'status' }]
 	}
 };
 
