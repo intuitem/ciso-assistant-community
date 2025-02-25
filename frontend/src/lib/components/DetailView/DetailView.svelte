@@ -248,12 +248,7 @@
 						</dt>
 						<dd class="text-gray-700 sm:col-span-2">
 							<ul class="">
-								<li
-									class="list-none"
-									data-testid={!(value instanceof Array)
-										? key.replace('_', '-') + '-field-value'
-										: null}
-								>
+								<li class="list-none" data-testid={key.replace('_', '-') + '-field-value'}>
 									{#if value !== null && value !== undefined && value !== ''}
 										{#if key === 'library'}
 											{@const itemHref = `/loaded-libraries/${value.id}`}
