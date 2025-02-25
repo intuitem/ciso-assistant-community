@@ -129,13 +129,13 @@
 	label={m.vulnerabilities()}
 />
 <div class="flex flex-row space-x-2">
+	{@debug $page}
 	<div class="w-full">
 		<AutocompleteSelect
 			multiple
 			{form}
 			optionsEndpoint="applied-controls"
 			optionsExtraFields={[['folder', 'str']]}
-			optionsDetailedUrlParameters={[['scope_folder_id', $page.data.object.folder.id]]}
 			field="applied_controls"
 			label={m.appliedControls()}
 		/>
