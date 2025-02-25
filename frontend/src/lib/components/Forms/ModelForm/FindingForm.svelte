@@ -13,6 +13,7 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	export let form: SuperForm<any>;
 	export let model: ModelInfo;
@@ -40,7 +41,12 @@
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: defaults(zod(AppliedControlSchema)),
+				form: defaults(
+					{
+						findings: [$page.data.object.id]
+					},
+					zod(AppliedControlSchema)
+				),
 				formAction: '/applied-controls?/create',
 				model: appliedControlModel,
 				debug: false
@@ -53,12 +59,13 @@
 			title: safeTranslate('add-' + appliedControlModel.localName),
 			response: (r: boolean) => {
 				if (r) {
-					form.submit();
+					invalidateAll();
 				}
 			}
 		};
 		modalStore.trigger(modal);
 	}
+	$: console.log($page.data);
 </script>
 
 <AutocompleteSelect
@@ -130,14 +137,16 @@
 />
 <div class="flex flex-row space-x-2">
 	<div class="w-full">
-		<AutocompleteSelect
-			multiple
-			{form}
-			optionsEndpoint="applied-controls"
-			optionsExtraFields={[['folder', 'str']]}
-			field="applied_controls"
-			label={m.appliedControls()}
-		/>
+		{#key $page.data}
+			<AutocompleteSelect
+				multiple
+				{form}
+				optionsEndpoint="applied-controls"
+				optionsExtraFields={[['folder', 'str']]}
+				field="applied_controls"
+				label={m.appliedControls()}
+			/>
+		{/key}
 	</div>
 	{#if context !== 'create'}
 		<div class="flex items-center justify-center">
