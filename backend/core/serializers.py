@@ -112,6 +112,7 @@ class AssessmentReadSerializer(BaseModelSerializer):
     perimeter = FieldsRelatedField(["id", "folder"])
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
 
 
 # Risk Assessment
