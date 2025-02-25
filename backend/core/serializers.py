@@ -547,6 +547,9 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     state = serializers.SerializerMethodField()
+    requirements_count = serializers.IntegerField(
+        source="requirement_assessments.count"
+    )
 
     def get_state(self, obj):
         if not obj.eta:

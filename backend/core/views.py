@@ -1149,6 +1149,42 @@ def convert_date_to_timestamp(date):
 class AppliedControlFilterSet(df.FilterSet):
     todo = df.BooleanFilter(method="filter_todo")
     to_review = df.BooleanFilter(method="filter_to_review")
+    compliance_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_compliance_assessments",
+        queryset=ComplianceAssessment.objects.all(),
+    )
+    risk_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_risk_assessments",
+        queryset=RiskAssessment.objects.all(),
+    )
+
+    def filter_risk_assessments(self, queryset, name, value):
+        if value:
+            risk_assessments = RiskAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(risk_assessments) == 0:
+                return queryset
+            risk_scenarios = chain.from_iterable(
+                [ra.risk_scenarios.all() for ra in risk_assessments]
+            )
+            return queryset.filter(risk_scenarios__in=risk_scenarios).distinct()
+        return queryset
+
+    def filter_compliance_assessments(self, queryset, name, value):
+        if value:
+            compliance_assessments = ComplianceAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(compliance_assessments) == 0:
+                return queryset
+            requirement_assessments = chain.from_iterable(
+                [ca.requirement_assessments.all() for ca in compliance_assessments]
+            )
+            return queryset.filter(
+                requirement_assessments__in=requirement_assessments
+            ).distinct()
+        return queryset
 
     def filter_todo(self, queryset, name, value):
         if value:
@@ -1187,6 +1223,8 @@ class AppliedControlFilterSet(df.FilterSet):
             "owner",
             "todo",
             "to_review",
+            "compliance_assessments",
+            "risk_assessments",
         ]
 
 
