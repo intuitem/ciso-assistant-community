@@ -454,6 +454,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
 			},
 			{ field: 'applied_controls', urlModel: 'applied-controls' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'evidences', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'requirement-assessments' }
 		]
 	},
 	'compliance-assessments': {
