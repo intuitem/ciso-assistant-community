@@ -4426,7 +4426,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = ["owner", "category", "perimeter", "folder", "authors", "status"]
+    filterset_fields = ["owner", "folder", "status"]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
