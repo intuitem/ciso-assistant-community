@@ -1177,5 +1177,9 @@
 	"findingsAssessment": "Findings assessment",
 	"findingsAssessments": "Findings assessments",
 	"addFinding": "Add finding",
-	"addFindingsAssessment": "Add findings assessment"
+	"addFindingsAssessment": "Add findings assessment",
+	"followUp": "Follow-up",
+	"pentest": "Pentest",
+	"audit": "Audit",
+	"internal": "Internal"
 }
