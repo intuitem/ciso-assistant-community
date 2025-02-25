@@ -106,22 +106,10 @@
 	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
-	const handler = new DataHandler(
-		source.body.map((item: Record<string, any>, index: number) => {
-			return {
-				...item,
-				meta: source.meta
-					? source.meta.results
-						? { ...source.meta.results[index] }
-						: { ...source.meta[index] }
-					: undefined
-			};
-		}),
-		{
-			rowsPerPage: pagination ? numberRowsPerPage : undefined,
-			totalRows: source.meta.count
-		}
-	);
+	const handler = new DataHandler([], {
+		rowsPerPage: pagination ? numberRowsPerPage : undefined,
+		totalRows: source.meta.count
+	});
 	const rows = handler.getRows();
 	let invalidateTable = false;
 
