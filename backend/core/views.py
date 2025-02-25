@@ -623,7 +623,12 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
-    filterset_fields = ["folder", "category", "csf_function"]
+    filterset_fields = [
+        "folder",
+        "category",
+        "csf_function",
+        "findings",
+    ]
     search_fields = ["name", "description", "provider"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -753,6 +758,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "applied_controls",
         "security_exceptions",
         "filtering_labels",
+        "findings",
     ]
     search_fields = ["name", "description"]
 
@@ -1225,6 +1231,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "to_review",
             "compliance_assessments",
             "risk_assessments",
+            "findings",
         ]
 
 
