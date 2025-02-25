@@ -1124,6 +1124,7 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
+    str = serializers.CharField(source="__str__")
     owner = FieldsRelatedField(many=True)
 
     class Meta:
