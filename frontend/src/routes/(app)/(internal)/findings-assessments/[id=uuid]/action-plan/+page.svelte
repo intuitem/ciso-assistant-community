@@ -85,7 +85,7 @@
 				'expiry_date',
 				'effort',
 				'cost',
-				'requirements_count'
+				'findings_count'
 			]}
 		/>
 	</div>
