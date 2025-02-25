@@ -19,6 +19,7 @@
 	import 'driver.js/dist/driver.css';
 	import { getFlash } from 'sveltekit-flash-message';
 	import './driver-custom.css';
+	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
 	export let open: boolean;
 
@@ -287,8 +288,7 @@
 {#if $loading}
 	<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50">
 		<div class="flex flex-col items-center space-y-2">
-			<div class="animate-spin rounded-full h-12 w-12 border-t-4 border-gray-900"></div>
-			<span class="text-gray-700 text-lg">{m.loading()}</span>
+			<LoadingSpinner></LoadingSpinner>
 		</div>
 	</div>
 {/if}
