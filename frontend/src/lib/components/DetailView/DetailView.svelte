@@ -458,11 +458,11 @@
 								{safeTranslate('associated-' + model.info.localNamePlural)}
 							</h4>
 						</div>
+						{@const field = data.model.reverseForeignKeyFields.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
 						{#if model.table && !model.disableAddDeleteButtons}
-							{@const field = data.model.reverseForeignKeyFields.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
 							<ModelTable
 								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
 								source={model.table}
@@ -480,7 +480,12 @@
 								>
 							</ModelTable>
 						{:else if model.table}
-							<ModelTable source={model.table} URLModel={urlmodel} />
+							<ModelTable
+								source={model.table}
+								URLModel={urlmodel}
+								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+								fields={fieldsToUse}
+							/>
 						{/if}
 					{/if}
 				{/each}
