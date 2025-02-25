@@ -551,6 +551,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     requirements_count = serializers.IntegerField(
         source="requirement_assessments.count"
     )
+    findings_count = serializers.IntegerField(source="findings.count")
 
     def get_state(self, obj):
         if not obj.eta:
