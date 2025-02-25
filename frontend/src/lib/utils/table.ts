@@ -68,6 +68,18 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const EFFORT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/effort',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		label: 'effort',
+		multiple: true
+	}
+};
+
 const PERIMETER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -556,7 +568,8 @@ export const listViewFields = {
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
-			priority: PRIORITY_FILTER
+			priority: PRIORITY_FILTER,
+			effort: EFFORT_FILTER
 		}
 	},
 	policies: {
@@ -835,16 +848,8 @@ export const listViewFields = {
 		body: ['ref_id', 'str', 'description', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'description', 'findings_assessment', 'perimeter', 'status', 'labels'],
-		body: [
-			'ref_id',
-			'str',
-			'description',
-			'findings_assessment',
-			'perimeter',
-			'status',
-			'filtering_labels'
-		]
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
+		body: ['ref_id', 'str', 'description', 'findings_assessment', 'status', 'filtering_labels']
 	},
 	extra: {
 		filters: {
