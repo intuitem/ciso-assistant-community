@@ -1146,29 +1146,57 @@ def convert_date_to_timestamp(date):
     return None
 
 
+class AppliedControlFilterSet(df.FilterSet):
+    todo = df.BooleanFilter(method="filter_todo")
+    to_review = df.BooleanFilter(method="filter_to_review")
+
+    def filter_todo(self, queryset, name, value):
+        if value:
+            return (
+                queryset.filter(eta__lte=date.today() + timedelta(days=30))
+                .exclude(status="active")
+                .order_by("eta")
+            )
+
+        return queryset
+
+    def filter_to_review(self, queryset, name, value):
+        if value:
+            return queryset.filter(
+                expiry_date__lte=date.today() + timedelta(days=30)
+            ).order_by("expiry_date")
+        return queryset
+
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "folder",
+            "category",
+            "csf_function",
+            "priority",
+            "status",
+            "reference_control",
+            "effort",
+            "cost",
+            "risk_scenarios",
+            "risk_scenarios_e",
+            "requirement_assessments",
+            "evidences",
+            "progress_field",
+            "security_exceptions",
+            "owner",
+            "todo",
+            "to_review",
+        ]
+
+
 class AppliedControlViewSet(BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
     """
 
     model = AppliedControl
-    filterset_fields = [
-        "folder",
-        "category",
-        "csf_function",
-        "priority",
-        "status",
-        "reference_control",
-        "effort",
-        "cost",
-        "risk_scenarios",
-        "risk_scenarios_e",
-        "requirement_assessments",
-        "evidences",
-        "progress_field",
-        "security_exceptions",
-        "owner",
-    ]
+    filterset_class = AppliedControlFilterSet
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -1782,6 +1810,24 @@ class RiskScenarioViewSet(BaseModelViewSet):
             )
 
 
+class RiskAcceptanceFilterSet(df.FilterSet):
+    to_review = df.BooleanFilter(method="filter_to_review")
+
+    def filter_to_review(self, queryset, name, value):
+        if value:
+            return (
+                queryset.filter(expiry_date__lte=date.today() + timedelta(days=30))
+                .filter(state__in=["submitted", "accepted"])
+                .order_by("expiry_date")
+            )
+
+        return queryset
+
+    class Meta:
+        model = RiskAcceptance
+        fields = ["folder", "state", "approver", "risk_scenarios", "to_review"]
+
+
 class RiskAcceptanceViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk acceptance to be viewed or edited.
@@ -1795,7 +1841,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
     model = RiskAcceptance
     serializer_class = RiskAcceptanceWriteSerializer
-    filterset_fields = ["folder", "state", "approver", "risk_scenarios"]
+    filterset_class = RiskAcceptanceFilterSet
     search_fields = ["name", "description", "justification"]
 
     def update(self, request, *args, **kwargs):
