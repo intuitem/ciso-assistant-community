@@ -56,9 +56,15 @@ The decoupling concept is a pillar of the app and allows you to save a considera
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
+## Decoupling concept
+
 Here is an illustration of the **decoupling** principle and its advantages:
 
 https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
+
+## System architecture
+
+![](./documentation/system-architecture.png)
 
 ## Features
 
@@ -87,7 +93,7 @@ and run the starter script
 ./docker-compose.sh
 ```
 
-If you are looking for other installation options, you might want to check the [docs](https://intuitem.gitbook.io/ciso-assistant).
+If you are looking for other installation options, you might want to check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
 
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
