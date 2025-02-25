@@ -8,6 +8,7 @@
 	import * as m from '$paraglide/messages.js';
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import { page } from '$app/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -63,7 +64,12 @@
 			</svelte:fragment>
 		</AccordionItem>
 	</Accordion>
-	<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+	<ModelTable
+		source={data.table}
+		deleteForm={data.deleteForm}
+		{URLModel}
+		baseEndpoint="/stakeholders?ebios_rm_study={$page.params.id}"
+	>
 		<div slot="addButton">
 			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 				<button
