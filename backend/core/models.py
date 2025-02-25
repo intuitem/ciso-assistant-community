@@ -3616,6 +3616,80 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self.compliance_assessment.upsert_daily_metrics()
 
 
+class FindingsAssessment(Assessment):
+    class Category(models.TextChoices):
+        UNDEFINED = "--", _("Undefined")
+        PENTEST = "pentest", _("Pentest")
+        AUDIT = "audit", _("Audit")
+        INTERNAL = "internal", _("Internal")
+
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="findings_assessments",
+    )
+
+    category = models.CharField(
+        verbose_name=_("Category"),
+        choices=Category.choices,
+        max_length=32,
+        default=Category.UNDEFINED,
+    )
+
+
+class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+    class Status(models.TextChoices):
+        UNDEFINED = "--", _("Undefined")
+        IDENTIFIED = "identified", _("Identified")
+        CONFIRMED = "confirmed", _("Confirmed")
+        DISMISSED = "dismissed", _("Dismissed")
+        ASSIGNED = "assigned", _("Assigned")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        MITIGATED = "mitigated", _("Mitigated")
+        RESOLVED = "resolved", _("Resolved")
+        DEPRECATED = "deprecated", _("Deprecated")
+
+    findings_assessment = models.ForeignKey(
+        FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
+    )
+    vulnerabilities = models.ManyToManyField(
+        Vulnerability, verbose_name=_("Vulnerabilities"), related_name="findings"
+    )
+    reference_controls = models.ManyToManyField(
+        ReferenceControl, verbose_name=_("Reference controls"), related_name="findings"
+    )
+    applied_controls = models.ManyToManyField(
+        AppliedControl, verbose_name=_("Applied controls"), related_name="findings"
+    )
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="findings",
+    )
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    severity = models.IntegerField(
+        default=-1,
+        verbose_name=_("Severity"),
+        help_text=_("The severity of the finding"),
+    )
+    status = models.CharField(
+        verbose_name="Status",
+        choices=Status.choices,
+        null=False,
+        default=Status.UNDEFINED,
+        max_length=32,
+    )
+
+    class Meta:
+        verbose_name = _("Finding")
+        verbose_name_plural = _("Findings")
+
+
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
 
