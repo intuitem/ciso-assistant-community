@@ -17,9 +17,9 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		cost: 'cost',
-		requirements_count: 'matchingRequirements'
+		findings_count: 'associated_findings'
 	};
-	const appliedControlsColums = [
+	const appliedControlsColumns = [
 		'name',
 		'status',
 		'priority',
@@ -29,12 +29,12 @@
 		'expiry_date',
 		'effort',
 		'cost',
-		'requirements_count'
+		'findings_count'
 	];
 
 	const appliedControls: TableSource = {
 		head: appliedControlsHead,
-		body: tableSourceMapper([], appliedControlsColums),
+		body: tableSourceMapper([], appliedControlsColumns),
 		meta: []
 	};
 </script>
