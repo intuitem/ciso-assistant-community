@@ -525,6 +525,17 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
 
 
 class AppliedControlWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
+    def create(self, validated_data: Any):
+        applied_control = super().create(validated_data)
+        findings = validated_data.pop("findings", [])
+        if findings:
+            applied_control.findings.set(findings)
+        return applied_control
+
     class Meta:
         model = AppliedControl
         fields = "__all__"
