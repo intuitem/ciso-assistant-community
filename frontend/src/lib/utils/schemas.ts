@@ -567,7 +567,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'strategic-scenarios': StrategicScenarioSchema,
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema,
-	'security-exceptions': SecurityExceptionSchema
+	'security-exceptions': SecurityExceptionSchema,
+	findings: FindingSchema,
+	'findings-assessments': FindingsAssessmentSchema
 };
 
 export const modelSchema = (model: string) => {
