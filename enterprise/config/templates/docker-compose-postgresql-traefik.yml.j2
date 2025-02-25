@@ -87,6 +87,7 @@ services:
       - DB_HOST=postgres
       {% if need_mailer %}
       - EMAIL_HOST={{ email.host }}
+      - EMAIL_PORT={{ email.port }}
       {% if email.use_tls %}- EMAIL_USE_TLS={{ email.use_tls }}{% endif %}
       - EMAIL_USE_TLS={{ email.use_tls }}
       - EMAIL_HOST_USER={{ email.user }}
