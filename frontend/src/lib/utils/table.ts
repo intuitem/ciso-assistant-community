@@ -830,6 +830,14 @@ export const listViewFields = {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder']
 	},
+	'findings-assessments': {
+		head: ['ref_id', 'name', 'description', 'findings', 'perimeter'],
+		body: ['ref_id', 'str', 'description', 'findings_count', 'perimeter']
+	},
+	findings: {
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'perimeter'],
+		body: ['ref_id', 'str', 'description', 'findings_assessment', 'perimeter']
+	},
 	extra: {
 		filters: {
 			risk: undefined,
