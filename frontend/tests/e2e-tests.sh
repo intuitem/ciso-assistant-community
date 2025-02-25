@@ -231,7 +231,7 @@ echo "==========================================================================
 FRONTEND_HASH_FILE="$APP_DIR/frontend/tests/.frontend_hash"
 FRONTEND_HASH=$(find "$APP_DIR/frontend/src" -type f \( -name "*.ts" -o -name "*.svelte" \) -print0 | xargs -0 md5sum | md5sum)
 
-if ! cmp <(cat "$FRONTEND_HASH_FILE") <(echo "$FRONTEND_HASH") &>/dev/null; then
+if [ "$(cat "$FRONTEND_HASH_FILE")" != "$FRONTEND_HASH" ]; then
   pnpm run build # Required for the "pnpm run preview" command of playwright.config.ts
   echo "$FRONTEND_HASH" >"$FRONTEND_HASH_FILE"
 fi
