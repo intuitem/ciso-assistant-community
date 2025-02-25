@@ -1171,5 +1171,9 @@
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Add exception",
 	"expirationDate": "Expiration date",
-	"filterBy": "Filter by"
+	"filterBy": "Filter by",
+	"finding": "Finding",
+	"findings": "Findings",
+	"findingsAssessment": "Findings assessment",
+	"findingsAssessments": "Findings assessments"
 }
