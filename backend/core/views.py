@@ -2131,7 +2131,7 @@ class FolderViewSet(BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
-    search_fields = ["ref_id"]
+    search_fields = ["name"]
     batch_size = 100  # Configurable batch size for processing domain import
 
     def perform_create(self, serializer):
