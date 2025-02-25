@@ -135,7 +135,7 @@
 	field="vulnerabilities"
 	label={m.vulnerabilities()}
 />
-<div class="flex flex-row space-x-2">
+<div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
 		{#key $page.data}
 			<AutocompleteSelect
@@ -149,14 +149,12 @@
 		{/key}
 	</div>
 	{#if context !== 'create'}
-		<div class="flex items-center justify-center">
-			<div>
-				<button
-					class="btn bg-gray-300 h-10 w-10"
-					on:click={(_) => modalAppliedControlCreateForm('applied_controls')}
-					type="button"><i class="fa-solid fa-plus text-sm" /></button
-				>
-			</div>
+		<div class="mt-4">
+			<button
+				class="btn bg-gray-300 h-10 w-10"
+				on:click={(_) => modalAppliedControlCreateForm('applied_controls')}
+				type="button"><i class="fa-solid fa-plus text-sm" /></button
+			>
 		</div>
 	{/if}
 </div>
