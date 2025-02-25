@@ -1163,6 +1163,23 @@ class AppliedControlFilterSet(df.FilterSet):
         method="filter_risk_assessments",
         queryset=RiskAssessment.objects.all(),
     )
+    findings_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_findings_assessments",
+        queryset=FindingsAssessment.objects.all(),
+    )
+
+    def filter_findings_assessments(self, queryset, name, value):
+        if value:
+            findings_assessments = FindingsAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(findings_assessments) == 0:
+                return queryset
+            findings = chain.from_iterable(
+                [fa.findings.all() for fa in findings_assessments]
+            )
+            return queryset.filter(findings__in=findings).distinct()
+        return queryset
 
     def filter_risk_assessments(self, queryset, name, value):
         if value:
@@ -1232,6 +1249,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "compliance_assessments",
             "risk_assessments",
             "findings",
+            "findings_assessments",
         ]
 
 
