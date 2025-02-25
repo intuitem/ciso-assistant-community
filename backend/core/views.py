@@ -4402,3 +4402,32 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(SecurityException.Status.choices))
+
+
+class FindingsAssessmentViewSet(BaseModelViewSet):
+    model = FindingsAssessment
+    filterset_fields = [
+        "owner",
+        "category",
+        "perimeter",
+        "folder",
+        "authors",
+        "status",
+    ]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(FindingsAssessment.Status.choices))
+
+    @action(detail=False, name="Get category choices")
+    def category(self, request):
+        return Response(dict(FindingsAssessment.Category.choices))
+
+
+class FindingViewSet(BaseModelViewSet):
+    model = Finding
+    filterset_fields = ["owner", "category", "perimeter", "folder", "authors", "status"]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Finding.Status.choices))

@@ -109,7 +109,7 @@ class ReferentialSerializer(BaseModelSerializer):
 
 
 class AssessmentReadSerializer(BaseModelSerializer):
-    perimeter = FieldsRelatedField()
+    perimeter = FieldsRelatedField(["id", "folder"])
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
 
@@ -1114,4 +1114,36 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = SecurityException
+        fields = "__all__"
+
+
+class FindingsAssessmentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = FindingsAssessment
+        exclude = ["created_at", "updated_at"]
+
+
+class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
+    owner = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = FindingsAssessment
+        fields = "__all__"
+
+
+class FindingWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Finding
+        exclude = ["created_at", "updated_at"]
+
+
+class FindingReadSerializer(FindingWriteSerializer):
+    owner = FieldsRelatedField(many=True)
+    findings_assessment = FieldsRelatedField()
+    vulnerabilities = FieldsRelatedField(many=True)
+    reference_controls = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = Finding
         fields = "__all__"
