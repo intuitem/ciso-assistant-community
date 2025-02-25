@@ -1175,5 +1175,7 @@
 	"finding": "Finding",
 	"findings": "Findings",
 	"findingsAssessment": "Findings assessment",
-	"findingsAssessments": "Findings assessments"
+	"findingsAssessments": "Findings assessments",
+	"addFinding": "Add finding",
+	"addFindingsAssessment": "Add findings assessment"
 }
