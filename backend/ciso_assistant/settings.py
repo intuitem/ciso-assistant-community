@@ -132,7 +132,7 @@ ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
 MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
 MEDIA_URL = ""
 
-PAGINATE_BY = os.environ.get("PAGINATE_BY", default=5000)
+PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 
 # Application definition
 
@@ -219,7 +219,7 @@ REST_FRAMEWORK = {
         "core.permissions.RBACPermissions",
     ],
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": PAGINATE_BY,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.helpers.handle",

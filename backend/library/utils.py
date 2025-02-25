@@ -538,7 +538,7 @@ class LibraryImporter:
                 ", ".join(missing_fields)
             )"""
 
-        library_objects = json.loads(self._library.content)
+        library_objects = self._library.content
 
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
