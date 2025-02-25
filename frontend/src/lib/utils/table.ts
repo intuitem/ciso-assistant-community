@@ -835,8 +835,16 @@ export const listViewFields = {
 		body: ['ref_id', 'str', 'description', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'description', 'findings_assessment', 'perimeter'],
-		body: ['ref_id', 'str', 'description', 'findings_assessment', 'perimeter']
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'perimeter', 'status', 'labels'],
+		body: [
+			'ref_id',
+			'str',
+			'description',
+			'findings_assessment',
+			'perimeter',
+			'status',
+			'filtering_labels'
+		]
 	},
 	extra: {
 		filters: {
