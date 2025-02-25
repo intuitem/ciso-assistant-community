@@ -129,7 +129,6 @@
 	label={m.vulnerabilities()}
 />
 <div class="flex flex-row space-x-2">
-	{@debug $page}
 	<div class="w-full">
 		<AutocompleteSelect
 			multiple
