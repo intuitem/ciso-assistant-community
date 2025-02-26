@@ -65,7 +65,6 @@
 		};
 		modalStore.trigger(modal);
 	}
-	$: console.log($page.data);
 </script>
 
 <AutocompleteSelect
