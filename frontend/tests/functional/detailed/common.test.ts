@@ -53,6 +53,7 @@ for (const key of testPages) {
 				await expect(page).toHaveURL(pages[key].url);
 				await page.waitForTimeout(1000); // try mitigating race condition on isHidden
 				if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
+					await page.waitForTimeout(3000);
 					await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);
 				}
 
@@ -90,7 +91,7 @@ for (const key of testPages) {
 				replaceValues(
 					history[testInfo.line],
 					items[key].build.name || items[key].build.email,
-					items[key].build.name + ' edited' || '_' + items[key].build.email
+					items[key].build.name ? items[key].build.name + ' edited' : '_' + items[key].build.email
 				);
 				if (key === 'riskAssessmentsPage') {
 					replaceValues(

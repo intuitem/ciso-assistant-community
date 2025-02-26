@@ -1260,7 +1260,7 @@ class AppliedControlViewSet(BaseModelViewSet):
 
     model = AppliedControl
     filterset_class = AppliedControlFilterSet
-    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+    search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
