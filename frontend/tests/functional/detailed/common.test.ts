@@ -52,6 +52,7 @@ for (const key of testPages) {
 				await pages[key].goto();
 				await expect(page).toHaveURL(pages[key].url);
 				if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
+					await page.waitForTimeout(3000);
 					await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);
 				}
 
@@ -86,11 +87,14 @@ for (const key of testPages) {
 					items[key].build,
 					items[key].editParams
 				);
+				console.log('editedValues', editedValues);
 				replaceValues(
 					history[testInfo.line],
 					items[key].build.name || items[key].build.email,
-					items[key].build.name + ' edited' || '_' + items[key].build.email
+					items[key].build.name ? items[key].build.name + ' edited' : '_' + items[key].build.email
 				);
+				console.log('key', key);
+				console.log('items', items);
 				if (key === 'riskAssessmentsPage') {
 					replaceValues(
 						history[testInfo.line],
