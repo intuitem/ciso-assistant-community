@@ -7,6 +7,7 @@ import type { Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
@@ -48,11 +49,24 @@ export const load = (async ({ fetch, params }) => {
 				},
 				zod(scoreSchema)
 			);
+			const updateSchema = modelSchema('requirement-assessments');
+			const updatedModel: ModelInfo = getModelInfo('requirement-assessments');
+			const object = {
+				...requirementAssessment,
+				folder: requirementAssessment.folder.id,
+				requirement: requirementAssessment.requirement.id,
+				compliance_assessment: requirementAssessment.compliance_assessment.id,
+				evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
+			};
+			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
 				...requirementAssessment,
 				evidenceCreateForm,
 				observationBuffer,
-				scoreForm
+				scoreForm,
+				updateForm,
+				updatedModel,
+				object
 			};
 		})
 	);
@@ -103,5 +117,8 @@ export const actions: Actions = {
 	},
 	createEvidence: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
+	},
+	update: async (event) => {
+		return nestedWriteFormAction({ event, action: 'edit' });
 	}
 };

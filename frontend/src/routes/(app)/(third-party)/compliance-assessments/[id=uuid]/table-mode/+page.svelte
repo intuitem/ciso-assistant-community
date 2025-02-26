@@ -3,6 +3,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import {
 		complianceResultTailwindColorMap,
@@ -100,6 +101,11 @@
 		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
+
+		// Update requirementAssessment.updateForm.data with the specified field and value
+		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
+			requirementAssessment.updateForm.data[field] = value;
+		}
 	}
 
 	function addColor(result: string, map: Record<string, string>) {
@@ -201,6 +207,25 @@
 				});
 			}
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
+	}
+
+	function modalUpdateForm(requirementAssessment): void {
+		let modalComponent: ModalComponent = {
+			ref: UpdateModal,
+			props: {
+				form: requirementAssessment.updateForm,
+				model: requirementAssessment.updatedModel,
+				object: requirementAssessment.object,
+				formAction: '?/update&id=' + requirementAssessment.id,
+				context: 'selectEvidences'
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: title(requirementAssessment)
+		};
+		modalStore.trigger(modal);
 	}
 </script>
 
@@ -556,6 +581,12 @@
 														type="button"
 														><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 													>
+													<button
+														class="btn variant-filled-secondary self-start"
+														type="button"
+														on:click={() => modalUpdateForm(requirementAssessment)}
+														><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
+													</button>
 												{/if}
 												{#key addedEvidence}
 													{#each requirementAssessment.evidences as evidence}
@@ -569,7 +600,7 @@
 																	on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
 																	type="button"
 																>
-																	<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
+																	<i class="fa-solid fa-trash ml-2 text-red-500"></i>
 																</button>
 															{/if}
 														</p>

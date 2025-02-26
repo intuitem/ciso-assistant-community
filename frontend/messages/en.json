@@ -1171,5 +1171,6 @@
 	"securityExceptions": "Exceptions",
 	"addSecurityException": "Add exception",
 	"expirationDate": "Expiration date",
-	"filterBy": "Filter by"
+	"filterBy": "Filter by",
+	"selectEvidence": "Select evidence"
 }

@@ -1085,5 +1085,6 @@
 	"environmental": "Lingkungan",
 	"documentationScore": "Skor dokumentasi",
 	"useDocumentationScore": "Gunakan skor dokumentasi",
-	"useDocumentationScoreHelpText": "Skor kedua (skor dokumentasi) akan tersedia untuk menilai persyaratan."
+	"useDocumentationScoreHelpText": "Skor kedua (skor dokumentasi) akan tersedia untuk menilai persyaratan.",
+	"selectEvidence": "Pilih bukti"
 }
