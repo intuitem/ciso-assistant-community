@@ -100,6 +100,7 @@ erDiagram
 1. `./utils/core/base.ts`
 2. `./utils/core/utils.ts`
 3. `./utils/core/test-data.ts`
+4. `./utils/core/hot-reloader.ts`
 
 ### Fixture coding rules (in ./core/fixtures.ts)
 
