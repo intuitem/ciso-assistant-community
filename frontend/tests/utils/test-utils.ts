@@ -522,10 +522,6 @@ export class TestContent {
 					description: vars.description,
 					attachment: vars.file,
 					folder: vars.folderName,
-					requirement_assessments: [
-						vars.requirement_assessment.name,
-						vars.requirement_assessment2.name
-					],
 					link: 'https://intuitem.com/'
 				},
 				editParams: {
@@ -664,7 +660,8 @@ export function getUniqueValue(value: string): string {
 		const email = value.split('@');
 		return getUniqueValue(email[0]) + '@' + email[1];
 	}
-	return process.env.TEST_WORKER_INDEX + '-' + value + '-' + randomBytes(2).toString('hex');
+	const workerIndex = process.env.TEST_WORKER_INDEX ?? '1';
+	return workerIndex + '-' + value + '-' + randomBytes(2).toString('hex');
 }
 
 export function replaceValues(obj: any, searchValue: string, replaceValue: string) {

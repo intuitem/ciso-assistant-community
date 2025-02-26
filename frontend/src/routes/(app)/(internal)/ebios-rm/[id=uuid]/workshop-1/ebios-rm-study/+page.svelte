@@ -186,6 +186,7 @@
 											source={model.table}
 											deleteForm={model.deleteForm}
 											URLModel={urlmodel}
+											baseEndpoint="/assets?ebios_rm_studies={$page.params.id}"
 										>
 											<button
 												slot="addButton"

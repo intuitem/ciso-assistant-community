@@ -444,6 +444,8 @@
 									/>
 								{/key}
 								<ModelTable
+									baseEndpoint="/applied-controls?requirement_assessments={$page.data
+										.requirementAssessment.id}"
 									source={$page.data.tables['applied-controls']}
 									hideFilters={true}
 									URLModel="applied-controls"
@@ -481,6 +483,8 @@
 									source={$page.data.tables['evidences']}
 									hideFilters={true}
 									URLModel="evidences"
+									baseEndpoint="/evidences?requirement_assessments={$page.data.requirementAssessment
+										.id}"
 								/>
 							</div>
 						{/if}
@@ -507,6 +511,8 @@
 									source={$page.data.tables['security-exceptions']}
 									hideFilters={true}
 									URLModel="security-exceptions"
+									baseEndpoint="/security-exceptions?requirement_assessments={$page.data
+										.requirementAssessment.id}"
 								/>
 							</div>
 						{/if}

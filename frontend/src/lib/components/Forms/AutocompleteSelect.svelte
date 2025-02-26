@@ -60,6 +60,8 @@
 	 */
 	export let optionsValueField: string = 'id';
 
+	export let browserCache: RequestCache = 'default';
+
 	/**
 	 * Additional fields to display in labels as prefixes
 	 * @format Array of [fieldPath, type] tuples
@@ -135,7 +137,7 @@
 					endpoint += endpoint.includes('?') ? '&' : '?';
 					endpoint += queryString;
 				}
-				const response = await fetch(endpoint);
+				const response = await fetch(endpoint, { cache: browserCache });
 				if (response.ok) {
 					const data = await response.json().then((res) => res?.results ?? res);
 					options = processOptions(data);

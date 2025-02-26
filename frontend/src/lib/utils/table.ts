@@ -32,6 +32,7 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -61,7 +62,20 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'applied-controls/priority',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
+		browserCache: 'force-cache',
 		label: 'priority',
+		multiple: true
+	}
+};
+
+const EFFORT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/effort',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		label: 'effort',
 		multiple: true
 	}
 };
@@ -82,6 +96,7 @@ const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -93,6 +108,7 @@ const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -104,6 +120,7 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -115,6 +132,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'treatment',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -126,6 +144,7 @@ const STATE_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'state',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -225,6 +244,7 @@ const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'ro-to/risk-origin',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -245,6 +265,7 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'ro-to/pertinence',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -319,6 +340,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'stored-libraries/locale',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -330,6 +352,7 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'assets/type',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -341,6 +364,7 @@ const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'reference-controls/category',
 		multiple: true,
 		optionsLabelField: 'label',
+		browserCache: 'force-cache',
 		optionsValueField: 'value'
 	}
 };
@@ -352,6 +376,7 @@ const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'stakeholders/category',
 		multiple: true,
 		optionsLabelField: 'label',
+		browserCache: 'force-cache',
 		optionsValueField: 'value'
 	}
 };
@@ -363,6 +388,7 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'csfFunction',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -394,6 +420,7 @@ const LIBRARY_TYPE_FILTER = {
 		optionsEndpoint: 'stored-libraries/object_type',
 		optionsLabelField: 'label',
 		optionsValueField: 'label',
+		browserCache: 'force-cache',
 		multiple: true
 	}
 };
@@ -541,7 +568,8 @@ export const listViewFields = {
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
-			priority: PRIORITY_FILTER
+			priority: PRIORITY_FILTER,
+			effort: EFFORT_FILTER
 		}
 	},
 	policies: {
@@ -814,6 +842,14 @@ export const listViewFields = {
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder']
+	},
+	'findings-assessments': {
+		head: ['ref_id', 'name', 'description', 'category', 'findings', 'perimeter'],
+		body: ['ref_id', 'str', 'description', 'category', 'findings_count', 'perimeter']
+	},
+	findings: {
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
+		body: ['ref_id', 'str', 'description', 'findings_assessment', 'status', 'filtering_labels']
 	},
 	extra: {
 		filters: {

@@ -17,9 +17,9 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		cost: 'cost',
-		requirements_count: 'matchingRequirements'
+		findings_count: 'associated_findings'
 	};
-	const appliedControlsColums = [
+	const appliedControlsColumns = [
 		'name',
 		'status',
 		'priority',
@@ -29,13 +29,13 @@
 		'expiry_date',
 		'effort',
 		'cost',
-		'requirements_count'
+		'findings_count'
 	];
 
-	const AppliedControls: TableSource = {
+	const appliedControls: TableSource = {
 		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan, appliedControlsColums),
-		meta: data.actionPlan
+		body: tableSourceMapper([], appliedControlsColumns),
+		meta: []
 	};
 </script>
 
@@ -44,28 +44,20 @@
 		{m.perimeter()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/perimeters/{data.compliance_assessment.perimeter.id}/"
-			>{data.compliance_assessment.perimeter.str}</a
+			href="/perimeters/{data.findings_assessment.perimeter.id}/"
+			>{data.findings_assessment.perimeter.str}</a
 		>
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
-		{m.complianceAssessment()}:
+		{m.findingsAssessment()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/compliance-assessments/{data.compliance_assessment.id}/"
-			>{data.compliance_assessment.name} - {data.compliance_assessment.version}</a
+			href="/findings-assessments/{data.findings_assessment.id}/"
+			>{data.findings_assessment.name} - {data.findings_assessment.version}</a
 		>
 	</p>
 	<p>/</p>
-	<p class="font-semibold text-lg">
-		{m.framework()}:
-		<a
-			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/frameworks/{data.compliance_assessment.framework.id}/"
-			>{data.compliance_assessment.framework.str}</a
-		>
-	</p>
 </div>
 <div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
 	<div>
@@ -77,12 +69,12 @@
 	<div class="">
 		<ModelTable
 			URLModel="applied-controls"
-			source={AppliedControls}
+			source={appliedControls}
 			search={true}
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
-			baseEndpoint="/applied-controls?compliance_assessments={$page.params.id}"
+			baseEndpoint="/applied-controls?findings_assessments={$page.params.id}"
 			fields={[
 				'name',
 				'status',
@@ -93,7 +85,7 @@
 				'expiry_date',
 				'effort',
 				'cost',
-				'requirements_count'
+				'findings_count'
 			]}
 		/>
 	</div>

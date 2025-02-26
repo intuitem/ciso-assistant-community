@@ -623,7 +623,12 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
-    filterset_fields = ["folder", "category", "csf_function"]
+    filterset_fields = [
+        "folder",
+        "category",
+        "csf_function",
+        "findings",
+    ]
     search_fields = ["name", "description", "provider"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -753,6 +758,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "applied_controls",
         "security_exceptions",
         "filtering_labels",
+        "findings",
     ]
     search_fields = ["name", "description"]
 
@@ -1146,30 +1152,115 @@ def convert_date_to_timestamp(date):
     return None
 
 
+class AppliedControlFilterSet(df.FilterSet):
+    todo = df.BooleanFilter(method="filter_todo")
+    to_review = df.BooleanFilter(method="filter_to_review")
+    compliance_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_compliance_assessments",
+        queryset=ComplianceAssessment.objects.all(),
+    )
+    risk_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_risk_assessments",
+        queryset=RiskAssessment.objects.all(),
+    )
+    findings_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_findings_assessments",
+        queryset=FindingsAssessment.objects.all(),
+    )
+
+    def filter_findings_assessments(self, queryset, name, value):
+        if value:
+            findings_assessments = FindingsAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(findings_assessments) == 0:
+                return queryset
+            findings = chain.from_iterable(
+                [fa.findings.all() for fa in findings_assessments]
+            )
+            return queryset.filter(findings__in=findings).distinct()
+        return queryset
+
+    def filter_risk_assessments(self, queryset, name, value):
+        if value:
+            risk_assessments = RiskAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(risk_assessments) == 0:
+                return queryset
+            risk_scenarios = chain.from_iterable(
+                [ra.risk_scenarios.all() for ra in risk_assessments]
+            )
+            return queryset.filter(risk_scenarios__in=risk_scenarios).distinct()
+        return queryset
+
+    def filter_compliance_assessments(self, queryset, name, value):
+        if value:
+            compliance_assessments = ComplianceAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(compliance_assessments) == 0:
+                return queryset
+            requirement_assessments = chain.from_iterable(
+                [ca.requirement_assessments.all() for ca in compliance_assessments]
+            )
+            return queryset.filter(
+                requirement_assessments__in=requirement_assessments
+            ).distinct()
+        return queryset
+
+    def filter_todo(self, queryset, name, value):
+        if value:
+            return (
+                queryset.filter(eta__lte=date.today() + timedelta(days=30))
+                .exclude(status="active")
+                .order_by("eta")
+            )
+
+        return queryset
+
+    def filter_to_review(self, queryset, name, value):
+        if value:
+            return queryset.filter(
+                expiry_date__lte=date.today() + timedelta(days=30)
+            ).order_by("expiry_date")
+        return queryset
+
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "folder",
+            "category",
+            "csf_function",
+            "priority",
+            "status",
+            "reference_control",
+            "effort",
+            "cost",
+            "risk_scenarios",
+            "risk_scenarios_e",
+            "requirement_assessments",
+            "evidences",
+            "progress_field",
+            "security_exceptions",
+            "owner",
+            "todo",
+            "to_review",
+            "compliance_assessments",
+            "risk_assessments",
+            "findings",
+            "findings_assessments",
+        ]
+
+
 class AppliedControlViewSet(BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
     """
 
     model = AppliedControl
-    filterset_fields = [
-        "folder",
-        "category",
-        "csf_function",
-        "priority",
-        "status",
-        "reference_control",
-        "effort",
-        "cost",
-        "risk_scenarios",
-        "risk_scenarios_e",
-        "requirement_assessments",
-        "evidences",
-        "progress_field",
-        "security_exceptions",
-        "owner",
-    ]
-    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+    filterset_class = AppliedControlFilterSet
+    search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1782,6 +1873,24 @@ class RiskScenarioViewSet(BaseModelViewSet):
             )
 
 
+class RiskAcceptanceFilterSet(df.FilterSet):
+    to_review = df.BooleanFilter(method="filter_to_review")
+
+    def filter_to_review(self, queryset, name, value):
+        if value:
+            return (
+                queryset.filter(expiry_date__lte=date.today() + timedelta(days=30))
+                .filter(state__in=["submitted", "accepted"])
+                .order_by("expiry_date")
+            )
+
+        return queryset
+
+    class Meta:
+        model = RiskAcceptance
+        fields = ["folder", "state", "approver", "risk_scenarios", "to_review"]
+
+
 class RiskAcceptanceViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk acceptance to be viewed or edited.
@@ -1795,7 +1904,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
     model = RiskAcceptance
     serializer_class = RiskAcceptanceWriteSerializer
-    filterset_fields = ["folder", "state", "approver", "risk_scenarios"]
+    filterset_class = RiskAcceptanceFilterSet
     search_fields = ["name", "description", "justification"]
 
     def update(self, request, *args, **kwargs):
@@ -2040,7 +2149,7 @@ class FolderViewSet(BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
-    search_fields = ["ref_id"]
+    search_fields = ["name"]
     batch_size = 100  # Configurable batch size for processing domain import
 
     def perform_create(self, serializer):
@@ -4318,3 +4427,32 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(SecurityException.Status.choices))
+
+
+class FindingsAssessmentViewSet(BaseModelViewSet):
+    model = FindingsAssessment
+    filterset_fields = [
+        "owner",
+        "category",
+        "perimeter",
+        "folder",
+        "authors",
+        "status",
+    ]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(FindingsAssessment.Status.choices))
+
+    @action(detail=False, name="Get category choices")
+    def category(self, request):
+        return Response(dict(FindingsAssessment.Category.choices))
+
+
+class FindingViewSet(BaseModelViewSet):
+    model = Finding
+    filterset_fields = ["owner", "folder", "status", "findings_assessment"]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Finding.Status.choices))
