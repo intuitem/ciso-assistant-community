@@ -22,6 +22,7 @@ description: "La directive Network and Information System Security a \xE9t\xE9 a
   \ les entreprises de services num\xE9riques (ESN).\nhttps://cyber.gouv.fr/sites/default/files/2020/12/guide_protection_des_systemes_essentiels.pdf"
 copyright: Licence ouverte / Open Licence v2.0 (Etalab)
 version: 2
+publication_date: 2024-06-10
 provider: ANSSI
 packager: protocolpaladin
 objects:

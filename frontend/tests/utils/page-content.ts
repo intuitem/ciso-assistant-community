@@ -12,6 +12,8 @@ export class PageContent extends BasePage {
 	readonly deleteModalTitle: Locator;
 	readonly deleteModalConfirmButton: Locator;
 	readonly deleteModalCancelButton: Locator;
+	readonly deleteModalPromptConfirmButton: Locator;
+	readonly deleteModalPromptConfirmText: Locator;
 
 	constructor(
 		public readonly page: Page,
@@ -34,6 +36,8 @@ export class PageContent extends BasePage {
 		this.deleteModalTitle = this.page.getByTestId('modal-title');
 		this.deleteModalConfirmButton = this.page.getByTestId('delete-confirm-button');
 		this.deleteModalCancelButton = this.page.getByTestId('delete-cancel-button');
+		this.deleteModalPromptConfirmButton = this.page.getByTestId('delete-prompt-confirm-button');
+		this.deleteModalPromptConfirmText = this.page.getByTestId('delete-prompt-confirm-text');
 	}
 
 	async createItem(values: { [k: string]: any }, dependency?: any) {
@@ -66,6 +70,7 @@ export class PageContent extends BasePage {
 	}
 
 	async importLibrary(name: string, urn?: string, language = 'English') {
+		await this.page.waitForTimeout(3000);
 		await this.page.getByTestId('search-input').fill(name);
 		if (
 			(await this.tab('Loaded libraries').isVisible()) &&
@@ -79,6 +84,7 @@ export class PageContent extends BasePage {
 			}
 		}
 		// If the library is not visible, it might have already been loaded
+		await this.page.waitForTimeout(3000);
 		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
 			if (await this.tab('Loaded libraries').isVisible()) {
 				await this.tab('Loaded libraries').click();
@@ -134,6 +140,14 @@ export class PageContent extends BasePage {
 
 	deleteItemButton(value: string) {
 		return this.getRow(value).getByTestId('tablerow-delete-button');
+	}
+
+	deletePromptConfirmTextField() {
+		return this.page.getByTestId('delete-prompt-confirm-textfield');
+	}
+
+	deletePromptConfirmButton() {
+		return this.page.getByTestId('delete-prompt-confirm-button');
 	}
 
 	importItemButton(value: string, language?: string) {

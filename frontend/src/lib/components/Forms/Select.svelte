@@ -12,6 +12,7 @@
 	export let helpText: string | undefined = undefined;
 	export let cachedValue: string | undefined = undefined;
 	export let blank: boolean = false;
+	export let disableDoubleDash: boolean = false;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
@@ -72,7 +73,7 @@
 			{...$constraints}
 			{...$$restProps}
 		>
-			{#if !$constraints?.required && !options.find( (o) => new Set( ['--', 'undefined'] ).has(o.label.toLowerCase()) )}
+			{#if !disableDoubleDash && !$constraints?.required && !options.find( (o) => new Set( ['--', 'undefined'] ).has(o.label.toLowerCase()) )}
 				{@const defaultValue = blank ? '' : null}
 				<option value={defaultValue} selected>--</option>
 			{/if}

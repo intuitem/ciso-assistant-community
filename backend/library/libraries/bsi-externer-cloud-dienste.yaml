@@ -10,6 +10,7 @@ description: "Das Bundesamt f\xFCr Sicherheit in der Informationstechnik (BSI) M
   \ 2.1 vom 15.12.2022\nLink : https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Mindeststandards/Mindeststandard_Nutzung_externer_Cloud-Dienste_Version_2_1.pdf?__blob=publicationFile&v=4 "
 copyright: BSI
 version: 1
+publication_date: 2024-10-14
 provider: BSI
 packager: intuitem
 objects:

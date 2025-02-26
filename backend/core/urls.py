@@ -23,7 +23,7 @@ router.register(
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
-router.register(r"projects", ProjectViewSet, basename="projects")
+router.register(r"perimeters", PerimeterViewSet, basename="perimeters")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
@@ -70,6 +70,11 @@ router.register(
     r"qualifications",
     QualificationViewSet,
     basename="qualifications",
+)
+router.register(
+    r"security-exceptions",
+    SecurityExceptionViewSet,
+    basename="security-exceptions",
 )
 
 ROUTES = settings.ROUTES

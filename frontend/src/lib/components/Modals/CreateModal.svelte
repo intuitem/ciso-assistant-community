@@ -12,11 +12,13 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let customNameDescription = false;
+	export let importFolder = false;
 	export let model: ModelInfo;
 	export let duplicate = false;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let formAction = '?/create';
 	export let context = 'create';
+	export let additionalInitialData = {};
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
 
@@ -49,6 +51,8 @@
 		<ModelForm
 			{form}
 			{customNameDescription}
+			{importFolder}
+			{additionalInitialData}
 			{suggestions}
 			{parent}
 			{invalidateAll}
@@ -59,6 +63,7 @@
 			caching={true}
 			action={formAction}
 			{debug}
+			{...$$restProps}
 		/>
 	</div>
 {/if}

@@ -11,7 +11,7 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
-	export let cachedValue: string | undefined;
+	export let cachedValue: string | undefined = undefined;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
@@ -59,6 +59,7 @@
 			type="text"
 			class="{'input ' + _class} {classesTextField($errors)}"
 			data-testid="form-input-{field.replaceAll('_', '-')}"
+			id="form-input-{field.replaceAll('_', '-')}"
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""

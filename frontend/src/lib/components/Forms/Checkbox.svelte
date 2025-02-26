@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { SlideToggle, type CssClasses } from '@skeletonlabs/skeleton';
+	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	export let label: string | undefined = undefined;
@@ -18,6 +19,12 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
+	const dispatch = createEventDispatcher();
+
+	function handleChange() {
+		dispatch('change', $value);
+	}
+
 	$: if (cachedValue !== undefined) {
 		value.set(cachedValue);
 	} else {
@@ -28,9 +35,10 @@
 	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
 </script>
 
-<div class={classesContainer}>
+<div class="{classesContainer} {classesHidden(hidden)}">
 	<div
-		class="flex flex-row space-x-2 items-center {classesHidden(hidden)} {classesDisabled(disabled)}"
+		class="flex flex-row space-x-2 items-center {classesDisabled(disabled)}"
+		aria-disabled={disabled}
 	>
 		{#if label !== undefined}
 			{#if $constraints?.required}
@@ -49,6 +57,7 @@
 					class="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"
 					bind:checked={cachedValue}
+					on:change={handleChange}
 					{...$constraints}
 					{...$$restProps}
 					{disabled}
@@ -59,6 +68,7 @@
 					type="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"
 					bind:checked={cachedValue}
+					on:change={handleChange}
 					{...$constraints}
 					{...$$restProps}
 					{disabled}

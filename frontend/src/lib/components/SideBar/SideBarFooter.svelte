@@ -8,6 +8,9 @@
 	import * as m from '$paraglide/messages';
 	import { setCookie } from '$lib/utils/cookies';
 
+	import { createEventDispatcher, onMount } from 'svelte';
+	const dispatch = createEventDispatcher();
+
 	const language: any = {
 		french: m.french(),
 		english: m.english(),
@@ -47,12 +50,11 @@
 	};
 
 	let value = languageTag();
-
 	async function handleLocaleChange(event: Event) {
 		event.preventDefault();
 		value = event?.target?.value;
 		setLanguageTag(value);
-		fetch('/api/user-preferences', {
+		fetch('/fe-api/user-preferences', {
 			method: 'PATCH',
 			body: JSON.stringify({
 				lang: value
@@ -79,6 +81,12 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	let enableMoreBtn = false;
+
+	onMount(() => {
+		enableMoreBtn = true;
+	});
 </script>
 
 <div class="border-t pt-2.5">
@@ -100,9 +108,22 @@
 				</span>
 			{/if}
 		</div>
-		<button class="btn bg-initial" data-testid="sidebar-more-btn" use:popup={popupUser}
-			><i class="fa-solid fa-ellipsis-vertical" /></button
-		>
+		{#key $modalStore}
+			{#if enableMoreBtn}
+				<button
+					class="btn bg-initial"
+					data-testid="sidebar-more-btn"
+					id="sidebar-more-btn"
+					use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical" /></button
+				>
+			{:else}
+				<button
+					class="btn bg-initial"
+					data-testid="sidebar-more-btn-disabled"
+					id="sidebar-more-btn-disabled"><i class="fa-solid fa-ellipsis-vertical" /></button
+				>
+			{/if}
+		{/key}
 		<div
 			class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
 			data-testid="sidebar-more-panel"
@@ -128,6 +149,18 @@
 					</option>
 				{/each}
 			</select>
+			<button
+				on:click={() => dispatch('triggerGT')}
+				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+				data-testid="gt-button"
+				><i class="fa-solid fa-wand-magic-sparkles mr-2" />{m.guidedTour()}</button
+			>
+			<button
+				on:click={() => dispatch('loadDemoDomain')}
+				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+				data-testid="load-demo-data-button"
+				><i class="fa-solid fa-file-import mr-2" />{m.loadDemoData()}</button
+			>
 			<button
 				on:click={modalBuildInfo}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"

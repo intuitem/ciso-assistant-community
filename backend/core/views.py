@@ -1,24 +1,27 @@
 import csv
+import json
 import mimetypes
 import re
-import tempfile
+import os
 import uuid
 import zipfile
 from datetime import date, datetime, timedelta
+from typing import Dict, Any, List, Tuple
 import time
-from django.views.generic import detail
+from django_filters.filterset import filterset_factory
 import pytz
-from typing import Any, Tuple
 from uuid import UUID
-from itertools import cycle
+from itertools import chain, cycle
 import django_filters as df
-from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
+from ciso_assistant.settings import (
+    EMAIL_HOST,
+    EMAIL_HOST_RESCUE,
+)
 
 import shutil
 from pathlib import Path
 import humanize
 
-from django.http import StreamingHttpResponse
 from wsgiref.util import FileWrapper
 
 import io
@@ -28,6 +31,8 @@ import random
 from docxtpl import DocxTemplate
 from .generators import gen_audit_context
 
+from django.utils import timezone
+from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -35,16 +40,18 @@ from django.core.cache import cache
 
 from django.db.models import F, Q
 
+from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.db import models
+from django.db import models, transaction
 from django.forms import ValidationError
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, UserGroup
 from rest_framework import filters, permissions, status, viewsets
@@ -55,13 +62,15 @@ from rest_framework.decorators import (
     permission_classes,
     renderer_classes,
 )
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import (
+    FileUploadParser,
+)
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.exceptions import PermissionDenied
 
 
 from weasyprint import HTML
@@ -74,15 +83,35 @@ from core.models import (
     RiskAssessment,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
-from core.utils import RoleCodename, UserGroupCodename
+from core.utils import (
+    RoleCodename,
+    UserGroupCodename,
+    compare_schema_versions,
+)
 
 from ebios_rm.models import (
     EbiosRMStudy,
-    OperationalScenario,
+    FearedEvent,
+    RoTo,
+    StrategicScenario,
+    Stakeholder,
+    AttackPath,
 )
+
+from tprm.models import Entity
 
 from .models import *
 from .serializers import *
+
+from serdes.utils import (
+    get_domain_export_objects,
+    import_export_serializer_class,
+    topological_sort,
+    build_dependency_graph,
+    get_self_referencing_field,
+    sort_objects_by_self_reference,
+)
+from serdes.serializers import ExportSerializer
 
 import structlog
 
@@ -98,6 +127,22 @@ SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
 
+class GenericFilterSet(df.FilterSet):
+    class Meta:
+        model = None  # This will be set dynamically via filterset_factory.
+        fields = "__all__"
+        filter_overrides = {
+            models.CharField: {
+                "filter_class": df.MultipleChoiceFilter,
+                "extra": lambda f: {
+                    "lookup_expr": "icontains",
+                    # If your model field defines choices, they will be used:
+                    "choices": f.choices if hasattr(f, "choices") else None,
+                },
+            },
+        }
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -105,13 +150,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
     ordering = ["created_at"]
-    ordering_fields = ordering
+    ordering_fields = "__all__"
     search_fields = ["name", "description"]
-    model: models.Model
+    filterset_fields = []
+    model = None
 
     serializers_module = "core.serializers"
 
+    # @property
+    # def filterset_class(self):
+    #     # If you have defined filterset_fields, build the FilterSet on the fly.
+    #     if self.filterset_fields:
+    #         return filterset_factory(
+    #             model=self.model,
+    #             filterset=GenericFilterSet,
+    #             fields=self.filterset_fields,
+    #         )
+    #     return None
+
     def get_queryset(self):
+        """the scope_folder_id query_param allows scoping the objects to retrieve"""
         if not self.model:
             return None
         object_ids_view = None
@@ -126,8 +184,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 if RoleAssignment.is_object_readable(self.request.user, self.model, id):
                     object_ids_view = [id]
         if not object_ids_view:
+            scope_folder_id = self.request.query_params.get("scope_folder_id")
+            scope_folder = (
+                get_object_or_404(Folder, id=scope_folder_id)
+                if scope_folder_id
+                else Folder.get_root_folder()
+            )
             object_ids_view = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, self.model
+                scope_folder, self.request.user, self.model
             )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
@@ -223,47 +287,60 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 # Risk Assessment
 
 
-class ProjectViewSet(BaseModelViewSet):
+class PerimeterFilter(df.FilterSet):
+    folder = df.ModelMultipleChoiceFilter(
+        queryset=Folder.objects.all(),
+    )
+    lc_status = df.MultipleChoiceFilter(
+        choices=Perimeter.PRJ_LC_STATUS, lookup_expr="icontains"
+    )
+
+    class Meta:
+        model = Perimeter
+        fields = ["folder", "lc_status"]
+
+
+class PerimeterViewSet(BaseModelViewSet):
     """
-    API endpoint that allows projects to be viewed or edited.
+    API endpoint that allows perimeters to be viewed or edited.
     """
 
-    model = Project
-    filterset_fields = ["folder", "lc_status"]
+    model = Perimeter
+    filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
-        return Response(dict(Project.PRJ_LC_STATUS))
+        return Response(dict(Perimeter.PRJ_LC_STATUS))
 
     @action(detail=False, methods=["get"])
     def names(self, request):
         uuid_list = request.query_params.getlist("id[]", [])
-        queryset = Project.objects.filter(id__in=uuid_list)
+        queryset = Perimeter.objects.filter(id__in=uuid_list)
 
-        return Response({str(project.id): project.name for project in queryset})
+        return Response({str(perimeter.id): perimeter.name for perimeter in queryset})
 
     @action(detail=False, methods=["get"])
     def quality_check(self, request):
         """
-        Returns the quality check of the projects
+        Returns the quality check of the perimeters
         """
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Project
+            folder=Folder.get_root_folder(), user=request.user, object_type=Perimeter
         )
-        projects = Project.objects.filter(id__in=viewable_objects)
+        perimeters = Perimeter.objects.filter(id__in=viewable_objects)
         res = {
             str(p.id): {
-                "project": ProjectReadSerializer(p).data,
+                "perimeter": PerimeterReadSerializer(p).data,
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
             }
-            for p in projects
+            for p in perimeters
         }
         for compliance_assessment in ComplianceAssessment.objects.filter(
-            project__in=projects
+            perimeter__in=perimeters
         ):
-            res[str(compliance_assessment.project.id)]["compliance_assessments"][
+            res[str(compliance_assessment.perimeter.id)]["compliance_assessments"][
                 "objects"
             ][str(compliance_assessment.id)] = {
                 "object": ComplianceAssessmentReadSerializer(
@@ -271,8 +348,8 @@ class ProjectViewSet(BaseModelViewSet):
                 ).data,
                 "quality_check": compliance_assessment.quality_check(),
             }
-        for risk_assessment in RiskAssessment.objects.filter(project__in=projects):
-            res[str(risk_assessment.project.id)]["risk_assessments"]["objects"][
+        for risk_assessment in RiskAssessment.objects.filter(perimeter__in=perimeters):
+            res[str(risk_assessment.perimeter.id)]["risk_assessments"]["objects"][
                 str(risk_assessment.id)
             ] = {
                 "object": RiskAssessmentReadSerializer(risk_assessment).data,
@@ -283,20 +360,20 @@ class ProjectViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="quality_check")
     def quality_check_detail(self, request, pk):
         """
-        Returns the quality check of the project
+        Returns the quality check of the perimeter
         """
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Project
+            folder=Folder.get_root_folder(), user=request.user, object_type=Perimeter
         )
         if UUID(pk) in viewable_objects:
-            project = self.get_object()
+            perimeter = self.get_object()
             res = {
-                "project": ProjectReadSerializer(project).data,
+                "perimeter": PerimeterReadSerializer(perimeter).data,
                 "compliance_assessments": {"objects": {}},
                 "risk_assessments": {"objects": {}},
             }
             for compliance_assessment in ComplianceAssessment.objects.filter(
-                project=project
+                perimeter=perimeter
             ):
                 res["compliance_assessments"]["objects"][
                     str(compliance_assessment.id)
@@ -306,7 +383,7 @@ class ProjectViewSet(BaseModelViewSet):
                     ).data,
                     "quality_check": compliance_assessment.quality_check(),
                 }
-            for risk_assessment in RiskAssessment.objects.filter(project=project):
+            for risk_assessment in RiskAssessment.objects.filter(perimeter=perimeter):
                 res["risk_assessments"]["objects"][str(risk_assessment.id)] = {
                     "object": RiskAssessmentReadSerializer(risk_assessment).data,
                     "quality_check": risk_assessment.quality_check(),
@@ -322,9 +399,9 @@ class ProjectViewSet(BaseModelViewSet):
         (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
-            object_type=Project,
+            object_type=Perimeter,
         )
-        for item in Project.objects.filter(id__in=viewable_items):
+        for item in Perimeter.objects.filter(id__in=viewable_items):
             if my_map.get(item.folder.name) is None:
                 my_map[item.folder.name] = {}
             my_map[item.folder.name].update({item.name: item.id})
@@ -379,6 +456,7 @@ class AssetViewSet(BaseModelViewSet):
         "type",
         "risk_scenarios",
         "ebios_rm_studies",
+        "security_exceptions",
     ]
     search_fields = ["name", "description", "business_value"]
 
@@ -455,7 +533,7 @@ class AssetViewSet(BaseModelViewSet):
                         "value": "parent",
                     }
                 )
-        meta = {"display_name": f"Assets Explorer"}
+        meta = {"display_name": "Assets Explorer"}
 
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
@@ -483,6 +561,60 @@ class AssetViewSet(BaseModelViewSet):
     @action(detail=False, name="Get disaster recovery objectives")
     def disaster_recovery_objectives(self, request):
         return Response({"results": Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES})
+
+    @action(detail=False, name="Export assets as CSV")
+    def export_csv(self, request):
+        try:
+            (viewable_assets_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Asset
+            )
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = 'attachment; filename="assets_export.csv"'
+
+            writer = csv.writer(response, delimiter=";")
+            columns = [
+                "internal_id",
+                "name",
+                "description",
+                "type",
+                "security_objectives",
+                "disaster_recovery_objectives",
+                "link",
+                "owners",
+                "parent_assets",
+                "labels",
+            ]
+            writer.writerow(columns)
+
+            for asset in Asset.objects.filter(id__in=viewable_assets_ids).iterator():
+                row = [
+                    asset.id,
+                    asset.name,
+                    asset.description,
+                    asset.type,
+                    ",".join(
+                        [i["str"] for i in asset.get_security_objectives_display()]
+                    ),
+                    ",".join(
+                        [
+                            i["str"]
+                            for i in asset.get_disaster_recovery_objectives_display()
+                        ]
+                    ),
+                    asset.reference_link,
+                    ",".join([o.email for o in asset.owner.all()]),
+                    ",".join([o.name for o in asset.parent_assets.all()]),
+                    ",".join([o.label for o in asset.filtering_labels.all()]),
+                ]
+                writer.writerow(row)
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error exporting assets to CSV: {str(e)}")
+            return HttpResponse(
+                status=500, content="An error occurred while generating the CSV export."
+            )
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
@@ -516,6 +648,56 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False)  # Set a name there
     def colors(self, request):
         return Response({"results": get_risk_color_ordered_list(request.user)})
+
+    @action(detail=False, name="Get risk level choices")
+    def risk(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        undefined = {-1: "--"}
+        options = []
+        for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
+            _choices = {
+                i: name
+                for i, name in enumerate(
+                    x["name"] for x in matrix.json_definition["risk"]
+                )
+            }
+            choices = undefined | _choices
+            options = options | choices.items()
+        return Response(
+            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
+        )
+
+    @action(detail=False, name="Get impact choices")
+    def impact(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        impacts = [
+            m.impact for m in RiskMatrix.objects.filter(id__in=viewable_matrices)
+        ]
+        return Response(chain.from_iterable(impacts))
+
+    @action(detail=False, name="Get probability choices")
+    def probability(self, request):
+        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        undefined = {-1: "--"}
+        options = []
+        for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
+            _choices = {
+                i: name
+                for i, name in enumerate(
+                    x["name"] for x in matrix.json_definition["probability"]
+                )
+            }
+            choices = undefined | _choices
+            options = options | choices.items()
+        return Response(
+            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
+        )
 
     @action(detail=False, name="Get used risk matrices")
     def used(self, request):
@@ -569,6 +751,8 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "severity",
         "risk_scenarios",
         "applied_controls",
+        "security_exceptions",
+        "filtering_labels",
     ]
     search_fields = ["name", "description"]
 
@@ -596,8 +780,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     model = RiskAssessment
     filterset_fields = [
-        "project",
-        "project__folder",
+        "perimeter",
+        "perimeter__folder",
         "authors",
         "risk_matrix",
         "status",
@@ -903,7 +1087,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data["name"],
                 description=data["description"],
-                project=Project.objects.get(id=data["project"]),
+                perimeter=Perimeter.objects.get(id=data["perimeter"]),
                 version=data["version"],
                 risk_matrix=risk_assessment.risk_matrix,
                 eta=risk_assessment.eta,
@@ -962,27 +1146,96 @@ def convert_date_to_timestamp(date):
     return None
 
 
+class AppliedControlFilterSet(df.FilterSet):
+    todo = df.BooleanFilter(method="filter_todo")
+    to_review = df.BooleanFilter(method="filter_to_review")
+    compliance_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_compliance_assessments",
+        queryset=ComplianceAssessment.objects.all(),
+    )
+    risk_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_risk_assessments",
+        queryset=RiskAssessment.objects.all(),
+    )
+
+    def filter_risk_assessments(self, queryset, name, value):
+        if value:
+            risk_assessments = RiskAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(risk_assessments) == 0:
+                return queryset
+            risk_scenarios = chain.from_iterable(
+                [ra.risk_scenarios.all() for ra in risk_assessments]
+            )
+            return queryset.filter(risk_scenarios__in=risk_scenarios).distinct()
+        return queryset
+
+    def filter_compliance_assessments(self, queryset, name, value):
+        if value:
+            compliance_assessments = ComplianceAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(compliance_assessments) == 0:
+                return queryset
+            requirement_assessments = chain.from_iterable(
+                [ca.requirement_assessments.all() for ca in compliance_assessments]
+            )
+            return queryset.filter(
+                requirement_assessments__in=requirement_assessments
+            ).distinct()
+        return queryset
+
+    def filter_todo(self, queryset, name, value):
+        if value:
+            return (
+                queryset.filter(eta__lte=date.today() + timedelta(days=30))
+                .exclude(status="active")
+                .order_by("eta")
+            )
+
+        return queryset
+
+    def filter_to_review(self, queryset, name, value):
+        if value:
+            return queryset.filter(
+                expiry_date__lte=date.today() + timedelta(days=30)
+            ).order_by("expiry_date")
+        return queryset
+
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "folder",
+            "category",
+            "csf_function",
+            "priority",
+            "status",
+            "reference_control",
+            "effort",
+            "cost",
+            "risk_scenarios",
+            "risk_scenarios_e",
+            "requirement_assessments",
+            "evidences",
+            "progress_field",
+            "security_exceptions",
+            "owner",
+            "todo",
+            "to_review",
+            "compliance_assessments",
+            "risk_assessments",
+        ]
+
+
 class AppliedControlViewSet(BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
     """
 
     model = AppliedControl
-    filterset_fields = [
-        "folder",
-        "category",
-        "csf_function",
-        "priority",
-        "status",
-        "reference_control",
-        "effort",
-        "cost",
-        "risk_scenarios",
-        "risk_scenarios_e",
-        "requirement_assessments",
-        "evidences",
-    ]
-    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+    filterset_class = AppliedControlFilterSet
+    search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1008,6 +1261,14 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
         return Response(dict(AppliedControl.EFFORT))
+
+    @action(detail=False, name="Get all applied controls owners")
+    def owner(self, request):
+        return Response(
+            UserReadSerializer(
+                User.objects.filter(applied_controls__isnull=False), many=True
+            ).data
+        )
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
@@ -1038,18 +1299,6 @@ class AppliedControlViewSet(BaseModelViewSet):
             key=lambda mtg: mtg.get_ranking_score(),
             reverse=True,
         )
-
-        """measures = [{
-            key: getattr(mtg,key)
-            for key in [
-                "id","folder","reference_control","type","status","effort", "cost", "name","description","eta","link","created_at","updated_at"
-            ]
-        } for mtg in measures]
-        for i in range(len(measures)) :
-            measures[i]["id"] = str(measures[i]["id"])
-            measures[i]["folder"] = str(measures[i]["folder"].name)
-            for key in ["created_at","updated_at","eta"] :
-                measures[i][key] = str(measures[i][key])"""
 
         ranking_scores = {str(mtg.id): mtg.get_ranking_score() for mtg in measures}
 
@@ -1334,6 +1583,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             link=applied_control.link,
             effort=applied_control.effort,
             cost=applied_control.cost,
+            progress_field=applied_control.progress_field,
         )
         duplicate_applied_control.owner.set(applied_control.owner.all())
         if data["duplicate_evidences"]:
@@ -1480,15 +1730,21 @@ class RiskScenarioViewSet(BaseModelViewSet):
     model = RiskScenario
     filterset_fields = [
         "risk_assessment",
-        "risk_assessment__project",
-        "risk_assessment__project__folder",
+        "risk_assessment__perimeter",
+        "risk_assessment__perimeter__folder",
+        "current_impact",
+        "current_proba",
+        "current_level",
+        "residual_impact",
+        "residual_proba",
+        "residual_level",
         "treatment",
         "threats",
         "assets",
         "applied_controls",
+        "security_exceptions",
     ]
     ordering = ["ref_id"]
-    ordering_fields = ordering
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
@@ -1592,14 +1848,38 @@ class RiskScenarioViewSet(BaseModelViewSet):
             )
 
 
+class RiskAcceptanceFilterSet(df.FilterSet):
+    to_review = df.BooleanFilter(method="filter_to_review")
+
+    def filter_to_review(self, queryset, name, value):
+        if value:
+            return (
+                queryset.filter(expiry_date__lte=date.today() + timedelta(days=30))
+                .filter(state__in=["submitted", "accepted"])
+                .order_by("expiry_date")
+            )
+
+        return queryset
+
+    class Meta:
+        model = RiskAcceptance
+        fields = ["folder", "state", "approver", "risk_scenarios", "to_review"]
+
+
 class RiskAcceptanceViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk acceptance to be viewed or edited.
     """
 
+    permission_overrides = {
+        "accept": "approve_riskacceptance",
+        "reject": "approve_riskacceptance",
+        "revoke": "approve_riskacceptance",
+    }
+
     model = RiskAcceptance
     serializer_class = RiskAcceptanceWriteSerializer
-    filterset_fields = ["folder", "state", "approver", "risk_scenarios"]
+    filterset_class = RiskAcceptanceFilterSet
     search_fields = ["name", "description", "justification"]
 
     def update(self, request, *args, **kwargs):
@@ -1630,22 +1910,62 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
         return Response({"results": acceptances})
 
+    @action(detail=True, methods=["post"], name="Submit risk acceptance")
+    def submit(self, request, pk):
+        if self.get_object().approver:
+            self.get_object().set_state("submitted")
+            return Response({"results": "state updated to submitted"})
+        else:
+            return Response(
+                {"error": "Missing 'approver' field"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+    # This set back risk acceptance to "Created"
+    @action(detail=True, methods=["post"], name="Draft risk acceptance")
+    def draft(self, request, pk):
+        self.get_object().set_state("created")
+        return Response({"results": "state updated back to created"})
+
     @action(detail=True, methods=["post"], name="Accept risk acceptance")
     def accept(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("accepted")
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can accept the risk acceptance",
+                user=request.user,
+                approver=self.get_object().approver,
+            )
+            raise PermissionDenied(
+                {"error": "Only the approver can accept the risk acceptance"}
+            )
+        self.get_object().set_state("accepted")
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
     def reject(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("rejected")
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can reject the risk acceptance",
+                user=request.user,
+                approver=self.get_object().approver,
+            )
+            raise PermissionDenied(
+                {"error": "Only the approver can reject the risk acceptance"}
+            )
+        self.get_object().set_state("rejected")
         return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
     def revoke(self, request, pk):
-        if request.user == self.get_object().approver:
-            self.get_object().set_state("revoked")
+        if request.user != self.get_object().approver:
+            logger.error(
+                "Only the approver can revoke the risk acceptance",
+                user=request.user,
+                approver=self.get_object().approver,
+            )
+            raise PermissionDenied(
+                {"error": "Only the approver can revoke the risk acceptance"}
+            )
+        self.get_object().set_state("revoked")
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
@@ -1655,27 +1975,31 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         ).count()
         return Response({"count": acceptance_count})
 
-    def perform_create(self, serializer):
+    def perform_update(self, serializer):
         risk_acceptance = serializer.validated_data
-        submitted = False
+
         if risk_acceptance.get("approver"):
-            submitted = True
-        for scenario in risk_acceptance.get("risk_scenarios"):
-            if not RoleAssignment.is_access_allowed(
-                risk_acceptance.get("approver"),
-                Permission.objects.get(codename="approve_riskacceptance"),
-                scenario.risk_assessment.project.folder,
-            ):
-                raise ValidationError(
-                    "The approver is not allowed to approve this risk acceptance"
-                )
+            for scenario in risk_acceptance.get("risk_scenarios"):
+                if not RoleAssignment.is_access_allowed(
+                    risk_acceptance.get("approver"),
+                    Permission.objects.get(codename="approve_riskacceptance"),
+                    scenario.risk_assessment.perimeter.folder,
+                ):
+                    raise ValidationError(
+                        "The approver is not allowed to approve this risk acceptance"
+                    )
         risk_acceptance = serializer.save()
-        if submitted:
-            risk_acceptance.set_state("submitted")
+
+    @action(detail=False, name="Get state choices")
+    def state(self, request):
+        return Response(dict(RiskAcceptance.ACCEPTANCE_STATE))
 
 
 class UserFilter(df.FilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
+    is_applied_control_owner = df.BooleanFilter(
+        method="filter_applied_control_owner", label="Applied control owner"
+    )
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -1686,6 +2010,9 @@ class UserFilter(df.FilterSet):
         if value:
             return queryset.filter(id__in=approvers_id)
         return queryset.exclude(id__in=approvers_id)
+
+    def filter_applied_control_owner(self, queryset, name, value):
+        return queryset.filter(applied_controls__isnull=not value)
 
     class Meta:
         model = User
@@ -1706,7 +2033,6 @@ class UserViewSet(BaseModelViewSet):
 
     model = User
     ordering = ["-is_active", "-is_superuser", "email", "id"]
-    ordering_fields = ordering
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
 
@@ -1749,7 +2075,6 @@ class UserGroupViewSet(BaseModelViewSet):
 
     model = UserGroup
     ordering = ["builtin", "name"]
-    ordering_fields = ordering
     filterset_fields = ["folder"]
 
 
@@ -1760,7 +2085,6 @@ class RoleViewSet(BaseModelViewSet):
 
     model = Role
     ordering = ["builtin", "name"]
-    ordering_fields = ordering
 
 
 class RoleAssignmentViewSet(BaseModelViewSet):
@@ -1770,7 +2094,6 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
     model = RoleAssignment
     ordering = ["builtin", "folder"]
-    ordering_fields = ordering
     filterset_fields = ["folder"]
 
 
@@ -1801,7 +2124,8 @@ class FolderViewSet(BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
-    search_fields = ["ref_id"]
+    search_fields = ["name"]
+    batch_size = 100  # Configurable batch size for processing domain import
 
     def perform_create(self, serializer):
         """
@@ -1865,7 +2189,7 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
-        Returns the tree of domains and projects
+        Returns the tree of domains and perimeters
         """
         tree = {"name": "Global", "children": []}
 
@@ -1963,6 +2287,893 @@ class FolderViewSet(BaseModelViewSet):
                 },
             }
         )
+
+    @action(detail=True, methods=["get"])
+    def export(self, request, pk):
+        include_attachments = True
+        instance = self.get_object()
+
+        logger.info(
+            "Starting domain export",
+            domain_id=instance.id,
+            domain_name=instance.name,
+            include_attachments=include_attachments,
+            user=request.user.username,
+        )
+
+        objects = get_domain_export_objects(instance)
+
+        for model in objects.keys():
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=f"view_{model}"),
+                folder=instance,
+            ):
+                logger.error(
+                    "User does not have permission to export object",
+                    user=request.user,
+                    model=model,
+                )
+                raise PermissionDenied(
+                    {"error": "userDoesNotHavePermissionToExportDomain"}
+                )
+
+        logger.debug(
+            "Retrieved domain objects for export",
+            object_types=list(objects.keys()),
+            total_objects=sum(len(queryset) for queryset in objects.values()),
+            objects_per_model={
+                model: len(queryset) for model, queryset in objects.items()
+            },
+        )
+
+        # Create in-memory zip file
+        zip_buffer = io.BytesIO()
+
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+            if include_attachments:
+                evidences = objects.get("evidence", Evidence.objects.none()).filter(
+                    attachment__isnull=False
+                )
+                logger.info(
+                    "Processing evidence attachments",
+                    total_evidences=evidences.count(),
+                    domain_id=instance.id,
+                )
+
+                for evidence in evidences:
+                    if evidence.attachment and default_storage.exists(
+                        evidence.attachment.name
+                    ):
+                        # Read file directly into memory
+                        with default_storage.open(evidence.attachment.name) as file:
+                            file_content = file.read()
+                            # Write the file content directly to the zip
+                            zipf.writestr(
+                                os.path.join(
+                                    "attachments",
+                                    os.path.basename(evidence.attachment.name),
+                                ),
+                                file_content,
+                            )
+
+            # Add the JSON dump to the zip file
+            dumpfile_name = (
+                f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
+            )
+            dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
+
+            logger.debug(
+                "Adding JSON dump to zip",
+                json_size=len(json.dumps(dump_data).encode("utf-8")),
+                filename=f"{dumpfile_name}.json",
+            )
+
+            zipf.writestr("data.json", json.dumps(dump_data).encode("utf-8"))
+
+        # Reset buffer position to the start
+        zip_buffer.seek(0)
+        final_size = len(zip_buffer.getvalue())
+
+        # Create the response with the in-memory zip file
+        response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="{dumpfile_name}.zip"'
+
+        logger.info(
+            "Domain export completed successfully",
+            domain_id=instance.id,
+            domain_name=instance.name,
+            zip_size=final_size,
+            filename=f"{dumpfile_name}.zip",
+        )
+
+        return response
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import",
+        parser_classes=(FileUploadParser,),
+    )
+    def import_domain(self, request):
+        """Handle file upload and initiate import process."""
+        load_missing_libraries = (
+            request.query_params.get("load_missing_libraries", "false").lower()
+            == "true"
+        )
+        try:
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="add_folder"),
+                folder=Folder.get_root_folder(),
+            ):
+                raise PermissionDenied()
+            domain_name = request.headers.get(
+                "X-CISOAssistantDomainName", str(uuid.uuid4())
+            )
+            parsed_data = self._process_uploaded_file(request.data["file"])
+            result = self._import_objects(
+                parsed_data, domain_name, load_missing_libraries, user=request.user
+            )
+            return Response(result, status=status.HTTP_200_OK)
+
+        except PermissionDenied:
+            logger.error(
+                "User does not have permission to import domain",
+                user=request.user,
+                exc_info=True,
+            )
+            return Response(
+                {"error": "userDoesNotHavePermissionToImportDomain"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        except KeyError:
+            logger.error("No file provided in the request", exc_info=True)
+            return Response(
+                {"errors": ["No file provided"]}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in uploaded file", exc_info=True)
+            return Response(
+                {"errors": ["Invalid JSON format"]}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import-dummy",
+    )
+    def import_dummy_domain(self, request):
+        timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+        domain_name = f"DEMO {timestamp}"
+
+        try:
+            dummy_fixture_path = (
+                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
+            )
+            if not dummy_fixture_path.exists():
+                logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
+                return Response(
+                    {"error": "dummyDomainFixtureNotFound"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            parsed_data = self._process_uploaded_file(dummy_fixture_path)
+            result = self._import_objects(
+                parsed_data, domain_name, load_missing_libraries=True, user=request.user
+            )
+            logger.info("Dummy domain imported successfully", domain_name=domain_name)
+            return Response(result, status=status.HTTP_200_OK)
+
+        except json.JSONDecodeError:
+            logger.error("Invalid JSON format in dummy fixture file", exc_info=True)
+            return Response(
+                {"errors": ["Invalid JSON format"]},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except Exception:
+            logger.error("Error importing dummy domain", exc_info=True)
+            return Response(
+                {"error": "failedToImportDummyDomain"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def _process_uploaded_file(self, dump_file: str | Path) -> Any:
+        """Process the uploaded file and return parsed data."""
+        if not zipfile.is_zipfile(dump_file):
+            logger.error("Invalid ZIP file format")
+            raise ValidationError({"file": "invalidZipFileFormat"})
+
+        with zipfile.ZipFile(dump_file, mode="r") as zipf:
+            if "data.json" not in zipf.namelist():
+                logger.error(
+                    "No data.json file found in uploaded file", files=zipf.namelist()
+                )
+                raise ValidationError({"file": "noDataJsonFileFound"})
+            infolist = zipf.infolist()
+            directories = list(set([Path(f.filename).parent.name for f in infolist]))
+            decompressed_data = zipf.read("data.json")
+            # Decode bytes to string if necessary
+            if isinstance(decompressed_data, bytes):
+                decompressed_data = decompressed_data.decode("utf-8")
+            try:
+                json_dump = json.loads(decompressed_data)
+                import_version = json_dump["meta"]["media_version"]
+                schema_version = json_dump["meta"].get("schema_version")
+            except json.JSONDecodeError:
+                logger.error("Invalid JSON format in uploaded file", exc_info=True)
+                raise
+            if "objects" not in json_dump:
+                raise ValidationError("badly formatted json")
+
+            # Check backup and local version
+
+            try:
+                schema_version_int = int(schema_version)
+            except (ValueError, TypeError) as e:
+                logger.error(
+                    "Invalid schema version format",
+                    schema_version=schema_version,
+                    exc_info=e,
+                )
+                raise ValidationError({"error": "invalidSchemaVersionFormat"})
+            compare_schema_versions(schema_version_int, import_version)
+
+            if "attachments" in directories:
+                attachments = {
+                    f for f in infolist if Path(f.filename).parent.name == "attachments"
+                }
+                logger.info(
+                    "Attachments found in uploaded file",
+                    attachments_count=len(attachments),
+                )
+                for attachment in attachments:
+                    try:
+                        content = zipf.read(attachment)
+                        current_name = Path(attachment.filename).name
+                        new_name = default_storage.save(
+                            current_name, io.BytesIO(content)
+                        )
+                        if new_name != current_name:
+                            for x in json_dump["objects"]:
+                                if (
+                                    x["model"] == "core.evidence"
+                                    and x["fields"]["attachment"] == current_name
+                                ):
+                                    x["fields"]["attachment"] = new_name
+
+                    except Exception:
+                        logger.error("Error extracting attachment", exc_info=True)
+
+        return json_dump
+
+    def _get_models_map(self, objects):
+        """Build a map of model names to model classes."""
+        model_names = {obj["model"] for obj in objects}
+        return {name: apps.get_model(name) for name in model_names}
+
+    def _resolve_dependencies(self, all_models):
+        """Resolve model dependencies and detect cycles."""
+        logger.debug("Resolving model dependencies", all_models=all_models)
+
+        graph = build_dependency_graph(all_models)
+
+        logger.debug("Dependency graph", graph=graph)
+
+        try:
+            return topological_sort(graph)
+        except ValueError as e:
+            logger.error("Cyclic dependency detected", error=str(e))
+            raise ValidationError({"error": "Cyclic dependency detected"})
+
+    def _import_objects(
+        self, parsed_data: dict, domain_name: str, load_missing_libraries: bool, user
+    ):
+        """
+        Import and validate objects using appropriate serializers.
+        Handles both validation and creation in separate phases within a transaction.
+        """
+        validation_errors = []
+        required_libraries = []
+        missing_libraries = []
+        link_dump_database_ids = {}
+
+        # First check if objects exist
+        objects = parsed_data.get("objects")
+        if not objects:
+            logger.error("No objects found in the dump")
+            raise ValidationError({"error": "No objects found in the dump"})
+
+        try:
+            # Validate models and check for domain
+            models_map = self._get_models_map(objects)
+            if Folder in models_map.values():
+                logger.error("Dump contains a domain")
+                raise ValidationError({"error": "Dump contains a domain"})
+
+            # check that user has permission to create all objects to import
+            error_dict = {}
+            for model in filter(
+                lambda x: x not in [RequirementAssessment], models_map.values()
+            ):
+                if not RoleAssignment.is_access_allowed(
+                    user=user,
+                    perm=Permission.objects.get(
+                        codename=f"add_{model._meta.model_name}"
+                    ),
+                    folder=Folder.get_root_folder(),
+                ):
+                    error_dict[model._meta.model_name] = "permission_denied"
+            if error_dict:
+                logger.error(
+                    "User does not have permission to import objects",
+                    error_dict=error_dict,
+                )
+                raise PermissionDenied()
+
+            # Validation phase (outside transaction since it doesn't modify database)
+            creation_order = self._resolve_dependencies(list(models_map.values()))
+
+            logger.debug("Resolved creation order", creation_order=creation_order)
+            logger.debug("Starting objects validation", objects_count=len(objects))
+
+            # Validate all objects first
+            for model in creation_order:
+                self._validate_model_objects(
+                    model=model,
+                    objects=objects,
+                    validation_errors=validation_errors,
+                    required_libraries=required_libraries,
+                )
+
+            logger.debug("required_libraries", required_libraries=required_libraries)
+
+            # If validation errors exist, raise them immediately
+            if validation_errors:
+                logger.error(
+                    "Failed to validate objects", validation_errors=validation_errors
+                )
+                raise ValidationError({"validation_errors": validation_errors})
+
+            # Creation phase - wrap in transaction
+            with transaction.atomic():
+                # Create base folder and store its ID
+                base_folder = Folder.objects.create(
+                    name=domain_name, content_type=Folder.ContentType.DOMAIN
+                )
+                link_dump_database_ids["base_folder"] = base_folder
+
+                # Check for missing libraries after folder creation
+                for library in required_libraries:
+                    if not LoadedLibrary.objects.filter(
+                        urn=library["urn"], version=library["version"]
+                    ).exists():
+                        if (
+                            StoredLibrary.objects.filter(
+                                urn=library["urn"], version__gte=library["version"]
+                            ).exists()
+                            and load_missing_libraries
+                        ):
+                            StoredLibrary.objects.get(
+                                urn=library["urn"], version__gte=library["version"]
+                            ).load()
+                        else:
+                            missing_libraries.append(library)
+
+                logger.debug("missing_libraries", missing_libraries=missing_libraries)
+
+                # If missing libraries exist, raise specific error
+                if missing_libraries:
+                    logger.warning(f"Missing libraries: {missing_libraries}")
+                    raise ValidationError({"missing_libraries": missing_libraries})
+
+                logger.info(
+                    "Starting objects creation",
+                    objects_count=len(objects),
+                    creation_order=creation_order,
+                )
+
+                # Create all objects within the transaction
+                for model in creation_order:
+                    self._create_model_objects(
+                        model=model,
+                        objects=objects,
+                        link_dump_database_ids=link_dump_database_ids,
+                    )
+
+            return {"message": "Import successful"}
+
+        except ValidationError as e:
+            logger.error(f"error: {e}")
+            raise
+        except Exception as e:
+            # Handle unexpected errors with a generic message
+            logger.exception(f"Failed to import objects: {str(e)}")
+            raise ValidationError({"non_field_errors": "errorOccuredDuringImport"})
+
+    def _validate_model_objects(
+        self, model, objects, validation_errors, required_libraries
+    ):
+        """Validate all objects for a model before creation."""
+        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+        model_objects = [obj for obj in objects if obj["model"] == model_name]
+
+        if not model_objects:
+            return
+
+        # Process validation in batches
+        for i in range(0, len(model_objects), self.batch_size):
+            batch = model_objects[i : i + self.batch_size]
+            self._validate_batch(
+                model=model,
+                batch=batch,
+                validation_errors=validation_errors,
+                required_libraries=required_libraries,
+            )
+
+    def _validate_batch(self, model, batch, validation_errors, required_libraries):
+        """Validate a batch of objects."""
+        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+
+        for obj in batch:
+            obj_id = obj.get("id")
+            fields = obj.get("fields", {}).copy()
+
+            try:
+                # Handle library objects
+                if model == LoadedLibrary:
+                    required_libraries.append(
+                        {"urn": fields["urn"], "version": fields["version"]}
+                    )
+                    logger.info(
+                        "Adding library to required libraries", urn=fields["urn"]
+                    )
+                    continue
+                if fields.get("library"):
+                    continue
+
+                # Validate using serializer
+                serializer_class = import_export_serializer_class(model)
+                serializer = serializer_class(data=fields)
+
+                if not serializer.is_valid():
+                    validation_errors.append(
+                        {
+                            "model": model_name,
+                            "id": obj_id,
+                            "errors": serializer.errors,
+                        }
+                    )
+
+            except Exception as e:
+                logger.error(
+                    f"Error validating object {obj_id} in {model_name}: {str(e)}",
+                    exc_info=True,
+                )
+                validation_errors.append(
+                    {
+                        "model": model_name,
+                        "id": obj_id,
+                        "errors": [str(e)],
+                    }
+                )
+
+    def _create_model_objects(self, model, objects, link_dump_database_ids):
+        """Create all objects for a model after validation."""
+        logger.debug("Creating objects for model", model=model)
+
+        model_name = f"{model._meta.app_label}.{model._meta.model_name}"
+        model_objects = [obj for obj in objects if obj["model"] == model_name]
+
+        logger.debug("Model objects", model=model, count=len(model_objects))
+
+        if not model_objects:
+            return
+
+        # Handle self-referencing dependencies
+        self_ref_field = get_self_referencing_field(model)
+        if self_ref_field:
+            try:
+                model_objects = sort_objects_by_self_reference(
+                    model_objects, self_ref_field
+                )
+            except ValueError as e:
+                logger.error(f"Cyclic dependency detected in {model_name}: {str(e)}")
+                raise ValidationError(
+                    {"error": f"Cyclic dependency detected in {model_name}"}
+                )
+
+        # Process creation in batches
+        for i in range(0, len(model_objects), self.batch_size):
+            batch = model_objects[i : i + self.batch_size]
+            self._create_batch(
+                model=model,
+                batch=batch,
+                link_dump_database_ids=link_dump_database_ids,
+            )
+
+    def _create_batch(self, model, batch, link_dump_database_ids):
+        """Create a batch of objects with proper relationship handling."""
+        # Create all objects in the batch within a single transaction
+        with transaction.atomic():
+            for obj in batch:
+                obj_id = obj.get("id")
+                fields = obj.get("fields", {}).copy()
+
+                try:
+                    # Handle library objects
+                    if fields.get("library") or model == LoadedLibrary:
+                        logger.info(f"Skipping creation of library object {obj_id}")
+                        link_dump_database_ids[obj_id] = fields.get("urn")
+                        continue
+
+                    # Handle folder reference
+                    if fields.get("folder"):
+                        fields["folder"] = link_dump_database_ids.get("base_folder")
+
+                    # Process model-specific relationships
+                    many_to_many_map_ids = {}
+                    fields = self._process_model_relationships(
+                        model=model,
+                        fields=fields,
+                        link_dump_database_ids=link_dump_database_ids,
+                        many_to_many_map_ids=many_to_many_map_ids,
+                    )
+
+                    try:
+                        # Run clean to validate unique constraints
+                        model(**fields).clean()
+                    except ValidationError as e:
+                        for field, error in e.error_dict.items():
+                            fields[field] = f"{fields[field]} {uuid.uuid4()}"
+
+                    logger.debug("Creating object", fields=fields)
+
+                    # Create the object
+                    obj_created = model.objects.create(**fields)
+                    link_dump_database_ids[obj_id] = obj_created.id
+
+                    # Handle many-to-many relationships
+                    self._set_many_to_many_relations(
+                        model=model,
+                        obj=obj_created,
+                        many_to_many_map_ids=many_to_many_map_ids,
+                    )
+
+                except Exception as e:
+                    logger.error("Error creating object", obj=obj, exc_info=True)
+                    # This will trigger a rollback of the entire batch
+                    raise ValidationError(
+                        f"Error creating {model._meta.model_name}: {str(e)}"
+                    )
+
+    def _process_model_relationships(
+        self,
+        model,
+        fields,
+        link_dump_database_ids,
+        many_to_many_map_ids,
+    ):
+        """Process model-specific relationships."""
+
+        def get_mapped_ids(
+            ids: List[str], link_dump_database_ids: Dict[str, str]
+        ) -> List[str]:
+            return [
+                link_dump_database_ids[id] for id in ids if id in link_dump_database_ids
+            ]
+
+        model_name = model._meta.model_name
+        _fields = fields.copy()
+
+        logger.debug(
+            "Processing model relationships", model=model_name, _fields=_fields
+        )
+
+        match model_name:
+            case "asset":
+                many_to_many_map_ids["parent_ids"] = get_mapped_ids(
+                    _fields.pop("parent_assets", []), link_dump_database_ids
+                )
+
+            case "riskassessment":
+                _fields["perimeter"] = Perimeter.objects.get(
+                    id=link_dump_database_ids.get(_fields["perimeter"])
+                )
+                _fields["risk_matrix"] = RiskMatrix.objects.get(
+                    urn=_fields.get("risk_matrix")
+                )
+                _fields["ebios_rm_study"] = (
+                    EbiosRMStudy.objects.get(
+                        id=link_dump_database_ids.get(_fields["ebios_rm_study"])
+                    )
+                    if _fields.get("ebios_rm_study")
+                    else None
+                )
+
+            case "complianceassessment":
+                _fields["perimeter"] = Perimeter.objects.get(
+                    id=link_dump_database_ids.get(_fields["perimeter"])
+                )
+                _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
+
+            case "appliedcontrol":
+                many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
+                    _fields.pop("evidences", []), link_dump_database_ids
+                )
+                ref_control_id = link_dump_database_ids.get(
+                    _fields["reference_control"]
+                )
+                _fields["reference_control"] = ReferenceControl.objects.filter(
+                    urn=ref_control_id
+                ).first()
+
+            case "evidence":
+                _fields.pop("size", None)
+                _fields.pop("attachment_hash", None)
+
+            case "requirementassessment":
+                logger.debug("Looking for requirement", urn=_fields.get("requirement"))
+                _fields["requirement"] = RequirementNode.objects.get(
+                    urn=_fields.get("requirement")
+                )
+                _fields["compliance_assessment"] = ComplianceAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["compliance_assessment"])
+                )
+                many_to_many_map_ids.update(
+                    {
+                        "applied_controls": get_mapped_ids(
+                            _fields.pop("applied_controls", []), link_dump_database_ids
+                        ),
+                        "evidence_ids": get_mapped_ids(
+                            _fields.pop("evidences", []), link_dump_database_ids
+                        ),
+                    }
+                )
+
+            case "vulnerability":
+                many_to_many_map_ids["applied_controls"] = get_mapped_ids(
+                    _fields.pop("applied_controls", []), link_dump_database_ids
+                )
+
+            case "riskscenario":
+                _fields["risk_assessment"] = RiskAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["risk_assessment"])
+                )
+                # Process all related _fields at once
+                related__fields = [
+                    "threats",
+                    "vulnerabilities",
+                    "assets",
+                    "applied_controls",
+                    "existing_applied_controls",
+                ]
+                for field in related__fields:
+                    map_key = (
+                        f"{field.rstrip('s')}_ids"
+                        if not field.endswith("controls")
+                        else f"{field}_ids"
+                    )
+                    many_to_many_map_ids[map_key] = get_mapped_ids(
+                        _fields.pop(field, []), link_dump_database_ids
+                    )
+
+            case "entity":
+                _fields.pop("owned_folders", None)
+
+            case "ebiosrmstudy":
+                _fields.update(
+                    {
+                        "risk_matrix": RiskMatrix.objects.get(
+                            urn=_fields.get("risk_matrix")
+                        ),
+                        "reference_entity": Entity.objects.get(
+                            id=link_dump_database_ids.get(_fields["reference_entity"])
+                        ),
+                    }
+                )
+                many_to_many_map_ids.update(
+                    {
+                        "asset_ids": get_mapped_ids(
+                            _fields.pop("assets", []), link_dump_database_ids
+                        ),
+                        "compliance_assessment_ids": get_mapped_ids(
+                            _fields.pop("compliance_assessments", []),
+                            link_dump_database_ids,
+                        ),
+                    }
+                )
+
+            case "fearedevent":
+                _fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(_fields["ebios_rm_study"])
+                )
+                many_to_many_map_ids.update(
+                    {
+                        "qualifications_urn": get_mapped_ids(
+                            _fields.pop("qualifications", []), link_dump_database_ids
+                        ),
+                        "asset_ids": get_mapped_ids(
+                            _fields.pop("assets", []), link_dump_database_ids
+                        ),
+                    }
+                )
+
+            case "roto":
+                _fields["ebios_rm_study"] = EbiosRMStudy.objects.get(
+                    id=link_dump_database_ids.get(_fields["ebios_rm_study"])
+                )
+                many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
+                    _fields.pop("feared_events", []), link_dump_database_ids
+                )
+
+            case "stakeholder":
+                _fields.update(
+                    {
+                        "ebios_rm_study": EbiosRMStudy.objects.get(
+                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
+                        ),
+                        "entity": Entity.objects.get(
+                            id=link_dump_database_ids.get(_fields["entity"])
+                        ),
+                    }
+                )
+                many_to_many_map_ids["applied_controls"] = get_mapped_ids(
+                    _fields.pop("applied_controls", []), link_dump_database_ids
+                )
+
+            case "strategicscenario":
+                _fields.update(
+                    {
+                        "ebios_rm_study": EbiosRMStudy.objects.get(
+                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
+                        ),
+                        "ro_to_couple": RoTo.objects.get(
+                            id=link_dump_database_ids.get(_fields["ro_to_couple"])
+                        ),
+                    }
+                )
+
+            case "attackpath":
+                _fields.update(
+                    {
+                        "ebios_rm_study": EbiosRMStudy.objects.get(
+                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
+                        ),
+                        "strategic_scenario": StrategicScenario.objects.get(
+                            id=link_dump_database_ids.get(_fields["strategic_scenario"])
+                        ),
+                    }
+                )
+                many_to_many_map_ids["stakeholder_ids"] = get_mapped_ids(
+                    _fields.pop("stakeholders", []), link_dump_database_ids
+                )
+
+            case "operationalscenario":
+                _fields.update(
+                    {
+                        "ebios_rm_study": EbiosRMStudy.objects.get(
+                            id=link_dump_database_ids.get(_fields["ebios_rm_study"])
+                        ),
+                        "attack_path": AttackPath.objects.get(
+                            id=link_dump_database_ids.get(_fields["attack_path"])
+                        ),
+                    }
+                )
+                many_to_many_map_ids["threat_ids"] = get_mapped_ids(
+                    _fields.pop("threats", []), link_dump_database_ids
+                )
+
+        return _fields
+
+    def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
+        """Set many-to-many relationships after object creation."""
+        model_name = model._meta.model_name
+
+        match model_name:
+            case "asset":
+                if parent_ids := many_to_many_map_ids.get("parent_ids"):
+                    logger.debug(
+                        "Setting parent assets", asset=obj, parent_ids=parent_ids
+                    )
+                    obj.parent_assets.set(Asset.objects.filter(id__in=parent_ids))
+
+            case "appliedcontrol":
+                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
+            case "requirementassessment":
+                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                    obj.applied_controls.set(
+                        AppliedControl.objects.filter(id__in=applied_control_ids)
+                    )
+                if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                    obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+
+            case "vulnerability":
+                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                    obj.applied_controls.set(
+                        AppliedControl.objects.filter(id__in=applied_control_ids)
+                    )
+
+            case "riskscenario":
+                if threat_ids := many_to_many_map_ids.get("threat_ids"):
+                    uuids, urns = self._split_uuids_urns(threat_ids)
+                    obj.threats.set(
+                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                    )
+
+                for field, model_class in {
+                    "vulnerability_ids": (Vulnerability, "vulnerabilities"),
+                    "asset_ids": (Asset, "assets"),
+                    "applied_control_ids": (AppliedControl, "applied_controls"),
+                    "existing_applied_control_ids": (
+                        AppliedControl,
+                        "existing_applied_controls",
+                    ),
+                }.items():
+                    if ids := many_to_many_map_ids.get(field):
+                        getattr(obj, model_class[1]).set(
+                            model_class[0].objects.filter(id__in=ids)
+                        )
+
+            case "ebiosrmstudy":
+                if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+                if compliance_assessment_ids := many_to_many_map_ids.get(
+                    "compliance_assessment_ids"
+                ):
+                    obj.compliance_assessments.set(
+                        ComplianceAssessment.objects.filter(
+                            id__in=compliance_assessment_ids
+                        )
+                    )
+
+            case "fearedevent":
+                if qualifications_urn := many_to_many_map_ids.get("qualifications_urn"):
+                    obj.qualifications.set(
+                        Qualification.objects.filter(urn__in=qualifications_urn)
+                    )
+                if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                    obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+
+            case "roto":
+                if feared_event_ids := many_to_many_map_ids.get("feared_event_ids"):
+                    obj.feared_events.set(
+                        FearedEvent.objects.filter(id__in=feared_event_ids)
+                    )
+
+            case "stakeholder":
+                if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
+                    obj.applied_controls.set(
+                        AppliedControl.objects.filter(id__in=applied_control_ids)
+                    )
+
+            case "attackpath":
+                if stakeholder_ids := many_to_many_map_ids.get("stakeholder_ids"):
+                    obj.stakeholders.set(
+                        Stakeholder.objects.filter(id__in=stakeholder_ids)
+                    )
+
+            case "operationalscenario":
+                if threat_ids := many_to_many_map_ids.get("threat_ids"):
+                    uuids, urns = self._split_uuids_urns(threat_ids)
+                    obj.threats.set(
+                        Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                    )
+
+    def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
+        """Split a list of strings into UUIDs and URNs."""
+        uuids = []
+        urns = []
+        for item in ids:
+            try:
+                uuid = UUID(str(item))
+                uuids.append(uuid)
+            except ValueError:
+                urns.append(item)
+        return uuids, urns
 
 
 class UserPreferencesView(APIView):
@@ -2087,15 +3298,38 @@ def get_composer_data(request):
 # Compliance Assessment
 
 
+class FrameworkFilter(df.FilterSet):
+    baseline = df.ModelChoiceFilter(
+        queryset=ComplianceAssessment.objects.all(),
+        method="filter_framework",
+        label="Baseline",
+    )
+
+    def filter_framework(self, queryset, name, value):
+        if not value:
+            return queryset
+        source_framework = value.framework
+        target_framework_ids = list(
+            RequirementMappingSet.objects.filter(
+                source_framework=source_framework
+            ).values_list("target_framework__id", flat=True)
+        )
+        target_framework_ids.append(source_framework.id)
+        return queryset.filter(id__in=target_framework_ids)
+
+    class Meta:
+        model = Framework
+        fields = ["folder", "baseline"]
+
+
 class FrameworkViewSet(BaseModelViewSet):
     """
     API endpoint that allows frameworks to be viewed or edited.
     """
 
     model = Framework
-    filterset_fields = ["folder"]
+    filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
-    ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @method_decorator(vary_on_cookie)
@@ -2110,12 +3344,6 @@ class FrameworkViewSet(BaseModelViewSet):
                 for framework in queryset
             }
         )
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
@@ -2198,7 +3426,6 @@ class EvidenceViewSet(BaseModelViewSet):
     model = Evidence
     filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
     search_fields = ["name"]
-    ordering_fields = ["name", "description"]
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
@@ -2212,7 +3439,9 @@ class EvidenceViewSet(BaseModelViewSet):
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
-            if not evidence.attachment:
+            if not evidence.attachment or not evidence.attachment.storage.exists(
+                evidence.attachment.name
+            ):
                 return Response(status=status.HTTP_404_NOT_FOUND)
             if request.method == "GET":
                 content_type = mimetypes.guess_type(evidence.filename())[0]
@@ -2277,9 +3506,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "project", "status", "ebios_rm_studies"]
+    filterset_fields = ["framework", "perimeter", "status", "ebios_rm_studies"]
     search_fields = ["name", "description", "ref_id"]
-    ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -2369,12 +3597,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def word_report(self, request, pk):
+        """
+        Word report generation (Exec)
+        """
+        lang = "en"
+        if request.user.preferences.get("lang") is not None:
+            lang = request.user.preferences.get("lang")
+            if lang not in ["fr", "en"]:
+                lang = "en"
         template_path = (
             Path(settings.BASE_DIR)
             / "core"
             / "templates"
             / "core"
-            / "audit_report_template.docx"
+            / f"audit_report_template_{lang}.docx"
         )
         doc = DocxTemplate(template_path)
         _framework = self.get_object().framework
@@ -2387,7 +3623,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         implementation_groups = self.get_object().selected_implementation_groups
         filter_graph_by_implementation_groups(tree, implementation_groups)
-        context = gen_audit_context(pk, doc, tree)
+        context = gen_audit_context(pk, doc, tree, lang)
         doc.render(context)
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
@@ -2487,41 +3723,104 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
+        with optimized database operations for different scenarios.
         """
         baseline = serializer.validated_data.pop("baseline", None)
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
-        instance: ComplianceAssessment = serializer.save()
-        instance.create_requirement_assessments(baseline)
-        if baseline and baseline.framework != instance.framework:
-            mapping_set = RequirementMappingSet.objects.get(
-                target_framework=serializer.validated_data["framework"],
-                source_framework=baseline.framework,
-            )
-            for (
-                requirement_assessment
-            ) in instance.compute_requirement_assessments_results(
-                mapping_set, baseline
-            ):
-                baseline_requirement_assessment = RequirementAssessment.objects.get(
-                    id=requirement_assessment.mapping_inference[
+
+        with transaction.atomic():
+            instance: ComplianceAssessment = serializer.save()
+            instance.create_requirement_assessments(baseline)
+
+            if baseline and baseline.framework == instance.framework:
+                instance.show_documentation_score = baseline.show_documentation_score
+                instance.save()
+
+            # Handle different framework case
+            elif baseline and baseline.framework != instance.framework:
+                # Fetch mapping set and prefetch related data
+                mapping_set = RequirementMappingSet.objects.select_related(
+                    "source_framework", "target_framework"
+                ).get(
+                    target_framework=serializer.validated_data["framework"],
+                    source_framework=baseline.framework,
+                )
+
+                # Compute results and get all affected requirement assessments
+                computed_assessments = instance.compute_requirement_assessments_results(
+                    mapping_set, baseline
+                )
+
+                # Collect all source requirement assessment IDs
+                source_assessment_ids = [
+                    assessment.mapping_inference["source_requirement_assessment"]["id"]
+                    for assessment in computed_assessments
+                ]
+
+                # Fetch all baseline requirement assessments in one query
+                baseline_assessments = {
+                    str(ra.id): ra
+                    for ra in RequirementAssessment.objects.filter(
+                        id__in=source_assessment_ids
+                    ).prefetch_related("evidences", "applied_controls")
+                }
+
+                # Prepare bulk updates
+                updates = []
+                m2m_operations = []
+
+                for requirement_assessment in computed_assessments:
+                    source_id = requirement_assessment.mapping_inference[
                         "source_requirement_assessment"
                     ]["id"]
+                    baseline_ra = baseline_assessments[source_id]
+
+                    # Update observation
+                    requirement_assessment.observation = baseline_ra.observation
+                    updates.append(requirement_assessment)
+
+                    # Store M2M operations for later
+                    m2m_operations.append(
+                        (
+                            requirement_assessment,
+                            baseline_ra.evidences.all(),
+                            baseline_ra.applied_controls.all(),
+                        )
+                    )
+
+                # Bulk update observations
+                if updates:
+                    RequirementAssessment.objects.bulk_update(updates, ["observation"])
+
+                # Handle M2M relationships in bulk
+                for assessment, evidences, controls in m2m_operations:
+                    assessment.evidences.add(*[ev.id for ev in evidences])
+                    assessment.applied_controls.add(*[ac.id for ac in controls])
+
+            # Handle applied controls creation
+            if create_applied_controls:
+                # Prefetch all requirement assessments with their suggestions
+                assessments = instance.requirement_assessments.all().prefetch_related(
+                    "requirement__reference_controls"
                 )
-                requirement_assessment.evidences.add(
-                    *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
-                )
-                requirement_assessment.applied_controls.add(
-                    *[
-                        ac.id
-                        for ac in baseline_requirement_assessment.applied_controls.all()
-                    ]
-                )
-                requirement_assessment.save()
-        if create_applied_controls:
-            for requirement_assessment in instance.requirement_assessments.all():
-                requirement_assessment.create_applied_controls_from_suggestions()
+
+                # Create applied controls in bulk for each assessment
+                for requirement_assessment in assessments:
+                    requirement_assessment.create_applied_controls_from_suggestions()
+
+    def perform_update(self, serializer):
+        compliance_assessment = serializer.save()
+        if compliance_assessment.show_documentation_score:
+            ra_null_documentation_score = RequirementAssessment.objects.filter(
+                compliance_assessment=compliance_assessment,
+                is_scored=True,
+                documentation_score__isnull=True,
+            )
+            ra_null_documentation_score.update(
+                documentation_score=compliance_assessment.min_score
+            )
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
@@ -2561,6 +3860,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "scores_definition": get_referential_translation(
                     compliance_assessment.framework, "scores_definition", get_language()
                 ),
+                "show_documentation_score": compliance_assessment.show_documentation_score,
             }
         )
 
@@ -2627,19 +3927,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             with zipfile.ZipFile(zip_name, "w") as zipf:
                 for evidence in evidences:
                     if evidence.attachment:
-                        with tempfile.NamedTemporaryFile(delete=True) as tmp:
-                            # Download the attachment to the temporary file
-                            if default_storage.exists(evidence.attachment.name):
-                                file = default_storage.open(evidence.attachment.name)
-                                tmp.write(file.read())
-                                tmp.flush()
-                                zipf.write(
-                                    tmp.name,
-                                    os.path.join(
-                                        "evidences",
-                                        os.path.basename(evidence.attachment.name),
-                                    ),
-                                )
+                        if default_storage.exists(evidence.attachment.name):
+                            zipf.writestr(
+                                os.path.join(
+                                    "evidences",
+                                    os.path.basename(evidence.attachment.name),
+                                ),
+                                default_storage.open(evidence.attachment.name).read(),
+                            )
                 zipf.writestr("index.html", index_content)
 
             response = FileResponse(open(zip_name, "rb"), as_attachment=True)
@@ -2709,8 +4004,9 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "compliance_assessment",
         "applied_controls",
+        "security_exceptions",
     ]
-    search_fields = ["name", "description"]
+    search_fields = ["requirement__name", "requirement__description"]
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
@@ -2918,7 +4214,7 @@ def get_build(request):
         total, used, free = disk_info
         disk_response = {
             "Disk space": f"{humanize.naturalsize(total)}",
-            "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
+            "Used": f"{humanize.naturalsize(used)} ({int((used / total) * 100)} %)",
         }
     else:
         disk_response = {
@@ -3089,3 +4385,20 @@ def export_mp_csv(request):
         writer.writerow(row)
 
     return response
+
+
+class SecurityExceptionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows security exceptions to be viewed or edited.
+    """
+
+    model = SecurityException
+    filterset_fields = ["requirement_assessments", "risk_scenarios"]
+
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(SecurityException.Severity.choices))
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(SecurityException.Status.choices))

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import * as m from '$paraglide/messages.js';
@@ -40,11 +41,11 @@
 
 <div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
-		{m.project()}:
+		{m.perimeter()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/projects/{data.compliance_assessment.project.id}/"
-			>{data.compliance_assessment.project.str}</a
+			href="/perimeters/{data.compliance_assessment.perimeter.id}/"
+			>{data.compliance_assessment.perimeter.str}</a
 		>
 	</p>
 	<p>/</p>
@@ -81,6 +82,19 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
+			baseEndpoint="/applied-controls?compliance_assessments={$page.params.id}"
+			fields={[
+				'name',
+				'status',
+				'priority',
+				'category',
+				'csf_function',
+				'eta',
+				'expiry_date',
+				'effort',
+				'cost',
+				'requirements_count'
+			]}
 		/>
 	</div>
 </div>

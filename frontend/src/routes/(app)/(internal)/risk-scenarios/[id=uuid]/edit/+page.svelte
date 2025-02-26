@@ -5,7 +5,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
@@ -15,7 +14,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '@skeletonlabs/skeleton';
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
 
 	import { browser } from '$app/environment';
@@ -25,8 +24,10 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { superForm } from 'sveltekit-superforms/client';
 
 	export let data: PageData;
+	export let form: ActionData;
 
 	const schema = modelSchema(data.model.urlModel!);
 
@@ -50,6 +51,16 @@
 		}
 	}
 
+	const _form = superForm(data.form, {
+		dataType: 'json',
+		invalidateAll: true,
+		applyAction: true,
+		resetForm: false,
+		validators: zod(schema),
+		taintedMessage: m.taintedFormMessage(),
+		validationMethod: 'auto'
+	});
+
 	function modalMeasureCreateForm(field: string): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -64,9 +75,20 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add-' + data.measureModel.localName)
+			title: safeTranslate('add-' + data.measureModel.localName),
+			response: (r: boolean) => {
+				if (r) {
+					_form.submit();
+				}
+			}
 		};
 		modalStore.trigger(modal);
+	}
+
+	const formStore = _form.form;
+
+	$: if (form && form.newControl) {
+		$formStore[form?.newControl?.field]?.push(form.newControl.appliedControl);
 	}
 
 	const next = getSecureRedirect($page.url.searchParams.get('next'));
@@ -83,19 +105,20 @@
 			class="flex flex-col space-y-3"
 			data={data.form}
 			dataType="json"
-			let:form
+			{_form}
 			validators={zod(schema)}
 			action="?/updateRiskScenario&next={next}"
-			{...$$restProps}
+			form={_form}
 		>
 			<div class="flex flex-row space-x-2">
 				<div class="card p-2 bg-white shadow-lg w-1/2">
 					<div class="flex justify-between p-2">
 						<div>
-							<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
+							<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
 							<Anchor
 								class="anchor text-sm font-semibold"
-								href="/projects/{data.scenario.project.id}">{data.scenario.project.str}</Anchor
+								href="/perimeters/{data.scenario.perimeter.id}"
+								>{data.scenario.perimeter.str}</Anchor
 							>
 						</div>
 						<div>
@@ -112,9 +135,10 @@
 					<div class="flex flex-row justify-between">
 						<div class=" px-2 w-2/3">
 							<AutocompleteSelect
-								{form}
+								form={_form}
 								multiple
-								options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
+								optionsEndpoint="users?is_third_party=false"
+								optionsLabelField="email"
 								field="owner"
 								label={m.owner()}
 							/>
@@ -122,7 +146,7 @@
 						<div class="w-1/3">
 							<Select
 								class="h-14"
-								{form}
+								form={_form}
 								options={data.treatmentChoices}
 								field="treatment"
 								label={m.treatmentStatus()}
@@ -135,45 +159,54 @@
 			<div class="flex flex-row space-x-2 min-h-72">
 				<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-5/12">
 					<span class="flex flex-row space-x-2">
-						<TextField {form} field="ref_id" label={m.refId()} />
-						<TextField {form} field="name" label={m.name()} classesContainer="w-full" />
+						<TextField form={_form} field="ref_id" label={m.refId()} />
+						<TextField form={_form} field="name" label={m.name()} classesContainer="w-full" />
 					</span>
-					<TextArea {form} field="description" rows={6} label={m.description()} />
+					<TextArea form={_form} field="description" rows={6} label={m.description()} />
 				</div>
-				<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-scroll">
+				<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-auto">
 					<AutocompleteSelect
 						multiple
-						{form}
-						options={getOptions({
-							objects: data.foreignKeys['assets'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						form={_form}
+						optionsEndpoint="assets"
+						optionsLabelField="auto"
+						optionsExtraFields={[['folder', 'str']]}
 						field="assets"
+						optionsDetailedUrlParameters={[
+							['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						]}
 						label={m.assets()}
-						helpText={m.riskScenarioAssetHelpText()}
 					/>
 					<AutocompleteSelect
-						{form}
+						form={_form}
 						multiple
-						options={getOptions({
-							objects: data.foreignKeys['threats'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="threats"
+						optionsDetailedUrlParameters={[
+							['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						]}
+						optionsExtraFields={[['folder', 'str']]}
+						optionsLabelField="auto"
 						field="threats"
 						label={m.threats()}
 					/>
 					<AutocompleteSelect
 						multiple
-						{form}
-						options={getOptions({
-							objects: data.foreignKeys['vulnerabilities'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						form={_form}
+						optionsEndpoint="vulnerabilities"
+						optionsDetailedUrlParameters={[
+							['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						]}
+						optionsExtraFields={[['folder', 'str']]}
 						field="vulnerabilities"
 						label={m.vulnerabilities()}
+					/>
+					<AutocompleteSelect
+						multiple
+						form={_form}
+						optionsEndpoint="security-exceptions"
+						optionsExtraFields={[['folder', 'str']]}
+						field="security_exceptions"
+						label={m.securityExceptions()}
 					/>
 				</div>
 			</div>
@@ -187,11 +220,12 @@
 							<div class="w-full mr-2">
 								<AutocompleteSelect
 									multiple
-									{form}
-									options={getOptions({
-										objects: data.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									form={_form}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
+									optionsDetailedUrlParameters={[
+										['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+									]}
 									field="existing_applied_controls"
 									label={m.existingControls()}
 									helpText={m.existingControlsHelper()}
@@ -208,7 +242,7 @@
 							</div>
 						</div>
 						<TextArea
-							{form}
+							form={_form}
 							field="existing_controls"
 							label="context"
 							helpText={m.existingContextHelper()}
@@ -220,7 +254,7 @@
 						<div class="flex flex-row space-x-4 my-auto">
 							<div class="min-w-36">
 								<Select
-									{form}
+									form={_form}
 									options={data.probabilityChoices}
 									color_map={probabilityColorMap}
 									field="current_proba"
@@ -230,7 +264,7 @@
 							<i class="fa-solid fa-xmark mt-8" />
 							<div class="min-w-36">
 								<Select
-									{form}
+									form={_form}
 									options={data.impactChoices}
 									color_map={impactColorMap}
 									field="current_impact"
@@ -240,7 +274,7 @@
 							<i class="fa-solid fa-equals mt-8" />
 							<div class="min-w-38">
 								<RiskLevel
-									{form}
+									form={_form}
 									field="current_risk_level"
 									label={m.currentRiskLevel()}
 									riskMatrix={data.riskMatrix}
@@ -262,11 +296,12 @@
 							<div class="w-full mr-2">
 								<AutocompleteSelect
 									multiple
-									{form}
-									options={getOptions({
-										objects: data.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									form={_form}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
+									optionsDetailedUrlParameters={[
+										['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+									]}
 									field="applied_controls"
 									label={m.extraAppliedControls()}
 									helpText={m.extraControlsHelper()}
@@ -287,7 +322,7 @@
 						<div class="flex flex-row space-x-4 my-auto">
 							<div class="min-w-36">
 								<Select
-									{form}
+									form={_form}
 									options={data.probabilityChoices}
 									color_map={probabilityColorMap}
 									field="residual_proba"
@@ -297,7 +332,7 @@
 							<i class="fa-solid fa-xmark mt-8" />
 							<div class="min-w-36">
 								<Select
-									{form}
+									form={_form}
 									options={data.impactChoices}
 									color_map={impactColorMap}
 									field="residual_impact"
@@ -307,7 +342,7 @@
 							<i class="fa-solid fa-equals mt-8" />
 							<div class="min-w-38">
 								<RiskLevel
-									{form}
+									form={_form}
 									field="current_risk_level"
 									label={m.residualRiskLevel()}
 									riskMatrix={data.riskMatrix}
@@ -325,7 +360,7 @@
 				<div class="flex space-x-4 mb-1">
 					<div class="w-1/2">
 						<AutocompleteSelect
-							{form}
+							form={_form}
 							options={data.qualificationChoices}
 							multiple={true}
 							field="qualifications"
@@ -334,7 +369,7 @@
 					</div>
 					<div class="w-1/2">
 						<Select
-							{form}
+							form={_form}
 							options={strengthOfKnowledgeFormChoices}
 							field="strength_of_knowledge"
 							label={m.strengthOfKnowledge()}
@@ -342,7 +377,7 @@
 						/>
 					</div>
 				</div>
-				<TextArea {form} field="justification" label={m.justification()} />
+				<TextArea form={_form} field="justification" label={m.justification()} />
 			</div>
 			<div class="flex flex-row justify-between space-x-4">
 				<button

@@ -1,0 +1,727 @@
+urn: urn:intuitem:risk:library:anssi-architectures-si-sensibles-dr
+locale: fr
+ref_id: anssi-architectures-si-sensibles-dr
+name: "Recommandations sur les architectures des syst\xE8mes d'information sensibles\
+  \ ou Diffusion Restreinte"
+description: "Outil d'aide et de suivi d'impl\xE9mentation de la s\xE9curit\xE9 (OASIS)\n\
+  Recommandations sur les architectures des syst\xE8mes d'information sensibles ou\
+  \ Diffusion Restreinte\nhttps://cyber.gouv.fr/publications/recommandations-pour-les-architectures-des-si-sensibles-ou-dr"
+copyright: ANSSI Etalab
+version: 1
+publication_date: 2025-01-20
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:anssi-architectures-si-sensibles-dr
+    ref_id: anssi-architectures-si-sensibles-dr
+    name: "Recommandations sur les architectures des syst\xE8mes d'information sensibles\
+      \ ou Diffusion Restreinte"
+    description: "Outil d'aide et de suivi d'impl\xE9mentation de la s\xE9curit\xE9\
+      \ (OASIS)\nRecommandations sur les architectures des syst\xE8mes d'information\
+      \ sensibles ou Diffusion Restreinte\nhttps://cyber.gouv.fr/publications/recommandations-pour-les-architectures-des-si-sensibles-ou-dr"
+    implementation_groups_definition:
+    - ref_id: lb
+      name: '*'
+      description: base
+    - ref_id: l1
+      name: 1
+      description: "Adopter une approche pragmatique pour construire rapidement un\
+        \ socle de s\xE9curit\xE9, \xE0 co\xFBt contenu pour l\u2019entit\xE9. "
+    - ref_id: l2
+      name: 2
+      description: "Renforcer le niveau de s\xE9curit\xE9 par des adaptations pouvant\
+        \ \xEAtre dimensionnantes. La robustesse ou les niveaux de s\xE9curit\xE9\
+        \ de produits ou de services cl\xE9s sont attest\xE9s par un tiers (certification/qualification). "
+    - ref_id: l3
+      name: 3
+      description: "Ma\xEEtriser pleinement les recommandations des \xE9tapes 1 et\
+        \ 2. Compl\xE9ter par des recommandations adapt\xE9es au niveau de menace\
+        \ gr\xE2ce \xE0 une analyse de risques."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Syst\xE8mes d'information (SI) non classifi\xE9s"
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:2
+      ref_id: R01
+      name: "Trier le patrimoine informationnel par niveau de sensibilit\xE9"
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:2
+      ref_id: R02
+      name: "Identifier les types de SI n\xE9cessaires"
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:2
+      ref_id: R03
+      name: "D\xE9terminer le r\xE9gime de protection des informations sensibles "
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:2
+      ref_id: R04
+      name: 'Homologuer tout SI sensible avant sa mise en production '
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Typologies de SI sensibles
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r05+
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:3
+      ref_id: R05+
+      name: 'Isoler physiquement le SI sensible et le SI usuel '
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:3
+      ref_id: R05
+      name: 'Cloisonner physiquement le SI sensible et le SI usuel '
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r05-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:3
+      ref_id: R05-
+      name: "Cloisonner logiquement les donn\xE9es sensibles au sein d'un SI sensible"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:3
+      ref_id: R06
+      name: "Appliquer le principe de d\xE9fense en profondeur en cas de mutualisation\
+        \ de ressources"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:3
+      ref_id: R07
+      name: Cloisonner les annuaires sensible et usuel
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Interconnexions directes de SI sensibles
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R08
+      name: "D\xE9finir une strat\xE9gie d'homologation pour chaque interconnexion\
+        \ de SI sensible"
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R09
+      name: "S\xE9curiser les interconnexions de SI DR "
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R10
+      name: "S\xE9curiser les interconnexions de SI sensibles "
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R11
+      name: 'Filtrer les flux des interconnexions de SI sensibles '
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R12
+      name: "Appliquer les recommandations de l'ANSSI relatives \xE0\_ l'interconnexion\
+        \ d'un SI \xE0 Internet"
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R13
+      name: "Passerelle de classe 1 : mettre en oeuvre au moins un pare-feu qualifi\xE9"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R14
+      name: 'Passerelle de classe 1 : mettre en oeuvre au moins un dispositif de rupture
+        de flux'
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R15
+      name: "Passerelle de classe 1 : mettre en oeuvre un syst\xE8me de d\xE9tection "
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R16
+      name: "Passerelle de classe 1 : mettre en oeuvre des taps qualifi\xE9s passifs"
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R17
+      name: "Passerelle de classe 1 : faire porter les fonctions de s\xE9curit\xE9\
+        \ par des dispositifs distincts"
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R18
+      name: Interdire la navigation Web depuis les SI sensibles
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r18-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R18-
+      name: Permettre la navigation Web depuis des postes de rebond
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r18--
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R18--
+      name: Permettre la navigation Web sans postes de rebond
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R19
+      name: "Chiffrer les informations DR transf\xE9r\xE9es via des SI de classe 0"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R20
+      name: "Chiffrer les informations sensibles transf\xE9r\xE9es via des SI de classe\
+        \ 0 "
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R21
+      name: "Interdire l'acc\xE9s aux applications sensibles depuis les SI non homologu\xE9\
+        s"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R22
+      name: "Cloisonner l'infrastructure de mise \xE0\_ disposition sur Internet d'informations\
+        \ sensibles"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R23
+      name: "Ma\xEEtriser les interconnexions descendantes des SI de classe 2 "
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R24
+      name: "N'autoriser que des protocoles de transfert vers le syst\xE8me d'\xE9\
+        changes s\xE9curis\xE9s"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R25
+      name: "Syst\xE8me d'\xE9changes s\xE9curis\xE9s : restreindre les acc\xE8s aux\
+        \ seuls utilisateurs autoris\xE9s"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r26
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R26
+      name: "Syst\xE8me d'\xE9changes s\xE9curis\xE9s : authentifier les utilisateurs\
+        \ avec un compte non sensible"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r27
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R27
+      name: "Syst\xE8me d'\xE9changes s\xE9curis\xE9s : analyser le contenu des donn\xE9\
+        es \xE9chang\xE9es"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r28
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:4
+      ref_id: R28
+      name: "Syst\xE8me d'\xE9changes s\xE9curis\xE9s : journaliser et imputer des\
+        \ donn\xE9es \xE9chang\xE9es"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "S\xE9curisation au sein des SI sensibles"
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r29
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R29
+      name: "Recourir \xE0 des prestataires de services SSI disposant d'un visa de\
+        \ s\xE9curit\xE9 ANSSI"
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r30
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R30
+      name: "Acqu\xE9rir des produits de s\xE9curit\xE9 disposant d'un visa de s\xE9\
+        curit\xE9 ANSSI "
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R31
+      name: "Respecter les conditions d'emploi des \xE9quipements de s\xE9curit\xE9\
+        \ agr\xE9\xE9s"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r32
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R32
+      name: "Cloisonner le SI sensible en zones ayant des niveaux de s\xE9curit\xE9\
+        \ homog\xE8nes"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r33
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R33
+      name: "\xC9viter l'installation de moyens informatiques sensibles dans les zones\
+        \ ouvertes au public"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r34
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R34
+      name: "Bloquer les communications lat\xE9rales "
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r35
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R35
+      name: "Durcir la configuration des mat\xE9riels et des logiciels utilis\xE9\
+        s sur les SI sensibles"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r36
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R36
+      name: 'Marquer les informations sensibles '
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r37
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R37
+      name: 'Marquer les supports stockant des informations sensibles '
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r38
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R38
+      name: "Adopter un code couleur pour le c\xE2blage des \xE9quipements "
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r39
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R39
+      name: Activer une authentification initiale forte
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r40
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R40
+      name: "Prot\xE9ger les secrets d'authentification "
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r41
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R41
+      name: "G\xE9rer avec rigueur l'affectation des droits d'acc\xE8s logiques des\
+        \ comptes informatiques"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r42
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R42
+      name: "Prot\xE9ger le SI sensible des codes malveillants"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r43
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R43
+      name: Adapter la politique de protection contre les codes malveillants
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r44
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R44
+      name: "D\xE9ployer des outils r\xE9v\xE8lant des activit\xE9s suspectes"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r45
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R45
+      name: "Supports amovibles : limiter leur usage au strict besoin op\xE9rationnel"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r46
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R46
+      name: "Supports amovibles : ma\xEEtriser leur gestion et leurs conditions d'usage "
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r47
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R47
+      name: "Supports amovibles : privil\xE9gier l'utilisation de supports en lecture\
+        \ seule"
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r48
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:5
+      ref_id: R48
+      name: "Supports amovibles : utiliser des solutions de d\xE9pollution des supports\
+        \ de stockage"
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "S\xE9curisation des postes de travail sensibles"
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r49
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R49
+      name: "Ma\xEEtriser les moyens informatiques affect\xE9s aux utilisateurs d'un\
+        \ SI sensible"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r50
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R50
+      name: "Connecter les ressources sensibles sur un r\xE9seau physique d\xE9di\xE9\
+        \ "
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r50-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R50-
+      name: "Connecter les ressources sensibles sur un r\xE9seau logique d\xE9di\xE9"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r51
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R51
+      name: "Authentifier les ressources sensibles vis-\xE0\_-vis du r\xE9seau "
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r52
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R52
+      name: "Utiliser un poste utilisateur sensible d\xE9di\xE9"
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r52-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R52-
+      name: Utiliser un poste utilisateur multiniveau
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r52--
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R52--
+      name: "Utiliser un poste utilisateur sensible avec acc\xE8s distant au SI usuel"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r53
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R53
+      name: "Appliquer les recommandations de l'ANSSI relatives au nomadisme num\xE9\
+        rique"
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r54
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R54
+      name: "Prot\xE9ger physiquement les \xE9quipements d'acc\xE8s nomade "
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r55
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R55
+      name: "S\xE9curiser les canaux d'interconnexion nomades des SI DR "
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r56
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R56
+      name: "S\xE9curiser les canaux d'interconnexion nomades des SI sensibles "
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r57
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R57
+      name: "Chiffrer les donn\xE9es DR stock\xE9es sur des supports amovibles"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r58
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R58
+      name: "Chiffrer les donn\xE9es sensibles stock\xE9es sur des supports amovibles"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r59
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R59
+      name: "Chiffrer les flux r\xE9seau d'un \xE9quipement d'acc\xE8s nomade sensible\
+        \ en toute circonstance"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r60
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R60
+      name: "Mettre en place une architecture de r\xE9seau sans fil cloisonn\xE9e\
+        \ du SI sensible"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r61
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:6
+      ref_id: R61
+      name: "Bloquer l'acc\xE8s aux portails captifs publics depuis des \xE9quipements\
+        \ d'acc\xE8s nomades sensibles"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Administration des SI sensibles
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r62
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R62
+      name: "Appliquer les recommandations de l'ANSSI relatives \xE0\_ l'administration\
+        \ s\xE9curis\xE9e des SI"
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r63
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R63
+      name: "G\xE9rer les administrateurs d'un SI sensible"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r64
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R64
+      name: "S\xE9curiser la cha\xEEne de connexion pour l'administration \xE0 distance"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r64-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R64-
+      name: "Ma\xEEtriser les syst\xE8mes de t\xE9l\xE9maintenance connect\xE9s \xE0\
+        \ des SI sensibles"
+      implementation_groups:
+      - l1
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r65
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R65
+      name: "D\xE9finir et appliquer une politique de MCS "
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r66
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R66
+      name: "Isoler les syst\xE8mes obsol\xE8tes"
+      implementation_groups:
+      - l2
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r67
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R67
+      name: "Appliquer les recommandations de l'ANSSI relatives \xE0\_ la journalisation"
+      implementation_groups:
+      - lb
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r68
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R68
+      name: 'Conserver les journaux d''un SI sensible pendant 12 mois '
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r69
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R69
+      name: "Recourir aux services d'un prestataire qualifi\xE9 pour la supervision\
+        \ de s\xE9curit\xE9"
+      implementation_groups:
+      - l3
+    - urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:r70
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-architectures-si-sensibles-dr:7
+      ref_id: R70
+      name: "Formaliser une proc\xE9dure de d\xE9claration des incidents de s\xE9\
+        curit\xE9 \xE0 l'ANSSI"
+      implementation_groups:
+      - lb

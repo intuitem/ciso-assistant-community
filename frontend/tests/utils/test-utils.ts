@@ -21,7 +21,7 @@ type Fixtures = {
 	foldersPage: PageContent;
 	frameworksPage: PageContent;
 	librariesPage: PageContent;
-	projectsPage: PageContent;
+	perimetersPage: PageContent;
 	riskAcceptancesPage: PageContent;
 	riskAssessmentsPage: PageContent;
 	riskMatricesPage: PageContent;
@@ -30,6 +30,7 @@ type Fixtures = {
 	appliedControlsPage: PageContent;
 	threatsPage: PageContent;
 	usersPage: PageContent;
+	securityExceptionsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
@@ -59,13 +60,14 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
-			projectsPage,
+			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
 			riskMatricesPage,
 			riskScenariosPage,
 			referenceControlsPage,
 			appliedControlsPage,
+			securityExceptionsPage,
 			threatsPage,
 			usersPage
 		},
@@ -78,13 +80,14 @@ export const test = base.extend<Fixtures>({
 			foldersPage,
 			frameworksPage,
 			librariesPage,
-			projectsPage,
+			perimetersPage,
 			riskAcceptancesPage,
 			riskAssessmentsPage,
 			riskMatricesPage,
 			riskScenariosPage,
 			referenceControlsPage,
 			appliedControlsPage,
+			securityExceptionsPage,
 			threatsPage,
 			usersPage
 		});
@@ -98,12 +101,12 @@ export const test = base.extend<Fixtures>({
 		const aPage = new PageContent(page, '/compliance-assessments', 'Audits', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'version', type: type.TEXT },
-			{ name: 'status', type: type.SELECT },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			//{ name: 'version', type: type.TEXT },
+			//{ name: 'status', type: type.SELECT },
 			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'eta', type: type.DATE },
-			{ name: 'due_date', type: type.DATE }
+			{ name: 'eta', type: type.DATE }
+			//{ name: 'due_date', type: type.DATE }
 		]);
 		await use(aPage);
 	},
@@ -112,7 +115,6 @@ export const test = base.extend<Fixtures>({
 		const aPage = new PageContent(page, '/assets', 'Assets', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'business_value', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'type', type: type.SELECT },
 			{ name: 'parent_assets', type: type.SELECT_AUTOCOMPLETE }
@@ -146,8 +148,8 @@ export const test = base.extend<Fixtures>({
 		await use(lPage);
 	},
 
-	projectsPage: async ({ page }, use) => {
-		const pPage = new PageContent(page, '/projects', 'Projects', [
+	perimetersPage: async ({ page }, use) => {
+		const pPage = new PageContent(page, '/perimeters', 'Perimeters', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
@@ -173,7 +175,7 @@ export const test = base.extend<Fixtures>({
 		const rPage = new PageContent(page, '/risk-assessments', 'Risk assessments', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'version', type: type.TEXT },
 			{ name: 'status', type: type.SELECT },
 			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
@@ -211,7 +213,7 @@ export const test = base.extend<Fixtures>({
 		const sPage = new PageContent(page, '/reference-controls', 'Reference controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'category', type: type.SELECT },
+			//{ name: 'category', type: type.SELECT },
 			// { name: 'csf_function', type: type.SELECT },
 			{ name: 'provider', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
@@ -223,14 +225,14 @@ export const test = base.extend<Fixtures>({
 		const sPage = new PageContent(page, '/applied-controls', 'Applied controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'category', type: type.SELECT },
-			{ name: 'csf_function', type: type.SELECT },
+			//{ name: 'category', type: type.SELECT },
+			//{ name: 'csf_function', type: type.SELECT },
 			{ name: 'status', type: type.SELECT },
 			{ name: 'eta', type: type.DATE },
-			{ name: 'expiry_date', type: type.DATE },
-			{ name: 'link', type: type.TEXT },
-			{ name: 'effort', type: type.SELECT },
-			{ name: 'cost', type: type.NUMBER },
+			//{ name: 'expiry_date', type: type.DATE },
+			//{ name: 'link', type: type.TEXT },
+			//{ name: 'effort', type: type.SELECT },
+			//{ name: 'cost', type: type.NUMBER },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
 		]);
@@ -245,6 +247,20 @@ export const test = base.extend<Fixtures>({
 			{ name: 'provider', type: type.TEXT }
 		]);
 		await use(tPage);
+	},
+
+	securityExceptionsPage: async ({ page }, use) => {
+		const sPage = new PageContent(page, '/security-exceptions', 'Exceptions', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'status', type: type.SELECT },
+			{ name: 'expiration_date', type: type.DATE },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'owners', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'approver', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(sPage);
 	},
 
 	usersPage: async ({ page }, use) => {
@@ -369,10 +385,10 @@ export class TestContent {
 					is_active: false
 				}
 			},
-			projectsPage: {
-				displayName: 'Projects',
+			perimetersPage: {
+				displayName: 'Perimeters',
 				build: {
-					name: vars.projectName,
+					name: vars.perimeterName,
 					description: vars.description,
 					folder: vars.folderName,
 					ref_id: 'R.1234',
@@ -390,14 +406,12 @@ export class TestContent {
 				build: {
 					name: vars.assetName,
 					description: vars.description,
-					business_value: 'Test value',
 					folder: vars.folderName,
 					type: 'Primary'
 				},
 				editParams: {
 					name: '',
 					description: '',
-					business_value: '',
 					type: 'Supporting'
 					//TODO add parent_assets
 				}
@@ -421,7 +435,7 @@ export class TestContent {
 				build: {
 					name: vars.referenceControlName,
 					description: vars.description,
-					category: 'Technical',
+					//category: 'Technical',
 					// csf_function: 'protect',
 					provider: 'Test provider',
 					folder: vars.folderName
@@ -429,7 +443,7 @@ export class TestContent {
 				editParams: {
 					name: '',
 					description: '',
-					category: 'Physical',
+					//category: 'Physical',
 					// csf_function: 'detect',
 					provider: ''
 				}
@@ -440,7 +454,7 @@ export class TestContent {
 				build: {
 					reference_control: {
 						value: 'Global/' + vars.referenceControl.name,
-						category: vars.referenceControl.category,
+						//category: vars.referenceControl.category,
 						// csf_function: vars.referenceControl.csf_function,
 						request: {
 							url: 'reference-controls'
@@ -449,18 +463,18 @@ export class TestContent {
 					name: vars.appliedControlName,
 					description: vars.description,
 					status: 'To do',
-					eta: '2025-01-01',
-					expiry_date: '2025-05-01',
-					link: 'https://intuitem.com/',
-					effort: 'Large',
-					folder: vars.folderName,
-					category: vars.referenceControl.category
+					//eta: '2025-01-01',
+					//expiry_date: '2025-05-01',
+					//link: 'https://intuitem.com/',
+					//effort: 'Large',
+					folder: vars.folderName
+					//category: vars.referenceControl.category
 					// csf_function: vars.referenceControl.csf_function
 				},
 				editParams: {
 					reference_control: {
 						value: 'Global/' + vars.referenceControl2.name,
-						category: vars.referenceControl2.category,
+						//category: vars.referenceControl2.category,
 						// csf_function: vars.referenceControl2.csf_function,
 						request: {
 							url: 'reference-controls'
@@ -468,12 +482,12 @@ export class TestContent {
 					},
 					name: '',
 					description: '',
-					status: 'Active',
-					eta: '2025-12-31',
-					expiry_date: '2026-02-25',
-					link: 'https://intuitem.com/community/',
-					effort: 'Medium',
-					category: vars.referenceControl2.category
+					status: 'Active'
+					//eta: '2025-12-31',
+					//expiry_date: '2026-02-25',
+					//link: 'https://intuitem.com/community/',
+					//effort: 'Medium',
+					//category: vars.referenceControl2.category
 					// csf_function: vars.referenceControl2.csf_function
 				}
 			},
@@ -484,8 +498,8 @@ export class TestContent {
 				build: {
 					name: vars.assessmentName,
 					description: vars.description,
-					project: vars.folderName + '/' + vars.projectName,
-					status: 'Planned',
+					perimeter: vars.folderName + '/' + vars.perimeterName,
+					// status: 'Planned',
 					// version: "1.4.2",
 					framework: vars.framework.name
 					// eta: "2025-01-01",
@@ -508,10 +522,6 @@ export class TestContent {
 					description: vars.description,
 					attachment: vars.file,
 					folder: vars.folderName,
-					requirement_assessments: [
-						vars.requirement_assessment.name,
-						vars.requirement_assessment2.name
-					],
 					link: 'https://intuitem.com/'
 				},
 				editParams: {
@@ -528,7 +538,7 @@ export class TestContent {
 					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					name: vars.riskAssessmentName,
 					description: vars.description,
-					project: vars.folderName + '/' + vars.projectName,
+					perimeter: vars.folderName + '/' + vars.perimeterName,
 					version: vars.riskAssessmentVersion,
 					status: 'Planned',
 					risk_matrix: vars.matrix.displayName
@@ -550,7 +560,7 @@ export class TestContent {
 				build: {
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+					risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					threats: ['Global/' + vars.threat.name, 'Global/' + vars.threat2.name]
 				},
 				editParams: {
@@ -577,7 +587,7 @@ export class TestContent {
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
 					risk_scenarios: [
-						`${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+						`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
 					]
 				},
 				editParams: {
@@ -585,6 +595,26 @@ export class TestContent {
 					description: '',
 					expiry_date: '2025-12-31'
 					//TODO add approver & risk_scenarios
+				}
+			},
+			securityExceptionsPage: {
+				displayName: 'Exceptions',
+				build: {
+					name: vars.securityExceptionName,
+					description: vars.description,
+					ref_id: '123456',
+					status: 'Draft',
+					expiration_date: '2100-01-01',
+					folder: vars.folderName,
+					owners: [LoginPage.defaultEmail],
+					approver: LoginPage.defaultEmail
+				},
+				editParams: {
+					name: '',
+					description: '',
+					ref_id: '',
+					status: 'In review',
+					expiration_date: '2100-12-31'
 				}
 			}
 		};
@@ -616,7 +646,8 @@ export function getSingularName(pluralName: string) {
 		Domains: 'Folder',
 		Libraries: 'Library',
 		'Risk matrices': 'Risk matrix',
-		Policies: 'Policy'
+		Policies: 'Policy',
+		Exceptions: 'Security exception'
 	};
 	return (
 		exceptions[pluralName] ??
@@ -629,7 +660,8 @@ export function getUniqueValue(value: string): string {
 		const email = value.split('@');
 		return getUniqueValue(email[0]) + '@' + email[1];
 	}
-	return process.env.TEST_WORKER_INDEX + '-' + value + '-' + randomBytes(2).toString('hex');
+	const workerIndex = process.env.TEST_WORKER_INDEX ?? '1';
+	return workerIndex + '-' + value + '-' + randomBytes(2).toString('hex');
 }
 
 export function replaceValues(obj: any, searchValue: string, replaceValue: string) {

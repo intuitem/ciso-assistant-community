@@ -11,9 +11,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z, type AnyZodObject } from 'zod';
 
 export const loadDetail = async ({ event, model, id }) => {
-	const endpoint = model.endpointUrl
-		? `${BASE_API_URL}/${model.endpointUrl}/${id}/`
-		: `${BASE_API_URL}/${model.urlModel}/${id}/`;
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
 
 	const res = await event.fetch(endpoint);
 	const data = await res.json();
@@ -70,7 +68,20 @@ export const loadDetail = async ({ event, model, id }) => {
 
 				const deleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
 				const createSchema = modelSchema(e.urlModel);
-				initialData[e.field] = data.id;
+				const fieldSchema = createSchema.shape[e.field];
+				let isArrayField = false;
+
+				if (fieldSchema) {
+					let currentSchema = fieldSchema;
+					while (currentSchema instanceof z.ZodOptional || currentSchema instanceof z.ZodNullable) {
+						currentSchema = currentSchema._def.innerType;
+					}
+					isArrayField = currentSchema instanceof z.ZodArray;
+				}
+				initialData[e.field] = isArrayField ? [data.id] : data.id;
+				if (data.ebios_rm_study) {
+					initialData['ebios_rm_study'] = data.ebios_rm_study.id;
+				}
 				if (data.folder) {
 					if (!new RegExp(UUID_REGEX).test(data.folder)) {
 						const objectEndpoint = `${endpoint}object/`;
@@ -82,24 +93,6 @@ export const loadDetail = async ({ event, model, id }) => {
 					}
 				}
 				const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
-
-				const foreignKeys: Record<string, any> = {};
-
-				if (info.foreignKeyFields) {
-					for (const keyField of info.foreignKeyFields) {
-						let queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-						if (keyField.detail === true) {
-							queryParams += `${data.ebios_rm_study.id}`; // used only for ebios for now
-						}
-						const url = `${BASE_API_URL}/${keyField.endpointUrl || keyField.urlModel}/${queryParams}`;
-						const response = await event.fetch(url);
-						if (response.ok) {
-							foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-						} else {
-							console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-						}
-					}
-				}
 
 				const selectOptions: Record<string, any> = {};
 
@@ -129,8 +122,9 @@ export const loadDetail = async ({ event, model, id }) => {
 					table,
 					deleteForm,
 					createForm,
-					foreignKeys,
-					selectOptions
+					selectOptions,
+					initialData,
+					disableAddDeleteButtons: e.disableAddDeleteButtons
 				};
 			})
 		);

@@ -53,16 +53,31 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj = self.model.objects.get(name="general")
+        obj.is_published = True  # we could do that at creation, but it's ok here
         self.check_object_permissions(self.request, obj)
         return obj
 
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
-        GlobalSettings.objects.get_or_create(
-            name="general",
-            defaults={"value": {"security_objective_scale": "1-4"}},
-        )
-        return Response(GeneralSettingsSerializer(self.get_object()).data.get("value"))
+        default_settings = {
+            "security_objective_scale": "1-4",
+            "ebios_radar_max": 6,
+            "ebios_radar_green_zone_radius": 0.2,
+            "ebios_radar_yellow_zone_radius": 0.9,
+            "ebios_radar_red_zone_radius": 2.5,
+            "notifications_enable_mailing": False,
+            "interface_agg_scenario_matrix": False,
+        }
+
+        settings, created = GlobalSettings.objects.get_or_create(name="general")
+
+        if created or not all(key in settings.value for key in default_settings):
+            existing_value = settings.value or {}
+            updated_value = {**default_settings, **existing_value}
+            settings.value = updated_value
+            settings.save()
+
+        return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
@@ -72,6 +87,40 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "FIPS-199": "FIPS-199",
         }
         return Response(choices)
+
+    @action(detail=True, name="Get ebios rm radar parameters")
+    def ebios_radar_parameters(self, request):
+        ebios_rm_parameters = {
+            "ebios_radar_max": self.get_object().value.get("ebios_radar_max"),
+            "ebios_radar_green_zone_radius": self.get_object().value.get(
+                "ebios_radar_green_zone_radius"
+            ),
+            "ebios_radar_yellow_zone_radius": self.get_object().value.get(
+                "ebios_radar_yellow_zone_radius"
+            ),
+            "ebios_radar_red_zone_radius": self.get_object().value.get(
+                "ebios_radar_red_zone_radius"
+            ),
+        }
+        return Response(ebios_rm_parameters)
+
+    @action(detail=True, name="Get notifications settings")
+    def notifications_settings(self, request):
+        notifications_settings = {
+            "notifications_enable_mailing": self.get_object().value.get(
+                "notifications_enable_mailing"
+            ),
+        }
+        return Response(notifications_settings)
+
+    @action(detail=True, name="Get interface settings")
+    def interface_settings(self, request):
+        interface_settings = {
+            "interface_agg_scenario_matrix": self.get_object().value.get(
+                "interface_agg_scenario_matrix"
+            ),
+        }
+        return Response(interface_settings)
 
 
 @api_view(["GET"])

@@ -18,9 +18,11 @@
 	import { safeTranslate } from '$lib/utils/i18n.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
+	import { listViewFields } from '$lib/utils/table';
 
 	export let data;
 	const showRisks = true;
+	const useBubbles = data.useBubbles;
 	const risk_assessment = data.risk_assessment;
 
 	const modalStore: ModalStore = getModalStore();
@@ -108,7 +110,7 @@
 		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{risk_assessment.project.str}/{risk_assessment.name} - {risk_assessment.version}
+					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
 				</div>
 				<br />
 				<div class="text-sm">
@@ -244,6 +246,16 @@
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
 				search={false}
+				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				fields={[
+					'ref_id',
+					'name',
+					'threats',
+					'existing_applied_controls',
+					'current_level',
+					'applied_controls',
+					'residual_level'
+				]}
 			>
 				<button
 					slot="addButton"
@@ -264,9 +276,11 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
+					{useBubbles}
 				/>
 			</div>
 			<div class="flex-1">
@@ -274,9 +288,11 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
+					{useBubbles}
 				/>
 			</div>
 		</div>

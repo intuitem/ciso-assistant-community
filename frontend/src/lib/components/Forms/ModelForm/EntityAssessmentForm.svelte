@@ -5,7 +5,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Score from '../Score.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -20,12 +19,13 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['project'] })}
-	field="project"
-	cacheLock={cacheLocks['project']}
-	bind:cachedValue={formDataCache['project']}
-	label={m.project()}
-	hidden={initialData.project}
+	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
+	field="perimeter"
+	cacheLock={cacheLocks['perimeter']}
+	bind:cachedValue={formDataCache['perimeter']}
+	label={m.perimeter()}
+	hidden={initialData.perimeter}
 />
 {#if !data.compliance_assessment}
 	<Checkbox
@@ -39,7 +39,7 @@
 		disabled={!data.create_audit}
 		mandatory
 		hidden={!data.create_audit}
-		options={getOptions({ objects: model.foreignKeys['framework'] })}
+		optionsEndpoint="frameworks"
 		field="framework"
 		cacheLock={cacheLocks['framework']}
 		bind:cachedValue={formDataCache['framework']}
@@ -72,7 +72,7 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['entity'] })}
+	optionsEndpoint="entities"
 	field="entity"
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}
@@ -82,7 +82,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['solutions'] })}
+	optionsEndpoint="solutions"
 	field="solutions"
 	cacheLock={cacheLocks['solutions']}
 	bind:cachedValue={formDataCache['solutions']}
@@ -92,7 +92,6 @@
 	{form}
 	label={m.criticality()}
 	field="criticality"
-	always_enabled={true}
 	inversedColors
 	fullDonut
 	min_score={1}
@@ -142,7 +141,8 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
 	field="authors"
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
@@ -151,7 +151,8 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['representatives'], label: 'email' })}
+	optionsEndpoint="users?is_third_party=true"
+	optionsLabelField="email"
 	field="representatives"
 	helpText={m.entityAssessmentRepresentativesHelpText()}
 	cacheLock={cacheLocks['representatives']}
@@ -161,7 +162,8 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
 	field="reviewers"
 	cacheLock={cacheLocks['reviewers']}
 	bind:cachedValue={formDataCache['reviewers']}
@@ -169,7 +171,7 @@
 />
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['compliance_assessment'] })}
+	optionsEndpoint="compliance-assessments"
 	field="compliance_assessment"
 	cacheLock={cacheLocks['compliance_assessment']}
 	bind:cachedValue={formDataCache['compliance_assessment']}
@@ -179,10 +181,8 @@
 />
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['evidence'],
-		extra_fields: [['folder', 'str']]
-	})}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
 	field="evidence"
 	cacheLock={cacheLocks['evidence']}
 	bind:cachedValue={formDataCache['evidence']}

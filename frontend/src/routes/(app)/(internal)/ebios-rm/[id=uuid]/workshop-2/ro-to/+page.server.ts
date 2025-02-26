@@ -25,26 +25,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);
-	const foreignKeyFields = urlParamModelForeignKeyFields(URLModel);
 	const selectFields = urlParamModelSelectFields(URLModel);
-
-	const foreignKeys: Record<string, any> = {};
-
-	for (const keyField of foreignKeyFields) {
-		const keyModel = getModelInfo(keyField.urlModel);
-		const queryParams = keyField.urlParams
-			? `?${keyField.urlParams}${keyField.detail ? params.id : ''}`
-			: '';
-		const url = `${BASE_API_URL}/${keyModel.endpointUrl ?? keyModel.urlModel}/${queryParams}`;
-		const response = await fetch(url);
-		if (response.ok) {
-			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-		} else {
-			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-		}
-	}
-
-	model['foreignKeys'] = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
 

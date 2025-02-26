@@ -3,7 +3,7 @@ export default {
 	assetName: 'Test asset',
 	evidenceName: 'Test evidence',
 	folderName: 'Test domain',
-	projectName: 'Test project',
+	perimeterName: 'Test perimeter',
 	riskAcceptanceName: 'Test risk acceptance',
 	riskAssessmentName: 'Test risk assessment',
 	riskAssessmentVersion: '1.4.2',
@@ -11,12 +11,13 @@ export default {
 	riskScenarioName: 'Test risk scenario',
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
+	securityExceptionName: 'Test exception',
 	threatName: 'Test threat',
 	description: 'Test description',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
 	user: {
-		email: 'User@tests.com',
+		email: 'user@tests.com',
 		password: 'pass123wordTest',
 		firstName: 'Test',
 		lastName: 'User'
@@ -31,12 +32,13 @@ export default {
 				'add_complianceassessment',
 				'add_evidence',
 				'add_policy',
-				'add_project',
+				'add_perimeter',
 				'add_riskacceptance',
 				'add_riskassessment',
 				'add_riskscenario',
 				'add_solution',
 				'add_threat',
+				'add_securityexception',
 				'change_appliedcontrol',
 				'change_asset',
 				'change_complianceassessment',
@@ -44,7 +46,7 @@ export default {
 				'change_entityassessment',
 				'change_evidence',
 				'change_policy',
-				'change_project',
+				'change_perimeter',
 				'change_referencecontrol',
 				'change_representative',
 				'change_requirementassessment',
@@ -53,6 +55,7 @@ export default {
 				'change_riskscenario',
 				'change_solution',
 				'change_threat',
+				'change_securityexception',
 				'delete_appliedcontrol',
 				'delete_asset',
 				'delete_complianceassessment',
@@ -60,7 +63,7 @@ export default {
 				'delete_entityassessment',
 				'delete_evidence',
 				'delete_policy',
-				'delete_project',
+				'delete_perimeter',
 				'delete_referencecontrol',
 				'delete_representative',
 				'delete_riskacceptance',
@@ -68,6 +71,7 @@ export default {
 				'delete_riskscenario',
 				'delete_solution',
 				'delete_threat',
+				'delete_securityexception',
 				'view_appliedcontrol',
 				'view_asset',
 				'view_complianceassessment',
@@ -78,7 +82,7 @@ export default {
 				'view_framework',
 				'view_loadedlibrary',
 				'view_policy',
-				'view_project',
+				'view_perimeter',
 				'view_referencecontrol',
 				'view_representative',
 				'view_requirementassessment',
@@ -93,7 +97,8 @@ export default {
 				'view_storedlibrary',
 				'view_threat',
 				'view_user',
-				'view_usergroup'
+				'view_usergroup',
+				'view_securityexception'
 			]
 		},
 		reader: {
@@ -109,7 +114,7 @@ export default {
 				'view_framework',
 				'view_loadedlibrary',
 				'view_policy',
-				'view_project',
+				'view_perimeter',
 				'view_referencecontrol',
 				'view_representative',
 				'view_requirementassessment',
@@ -124,13 +129,15 @@ export default {
 				'view_storedlibrary',
 				'view_threat',
 				'view_user',
-				'view_usergroup'
+				'view_usergroup',
+				'view_securityexception'
 			]
 		},
 		domainManager: {
 			name: 'Domain manager',
 			perms: [
 				'add_appliedcontrol',
+				'add_securityexception',
 				'add_asset',
 				'add_complianceassessment',
 				'add_entity',
@@ -138,7 +145,7 @@ export default {
 				'add_evidence',
 				'add_folder',
 				'add_policy',
-				'add_project',
+				'add_perimeter',
 				'add_riskacceptance',
 				'add_riskassessment',
 				'add_riskmatrix',
@@ -146,6 +153,7 @@ export default {
 				'add_solution',
 				'add_threat',
 				'change_appliedcontrol',
+				'change_securityexception',
 				'change_asset',
 				'change_complianceassessment',
 				'change_entity',
@@ -153,7 +161,7 @@ export default {
 				'change_evidence',
 				'change_folder',
 				'change_policy',
-				'change_project',
+				'change_perimeter',
 				'change_referencecontrol',
 				'change_representative',
 				'change_requirementassessment',
@@ -164,6 +172,7 @@ export default {
 				'change_solution',
 				'change_threat',
 				'delete_appliedcontrol',
+				'delete_securityexception',
 				'delete_asset',
 				'delete_complianceassessment',
 				'delete_entity',
@@ -171,7 +180,7 @@ export default {
 				'delete_evidence',
 				'delete_folder',
 				'delete_policy',
-				'delete_project',
+				'delete_perimeter',
 				'delete_referencecontrol',
 				'delete_representative',
 				'delete_riskacceptance',
@@ -190,7 +199,7 @@ export default {
 				'view_framework',
 				'view_loadedlibrary',
 				'view_policy',
-				'view_project',
+				'view_perimeter',
 				'view_referencecontrol',
 				'view_representative',
 				'view_requirementassessment',
@@ -205,13 +214,14 @@ export default {
 				'view_storedlibrary',
 				'view_threat',
 				'view_user',
-				'view_usergroup'
+				'view_usergroup',
+				'view_securityexception'
 			]
 		},
 		approver: {
 			name: 'Approver',
 			perms: [
-				'view_project',
+				'view_perimeter',
 				'view_riskassessment',
 				'view_appliedcontrol',
 				'view_policy',
@@ -233,7 +243,8 @@ export default {
 				'view_loadedlibrary',
 				'view_user',
 				'view_requirementmappingset',
-				'view_requirementmapping'
+				'view_requirementmapping',
+				'view_securityexception'
 			]
 		}
 	},
@@ -249,7 +260,7 @@ export default {
 	},
 	referenceControl: {
 		name: 'POL.PHYSICAL - Physical security policy',
-		category: 'policy',
+		// category: 'policy',
 		// csf_function: 'govern',
 		library: {
 			name: 'Usual reference controls',
@@ -260,7 +271,7 @@ export default {
 	},
 	referenceControl2: {
 		name: 'DOC.CONTROLS - Controls accountability matrix',
-		category: 'process',
+		// category: 'process',
 		// csf_function: 'protect',
 		library: {
 			name: 'Usual reference controls',

@@ -4,11 +4,9 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { TabGroup, Tab, getModalStore } from '@skeletonlabs/skeleton';
-	import { checkConstraints } from '$lib/utils/crud';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const modalStore: ModalStore = getModalStore();
@@ -40,18 +38,6 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + model.info.localName).toLowerCase(),
-				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 
@@ -100,11 +86,17 @@
 				{m.edit()}
 			</Anchor>
 		</div>
-		<div class="flex justify-center items-center w-full">
+		<div class="flex justify-center items-center w-full gap-5">
 			<span class="text-sm text-gray-500"
 				>{m.referenceEntitySemiColon()}
 				<a class="anchor" href="/entities/{ebiosRmStudy.reference_entity.id}"
 					>{ebiosRmStudy.reference_entity.str}</a
+				>
+			</span>
+			<span class="text-sm text-gray-500"
+				>{m.ebiosRmMatrixHelpText()}
+				<a class="anchor" href="/risk-matrices/{ebiosRmStudy.risk_matrix.id}"
+					>{ebiosRmStudy.risk_matrix.str}</a
 				>
 			</span>
 		</div>
@@ -194,6 +186,7 @@
 											source={model.table}
 											deleteForm={model.deleteForm}
 											URLModel={urlmodel}
+											baseEndpoint="/assets?ebios_rm_studies={$page.params.id}"
 										>
 											<button
 												slot="addButton"

@@ -7,9 +7,11 @@
 ```mermaid
 erDiagram
 
-    USER }o--o{ RISK_SCENARIO  : owns
-    USER }o--o{ APPLIED_CONTROL: owns
-    USER }o--o{ ASSET          : owns
+    USER }o--o{ RISK_SCENARIO : owns
+    USER }o--o{ APPLIED_CONTROL : owns
+    USER }o--o{ ASSET : owns
+    USER }o--o{ SECURITY_EXCEPTION : owns
+    USER |o--o{ SECURITY_EXCEPTION : approves
 
     USER_GROUP      ||--o{ USER      : contains
     ROLE            }o--|{ PERMISSION: contains
@@ -90,6 +92,7 @@ erDiagram
     LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
 
 ```
+
 ### Project management model
 
 ```mermaid
@@ -143,6 +146,12 @@ erDiagram
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
     PERIMETER                    |o--o{ RISK_ASSESSMENT       : contains
+    SECURITY_EXCEPTION           }o--o{ VULNERABILITY         : concerns
+    SECURITY_EXCEPTION           }o--o{ REQUIREMENT_ASSESSMENT: concerns
+    SECURITY_EXCEPTION           }o--o{ ASSET                 : concerns
+    SECURITY_EXCEPTION           }o--o{ RISK_SCENARIO         : concerns
+    SECURITY_EXCEPTION           }o--o{ APPLIED_CONTROL       : concerns
+    APPLIED_CONTROL              }o--o{ SECURITY_EXCEPTION    : mitigates
 
     FRAMEWORK {
         string  urn
@@ -267,6 +276,15 @@ erDiagram
         string  status
         int     severity
         json    references
+    }
+
+    SECURITY_EXCEPTION {
+        string  ref_id
+        string  name
+        string  description
+        string  status
+        int     severity
+        date    expiration
     }
 
 
@@ -401,7 +419,7 @@ erDiagram
 
 All objects can be linked to user-defined labels. Labels are simple strings with no blank, regex r"\w{0:36}".
 
-Labels are attached to the root folder. They can be read by everyone, added by any contributor, and modified or deleted only by global administrators. 
+Labels are attached to the root folder. They can be read by everyone, added by any contributor, and modified or deleted only by global administrators.
 
 ```mermaid
 erDiagram
@@ -430,6 +448,7 @@ All models have the following fields:
 The domain is the fundamental perimeter for access control. All objects, in particular domains, within a domain, have consistent access rights. If this granularity is not sufficient, the entity shall define new domains.
 
 Note: the IAM model is based on folders. A folder has a type among:
+
 - ROOT: the root folder, which is also called "global domain".
 - DOMAIN: a user-defined domain.
 - ENCLAVE: a invisible folder used to confine the actions of a third party.
@@ -438,6 +457,7 @@ Note: the IAM model is based on folders. A folder has a type among:
 
 Inside a domain, assessments can be grouped in perimeters, with no impact on access control.
 The perimeter has the following fields:
+
 - ref_id
 - name
 - description
@@ -445,7 +465,7 @@ The perimeter has the following fields:
 
 An assessment can only be attached to a perimeter that is in the same domain as the assessment.
 
-Note: perimeters where previously named "projects", but this was misleading.
+Note: perimeters were previously named "projects", but this was misleading.
 
 ### Project objects
 
@@ -513,15 +533,16 @@ Assets are of type primary or supporting. A primary asset has no parent, a suppo
 
 The following disaster recovery objectives (measured in seconds) can be defined on assets:
 
- | Abbreviation | Name                       | Description |
- | ------------ | -------------------------- | ----------- |
- | RTO          | Recovery Time Objective    | ...         |
- | RPO          | Recovery Point Objetive    | ...         |
- | MTD          | Maximum Tolerable Downtime | ...         |
+| Abbreviation | Name                       | Description |
+| ------------ | -------------------------- | ----------- |
+| RTO          | Recovery Time Objective    | ...         |
+| RPO          | Recovery Point Objetive    | ...         |
+| MTD          | Maximum Tolerable Downtime | ...         |
 
 Assets have security objectives. Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its primary assets. They are a subset of qualifications.
 
 Security objectives are measured using a specifc scale. For now, the following scales are defined:
+
 - 0-3: coded as 0-3
 - 1-4: coded as 0-3
 - FIPS-199: coded as 0-3
@@ -589,6 +610,7 @@ Vulnerabilities are used to clarify a risk scenario and to follow remediations, 
 Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed.
 
 The format of the references field is list of the following objects (* for mandatory):
+
 - string ref_id (*)
 - url reference_link
 - boolean is_cve
@@ -654,7 +676,7 @@ When a compliance assessment is created, each requirement of the corresponding f
 Here are the specific fields for requirement assessments:
 
 - result: --/compliant/partially compliant/non-compliant/not applicable
-- score: --/<integer value from min_score to max_score>.
+- score: --/`<integer value from min_score to max_score>`.
 - a status: (todo/in progress/in review/done) that facilitates reporting.
 
 The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
@@ -784,6 +806,30 @@ The state of a risk acceptance can be: created/submitted/accepted/rejected/revok
 The justification field can be edited only by the approver.
 
 Once a risk acceptance is active, the correponding risk assessments are frozen. They shall be cloned to make evolutions.
+
+## Security exceptions
+
+Security exceptions are used to trace assumed non-compliances, whether for assets, requirement assessments, risk scenarios, applied controls, vulnerabilities, or even something not linked to an existing object.
+
+Security exceptions can have zero, one or several owners.
+Security exceptions can have zero, or one approver.
+
+Security exceptions can be mitigated by applied controls.
+
+Security exceptions also have the following fields:
+
+- ref_id (defaults to empty string)
+- name
+- description
+- severity within values --/low/medium/high/critical (coded as an integer from -1 to 3)
+- status within values draft/in_review/approved/resolved/expired/deprecated
+- expiration date
+
+Only the approver shall be able to set the status to approved.
+
+Security exceptions are located in the governance menu.
+
+The performance of the UX shall be optimized, by avoiding to preload all possible targets for the security exception.
 
 ## Libraries
 
@@ -961,8 +1007,8 @@ To simplify access control, we use a RBAC model.
 | Administrator       | full access (except approval), and specifically management of domains, users and users rights                                     |
 | referential_manager | capacity to manage referentials in the root folder                                                                                |
 | Domain manager      | full access to selected domains (except approval), in particular managing rights for these domains. Read access to global objects |
-| Analyst             | readwrite acces to selected domains. Read access to global and domain objects                                            |
-| Reader              | read access to selected domains                                                                                          |
+| Analyst             | readwrite acces to selected domains. Read access to global and domain objects                                                     |
+| Reader              | read access to selected domains                                                                                                   |
 | Risk approver       | like reader, but with additional capability to approve risk acceptances                                                           |
 | Reviewer            | like reader, but with additional capability to review assessments.                                                                |
 
@@ -1214,6 +1260,8 @@ The objects manipulated by the third party (compliance assessment and evidences)
 ## Near-term evolutions
 
 We need to add in the near term the follwoing objects:
+
+- EBIOS-RM study
 - Audit campaign
 - Third-party campaign
 - Pentest follow-up
@@ -1225,27 +1273,28 @@ Each of these objects will have its specific datamodel. Factoring will be done a
 
 ### Mapping of essential concepts
 
-| EBIOS-RM (english)    | EBIOS-RM (french)       | CISO Assistant                                            |
-| --------------------- | ----------------------- | --------------------------------------------------------- |
-| Study                 | Etude                   | Study                                                     |
-| Studied object        | Objet de l'étude        | Description of the Study                                  |
-| Mission               | Mission                 | Mission of the reference entity added to the Study        |
-| Business asset        | Valeurs métier          | Primary asset                                             |
-| Supporting asset      | Bien support            | Supporting asset                                          |
+| EBIOS-RM (english)    | EBIOS-RM (french)         | CISO Assistant                                            |
+| --------------------- | ------------------------- | --------------------------------------------------------- |
+| Study                 | Etude                     | Study                                                     |
+| Studied object        | Objet de l'étude         | Description of the Study                                  |
+| Mission               | Mission                   | Mission of the reference entity added to the Study        |
+| Business asset        | Valeurs métier           | Primary asset                                             |
+| Supporting asset      | Bien support              | Supporting asset                                          |
 | Feared event          | Evénement redouté       | Risk analysis at asset level                              |
-| Impact                | Impact                  | Impact in a risk analysis                                 |
+| Impact                | Impact                    | Impact in a risk analysis                                 |
 | Security baseline     | Socle de sécurité       | Compliance frameworks and audits                          |
-| Risk origins          | Sources de risque       | RoTo                                                      |
-| Target objectives     | Objectifs visés         | RoTo                                                      |
-| Ecosystem             | Ecosystème              | Third Party Risk Management                               |
+| Risk origins          | Sources de risque         | RoTo                                                      |
+| Target objectives     | Objectifs visés          | RoTo                                                      |
+| Ecosystem             | Ecosystème               | Third Party Risk Management                               |
 | Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)        |
 | Security controls     | Mesures de sécurité     | Reference/applied controls                                |
 | Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability) |
-| Risk treatment        | Traitement du risque    | Applied controls in a risk analysis                       |
+| Risk treatment        | Traitement du risque      | Applied controls in a risk analysis                       |
 
 ### EBIOS-RM study
 
 The type EBIOS-RM study is a sort of assessment. It contains the following specific fields:
+
 - reference risk matrix (chosen at creation and immutable after creation)
 - ref_id
 - name of the study
@@ -1261,6 +1310,7 @@ The type EBIOS-RM study is a sort of assessment. It contains the following speci
 - a resulting risk assessment (workshop 5)
 
 The object feared events (workshop 1) contains the following fields:
+
 - primary asset
 - ref_id
 - name
@@ -1271,6 +1321,7 @@ The object feared events (workshop 1) contains the following fields:
 - justification
 
 The object risk_origin_target_objective (workshop 2) contains the following fields:
+
 - risk origin (--/state/organized crime/terrorist/activist/professional/amateur/avenger/pathological/)
 - target objective (text)
 - motivation (--/1 very low/2 low/3 significant/4 strong) (--/très peu/peu/assez/fortement motivé)
@@ -1281,6 +1332,7 @@ The object risk_origin_target_objective (workshop 2) contains the following fiel
 - justification
 
 The object ecosystem entity (workshop 3) links to a TPRM entity, and contains the following fields:
+
 - category (provider/partner/client/...)
 - third-party entity from TPRM (optional)
 - Dependence
@@ -1291,6 +1343,7 @@ The object ecosystem entity (workshop 3) links to a TPRM entity, and contains th
 - justification
 
 The object strategic attack path (workshop 3) contains the following fields:
+
 - risk_origin_target_objective
 - description
 - affected stakeholders
@@ -1301,6 +1354,7 @@ The object strategic attack path (workshop 3) contains the following fields:
 - justification
 
 THe object operational scenario (workshop 4) contains the following fields:
+
 - strategic attack path
 - list of techniques/threats (typically from Mitre Att@ck)
 - description
@@ -1309,6 +1363,7 @@ THe object operational scenario (workshop 4) contains the following fields:
 - justification
 
 The frontend for risk study shall propose the following steps:
+
 - workshop 1: framing and security baseline (cadrage et socle de sécurité)
   - define the study, the reference entity and its mission
   - select/define primary assets ("valeurs métier")
@@ -1323,11 +1378,10 @@ The frontend for risk study shall propose the following steps:
   - list of strategic scenarios/attack paths
 - workshop 4: operational scenarios
   - list of operational scenarios
-  - The risk assessment is generated automatically, thanks to a dedicated button. When the risk assessment is generated again, automatic versioning is applied, and mitigations can be copied on demand (based on ref_id of operational scenarios). 
+  - The risk assessment is generated automatically, thanks to a dedicated button. When the risk assessment is generated again, automatic versioning is applied, and mitigations can be copied on demand (based on ref_id of operational scenarios).
 - workshop 5: risk treatment
   - After generation, a risk assessment is fully editable, to allow customisation, and the risk assessment can be managed normally as any other risk assessment.
   - risk treatment is based on the risk assessment.
-
 
 ```mermaid
 erDiagram
@@ -1440,3 +1494,47 @@ erDiagram
 
 - EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
 - the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
+
+## Domain import/export
+
+### MVP
+
+- It is possible to export a domain, and reimport it on another instance.
+- The imported domain is created as a new child domain of the global domain.
+- The name of the domain is not exported. The name of the imported domain is selected at import. It shall be unique.
+- Subdomains are not exported, only the domain itself.
+- Objects coming from a library shall be available on the target. If not, an error message is displayed to point to the missing library.
+- Objects not coming from library are created in the target domain, even if they come from an upper domain.
+- The export is a zip file containing a json dump of concerned objects and attached evidences.
+- The import is atomic, any error provokes a rollback.
+- The export function is only available in the PRO version.
+- The version of CISO Assistant is published in the export. The version at import shall be identical.
+
+### Additional features
+
+- It shall be possible to see the list of objects that would be exported, and to select/deselect some of them while keeping consistency. This should include evidences with their size.
+- It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency.  This should include evidences with their size.
+- It shall be possible to optionally export subdomains along with the domain. The import shall be flattened if the target is not a PRO version.
+
+## Asset compliance (draft)
+
+```mermaid
+erDiagram
+
+    COMPLIANCE_INDICATOR          }o--o{ ASSET                : applies_to
+    OBSERVATION                   }o--|| ASSET                : applies_to
+    OBSERVATION                   }o--|| COMPLIANCE_INDICATOR : corresponds_to
+ 
+    COMPLIANCE_INDICATOR {
+        string ref_id
+        string name
+        string description
+        json   tracker_metadata
+    }
+
+    OBSERVATION {
+        datetime when
+        json     tracked_data
+        boolean  compliance_status
+    }
+```
