@@ -25,6 +25,7 @@
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
+	import { listViewFields } from '$lib/utils/table';
 	const modalStore: ModalStore = getModalStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
@@ -44,7 +45,7 @@
 
 	$: data.relatedModels = Object.fromEntries(Object.entries(data.relatedModels).sort());
 
-	if (data.model.detailViewFields) {
+	if (data.model?.detailViewFields) {
 		data.data = Object.fromEntries(
 			Object.entries(data.data).filter(
 				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
@@ -457,8 +458,18 @@
 								{safeTranslate('associated-' + model.info.localNamePlural)}
 							</h4>
 						</div>
+						{@const field = data.model.reverseForeignKeyFields.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
 						{#if model.table && !model.disableAddDeleteButtons}
-							<ModelTable source={model.table} deleteForm={model.deleteForm} URLModel={urlmodel}>
+							<ModelTable
+								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+								source={model.table}
+								deleteForm={model.deleteForm}
+								URLModel={urlmodel}
+								fields={fieldsToUse}
+							>
 								<button
 									slot="addButton"
 									class="btn variant-filled-primary self-end my-auto"
@@ -469,7 +480,12 @@
 								>
 							</ModelTable>
 						{:else if model.table}
-							<ModelTable source={model.table} URLModel={urlmodel} />
+							<ModelTable
+								source={model.table}
+								URLModel={urlmodel}
+								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+								fields={fieldsToUse}
+							/>
 						{/if}
 					{/if}
 				{/each}

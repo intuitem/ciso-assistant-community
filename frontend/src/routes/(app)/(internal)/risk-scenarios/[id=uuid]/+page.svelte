@@ -135,11 +135,21 @@
 	<div class="flex flex-row space-x-2">
 		<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
-			<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
+			<ModelTable
+				source={data.tables['assets']}
+				hideFilters={true}
+				URLModel="assets"
+				baseEndpoint="/assets?risk_scenarios={$page.params.id}"
+			/>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.threats()}</h4>
-			<ModelTable source={data.tables['threats']} hideFilters={true} URLModel="threats" />
+			<ModelTable
+				source={data.tables['threats']}
+				hideFilters={true}
+				URLModel="threats"
+				baseEndpoint="/threats?risk_scenarios={$page.params.id}"
+			/>
 		</div>
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
@@ -148,6 +158,7 @@
 			source={data.tables['vulnerabilities']}
 			hideFilters={true}
 			URLModel="vulnerabilities"
+			baseEndpoint="/vulnerabilities?risk_scenarios={$page.params.id}"
 		/>
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
@@ -156,6 +167,7 @@
 			source={data.tables['security-exceptions']}
 			hideFilters={true}
 			URLModel="security-exceptions"
+			baseEndpoint="/security-exceptions?risk_scenarios={$page.params.id}"
 		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
@@ -172,6 +184,7 @@
 				source={data.tables['risk_scenarios_e']}
 				hideFilters={true}
 				URLModel="applied-controls"
+				baseEndpoint="/applied-controls?risk_scenarios_e={$page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
@@ -218,6 +231,7 @@
 				source={data.tables['risk_scenarios']}
 				hideFilters={true}
 				URLModel="applied-controls"
+				baseEndpoint="/applied-controls?risk_scenarios={$page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">

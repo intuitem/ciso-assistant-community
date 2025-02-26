@@ -180,10 +180,6 @@ test('user usual routine actions are working correctly', async ({
 			description: vars.description,
 			attachment: vars.file,
 			folder: vars.folderName,
-			requirement_assessments: [
-				vars.requirement_assessment.name,
-				vars.requirement_assessment2.name
-			],
 			link: 'https://intuitem.com/'
 		});
 

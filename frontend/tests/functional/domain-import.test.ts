@@ -65,6 +65,8 @@ test('User can import a domain from a .bak file', async ({ logedPage, page }) =>
 		await expect(toast).toHaveText(/successfully imported/i);
 
 		// Confirm that the number of rows has increased.
+		// take a quick nap to make sure the data is loaded
+		await page.waitForTimeout(3000);
 		const newRowCount = await getRowCount(page);
 		expect(newRowCount).toBeGreaterThan(initialRowCount);
 	});
@@ -94,6 +96,8 @@ test('User can load demo data', async ({ logedPage, page }) => {
 		await expect(toast).toHaveText(/successfully imported/i);
 
 		// Confirm that the new row count is greater than the initial.
+		// take a quick nap to make sure the data is loaded
+		await page.waitForTimeout(3000);
 		const newRowCount = await getRowCount(page);
 		expect(newRowCount).toBeGreaterThan(initialRowCount);
 	});

@@ -70,6 +70,7 @@ export class PageContent extends BasePage {
 	}
 
 	async importLibrary(name: string, urn?: string, language = 'English') {
+		await this.page.waitForTimeout(3000);
 		await this.page.getByTestId('search-input').fill(name);
 		if (
 			(await this.tab('Loaded libraries').isVisible()) &&

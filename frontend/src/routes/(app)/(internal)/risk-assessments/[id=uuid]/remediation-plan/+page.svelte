@@ -92,6 +92,20 @@
 			<ModelTable
 				source={makeSourceFromAppliedControls(scenario.applied_controls)}
 				URLModel="applied-controls"
+				baseEndpoint="/applied-controls?risk_scenarios={scenario.id}"
+				fields={[
+					'name',
+					'priority',
+					'description',
+					'category',
+					'csf_function',
+					'reference_control',
+					'eta',
+					'effort',
+					'cost',
+					'link',
+					'status'
+				]}
 			/>
 		{/if}
 		{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}

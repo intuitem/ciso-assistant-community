@@ -2,6 +2,7 @@ import hashlib
 from enum import Enum
 from re import sub
 from typing import Literal
+from datetime import datetime
 
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
@@ -250,3 +251,29 @@ def compare_schema_versions(
             raise ValidationError(
                 {"error": "importVersionNotCompatibleWithCurrentVersion"}
             )
+
+
+def time_state(date_str: str) -> dict:
+    """
+    Determine the state based on the provided date string.
+
+    Args:
+        date_str (str): Date string in ISO 8601 format.
+
+    Returns:
+        dict: A dictionary with 'name' and 'hexcolor' keys indicating the state.
+              - 'incoming' if the date is in the future.
+              - 'outdated' if the date is in the past.
+              - 'today' if the date exactly matches the current time.
+    """
+    # Parse the date string
+    eta = datetime.fromisoformat(date_str)
+    # Get the current date and time. If eta contains timezone info, use it.
+    now = datetime.now(eta.tzinfo) if eta.tzinfo else datetime.now()
+
+    if eta > now:
+        return {"name": "incoming", "hexcolor": "#93c5fd"}
+    elif eta < now:
+        return {"name": "outdated", "hexcolor": "#f87171"}
+    else:
+        return {"name": "today", "hexcolor": "#fbbf24"}

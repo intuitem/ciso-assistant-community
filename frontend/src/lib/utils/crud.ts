@@ -453,7 +453,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'folders',
 				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
 			},
-			{ field: 'applied_controls', urlModel: 'applied-controls' }
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'evidences', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'requirement-assessments' }
 		]
 	},
 	'compliance-assessments': {

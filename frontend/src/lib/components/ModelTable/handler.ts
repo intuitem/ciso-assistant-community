@@ -4,19 +4,35 @@ import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';
 
-export const loadTableData = async (state: State, URLModel: urlModel, endpoint: string) => {
-	const response = await fetch(`${endpoint}?${getParams(state)}`).then((res) => res.json());
+export interface LoadTableDataParams {
+	state: State;
+	URLModel: urlModel;
+	endpoint: string;
+	fields?: string[];
+}
+
+export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadTableDataParams) => {
+	const url = new URL(endpoint, window.location.origin);
+	const params = new URLSearchParams(url.search);
+	const newParams = getParams(state);
+
+	newParams.forEach((value, key) => params.append(key, value));
+	url.search = params.toString();
+
+	const response = await fetch(url.toString()).then((res) => res.json());
 	state.setTotalRows(response.count);
 
-	const bodyData = tableSourceMapper(response.results, listViewFields[URLModel as urlModel].body);
+	const fieldsToUse =
+		fields.length > 0
+			? { ...listViewFields[URLModel as urlModel], head: fields, body: fields }
+			: listViewFields[URLModel as urlModel];
 
-	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
-		(obj, key, index) => {
-			obj[key] = listViewFields[URLModel as urlModel].head[index];
-			return obj;
-		},
-		{}
-	);
+	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
+
+	const headData: Record<string, string> = fieldsToUse.body.reduce((obj, key, index) => {
+		obj[key] = fieldsToUse.head[index];
+		return obj;
+	}, {});
 
 	const table: TableSource = {
 		head: headData,

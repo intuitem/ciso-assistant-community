@@ -414,10 +414,20 @@
 						<ModelTable
 							URLModel="applied-controls"
 							source={appliedControlTodoTable}
+							fields={[
+								'name',
+								'category',
+								'csf_function',
+								'folder',
+								'ranking_score',
+								'eta',
+								'state'
+							]}
 							hideFilters={true}
 							search={false}
 							rowsPerPage={false}
 							orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
+							baseEndpoint="/applied-controls?todo=true"
 						/>
 						<div class="text-sm">
 							<i class="fa-solid fa-info-circle" />
@@ -441,6 +451,16 @@
 								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
+								fields={[
+									'name',
+									'category',
+									'csf_function',
+									'folder',
+									'eta',
+									'expiry_date',
+									'state'
+								]}
+								baseEndpoint="/applied-controls?to_review=true"
 							/>
 						</div>
 						<div class="w-full">
@@ -451,6 +471,8 @@
 								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
+								fields={['name', 'risk_scenarios', 'expiry_date', 'state']}
+								baseEndpoint="/risk-acceptances?to_review=true&approver={$page.data.user.id}"
 							/>
 						</div>
 					</div>

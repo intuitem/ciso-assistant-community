@@ -18,6 +18,7 @@
 	import { safeTranslate } from '$lib/utils/i18n.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
+	import { listViewFields } from '$lib/utils/table';
 
 	export let data;
 	const showRisks = true;
@@ -245,6 +246,16 @@
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
 				search={false}
+				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				fields={[
+					'ref_id',
+					'name',
+					'threats',
+					'existing_applied_controls',
+					'current_level',
+					'applied_controls',
+					'residual_level'
+				]}
 			>
 				<button
 					slot="addButton"
