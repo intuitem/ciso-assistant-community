@@ -1,5 +1,7 @@
 ## Testing locally 🚀
 
+New: use the config builder on the `config` folder.
+
 To run CISO Assistant Enterprise locally in a straightforward way, you can use Docker compose.
 
 1. Make sure you are located in the enterprise directory of the repository

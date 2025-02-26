@@ -1,0 +1,4 @@
+questionary
+rich
+Jinja2
+icecream
