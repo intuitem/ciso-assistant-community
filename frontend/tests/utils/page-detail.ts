@@ -40,7 +40,6 @@ export class PageDetail extends BasePage {
 	}
 
 	async verifyItem(values: { [k: string]: any }) {
-		console.log('values', values);
 		if (this.url.includes('risk-assessments')) {
 			if ('perimeter' in values) {
 				await expect
