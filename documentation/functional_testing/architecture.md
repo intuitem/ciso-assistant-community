@@ -96,11 +96,12 @@ erDiagram
 
 ### THE MOST IMPORTANT RULE (in ./tests)
 
-**Importing files from `./utils` in the test code is STRICTLY FORBIDDEN except for the following files:**
+**Importing variables from `./utils` in the test code is STRICTLY FORBIDDEN except for the following files:**
 1. `./utils/core/base.ts`
 2. `./utils/core/utils.ts`
 3. `./utils/core/test-data.ts`
 4. `./utils/core/hot-reloader.ts`
+Note that this restriction doesn't include type-only import declarations.
 
 ### Fixture coding rules (in ./core/fixtures.ts)
 
