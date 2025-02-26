@@ -197,7 +197,7 @@
 	"watchlist": "Lista obserwacyjna",
 	"watchlistDescription": "Elementy, które wygasły lub wygasną w ciągu najbliższych 30 dni",
 	"measuresToReview": "Kontrole do przeglądu",
-	"exceptionsToReview": "Akceptacje do przeglądu",
+	"acceptancesToReview": "Akceptacje do przeglądu",
 	"expired": "Wygasłe",
 	"upcoming": "Nadchodzące",
 	"today": "Dzisiaj",
@@ -729,7 +729,7 @@
 	"observationSemiColon": "Obserwacja:",
 	"tableMode": "Tryb tabeli",
 	"owner": "Właściciel",
-	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko.",
+	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Można je znaleźć w menu zarządzanie.",
 	"licenseSeats": "Miejsca na licencję",
 	"licenseExpiration": "Wygaśnięcie licencji",
 	"answer": "Odpowiedź",
@@ -752,7 +752,7 @@
 	"mailFailedToSend": "Nie udało się wysłać maila",
 	"questionOrQuestions": "Pytanie(a)",
 	"successfullyUpdatedClientSettings": "Ustawienia klienta zostały pomyślnie zaktualizowane. Odśwież stronę.",
-	"xRaysEmptyMessage": "Aby użyć promieni rentgenowskich, musisz utworzyć co najmniej jeden projekt.",
+	"xRaysEmptyMessage": "Aby użyć promieni rentgenowskich, musisz utworzyć co najmniej jeden zakres.",
 	"suggestControls": "Zaproponuj kontrole",
 	"createAppliedControlsFromSuggestionsHelpText": "Utwórz kontrolki stosowane na podstawie sugerowanych kontrolek referencyjnych wymagań struktury",
 	"createAppliedControlsFromSuggestionsSuccess": "Zastosowano pomyślnie elementy sterujące utworzone na podstawie sugerowanych elementów referencyjnych",
@@ -867,5 +867,6 @@
 	"documentationScore": "Wynik dokumentacji",
 	"useDocumentationScore": "Korzystanie z punktacji dokumentacji",
 	"useDocumentationScoreHelpText": "Drugi wynik (wynik dokumentacji) będzie dostępny do oceny wymagań.",
-	"publicationDate": "Data publikacji"
+	"publicationDate": "Data publikacji",
+	"filterby": "Filtruj według"
 }

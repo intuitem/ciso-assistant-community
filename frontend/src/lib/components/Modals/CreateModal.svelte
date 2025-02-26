@@ -18,6 +18,7 @@
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let formAction = '?/create';
 	export let context = 'create';
+	export let additionalInitialData = {};
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
 
@@ -51,6 +52,7 @@
 			{form}
 			{customNameDescription}
 			{importFolder}
+			{additionalInitialData}
 			{suggestions}
 			{parent}
 			{invalidateAll}

@@ -17,15 +17,6 @@ type GetOptionsParams = {
 	selfSelect?: boolean;
 };
 
-export function checkConstraints(constraints: { [key: string]: any }, foreignKeys: any): string[] {
-	const emptyConstraintsList = [];
-	for (const [key, constraint] of Object.entries(constraints)) {
-		if (constraint.required && foreignKeys[key])
-			if (foreignKeys[key].length === 0) emptyConstraintsList.push(key);
-	}
-	return emptyConstraintsList;
-}
-
 function getValue(object: { [key: string]: any }, keys: string | string[]) {
 	if (typeof keys === 'string') {
 		return object[keys];
@@ -57,8 +48,9 @@ export const getOptions = ({
 		.map((object) => {
 			const my_label =
 				label != 'auto'
-					? object[label]
-					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
+					? (object[label] ?? '')
+					: (append(object['ref_id'], object['name'] ? object['name'] : object['description']) ??
+						'');
 			return {
 				label:
 					extra_fields.length > 0
@@ -107,6 +99,7 @@ interface ForeignKeyField {
 	urlParams?: string;
 	detail?: boolean;
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
+	disableAddDeleteButtons?: boolean;
 }
 
 interface Field {
@@ -235,7 +228,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
@@ -264,13 +258,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' },
-			{ field: 'progress_field' }
+			{ field: 'progress_field' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
@@ -339,7 +335,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
@@ -391,7 +388,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' }
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [
@@ -493,7 +491,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
+			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		]
 	},
 	'stored-libraries': {
@@ -745,6 +744,30 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
+	},
+	'security-exceptions': {
+		name: 'securityexception',
+		localName: 'securityException',
+		localNamePlural: 'securityExceptions',
+		verboseName: 'Security exception',
+		verboseNamePlural: 'Security exceptions',
+		foreignKeyFields: [
+			{ field: 'owners', urlModel: 'users' },
+			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
+		reverseForeignKeyFields: [
+			{ field: 'security_exceptions', urlModel: 'applied-controls', disableAddDeleteButtons: true },
+			{ field: 'security_exceptions', urlModel: 'assets', disableAddDeleteButtons: true },
+			{ field: 'security_exceptions', urlModel: 'vulnerabilities', disableAddDeleteButtons: true },
+			{
+				field: 'security_exceptions',
+				urlModel: 'requirement-assessments',
+				disableAddDeleteButtons: true
+			},
+			{ field: 'security_exceptions', urlModel: 'risk-scenarios', disableAddDeleteButtons: true }
+		]
 	}
 };
 
@@ -754,18 +777,14 @@ export const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
-	libraries: {
+	'stored-libraries': {
 		locales: LanguageDisplay,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
-	// "stored-libraries": {
-	// 	locale: LanguageDisplay,
-	// 	[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	// },
-	// "loaded-libraries": {
-	// 	locale: LanguageDisplay
-	// 	// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	// },
+	'loaded-libraries': {
+		locales: LanguageDisplay,
+		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
+	},
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
 	}
@@ -900,30 +919,6 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		}
 	}
 };
-
-export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any, language: string) => any } =
-	{
-		frameworks: async ({ fetch }) => {
-			// ({ fetch }, language)
-			const endpoint = `${BASE_API_URL}/frameworks/`;
-			const res = await fetch(endpoint);
-			const response_data = await res.json();
-			const frameworks = response_data.results;
-
-			let compliance_assessment_req = null;
-			let compliance_assessment_data = null;
-
-			for (const framework of frameworks) {
-				compliance_assessment_req = await fetch(
-					`${BASE_API_URL}/compliance-assessments/?framework=${framework.id}`
-				);
-				compliance_assessment_data = await compliance_assessment_req.json();
-				framework.compliance_assessments = compliance_assessment_data.count;
-			}
-
-			return frameworks;
-		}
-	};
 
 export const urlParamModelVerboseName = (model: string): string => {
 	return URL_MODEL_MAP[model]?.verboseName || '';

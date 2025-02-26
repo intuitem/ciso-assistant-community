@@ -33,6 +33,7 @@ export const actions: Actions = {
 		});
 		const data = await response.json();
 		if (response.status >= 400) {
+			console.error(data);
 			switch (data.error) {
 				case 'errorBackupInvalidVersion':
 					setFlash({ type: 'error', message: m.backupVersionError() }, event);

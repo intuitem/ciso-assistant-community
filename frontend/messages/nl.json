@@ -197,7 +197,7 @@
 	"watchlist": "Volglijst",
 	"watchlistDescription": "Items die zijn verlopen of binnen de komende 30 dagen verlopen",
 	"measuresToReview": "Te beoordelen toegepaste controles",
-	"exceptionsToReview": "Te beoordelen acceptaties",
+	"acceptancesToReview": "Te beoordelen acceptaties",
 	"expired": "Verlopen",
 	"upcoming": "Aankomend",
 	"today": "Vandaag",
@@ -729,7 +729,7 @@
 	"observationSemiColon": "Observatie:",
 	"tableMode": "Tabelmodus",
 	"owner": "Eigenaar",
-	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het tabblad risico.",
+	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het bestuursmenu.",
 	"licenseSeats": "Licentieplaatsen",
 	"licenseExpiration": "Licentie verloopt",
 	"answer": "Antwoord",
@@ -867,5 +867,6 @@
 	"documentationScore": "Documentatie score",
 	"useDocumentationScore": "Documentatiescore gebruiken",
 	"useDocumentationScoreHelpText": "Een tweede score (documentatiescore) zal beschikbaar zijn om de vereisten te beoordelen.",
-	"publicationDate": "Publicatiedatum"
+	"publicationDate": "Publicatiedatum",
+	"filterBy": "Filteren op"
 }

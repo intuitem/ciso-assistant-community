@@ -197,7 +197,7 @@
 	"watchlist": "Lista de seguimiento",
 	"watchlistDescription": "Elementos que han caducado o caducarán en los próximos 30 días",
 	"measuresToReview": "Controles aplicados a revisar",
-	"exceptionsToReview": "Aceptaciones a revisar",
+	"acceptancesToReview": "Aceptaciones a revisar",
 	"expired": "Caducado",
 	"upcoming": "Próximo",
 	"today": "Hoy",
@@ -729,7 +729,7 @@
 	"observationSemiColon": "Observación:",
 	"tableMode": "Modo de tabla",
 	"owner": "Titular",
-	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puedes encontrarlos en la pestaña de riesgo.",
+	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puede encontrarlas en el menú de gobernanza.",
 	"licenseSeats": "Asientos de licencia",
 	"licenseExpiration": "Caducidad de la licencia",
 	"answer": "Respuesta",
@@ -752,7 +752,7 @@
 	"mailFailedToSend": "El correo no se pudo enviar",
 	"questionOrQuestions": "Preguntas)",
 	"successfullyUpdatedClientSettings": "La configuración del cliente se actualizó correctamente, actualice la página.",
-	"xRaysEmptyMessage": "Debes crear al menos un proyecto para poder utilizar rayos X.",
+	"xRaysEmptyMessage": "Debes crear al menos un alcance para poder utilizar rayos X.",
 	"suggestControls": "Sugerir controles",
 	"createAppliedControlsFromSuggestionsHelpText": "Crear controles aplicados a partir de los controles de referencia sugeridos por los requisitos del marco",
 	"createAppliedControlsFromSuggestionsSuccess": "Controles aplicados creados exitosamente a partir de los controles de referencia sugeridos",
@@ -867,5 +867,6 @@
 	"documentationScore": "Puntuación de la documentación",
 	"useDocumentationScore": "Utilizar la puntuación de la documentación",
 	"useDocumentationScoreHelpText": "Se dispondrá de una segunda puntuación (puntuación de la documentación) para evaluar los requisitos.",
-	"publicationDate": "Fecha de publicación"
+	"publicationDate": "Fecha de publicación",
+	"filterBy": "Filtrar por"
 }

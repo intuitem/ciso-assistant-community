@@ -44,21 +44,6 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				const createSchema = modelSchema(e.urlModel);
 				const createForm = await superValidate(zod(createSchema));
 
-				const foreignKeys: Record<string, any> = {};
-
-				if (info.foreignKeyFields) {
-					for (const keyField of info.foreignKeyFields) {
-						const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-						const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-						const response = await fetch(url);
-						if (response.ok) {
-							foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-						} else {
-							console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-						}
-					}
-				}
-
 				const selectOptions: Record<string, any> = {};
 
 				if (info.selectFields) {
@@ -85,7 +70,6 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 					table,
 					deleteForm,
 					createForm,
-					foreignKeys,
 					selectOptions
 				};
 			})

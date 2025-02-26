@@ -5,8 +5,8 @@
 	export let ref_id: string;
 	export let name: string;
 	export let description: string;
-	export let threats: Record<string, unknown>[];
-	export let reference_controls: Record<string, unknown>[];
+	export let threats: Record<string, unknown>[] = [];
+	export let reference_controls: Record<string, unknown>[] = [];
 	export let children: Record<string, unknown>[];
 	export let assessable: boolean;
 

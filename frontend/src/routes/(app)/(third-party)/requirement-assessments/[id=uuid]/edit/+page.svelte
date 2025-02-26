@@ -24,7 +24,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import {
 		ProgressRadial,
@@ -95,6 +94,25 @@
 			component: modalComponent,
 			// Data
 			title: safeTranslate('add-' + data.evidenceModel.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalSecurityExceptionCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.securityExceptionCreateForm,
+				formAction: '?/createSecurityException',
+				model: data.securityExceptionModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + data.securityExceptionModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -177,12 +195,24 @@
 
 	let tabSet = $page.data.user.is_third_party ? 1 : 0;
 
+	// Refresh AutompleteSelect to assign created applied control/evidence
+	let refreshKey = false;
+	function forceRefresh() {
+		refreshKey = !refreshKey;
+	}
+
 	$: if (form && form.newControl) {
+		forceRefresh();
 		$formStore.applied_controls.push(form.newControl);
 	}
 
 	$: if (form && form.newEvidence) {
+		forceRefresh();
 		$formStore.evidences.push(form.newEvidence);
+	}
+
+	$: if (form && form.newSecurityException) {
+		$formStore.security_exceptions.push(form.newSecurityException);
 	}
 </script>
 
@@ -354,7 +384,10 @@
 							>{m.appliedControls()}
 						</Tab>
 					{/if}
-					<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
+					<Tab bind:group={tabSet} name="evidences_tab" value={1}>{m.evidences()}</Tab>
+					<Tab bind:group={tabSet} name="security_exceptions_tab" value={2}
+						>{m.securityExceptions()}</Tab
+					>
 					<svelte:fragment slot="panel">
 						{#if tabSet === 0 && !$page.data.user.is_third_party}
 							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
@@ -398,15 +431,18 @@
 										type="button"><i class="fa-solid fa-plus mr-2" />{m.addAppliedControl()}</button
 									>
 								</span>
-								<AutocompleteSelect
-									multiple
-									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
-									field="applied_controls"
-								/>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="applied-controls"
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', $page.data.requirementAssessment.folder.id]
+										]}
+										optionsExtraFields={[['folder', 'str']]}
+										field="applied_controls"
+									/>
+								{/key}
 								<ModelTable
 									source={$page.data.tables['applied-controls']}
 									hideFilters={true}
@@ -429,19 +465,48 @@
 										type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 									>
 								</span>
-								<AutocompleteSelect
-									multiple
-									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['evidences'],
-										extra_fields: [['folder', 'str']]
-									})}
-									field="evidences"
-								/>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="evidences"
+										optionsExtraFields={[['folder', 'str']]}
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', $page.data.requirementAssessment.folder.id]
+										]}
+										field="evidences"
+									/>
+								{/key}
 								<ModelTable
 									source={$page.data.tables['evidences']}
 									hideFilters={true}
 									URLModel="evidences"
+								/>
+							</div>
+						{/if}
+						{#if tabSet === 2 && !$page.data.user.is_third_party}
+							<div
+								class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+							>
+								<span class="flex flex-row justify-end items-center">
+									<button
+										class="btn variant-filled-primary self-end"
+										on:click={modalSecurityExceptionCreateForm}
+										type="button"
+										><i class="fa-solid fa-plus mr-2" />{m.addSecurityException()}</button
+									>
+								</span>
+								<AutocompleteSelect
+									multiple
+									{form}
+									optionsEndpoint="security-exceptions"
+									optionsExtraFields={[['folder', 'str']]}
+									field="security_exceptions"
+								/>
+								<ModelTable
+									source={$page.data.tables['security-exceptions']}
+									hideFilters={true}
+									URLModel="security-exceptions"
 								/>
 							</div>
 						{/if}

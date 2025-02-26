@@ -5,7 +5,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
@@ -138,7 +137,8 @@
 							<AutocompleteSelect
 								form={_form}
 								multiple
-								options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
+								optionsEndpoint="users?is_third_party=false"
+								optionsLabelField="email"
 								field="owner"
 								label={m.owner()}
 							/>
@@ -164,40 +164,49 @@
 					</span>
 					<TextArea form={_form} field="description" rows={6} label={m.description()} />
 				</div>
-				<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-scroll">
+				<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-auto">
 					<AutocompleteSelect
 						multiple
 						form={_form}
-						options={getOptions({
-							objects: data.foreignKeys['assets'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="assets"
+						optionsLabelField="auto"
+						optionsExtraFields={[['folder', 'str']]}
 						field="assets"
+						optionsDetailedUrlParameters={[
+							['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						]}
 						label={m.assets()}
-						helpText={m.riskScenarioAssetHelpText()}
 					/>
 					<AutocompleteSelect
 						form={_form}
 						multiple
-						options={getOptions({
-							objects: data.foreignKeys['threats'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="threats"
+						optionsDetailedUrlParameters={[
+							['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						]}
+						optionsExtraFields={[['folder', 'str']]}
+						optionsLabelField="auto"
 						field="threats"
 						label={m.threats()}
 					/>
 					<AutocompleteSelect
 						multiple
 						form={_form}
-						options={getOptions({
-							objects: data.foreignKeys['vulnerabilities'],
-							extra_fields: [['folder', 'str']],
-							label: 'auto'
-						})}
+						optionsEndpoint="vulnerabilities"
+						optionsDetailedUrlParameters={[
+							['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						]}
+						optionsExtraFields={[['folder', 'str']]}
 						field="vulnerabilities"
 						label={m.vulnerabilities()}
+					/>
+					<AutocompleteSelect
+						multiple
+						form={_form}
+						optionsEndpoint="security-exceptions"
+						optionsExtraFields={[['folder', 'str']]}
+						field="security_exceptions"
+						label={m.securityExceptions()}
 					/>
 				</div>
 			</div>
@@ -212,10 +221,11 @@
 								<AutocompleteSelect
 									multiple
 									form={_form}
-									options={getOptions({
-										objects: data.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
+									optionsDetailedUrlParameters={[
+										['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+									]}
 									field="existing_applied_controls"
 									label={m.existingControls()}
 									helpText={m.existingControlsHelper()}
@@ -287,10 +297,11 @@
 								<AutocompleteSelect
 									multiple
 									form={_form}
-									options={getOptions({
-										objects: data.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
+									optionsEndpoint="applied-controls"
+									optionsExtraFields={[['folder', 'str']]}
+									optionsDetailedUrlParameters={[
+										['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+									]}
 									field="applied_controls"
 									label={m.extraAppliedControls()}
 									helpText={m.extraControlsHelper()}

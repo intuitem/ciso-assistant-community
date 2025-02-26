@@ -14,7 +14,6 @@
 	} from '@skeletonlabs/skeleton';
 
 	import { goto } from '$app/navigation';
-	import { getSecureRedirect } from '$lib/utils/helpers';
 
 	import { getModalStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
@@ -38,10 +37,9 @@
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { displayScoreColor } from '$lib/utils/helpers';
+	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
-	import { nodeIsDragged } from '@unovis/ts/components/graph/modules/node/style';
 
 	$: tree = data.tree;
 
@@ -108,11 +106,43 @@
 		return resultCounts;
 	};
 
+	let selectedStatus = ['done', 'to_do', 'in_progress', 'in_review'];
+	let selectedResults = [
+		'compliant',
+		'non_compliant',
+		'partially_compliant',
+		'not_assessed',
+		'not_applicable'
+	];
+	function toggleItem(item, selectedItems) {
+		if (selectedItems.includes(item)) {
+			return selectedItems.filter((s) => s !== item);
+		} else {
+			return [...selectedItems, item];
+		}
+	}
+
+	function toggleStatus(status) {
+		selectedStatus = toggleItem(status, selectedStatus);
+	}
+
+	function toggleResult(result) {
+		selectedResults = toggleItem(result, selectedResults);
+	}
+
+	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
+		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
+		return (
+			!(!displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
+			((!selectedStatus.includes(node.status) || !selectedResults.includes(node.result)) &&
+				node.assessable)
+		);
+	}
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
 			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
-			const hidden = !(!$displayOnlyAssessableNodes || node.assessable || hasAssessableChildren);
+			const hidden = isNodeHidden(node, $displayOnlyAssessableNodes);
 
 			return {
 				id: id,
@@ -120,7 +150,8 @@
 				contentProps: {
 					...node,
 					canEditRequirementAssessment,
-					hidden
+					hidden,
+					selectedStatus
 				},
 				lead: TreeViewItemLead,
 				leadProps: {
@@ -220,10 +251,6 @@
 			}
 		};
 		modalStore.trigger(modal);
-	}
-
-	$: if (form && form.redirect) {
-		goto(getSecureRedirect(form.redirect));
 	}
 
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
@@ -433,6 +460,39 @@
 					{assessableNodesCount(treeViewNodes)}
 				{/if}
 			</span>
+			<span class="text-xs ml-2 text-gray-500">{m.filterBy()}</span>
+			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+				{#each Object.entries(complianceStatusColorMap) as [status, color]}
+					<button
+						type="button"
+						on:click={() => toggleStatus(status)}
+						class="px-2 py-1 rounded-md font-bold"
+						style="background-color: {selectedStatus.includes(status)
+							? color + '44'
+							: 'grey'}; color: {selectedStatus.includes(status)
+							? darkenColor(color, 0.3)
+							: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.5};"
+					>
+						{safeTranslate(status)}
+					</button>
+				{/each}
+			</div>
+			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+				{#each Object.entries(complianceResultColorMap) as [result, color]}
+					<button
+						type="button"
+						on:click={() => toggleResult(result)}
+						class="px-2 py-1 rounded-md font-bold"
+						style="background-color: {selectedResults.includes(result)
+							? color + '44'
+							: 'grey'}; color: {selectedResults.includes(result)
+							? darkenColor(color, 0.3)
+							: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.5};"
+					>
+						{safeTranslate(result)}
+					</button>
+				{/each}
+			</div>
 			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
 				{#if $displayOnlyAssessableNodes}
 					<p class="font-bold">{m.ShowAllNodesMessage()}</p>
@@ -461,7 +521,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key $displayOnlyAssessableNodes}
+			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes

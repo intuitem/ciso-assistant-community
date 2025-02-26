@@ -1,10 +1,6 @@
 import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
-import {
-	getModelInfo,
-	urlParamModelForeignKeyFields,
-	urlParamModelSelectFields
-} from '$lib/utils/crud';
+import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo, urlModel } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
@@ -31,45 +27,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const object = await objectResponse.json();
 	const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);
-	const foreignKeyFields = urlParamModelForeignKeyFields(URLModel);
-	const updateForeignKeyFields = urlParamModelForeignKeyFields('ebios-rm');
 	const selectFields = model.selectFields;
-
-	const foreignKeys: Record<string, any> = {};
-
-	for (const keyField of foreignKeyFields) {
-		const model = getModelInfo(keyField.urlModel);
-		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-		const url = model.endpointUrl
-			? `${BASE_API_URL}/${model.endpointUrl}/${queryParams}`
-			: `${BASE_API_URL}/${model.urlModel}/${queryParams}`;
-		const response = await fetch(url);
-		if (response.ok) {
-			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-		} else {
-			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-		}
-	}
-
-	model['foreignKeys'] = foreignKeys;
-
-	const updateForeignKeys: Record<string, any> = {};
-
-	for (const keyField of updateForeignKeyFields) {
-		const model = getModelInfo(keyField.urlModel);
-		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-		const url = model.endpointUrl
-			? `${BASE_API_URL}/${model.endpointUrl}/${queryParams}`
-			: `${BASE_API_URL}/${model.urlModel}/${queryParams}`;
-		const response = await fetch(url);
-		if (response.ok) {
-			updateForeignKeys[keyField.field] = await response.json().then((data) => data.results);
-		} else {
-			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-		}
-	}
-
-	updatedModel['foreignKeys'] = updateForeignKeys;
 
 	const selectOptions: Record<string, any> = {};
 

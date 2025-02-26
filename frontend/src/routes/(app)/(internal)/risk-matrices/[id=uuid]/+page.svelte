@@ -36,7 +36,7 @@
 								</ul>
 							{:else if value.id}
 								{#if key === 'library'}
-									{@const itemHref = `/libraries/${value.id}?loaded`}
+									{@const itemHref = `/loaded-libraries/${value.id}`}
 									<Anchor href={itemHref} class="anchor">{value.name}</Anchor>
 								{:else}
 									{@const itemHref = `/${

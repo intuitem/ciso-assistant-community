@@ -47,6 +47,7 @@ READER_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "view_qualification",
     "view_globalsettings",
+    "view_securityexception",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -83,6 +84,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "view_qualification",
     "view_globalsettings",
+    "view_securityexception",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -190,6 +192,10 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_operationalscenario",
     "view_qualification",
     "view_globalsettings",
+    "view_securityexception",
+    "add_securityexception",
+    "change_securityexception",
+    "delete_securityexception",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -305,6 +311,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_operationalscenario",
     "view_qualification",
     "view_globalsettings",
+    "view_securityexception",
+    "add_securityexception",
+    "change_securityexception",
+    "delete_securityexception",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -451,6 +461,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_qualification",
     "change_qualification",
     "delete_qualification",
+    "view_securityexception",
+    "add_securityexception",
+    "change_securityexception",
+    "delete_securityexception",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

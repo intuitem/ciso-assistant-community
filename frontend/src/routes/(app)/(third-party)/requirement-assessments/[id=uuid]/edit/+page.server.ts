@@ -46,22 +46,9 @@ export const load = (async ({ fetch, params }) => {
 
 	const schema = modelSchema(URLModel);
 	object.evidences = object.evidences.map((evidence) => evidence.id);
+	object.security_exceptions =
+		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
 	const form = await superValidate(object, zod(schema), { errors: true });
-
-	const foreignKeys: Record<string, any> = {};
-	if (model.foreignKeyFields) {
-		await Promise.all(
-			model.foreignKeyFields.map(async (keyField) => {
-				const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-				const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-				const data = await fetchJson(url);
-				if (data) {
-					foreignKeys[keyField.field] = data.results;
-				}
-			})
-		);
-	}
-	model.foreignKeys = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
 	if (model.selectFields) {
@@ -112,7 +99,7 @@ export const load = (async ({ fetch, params }) => {
 	const tables: Record<string, any> = {};
 
 	await Promise.all(
-		['applied-controls', 'evidences'].map(async (key) => {
+		['applied-controls', 'evidences', 'security-exceptions'].map(async (key) => {
 			const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
 			const response = await fetch(keyEndpoint);
 
@@ -132,25 +119,6 @@ export const load = (async ({ fetch, params }) => {
 			}
 		})
 	);
-
-	const measureForeignKeys: Record<string, any> = {};
-	if (measureModel.foreignKeyFields) {
-		await Promise.all(
-			measureModel.foreignKeyFields.map(async (keyField) => {
-				if (keyField.field === 'folder') {
-					measureForeignKeys[keyField.field] = [requirementAssessment.folder];
-				} else {
-					const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-					const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-					const data = await fetchJson(url);
-					if (data) {
-						measureForeignKeys[keyField.field] = data.results;
-					}
-				}
-			})
-		);
-	}
-	measureModel.foreignKeys = measureForeignKeys;
 
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
@@ -177,17 +145,32 @@ export const load = (async ({ fetch, params }) => {
 	}
 	evidenceModel.selectOptions = evidenceSelectOptions;
 
-	const evidenceForeignKeys: Record<string, any> = {};
-	if (evidenceModel.foreignKeyFields) {
-		evidenceModel.foreignKeyFields.forEach((keyField) => {
-			if (keyField.field === 'folder') {
-				evidenceForeignKeys[keyField.field] = [requirementAssessment.folder];
-			} else {
-				evidenceForeignKeys[keyField.field] = [];
-			}
-		});
+	const securityExceptionModel = getModelInfo('security-exceptions');
+	const securityExceptionCreateSchema = modelSchema('security-exceptions');
+	const securityExceptionCreateForm = await superValidate(
+		{ requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
+		zod(securityExceptionCreateSchema),
+		{ errors: false }
+	);
+
+	const securityExceptionSelectOptions: Record<string, any> = {};
+	if (securityExceptionModel.selectFields) {
+		await Promise.all(
+			securityExceptionModel.selectFields.map(async (selectField) => {
+				const url = `${baseUrl}/security-exceptions/${selectField.field}/`;
+				const data = await fetchJson(url);
+				if (data) {
+					securityExceptionSelectOptions[selectField.field] = Object.entries(data).map(
+						([key, value]) => ({
+							label: value,
+							value: selectField.valueType === 'number' ? parseInt(key) : key
+						})
+					);
+				}
+			})
+		);
 	}
-	evidenceModel.foreignKeys = evidenceForeignKeys;
+	securityExceptionModel.selectOptions = securityExceptionSelectOptions;
 
 	return {
 		URLModel,
@@ -202,6 +185,8 @@ export const load = (async ({ fetch, params }) => {
 		measureModel,
 		evidenceModel,
 		evidenceCreateForm,
+		securityExceptionModel,
+		securityExceptionCreateForm,
 		tables
 	};
 }) satisfies PageServerLoad;
@@ -285,7 +270,11 @@ export const actions: Actions = {
 	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
-		return { form: result.form, newEvidence: result.object.id };
+		return { form: result.form, newEvidence: result.form.message.object.id };
+	},
+	createSecurityException: async (event) => {
+		const result = await nestedWriteFormAction({ event, action: 'create' });
+		return { form: result.form, newSecurityException: result.form.message.object.id };
 	},
 	createSuggestedControls: async (event) => {
 		const formData = await event.request.formData();

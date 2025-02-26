@@ -6,7 +6,6 @@
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -30,7 +29,8 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+		optionsEndpoint="users?is_third_party=false"
+		optionsLabelField="email"
 		field="owner"
 		cacheLock={cacheLocks['owner']}
 		bind:cachedValue={formDataCache['owner']}
@@ -80,14 +80,22 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			options={getOptions({
-				objects: model.foreignKeys['evidences'],
-				extra_fields: [['folder', 'str']]
-			})}
+			optionsEndpoint="evidences"
+			optionsExtraFields={[['folder', 'str']]}
 			field="evidences"
 			cacheLock={cacheLocks['evidences']}
 			bind:cachedValue={formDataCache['evidences']}
 			label={m.evidences()}
+		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="security-exceptions"
+			optionsExtraFields={[['folder', 'str']]}
+			field="security_exceptions"
+			cacheLock={cacheLocks['security_exceptions']}
+			bind:cachedValue={formDataCache['security_exceptions']}
+			label={m.securityExceptions()}
 		/>
 		{#if schema.shape.category}
 			<Select
@@ -164,7 +172,7 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['folder'] })}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

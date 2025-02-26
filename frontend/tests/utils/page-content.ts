@@ -83,6 +83,7 @@ export class PageContent extends BasePage {
 			}
 		}
 		// If the library is not visible, it might have already been loaded
+		await this.page.waitForTimeout(3000);
 		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
 			if (await this.tab('Loaded libraries').isVisible()) {
 				await this.tab('Loaded libraries').click();
