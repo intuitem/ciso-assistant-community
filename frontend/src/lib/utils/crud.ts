@@ -383,6 +383,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assets',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
+		reverseForeignKeyFields: [
+			{ field: 'asset', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
+		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
@@ -469,7 +472,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' },
-			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' }
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' },
+			{ field: 'assets', urlModel: 'assets' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
