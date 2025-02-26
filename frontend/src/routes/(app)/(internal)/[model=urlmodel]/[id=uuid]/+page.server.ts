@@ -21,27 +21,6 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const modelInfo = getModelInfo(event.params.model);
-	const foreignKeys: Record<string, any> = {};
-
-	if (modelInfo.foreignKeyFields) {
-		await Promise.all(
-			modelInfo.foreignKeyFields.map(async (keyField) => {
-				const keyModel = getModelInfo(keyField.urlModel);
-				const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-				const url = keyModel.endpointUrl
-					? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
-					: `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-				const response = await event.fetch(url);
-				if (response.ok) {
-					foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-				} else {
-					console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-				}
-			})
-		);
-	}
-
-	modelInfo['foreignKeys'] = foreignKeys;
 
 	const data = await loadDetail({
 		event,

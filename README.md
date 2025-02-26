@@ -27,7 +27,7 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![CodeFactor](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community/badge)](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community)
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/795e9d4203bf469dafcc45a9f3131d57)](https://app.codacy.com/gh/intuitem/ciso-assistant-community/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
 
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
@@ -56,9 +56,15 @@ The decoupling concept is a pillar of the app and allows you to save a considera
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
+## Decoupling concept
+
 Here is an illustration of the **decoupling** principle and its advantages:
 
 https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
+
+## System architecture
+
+![](./documentation/system-architecture.png)
 
 ## Features
 
@@ -87,7 +93,7 @@ and run the starter script
 ./docker-compose.sh
 ```
 
-If you are looking for other installation options, you might want to check the [docs](https://intuitem.gitbook.io/ciso-assistant).
+If you are looking for other installation options, you might want to check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
 
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
@@ -399,15 +405,7 @@ poetry run python manage.py createsuperuser
 poetry run python manage.py runserver
 ```
 
-10. Configure the git hooks for generating the build name.
-
-```sh
-cd .git/hooks
-ln -fs ../../git_hooks/post-commit .
-ln -fs ../../git_hooks/post-merge .
-```
-
-11. for Huey (tasks runner)
+10. for Huey (tasks runner)
 
 - prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
@@ -437,7 +435,7 @@ pnpm run dev
 4. Reach the frontend on <http://localhost:5173>
 
 > [!NOTE]
-> Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
+> Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. Please see the [readme file](frontend/README.md) in frontend directory for more information on this.
 
 5. Environment variables
 

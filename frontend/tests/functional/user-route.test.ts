@@ -12,6 +12,23 @@ test('user usual routine actions are working correctly', async ({
 }) => {
 	test.slow();
 
+	await page.waitForLoadState('networkidle');
+	const modalBackdrop = page.getByTestId('modal-backdrop');
+
+	await test.step('Dismiss any blocking modals', async () => {
+		if (await modalBackdrop.isVisible()) {
+			await modalBackdrop.press('Escape');
+			await expect(modalBackdrop).not.toBeVisible();
+		}
+
+		if (await page.locator('#driver-dummy-element').isVisible()) {
+			await page.locator('.driver-popover-close-btn').first().click();
+		}
+	});
+
+	// Attempt to close any remaining modals
+	await page.locator('body').press('Escape');
+
 	await test.step('proper redirection to the analytics page after login', async () => {
 		await analyticsPage.hasUrl();
 		await analyticsPage.hasTitle();
@@ -117,6 +134,23 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the applied control data are displayed in the table
 	});
 
+	await test.step('user can create a security exception', async () => {
+		await sideBar.click('Governance', pages.securityExceptionsPage.url);
+		await pages.securityExceptionsPage.hasUrl();
+		await pages.securityExceptionsPage.hasTitle();
+
+		await pages.securityExceptionsPage.createItem({
+			name: vars.securityExceptionName,
+			description: vars.description,
+			ref_id: '123456',
+			status: 'Draft',
+			expiration_date: '2100-01-01',
+			folder: vars.folderName,
+			owners: [LoginPage.defaultEmail],
+			approver: LoginPage.defaultEmail
+		});
+	});
+
 	await test.step('user can create a compliance assessment', async () => {
 		await sideBar.click('Compliance', pages.complianceAssessmentsPage.url);
 		await pages.complianceAssessmentsPage.hasUrl();
@@ -162,7 +196,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskMatricesPage.hasTitle();
 
 		await pages.riskMatricesPage.addButton.click();
-		await pages.librariesPage.hasUrl(true, '/libraries?objectType=risk_matrix');
+		await pages.librariesPage.hasUrl(true, '/libraries?object_type=risk_matrix');
 		await pages.librariesPage.hasTitle();
 
 		await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);

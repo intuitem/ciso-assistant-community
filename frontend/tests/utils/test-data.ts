@@ -11,12 +11,13 @@ export default {
 	riskScenarioName: 'Test risk scenario',
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
+	securityExceptionName: 'Test exception',
 	threatName: 'Test threat',
 	description: 'Test description',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
 	user: {
-		email: 'User@tests.com',
+		email: 'user@tests.com',
 		password: 'pass123wordTest',
 		firstName: 'Test',
 		lastName: 'User'
@@ -37,6 +38,7 @@ export default {
 				'add_riskscenario',
 				'add_solution',
 				'add_threat',
+				'add_securityexception',
 				'change_appliedcontrol',
 				'change_asset',
 				'change_complianceassessment',
@@ -53,6 +55,7 @@ export default {
 				'change_riskscenario',
 				'change_solution',
 				'change_threat',
+				'change_securityexception',
 				'delete_appliedcontrol',
 				'delete_asset',
 				'delete_complianceassessment',
@@ -68,6 +71,7 @@ export default {
 				'delete_riskscenario',
 				'delete_solution',
 				'delete_threat',
+				'delete_securityexception',
 				'view_appliedcontrol',
 				'view_asset',
 				'view_complianceassessment',
@@ -93,7 +97,8 @@ export default {
 				'view_storedlibrary',
 				'view_threat',
 				'view_user',
-				'view_usergroup'
+				'view_usergroup',
+				'view_securityexception'
 			]
 		},
 		reader: {
@@ -124,13 +129,15 @@ export default {
 				'view_storedlibrary',
 				'view_threat',
 				'view_user',
-				'view_usergroup'
+				'view_usergroup',
+				'view_securityexception'
 			]
 		},
 		domainManager: {
 			name: 'Domain manager',
 			perms: [
 				'add_appliedcontrol',
+				'add_securityexception',
 				'add_asset',
 				'add_complianceassessment',
 				'add_entity',
@@ -146,6 +153,7 @@ export default {
 				'add_solution',
 				'add_threat',
 				'change_appliedcontrol',
+				'change_securityexception',
 				'change_asset',
 				'change_complianceassessment',
 				'change_entity',
@@ -164,6 +172,7 @@ export default {
 				'change_solution',
 				'change_threat',
 				'delete_appliedcontrol',
+				'delete_securityexception',
 				'delete_asset',
 				'delete_complianceassessment',
 				'delete_entity',
@@ -205,7 +214,8 @@ export default {
 				'view_storedlibrary',
 				'view_threat',
 				'view_user',
-				'view_usergroup'
+				'view_usergroup',
+				'view_securityexception'
 			]
 		},
 		approver: {
@@ -233,7 +243,8 @@ export default {
 				'view_loadedlibrary',
 				'view_user',
 				'view_requirementmappingset',
-				'view_requirementmapping'
+				'view_requirementmapping',
+				'view_securityexception'
 			]
 		}
 	},

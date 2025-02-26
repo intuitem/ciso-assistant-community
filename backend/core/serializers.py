@@ -157,6 +157,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
+    security_exceptions = FieldsRelatedField(many=True)
 
     class Meta:
         model = Vulnerability
@@ -329,6 +330,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     )
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
+    security_exceptions = FieldsRelatedField(many=True)
 
 
 class AssetImportExportSerializer(BaseModelSerializer):
@@ -481,6 +483,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     existing_applied_controls = FieldsRelatedField(many=True)
 
     owner = FieldsRelatedField(many=True)
+    security_exceptions = FieldsRelatedField(many=True)
 
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):
@@ -541,6 +544,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
+    security_exceptions = FieldsRelatedField(many=True)
     # These properties shouldn't be displayed in the frontend detail view as they are simple derivations from fields already displayed in the detail view.
     # has_evidences = serializers.BooleanField()
     # eta_missed = serializers.BooleanField()
@@ -821,10 +825,10 @@ class EvidenceReadSerializer(BaseModelSerializer):
 
 class EvidenceWriteSerializer(BaseModelSerializer):
     applied_controls = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=AppliedControl.objects.all()
+        many=True, queryset=AppliedControl.objects.all(), required=False
     )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=RequirementAssessment.objects.all()
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
 
     class Meta:
@@ -962,6 +966,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FilteredNodeSerializer()
+    security_exceptions = FieldsRelatedField(many=True)
 
     class Meta:
         model = RequirementAssessment
@@ -1082,3 +1087,24 @@ class QualificationReadSerializer(ReferentialSerializer):
 
 class QualificationWriteSerializer(QualificationReadSerializer):
     pass
+
+
+class SecurityExceptionWriteSerializer(BaseModelSerializer):
+    requirement_assessments = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
+    )
+
+    class Meta:
+        model = SecurityException
+        fields = "__all__"
+
+
+class SecurityExceptionReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    owners = FieldsRelatedField(many=True)
+    approver = FieldsRelatedField()
+    severity = serializers.CharField(source="get_severity_display")
+
+    class Meta:
+        model = SecurityException
+        fields = "__all__"

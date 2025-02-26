@@ -197,7 +197,7 @@
 	"watchlist": "Beobachtungsliste",
 	"watchlistDescription": "Elemente, die abgelaufen sind oder in den nächsten 30 Tagen ablaufen",
 	"measuresToReview": "Zu überprüfende angewendete Kontrollen",
-	"exceptionsToReview": "Zu überprüfende Akzeptanzen",
+	"acceptancesToReview": "Zu überprüfende Akzeptanzen",
 	"expired": "Abgelaufen",
 	"upcoming": "Bevorstehend",
 	"today": "Heute",
@@ -729,7 +729,7 @@
 	"observationSemiColon": "Beobachtung:",
 	"tableMode": "Tabellenmodus",
 	"owner": "Eigentümer",
-	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie auf der Registerkarte „Risiken“.",
+	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie im Menü „Governance“.",
 	"licenseSeats": "Lizenzplätze",
 	"licenseExpiration": "Ablauf der Lizenz",
 	"answer": "Antwort",
@@ -752,7 +752,7 @@
 	"mailFailedToSend": "Die E-Mail konnte nicht gesendet werden",
 	"questionOrQuestions": "Frage(n)",
 	"successfullyUpdatedClientSettings": "Clienteinstellungen erfolgreich aktualisiert, bitte aktualisieren Sie die Seite.",
-	"xRaysEmptyMessage": "Um Röntgenstrahlen verwenden zu können, müssen Sie mindestens ein Projekt erstellen.",
+	"xRaysEmptyMessage": "Um Röntgenstrahlen verwenden zu können, müssen Sie mindestens ein Bereich erstellen.",
 	"suggestControls": "Steuerelemente vorschlagen",
 	"createAppliedControlsFromSuggestionsHelpText": "Erstellen Sie angewandte Kontrollen aus den vorgeschlagenen Referenzkontrollen der Framework-Anforderungen",
 	"createAppliedControlsFromSuggestionsSuccess": "Angewandte Kontrollen erfolgreich aus den vorgeschlagenen Referenzkontrollen erstellt",
@@ -867,5 +867,6 @@
 	"documentationScore": "Bewertung der Dokumentation",
 	"useDocumentationScore": "Dokumentationsnote verwenden",
 	"useDocumentationScoreHelpText": "Eine zweite Punktzahl (Dokumentationspunktzahl) wird verfügbar sein, um die Anforderungen zu bewerten.",
-	"publicationDate": "Veröffentlichungsdatum"
+	"publicationDate": "Veröffentlichungsdatum",
+	"filterBy": "Filtern nach"
 }

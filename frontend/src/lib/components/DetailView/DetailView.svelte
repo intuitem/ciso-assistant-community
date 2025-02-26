@@ -4,10 +4,9 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { URL_MODEL_MAP, checkConstraints } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
@@ -82,7 +81,8 @@
 			props: {
 				form: model.createForm,
 				model: model,
-				debug: false
+				debug: false,
+				additionalInitialData: model.initialData
 			}
 		};
 		let modal: ModalSettings = {
@@ -91,18 +91,6 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + model.info.localName).toLowerCase(),
-				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 
@@ -267,7 +255,7 @@
 								>
 									{#if value !== null && value !== undefined && value !== ''}
 										{#if key === 'library'}
-											{@const itemHref = `/libraries/${value.id}?loaded`}
+											{@const itemHref = `/loaded-libraries/${value.id}`}
 											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 												>{value.name}</Anchor
 											>
@@ -339,7 +327,7 @@
 											<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 												>{value}</Anchor
 											>
-										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date')}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else if m[toCamelCase(value.str || value.name)]}
 											{safeTranslate((value.str || value.name) ?? value)}
@@ -469,7 +457,7 @@
 								{safeTranslate('associated-' + model.info.localNamePlural)}
 							</h4>
 						</div>
-						{#if model.table}
+						{#if model.table && !model.disableAddDeleteButtons}
 							<ModelTable source={model.table} deleteForm={model.deleteForm} URLModel={urlmodel}>
 								<button
 									slot="addButton"
@@ -480,6 +468,8 @@
 									)}</button
 								>
 							</ModelTable>
+						{:else if model.table}
+							<ModelTable source={model.table} URLModel={urlmodel} />
 						{/if}
 					{/if}
 				{/each}

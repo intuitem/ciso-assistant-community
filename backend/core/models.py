@@ -6,7 +6,6 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
-from rest_framework.renderers import status
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -14,7 +13,7 @@ from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import F, Q, OuterRef, Subquery
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -243,7 +242,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
 class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
-    content = models.TextField()
+    content = models.JSONField()
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
@@ -308,7 +307,7 @@ class StoredLibrary(LibraryMixin):
             "dependencies", []
         )  # I don't want whitespaces in URN anymore nontheless
 
-        library_objects = json.dumps(library_data["objects"])
+        library_objects = library_data["objects"]
         return StoredLibrary.objects.create(
             name=library_data["name"],
             is_published=True,
@@ -366,7 +365,7 @@ class LibraryUpdater:
             *old_library.risk_matrices.all(),
         ]
         self.new_library = new_library
-        new_library_content = json.loads(self.new_library.content)
+        new_library_content = self.new_library.content
         self.dependencies = self.new_library.dependencies
         if self.dependencies is None:
             self.dependencies = []
@@ -735,6 +734,30 @@ class LoadedLibrary(LibraryMixin):
             + LoadedLibrary.objects.filter(dependencies=self).distinct().count()
         )
 
+    @property
+    def has_update(self) -> bool:
+        max_version = (
+            StoredLibrary.objects.filter(urn=self.urn)
+            .values_list("version", flat=True)
+            .order_by("-version")
+            .first()
+        )
+        return max_version > self.version if max_version is not None else False
+
+    @classmethod
+    def updatable_libraries(cls):
+        # Create a subquery to get the highest version in StoredLibrary for the same urn.
+        latest_version_qs = (
+            StoredLibrary.objects.filter(urn=OuterRef("urn"))
+            .order_by("-version")
+            .values("version")[:1]
+        )
+
+        # Annotate each LoadedLibrary with the latest stored version and filter.
+        return cls.objects.annotate(
+            latest_stored_version=Subquery(latest_version_qs)
+        ).filter(latest_stored_version__gt=F("version"))
+
     def delete(self, *args, **kwargs):
         if self.reference_count > 0:
             raise ValueError(
@@ -759,6 +782,7 @@ class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
         blank=True,
         related_name="threats",
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -807,7 +831,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         blank=True,
         related_name="reference_controls",
     )
-
     category = models.CharField(
         max_length=20,
         null=True,
@@ -815,7 +838,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         choices=CATEGORY,
         verbose_name=_("Category"),
     )
-
     csf_function = models.CharField(
         max_length=20,
         null=True,
@@ -823,10 +845,10 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         choices=CSF_FUNCTION,
         verbose_name=_("CSF Function"),
     )
-
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
 
@@ -898,10 +920,10 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return Perimeter.objects.filter(riskassessment__risk_matrix=self).distinct()
 
     def parse_json(self) -> dict:
-        return json.loads(self.json_definition)
+        return self.json_definition
 
     def parse_json_translated(self) -> dict:
-        return update_translations_in_object(json.loads(self.json_definition))
+        return update_translations_in_object(self.json_definition)
 
     @property
     def grid(self) -> list:
@@ -1394,6 +1416,69 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
+class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    class Severity(models.IntegerChoices):
+        UNDEFINED = -1, "undefined"
+        LOW = 0, "low"
+        MEDIUM = 1, "medium"
+        HIGH = 2, "high"
+        CRITICAL = 3, "critical"
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", "draft"
+        IN_REVIEW = "in_review", "in review"
+        APPROVED = "approved", "approved"
+        RESOLVED = "resolved", "resolved"
+        EXPIRED = "expired", "expired"
+        DEPRECATED = "deprecated", "deprecated"
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
+    severity = models.SmallIntegerField(
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
+    )
+    status = models.CharField(
+        verbose_name="Status",
+        choices=Status.choices,
+        null=False,
+        default=Status.DRAFT,
+        max_length=20,
+    )
+    expiration_date = models.DateField(
+        help_text="Specify when the security exception will no longer apply",
+        null=True,
+        verbose_name="Expiration date",
+    )
+    owners = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name="Owner",
+        related_name="security_exceptions",
+    )
+    approver = models.ForeignKey(
+        User,
+        max_length=200,
+        verbose_name=_("Approver"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    fields_to_check = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        super().clean()
+        if self.expiration_date and self.expiration_date < now().date():
+            raise ValidationError(
+                {"expiration_date": "Expiration date must be in the future"}
+            )
+
+
 class Asset(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
@@ -1511,12 +1596,23 @@ class Asset(
             JSONSchemaInstanceValidator(DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA)
         ],
     )
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
     owner = models.ManyToManyField(
         User,
         blank=True,
         verbose_name=_("Owner"),
         related_name="assets",
     )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="assets",
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -1700,6 +1796,7 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -1855,7 +1952,6 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         help_text=_("Cost of the measure (using globally-chosen currency)"),
         verbose_name=_("Cost"),
     )
-
     progress_field = models.IntegerField(
         default=0,
         verbose_name=_("Progress Field"),
@@ -1864,6 +1960,13 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             MaxValueValidator(100, message="Progress cannot be more than 100"),
         ],
     )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="applied_controls",
+    )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -2009,6 +2112,13 @@ class Vulnerability(
         verbose_name=_("Applied controls"),
         related_name="vulnerabilities",
     )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="vulnerabilities",
+    )
+    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -2433,7 +2543,7 @@ class RiskAssessment(Assessment):
 
 
 def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
-    fields = json.loads(risk_matrix.json_definition)
+    fields = risk_matrix.json_definition
     risk_index = fields["grid"][probability][impact]
     return risk_index
 
@@ -2581,7 +2691,9 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    ref_id = models.CharField(max_length=8, blank=True, verbose_name=_("Reference ID"))
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
 
     qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 
@@ -2592,6 +2704,12 @@ class RiskScenario(NameDescriptionMixin):
     )
     justification = models.CharField(
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="risk_scenarios",
     )
 
     fields_to_check = ["name"]
@@ -2757,6 +2875,8 @@ class ComplianceAssessment(Assessment):
     )
     show_documentation_score = models.BooleanField(default=False)
 
+    fields_to_check = ["name", "version"]
+
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
@@ -2842,6 +2962,9 @@ class ComplianceAssessment(Assessment):
                     assessment.result = baseline_assessment.result
                     assessment.status = baseline_assessment.status
                     assessment.score = baseline_assessment.score
+                    assessment.documentation_score = (
+                        baseline_assessment.documentation_score
+                    )
                     assessment.is_scored = baseline_assessment.is_scored
                     assessment.observation = baseline_assessment.observation
                     updates.append(assessment)
@@ -2858,7 +2981,15 @@ class ComplianceAssessment(Assessment):
             # Bulk update scalar fields
             if updates:
                 RequirementAssessment.objects.bulk_update(
-                    updates, ["result", "status", "score", "is_scored", "observation"]
+                    updates,
+                    [
+                        "result",
+                        "status",
+                        "score",
+                        "documentation_score",
+                        "is_scored",
+                        "observation",
+                    ],
                 )
 
             # Handle M2M relationships
@@ -2958,16 +3089,31 @@ class ComplianceAssessment(Assessment):
 
     def get_requirements_result_count(self):
         requirements_result_count = []
-        for rs in RequirementAssessment.Result:
-            requirements_result_count.append(
-                (
-                    RequirementAssessment.objects.filter(result=rs)
-                    .filter(compliance_assessment=self)
-                    .filter(requirement__assessable=True)
-                    .count(),
-                    rs,
-                )
-            )
+        selected_implementation_groups_set = (
+            set(self.selected_implementation_groups)
+            if self.selected_implementation_groups
+            else None
+        )
+
+        requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        ).select_related("requirement")
+
+        if selected_implementation_groups_set is not None:
+            result_groups = {}
+            for req in requirements:
+                req_groups = set(req.requirement.implementation_groups or [])
+                if selected_implementation_groups_set & req_groups:
+                    result_groups.setdefault(req.result, []).append(req)
+
+            for rs in RequirementAssessment.Result:
+                count = len(result_groups.get(rs, []))
+                requirements_result_count.append((count, rs))
+        else:
+            for rs in RequirementAssessment.Result:
+                count = requirements.filter(result=rs).count()
+                requirements_result_count.append((count, rs))
+
         return requirements_result_count
 
     def get_measures_status_count(self):
@@ -3368,6 +3514,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         blank=True,
         null=True,
         verbose_name=_("Answer"),
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+        verbose_name="Security exceptions",
+        related_name="requirement_assessments",
     )
 
     def __str__(self) -> str:

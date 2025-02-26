@@ -48,6 +48,8 @@ export const URL_MODEL = [
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
+	'stored-libraries',
+	'loaded-libraries',
 	'libraries',
 	'sso-settings',
 	'general-settings',
@@ -63,8 +65,10 @@ export const URL_MODEL = [
 	'stakeholders',
 	'strategic-scenarios',
 	'attack-paths',
-	'operational-scenarios'
+	'operational-scenarios',
+	'qualifications',
 	// 'ebios-rm',
+	'security-exceptions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

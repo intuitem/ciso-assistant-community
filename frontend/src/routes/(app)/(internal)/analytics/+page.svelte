@@ -326,10 +326,10 @@
 								href="/folders"
 							/>
 							<CounterCard
-								count={counters.projects}
-								label={m.projects()}
+								count={counters.perimeters}
+								label={m.perimeters()}
 								faIcon="fa-solid fa-cubes"
-								href="/projects"
+								href="/perimeters"
 							/>
 							<CounterCard
 								count={counters.applied_controls}
@@ -444,7 +444,7 @@
 							/>
 						</div>
 						<div class="w-full">
-							<span class="text-md font-semibold">{m.exceptionsToReview()}</span>
+							<span class="text-md font-semibold">{m.acceptancesToReview()}</span>
 							<ModelTable
 								source={riskAcceptanceWatchlistTable}
 								URLModel="risk-acceptances"
