@@ -32,8 +32,10 @@ for (const key of testPages) {
 
 		test.describe(`Tests on ${items[key].displayName.toLowerCase()} item details`, () => {
 			test.beforeEach(async ({ logedPage, pages, page }, testInfo) => {
+				console.log('1');
 				await pages[key].goto();
 				await expect(page).toHaveURL(pages[key].url);
+				console.log('2');
 
 				if (testInfo.line in history) {
 					items = history[testInfo.line];
@@ -42,29 +44,38 @@ for (const key of testPages) {
 					history[testInfo.line] = items;
 				}
 
+				console.log('3');
 				setHttpResponsesListener(page);
 
+				console.log('4');
 				await pages[key].waitUntilLoaded();
 				await pages[key].createItem(
 					items[key].build,
 					'dependency' in items[key] ? items[key].dependency : null
 				);
+				console.log('5');
 				await pages[key].goto();
+				console.log('6');
 				await expect(page).toHaveURL(pages[key].url);
 				if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
 					await page.waitForTimeout(3000);
 					await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);
 				}
+				console.log('7');
 
 				await pages[key].waitUntilLoaded();
+				console.log('8');
 				await pages[key].viewItemDetail(items[key].build.name || items[key].build.email);
+				console.log('9');
 				await pages[key].itemDetail.hasTitle(
 					items[key].build.str || items[key].build.name || items[key].build.email
 				);
+				console.log('10');
 				await pages[key].itemDetail.hasBreadcrumbPath([
 					items[key].displayName,
 					items[key].build.str || items[key].build.name || items[key].build.email
 				]);
+				console.log('11');
 				//wait fore the file to load to prevent crashing
 				page.url().includes('evidences')
 					? await pages[key].page.getByTestId('attachment-name-title').waitFor({ state: 'visible' })
@@ -83,18 +94,18 @@ for (const key of testPages) {
 				pages,
 				page
 			}, testInfo) => {
+				console.log('key', key);
+				console.log('items', items[key]);
+				console.log('\n\n\n');
 				const editedValues = await pages[key].itemDetail.editItem(
 					items[key].build,
 					items[key].editParams
 				);
-				console.log('editedValues', editedValues);
 				replaceValues(
 					history[testInfo.line],
 					items[key].build.name || items[key].build.email,
 					items[key].build.name ? items[key].build.name + ' edited' : '_' + items[key].build.email
 				);
-				console.log('key', key);
-				console.log('items', items);
 				if (key === 'riskAssessmentsPage') {
 					replaceValues(
 						history[testInfo.line],
