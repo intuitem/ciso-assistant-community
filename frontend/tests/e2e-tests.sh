@@ -130,17 +130,16 @@ cleanup() {
     rm "$DB_DIR/$DB_INIT_NAME"
     echo "| test initial database snapshot deleted"
   fi
-  # This is dead code for now, we must delete this code if we abandon the .testhistory file usage
-  # if [[ -d "$APP_DIR/frontend/tests/utils/.testhistory" ]]; then
-  # rm -rf "$APP_DIR/frontend/tests/utils/.testhistory"
-  # echo "| test data history removed"
-  # fi
-  # This must be at the end of the cleanup as the sudo command can block the script
   if [[ -n "$MAILER_PID" ]]; then
     sudo docker stop $MAILER_PID &>/dev/null
     sudo docker rm $MAILER_PID &>/dev/null
     echo "| mailer service stopped"
   fi
+  if [[ -d "$APP_DIR/frontend/tests/utils/.testhistory" ]]; then
+    rm -rf "$APP_DIR/frontend/tests/utils/.testhistory"
+    echo "| test data history removed"
+  fi
+  # This must be at the end of the cleanup as the sudo command can block the script
   trap - SIGINT SIGTERM EXIT
   echo "Cleanup done"
   exit 0
