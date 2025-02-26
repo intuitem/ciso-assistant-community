@@ -1,7 +1,7 @@
 services:
   backend:
     container_name: backend
-    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
     pull_policy: always
     restart: always
     environment:
@@ -9,6 +9,8 @@ services:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG={{ enable_debug }}
       - AUTH_TOKEN_TTL=7200
+      - LICENSE_SEATS=5
+      - LICENSE_EXPIRATION=2025-12-21
       {% if need_mailer %}
       - EMAIL_HOST={{ email.host }}
       - EMAIL_PORT={{ email.port }}
@@ -28,7 +30,7 @@ services:
 
   huey:
     container_name: huey
-    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
     pull_policy: always
     depends_on:
       backend:
@@ -39,6 +41,8 @@ services:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG=False
       - AUTH_TOKEN_TTL=7200
+      - LICENSE_SEATS=5
+      - LICENSE_EXPIRATION=2025-12-21
       {% if need_mailer %}
       - EMAIL_HOST={{ email.host }}
       - EMAIL_PORT={{ email.port }}
@@ -62,7 +66,7 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
-    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest
     pull_policy: always
     depends_on:
       backend:
