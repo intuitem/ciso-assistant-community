@@ -1,0 +1,5 @@
+docker-compose.yml
+certs/
+traefik_data/
+caddy_data/
+.venv
