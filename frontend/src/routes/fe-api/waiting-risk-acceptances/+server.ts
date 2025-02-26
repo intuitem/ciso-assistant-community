@@ -6,7 +6,8 @@ export const GET: RequestHandler = async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/risk-acceptances/waiting/`;
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Error fetching waiting risk acceptance');
+		console.error(await res.json());
+		error(res.status, 'Error fetching waiting risk acceptance');
 	}
 
 	const riskAcceptances = await res.json();
