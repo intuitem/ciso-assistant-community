@@ -67,7 +67,9 @@
 	export let identifierField = 'id';
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
+	export let baseEndpoint: string = `/${URLModel}`;
 	export let detailQueryParameter: string | undefined = undefined;
+	export let fields: string[] = [];
 
 	export let hideFilters = false;
 
@@ -104,26 +106,16 @@
 	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
-	const handler = new DataHandler(
-		source.body.map((item: Record<string, any>, index: number) => {
-			return {
-				...item,
-				meta: source.meta
-					? source.meta.results
-						? { ...source.meta.results[index] }
-						: { ...source.meta[index] }
-					: undefined
-			};
-		}),
-		{
-			rowsPerPage: pagination ? numberRowsPerPage : undefined,
-			totalRows: source.meta.count
-		}
-	);
+	const handler = new DataHandler([], {
+		rowsPerPage: pagination ? numberRowsPerPage : undefined,
+		totalRows: source.meta.count
+	});
 	const rows = handler.getRows();
 	let invalidateTable = false;
 
-	handler.onChange((state: State) => loadTableData(state, URLModel, `/${URLModel}`));
+	handler.onChange((state: State) =>
+		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
+	);
 
 	onMount(() => {
 		if (orderBy) {
