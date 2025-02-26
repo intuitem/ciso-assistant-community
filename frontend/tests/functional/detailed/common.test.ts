@@ -51,7 +51,6 @@ for (const key of testPages) {
 				);
 				await pages[key].goto();
 				await expect(page).toHaveURL(pages[key].url);
-				await page.waitForTimeout(3000); // try mitigate race condition with isHidden
 				if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
 					await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);
 				}
