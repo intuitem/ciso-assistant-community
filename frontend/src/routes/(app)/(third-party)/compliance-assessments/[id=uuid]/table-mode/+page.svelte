@@ -154,34 +154,6 @@
 		addedEvidence = +1;
 	}
 
-	function modalConfirmDelete(id: string, name: string): void {
-		const modalComponent: ModalComponent = {
-			ref: DeleteConfirmModal,
-			props: {
-				_form: data.deleteForm,
-				formAction: `/evidences?/delete`,
-				id: id,
-				invalidateAll: invalidateAll,
-				debug: false,
-				URLModel: getModelInfo('evidences').urlModel
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.deleteModalTitle(),
-			body: `${m.deleteModalMessage({ name })}`
-		};
-		modalStore.trigger(modal);
-		data.requirements.forEach((requirementAssessment) => {
-			console.log(requirementAssessment.evidences);
-			requirementAssessment.evidences = requirementAssessment.evidences.filter(
-				(evidence) => evidence.id !== id
-			);
-		});
-	}
-
 	const requirementAssessmentScores = Object.fromEntries(
 		data.requirement_assessments.map((requirement) => {
 			return [requirement.id, [requirement.is_scored, requirement.score]];
@@ -588,21 +560,16 @@
 														><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
 													</button>
 												{/if}
+											</div>
+											<div class="flex flex-wrap space-x-2 items-center">
 												{#key addedEvidence}
 													{#each requirementAssessment.evidences as evidence}
-														<p class="card p-2">
-															<a class="hover:text-primary-500" href="/evidences/{evidence.id}"
+														<p class="p-2">
+															<a
+																class="text-primary-700 hover:text-primary-500"
+																href="/evidences/{evidence.id}"
 																><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
 															>
-															{#if !shallow}
-																<button
-																	class="cursor-pointer"
-																	on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
-																	type="button"
-																>
-																	<i class="fa-solid fa-trash ml-2 text-red-500"></i>
-																</button>
-															{/if}
 														</p>
 													{/each}
 												{/key}

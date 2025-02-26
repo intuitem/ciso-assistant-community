@@ -86,16 +86,12 @@ export const load = (async ({ fetch, params }) => {
 		return requirement;
 	});
 
-	const schema = z.object({ id: z.string().uuid() });
-	const deleteForm = await superValidate(zod(schema));
-
 	return {
 		URLModel,
 		compliance_assessment,
 		requirement_assessments,
 		requirements,
 		evidenceModel,
-		deleteForm,
 		title: m.tableMode()
 	};
 }) satisfies PageServerLoad;
