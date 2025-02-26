@@ -4,6 +4,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { BASE_API_URL } from '$lib/utils/constants';
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
@@ -68,6 +69,32 @@
 	const securityObjectiveOptions: Option[] = filterDuplicateLabels(
 		securityObjectiveScaleMap.map(createOption)
 	);
+
+	let validParentAssets: Option[] = [];
+
+	async function fetchValidParentAssets() {
+    if (!data.id) return false;
+
+    const url = `${BASE_API_URL}/assets/${data.id}/valid_parent_assets/`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok)
+			return false;
+
+        const assets = await response.json();
+        validParentAssets = assets.map((asset: any) => ({
+            label: asset.name || asset.label || 'Unknown',
+            value: asset.id
+        }));
+		console.log('validParentAssets:', validParentAssets);
+		return true;
+    } catch (error) {
+        console.error('Error fetching valid parent assets:', error);
+		return false;
+    }
+}
+
 </script>
 
 <TextField
@@ -105,12 +132,13 @@
 	cacheLock={cacheLocks['type']}
 	bind:cachedValue={formDataCache['type']}
 />
+{#if fetchValidParentAssets()}
 <AutocompleteSelect
 	disabled={data.type === 'PR'}
 	hidden={data.type === 'PR'}
 	multiple
 	{form}
-	optionsEndpoint="assets?type=PR"
+	options={validParentAssets}
 	optionsLabelField="auto"
 	optionsSelf={object}
 	field="parent_assets"
@@ -118,6 +146,21 @@
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
 />
+{:else}
+<AutocompleteSelect
+	disabled={data.type === 'PR'}
+	hidden={data.type === 'PR'}
+	multiple
+	{form}
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	optionsSelf={object}
+	field="parent_assets"
+	cacheLock={cacheLocks['parent_assets']}
+	bind:cachedValue={formDataCache['parent_assets']}
+	label={m.parentAssets()}
+/>
+{/if}
 <AutocompleteSelect
 	{form}
 	multiple

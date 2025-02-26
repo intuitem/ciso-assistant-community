@@ -434,6 +434,13 @@ class AssetViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Asset.Type.choices))
 
+    @action(detail=True, methods=["GET"], name="Get valid parent assets")
+    def valid_parent_assets(self, request, pk=None):
+        asset = self.get_object()
+        invalid_assets = asset.get_descendants()
+        valid_assets = Asset.objects.exclude(id__in=[a.id for a in invalid_assets])
+        return Response(AssetReadSerializer(valid_assets, many=True).data)
+
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
         nodes = []
