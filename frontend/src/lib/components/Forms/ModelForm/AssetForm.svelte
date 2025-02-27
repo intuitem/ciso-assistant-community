@@ -68,7 +68,6 @@
 	const securityObjectiveOptions: Option[] = filterDuplicateLabels(
 		securityObjectiveScaleMap.map(createOption)
 	);
-
 </script>
 
 <TextField
