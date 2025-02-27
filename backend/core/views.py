@@ -3550,7 +3550,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "perimeter", "status", "ebios_rm_studies"]
+    filterset_fields = [
+        "framework",
+        "perimeter",
+        "status",
+        "ebios_rm_studies",
+        "assets",
+    ]
     search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
