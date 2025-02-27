@@ -47,6 +47,7 @@
 	deleteForm={data.deleteForm}
 	{URLModel}
 	detailQueryParameter={`activity=${activeActivity}`}
+	baseEndpoint="/ro-to?ebios_rm_study={$page.params.id}"
 >
 	<div slot="addButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">

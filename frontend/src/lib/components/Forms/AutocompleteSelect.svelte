@@ -13,6 +13,10 @@
 		suggested?: boolean;
 	}
 
+	type FieldContext = 'form-input' | 'filter-input';
+
+	export let fieldContext: FieldContext = 'form-input';
+
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
@@ -55,6 +59,8 @@
 	 * @example 'meta.identifier' -> object.meta.identifier
 	 */
 	export let optionsValueField: string = 'id';
+
+	export let browserCache: RequestCache = 'default';
 
 	/**
 	 * Additional fields to display in labels as prefixes
@@ -131,9 +137,9 @@
 					endpoint += endpoint.includes('?') ? '&' : '?';
 					endpoint += queryString;
 				}
-				const response = await fetch(endpoint);
+				const response = await fetch(endpoint, { cache: browserCache });
 				if (response.ok) {
-					const data = await response.json();
+					const data = await response.json().then((res) => res?.results ?? res);
 					options = processOptions(data);
 					const isRequired = mandatory || $constraints?.required;
 					const hasNoOptions = options.length === 0;
@@ -313,7 +319,7 @@
 	{/if}
 	<div
 		class="control overflow-x-clip flex items-center space-x-2"
-		data-testid="form-input-{field.replaceAll('_', '-')}"
+		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
 	>
 		<input type="hidden" name={field} value={$value ? $value : ''} />
 		<MultiSelect

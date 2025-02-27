@@ -1,0 +1,131 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    pull_policy: always
+    restart: always
+    environment:
+      POSTGRES_DB: {{ postgres.name }}
+      POSTGRES_USER: {{ postgres.user }}
+      {% if postgres.password is defined %}
+      POSTGRES_PASSWORD: {{ postgres.password }}
+      {% endif %}
+    volumes:
+      - ./db/pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ postgres.user }} -d {{ postgres.name }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  backend:
+    container_name: backend
+    image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
+    pull_policy: always
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      - DJANGO_DEBUG={{ enable_debug }}
+      - AUTH_TOKEN_TTL=7200
+      - LICENSE_SEATS=5
+      - LICENSE_EXPIRATION=2025-12-21
+      - POSTGRES_NAME={{ postgres.name }}
+      - POSTGRES_USER={{ postgres.user }}
+      {% if postgres.password is defined %}
+      - POSTGRES_PASSWORD={{ postgres.password }}
+      {% endif %}
+      - DB_HOST=postgres
+      {% if need_mailer %}
+      - EMAIL_HOST={{ email.host }}
+      - EMAIL_PORT={{ email.port }}
+      {% if email.use_tls %}- EMAIL_USE_TLS={{ email.use_tls }}{% endif %}
+      - EMAIL_HOST_USER={{ email.user }}
+      - EMAIL_HOST_PASSWORD={{ email.password }}
+      - DEFAULT_FROM_EMAIL={{ email.from_email }}
+      {% endif %}
+    volumes:
+      - ./db:/code/db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  huey:
+    container_name: huey
+    image: ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
+    pull_policy: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      - DJANGO_DEBUG=False
+      - AUTH_TOKEN_TTL=7200
+      - LICENSE_SEATS=5
+      - LICENSE_EXPIRATION=2025-12-21
+      - POSTGRES_NAME={{ postgres.name }}
+      - POSTGRES_USER={{ postgres.user }}
+      {% if postgres.password is defined %}
+      - POSTGRES_PASSWORD={{ postgres.password }}
+      {% endif %}
+      - DB_HOST=postgres
+      {% if need_mailer %}
+      - EMAIL_HOST={{ email.host }}
+      - EMAIL_PORT={{ email.port }}
+      {% if email.use_tls %}- EMAIL_USE_TLS={{ email.use_tls }}{% endif %}
+      - EMAIL_HOST_USER={{ email.user }}
+      - EMAIL_HOST_PASSWORD={{ email.password }}
+      - DEFAULT_FROM_EMAIL={{ email.from_email }}
+      {% endif %}
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+    image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest
+    pull_policy: always
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  caddy:
+    container_name: caddy
+    image: caddy:2.8.4
+    environment:
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - {{ port }}:{{ port }}
+    volumes:
+      - ./caddy_data:/data{% if not can_do_tls and use_custom_cert %}
+      - {{ cert_config.cert_path }}:/etc/caddy/cert.pem:ro
+      - {{ cert_config.key_path }}:/etc/caddy/key.pem:ro{% endif %}
+    command: |
+      sh -c 'echo $$CISO_ASSISTANT_URL "{
+      reverse_proxy /api/* backend:8000
+      reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
+      tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
+      tls internal{% endif %}{% endif %}
+      }" > Caddyfile && caddy run'
