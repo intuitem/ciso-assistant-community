@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                             ("--", "Undefined"),
                             ("pentest", "Pentest"),
                             ("audit", "Audit"),
-                            ("internal", "Internal"),
+                            ("self_identified", "Self-identified"),
                         ],
                         default="--",
                         max_length=32,

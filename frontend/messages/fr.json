@@ -1172,7 +1172,7 @@
 	"followUp": "Suivi",
 	"pentest": "Test d'intrusion",
 	"audit": "Audit",
-	"internal": "Interne",
+	"selfIdentified": "Auto-identifié",
 	"identified": "Identifié",
 	"confirmed": "Confirmé",
 	"dismissed": "Rejeté",

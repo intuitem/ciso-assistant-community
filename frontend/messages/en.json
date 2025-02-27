@@ -1182,7 +1182,7 @@
 	"followUp": "Follow-up",
 	"pentest": "Pentest",
 	"audit": "Audit",
-	"internal": "Internal",
+	"selfIdentified": "Self-identified",
 	"identified": "Identified",
 	"confirmed": "Confirmed",
 	"dismissed": "Dismissed",
