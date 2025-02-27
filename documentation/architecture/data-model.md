@@ -1203,22 +1203,22 @@ There is no link between representatives (modeling of the ecosystem) and users o
 
 - add field observation
 
-#### Requirement assessment
+### Requirement assessment
 
 - add the following fields:
-  - answer: a json corresponding to the optional questions of the requirement node.
+  - answers: a json corresponding to the answers of the requirement node questions.
 
-#### Compliance assessment
+### Compliance assessment
 
 - add the following fields:
   - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
 
-#### Requirement node
+### Requirement node
 
 - Add the following fields:
-  - questions: a json field describing a form.
+  - questions: a json corresponding to the optional questions of the requirement node.
 
-#### Applied control
+### Applied control
 
 - Add a "contract" category
 - Add a foreign key "contract" to point to a contract
@@ -1229,7 +1229,7 @@ Note: in the future, we will use the same approach for policies.
 
 ### Question and answer format
 
-The format for question and answer json fields will evolve over time. The initial format is the following:
+The format for questions and answers json fields will evolve over time. The initial format is the following:
 
 - questions:
 
@@ -1238,11 +1238,35 @@ The format for question and answer json fields will evolve over time. The initia
     "urn:intuitem:risk:req_node:example:a.1:question:1": {
         "question_type": "unique_choice",
         "question_choices": [
-            "yes",
-            "no",
-            "n/a"
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
+                "value": "yes"
+            },
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
+                "value": "no"
+            },
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:3",
+                "value": "n/a"
+            }
         ],
-        "text": "",
+        "text": "Question title",
+    },
+    "urn:intuitem:risk:req_node:example:a.1:question:2": {
+    ...
+    }
+}
+```
+
+- answers:
+
+```json
+{
+    "urn:intuitem:risk:req_node:example:a.1:question:1": {
+        "value": [
+            "urn:intuitem:risk:framework:example:answer01:choice:1"
+        ],
     },
     "urn:intuitem:risk:req_node:example:a.1:question:2": {
     ...

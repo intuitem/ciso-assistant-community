@@ -154,7 +154,6 @@ library_vars_dict_reverse = defaultdict(dict)
 library_vars_dict_arg = defaultdict(dict)
 urn_unicity_checker = set()
 
-
 parser = argparse.ArgumentParser(
     prog="convert-library.py",
     description="convert an Excel file in a library for CISO Assistant",
@@ -180,11 +179,9 @@ questions = []
 risk_matrix = {}
 requirement_mappings = []
 
-
 def error(message):
     print("Error:", message)
     exit(1)
-
 
 def read_header(row):
     """
@@ -203,7 +200,6 @@ def read_header(row):
         i += 1
     return header
 
-
 def get_translations(header, row):
     """read available translations"""
     result = {}
@@ -215,7 +211,6 @@ def get_translations(header, row):
                 result[lang] = {}
             result[lang][v] = row[i].value
     return result
-
 
 def get_translations_content(library_vars, prefix):
     """read available translations in library_vars"""
@@ -230,14 +225,12 @@ def get_translations_content(library_vars, prefix):
             result[lang][k2] = v
     return result
 
-
 # https://gist.github.com/Mike-Honey/b36e651e9a7f1d2e1d60ce1c63b9b633
 from colorsys import rgb_to_hls, hls_to_rgb
 
 RGBMAX = 0xFF  # Corresponds to 255
 HLSMAX = 240  # MS excel's tint function expects that HLS is base 240. see:
 # https://social.msdn.microsoft.com/Forums/en-US/e9d8c136-6d62-4098-9b1b-dac786149f43/excel-color-tint-algorithm-incorrect?forum=os_binaryfile#d3c2ac95-52e0-476b-86f1-e2a697f24969
-
 
 def rgb_to_ms_hls(red, green=None, blue=None):
     """Converts rgb values in range (0,1) or a hex string of the form '[#aa]rrggbb' to HLSMAX based HLS, (alpha values are ignored)"""
@@ -253,13 +246,11 @@ def rgb_to_ms_hls(red, green=None, blue=None):
     h, l, s = rgb_to_hls(red, green, blue)
     return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
 
-
 def ms_hls_to_rgb(hue, lightness=None, saturation=None):
     """Converts HLSMAX based HLS values to rgb values in the range (0,1)"""
     if lightness is None:
         hue, lightness, saturation = hue
     return hls_to_rgb(hue / HLSMAX, lightness / HLSMAX, saturation / HLSMAX)
-
 
 def rgb_to_hex(red, green=None, blue=None):
     """Converts (0,1) based RGB values to a hex string 'rrggbb'"""
@@ -273,7 +264,6 @@ def rgb_to_hex(red, green=None, blue=None):
             int(round(blue * RGBMAX)),
         )
     ).upper()
-
 
 def get_theme_colors(wb):
     """Gets theme colors from the workbook"""
@@ -309,7 +299,6 @@ def get_theme_colors(wb):
 
     return colors
 
-
 def tint_luminance(tint, lum):
     """Tints a HLSMAX based luminance"""
     # See: http://ciintelligence.blogspot.co.uk/2012/02/converting-excel-theme-color-and-tint.html
@@ -318,13 +307,11 @@ def tint_luminance(tint, lum):
     else:
         return int(round(lum * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint))))
 
-
 def theme_and_tint_to_rgb(wb, theme, tint):
     """Given a workbook, a theme number and a tint return a hex based rgb"""
     rgb = get_theme_colors(wb)[theme]
     h, l, s = rgb_to_ms_hls(rgb)
     return rgb_to_hex(ms_hls_to_rgb(h, tint_luminance(tint, l), s))
-
 
 def get_color(wb, cell):
     """get cell color; None for no fill"""
@@ -337,8 +324,7 @@ def get_color(wb, cell):
     color = theme_and_tint_to_rgb(wb, theme, tint)
     return "#" + color
 
-
-def get_question(tab):
+def get_answers(tab):
     print("processing answers")
     found_answers = {}
     is_header = True
@@ -359,7 +345,7 @@ def get_question(tab):
                 else None
             )
             question_choices = (
-                row[header.get("question_choices")].value.split("\n")
+                [{"urn": f"{library_vars['framework_urn']}:{row_id}:choice:{i}", "value": choice.strip()} for i, choice in enumerate(row[header.get("question_choices")].value.split("\n"))]
                 if "question_choices" in header
                 and row[header["question_choices"]].value
                 else None
@@ -371,7 +357,6 @@ def get_question(tab):
 
     return found_answers
 
-
 ################################################################
 def build_ids_set(tab_name):
     output = set()
@@ -379,12 +364,11 @@ def build_ids_set(tab_name):
     output = {cell.value for cell in raw if cell.value is not None}
     return output
 
-
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
     try:
-        answers = get_question(dataframe["answers"])
+        answers = get_answers(dataframe["answers"])
     except KeyError:
         answers = {}
     if title.lower() == "library_content":
@@ -526,7 +510,7 @@ for tab in dataframe:
                     (
                         row[header["questions"]].value.split("\n")
                         if row[header["questions"]].value
-                        else [""]
+                        else []
                     )
                     if "questions" in header
                     else None
@@ -535,7 +519,7 @@ for tab in dataframe:
                     (
                         row[header["answer"]].value.split("\n")
                         if row[header["answer"]].value
-                        else [""]
+                        else []
                     )
                     if "answer" in header
                     else None
