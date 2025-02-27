@@ -271,8 +271,7 @@
 											{stringifiedSeverity}
 										{:else if key === 'children_assets'}
 											{#if Object.keys(value).length > 0}
-														<ul class="inline-flex flex-wrap space-x-4">
-
+												<ul class="inline-flex flex-wrap space-x-4">
 													{#each value as val}
 														<li data-testid={key.replace('_', '-') + '-field-value'}>
 															{#if val.str && val.id}
@@ -282,7 +281,6 @@
 																	)?.urlModel
 																}/${val.id}`}
 																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																
 																	>{val.str}</Anchor
 																>
 															{:else if val.str}
