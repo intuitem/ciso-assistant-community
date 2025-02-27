@@ -4,7 +4,6 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
-	import { BASE_API_URL } from '$lib/utils/constants';
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
@@ -70,7 +69,6 @@
 		securityObjectiveScaleMap.map(createOption)
 	);
 
-	let validParentAssets: Option[] = [];
 </script>
 
 <TextField
