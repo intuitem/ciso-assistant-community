@@ -3621,7 +3621,7 @@ class FindingsAssessment(Assessment):
         UNDEFINED = "--", _("Undefined")
         PENTEST = "pentest", _("Pentest")
         AUDIT = "audit", _("Audit")
-        SELF_IDENTIFIED = "self-identified", _("Self-identified")
+        SELF_IDENTIFIED = "self_identified", _("Self-identified")
 
     owner = models.ManyToManyField(
         User,
