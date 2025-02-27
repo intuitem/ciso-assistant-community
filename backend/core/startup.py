@@ -48,6 +48,8 @@ READER_PERMISSIONS_LIST = [
     "view_qualification",
     "view_globalsettings",
     "view_securityexception",
+    "view_finding",
+    "view_findingsassessment",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -85,6 +87,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_qualification",
     "view_globalsettings",
     "view_securityexception",
+    "view_finding",
+    "view_findingsassessment",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -196,6 +200,14 @@ ANALYST_PERMISSIONS_LIST = [
     "add_securityexception",
     "change_securityexception",
     "delete_securityexception",
+    "add_finding",
+    "view_finding",
+    "change_finding",
+    "delete_finding",
+    "add_findingsassessment",
+    "view_findingsassessment",
+    "change_findingsassessment",
+    "delete_findingsassessment",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -315,6 +327,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_securityexception",
     "change_securityexception",
     "delete_securityexception",
+    "add_finding",
+    "view_finding",
+    "change_finding",
+    "delete_finding",
+    "add_findingsassessment",
+    "view_findingsassessment",
+    "change_findingsassessment",
+    "delete_findingsassessment",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -465,6 +485,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_securityexception",
     "change_securityexception",
     "delete_securityexception",
+    "add_finding",
+    "view_finding",
+    "change_finding",
+    "delete_finding",
+    "add_findingsassessment",
+    "view_findingsassessment",
+    "change_findingsassessment",
+    "delete_findingsassessment",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
