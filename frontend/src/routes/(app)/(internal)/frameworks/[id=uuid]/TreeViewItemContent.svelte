@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { getOptions } from '$lib/utils/crud';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let ref_id: string;
 	export let name: string;
@@ -55,6 +56,7 @@
 				{/if}
 				{#if description}
 					<p>{description}</p>
+					<Anchor href={`inspect-requirement/${node.id}`} label={title} class="text-sm"><i class="fas fa-trash"></i></Anchor>
 				{/if}
 			{:else if node.question && node.question.questions && node.question.questions[0]}
 				<!-- This only displays the first question -->

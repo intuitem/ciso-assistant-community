@@ -3416,6 +3416,13 @@ class RequirementViewSet(BaseModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+    
+    @action(detail=True, methods=["get"], name="Inspect specific requirements")
+    def inspect_requirement(self, request, pk):
+        requirement = RequirementNode.objects.get(id=pk)
+        requirement_assessments = RequirementAssessment.objects.filter(requirement=requirement)
+        serialized_requirement_assessments = RequirementAssessmentReadSerializer(requirement_assessments, many=True).data
+        return Response(serialized_requirement_assessments)
 
 
 class EvidenceViewSet(BaseModelViewSet):

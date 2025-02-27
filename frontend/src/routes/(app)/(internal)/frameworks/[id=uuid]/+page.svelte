@@ -14,6 +14,7 @@
 
 	function transformToTreeView(nodes) {
 		return nodes.map(([id, node]) => {
+			node.id = id;
 			return {
 				id: id,
 				content: TreeViewItemContent,
