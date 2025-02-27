@@ -4,25 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0057_store_storedlibrary_content_as_dict_not_str'),
+        ("core", "0057_store_storedlibrary_content_as_dict_not_str"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='appliedcontrol',
-            name='filtering_labels',
-            field=models.ManyToManyField(blank=True, to='core.filteringlabel', verbose_name='Labels'),
+            model_name="appliedcontrol",
+            name="filtering_labels",
+            field=models.ManyToManyField(
+                blank=True, to="core.filteringlabel", verbose_name="Labels"
+            ),
         ),
         migrations.AddField(
-            model_name='referencecontrol',
-            name='filtering_labels',
-            field=models.ManyToManyField(blank=True, to='core.filteringlabel', verbose_name='Labels'),
+            model_name="referencecontrol",
+            name="filtering_labels",
+            field=models.ManyToManyField(
+                blank=True, to="core.filteringlabel", verbose_name="Labels"
+            ),
         ),
         migrations.AddField(
-            model_name='threat',
-            name='filtering_labels',
-            field=models.ManyToManyField(blank=True, to='core.filteringlabel', verbose_name='Labels'),
+            model_name="threat",
+            name="filtering_labels",
+            field=models.ManyToManyField(
+                blank=True, to="core.filteringlabel", verbose_name="Labels"
+            ),
         ),
     ]
