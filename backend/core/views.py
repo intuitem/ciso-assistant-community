@@ -415,7 +415,7 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder", "risk_scenarios"]
+    filterset_fields = ["folder", "provider", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
     def list(self, request, *args, **kwargs):
@@ -444,20 +444,38 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
+class AssetFilter(df.FilterSet):
+    exclude_childrens = df.ModelChoiceFilter(
+        queryset=Asset.objects.all(),
+        method="filter_exclude_childrens",
+        label="Exclude childrens",
+    )
+
+    def filter_exclude_childrens(self, queryset, name, value):
+        print(value.get_descendants())
+        descendants = value.get_descendants()
+        return queryset.exclude(id__in=[descendant.id for descendant in descendants])
+
+    class Meta:
+        model = Asset
+        fields = [
+            "folder",
+            "type",
+            "parent_assets",
+            "exclude_childrens",
+            "ebios_rm_studies",
+            "risk_scenarios",
+            "security_exceptions",
+        ]
+
+
 class AssetViewSet(BaseModelViewSet):
     """
     API endpoint that allows assets to be viewed or edited.
     """
 
     model = Asset
-    filterset_fields = [
-        "folder",
-        "parent_assets",
-        "type",
-        "risk_scenarios",
-        "ebios_rm_studies",
-        "security_exceptions",
-    ]
+    filterset_class = AssetFilter
     search_fields = ["name", "description", "business_value"]
 
     def _perform_write(self, serializer):
@@ -623,7 +641,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
-    filterset_fields = ["folder", "category", "csf_function"]
+    filterset_fields = ["folder", "category", "csf_function", "provider"]
     search_fields = ["name", "description", "provider"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -643,7 +661,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
     """
 
     model = RiskMatrix
-    filterset_fields = ["folder", "is_enabled"]
+    filterset_fields = ["folder", "is_enabled", "provider"]
 
     @action(detail=False)  # Set a name there
     def colors(self, request):
@@ -3319,7 +3337,7 @@ class FrameworkFilter(df.FilterSet):
 
     class Meta:
         model = Framework
-        fields = ["folder", "baseline"]
+        fields = ["folder", "baseline", "provider"]
 
 
 class FrameworkViewSet(BaseModelViewSet):
