@@ -185,6 +185,10 @@
 	if (data.urlModel === 'folders') {
 		orderRelatedModels = ['perimeters', 'entities'];
 	}
+
+	function truncateString(str: string, maxLength: number = 50): string {
+		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
+	}
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -280,8 +284,8 @@
 																		(item) => item.field === key
 																	)?.urlModel
 																}/${val.id}`}
-																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																	>{val.str}</Anchor
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
+																	{truncateString(val.str)}</Anchor
 																>
 															{:else if val.str}
 																{safeTranslate(val.str)}
