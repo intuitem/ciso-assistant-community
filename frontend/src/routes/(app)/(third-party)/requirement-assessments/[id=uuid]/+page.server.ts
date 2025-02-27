@@ -21,14 +21,10 @@ export const load = (async ({ fetch, params }) => {
 		const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
 		const response = await fetch(keyEndpoint);
 		if (response.ok) {
-			const data = await response.json().then((data) => data.results);
-
-			const bodyData = tableSourceMapper(data, listViewFields[key].body);
-
 			const table: TableSource = {
 				head: listViewFields[key].head,
-				body: bodyData,
-				meta: data
+				body: [],
+				meta: []
 			};
 			tables[key] = table;
 		} else {

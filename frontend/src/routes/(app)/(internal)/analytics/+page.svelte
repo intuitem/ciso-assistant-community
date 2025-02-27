@@ -12,7 +12,7 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
-	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
+	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
 	import type { PageData } from './$types';
@@ -40,16 +40,8 @@
 			eta: 'eta',
 			state: 'state'
 		},
-		body: tableSourceMapper(data.measures, [
-			'name',
-			'category',
-			'csf_function',
-			'folder',
-			'ranking_score',
-			'eta',
-			'state'
-		]),
-		meta: data.measures
+		body: [],
+		meta: []
 	};
 
 	const appliedControlWatchlistTable: TableSource = {
@@ -62,16 +54,8 @@
 			expiry_date: 'expiryDate',
 			state: 'state'
 		},
-		body: tableSourceMapper(data.measures_to_review, [
-			'name',
-			'category',
-			'csf_function',
-			'folder',
-			'eta',
-			'expiry_date',
-			'state'
-		]),
-		meta: data.measures_to_review
+		body: [],
+		meta: []
 	};
 
 	const riskAcceptanceWatchlistTable: TableSource = {
@@ -81,13 +65,8 @@
 			expiry_date: 'expiryDate',
 			state: 'state'
 		},
-		body: tableSourceMapper(data.acceptances_to_review, [
-			'name',
-			'risk_scenarios',
-			'expiry_date',
-			'state'
-		]),
-		meta: data.acceptances_to_review
+		body: [],
+		meta: []
 	};
 
 	let tabSet = $page.url.searchParams.get('tab')
