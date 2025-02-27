@@ -23,18 +23,10 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	if (model.reverseForeignKeyFields) {
 		await Promise.all(
 			model.reverseForeignKeyFields.map(async (e) => {
-				const relEndpoint = `${BASE_API_URL}/${e.urlModel}/?${e.field}=${params.id}`;
-				const res = await fetch(relEndpoint);
-				const data = await res.json().then((res) => res.results);
-
-				const metaData = tableSourceMapper(data, ['id']);
-
-				const bodyData = tableSourceMapper(data, listViewFields[e.urlModel].body);
-
 				const table: TableSource = {
 					head: listViewFields[e.urlModel].head,
-					body: bodyData,
-					meta: metaData
+					body: [],
+					meta: []
 				};
 
 				const info = getModelInfo(e.urlModel);

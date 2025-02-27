@@ -27,10 +27,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const model: ModelInfo = getModelInfo(URLModel);
 	const selectFields = urlParamModelSelectFields(URLModel);
 
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_study=${params.id}`;
-	const res = await fetch(endpoint);
-	const data = await res.json().then((res) => res.results);
-
 	const selectOptions: Record<string, any> = {};
 
 	for (const selectField of selectFields) {
@@ -65,8 +61,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
-
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
 			obj[key] = listViewFields[URLModel as urlModel].head[index];
@@ -77,8 +71,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const table: TableSource = {
 		head: headData,
-		body: bodyData,
-		meta: data // metaData
+		body: [],
+		meta: []
 	};
 
 	return { createForm, deleteForm, model, URLModel, table };

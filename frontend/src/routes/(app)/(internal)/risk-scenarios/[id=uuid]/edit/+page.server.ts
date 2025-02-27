@@ -36,16 +36,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
 			const response = await fetch(keyEndpoint);
 			if (response.ok) {
-				const data = await response.json().then((data) => data.results);
-
-				const metaData = tableSourceMapper(data, ['id', 'status']);
-
-				const bodyData = tableSourceMapper(data, listViewFields[key].body);
-
 				const table: TableSource = {
 					head: listViewFields[key].head,
-					body: bodyData,
-					meta: metaData
+					body: [],
+					meta: []
 				};
 				tables[key] = table;
 			} else {

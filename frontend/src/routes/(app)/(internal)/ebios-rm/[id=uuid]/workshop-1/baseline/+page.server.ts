@@ -2,14 +2,14 @@ import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/acti
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
+import { listViewFields } from '$lib/utils/table';
 import type { ModelInfo, urlModel } from '$lib/utils/types';
+import { type TableSource } from '@skeletonlabs/skeleton';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { listViewFields } from '$lib/utils/table';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
@@ -52,14 +52,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	const endpoint = model.endpointUrl
-		? `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_studies=${params.id}`
-		: `${BASE_API_URL}/${model.urlModel}?ebios_rm_studies=${params.id}`;
-	const res = await fetch(endpoint);
-	const data = await res.json().then((res) => res.results);
-
-	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
-
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
 			obj[key] = listViewFields[URLModel as urlModel].head[index];
@@ -70,8 +62,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const table: TableSource = {
 		head: headData,
-		body: bodyData,
-		meta: data // metaData
+		body: [],
+		meta: []
 	};
 
 	return { createForm, deleteForm, model, URLModel, table, updateForm, updatedModel, object };
