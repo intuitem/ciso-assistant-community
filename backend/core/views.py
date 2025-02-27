@@ -402,20 +402,38 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
+class AssetFilter(df.FilterSet):
+    exclude_childrens = df.ModelChoiceFilter(
+        queryset=Asset.objects.all(),
+        method="filter_exclude_childrens",
+        label="Exclude childrens",
+    )
+
+    def filter_exclude_childrens(self, queryset, name, value):
+        print(value.get_descendants())
+        descendants = value.get_descendants()
+        return queryset.exclude(id__in=[descendant.id for descendant in descendants])
+
+    class Meta:
+        model = Asset
+        fields = [
+            "folder",
+            "type",
+            "parent_assets",
+            "exclude_childrens",
+            "ebios_rm_studies",
+            "risk_scenarios",
+            "security_exceptions",
+        ]
+
+
 class AssetViewSet(BaseModelViewSet):
     """
     API endpoint that allows assets to be viewed or edited.
     """
 
     model = Asset
-    filterset_fields = [
-        "folder",
-        "parent_assets",
-        "type",
-        "risk_scenarios",
-        "ebios_rm_studies",
-        "security_exceptions",
-    ]
+    filterset_class = AssetFilter
     search_fields = ["name", "description", "business_value"]
 
     def _perform_write(self, serializer):
@@ -433,13 +451,6 @@ class AssetViewSet(BaseModelViewSet):
     @action(detail=False, name="Get type choices")
     def type(self, request):
         return Response(dict(Asset.Type.choices))
-
-    @action(detail=True, methods=["GET"], name="Get valid parent assets")
-    def valid_parent_assets(self, request, pk=None):
-        asset = self.get_object()
-        invalid_assets = asset.get_descendants()
-        valid_assets = Asset.objects.exclude(id__in=[a.id for a in invalid_assets])
-        return Response(AssetReadSerializer(valid_assets, many=True).data)
 
     @action(detail=False, name="Get assets graph")
     def graph(self, request):

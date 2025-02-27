@@ -71,30 +71,6 @@
 	);
 
 	let validParentAssets: Option[] = [];
-
-	async function fetchValidParentAssets() {
-    if (!data.id) return false;
-
-    const url = `${BASE_API_URL}/assets/${data.id}/valid_parent_assets/`;
-
-    try {
-        const response = await fetch(url);
-        if (!response.ok)
-			return false;
-
-        const assets = await response.json();
-        validParentAssets = assets.map((asset: any) => ({
-            label: asset.name || asset.label || 'Unknown',
-            value: asset.id
-        }));
-		console.log('validParentAssets:', validParentAssets);
-		return true;
-    } catch (error) {
-        console.error('Error fetching valid parent assets:', error);
-		return false;
-    }
-}
-
 </script>
 
 <TextField
@@ -132,27 +108,13 @@
 	cacheLock={cacheLocks['type']}
 	bind:cachedValue={formDataCache['type']}
 />
-{#if fetchValidParentAssets()}
-<AutocompleteSelect
-	disabled={data.type === 'PR'}
-	hidden={data.type === 'PR'}
-	multiple
-	{form}
-	options={validParentAssets}
-	optionsLabelField="auto"
-	optionsSelf={object}
-	field="parent_assets"
-	cacheLock={cacheLocks['parent_assets']}
-	bind:cachedValue={formDataCache['parent_assets']}
-	label={m.parentAssets()}
-/>
-{:else}
 <AutocompleteSelect
 	disabled={data.type === 'PR'}
 	hidden={data.type === 'PR'}
 	multiple
 	{form}
 	optionsEndpoint="assets"
+	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
 	optionsLabelField="auto"
 	optionsSelf={object}
 	field="parent_assets"
@@ -160,7 +122,6 @@
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
 />
-{/if}
 <AutocompleteSelect
 	{form}
 	multiple
