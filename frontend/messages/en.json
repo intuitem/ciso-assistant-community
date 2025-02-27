@@ -1186,5 +1186,6 @@
 	"identified": "Identified",
 	"confirmed": "Confirmed",
 	"dismissed": "Dismissed",
-	"assigned": "Assigned"
+	"assigned": "Assigned",
+	"selectEvidence": "Select evidence"
 }

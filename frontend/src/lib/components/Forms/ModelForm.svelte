@@ -290,7 +290,7 @@
 	{:else if URLModel === 'assets'}
 		<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 	{:else if URLModel === 'requirement-assessments'}
-		<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} />
+		<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'entities'}
 		<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'entity-assessments'}

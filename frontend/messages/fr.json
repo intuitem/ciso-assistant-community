@@ -1176,5 +1176,6 @@
 	"identified": "Identifié",
 	"confirmed": "Confirmé",
 	"dismissed": "Rejeté",
-	"assigned": "Assigné"
+	"assigned": "Assigné",
+	"selectEvidence": "Sélectionner une preuve"
 }
