@@ -4210,9 +4210,9 @@ def get_build(request):
     DATABASES = settings.DATABASES
     default_db_engine = settings.DATABASES["default"]["ENGINE"]
     if "postgresql" in default_db_engine:
-        database_type = "PostgreSQL"
+        database_type = "P"
     elif "sqlite" in default_db_engine:
-        database_type = "SQLite"
+        database_type = "S"
     else:
         database_type = "Unknown"
 
