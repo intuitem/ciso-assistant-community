@@ -1,7 +1,7 @@
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, params, url }) => {
-	const endpoint = `/libraries/${params.id}`;
+	const endpoint = `/loaded-libraries/${params.id}`;
 	const queryParams = url.searchParams.toString();
 	const library = await fetch(`${endpoint}?${queryParams}`).then((res) => res.json());
 

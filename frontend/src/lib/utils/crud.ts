@@ -453,7 +453,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'folders',
 				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
 			},
-			{ field: 'applied_controls', urlModel: 'applied-controls' }
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'evidences', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'requirement-assessments' }
 		]
 	},
 	'compliance-assessments': {
@@ -777,18 +782,14 @@ export const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
-	libraries: {
+	'stored-libraries': {
 		locales: LanguageDisplay,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
-	// "stored-libraries": {
-	// 	locale: LanguageDisplay,
-	// 	[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	// },
-	// "loaded-libraries": {
-	// 	locale: LanguageDisplay
-	// 	// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	// },
+	'loaded-libraries': {
+		locales: LanguageDisplay,
+		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
+	},
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
 	}
@@ -923,30 +924,6 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		}
 	}
 };
-
-export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any, language: string) => any } =
-	{
-		frameworks: async ({ fetch }) => {
-			// ({ fetch }, language)
-			const endpoint = `${BASE_API_URL}/frameworks/`;
-			const res = await fetch(endpoint);
-			const response_data = await res.json();
-			const frameworks = response_data.results;
-
-			let compliance_assessment_req = null;
-			let compliance_assessment_data = null;
-
-			for (const framework of frameworks) {
-				compliance_assessment_req = await fetch(
-					`${BASE_API_URL}/compliance-assessments/?framework=${framework.id}`
-				);
-				compliance_assessment_data = await compliance_assessment_req.json();
-				framework.compliance_assessments = compliance_assessment_data.count;
-			}
-
-			return frameworks;
-		}
-	};
 
 export const urlParamModelVerboseName = (model: string): string => {
 	return URL_MODEL_MAP[model]?.verboseName || '';

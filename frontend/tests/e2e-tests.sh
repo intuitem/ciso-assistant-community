@@ -130,17 +130,16 @@ cleanup() {
     rm "$DB_DIR/$DB_INIT_NAME"
     echo "| test initial database snapshot deleted"
   fi
-  # This is dead code for now, we must delete this code if we abandon the .testhistory file usage
-  # if [[ -d "$APP_DIR/frontend/tests/utils/.testhistory" ]]; then
-  # rm -rf "$APP_DIR/frontend/tests/utils/.testhistory"
-  # echo "| test data history removed"
-  # fi
-  # This must be at the end of the cleanup as the sudo command can block the script
   if [[ -n "$MAILER_PID" ]]; then
     sudo docker stop $MAILER_PID &>/dev/null
     sudo docker rm $MAILER_PID &>/dev/null
     echo "| mailer service stopped"
   fi
+  if [[ -d "$APP_DIR/frontend/tests/utils/.testhistory" ]]; then
+    rm -rf "$APP_DIR/frontend/tests/utils/.testhistory"
+    echo "| test data history removed"
+  fi
+  # This must be at the end of the cleanup as the sudo command can block the script
   trap - SIGINT SIGTERM EXIT
   echo "Cleanup done"
   exit 0
@@ -231,7 +230,7 @@ echo "==========================================================================
 FRONTEND_HASH_FILE="$APP_DIR/frontend/tests/.frontend_hash"
 FRONTEND_HASH=$(find "$APP_DIR/frontend/src" -type f \( -name "*.ts" -o -name "*.svelte" \) -print0 | xargs -0 md5sum | md5sum)
 
-if ! cmp <(cat "$FRONTEND_HASH_FILE") <(echo "$FRONTEND_HASH") &>/dev/null; then
+if [ "$(cat "$FRONTEND_HASH_FILE")" != "$FRONTEND_HASH" ]; then
   pnpm run build # Required for the "pnpm run preview" command of playwright.config.ts
   echo "$FRONTEND_HASH" >"$FRONTEND_HASH_FILE"
 fi
