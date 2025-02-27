@@ -4,7 +4,10 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+<<<<<<< HEAD
 	import { BASE_API_URL } from '$lib/utils/constants';
+=======
+>>>>>>> f9493f752cb814e685d76a6ad4081126cbab6d38
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
@@ -132,13 +135,20 @@
 	cacheLock={cacheLocks['type']}
 	bind:cachedValue={formDataCache['type']}
 />
+<<<<<<< HEAD
 {#if fetchValidParentAssets()}
+=======
+>>>>>>> f9493f752cb814e685d76a6ad4081126cbab6d38
 <AutocompleteSelect
 	disabled={data.type === 'PR'}
 	hidden={data.type === 'PR'}
 	multiple
 	{form}
+<<<<<<< HEAD
 	options={validParentAssets}
+=======
+	optionsEndpoint="assets?type=PR"
+>>>>>>> f9493f752cb814e685d76a6ad4081126cbab6d38
 	optionsLabelField="auto"
 	optionsSelf={object}
 	field="parent_assets"
@@ -146,6 +156,7 @@
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
 />
+<<<<<<< HEAD
 {:else}
 <AutocompleteSelect
 	disabled={data.type === 'PR'}
@@ -161,6 +172,8 @@
 	label={m.parentAssets()}
 />
 {/if}
+=======
+>>>>>>> f9493f752cb814e685d76a6ad4081126cbab6d38
 <AutocompleteSelect
 	{form}
 	multiple
