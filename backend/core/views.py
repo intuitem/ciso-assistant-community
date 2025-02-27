@@ -415,7 +415,7 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder", "risk_scenarios"]
+    filterset_fields = ["folder", "provider", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
     def list(self, request, *args, **kwargs):
@@ -627,6 +627,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "folder",
         "category",
         "csf_function",
+        "provider",
         "findings",
     ]
     search_fields = ["name", "description", "provider"]
@@ -648,7 +649,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
     """
 
     model = RiskMatrix
-    filterset_fields = ["folder", "is_enabled"]
+    filterset_fields = ["folder", "is_enabled", "provider"]
 
     @action(detail=False)  # Set a name there
     def colors(self, request):
@@ -3344,7 +3345,7 @@ class FrameworkFilter(df.FilterSet):
 
     class Meta:
         model = Framework
-        fields = ["folder", "baseline"]
+        fields = ["folder", "baseline", "provider"]
 
 
 class FrameworkViewSet(BaseModelViewSet):

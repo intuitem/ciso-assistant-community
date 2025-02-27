@@ -48,8 +48,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json().then((res) => res.results);
 
-	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
-
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
 			obj[key] = listViewFields[URLModel as urlModel].head[index];
@@ -60,8 +58,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const table: TableSource = {
 		head: headData,
-		body: bodyData,
-		meta: data // metaData
+		body: [],
+		meta: []
 	};
 
 	return { createForm, deleteForm, model, URLModel, table };
