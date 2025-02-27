@@ -12,10 +12,6 @@ export const load: PageServerLoad = async (event) => {
 	const response = await event.fetch(endpoint);
 	const data = await response.json();
 
-	const relEndpoint = `${BASE_API_URL}/ebios-rm/feared-events?ro_to_couples=${event.params.id}`;
-	const res = await event.fetch(relEndpoint);
-	const revData = await res.json().then((res) => res.results);
-
 	const tableFieldsRef = listViewFields['feared-events'];
 	const tableFields = {
 		head: [...tableFieldsRef.head],
@@ -26,12 +22,11 @@ export const load: PageServerLoad = async (event) => {
 		tableFields.head.splice(index, 1);
 		tableFields.body.splice(index, 1);
 	}
-	const bodyData = tableSourceMapper(revData, tableFields.body);
 
 	const table: TableSource = {
 		head: tableFields.head,
-		body: bodyData,
-		meta: revData
+		body: [],
+		meta: []
 	};
 
 	return { data, table, title: `${safeTranslate(data.risk_origin)} / ${data.target_objective}` };
