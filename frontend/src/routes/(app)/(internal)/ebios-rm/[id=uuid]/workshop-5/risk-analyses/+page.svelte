@@ -5,6 +5,7 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { page } from '$app/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -30,7 +31,12 @@
 	}
 </script>
 
-<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+<ModelTable
+	source={data.table}
+	deleteForm={data.deleteForm}
+	{URLModel}
+	baseEndpoint="/risk-assessments/?ebios_rm_study={$page.params.id}"
+>
 	<div slot="addButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 			<button
