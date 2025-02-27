@@ -444,20 +444,38 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
+class AssetFilter(df.FilterSet):
+    exclude_childrens = df.ModelChoiceFilter(
+        queryset=Asset.objects.all(),
+        method="filter_exclude_childrens",
+        label="Exclude childrens",
+    )
+
+    def filter_exclude_childrens(self, queryset, name, value):
+        print(value.get_descendants())
+        descendants = value.get_descendants()
+        return queryset.exclude(id__in=[descendant.id for descendant in descendants])
+
+    class Meta:
+        model = Asset
+        fields = [
+            "folder",
+            "type",
+            "parent_assets",
+            "exclude_childrens",
+            "ebios_rm_studies",
+            "risk_scenarios",
+            "security_exceptions",
+        ]
+
+
 class AssetViewSet(BaseModelViewSet):
     """
     API endpoint that allows assets to be viewed or edited.
     """
 
     model = Asset
-    filterset_fields = [
-        "folder",
-        "parent_assets",
-        "type",
-        "risk_scenarios",
-        "ebios_rm_studies",
-        "security_exceptions",
-    ]
+    filterset_class = AssetFilter
     search_fields = ["name", "description", "business_value"]
 
     def _perform_write(self, serializer):
