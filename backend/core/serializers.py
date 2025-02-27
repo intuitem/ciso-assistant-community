@@ -8,7 +8,6 @@ from django.db import models
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
-from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy
 from iam.models import *
 
@@ -322,6 +321,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    children_assets = FieldsRelatedField(["id"], many=True)
     owner = FieldsRelatedField(many=True)
     security_objectives = serializers.JSONField(
         source="get_security_objectives_display"
@@ -546,15 +546,9 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
-    state = serializers.SerializerMethodField()
-    requirements_count = serializers.IntegerField(
-        source="requirement_assessments.count"
-    )
-
-    def get_state(self, obj):
-        if not obj.eta:
-            return None
-        return time_state(obj.eta.isoformat())
+    # These properties shouldn't be displayed in the frontend detail view as they are simple derivations from fields already displayed in the detail view.
+    # has_evidences = serializers.BooleanField()
+    # eta_missed = serializers.BooleanField()
 
 
 class AppliedControlDuplicateSerializer(BaseModelSerializer):
