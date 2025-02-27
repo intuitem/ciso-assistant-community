@@ -111,6 +111,7 @@
 	multiple
 	{form}
 	optionsEndpoint="assets"
+	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
 	optionsLabelField="auto"
 	optionsSelf={object}
 	field="parent_assets"
