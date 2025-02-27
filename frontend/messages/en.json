@@ -1172,5 +1172,6 @@
 	"addSecurityException": "Add exception",
 	"expirationDate": "Expiration date",
 	"filterBy": "Filter by",
-	"demoDataAlreadyImported": "Demo data has already been imported"
+	"demoDataAlreadyImported": "Demo data has already been imported",
+	"selectEvidence": "Select evidence"
 }

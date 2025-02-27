@@ -1162,5 +1162,6 @@
 	"expirationDate": "Date d'expiration",
 	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur.",
 	"filterBy": "Filtrer par",
-	"demoDataAlreadyImported": "Les données de démonstration ont déjà été importées"
+	"demoDataAlreadyImported": "Les données de démonstration ont déjà été importées",
+	"selectEvidence": "Sélectionner une preuve"
 }

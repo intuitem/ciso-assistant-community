@@ -867,5 +867,6 @@
 	"documentationScore": "Punctajul documentației",
 	"useDocumentationScore": "Utilizați punctajul documentației",
 	"useDocumentationScoreHelpText": "Un al doilea punctaj (punctajul pentru documentație) va fi disponibil pentru evaluarea cerințelor.",
-	"publicationDate": "Data publicării"
+	"publicationDate": "Data publicării",
+	"selectEvidence": "Selectați dovezile"
 }
