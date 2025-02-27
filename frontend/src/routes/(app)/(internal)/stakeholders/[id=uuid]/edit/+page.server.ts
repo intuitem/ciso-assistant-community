@@ -64,7 +64,7 @@ export const load: LayoutServerLoad = async (event) => {
 			}
 		}
 	}
-	model.foreignKeys = foreignKeys;
+
 	model.selectOptions = selectOptions;
 
 	const measureCreateSchema = modelSchema('applied-controls');
