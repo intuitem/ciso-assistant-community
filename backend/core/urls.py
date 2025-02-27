@@ -76,6 +76,10 @@ router.register(
     SecurityExceptionViewSet,
     basename="security-exceptions",
 )
+router.register(
+    r"findings-assessments", FindingsAssessmentViewSet, basename="findings-assessments"
+)
+router.register(r"findings", FindingViewSet, basename="findings")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
