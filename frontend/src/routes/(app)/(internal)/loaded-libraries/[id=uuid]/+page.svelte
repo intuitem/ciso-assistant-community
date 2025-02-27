@@ -1,21 +1,24 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import * as m from '$paraglide/messages';
+	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
+	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	export let data;
-	let loading = { form: false, library: '' };
+
 	const showRisks = true;
+
 	interface LibraryObjects {
 		[key: string]: any;
 	}
 
-	const libraryObjects: LibraryObjects = data.library.objects ?? [];
+	const libraryObjects: LibraryObjects = data?.library?.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
@@ -32,14 +35,10 @@
 		});
 	}
 
-	import { enhance } from '$app/forms';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { ProgressRadial, tableSourceMapper } from '@skeletonlabs/skeleton';
-
 	const riskMatricesTable: TableSource = {
 		head: { name: 'name', description: 'description' },
-		body: tableSourceMapper(riskMatrices, ['name', 'description'])
+		body: tableSourceMapper(riskMatrices, ['name', 'description']),
+		meta: { count: riskMatrices.length }
 	};
 
 	const referenceControlsTable: TableSource = {
@@ -56,42 +55,25 @@
 			'description',
 			'category',
 			'csf_function'
-		])
+		]),
+		meta: { count: referenceControls.length }
 	};
 
 	const threatsTable: TableSource = {
 		head: { ref_id: 'ref', name: 'name', description: 'description' },
-		body: tableSourceMapper(threats, ['ref_id', 'name', 'description'])
+		body: tableSourceMapper(threats, ['ref_id', 'name', 'description']),
+		meta: { count: threats.length }
 	};
 
 	function riskMatricesPreview(riskMatrices: []) {
 		let riskMatricesDumps = [];
-		let riskMatrixDump = {
-			json_definition: ''
-		};
 		for (const riskMatrix of riskMatrices) {
-			riskMatrixDump['json_definition'] = JSON.stringify(riskMatrix);
+			const riskMatrixDump = {
+				json_definition: JSON.stringify(riskMatrix)
+			};
 			riskMatricesDumps.push(riskMatrixDump);
 		}
 		return riskMatricesDumps;
-	}
-
-	$: displayImportButton = !(data.library.is_loaded ?? true);
-
-	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
-		const data = new FormData(event.currentTarget);
-
-		const response = await fetch(event.currentTarget.action, {
-			method: 'POST',
-			body: data
-		});
-
-		const result: ActionResult = deserialize(await response.text());
-
-		if (result.type === 'success') {
-			await invalidateAll();
-		}
-		applyAction(result);
 	}
 </script>
 
@@ -99,34 +81,6 @@
 	<div class="flex flex-col space-y-2">
 		<span class="w-full flex flex-row justify-between">
 			<h1 class="font-medium text-xl">{data.library.name}</h1>
-			<div>
-				{#if displayImportButton}
-					{#if loading.form}
-						<ProgressRadial width="w-6" meter="stroke-primary-500" />
-					{:else}
-						<form
-							method="post"
-							action="/libraries/{data.library.id}?/load"
-							use:enhance={() => {
-								loading.form = true;
-								loading.library = data.library.urn;
-								return async ({ update }) => {
-									loading.form = false;
-									loading.library = '';
-									update();
-								};
-							}}
-							on:submit={handleSubmit}
-						>
-							{#if $page.data.user.is_admin}
-								<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
-									<i class="fa-solid fa-file-import" />
-								</button>
-							{/if}
-						</form>
-					{/if}
-				{/if}
-			</div>
 		</span>
 		<div class="space-y-1">
 			<p class="text-md leading-5 text-gray-700">
@@ -195,7 +149,15 @@
 			icon="fa-solid fa-gears"
 			header="{referenceControls.length} {m.referenceControls()}"
 		>
-			<ModelTable source={referenceControlsTable} displayActions={false} interactive={false} />
+			<ModelTable
+				source={referenceControlsTable}
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+				interactive={false}
+			/>
 		</Dropdown>
 	{/if}
 
@@ -205,7 +167,15 @@
 			icon="fa-solid fa-biohazard"
 			header="{threats.length} {m.threats()}"
 		>
-			<ModelTable source={threatsTable} displayActions={false} interactive={false} />
+			<ModelTable
+				source={threatsTable}
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+				interactive={false}
+			/>
 		</Dropdown>
 	{/if}
 

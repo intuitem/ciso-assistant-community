@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import * as m from '$paraglide/messages.js';
@@ -81,6 +82,19 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
+			baseEndpoint="/applied-controls?compliance_assessments={$page.params.id}"
+			fields={[
+				'name',
+				'status',
+				'priority',
+				'category',
+				'csf_function',
+				'eta',
+				'expiry_date',
+				'effort',
+				'cost',
+				'requirements_count'
+			]}
 		/>
 	</div>
 </div>
