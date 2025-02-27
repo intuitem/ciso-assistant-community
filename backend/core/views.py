@@ -3319,7 +3319,7 @@ class FrameworkFilter(df.FilterSet):
 
     class Meta:
         model = Framework
-        fields = ["folder", "baseline"]
+        fields = ["folder", "baseline", "provider"]
 
 
 class FrameworkViewSet(BaseModelViewSet):
