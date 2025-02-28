@@ -1,22 +1,21 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import HiddenInput from '../HiddenInput.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
-	import { defaults, type SuperValidated } from 'sveltekit-superforms';
+	import { defaults, type SuperForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
-	import { onMount } from 'svelte';
-	import { getModelInfo } from '$lib/utils/crud';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { invalidateAll } from '$app/navigation';
-	import { AppliedControlSchema } from '$lib/utils/schemas';
-	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { getModelInfo } from '$lib/utils/crud';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { AppliedControlSchema } from '$lib/utils/schemas';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
 
-	export let form: SuperValidated<any>;
+	export let form: SuperForm<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
@@ -44,7 +43,7 @@
 			props: {
 				form: defaults(
 					{
-						security_exceptions: [$page.data.object.id]
+						findings: [$page.data.object.id]
 					},
 					zod(AppliedControlSchema)
 				),
@@ -68,15 +67,23 @@
 	}
 </script>
 
-<HiddenInput {form} field="requirement_assessments" />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	hidden={initialData.folder}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
+/>
+<Select
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
 />
 <TextField
 	{form}
@@ -85,51 +92,47 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
-	field="owners"
-	cacheLock={cacheLocks['owners']}
-	bind:cachedValue={formDataCache['owners']}
-	label={m.owners()}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="users?is_approver=true"
-	optionsLabelField="email"
-	field="approver"
-	cacheLock={cacheLocks['approver']}
-	bind:cachedValue={formDataCache['approver']}
-	nullable={true}
-	label={m.approver()}
-	helpText={m.approverHelpText()}
-/>
 <Select
 	{form}
-	options={model.selectOptions['severity']}
+	options={[
+		{ label: '--', value: -1 },
+		{ label: m.low(), value: 0 },
+		{ label: m.medium(), value: 1 },
+		{ label: m.high(), value: 2 },
+		{ label: m.critical(), value: 3 }
+	]}
 	field="severity"
 	label={m.severity()}
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
 />
-<Select
+<AutocompleteSelect
 	{form}
-	options={model.selectOptions['status']}
-	field="status"
-	label={m.status()}
-	cacheLock={cacheLocks['status']}
-	disableDoubleDash="true"
-	bind:cachedValue={formDataCache['status']}
+	optionsEndpoint="findings-assessments"
+	field="findings_assessment"
+	cacheLock={cacheLocks['findings_assessment']}
+	bind:cachedValue={formDataCache['findings_assessment']}
+	label={m.findingsAssessment()}
+	hidden={initialData.findings_assessment}
 />
-<TextField
-	type="date"
+<AutocompleteSelect
+	multiple
 	{form}
-	field="expiration_date"
-	label={m.expirationDate()}
-	cacheLock={cacheLocks['expiration_date']}
-	bind:cachedValue={formDataCache['expiration_date']}
+	createFromSelection={true}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	allowUserOptions="append"
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="vulnerabilities"
+	optionsExtraFields={[['folder', 'str']]}
+	field="vulnerabilities"
+	label={m.vulnerabilities()}
 />
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">

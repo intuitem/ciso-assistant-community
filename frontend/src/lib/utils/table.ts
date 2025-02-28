@@ -68,6 +68,18 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const EFFORT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/effort',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		label: 'effort',
+		multiple: true
+	}
+};
+
 const PERIMETER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -556,7 +568,8 @@ export const listViewFields = {
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
-			priority: PRIORITY_FILTER
+			priority: PRIORITY_FILTER,
+			effort: EFFORT_FILTER
 		}
 	},
 	policies: {
@@ -829,6 +842,14 @@ export const listViewFields = {
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder']
+	},
+	'findings-assessments': {
+		head: ['ref_id', 'name', 'description', 'category', 'findings', 'perimeter'],
+		body: ['ref_id', 'str', 'description', 'category', 'findings_count', 'perimeter']
+	},
+	findings: {
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
+		body: ['ref_id', 'str', 'description', 'findings_assessment', 'status', 'filtering_labels']
 	},
 	extra: {
 		filters: {

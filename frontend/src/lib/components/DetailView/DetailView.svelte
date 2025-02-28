@@ -83,7 +83,8 @@
 				form: model.createForm,
 				model: model,
 				debug: false,
-				additionalInitialData: model.initialData
+				additionalInitialData: model.initialData,
+				formAction: `/${model.urlModel}?/create`
 			}
 		};
 		let modal: ModalSettings = {
