@@ -3513,7 +3513,6 @@ class EvidenceViewSet(BaseModelViewSet):
             evidence = self.get_object()
             if evidence.attachment:
                 evidence.attachment.delete()
-                evidence.save()
                 response = Response(status=status.HTTP_200_OK)
         return response
 
