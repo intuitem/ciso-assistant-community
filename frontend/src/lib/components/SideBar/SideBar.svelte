@@ -261,16 +261,17 @@
 	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
 </script>
 
-<aside
-	class="flex w-64 shadow transition-all duration-300 fixed h-screen overflow-visible top-0 left-0 z-20 {classesSidebarOpen(
-		open
-	)}"
->
-	<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
-		<SideBarHeader />
-		<SideBarNavigation />
-		<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
-	</nav>
-</aside>
-
-<SideBarToggle bind:open />
+<div data-testid="sidebar">
+	<aside
+		class="flex w-64 shadow transition-all duration-300 fixed h-screen overflow-visible top-0 left-0 z-20 {classesSidebarOpen(
+			open
+		)}"
+	>
+		<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
+			<SideBarHeader />
+			<SideBarNavigation />
+			<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
+		</nav>
+	</aside>
+	<SideBarToggle bind:open />
+</div>
