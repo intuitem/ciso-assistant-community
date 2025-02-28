@@ -444,20 +444,38 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
+class AssetFilter(df.FilterSet):
+    exclude_childrens = df.ModelChoiceFilter(
+        queryset=Asset.objects.all(),
+        method="filter_exclude_childrens",
+        label="Exclude childrens",
+    )
+
+    def filter_exclude_childrens(self, queryset, name, value):
+        print(value.get_descendants())
+        descendants = value.get_descendants()
+        return queryset.exclude(id__in=[descendant.id for descendant in descendants])
+
+    class Meta:
+        model = Asset
+        fields = [
+            "folder",
+            "type",
+            "parent_assets",
+            "exclude_childrens",
+            "ebios_rm_studies",
+            "risk_scenarios",
+            "security_exceptions",
+        ]
+
+
 class AssetViewSet(BaseModelViewSet):
     """
     API endpoint that allows assets to be viewed or edited.
     """
 
     model = Asset
-    filterset_fields = [
-        "folder",
-        "parent_assets",
-        "type",
-        "risk_scenarios",
-        "ebios_rm_studies",
-        "security_exceptions",
-    ]
+    filterset_class = AssetFilter
     search_fields = ["name", "description", "business_value"]
 
     def _perform_write(self, serializer):
@@ -623,7 +641,13 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
-    filterset_fields = ["folder", "category", "csf_function", "provider"]
+    filterset_fields = [
+        "folder",
+        "category",
+        "csf_function",
+        "provider",
+        "findings",
+    ]
     search_fields = ["name", "description", "provider"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -753,6 +777,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "applied_controls",
         "security_exceptions",
         "filtering_labels",
+        "findings",
     ]
     search_fields = ["name", "description"]
 
@@ -1157,6 +1182,23 @@ class AppliedControlFilterSet(df.FilterSet):
         method="filter_risk_assessments",
         queryset=RiskAssessment.objects.all(),
     )
+    findings_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_findings_assessments",
+        queryset=FindingsAssessment.objects.all(),
+    )
+
+    def filter_findings_assessments(self, queryset, name, value):
+        if value:
+            findings_assessments = FindingsAssessment.objects.filter(
+                id__in=[x.id for x in value]
+            )
+            if len(findings_assessments) == 0:
+                return queryset
+            findings = chain.from_iterable(
+                [fa.findings.all() for fa in findings_assessments]
+            )
+            return queryset.filter(findings__in=findings).distinct()
+        return queryset
 
     def filter_risk_assessments(self, queryset, name, value):
         if value:
@@ -1225,6 +1267,8 @@ class AppliedControlFilterSet(df.FilterSet):
             "to_review",
             "compliance_assessments",
             "risk_assessments",
+            "findings",
+            "findings_assessments",
         ]
 
 
@@ -4402,3 +4446,32 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(SecurityException.Status.choices))
+
+
+class FindingsAssessmentViewSet(BaseModelViewSet):
+    model = FindingsAssessment
+    filterset_fields = [
+        "owner",
+        "category",
+        "perimeter",
+        "folder",
+        "authors",
+        "status",
+    ]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(FindingsAssessment.Status.choices))
+
+    @action(detail=False, name="Get category choices")
+    def category(self, request):
+        return Response(dict(FindingsAssessment.Category.choices))
+
+
+class FindingViewSet(BaseModelViewSet):
+    model = Finding
+    filterset_fields = ["owner", "folder", "status", "findings_assessment"]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Finding.Status.choices))

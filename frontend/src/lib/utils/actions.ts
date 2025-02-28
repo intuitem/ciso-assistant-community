@@ -54,7 +54,7 @@ function getEndpoint({
 			? `${BASE_API_URL}/${model.endpointUrl}/`
 			: `${BASE_API_URL}/${urlModel}/`;
 	}
-	const id = event.params.id;
+	const id = event.url.searchParams.get('id') || event.params.id;
 	return model.endpointUrl
 		? `${BASE_API_URL}/${model.endpointUrl}/${id}/`
 		: `${BASE_API_URL}/${urlModel}/${id}/`;

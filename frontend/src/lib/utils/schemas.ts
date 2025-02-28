@@ -158,7 +158,8 @@ export const AppliedControlSchema = z.object({
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	progress_field: z.number().optional().default(0),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional()
 });
 
 export const AppliedControlDuplicateSchema = z.object({
@@ -506,7 +507,36 @@ export const SecurityExceptionSchema = z.object({
 	severity: z.number().default(-1).optional(),
 	status: z.string().default('draft'),
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	requirement_assessments: z.string().optional().array().optional()
+	requirement_assessments: z.string().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional()
+});
+
+export const FindingSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	owner: z.string().optional().array().optional(),
+	status: z.string().default('--'),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
+	reference_controls: z.string().uuid().optional().array().optional(),
+	findings_assessment: z.string(),
+	severity: z.number().default(-1),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const FindingsAssessmentSchema = z.object({
+	...NameDescriptionMixin,
+	version: z.string().optional().default('0.1'),
+	perimeter: z.string(),
+	status: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	owner: z.string().optional().array().optional(),
+	observation: z.string().optional().nullable(),
+	category: z.string().default('--')
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -542,7 +572,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'strategic-scenarios': StrategicScenarioSchema,
 	'attack-paths': AttackPathSchema,
 	'operational-scenarios': operationalScenarioSchema,
-	'security-exceptions': SecurityExceptionSchema
+	'security-exceptions': SecurityExceptionSchema,
+	findings: FindingSchema,
+	'findings-assessments': FindingsAssessmentSchema
 };
 
 export const modelSchema = (model: string) => {

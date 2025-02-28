@@ -777,6 +777,36 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'security_exceptions', urlModel: 'risk-scenarios', disableAddDeleteButtons: true }
 		]
+	},
+	'findings-assessments': {
+		name: 'findingsassessment',
+		localName: 'findingsAssessment',
+		localNamePlural: 'findingsAssessments',
+		verboseName: 'Findings assessment',
+		verboseNamePlural: 'Findings assessments',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' }],
+		selectFields: [{ field: 'status' }, { field: 'category' }]
+	},
+	findings: {
+		name: 'finding',
+		localName: 'finding',
+		localNamePlural: 'findings',
+		verboseName: 'Finding',
+		verboseNamePlural: 'Findings',
+		foreignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings-assessments' }],
+		// reverseForeignKeyFields: [
+		// 	{ field: 'findings', urlModel: 'vulnerabilities' },
+		// 	{ field: 'findings', urlModel: 'reference-controls' },
+		// 	{ field: 'findings', urlModel: 'applied-controls' }
+		// ],
+		selectFields: [{ field: 'status' }]
 	}
 };
 
