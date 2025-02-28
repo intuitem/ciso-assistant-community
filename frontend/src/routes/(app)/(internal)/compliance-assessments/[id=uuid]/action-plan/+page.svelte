@@ -17,25 +17,13 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		cost: 'cost',
-		requirements_count: 'matchingRequirements'
+		'requirements-assessments': 'matchingRequirements'
 	};
-	const appliedControlsColums = [
-		'name',
-		'status',
-		'priority',
-		'category',
-		'csf_function',
-		'eta',
-		'expiry_date',
-		'effort',
-		'cost',
-		'requirements_count'
-	];
 
 	const AppliedControls: TableSource = {
 		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan, appliedControlsColums),
-		meta: data.actionPlan
+		body: [],
+		meta: []
 	};
 </script>
 
@@ -82,7 +70,7 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
-			baseEndpoint="/applied-controls?compliance_assessments={$page.params.id}"
+			baseEndpoint="/compliance-assessments/{$page.params.id}/action-plan"
 			fields={[
 				'name',
 				'status',
@@ -93,7 +81,7 @@
 				'expiry_date',
 				'effort',
 				'cost',
-				'requirements_count'
+				'requirement-assessments'
 			]}
 		/>
 	</div>
