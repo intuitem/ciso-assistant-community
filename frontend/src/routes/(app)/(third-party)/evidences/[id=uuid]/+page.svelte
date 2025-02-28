@@ -9,6 +9,9 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import * as m from '$paraglide/messages';
+	import { defaults } from 'sveltekit-superforms';
+	import { z } from 'zod';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 
@@ -25,7 +28,10 @@
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: data.attachmentDeleteForm,
+				_form: defaults(
+					{ id, urlmodel: 'evidences' },
+					zod(z.object({ id: z.string(), urlmodel: z.string() }))
+				),
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel,
