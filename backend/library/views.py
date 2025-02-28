@@ -221,7 +221,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
-        providers = set(StoredLibrary.objects.all().values_list("provider", flat=True))
+        providers = set(
+            StoredLibrary.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
         return Response({p: p for p in providers})
 
     @action(detail=False, name="Get locale choices")
