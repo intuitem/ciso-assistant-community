@@ -32,6 +32,8 @@
 	import StakeholderForm from './ModelForm/StakeholderForm.svelte';
 	import AttackPathForm from './ModelForm/AttackPathForm.svelte';
 	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
+	import FindingForm from './ModelForm/FindingForm.svelte';
+	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -288,7 +290,7 @@
 	{:else if URLModel === 'assets'}
 		<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 	{:else if URLModel === 'requirement-assessments'}
-		<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} />
+		<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'entities'}
 		<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'entity-assessments'}
@@ -330,6 +332,10 @@
 		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'security-exceptions'}
 		<SecurityExceptionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'findings'}
+		<FindingForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'findings-assessments'}
+		<FindingsAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

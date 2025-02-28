@@ -1161,5 +1161,21 @@
 	"addSecurityException": "Ajouter une exception",
 	"expirationDate": "Date d'expiration",
 	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur.",
-	"filterBy": "Filtrer par"
+	"filterBy": "Filtrer par",
+	"finding": "Constat",
+	"findings": "Constats",
+	"associatedFindings": "Constats associés",
+	"findingsAssessment": "Suivi",
+	"findingsAssessments": "Suivis",
+	"addFinding": "Ajouter un constat",
+	"addFindingsAssessment": "Ajouter un suivi",
+	"followUp": "Suivi",
+	"pentest": "Test d'intrusion",
+	"audit": "Audit",
+	"selfIdentified": "Auto-identifié",
+	"identified": "Identifié",
+	"confirmed": "Confirmé",
+	"dismissed": "Rejeté",
+	"assigned": "Assigné",
+	"selectEvidence": "Sélectionner une preuve"
 }
