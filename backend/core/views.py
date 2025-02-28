@@ -2336,19 +2336,24 @@ class FolderViewSet(BaseModelViewSet):
     def check_out_of_scope_objects(self, request, pk=None):
         """Action to check if there are out-of-scope objects for the folder."""
         instance = self.get_object()
+
         if instance.content_type == "GL":
-            return Response({"has_out_of_scope_objects": False})
+            return Response({"has_out_of_scope_objects": []})
+
         valid_folder_ids = set(
             Folder.objects.filter(
                 Q(id=instance.id) | Q(id__in=[f.id for f in instance.get_sub_folders()])
             ).values_list("id", flat=True)
         )
+
         objects = get_domain_export_objects(instance)
+        out_of_scope_types = []
+
         for model_name, queryset in objects.items():
             if queryset.exclude(id__in=valid_folder_ids).exists():
-                return Response({"has_out_of_scope_objects": True})
+                out_of_scope_types.append(model_name)
 
-        return Response({"has_out_of_scope_objects": False})
+        return Response({"has_out_of_scope_objects": out_of_scope_types})
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):

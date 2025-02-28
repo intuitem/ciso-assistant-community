@@ -5,10 +5,10 @@
 	import { page } from '$app/stores';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -20,15 +20,17 @@
 	}
 
 	function confirmExport(event: Event) {
-		event.preventDefault(); // Prevent form submission until confirmed
+		event.preventDefault(); 
 
-		if (data.has_out_of_scope_objects) {
-			
+		if (data.has_out_of_scope_objects?.length) {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal
+		};
 		const modal: ModalSettings = {
-			type: 'confirm',
-			// Data
+			type: 'component',
+			component: modalComponent,
 			title: m.confirmModalTitleWarning(),
-			body: m.bodyModalExportFolder(),
+			body: `${m.bodyModalExportFolder()}${data.has_out_of_scope_objects}`,
 			response: (r: boolean) => {
 				if (r)
 					(event.target as HTMLFormElement).submit()
@@ -36,7 +38,6 @@
 		};
 		modalStore.trigger(modal);
 		} else {
-			// Directly submit if there's no warning
 			(event.target as HTMLFormElement).submit();
 		}
 	}
