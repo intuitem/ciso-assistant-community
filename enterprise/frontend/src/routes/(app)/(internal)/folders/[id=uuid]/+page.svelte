@@ -12,14 +12,24 @@
 	$: if (form && form.redirect) {
 		goto(getSecureRedirect(form.redirect));
 	}
+
+	function handleExportSubmit(event: Event) {
+		if (data.has_out_of_scope_objects) {
+			const confirmed = confirm("Warning: Some objects are out of scope. Do you want to continue?");
+			if (!confirmed) {
+				event.preventDefault(); // Prevent the form submission if canceled
+			}
+		}
+	}
 </script>
 
 <DetailView {data}>
-  <div slot="actions" class="flex flex-col space-y-2 justify-end">
-			<form class="flex justify-end" action={`${$page.url.pathname}/export`}>
-				<button type="submit" class="btn variant-filled-primary h-fit" >
-          <i class="fa-solid fa-download mr-2" /> {m.exportButton()}
-        </button>
-			</form>
-  </div>
+	<div slot="actions" class="flex flex-col space-y-2 justify-end">
+		<!-- Use the submit event instead of the click event on the button -->
+		<form class="flex justify-end" action={`${$page.url.pathname}/export`} on:submit={handleExportSubmit}>
+			<button type="submit" class="btn variant-filled-primary h-fit">
+				<i class="fa-solid fa-download mr-2" /> {m.exportButton()}
+			</button>
+		</form>
+	</div>
 </DetailView>
