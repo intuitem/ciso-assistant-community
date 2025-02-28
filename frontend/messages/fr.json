@@ -159,6 +159,7 @@
 	"typicalEvidence": "Preuve typique",
 	"parentAsset": "Actif parent",
 	"parentAssets": "Actifs parents",
+	"childrenAssets": "Actifs enfants",
 	"approver": "Approbateur",
 	"state": "État",
 	"justification": "Justification",
