@@ -1829,6 +1829,11 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         else:
             return f"{size / 1024 / 1024:.1f} MB"
 
+    def delete(self, *args, **kwargs):
+        if self.attachment:
+            self.attachment.delete()
+        super().delete(*args, **kwargs)
+
     @property
     def attachment_hash(self):
         if not self.attachment:
