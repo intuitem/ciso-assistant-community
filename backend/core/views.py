@@ -424,6 +424,15 @@ class ThreatViewSet(BaseModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Threat.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
         return Response({"results": threats_count_per_name(request.user)})
@@ -650,6 +659,15 @@ class ReferenceControlViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "provider"]
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            ReferenceControl.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -672,6 +690,15 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False)  # Set a name there
     def colors(self, request):
         return Response({"results": get_risk_color_ordered_list(request.user)})
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            RiskMatrix.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
 
     @action(detail=False, name="Get risk level choices")
     def risk(self, request):
@@ -3435,6 +3462,15 @@ class FrameworkViewSet(BaseModelViewSet):
         ).data
         return Response({"results": available_target_frameworks})
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Framework.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """
@@ -4171,7 +4207,16 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 class RequirementMappingSetViewSet(BaseModelViewSet):
     model = RequirementMappingSet
 
-    filterset_fields = ["target_framework", "source_framework"]
+    filterset_fields = ["target_framework", "source_framework", "library__provider"]
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            LoadedLibrary.objects.filter(
+                provider__isnull=False, requirement_mapping_sets__isnull=False
+            ).values_list("provider", flat=True)
+        )
+        return Response({p: p for p in providers})
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
