@@ -116,7 +116,7 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-primary-password
           {{- end }}
-          {{- if .Values.backend.config.smtp.rescue.enabled }}          -
+          {{- if .Values.backend.config.smtp.rescue.enabled }}
           - name: EMAIL_HOST_RESCUE
             value: {{ .Values.backend.config.smtp.rescue.host | quote }}
           - name: EMAIL_PORT_RESCUE
