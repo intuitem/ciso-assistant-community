@@ -466,6 +466,8 @@
 	"revoke": "Revoke",
 	"riskAcceptanceValidatedMessage": "This risk acceptance is currently validated. It can be revoked at any time, but this will be irrevocable. You will need to duplicate it with a different version if necessary.",
 	"confirmModalTitle": "Confirm",
+	"confirmModalTitleWarning": "Be careful",
+	"bodyModalExportFolder": "Some objects out of this domain will also be exported. Do you still want to export?",
 	"confirmModalMessage": "Are you sure? This action will permanently affect the following object",
 	"submit": "Submit",
 	"draft": "Draft",

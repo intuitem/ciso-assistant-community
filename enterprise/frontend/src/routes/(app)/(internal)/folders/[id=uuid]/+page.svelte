@@ -2,31 +2,49 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
 	import { goto } from '$app/navigation';
-  import { page } from '$app/stores';
+	import { page } from '$app/stores';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-  import * as m from '$paraglide/messages';
+	import * as m from '$paraglide/messages';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 
 	export let data: PageData;
 	export let form: ActionData;
+
+	const modalStore: ModalStore = getModalStore();
 
 	$: if (form && form.redirect) {
 		goto(getSecureRedirect(form.redirect));
 	}
 
-	function handleExportSubmit(event: Event) {
+	function confirmExport(event: Event) {
+		event.preventDefault(); // Prevent form submission until confirmed
+
 		if (data.has_out_of_scope_objects) {
-			const confirmed = confirm("Warning: Some objects are out of scope. Do you want to continue?");
-			if (!confirmed) {
-				event.preventDefault(); // Prevent the form submission if canceled
-			}
+			
+		const modal: ModalSettings = {
+			type: 'confirm',
+			// Data
+			title: m.confirmModalTitleWarning(),
+			body: m.bodyModalExportFolder(),
+			response: (r: boolean) => {
+				if (r)
+					(event.target as HTMLFormElement).submit()
+				},
+		};
+		modalStore.trigger(modal);
+		} else {
+			// Directly submit if there's no warning
+			(event.target as HTMLFormElement).submit();
 		}
 	}
 </script>
 
 <DetailView {data}>
 	<div slot="actions" class="flex flex-col space-y-2 justify-end">
-		<!-- Use the submit event instead of the click event on the button -->
-		<form class="flex justify-end" action={`${$page.url.pathname}/export`} on:submit={handleExportSubmit}>
+		<form class="flex justify-end" action={`${$page.url.pathname}/export`} method="GET" on:submit={confirmExport}>
 			<button type="submit" class="btn variant-filled-primary h-fit">
 				<i class="fa-solid fa-download mr-2" /> {m.exportButton()}
 			</button>

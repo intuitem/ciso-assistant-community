@@ -1176,6 +1176,8 @@
 	"identified": "Identifié",
 	"confirmed": "Confirmé",
 	"dismissed": "Rejeté",
+	"confirmModalTitleWarning": "Faites attention",
+	"bodyModalExportFolder": "Certains objets en dehors de ce domaine vont aussi être exportés. Voulez-vous continuer l'exportation?",
 	"assigned": "Assigné",
 	"selectEvidence": "Sélectionner une preuve"
 }
