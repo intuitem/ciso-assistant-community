@@ -388,6 +388,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },

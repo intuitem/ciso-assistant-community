@@ -1653,6 +1653,12 @@ class Asset(
             sub_children.update(child.get_descendants())
         return sub_children
 
+    @property
+    def children_assets(self):
+        descendants = self.get_descendants()
+        descendant_ids = [d.id for d in descendants]
+        return Asset.objects.filter(id__in=descendant_ids).exclude(id=self.id)
+
     def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
         Gets the security objectives of a given asset.

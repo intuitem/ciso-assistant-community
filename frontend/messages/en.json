@@ -159,6 +159,7 @@
 	"typicalEvidence": "Typical evidence",
 	"parentAsset": "Parent asset",
 	"parentAssets": "Parent assets",
+	"childrenAssets": "Children assets",
 	"approver": "Approver",
 	"state": "State",
 	"justification": "Justification",
