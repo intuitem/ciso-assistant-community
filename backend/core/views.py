@@ -2345,7 +2345,7 @@ class FolderViewSet(BaseModelViewSet):
         )
         objects = get_domain_export_objects(instance)
         for model_name, queryset in objects.items():
-            if queryset.exclude(folder_id__in=valid_folder_ids).exists():
+            if queryset.exclude(id__in=valid_folder_ids).exists():
                 return Response(True)
 
         return Response(False)
