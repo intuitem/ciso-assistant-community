@@ -24,7 +24,7 @@ All source files must written in typescript and end with the `.ts` extension.
 - `./utils` Contains all the classes/fixtures/functions used in the tests
 - `./utils/core` Contain core code used everywhere (fixtures, **fundamental classes**, core utilities etc...)
   - `test-data.ts` Contains the **global test data** which will be used by the test files (e.g. Role permissions, model infos etc...).
-  - `base.ts` Contains the `test`, `expect`, `applyMixins` and `notImplemented` functions.
+  - `base.ts` Contains the `test`, `expect` and `notImplemented` functions.
   - `fixtures.ts` Contains all the fixture definitions.
   - `page.ts` Defines the `Page` **fundamental class** and its **mixins**.
   - `element.ts` Defines the `Element` **fundamental class** and its **mixins**.
@@ -53,9 +53,11 @@ export namespace BaseClass {
 }
 ```
 The goal of this block of code is to create a `BaseClass.Derived` type which represents a **derived class** of `BaseClass`, this must be the only way of precising the type of **derived class** of a specific **base class** in the test code when using class polymorphism.
-- `Mixins` Are a type of class that contain methods, the sole purpose of a **mixin** is to be applied to either a **base class** or a **derived class**. Applying a **mixin** (done with the `applyMixins` decorator) will add the methods defined in the **mixin** to the class it's been applied to. A mixin always target a specific class.
+- `Mixins` Are functions that take a class as an argument and return a superclass of it, the sole purpose of a **mixin** is to be applied to either a **base class** or a **derived class**. To apply a **mixin** `HaveSomething` to a derived class `DerivedClass` with a base class `BaseClass` the syntax is `class DerivedClass extends HaveSomething(BaseClass)`.
+Note that multiple mixins can be applied to the same class (e.g. `class DerivedClass extends HaveElem1(HaveElem2(HaveElem3(BaseClass)))`).
+The sole purpose of a **mixin** is to add extra methods to a class, a **mixin** always targets a specific class.
   - If a **mixin** targets a class, it means that it can be applied to all the directly or indirectly **derived classes** of this class (e.g. a **mixin linked** to the `Page` class can be applied to any class directly or indirectly inheriting from `Page`).
-  - If a **mixin** `Mixin` targets a class `SomeClass` then we say that `Mixin` is **linked** to `SomeClass`, we can also say that `SomeClass` is **linked** to `Mixin`.
+  - If a **mixin** `HaveElem` targets a class `SomeClass` then we say that `HaveElem` is **linked** to `SomeClass`, we can also say that `SomeClass` is **linked** to `Mixin`.
   - A **Mixin** must always be defined in the same file as its target class.
   - For now all **mixins** must have a name of the form `Have{Something}`, because a **mixin** only indicates the presence of something (which is not always present). For example the `HaveSidebar` **mixin** indicates the presence of a `Sidebar` element in the page (which it not present in the login page), and the mixin implements the `getSidebar` method so that its target class can access the `Sidebar` object.
 - `Derived classes` Inherit from a **base class** most of the time but might also inherit directly from a **fundamental class**. What make a **derived class** differs from a **base class** is its usage. The goal of a **derived class** is to be used directly while the main goal of a **base class** is to serve as a base for a **derived classes**.
@@ -88,11 +90,6 @@ erDiagram
 4. Every property of a class must start with an underscore (e.g. `this._self`)
 5. A **Page class** must have a name of the form `{...}Page`.
 6. The constructor and methods of 2 **derived classes** from the same **base class** must have the same function signature.
-7. When creating a **mixin** named `{MixinName}`, you must create and export an interface named `{MixinName}I` which describe the structure of the **mixin** `{MixinName}`.
-8. When applying a **mixin** `Mixin` on a class `{Class}` you must:
-    1. Use the `applyMixins` decorator for this.
-    2. Use the `implements` keyword of typescript to implement the `{MixinName}I` interface on `{Class}`.
-    3. Declare the added methods and their signature as defined in the `${MixinName}I` interface inside the body of the class `{Class}` (e.g. `getSidebar!: () => Sidebar;` for the `HaveSidebar` **mixin**).
 
 ### THE MOST IMPORTANT RULE (in ./tests)
 
