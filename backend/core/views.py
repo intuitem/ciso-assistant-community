@@ -3570,32 +3570,48 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             user=request.user,
             object_type=ComplianceAssessment,
         )
-        if UUID(pk) in viewable_objects:
-            response = []
-            compliance_assessment_object: ComplianceAssessment = self.get_object()
-            requirement_assessments_objects = (
-                compliance_assessment_object.get_requirement_assessments(
-                    include_non_assessable=True
-                )
+        if UUID(pk) not in viewable_objects:
+            return Response({"detail": "Not found."}, status=404)
+
+        compliance_assessment_object: ComplianceAssessment = self.get_object()
+        requirement_assessments_objects = (
+            compliance_assessment_object.get_requirement_assessments(
+                include_non_assessable=True
             )
-            applied_controls = [
-                AppliedControlReadSerializer(applied_control).data
-                for applied_control in AppliedControl.objects.filter(
-                    requirement_assessments__in=requirement_assessments_objects
-                ).distinct()
-            ]
+        )
 
-            for applied_control in applied_controls:
-                applied_control["requirements_count"] = (
-                    RequirementAssessment.objects.filter(
-                        compliance_assessment=compliance_assessment_object
-                    )
-                    .filter(applied_controls=applied_control["id"])
-                    .count()
+        applied_controls_qs = AppliedControl.objects.filter(
+            requirement_assessments__in=requirement_assessments_objects
+        ).distinct()
+
+        page = self.paginate_queryset(applied_controls_qs)
+        if page is not None:
+            serialized_controls = AppliedControlReadSerializer(page, many=True).data
+
+            for applied_control in serialized_controls:
+                req_assessments = RequirementAssessment.objects.filter(
+                    compliance_assessment=compliance_assessment_object,
+                    applied_controls=applied_control["id"],
                 )
-                response.append(applied_control)
+                applied_control["requirement-assessments"] = [
+                    {"str": str(req.requirement.display_short), "id": str(req.id)}
+                    for req in req_assessments
+                ]
+            return self.get_paginated_response(serialized_controls)
 
-        return Response(response)
+        serialized_controls = AppliedControlReadSerializer(
+            applied_controls_qs, many=True
+        ).data
+        for applied_control in serialized_controls:
+            req_assessments = RequirementAssessment.objects.filter(
+                compliance_assessment=compliance_assessment_object,
+                applied_controls=applied_control["id"],
+            )
+            applied_control["requirement-assessments"] = [
+                {"str": str(req.requirement.display_short), "id": str(req.id)}
+                for req in req_assessments
+            ]
+        return Response(serialized_controls)
 
     @action(detail=True, name="Get compliance assessment (audit) CSV")
     def compliance_assessment_csv(self, request, pk):
