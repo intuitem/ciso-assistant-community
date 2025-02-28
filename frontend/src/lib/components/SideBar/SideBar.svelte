@@ -220,10 +220,10 @@
 		modalStore.trigger(modal);
 	}
 
-	let loading = writable(false);
+	const loading = writable(false);
 
 	async function loadDemoDomain() {
-		loading.set(true);
+		$loading = true;
 		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
 		if (!response.ok) {
 			if (response.status === 500) {
@@ -232,7 +232,7 @@
 				flash.set({ type: 'error', message: m.errorOccuredDuringImport() });
 			}
 			console.error('Failed to load demo data');
-			loading.set(false);
+			$loading = false;
 			return false;
 		}
 		flash.set({ type: 'success', message: m.successfullyImportedFolder() });
@@ -244,7 +244,7 @@
 		});
 
 		invalidateAll();
-		loading.set(false);
+		$loading = false;
 		return true;
 	}
 
