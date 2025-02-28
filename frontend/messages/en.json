@@ -1172,6 +1172,7 @@
 	"addSecurityException": "Add exception",
 	"expirationDate": "Expiration date",
 	"filterBy": "Filter by",
+	"demoDataAlreadyImported": "Demo data has already been imported",
 	"finding": "Finding",
 	"findings": "Findings",
 	"associatedFindings": "Associated findings",

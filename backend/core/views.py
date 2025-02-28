@@ -2490,8 +2490,7 @@ class FolderViewSet(BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
-        domain_name = f"DEMO {timestamp}"
+        domain_name = f"DEMO"
 
         try:
             dummy_fixture_path = (
