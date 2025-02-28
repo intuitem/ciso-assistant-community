@@ -1187,5 +1187,7 @@
 	"confirmed": "Confirmed",
 	"dismissed": "Dismissed",
 	"assigned": "Assigned",
-	"selectEvidence": "Select evidence"
+	"selectEvidence": "Select evidence",
+	"infrastructure": "Infrastructure",
+	"build": "Build"
 }

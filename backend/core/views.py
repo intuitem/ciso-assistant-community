@@ -4253,9 +4253,9 @@ def get_build(request):
     VERSION = settings.VERSION
     default_db_engine = settings.DATABASES["default"]["ENGINE"]
     if "postgresql" in default_db_engine:
-        database_type = "P"
+        database_type = "P-FS"
     elif "sqlite" in default_db_engine:
-        database_type = "S"
+        database_type = "S-FS"
     else:
         database_type = "Unknown"
 
@@ -4273,7 +4273,12 @@ def get_build(request):
         }
 
     return Response(
-        {"version": VERSION, "build": BUILD, **disk_response, "database": database_type}
+        {
+            "version": VERSION,
+            "build": BUILD,
+            **disk_response,
+            "infrastructure": database_type,
+        }
     )
 
 
