@@ -299,7 +299,7 @@
 												{#each value as val}
 													<li>
 														{#if val.str && val.id}
-															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${val.id}`}
+															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 															<Anchor href={itemHref} class="anchor" stopPropagation
 																>{val.str}</Anchor
 															>
