@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0058_findingsassessment_finding'),
+        ("core", "0058_findingsassessment_finding"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='complianceassessment',
-            name='assets',
-            field=models.ManyToManyField(blank=True, help_text='Assets related to the compliance assessment', related_name='compliance_assessments', to='core.asset', verbose_name='Related assets'),
+            model_name="complianceassessment",
+            name="assets",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Assets related to the compliance assessment",
+                related_name="compliance_assessments",
+                to="core.asset",
+                verbose_name="Related assets",
+            ),
         ),
     ]
