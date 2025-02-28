@@ -109,9 +109,10 @@ class ReferentialSerializer(BaseModelSerializer):
 
 
 class AssessmentReadSerializer(BaseModelSerializer):
-    perimeter = FieldsRelatedField()
+    perimeter = FieldsRelatedField(["id", "folder"])
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
 
 
 # Risk Assessment
@@ -524,6 +525,17 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
 
 
 class AppliedControlWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
+    def create(self, validated_data: Any):
+        applied_control = super().create(validated_data)
+        findings = validated_data.pop("findings", [])
+        if findings:
+            applied_control.findings.set(findings)
+        return applied_control
+
     class Meta:
         model = AppliedControl
         fields = "__all__"
@@ -550,6 +562,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     requirements_count = serializers.IntegerField(
         source="requirement_assessments.count"
     )
+    findings_count = serializers.IntegerField(source="findings.count")
 
     def get_state(self, obj):
         if not obj.eta:
@@ -1100,6 +1113,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
+    applied_controls = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=AppliedControl.objects.all(), required=False
+    )
 
     class Meta:
         model = SecurityException
@@ -1114,4 +1130,41 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = SecurityException
+        fields = "__all__"
+
+
+class FindingsAssessmentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = FindingsAssessment
+        exclude = ["created_at", "updated_at"]
+
+
+class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
+    str = serializers.CharField(source="__str__")
+    owner = FieldsRelatedField(many=True)
+    findings_count = serializers.IntegerField(source="findings.count")
+
+    class Meta:
+        model = FindingsAssessment
+        fields = "__all__"
+
+
+class FindingWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Finding
+        exclude = ["created_at", "updated_at"]
+
+
+class FindingReadSerializer(FindingWriteSerializer):
+    str = serializers.CharField(source="__str__")
+    owner = FieldsRelatedField(many=True)
+    findings_assessment = FieldsRelatedField()
+    vulnerabilities = FieldsRelatedField(many=True)
+    reference_controls = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Finding
         fields = "__all__"
