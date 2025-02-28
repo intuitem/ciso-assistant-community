@@ -182,6 +182,11 @@ export const navData = {
 					name: 'securityExceptions',
 					fa_icon: 'fa-solid fa-circle-exclamation',
 					href: '/security-exceptions'
+				},
+				{
+					name: 'followUp',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/findings-assessments'
 				}
 			]
 		},
