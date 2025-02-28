@@ -3462,6 +3462,15 @@ class FrameworkViewSet(BaseModelViewSet):
         ).data
         return Response({"results": available_target_frameworks})
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Framework.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """

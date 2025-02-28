@@ -676,7 +676,10 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			provider: PROVIDER_FILTER
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'frameworks/provider' }
+			}
 		}
 	},
 	'compliance-assessments': {
