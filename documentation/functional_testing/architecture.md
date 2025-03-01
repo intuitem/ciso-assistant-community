@@ -114,7 +114,7 @@ If a `Page`/`Element` `A` class can return an `Element` `B` we can say that:
 - `B` is a **sub-element** of `A`
 
 If `A` is an element we can say that:
-- `A` is a **super-element** of `A`
+- `A` is a **super-element** of `B`
 
 If `A` is a page we can say that:
 - `A` is the page of `B`
@@ -210,7 +210,7 @@ Here is the list of the **context sources** order from the highest to the lowest
 
 All methods must be named after one of the folliwing prefixes:
 
-- `check{Something}(expect, {...})` Checks for something, this is a wrapper around one or multiple playwright checks (e.g. checkUrl, checkBreadcrumbPath). A check function must always take an `Except` as its first argument. Checks must never use the `expect.soft({...})` alternative of the original `except` function.
+- `check{Something}(expect, {...})` Checks for something, this is a wrapper around one or multiple playwright checks (e.g. checkUrl, checkBreadcrumbPath). A check function must always take an `Expect` as its first argument. Checks must never use the `expect.soft({...})` alternative of the original `expect` function.
 - `do{Action}` Does an action (e.g. doFillForm, doCloseModal).
 - `do{Action}P` Does an action that returns a page (this must be used if the action redirects to a new page e.g. doLoginP).
 - `get{Object}` Usually return an `Element` object, a playwright Locator. But it can also return any kind of values (e.g. getNumberOfPages()).
