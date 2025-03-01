@@ -47,6 +47,8 @@ RUN poetry install --no-root \
 
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
+RUN addgroup --gid 1001 app && adduser --uid 1001 --gid 1001 app
+USER app
 
 EXPOSE 8000
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
