@@ -1,0 +1,64 @@
+name: Publish Helm Chart - CE
+
+on:
+  push:
+    branches:
+      - main # Trigger on main branch
+    paths:
+      - "charts/ciso-assistant-next/**" # Only when changes to the chart
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: "latest"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Helm for OCI Registry
+        run: |
+          # Using password-stdin to avoid credentials in logs
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Lint Helm Chart
+        run: |
+          cd charts
+          helm lint ciso-assistant-next
+
+      - name: Build Dependencies
+        run: |
+          cd charts
+          helm dependency build ciso-assistant-next
+
+      - name: Package Helm Chart
+        id: package
+        run: |
+          cd charts
+          helm package ciso-assistant-next
+          # Extract the package filename - can be improved
+          PACKAGE_NAME=$(ls ciso-assistant-*.tgz)
+          echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
+          echo "Package name: ${PACKAGE_NAME}"
+
+      - name: Push to GitHub Container Registry
+        run: |
+          cd charts
+          helm push ${PACKAGE_NAME} oci://ghcr.io/intuitem/helm-charts/ce
