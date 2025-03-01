@@ -286,7 +286,7 @@
 	</nav>
 </aside>
 {#if $loading}
-	<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50">
+	<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-[1000]">
 		<div class="flex flex-col items-center space-y-2">
 			<LoadingSpinner></LoadingSpinner>
 		</div>

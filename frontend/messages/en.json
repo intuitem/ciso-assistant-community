@@ -1172,7 +1172,7 @@
 	"addSecurityException": "Add exception",
 	"expirationDate": "Expiration date",
 	"filterBy": "Filter by",
-	"demoDataAlreadyImported": "Demo data has already been imported",
+	"demoDataAlreadyImported": "Demo data has already been imported. Delete or rename your existing DEMO domain.",
 	"finding": "Finding",
 	"findings": "Findings",
 	"associatedFindings": "Associated findings",
