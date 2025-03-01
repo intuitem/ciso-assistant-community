@@ -18,11 +18,11 @@
 To install the chart, firt get the values.yaml file and customize values.
 
 ```
-helm show values oci://ghcr.io/intuitem/ciso-assistant > custom.yaml
+helm show values oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant > custom.yaml
 ```
 To deploy the release :
 ```
-helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f custom.yaml
+helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant -f custom.yaml
 ```
 
 {{ template "chart.valuesSection" . }}
