@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
     && pip install --no-cache-dir --upgrade pip poetry==2.0.1
 
 # Create non-root user
-RUN groupadd -r app && useradd -r -g app app
+RUN groupadd -r app && useradd -r -g app app -m
 
 WORKDIR /code
 RUN mkdir -p /code && chown -R app:app /code
