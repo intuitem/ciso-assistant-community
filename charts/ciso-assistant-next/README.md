@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.2.4](https://img.shields.io/badge/AppVersion-v2.2.4-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: latest](https://img.shields.io/badge/AppVersion-latest-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -23,6 +23,9 @@ To install the chart, firt get the values.yaml file and customize values.
 ```
 helm show values oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant > custom.yaml
 ```
+
+Make sure to pin the appVersion to one of the official releases, if you don't want the app to auto-update each time you restart the deployment.
+
 To deploy the release :
 ```
 helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant -f custom.yaml
