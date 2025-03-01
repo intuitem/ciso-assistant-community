@@ -7,8 +7,7 @@ ENV PYTHONUNBUFFERED=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
-WORKDIR /code
-
+# Install dependencies as root
 RUN apt-get update && apt-get install -y \
     libyaml-cpp-dev \
     libffi-dev \
@@ -40,13 +39,22 @@ RUN apt-get update && apt-get install -y \
     && locale-gen id_ID.UTF-8 \
     && pip install --no-cache-dir --upgrade pip poetry==2.0.1
 
-COPY pyproject.toml poetry.lock ./
+# Create non-root user
+RUN groupadd -r app && useradd -r -g app app
 
+WORKDIR /code
+RUN mkdir -p /code && chown -R app:app /code
+
+COPY --chown=app:app pyproject.toml poetry.lock ./
+
+# Switch to non-root user for remaining operations
+USER app
+
+# Install Python dependencies
 RUN poetry install --no-root \
     && rm -rf $POETRY_CACHE_DIR
 
-#watch out for local files during dev and maintenance of .dockerignore
-COPY . .
+COPY --chown=app:app . .
 
 EXPOSE 8000
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
