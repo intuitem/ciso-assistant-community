@@ -1,0 +1,60 @@
+name: Build/Push Canary Images - CE
+on:
+  push:
+    tags:
+      - "canary-*"
+  workflow_dispatch:
+env:
+  UBUNTU_VERSION: "ubuntu-24.04"
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get version and Create .meta file
+        run: |
+          # For canary builds, we use YYYYMMDD-commit format
+          CANARY_VERSION="canary-$(date +'%Y%m%d')-$(git rev-parse --short HEAD)"
+
+          echo "VERSION=${CANARY_VERSION}" >> $GITHUB_ENV
+          echo "BUILD=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "CISO_ASSISTANT_VERSION=${CANARY_VERSION}" > .meta
+          echo "CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)" >> .meta
+          cp .meta ./backend/
+          cp .meta ./backend/ciso_assistant/
+      - name: Build and Push Frontend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
+            ghcr.io/${{ github.repository }}/frontend:canary
+          platforms: linux/amd64,linux/arm64
+      - name: Build and Push Backend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
+            ghcr.io/${{ github.repository }}/backend:canary
+          platforms: linux/amd64,linux/arm64
