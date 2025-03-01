@@ -1,0 +1,59 @@
+name: Build/Push Canary Images - EE
+on:
+  push:
+    tags:
+      - "canary-*"
+  workflow_dispatch:
+env:
+  UBUNTU_VERSION: "ubuntu-24.04"
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensure all history and tags are fetched
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get version and Create .meta file
+        run: |
+          # For canary builds, we use YYYYMMDD-commit format
+          CANARY_VERSION="canary-$(date +'%Y%m%d')-$(git rev-parse --short HEAD)"
+          echo "VERSION=${CANARY_VERSION}" >> $GITHUB_ENV
+          echo "BUILD=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "CISO_ASSISTANT_VERSION=${CANARY_VERSION}" > .meta
+          echo "CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)" >> .meta
+          cp .meta ./backend/
+          cp .meta ./backend/ciso_assistant/
+      - name: Build and Push Enterprise Frontend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./enterprise/frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ env.VERSION }}
+            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:canary
+          platforms: linux/amd64,linux/arm64
+      - name: Build and Push Enterprise Backend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./enterprise/backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ env.VERSION }}
+            ghcr.io/intuitem/ciso-assistant-enterprise-backend:canary
+          platforms: linux/amd64,linux/arm64
