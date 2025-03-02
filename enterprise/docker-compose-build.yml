@@ -2,7 +2,7 @@ services:
   backend:
     container_name: backend
     build:
-      context: ./
+      context: ../
       dockerfile: ./enterprise/backend/Dockerfile
     restart: always
     environment:
@@ -14,12 +14,12 @@ services:
       - DJANGO_SETTINGS_MODULE=enterprise_core.settings
     user: "1001:1001"
     volumes:
-      - ./db:/code/db
+      - ../db:/code/db
 
   huey:
     container_name: huey
     build:
-      context: ./
+      context: ../
       dockerfile: ./enterprise/backend/Dockerfile
     depends_on:
       - backend    
@@ -31,7 +31,7 @@ services:
       - LICENSE_EXPIRATION=2025-12-21
     user: "1001:1001"
     volumes:
-      - ./db:/code/db
+      - ../db:/code/db
     entrypoint:
       - /bin/sh
       - -c
