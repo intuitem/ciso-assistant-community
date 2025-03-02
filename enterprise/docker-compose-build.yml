@@ -2,7 +2,7 @@ services:
   backend:
     container_name: backend
     build:
-      context: ../
+      context: ./
       dockerfile: ./enterprise/backend/Dockerfile
     restart: always
     environment:
@@ -19,7 +19,7 @@ services:
   huey:
     container_name: huey
     build:
-      context: ../
+      context: ./
       dockerfile: ./enterprise/backend/Dockerfile
     depends_on:
       - backend    
