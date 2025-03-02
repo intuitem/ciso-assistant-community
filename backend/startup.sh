@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+cat /etc/hosts
 ls -alR /code
 # wait for database to be ready
 if [ ! -n "$DJANGO_SETTINGS_MODULE" ]; then
