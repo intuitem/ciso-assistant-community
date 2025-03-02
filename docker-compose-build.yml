@@ -1,3 +1,6 @@
+volumes:
+  db_data:
+
 services:
   backend:
     container_name: backend
@@ -10,7 +13,7 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
     volumes:
-      - ./db:/code/db
+      - db_data:/code/db
 
   huey:
     container_name: huey
@@ -25,12 +28,12 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=False
     volumes:
-      - ./db:/code/db
+      - db_data:/code/db
     entrypoint:
       - /bin/sh
       - -c
       - |
-        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+        poetry run python manage.py run_huey
 
   frontend:
     container_name: frontend
