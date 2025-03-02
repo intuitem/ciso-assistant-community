@@ -46,7 +46,7 @@ RUN poetry install --no-root \
     && rm -rf $POETRY_CACHE_DIR
 
 #watch out for local files during dev and maintenance of .dockerignore
-COPY --chown 1001:1001 . .
+COPY --chown=1001:1001 . .
 RUN groupadd --gid 1001 app && useradd --uid 1001 --gid 1001 app
 USER app
 
