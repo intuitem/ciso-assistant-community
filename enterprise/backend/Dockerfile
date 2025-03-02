@@ -49,11 +49,10 @@ COPY backend/pyproject.toml backend/poetry.lock ./
 RUN poetry install --no-root \
    && rm -rf $POETRY_CACHE_DIR
 
-COPY --chown=1001:1001 backend /code/
-COPY --chown=1001:1001 db /code/
-COPY --chown=1001:1001 db /code/db42
-COPY --chown=1001:1001 enterprise/backend/enterprise_core /code/enterprise_core
-COPY --chown=1001:1001 backend/startup.sh /code/
+COPY backend /code/
+COPY db /code/
+COPY enterprise/backend/enterprise_core /code/enterprise_core
+COPY backend/startup.sh /code/
 
 RUN groupadd --gid 1001 app && useradd --uid 1001 --gid 1001 app
 USER app
