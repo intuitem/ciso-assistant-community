@@ -47,7 +47,7 @@ RUN poetry install --no-root \
 
 #watch out for local files during dev and maintenance of .dockerignore
 COPY --chown=1001:1001 . .
-COPY --chown=1001:1001 ./db /code/db42
+COPY --chown=1001:1001 backend/db /code/db42
 RUN groupadd --gid 1001 app && useradd --uid 1001 --gid 1001 app
 USER app
 
