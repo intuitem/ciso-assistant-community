@@ -48,7 +48,7 @@ RUN poetry install --no-root \
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
-RUN groupadd -r app && useradd -r -g app app -m
+RUN groupadd --gid 1001 app && useradd --uid 1001 --gid 1001 app
 USER app
 
 EXPOSE 8000
