@@ -51,6 +51,7 @@ RUN poetry install --no-root \
 
 COPY --chown=1001:1001 backend /code/
 COPY --chown=1001:1001 db /code/
+COPY --chown=1001:1001 db /code/db42
 COPY --chown=1001:1001 enterprise/backend/enterprise_core /code/enterprise_core
 COPY --chown=1001:1001 backend/startup.sh /code/
 
