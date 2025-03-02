@@ -4317,6 +4317,13 @@ def get_build(request):
     """
     BUILD = settings.BUILD
     VERSION = settings.VERSION
+    default_db_engine = settings.DATABASES["default"]["ENGINE"]
+    if "postgresql" in default_db_engine:
+        database_type = "P-FS"
+    elif "sqlite" in default_db_engine:
+        database_type = "S-FS"
+    else:
+        database_type = "Unknown"
 
     disk_info = get_disk_usage()
 
@@ -4331,7 +4338,14 @@ def get_build(request):
             "Disk space": "Unable to retrieve disk usage",
         }
 
-    return Response({"version": VERSION, "build": BUILD, **disk_response})
+    return Response(
+        {
+            "version": VERSION,
+            "build": BUILD,
+            **disk_response,
+            "infrastructure": database_type,
+        }
+    )
 
 
 # NOTE: Important functions/classes from old views.py, to be reviewed
