@@ -90,7 +90,7 @@ spec:
           - name: CISO_ASSISTANT_URL
             value: {{ template "ciso-assistant.url" . }}
           - name: ALLOWED_HOSTS
-            value: localhost,127.0.0.1,{{ include "ciso-assistant.fullname" . }}-backend,{{ template "ciso-assistant.url" . }}
+            value: localhost,127.0.0.1,{{ include "ciso-assistant.fullname" . }}-backend,{{ template "ciso-assistant.url" . }},{{ .Values.global.domain }}
           - name: DEFAULT_FROM_EMAIL
             value: {{ .Values.backend.config.smtp.defaultFrom | quote }}
           - name: EMAIL_HOST

@@ -52,6 +52,9 @@ backend:
   # -- Backend name
   name: backend
 
+  # -- Environment variables to pass to backend
+  env: []
+
   # -- The number of backend pods to run
   replicas: 1
 
@@ -153,9 +156,6 @@ backend:
     #     cpu: 256m
     #     memory: 1024Mi
 
-  # -- Environment variables to pass to backend
-  env: []
-
   # -- Toggle and define container-level security context
   # @default -- `{}`
   containerSecurityContext: {}
@@ -187,6 +187,9 @@ backend:
 frontend:
   # -- Frontend name
   name: frontend
+
+  # -- Environment variables to pass to frontend
+  env: []
 
   # -- The number of frontend pods to run
   replicas: 1
