@@ -37,6 +37,8 @@ for arg in "$@"; do
     STORE_BACKEND_OUTPUT=1
   elif [[ $arg == -k ]]; then
     KEEP_DATABASE_SNAPSHOT=1
+  elif [[ $arg == --no-sudo ]]; then
+    DO_NOT_USE_SUDO=1
   elif [[ $arg == --* ]]; then
     SCRIPT_LONG_ARGS+=("$arg")
   elif [[ $arg == -* ]]; then
@@ -54,6 +56,7 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
   echo "  -k                      Keep a saved snapshot of the initial database and use it to avoid executing useless migrations."
   echo "                          If the initial database hasn't been created running the tests with this option will create it."
   echo "                          Running the tests without this option will delete the saved initial database."
+  echo "  --no-sudo               Run docker commands without using sudo as a prefix."
   echo "  --port=PORT             Run the backend server on the specified port (default: $BACKEND_PORT)"
   echo "  -m, --mailer=PORT/PORT  Use an existing mailer service on the optionally defined ports (default: $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT)"
 
@@ -131,8 +134,13 @@ cleanup() {
     echo "| test initial database snapshot deleted"
   fi
   if [[ -n "$MAILER_PID" ]]; then
-    sudo docker stop $MAILER_PID &>/dev/null
-    sudo docker rm $MAILER_PID &>/dev/null
+    if [[ -z "$DO_NOT_USE_SUDO" ]]; then
+      sudo docker stop $MAILER_PID &>/dev/null
+      sudo docker rm $MAILER_PID &>/dev/null
+    else
+      docker stop $MAILER_PID &>/dev/null
+      docker rm $MAILER_PID &>/dev/null
+    fi
     echo "| mailer service stopped"
   fi
   if [[ -d "$APP_DIR/frontend/tests/utils/.testhistory" ]]; then
@@ -156,7 +164,11 @@ trap finish EXIT
 if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then
   if command -v docker &>/dev/null; then
     echo "Starting mailer service..."
-    MAILER_PID=$(sudo docker run -d -p $MAILER_SMTP_SERVER_PORT:1025 -p $MAILER_WEB_SERVER_PORT:8025 mailhog/mailhog)
+    if [[ -z "$DO_NOT_USE_SUDO" ]]; then
+      MAILER_PID=$(sudo docker run -d -p $MAILER_SMTP_SERVER_PORT:1025 -p $MAILER_WEB_SERVER_PORT:8025 mailhog/mailhog)
+    else
+      MAILER_PID=$(docker run -d -p $MAILER_SMTP_SERVER_PORT:1025 -p $MAILER_WEB_SERVER_PORT:8025 mailhog/mailhog)
+    fi
     echo "Mailer service started on ports $MAILER_SMTP_SERVER_PORT/$MAILER_WEB_SERVER_PORT (Container ID: ${MAILER_PID:0:6})"
   else
     echo "Docker is not installed!"
