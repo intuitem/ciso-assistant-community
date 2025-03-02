@@ -20,6 +20,8 @@ services:
     build:
       context: ../
       dockerfile: ./enterprise/backend/Dockerfile
+    depends_on:
+      - backend    
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
