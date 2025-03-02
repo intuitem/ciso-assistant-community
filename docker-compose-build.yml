@@ -12,8 +12,14 @@ services:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/build || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
     volumes:
-      - db_data:/code/db:rw
+      - db_data:/code/db
 
   huey:
     container_name: huey
@@ -21,14 +27,15 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=False
     volumes:
-      - db_data:/code/db:ro
+      - db_data:/code/db
     entrypoint:
       - /bin/sh
       - -c
@@ -55,6 +62,9 @@ services:
     environment:
       - CISO_ASSISTANT_URL=https://localhost:8443
     restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
     ports:
       - 8443:8443
     volumes:
