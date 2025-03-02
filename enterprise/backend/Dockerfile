@@ -49,7 +49,7 @@ COPY backend/pyproject.toml backend/poetry.lock ./
 RUN poetry install --no-root \
    && rm -rf $POETRY_CACHE_DIR
 
-COPY backend /code/
+COPY --chown 1001:1001 backend /code/
 COPY enterprise/backend/enterprise_core /code/enterprise_core
 COPY backend/startup.sh /code/
 
