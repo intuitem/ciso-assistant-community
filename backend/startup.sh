@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+ls -alR /code
 # wait for database to be ready
 if [ ! -n "$DJANGO_SETTINGS_MODULE" ]; then
   export DJANGO_SETTINGS_MODULE=ciso_assistant.settings
