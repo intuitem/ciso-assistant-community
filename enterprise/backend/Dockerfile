@@ -53,5 +53,8 @@ COPY backend /code/
 COPY enterprise/backend/enterprise_core /code/enterprise_core
 COPY backend/startup.sh /code/
 
+RUN groupadd --gid 1001 app && useradd --uid 1001 --gid 1001 app
+USER app
+
 EXPOSE 8000
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
