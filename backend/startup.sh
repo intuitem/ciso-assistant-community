@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# for matplotlib
+export MPLCONFIGDIR=/tmp
+
 # wait for database to be ready
 if [ ! -n "$DJANGO_SETTINGS_MODULE" ]; then
   export DJANGO_SETTINGS_MODULE=ciso_assistant.settings
