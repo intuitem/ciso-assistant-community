@@ -135,7 +135,6 @@ jobs:
         run: |
           rm -rf db
           mkdir db
-          chown 1001:1001 db
           echo -n "pwd:"
           pwd
           ls -aln db
@@ -279,7 +278,6 @@ jobs:
         run: |
           rm -rf db
           mkdir db
-          chown 1001:1001 db
           echo -n "pwd:"
           pwd
           ls -aln db
