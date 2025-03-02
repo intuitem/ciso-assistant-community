@@ -270,7 +270,7 @@ jobs:
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright install
       - name: Build the Docker app
-        run: docker compose -f enterprise/docker-compose-build.yml up -d
+        run: docker compose -f enterprise/docker-compose-build.yml up
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
