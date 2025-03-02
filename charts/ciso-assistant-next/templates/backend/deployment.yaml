@@ -36,6 +36,8 @@ spec:
           {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
           - name: SQLITE_FILE
             value: /ciso/db/ciso-assistant.sqlite3
+          - name: HUEY_FILE_PATH
+            value: /ciso/db/huey.db
           {{- else if eq .Values.backend.config.databaseType "pgsql" }}
           - name: DB_HOST
             value: {{ template "ciso-assistant.fullname" . }}-postgresql
