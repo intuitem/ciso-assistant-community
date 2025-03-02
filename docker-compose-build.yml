@@ -28,7 +28,7 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=False
     volumes:
-      - db_data:/code/db:rw
+      - db_data:/code/db:ro
     entrypoint:
       - /bin/sh
       - -c
