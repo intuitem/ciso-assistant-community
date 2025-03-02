@@ -50,7 +50,6 @@ RUN poetry install --no-root \
    && rm -rf $POETRY_CACHE_DIR
 
 COPY backend /code/
-COPY db /code/
 COPY enterprise/backend/enterprise_core /code/enterprise_core
 COPY backend/startup.sh /code/
 
