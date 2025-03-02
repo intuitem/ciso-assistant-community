@@ -12,7 +12,6 @@ services:
       - LICENSE_SEATS=5
       - LICENSE_EXPIRATION=2025-12-21
       - DJANGO_SETTINGS_MODULE=enterprise_core.settings
-    user: "1001:1001"
     volumes:
       - ../db:/code/db
 
@@ -29,7 +28,6 @@ services:
       - DJANGO_DEBUG=True
       - LICENSE_SEATS=5
       - LICENSE_EXPIRATION=2025-12-21
-    user: "1001:1001"
     volumes:
       - ../db:/code/db
     entrypoint:
