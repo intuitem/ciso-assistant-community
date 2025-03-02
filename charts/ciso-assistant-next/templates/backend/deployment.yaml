@@ -36,6 +36,8 @@ spec:
           {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
           - name: SQLITE_FILE
             value: /ciso/db/ciso-assistant.sqlite3
+          - name: HUEY_FILE_PATH
+            value: /ciso/db/huey.db
           {{- else if eq .Values.backend.config.databaseType "pgsql" }}
           - name: DB_HOST
             value: {{ template "ciso-assistant.fullname" . }}-postgresql
@@ -90,7 +92,7 @@ spec:
           - name: CISO_ASSISTANT_URL
             value: {{ template "ciso-assistant.url" . }}
           - name: ALLOWED_HOSTS
-            value: localhost,127.0.0.1,{{ include "ciso-assistant.fullname" . }}-backend,{{ template "ciso-assistant.url" . }}
+            value: localhost,127.0.0.1,{{ include "ciso-assistant.fullname" . }}-backend,{{ template "ciso-assistant.url" . }},{{ .Values.global.domain }}
           - name: DEFAULT_FROM_EMAIL
             value: {{ .Values.backend.config.smtp.defaultFrom | quote }}
           - name: EMAIL_HOST
