@@ -137,7 +137,7 @@ jobs:
           mkdir db
           echo -n "pwd:"
           pwd
-          ls -al db
+          ls -aln db
           docker compose -f docker-compose-build.yml up -d
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
@@ -280,7 +280,8 @@ jobs:
           mkdir db
           echo -n "pwd:"
           pwd
-          ls -al db
+          ls -aln db
+
           docker compose -f enterprise/docker-compose-build.yml up -d
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
