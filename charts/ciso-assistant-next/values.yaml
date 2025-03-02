@@ -226,9 +226,6 @@ frontend:
     #     cpu: 256m
     #     memory: 1024Mi
 
-  # -- Environment variables to pass to frontend
-  env: []
-
   # -- Toggle and define container-level security context
   # @default -- `{}`
   containerSecurityContext: {}
