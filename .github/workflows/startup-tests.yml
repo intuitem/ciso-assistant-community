@@ -138,7 +138,7 @@ jobs:
           touch db/toto
           echo -n "pwd:"
           pwd
-          ls -aln db
+          ls -aln
           docker compose -f docker-compose-build.yml up -d
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
@@ -281,7 +281,7 @@ jobs:
           touch db/toto
           echo -n "pwd:"
           pwd
-          ls -aln db
+          ls -aln
 
           docker compose -f enterprise/docker-compose-build.yml up -d
       - name: Create backend environment variables file
