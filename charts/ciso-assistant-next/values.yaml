@@ -188,7 +188,7 @@ frontend:
   # -- Frontend name
   name: frontend
 
-  # -- Environment variables to pass to frontend
+  # -- Environment variables to pass to frontend.
   env: []
 
   # -- The number of frontend pods to run
