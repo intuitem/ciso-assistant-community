@@ -13,7 +13,7 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
     volumes:
-      - db_data:/code/db
+      - db_data:/code/db:rw
 
   huey:
     container_name: huey
@@ -28,7 +28,7 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=False
     volumes:
-      - db_data:/code/db
+      - db_data:/code/db:rw
     entrypoint:
       - /bin/sh
       - -c
