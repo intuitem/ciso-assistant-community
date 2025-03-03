@@ -1,3 +1,5 @@
+volumes:
+  db:
 services:
   backend:
     container_name: backend
@@ -10,7 +12,7 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
     volumes:
-      - ./db:/code/db
+      - db:/code/db
 
   huey:
     container_name: huey
@@ -25,7 +27,7 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=False
     volumes:
-      - ./db:/code/db
+      - db:/code/db
     entrypoint:
       - /bin/sh
       - -c
@@ -55,7 +57,7 @@ services:
     ports:
       - 8443:8443
     volumes:
-      - ./db:/data
+      - db:/data
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
