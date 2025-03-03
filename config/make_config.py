@@ -94,7 +94,7 @@ def get_config():
 
 
 def generate_compose_file(config):
-    """Generate docker-compose.yml based on configuration"""
+    """Generate docker-compose-custom.yml based on configuration"""
     env = Environment(loader=FileSystemLoader("templates"), autoescape=True)
 
     # Get template name based on database and proxy choice
@@ -118,8 +118,8 @@ def generate_compose_file(config):
     # Render template with configuration
     compose_content = template.render(config)
 
-    # Write to docker-compose.yml
-    with open("docker-compose.yml", "w") as f:
+    # Write to docker-compose-custom.yml
+    with open("docker-compose-custom.yml", "w") as f:
         f.write(compose_content)
 
 
@@ -154,11 +154,13 @@ def main():
 
     generate_compose_file(config)
 
-    print("[green]Successfully generated docker-compose.yml[/green]")
+    print("[green]Successfully generated docker-compose-custom.yml[/green]")
 
     # Show next steps
     print("\n[yellow]Next steps:[/yellow]")
-    print("1. Review the generated docker-compose.yml file, and adjust it if needed")
+    print(
+        "1. Review the generated docker-compose-custom.yml file, and adjust it if needed"
+    )
     if config.get("use_custom_cert"):
         print("2. Ensure your certificate files are in place:")
         print(f"   - Certificate: {config['cert_config']['cert_path']}")
