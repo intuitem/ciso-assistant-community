@@ -35,7 +35,7 @@ else
   sleep 50
 
   echo "Initialize your superuser account..."
-  docker compose exec backend poetry run python manage.py createsuperuser
+  docker compose -f "${DOCKER_COMPOSE_FILE}" exec backend poetry run python manage.py createsuperuser
 
   echo "🚀 CISO Assistant is ready!"
   echo "Connect to CISO Assistant on https://localhost:8443"

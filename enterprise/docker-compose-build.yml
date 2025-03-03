@@ -1,6 +1,6 @@
 volumes:
-  - db
-  - caddy
+  db:
+  caddy:
 services:
   backend:
     container_name: backend
