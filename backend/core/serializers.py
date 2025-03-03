@@ -964,6 +964,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "associated_reference_controls",
                 "associated_threats",
                 "parent_requirement",
+                "questions"
             ]
 
     name = serializers.CharField(source="__str__")

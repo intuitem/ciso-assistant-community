@@ -96,7 +96,7 @@ class RequirementNodeImporter:
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
             is_published=True,
-            question=self.requirement_data.get("question"),
+            questions=self.requirement_data.get("questions"),
         )
         for threat in self.requirement_data.get("threats", []):
             requirement_node.threats.add(

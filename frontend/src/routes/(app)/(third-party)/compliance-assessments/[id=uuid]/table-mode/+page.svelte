@@ -85,18 +85,11 @@
 	async function update(
 		requirementAssessment,
 		field: string,
-		question: {
-			urn: string;
-			answer: string;
+		answers: {
+			urn: {value: string | string[]};
 		} | null = null
 	) {
-		if (question) {
-			const questionIndex = requirementAssessment.answer.questions.findIndex(
-				(q) => q.urn === question.urn
-			);
-			requirementAssessment.answer.questions[questionIndex].answer = question.answer;
-		}
-		const value = question ? requirementAssessment.answer : requirementAssessment[field];
+		const value = answers ? requirementAssessment.answers : requirementAssessment[field];
 		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
@@ -325,56 +318,56 @@
 								</div>
 							</div>
 						{/if}
-						{#if requirementAssessment.answer != null && Object.keys(requirementAssessment.answer).length !== 0}
+						{#if requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
 							<div class="flex flex-col w-full space-y-2">
-								{#each requirementAssessment.answer.questions as question}
+								{#each Object.entries(requirementAssessment.requirement.questions) as [urn, question]}
 									<li class="flex flex-col space-y-2 rounded-xl">
 										<p>{question.text}</p>
 										{#if shallow}
-											{#if question.answer}
-												<p class="text-primary-500 font-semibold">{question.answer}</p>
+											{#if requirementAssessment.answers[urn].value}
+												<p class="text-primary-500 font-semibold">{requirementAssessment.answers[urn].value}</p>
 											{:else}
 												<p class="text-gray-400 italic">{m.noAnswer()}</p>
 											{/if}
-										{:else if question.type === 'unique_choice'}
+										{:else if question.question_type === 'unique_choice'}
 											<RadioGroup
 												class="flex-col"
 												active="variant-filled-primary"
 												hover="hover:variant-soft-primary"
 											>
-												{#each question.options as option}
+												{#each question.question_choices as option}
 													<RadioItem
 														class="shadow-md flex"
-														bind:group={question.answer}
+														bind:group={requirementAssessment.answers[urn].value}
 														name="question"
-														value={option}
+														value={option.urn}
 														on:click={async () => {
-															const newAnswer = question.answer === option ? null : option;
-															question.answer = newAnswer;
-															await update(requirementAssessment, 'answer', question);
+															const newAnswer = requirementAssessment.answers[urn].value === option.urn ? null : option.urn;
+															requirementAssessment.answers[urn].value = newAnswer;
+															await update(requirementAssessment, 'answers', requirementAssessment.answers);
 														}}
-														><span class="text-left">{option}</span>
+														><span class="text-left">{option.value}</span>
 													</RadioItem>
 												{/each}
 											</RadioGroup>
-										{:else if question.type === 'date'}
+										{:else if question.question_type === 'date'}
 											<input
 												type="date"
 												placeholder=""
 												class="input w-fit"
-												bind:value={question.answer}
+												bind:value={requirementAssessment.answers[urn].value}
 												on:change={async () =>
-													await update(requirementAssessment, 'answer', question)}
+													await update(requirementAssessment, 'answers', requirementAssessment.answers)}
 												{...$$restProps}
 											/>
 										{:else}
 											<textarea
 												placeholder=""
 												class="input w-full"
-												bind:value={question.answer}
+												bind:value={requirementAssessment.answers[urn].value}
 												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
 												on:change={async () =>
-													await update(requirementAssessment, 'answer', question)}
+													await update(requirementAssessment, 'answers', requirementAssessment.answers)}
 												{...$$restProps}
 											/>
 										{/if}

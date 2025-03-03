@@ -1267,6 +1267,9 @@ The format for questions and answers json fields will evolve over time. The init
         "value": [
             "urn:intuitem:risk:framework:example:answer01:choice:1"
         ],
+        // or if not multiple_choices
+        "value": "yes",
+        "is_visible": true // (incoming) when the questionnaire will evolve dynamically based on previous answers
     },
     "urn:intuitem:risk:req_node:example:a.1:question:2": {
     ...

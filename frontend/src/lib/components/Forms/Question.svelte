@@ -8,6 +8,7 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
+	export let questions = {};
 
 	export let form: SuperForm<AnyZodObject>;
 
@@ -35,41 +36,40 @@
 		</div>
 	{/if}
 	<div class="control">
-		{#each $value.questions as question}
+		{#each Object.entries(questions) as [urn, question]}
 			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 				<p class="font-semibold p-2">{question.text}</p>
-				{#if question.type === 'unique_choice'}
+				{#if question.question_type === 'unique_choice'}
 					<RadioGroup
 						class="flex-col"
 						active="variant-filled-primary"
 						hover="hover:variant-soft-primary"
 					>
-						{#each question.options as option}
+						{#each question.question_choices as option}
 							<RadioItem
 								class="shadow-md"
-								bind:group={question.answer}
+								bind:group={$value[urn].value}
 								name="question"
-								value={option}
-								on:click={() => (question.answer = question.answer === option ? null : option)}
-								>{option}</RadioItem
+								value={option.urn}
+								on:click={() => ($value[urn].value = $value[urn].value === option.urn ? null : option.urn)}
+								>{option.value}</RadioItem
 							>
 						{/each}
 					</RadioGroup>
-				{:else if question.type === 'date'}
+				{:else if question.question_type === 'date'}
 					<input
 						type="date"
 						placeholder=""
 						class="{'input ' + _class} {classesTextField($errors)}"
-						bind:value={question.answer}
+						bind:value={$value[urn].value}
 						{...$constraints}
 						{...$$restProps}
 					/>
 				{:else}
-					<input
-						type="text"
+					<textarea
 						placeholder=""
-						class="{'input ' + _class} {classesTextField($errors)}"
-						bind:value={question.answer}
+						class="{'input w-full' + _class} {classesTextField($errors)}"
+						bind:value={$value[urn].value}
 						{...$constraints}
 						{...$$restProps}
 					/>
