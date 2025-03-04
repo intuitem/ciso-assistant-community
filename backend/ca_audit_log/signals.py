@@ -1,8 +1,12 @@
+# signals.py
+import logging
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from .models import AuditLog
 from .registry import audit_registry
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(post_save)
@@ -12,9 +16,13 @@ def log_save(sender, instance, created, **kwargs):
     if sender == AuditLog:
         return
 
+    # Debug logging to see if signal is received
+    logger.debug(f"post_save signal received for {sender.__name__} (created={created})")
+
     # Check if this model should be monitored
     operation = "C" if created else "U"
     if not audit_registry.should_log(sender, operation):
+        logger.debug(f"Model {sender.__name__} not registered for {operation}")
         return
 
     try:
@@ -29,28 +37,29 @@ def log_save(sender, instance, created, **kwargs):
             event_data["changed_fields"] = []
             if hasattr(instance, "_changed_fields"):
                 event_data["changed_fields"] = instance._changed_fields
+                logger.debug(f"Changed fields: {instance._changed_fields}")
+            else:
+                logger.debug("No _changed_fields attribute found on instance")
 
         # Get the current user from thread local storage
-        # Note: This requires adding user to local thread in middleware or request processor
         from threading import local
 
         _thread_locals = local()
         user = getattr(_thread_locals, "user", None)
+        logger.debug(f"Current user from thread locals: {user}")
 
         # Create the audit log entry
-        AuditLog.objects.create(
+        audit_log = AuditLog.objects.create(
             user=user,
             operation=operation,
             content_type=content_type,
             object_id=str(instance.pk),
             event_data=event_data,
         )
+        logger.debug(f"Created audit log entry: {audit_log.id}")
     except Exception as e:
         # Log the error but don't interrupt the save operation
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.error(f"Failed to create audit log: {e}")
+        logger.error(f"Failed to create audit log: {e}", exc_info=True)
 
 
 @receiver(post_delete)
@@ -60,8 +69,12 @@ def log_delete(sender, instance, **kwargs):
     if sender == AuditLog:
         return
 
+    # Debug logging
+    logger.debug(f"post_delete signal received for {sender.__name__}")
+
     # Check if this model should be monitored for deletion
     if not audit_registry.should_log(sender, "D"):
+        logger.debug(f"Model {sender.__name__} not registered for D")
         return
 
     try:
@@ -73,18 +86,17 @@ def log_delete(sender, instance, **kwargs):
 
         _thread_locals = local()
         user = getattr(_thread_locals, "user", None)
+        logger.debug(f"Current user from thread locals: {user}")
 
         # Create the audit log entry
-        AuditLog.objects.create(
+        audit_log = AuditLog.objects.create(
             user=user,
             operation="D",
             content_type=content_type,
             object_id=str(instance.pk),
             event_data={"model_str": str(instance)},
         )
+        logger.warn(f"Created audit log entry: {audit_log.id}")
     except Exception as e:
         # Log the error but don't interrupt the delete operation
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.error(f"Failed to create audit log: {e}")
+        logger.error(f"Failed to create audit log: {e}", exc_info=True)
