@@ -14,12 +14,17 @@
 	import { goto } from '$app/navigation';
 
 	import { onMount } from 'svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 	export let data: PageData;
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
-
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: model.name,
+		domain: data.scenario.perimeter.folder.id
+	});
 	let color_map = {};
 	color_map['--'] = '#A9A9A9';
 	data.riskMatrix.risk.forEach((risk, i) => {

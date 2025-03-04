@@ -26,6 +26,7 @@
 
 	import { goto } from '$app/navigation';
 	import { listViewFields } from '$lib/utils/table';
+	import { canPerformAction } from '$lib/utils/access-control';
 	const modalStore: ModalStore = getModalStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
@@ -165,7 +166,12 @@
 	}
 
 	const user = $page.data.user;
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${data.model.name}`);
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: data.model.name,
+		domain: data.model.name === 'folder' ? data.data.id : (data.data.folder?.id ?? data.data.folder)
+	});
 
 	$: displayEditButton = function () {
 		return (

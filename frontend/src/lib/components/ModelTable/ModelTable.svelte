@@ -205,7 +205,11 @@
 				user,
 				action: 'add',
 				model: model.name,
-				domain: $page.params.id || user.root_folder_id
+				domain:
+					$page.data?.data?.folder?.id ||
+					$page.data?.data?.folder ||
+					$page.params.id ||
+					user.root_folder_id
 			})
 		: false;
 	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
