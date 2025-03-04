@@ -1,16 +1,6 @@
 #! /bin/bash
 set -euo pipefail
 
-if [ -d ./db ]; then
-  echo "The database seems already created. You should launch 'docker compose up -d' instead."
-  echo "For a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over"
-  exit 1
-fi
-mkdir db
-if [[ "$(uname -s)" == "Linux" ]]; then
-  echo "need to change the owner of the db directory with sudo"
-  sudo chown 1001:1001 db
-fi
 echo "Starting CISO Assistant services..."
 docker compose pull
 echo "Initializing the database. This can take up to 2 minutes, please wait.."

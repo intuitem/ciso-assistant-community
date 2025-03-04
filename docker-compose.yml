@@ -1,3 +1,6 @@
+volumes:
+  db:
+  caddy_data:
 services:
   backend:
     container_name: backend
@@ -11,7 +14,7 @@ services:
       - AUTH_TOKEN_TTL=7200
 
     volumes:
-      - ./db:/code/db
+      - db:/code/db
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
       interval: 10s
@@ -34,7 +37,7 @@ services:
       - AUTH_TOKEN_TTL=7200
 
     volumes:
-      - ./db:/code/db
+      - db:/code/db
     entrypoint:
       - /bin/sh
       - -c
@@ -66,7 +69,7 @@ services:
     ports:
       - 8443:8443
     volumes:
-      - ./caddy_data:/data
+      - caddy_data:/data
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
