@@ -3637,10 +3637,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
 class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
-        UNDEFINED = "--", _("Undefined")
-        PENTEST = "pentest", _("Pentest")
-        AUDIT = "audit", _("Audit")
-        SELF_IDENTIFIED = "self_identified", _("Self-identified")
+        UNDEFINED = "--", "Undefined"
+        PENTEST = "pentest", "Pentest"
+        AUDIT = "audit", "Audit"
+        SELF_IDENTIFIED = "self_identified", "Self-identified"
 
     owner = models.ManyToManyField(
         User,
