@@ -1,14 +1,10 @@
 # ciso-assistant
 
-
-
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.0.6](https://img.shields.io/badge/AppVersion-v2.0.6-informational?style=flat-square) 
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: latest](https://img.shields.io/badge/AppVersion-latest-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
 **Homepage:** <https://intuitem.com>
-
-
 
 ## Source Code
 
@@ -25,11 +21,14 @@ A Helm chart for CISO Assistant k8s's deployment
 To install the chart, firt get the values.yaml file and customize values.
 
 ```
-helm show values oci://ghcr.io/intuitem/ciso-assistant > custom.yaml
+helm show values oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant > custom.yaml
 ```
+
+Make sure to pin the appVersion to one of the official releases, if you don't want the app to auto-update each time you restart the deployment.
+
 To deploy the release :
 ```
-helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f custom.yaml
+helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant -f custom.yaml
 ```
 
 ## Values
@@ -38,20 +37,23 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 |-----|------|---------|-------------|
 | backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
 | backend.config.djangoDebug | bool | `false` | Enable Django debug mode |
+| backend.config.djangoExistingSecretKey | string | `""` | Name of an existing secret resource containing the django secret in a 'django-secret-key' key |
 | backend.config.djangoSecretKey | string | `"changeme"` | Set Django secret key |
 | backend.config.emailAdmin | string | `"admin@example.net"` | Admin email for initial configuration |
 | backend.config.smtp.defaultFrom | string | `"no-reply@ciso-assistant.net"` | Default from email address |
+| backend.config.smtp.existingSecret | string | `""` | and the rescue SMTP username in a 'email-rescue-username' key |
 | backend.config.smtp.primary.host | string | `"primary.cool-mailer.net"` | Primary SMTP hostname |
 | backend.config.smtp.primary.password | string | `"primary_password_here"` | Primary SMTP password |
 | backend.config.smtp.primary.port | int | `587` | Primary SMTP post |
 | backend.config.smtp.primary.useTls | bool | `true` | Enable TLS for primary SMTP |
 | backend.config.smtp.primary.username | string | `"apikey"` | Primary SMTP username |
+| backend.config.smtp.rescue.enabled | bool | `true` | Rescue SMTP hostname |
 | backend.config.smtp.rescue.host | string | `"smtp.secondary.mailer.cloud"` | Rescue SMTP hostname |
 | backend.config.smtp.rescue.password | string | `"rescue_password_here"` | Rescue SMTP hostname |
 | backend.config.smtp.rescue.port | int | `587` | Rescue SMTP hostname |
 | backend.config.smtp.rescue.useTls | bool | `true` | Enable TLS for rescue SMTP |
 | backend.config.smtp.rescue.username | string | `"username"` | Rescue SMTP hostname |
-| backend.containerSecurityContext | object | `{}`  | Toggle and define container-level security context |
+| backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | backend.env | list | `[]` | Environment variables to pass to backend |
 | backend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the backend |
 | backend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the backend |
@@ -80,7 +82,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | externalPgsql.port | int | `5432` | Port of an external PostgreSQL to connect |
 | externalPgsql.user | string | `"ciso-assistant"` | User of an external PostgreSQL instance to connect |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
-| frontend.containerSecurityContext | object | `{}`  | Toggle and define container-level security context |
+| frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
 | frontend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the frontend |
 | frontend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the frontend |
@@ -103,7 +105,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | global.image.tag | string | `""` | Overrides the global CISO Assistant image tag whose default is the chart appVersion |
 | global.imagePullSecrets | list | `[]` | Secrets with credentials to pull images from a private registry |
 | global.nodeSelector | object | `{}` | Default node selector for all components |
-| global.securityContext | object | `{}`  | Toggle and define pod-level security context |
+| global.securityContext | object | `{}` | Toggle and define pod-level security context |
 | global.tls | bool | `false` | Globally enable TLS (Ingress, URLs, etc.) |
 | global.tolerations | list | `[]` | Default tolerations for all components |
 | ingress.annotations | object | `{}` | Additional ingress annotations |
@@ -120,7 +122,6 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | postgresql.global.postgresql.auth.postgresPassword | string | `""` | Super-user postgres account password # Note: if not set, it will be dynamically generated |
 | postgresql.global.postgresql.auth.username | string | `"ciso-assistant"` | Database username |
 | postgresql.primary.persistence.size | string | `"5Gi"` | PostgreSQL persistant volume size (default 8Gi). |
-
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

@@ -3630,7 +3630,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     applied_controls=applied_control["id"],
                 )
                 applied_control["requirement-assessments"] = [
-                    {"str": str(req.requirement.display_short), "id": str(req.id)}
+                    {
+                        "str": str(
+                            req.requirement.display_short or req.requirement.urn
+                        ),
+                        "id": str(req.id),
+                    }
                     for req in req_assessments
                 ]
             return self.get_paginated_response(serialized_controls)
@@ -3644,7 +3649,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 applied_controls=applied_control["id"],
             )
             applied_control["requirement-assessments"] = [
-                {"str": str(req.requirement.display_short), "id": str(req.id)}
+                {
+                    "str": str(req.requirement.display_short or req.requirement.urn),
+                    "id": str(req.id),
+                }
                 for req in req_assessments
             ]
         return Response(serialized_controls)
