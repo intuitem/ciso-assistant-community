@@ -5,7 +5,8 @@ ENV PYTHONUNBUFFERED=1 \
    POETRY_VIRTUALENVS_IN_PROJECT=1 \
    POETRY_VIRTUALENVS_CREATE=1 \
    POETRY_CACHE_DIR=/tmp/poetry_cache \
-   DJANGO_SETTINGS_MODULE=enterprise_core.settings
+   DJANGO_SETTINGS_MODULE=enterprise_core.settings \
+   HOME=/tmp
 
 WORKDIR /code
 
