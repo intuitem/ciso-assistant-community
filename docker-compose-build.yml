@@ -58,7 +58,7 @@ services:
     ports:
       - 8443:8443
     volumes:
-      - caddy:/data
+      - caddy_data:/data
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
