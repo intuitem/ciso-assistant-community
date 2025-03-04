@@ -53,4 +53,10 @@ class AuditLog(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.get_operation_display()} on {self.content_type} #{self.object_id} by {self.user} at {self.timestamp}"
+        operation_display = dict(self.OPERATION_CHOICES).get(
+            self.operation, self.operation
+        )
+        model_name = (
+            self.content_type.model_class().__name__ if self.content_type else "Unknown"
+        )
+        return f"{operation_display} on {model_name} #{self.object_id} by {self.user} at {self.timestamp}"
