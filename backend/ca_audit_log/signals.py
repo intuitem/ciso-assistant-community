@@ -3,6 +3,10 @@ from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from .models import AuditLog
 from .registry import audit_registry
+import threading
+
+# Create thread local storage
+_thread_locals = threading.local()
 
 
 @receiver(post_save)
@@ -27,7 +31,6 @@ def log_save(sender, instance, created, **kwargs):
             # For updates, we might want to track what changed
             if hasattr(instance, "_changed_fields"):
                 event_data["changed_fields"] = instance._changed_fields
-
                 # Include previous and current values if available
                 if hasattr(instance, "_changed_data"):
                     event_data["changes"] = instance._changed_data
@@ -36,10 +39,6 @@ def log_save(sender, instance, created, **kwargs):
         event_data["model_name"] = sender.__name__
 
         # Get the current user from thread local storage
-        # Note: This requires adding user to local thread in middleware or request processor
-        from threading import local
-
-        _thread_locals = local()
         user = getattr(_thread_locals, "user", None)
 
         # Create the audit log entry
@@ -74,9 +73,6 @@ def log_delete(sender, instance, **kwargs):
         content_type = ContentType.objects.get_for_model(sender)
 
         # Get the current user from thread local storage
-        from threading import local
-
-        _thread_locals = local()
         user = getattr(_thread_locals, "user", None)
 
         # Create the audit log entry
