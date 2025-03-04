@@ -3465,7 +3465,9 @@ class ComplianceAssessment(Assessment):
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
 
 
-class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
+class RequirementAssessment(
+    TrackFieldChanges, AbstractBaseModel, FolderMixin, ETADueDateMixin
+):
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
