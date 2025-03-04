@@ -6,6 +6,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from ca_audit_log.mixins import TrackFieldChanges
+
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -1847,7 +1849,9 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
-class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class AppliedControl(
+    TrackFieldChanges, NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
+):
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
