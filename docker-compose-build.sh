@@ -36,4 +36,4 @@ docker compose -f "${DOCKER_COMPOSE_FILE}" exec backend poetry run python manage
 
 echo "🚀 CISO Assistant is ready!"
 echo "Connect to CISO Assistant on https://localhost:8443"
-echo "For successive runs, you can now use 'docker compose -f "${DOCKER_COMPOSE_FILE}" up -d'."
+echo "For successive runs, you can now use 'docker compose -f ${DOCKER_COMPOSE_FILE} up -d'."
