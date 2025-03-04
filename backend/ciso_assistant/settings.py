@@ -163,6 +163,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
     "huey.contrib.djhuey",
+    "ca_audit_log",
 ]
 
 MIDDLEWARE = [
