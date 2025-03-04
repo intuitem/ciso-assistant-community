@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOCKER_COMPOSE_FILE=docker-compose-build.yml
+DOCKER_COMPOSE_FILE="${1:-docker-compose-build.yml}"
 
 prepare_meta_file() {
   VERSION=$(git describe --tags --always)
