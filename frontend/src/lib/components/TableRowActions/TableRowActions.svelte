@@ -11,6 +11,7 @@
 
 	import * as m from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -94,8 +95,23 @@
 	}
 
 	const user = $page.data.user;
-	$: canDeleteObject = Object.hasOwn(user.permissions, `delete_${model?.name}`) && !preventDelete;
-	$: canEditObject = Object.hasOwn(user.permissions, `change_${model?.name}`);
+
+	$: canDeleteObject = model
+		? canPerformAction({
+				user,
+				action: 'delete',
+				model: model.name,
+				domain: model.name === 'folder' ? row.meta.id : (row.meta.folder?.id ?? row.meta.folder)
+			}) && !preventDelete
+		: false;
+	$: canEditObject = model
+		? canPerformAction({
+				user,
+				action: 'change',
+				model: model.name,
+				domain: model.name === 'folder' ? row.meta.id : (row.meta.folder?.id ?? row.meta.folder)
+			})
+		: false;
 
 	$: displayDetail = detailURL;
 	$: displayEdit =
