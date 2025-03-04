@@ -28,7 +28,7 @@ GUNICORN_KEEPALIVE=${GUNICORN_KEEPALIVE:-30}
 GUNICORN_LIMIT_REQUEST_LINE=${GUNICORN_LIMIT_REQUEST_LINE:-5120}
 
 exec gunicorn --chdir ciso_assistant \
-  --bind :8000 \
+  --bind :${PORT:-8000} \
   --timeout $GUNICORN_TIMEOUT \
   --keep-alive $GUNICORN_KEEPALIVE \
   --workers=$GUNICORN_WORKERS \
