@@ -273,6 +273,9 @@ For the following executions, use "docker compose up" directly.
 > [!TIP]
 > If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
 
+> [!Note]
+> For docker compose under Linux, using a bind-mount, it is necessary to do `chown 1001:1001 db`.
+
 ## Docker-compose on remote
 
 For docker setup on a remote server or hypervisor, checkout the [specific instructions here](https://intuitem.gitbook.io/ciso-assistant/deployment/remote-virtualization)
