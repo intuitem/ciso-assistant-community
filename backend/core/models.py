@@ -561,7 +561,6 @@ class LibraryUpdater:
                             continue
 
                         answers = ra.answers
-                        print(answers)
 
                         # Remove answers corresponding to questions that have been removed
                         for urn in list(answers.keys()):
@@ -571,37 +570,36 @@ class LibraryUpdater:
                         for urn, question in questions.items():
                             # If the question is not present in answers, initialize it
                             if urn not in answers:
-                                answers[urn] = {'value': None, 'is_visible': True}
+                                answers[urn] = None
                                 continue
 
-                            answer_val = answers[urn].get('value')
+                            answer_val = answers[urn]
                             question_type = question.get('question_type')
 
                             if question_type == 'multiple_choices':
                                 # Keep only the choices that exist in the question
                                 if isinstance(answer_val, list):
                                     valid_choices = {choice['urn'] for choice in question.get('question_choices', [])}
-                                    answers[urn]['value'] = [choice for choice in answer_val if choice in valid_choices]
+                                    answers[urn] = [choice for choice in answer_val if choice in valid_choices]
                                 else:
-                                    answers[urn]['value'] = None
+                                    answers[urn] = None
 
                             elif question_type == 'unique_choice':
                                 # If the answer does not match a valid choice, reset it to None
                                 valid_choices = {choice['urn'] for choice in question.get('question_choices', [])}
-                                answers[urn]['value'] = answer_val if answer_val in valid_choices else None
+                                answers[urn] = answer_val if answer_val in valid_choices else None
 
                             elif question_type == 'text':
                                 # For a text question, simply check that it is a string
-                                answers[urn]['value'] = answer_val if isinstance(answer_val, str) else None
+                                answers[urn] = answer_val if isinstance(answer_val, str) else None
 
                             elif question_type == 'date':
                                 # For a date question, check the expected format (e.g., "YYYY-MM-DD")
                                 try:
                                     datetime.strptime(answer_val, '%Y-%m-%d')
-                                    answers[urn]['value'] = answer_val
+                                    answers[urn] = answer_val
                                 except Exception:
-                                    answers[urn]['value'] = None
-                        print(answers)
+                                    answers[urn] = None
                         ra.answers = answers
                         ra.save()
 
