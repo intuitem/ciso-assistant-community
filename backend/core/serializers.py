@@ -563,6 +563,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     requirements_count = serializers.IntegerField(
         source="requirement_assessments.count"
     )
+    requirement_assessments = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
 
     def get_state(self, obj):
