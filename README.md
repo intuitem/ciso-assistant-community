@@ -271,7 +271,8 @@ You can then reach CISO Assistant using your web browser at [https://localhost:8
 For the following executions, use "docker compose up" directly.
 
 > [!TIP]
-> If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
+> If you want a fresh install, simply delete the `db` volume, where the database is stored. Use `docker volume ls` to find the volume, and `docker volume rm` to delete it.
+
 
 ## Docker-compose on remote
 

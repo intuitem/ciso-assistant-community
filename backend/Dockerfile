@@ -5,7 +5,8 @@ ENV PYTHONUNBUFFERED=1 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+    POETRY_CACHE_DIR=/tmp/poetry_cache \
+    HOME=/tmp/
 
 WORKDIR /code
 
@@ -47,6 +48,9 @@ RUN poetry install --no-root \
 
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
+RUN groupadd --gid 1001 app && useradd --uid 1001 --gid 1001 app && mkdir -p /code/db && chown 1001:1001 /code/db
+USER app
+VOLUME /code/db
 
 EXPOSE 8000
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
