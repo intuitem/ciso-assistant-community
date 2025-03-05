@@ -324,8 +324,8 @@
 									<li class="flex flex-col space-y-2 rounded-xl">
 										<p>{question.text}</p>
 										{#if shallow}
-											{#if requirementAssessment.answers[urn].value}
-												<p class="text-primary-500 font-semibold">{requirementAssessment.answers[urn].value}</p>
+											{#if requirementAssessment.answers[urn]}
+												<p class="text-primary-500 font-semibold">{requirementAssessment.answers[urn]}</p>
 											{:else}
 												<p class="text-gray-400 italic">{m.noAnswer()}</p>
 											{/if}
@@ -338,12 +338,12 @@
 												{#each question.question_choices as option}
 													<RadioItem
 														class="shadow-md flex"
-														bind:group={requirementAssessment.answers[urn].value}
+														bind:group={requirementAssessment.answers[urn]}
 														name="question"
 														value={option.urn}
 														on:click={async () => {
-															const newAnswer = requirementAssessment.answers[urn].value === option.urn ? null : option.urn;
-															requirementAssessment.answers[urn].value = newAnswer;
+															const newAnswer = requirementAssessment.answers[urn] === option.urn ? null : option.urn;
+															requirementAssessment.answers[urn] = newAnswer;
 															await update(requirementAssessment, 'answers', requirementAssessment.answers);
 														}}
 														><span class="text-left">{option.value}</span>
@@ -355,7 +355,7 @@
 												type="date"
 												placeholder=""
 												class="input w-fit"
-												bind:value={requirementAssessment.answers[urn].value}
+												bind:value={requirementAssessment.answers[urn]}
 												on:change={async () =>
 													await update(requirementAssessment, 'answers', requirementAssessment.answers)}
 												{...$$restProps}
@@ -364,7 +364,7 @@
 											<textarea
 												placeholder=""
 												class="input w-full"
-												bind:value={requirementAssessment.answers[urn].value}
+												bind:value={requirementAssessment.answers[urn]}
 												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
 												on:change={async () =>
 													await update(requirementAssessment, 'answers', requirementAssessment.answers)}

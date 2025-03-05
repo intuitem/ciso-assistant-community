@@ -48,10 +48,10 @@
 						{#each question.question_choices as option}
 							<RadioItem
 								class="shadow-md"
-								bind:group={$value[urn].value}
+								bind:group={$value[urn]}
 								name="question"
 								value={option.urn}
-								on:click={() => ($value[urn].value = $value[urn].value === option.urn ? null : option.urn)}
+								on:click={() => ($value[urn] = $value[urn] === option.urn ? null : option.urn)}
 								>{option.value}</RadioItem
 							>
 						{/each}
@@ -61,7 +61,7 @@
 						type="date"
 						placeholder=""
 						class="{'input ' + _class} {classesTextField($errors)}"
-						bind:value={$value[urn].value}
+						bind:value={$value[urn]}
 						{...$constraints}
 						{...$$restProps}
 					/>
@@ -69,7 +69,7 @@
 					<textarea
 						placeholder=""
 						class="{'input w-full' + _class} {classesTextField($errors)}"
-						bind:value={$value[urn].value}
+						bind:value={$value[urn]}
 						{...$constraints}
 						{...$$restProps}
 					/>
