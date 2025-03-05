@@ -20,7 +20,7 @@ export const POST: RequestHandler = async (event) => {
 		});
 	}
 
-	return new Response(null, {
+	return new Response(JSON.stringify(await res.json()), {
 		headers: {
 			'Content-Type': 'application/json'
 		}
