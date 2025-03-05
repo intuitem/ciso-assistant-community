@@ -170,7 +170,10 @@
 		user,
 		action: 'change',
 		model: data.model.name,
-		domain: data.model.name === 'folder' ? data.data.id : (data.data.folder?.id ?? data.data.folder)
+		domain:
+			data.model.name === 'folder'
+				? data.data.id
+				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
 
 	$: displayEditButton = function () {

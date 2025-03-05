@@ -101,7 +101,10 @@
 				user,
 				action: 'delete',
 				model: model.name,
-				domain: model.name === 'folder' ? row.meta.id : (row.meta.folder?.id ?? row.meta.folder)
+				domain:
+					model.name === 'folder'
+						? row.meta.id
+						: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
 			}) && !preventDelete
 		: false;
 	$: canEditObject = model
@@ -109,7 +112,10 @@
 				user,
 				action: 'change',
 				model: model.name,
-				domain: model.name === 'folder' ? row.meta.id : (row.meta.folder?.id ?? row.meta.folder)
+				domain:
+					model.name === 'folder'
+						? row.meta.id
+						: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
 			})
 		: false;
 
