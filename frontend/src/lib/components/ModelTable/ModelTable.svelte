@@ -201,16 +201,18 @@
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	$: model = URL_MODEL_MAP[URLModel];
 	$: canCreateObject = model
-		? canPerformAction({
-				user,
-				action: 'add',
-				model: model.name,
-				domain:
-					$page.data?.data?.folder?.id ||
-					$page.data?.data?.folder ||
-					$page.params.id ||
-					user.root_folder_id
-			})
+		? $page.params.id
+			? canPerformAction({
+					user,
+					action: 'add',
+					model: model.name,
+					domain:
+						$page.data?.data?.folder?.id ||
+						$page.data?.data?.folder ||
+						$page.params.id ||
+						user.root_folder_id
+				})
+			: Object.hasOwn(user.permissions, `add_${model.name}`)
 		: false;
 	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
 

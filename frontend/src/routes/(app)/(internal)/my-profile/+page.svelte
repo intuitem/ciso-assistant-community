@@ -27,7 +27,7 @@
 	const user = $page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
-		action: 'delete',
+		action: 'change',
 		model: 'user',
 		domain: user.root_folder_id
 	});

@@ -97,26 +97,30 @@
 	const user = $page.data.user;
 
 	$: canDeleteObject = model
-		? canPerformAction({
-				user,
-				action: 'delete',
-				model: model.name,
-				domain:
-					model.name === 'folder'
-						? row.meta.id
-						: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-			}) && !preventDelete
+		? $page.params.id
+			? canPerformAction({
+					user,
+					action: 'delete',
+					model: model.name,
+					domain:
+						model.name === 'folder'
+							? row.meta.id
+							: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+				}) && !preventDelete
+			: Object.hasOwn(user.permissions, `delete_${model.name}`)
 		: false;
 	$: canEditObject = model
-		? canPerformAction({
-				user,
-				action: 'change',
-				model: model.name,
-				domain:
-					model.name === 'folder'
-						? row.meta.id
-						: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-			})
+		? $page.params.id
+			? canPerformAction({
+					user,
+					action: 'change',
+					model: model.name,
+					domain:
+						model.name === 'folder'
+							? row.meta.id
+							: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+				})
+			: Object.hasOwn(user.permissions, `change_${model.name}`)
 		: false;
 
 	$: displayDetail = detailURL;
