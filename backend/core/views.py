@@ -4072,9 +4072,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
         requirement_assessments = compliance_assessment.requirement_assessments.all()
+        controls = []
         for requirement_assessment in requirement_assessments:
-            requirement_assessment.create_applied_controls_from_suggestions()
-        return Response(status=status.HTTP_200_OK)
+            controls.append(
+                requirement_assessment.create_applied_controls_from_suggestions()
+            )
+        return Response(
+            AppliedControlReadSerializer(chain.from_iterable(controls), many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
@@ -4208,8 +4214,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             folder=requirement_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        requirement_assessment.create_applied_controls_from_suggestions()
-        return Response(status=status.HTTP_200_OK)
+        controls = requirement_assessment.create_applied_controls_from_suggestions()
+        return Response(
+            AppliedControlReadSerializer(controls, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
