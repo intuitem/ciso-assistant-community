@@ -560,9 +560,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     state = serializers.SerializerMethodField()
-    requirements_count = serializers.IntegerField(
-        source="requirement_assessments.count"
-    )
+    requirement_assessments = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
 
     def get_state(self, obj):
