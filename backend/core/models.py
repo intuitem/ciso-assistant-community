@@ -3814,4 +3814,26 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.save()
 
 
-auditlog.register(AppliedControl, m2m_fields={"owner"})
+# TODO: common exclusion?
+auditlog.register(
+    AppliedControl,
+    m2m_fields={"owner", "evidences"},
+    exclude_fields=["created_at", "updated_at"],
+)
+auditlog.register(
+    RequirementAssessment,
+    m2m_fields={"applied_controls"},
+    exclude_fields=["created_at", "updated_at"],
+)
+auditlog.register(
+    RiskScenario,
+    m2m_fields={"owner", "applied_controls", "existing_applied_controls"},
+    exclude_fields=["created_at", "updated_at"],
+)
+auditlog.register(
+    Finding,
+    m2m_fields={"applied_controls"},
+    exclude_fields=["created_at", "updated_at"],
+)
+
+# actions - 0: create, 1: update, 2: delete
