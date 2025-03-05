@@ -176,8 +176,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "auditlog.middleware.AuditlogMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
