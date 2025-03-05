@@ -795,6 +795,22 @@ socialaccount = ["pyjwt[crypto] (>=1.7)", "requests (>=2.0.0)", "requests-oauthl
 steam = ["python3-openid (>=3.0.8)"]
 
 [[package]]
+name = "django-auditlog"
+version = "3.0.0"
+description = "Audit log app for Django"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "django-auditlog-3.0.0.tar.gz", hash = "sha256:9de49f80a4911135d136017123cd73461f869b4947eec14d5e76db4b88182f3f"},
+    {file = "django_auditlog-3.0.0-py3-none-any.whl", hash = "sha256:92db1cf4a51ceca5c26b3ff46997d9e3305a02da1bd435e2efb5b8b6d300ce1f"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+python-dateutil = ">=2.7.0"
+
+[[package]]
 name = "django-filter"
 version = "24.3"
 description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
@@ -2917,4 +2933,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "fd698305960a2142ad6c8e97fd84af13b0f44d07d921fe9c0b44d9524320c9a6"
+content-hash = "0b93f8ea062c1bc567cbf0f9231c82bcf18b9cb8ad25ace277d3732951bd41aa"

@@ -6,6 +6,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from auditlog.registry import auditlog
+
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -3810,3 +3812,6 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
+
+
+auditlog.register(AppliedControl, m2m_fields={"owner"})
