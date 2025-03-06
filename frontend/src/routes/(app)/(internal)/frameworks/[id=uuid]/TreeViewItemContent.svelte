@@ -49,20 +49,41 @@
 
 <div>
 	<span class="whitespace-pre-line" style="font-weight: 300;">
-		<p class="max-w-[80ch]">
-			{#if title || description}
-				{#if title}
-					<span style="font-weight: 600;">{title}</span>
+		{#if node.assessable}
+			<Anchor
+				href={`inspect-requirement/${node.id}`}
+				label={title}
+				class="text-primary-700 hover:text-primary-500"
+			>
+				<p class="max-w-[80ch]">
+					{#if title || description}
+						{#if title}
+							<span style="font-weight: 600;">{title}</span>
+						{/if}
+						{#if description}
+							<p>{description}</p>
+						{/if}
+					{:else if node.question && node.question.questions && node.question.questions[0]}
+						<!-- This only displays the first question -->
+						{node.question.questions[0].text}
+					{/if}
+				</p>
+			</Anchor>
+		{:else}
+			<p class="max-w-[80ch]">
+				{#if title || description}
+					{#if title}
+						<span style="font-weight: 600;">{title}</span>
+					{/if}
+					{#if description}
+						<p>{description}</p>
+					{/if}
+				{:else if node.question && node.question.questions && node.question.questions[0]}
+					<!-- This only displays the first question -->
+					{node.question.questions[0].text}
 				{/if}
-				{#if description}
-					<p>{description}</p>
-					<Anchor href={`inspect-requirement/${node.id}`} label={title} class="text-sm"><i class="fas fa-trash"></i></Anchor>
-				{/if}
-			{:else if node.question && node.question.questions && node.question.questions[0]}
-				<!-- This only displays the first question -->
-				{node.question.questions[0].text}
-			{/if}
-		</p>
+			</p>
+		{/if}
 	</span>
 	{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 		<div

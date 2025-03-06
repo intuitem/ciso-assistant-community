@@ -8,6 +8,8 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
+from django.db.models import F, Count, Avg, Q, ExpressionWrapper, FloatField
+from collections import defaultdict
 from django_filters.filterset import filterset_factory
 import pytz
 from uuid import UUID
@@ -3494,13 +3496,107 @@ class RequirementViewSet(BaseModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
+
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
     def inspect_requirement(self, request, pk):
         requirement = RequirementNode.objects.get(id=pk)
-        requirement_assessments = RequirementAssessment.objects.filter(requirement=requirement)
-        serialized_requirement_assessments = RequirementAssessmentReadSerializer(requirement_assessments, many=True).data
-        return Response(serialized_requirement_assessments)
+        requirement_assessments = RequirementAssessment.objects.filter(
+            requirement=requirement
+        ).prefetch_related("folder", "compliance_assessment__perimeter")
+        serialized_requirement_assessments = RequirementAssessmentReadSerializer(
+            requirement_assessments, many=True
+        ).data
+
+        # Group by Domain and Perimeter
+        grouped_data = requirement_assessments.values(
+            "folder__name", "compliance_assessment__perimeter__name"
+        ).annotate(
+            compliant_count=Count(
+                "id", filter=Q(result=RequirementAssessment.Result.COMPLIANT)
+            ),
+            total_count=Count("id"),
+            compliance_percentage=ExpressionWrapper(
+                Count("id", filter=Q(result=RequirementAssessment.Result.COMPLIANT))
+                * 100.0
+                / Count("id"),
+                output_field=FloatField(),
+            ),
+            assessed_count=Count(
+                "id", filter=~Q(status=RequirementAssessment.Status.TODO)
+            ),
+            assessment_completion_rate=ExpressionWrapper(
+                Count("id", filter=~Q(status=RequirementAssessment.Status.TODO))
+                * 100.0
+                / Count("id"),
+                output_field=FloatField(),
+            ),
+            average_score=Avg("score"),
+            average_documentation_score=Avg("documentation_score"),
+        )
+
+        # Organize data by domain and perimeter
+        domain_dict = defaultdict(lambda: {"name": "", "perimeters": []})
+
+        for item in grouped_data:
+            domain_name = item["folder__name"]
+            perimeter_name = item["compliance_assessment__perimeter__name"]
+
+            # Set domain name if not yet set
+            if not domain_dict[domain_name]["name"]:
+                domain_dict[domain_name]["name"] = domain_name
+
+            # Create perimeter entry
+            perimeter_entry = {
+                "name": perimeter_name,
+                "compliance_result": {
+                    "compliant_count": item["compliant_count"],
+                    "total_count": item["total_count"],
+                    "compliance_percentage": item["compliance_percentage"],
+                },
+                "assessment_progress": {
+                    "assessed_count": item["assessed_count"],
+                    "total_count": item["total_count"],
+                    "assessment_completion_rate": item["assessment_completion_rate"],
+                },
+                "scoring_metrics": {
+                    "average_score": item["average_score"],
+                    "average_documentation_score": item["average_documentation_score"],
+                },
+                "compliance_assessments": [],
+            }
+
+            # Add compliance assessments to the perimeter entry
+            compliance_assessments = (
+                requirement_assessments.filter(
+                    folder__name=domain_name,
+                    compliance_assessment__perimeter__name=perimeter_name,
+                )
+                .select_related("compliance_assessment")
+                .values("compliance_assessment__id", "compliance_assessment__name")
+                .distinct()
+            )
+
+            for ca in compliance_assessments:
+                perimeter_entry["compliance_assessments"].append(
+                    {
+                        "id": ca["compliance_assessment__id"],
+                        "name": ca["compliance_assessment__name"],
+                    }
+                )
+
+            domain_dict[domain_name]["perimeters"].append(perimeter_entry)
+
+        # Convert defaultdict to list for the response
+        data_by_domain = [
+            domain_data for domain_data in domain_dict.values() if domain_data["name"]
+        ]
+
+        return Response(
+            {
+                "requirement_assessments": serialized_requirement_assessments,
+                "metrics": data_by_domain,
+            }
+        )
 
 
 class EvidenceViewSet(BaseModelViewSet):
