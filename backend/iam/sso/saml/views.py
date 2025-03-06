@@ -138,10 +138,21 @@ class FinishACSView(SAMLViewMixin, View):
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                email_attributes = provider.app.settings.get("attribute_mapping").get(
-                    "email"
-                )
-                email = auth._attributes.get(email_attributes[0])[0]
+                attribute_mapping = provider.app.settings.get("attribute_mapping", {})
+                email_attributes = attribute_mapping.get("email", [])
+                if email_attributes:
+                    attribute_values = auth._attributes.get(email_attributes[0], [])
+                    if attribute_values:
+                        email = attribute_values[0]
+                    else:
+                        logger.error(
+                            "No values found for email attribute",
+                            attribute=email_attributes[0],
+                        )
+                        raise AuthError.FAILED_SSO
+                else:
+                    logger.error("No email attributes configured in attribute_mapping")
+                    raise AuthError.FAILED_SSO
                 user = User.objects.get(email=email)
             idp_first_name = auth._attributes.get(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", [""]
