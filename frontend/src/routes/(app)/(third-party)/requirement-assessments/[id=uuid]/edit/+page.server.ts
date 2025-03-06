@@ -300,7 +300,9 @@ export const actions: Actions = {
 				},
 				event
 			);
+			return fail(400, { form });
 		}
-		return { form };
+		const newControls = await response.json().then((data) => data.map((e) => e.id));
+		return { form, newControls };
 	}
 };

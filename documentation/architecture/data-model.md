@@ -124,6 +124,7 @@ erDiagram
     REQUIREMENT_NODE             }o--o{ REFERENCE_CONTROL     : leverages
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
+    COMPLIANCE_ASSESSMENT        }o--o{ ASSET                 : relates_to
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
@@ -731,7 +732,7 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 
 ### Requirement Mapping set
 
-Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see <https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf>).
 
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 

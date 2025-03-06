@@ -424,6 +424,15 @@ class ThreatViewSet(BaseModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Threat.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
         return Response({"results": threats_count_per_name(request.user)})
@@ -650,6 +659,15 @@ class ReferenceControlViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "provider"]
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            ReferenceControl.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -672,6 +690,15 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False)  # Set a name there
     def colors(self, request):
         return Response({"results": get_risk_color_ordered_list(request.user)})
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            RiskMatrix.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
 
     @action(detail=False, name="Get risk level choices")
     def risk(self, request):
@@ -2490,9 +2517,7 @@ class FolderViewSet(BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
-        domain_name = f"DEMO {timestamp}"
-
+        domain_name = f"DEMO"
         try:
             dummy_fixture_path = (
                 Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
@@ -2511,13 +2536,13 @@ class FolderViewSet(BaseModelViewSet):
             return Response(result, status=status.HTTP_200_OK)
 
         except json.JSONDecodeError:
-            logger.error("Invalid JSON format in dummy fixture file", exc_info=True)
+            logger.error("Invalid JSON format in dummy fixture file")
             return Response(
                 {"errors": ["Invalid JSON format"]},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         except Exception:
-            logger.error("Error importing dummy domain", exc_info=True)
+            logger.error("Error importing dummy domain")
             return Response(
                 {"error": "failedToImportDummyDomain"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -3435,6 +3460,15 @@ class FrameworkViewSet(BaseModelViewSet):
         ).data
         return Response({"results": available_target_frameworks})
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Framework.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """
@@ -3556,7 +3590,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "perimeter", "status", "ebios_rm_studies"]
+    filterset_fields = [
+        "framework",
+        "perimeter",
+        "status",
+        "ebios_rm_studies",
+        "assets",
+    ]
     search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -3571,32 +3611,56 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             user=request.user,
             object_type=ComplianceAssessment,
         )
-        if UUID(pk) in viewable_objects:
-            response = []
-            compliance_assessment_object: ComplianceAssessment = self.get_object()
-            requirement_assessments_objects = (
-                compliance_assessment_object.get_requirement_assessments(
-                    include_non_assessable=True
-                )
+        if UUID(pk) not in viewable_objects:
+            return Response({"detail": "Not found."}, status=404)
+
+        compliance_assessment_object: ComplianceAssessment = self.get_object()
+        requirement_assessments_objects = (
+            compliance_assessment_object.get_requirement_assessments(
+                include_non_assessable=True
             )
-            applied_controls = [
-                AppliedControlReadSerializer(applied_control).data
-                for applied_control in AppliedControl.objects.filter(
-                    requirement_assessments__in=requirement_assessments_objects
-                ).distinct()
-            ]
+        )
 
-            for applied_control in applied_controls:
-                applied_control["requirements_count"] = (
-                    RequirementAssessment.objects.filter(
-                        compliance_assessment=compliance_assessment_object
-                    )
-                    .filter(applied_controls=applied_control["id"])
-                    .count()
+        applied_controls_qs = AppliedControl.objects.filter(
+            requirement_assessments__in=requirement_assessments_objects
+        ).distinct()
+
+        page = self.paginate_queryset(applied_controls_qs)
+        if page is not None:
+            serialized_controls = AppliedControlReadSerializer(page, many=True).data
+
+            for applied_control in serialized_controls:
+                req_assessments = RequirementAssessment.objects.filter(
+                    compliance_assessment=compliance_assessment_object,
+                    applied_controls=applied_control["id"],
                 )
-                response.append(applied_control)
+                applied_control["requirement-assessments"] = [
+                    {
+                        "str": str(
+                            req.requirement.display_short or req.requirement.urn
+                        ),
+                        "id": str(req.id),
+                    }
+                    for req in req_assessments
+                ]
+            return self.get_paginated_response(serialized_controls)
 
-        return Response(response)
+        serialized_controls = AppliedControlReadSerializer(
+            applied_controls_qs, many=True
+        ).data
+        for applied_control in serialized_controls:
+            req_assessments = RequirementAssessment.objects.filter(
+                compliance_assessment=compliance_assessment_object,
+                applied_controls=applied_control["id"],
+            )
+            applied_control["requirement-assessments"] = [
+                {
+                    "str": str(req.requirement.display_short or req.requirement.urn),
+                    "id": str(req.id),
+                }
+                for req in req_assessments
+            ]
+        return Response(serialized_controls)
 
     @action(detail=True, name="Get compliance assessment (audit) CSV")
     def compliance_assessment_csv(self, request, pk):
@@ -4013,9 +4077,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
         requirement_assessments = compliance_assessment.requirement_assessments.all()
+        controls = []
         for requirement_assessment in requirement_assessments:
-            requirement_assessment.create_applied_controls_from_suggestions()
-        return Response(status=status.HTTP_200_OK)
+            controls.append(
+                requirement_assessment.create_applied_controls_from_suggestions()
+            )
+        return Response(
+            AppliedControlReadSerializer(chain.from_iterable(controls), many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
@@ -4149,14 +4219,26 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             folder=requirement_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        requirement_assessment.create_applied_controls_from_suggestions()
-        return Response(status=status.HTTP_200_OK)
+        controls = requirement_assessment.create_applied_controls_from_suggestions()
+        return Response(
+            AppliedControlReadSerializer(controls, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
     model = RequirementMappingSet
 
-    filterset_fields = ["target_framework", "source_framework"]
+    filterset_fields = ["target_framework", "source_framework", "library__provider"]
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            LoadedLibrary.objects.filter(
+                provider__isnull=False, requirement_mapping_sets__isnull=False
+            ).values_list("provider", flat=True)
+        )
+        return Response({p: p for p in providers})
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):

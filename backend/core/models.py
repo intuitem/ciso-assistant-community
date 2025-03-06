@@ -1653,6 +1653,12 @@ class Asset(
             sub_children.update(child.get_descendants())
         return sub_children
 
+    @property
+    def children_assets(self):
+        descendants = self.get_descendants()
+        descendant_ids = [d.id for d in descendants]
+        return Asset.objects.filter(id__in=descendant_ids).exclude(id=self.id)
+
     def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
         Gets the security objectives of a given asset.
@@ -2880,6 +2886,14 @@ class ComplianceAssessment(Assessment):
     )
     show_documentation_score = models.BooleanField(default=False)
 
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name=_("Related assets"),
+        blank=True,
+        help_text=_("Assets related to the compliance assessment"),
+        related_name="compliance_assessments",
+    )
+
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -3623,10 +3637,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
 class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
-        UNDEFINED = "--", _("Undefined")
-        PENTEST = "pentest", _("Pentest")
-        AUDIT = "audit", _("Audit")
-        SELF_IDENTIFIED = "self_identified", _("Self-identified")
+        UNDEFINED = "--", "Undefined"
+        PENTEST = "pentest", "Pentest"
+        AUDIT = "audit", "Audit"
+        SELF_IDENTIFIED = "self_identified", "Self-identified"
 
     owner = models.ManyToManyField(
         User,

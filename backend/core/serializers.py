@@ -323,6 +323,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    children_assets = FieldsRelatedField(["id"], many=True)
     owner = FieldsRelatedField(many=True)
     security_objectives = serializers.JSONField(
         source="get_security_objectives_display"
@@ -901,6 +902,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         source="get_selected_implementation_groups"
     )
     progress = serializers.ReadOnlyField()
+    assets = FieldsRelatedField(many=True)
 
     class Meta:
         model = ComplianceAssessment
