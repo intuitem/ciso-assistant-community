@@ -606,6 +606,8 @@ class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
     class Meta:
         model = AppliedControl
         fields = [
+            "id",
+            "ref_id",
             "name",
             "description",
             "folder",
