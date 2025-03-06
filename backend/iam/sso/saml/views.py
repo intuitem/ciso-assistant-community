@@ -135,7 +135,12 @@ class FinishACSView(SAMLViewMixin, View):
             login.state["next"] = next_url
         try:
             email = auth._nameid
-            user = User.objects.get(email=email)
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                email_attributes = provider.app.settings.get("attribute_mapping").get("email")
+                email = auth._attributes.get(email_attributes[0])[0]
+                user = User.objects.get(email=email)
             idp_first_name = auth._attributes.get(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", [""]
             )[0]
