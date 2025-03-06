@@ -70,7 +70,7 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
-			baseEndpoint="/applied-controls/?compliance_assessment={$page.params.id}"
+			baseEndpoint="/compliance-assessments/{$page.params.id}/action-plan"
 			fields={[
 				'name',
 				'status',

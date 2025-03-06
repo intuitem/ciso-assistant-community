@@ -54,7 +54,7 @@ from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, UserGroup
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, generics, permissions, status, viewsets
 from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
     action,
@@ -1771,6 +1771,34 @@ class AppliedControlViewSet(BaseModelViewSet):
                 links.append({"source": indexes[ac.id], "target": indexes[sc.id]})
 
         return Response({"nodes": nodes, "categories": categories, "links": links})
+
+
+class ComplianceAssessmentActionPlanList(generics.ListAPIView):
+    filterset_fields = ["reference_control"]
+    serializer_class = ComplianceAssessmentActionPlanSerializer
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    ordering_fields = "__all__"
+    ordering = ["eta"]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"pk": self.kwargs["pk"]})
+        return context
+
+    def get_queryset(self):
+        compliance_assessment: ComplianceAssessment = ComplianceAssessment.objects.get(
+            id=self.kwargs["pk"]
+        )
+        requirement_assessments = compliance_assessment.get_requirement_assessments(
+            include_non_assessable=True
+        )
+        return AppliedControl.objects.filter(
+            requirement_assessments__in=requirement_assessments
+        ).distinct()
 
 
 class PolicyViewSet(AppliedControlViewSet):
