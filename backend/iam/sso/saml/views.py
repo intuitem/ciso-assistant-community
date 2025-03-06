@@ -19,6 +19,7 @@ from allauth.socialaccount.providers.saml.views import (
     render_authentication_error,
 )
 from allauth.socialaccount.providers.saml.views import AuthError as AllauthAuthError
+from allauth.socialaccount.helpers import complete_social_login
 from allauth.utils import ValidationError
 from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import Http404
@@ -134,36 +135,13 @@ class FinishACSView(SAMLViewMixin, View):
             login.state["process"] = AuthProcess.LOGIN
             login.state["next"] = next_url
         try:
-            email = auth._nameid
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                attribute_mapping = provider.app.settings.get("attribute_mapping", {})
-                email_attributes = attribute_mapping.get("email", [])
-                if email_attributes:
-                    attribute_values = auth._attributes.get(email_attributes[0], [])
-                    if attribute_values:
-                        email = attribute_values[0]
-                    else:
-                        logger.error(
-                            "No values found for email attribute",
-                            attribute=email_attributes[0],
-                        )
-                        raise AuthError.FAILED_SSO
-                else:
-                    logger.error("No email attributes configured in attribute_mapping")
-                    raise AuthError.FAILED_SSO
-                user = User.objects.get(email=email)
-            idp_first_name = auth._attributes.get(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", [""]
-            )[0]
-            idp_last_name = auth._attributes.get(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", [""]
-            )[0]
-            if idp_first_name and user.first_name != idp_first_name:
-                user.first_name = idp_first_name
-            if idp_last_name and user.last_name != idp_last_name:
-                user.last_name = idp_last_name
+            emails = auth.get_attribute('http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress')
+            emails.append(auth.get_nameid()) # just in case
+            user = User.objects.get(email__in=emails)
+            idp_first_names = auth.get_attribute("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname")
+            idp_last_names = auth.get_attribute("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname")
+            user.first_name = idp_first_names[0] if idp_first_names else user.first_name
+            user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.is_sso = True
             user.save()
             token = generate_token(user)
@@ -171,7 +149,7 @@ class FinishACSView(SAMLViewMixin, View):
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
-            login._accept_login(request)
+            complete_social_login(request, login)
             record_authentication(request, login)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
