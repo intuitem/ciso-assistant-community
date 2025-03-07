@@ -3515,12 +3515,6 @@ class RequirementViewSet(BaseModelViewSet):
                 "id", filter=Q(result=RequirementAssessment.Result.COMPLIANT)
             ),
             total_count=Count("id"),
-            compliance_percentage=ExpressionWrapper(
-                Count("id", filter=Q(result=RequirementAssessment.Result.COMPLIANT))
-                * 100.0
-                / Count("id"),
-                output_field=FloatField(),
-            ),
             assessed_count=Count(
                 "id", filter=~Q(status=RequirementAssessment.Status.TODO)
             ),
@@ -3530,8 +3524,6 @@ class RequirementViewSet(BaseModelViewSet):
                 / Count("id"),
                 output_field=FloatField(),
             ),
-            average_score=Avg("score"),
-            average_documentation_score=Avg("documentation_score"),
         )
 
         # Collect all data by domain for calculations
@@ -3614,24 +3606,6 @@ class RequirementViewSet(BaseModelViewSet):
 
                 perimeter_entry = {
                     "name": perimeter_name,
-                    "compliance_result": {
-                        "compliant_count": item["compliant_count"],
-                        "total_count": item["total_count"],
-                        "compliance_percentage": int(item["compliance_percentage"]),
-                    },
-                    "assessment_progress": {
-                        "assessed_count": item["assessed_count"],
-                        "total_count": item["total_count"],
-                        "assessment_completion_rate": int(
-                            item["assessment_completion_rate"]
-                        ),
-                    },
-                    "scoring_metrics": {
-                        "average_score": item["average_score"],
-                        "average_documentation_score": item[
-                            "average_documentation_score"
-                        ],
-                    },
                     "compliance_assessments": [],
                 }
 
@@ -3642,7 +3616,13 @@ class RequirementViewSet(BaseModelViewSet):
                         compliance_assessment__perimeter__name=perimeter_name,
                     )
                     .select_related("compliance_assessment")
-                    .values("compliance_assessment__id", "compliance_assessment__name")
+                    .values(
+                        "compliance_assessment__id",
+                        "compliance_assessment__name",
+                        "compliance_assessment__version",
+                        "compliance_assessment__show_documentation_score",
+                        "compliance_assessment__max_score",
+                    )
                     .distinct()
                 )
 
@@ -3651,6 +3631,11 @@ class RequirementViewSet(BaseModelViewSet):
                         {
                             "id": ca["compliance_assessment__id"],
                             "name": ca["compliance_assessment__name"],
+                            "version": ca["compliance_assessment__version"],
+                            "show_documentation_score": ca[
+                                "compliance_assessment__show_documentation_score"
+                            ],
+                            "max_score": ca["compliance_assessment__max_score"],
                         }
                     )
 

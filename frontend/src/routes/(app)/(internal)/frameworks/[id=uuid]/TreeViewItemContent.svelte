@@ -53,7 +53,7 @@
 			<Anchor
 				href={`inspect-requirement/${node.id}`}
 				label={title}
-				class="text-primary-700 hover:text-primary-500"
+				class="text-primary-500 hover:text-primary-700"
 			>
 				<p class="max-w-[80ch]">
 					{#if title || description}
