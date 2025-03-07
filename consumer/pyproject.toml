@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "redpanda-consumer"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+kafka-python = "^2.0.6"
+click = "^8.1.8"
+requests = "^2.32.3"
+rich = "^13.9.4"
+icecream = "^2.1.4"
+pyyaml = "^6.0.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
