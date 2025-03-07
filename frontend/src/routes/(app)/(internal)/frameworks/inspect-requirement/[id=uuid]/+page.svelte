@@ -4,6 +4,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import * as m from '$paraglide/messages';
 	import { darkenColor } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
@@ -45,16 +46,22 @@
 		metricsData = [...metricsData];
 		metricsData[domainIndex] = updatedDomain;
 	}
+
+	console.log(data.requirementAssessments);
 </script>
 
 <div
 	class="card px-6 py-4 bg-white flex flex-col justify-center items-center shadow-lg w-full rounded-lg"
 >
 	{#if data.requirementAssessments.length > 0}
-		<span class="text-2xl font-bold text-gray-800">{data.requirementAssessments[0].name}</span>
-		<span class="text-sm text-center text-gray-600"
-			>{data.requirementAssessments[0].description}</span
-		>
+		{#if data.requirementAssessments[0].name}
+			<span class="text-2xl font-bold text-gray-800">{data.requirementAssessments[0].name}</span>
+		{/if}
+		{#if data.requirementAssessments[0].description}
+			<span class="text-sm text-center text-gray-600"
+				>{data.requirementAssessments[0].description}</span
+			>
+		{/if}
 		{#each metricsData as domain, domainIndex}
 			<Accordion>
 				<AccordionItem open>
@@ -66,7 +73,7 @@
 							<span class="font-bold text-lg text-gray-800">{domain.name}</span>
 							<div>
 								<div class="flex items-center space-x-2 text-sm">
-									<p class="text-gray-600">Compliant Requirements:</p>
+									<p class="text-gray-600">{m.compliantRequirementsSemiColon()}</p>
 									<span class="font-bold text-green-500"
 										>{domain.compliance_result.compliance_percentage}%</span
 									>
@@ -84,7 +91,7 @@
 							</div>
 							<div>
 								<div class="flex items-center space-x-2 text-sm">
-									<p class="text-gray-600">Requirements Progression:</p>
+									<p class="text-gray-600">{m.requirementsProgressionSemiColon()}</p>
 									<span class="font-bold text-blue-500"
 										>{domain.assessment_progress.assessment_completion_rate}%</span
 									>
@@ -231,8 +238,8 @@
 	{:else}
 		<div class="flex flex-col items-center justify-center h-full">
 			<div class="text-center">
-				<h1 class="text-2xl font-bold">No requirements found</h1>
-				<p class="text-gray-500">There is no audit for this framework.</p>
+				<h1 class="text-2xl font-bold">{m.noRequirementFound()}</h1>
+				<p class="text-gray-500">{m.noAuditForTheFramework()}</p>
 			</div>
 		</div>
 	{/if}

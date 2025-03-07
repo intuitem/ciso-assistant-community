@@ -1179,5 +1179,9 @@
 	"confirmed": "Confirmé",
 	"dismissed": "Rejeté",
 	"assigned": "Assigné",
-	"selectEvidence": "Sélectionner une preuve"
+	"selectEvidence": "Sélectionner une preuve",
+	"compliantRequirementsSemiColon": "Exigences conformes :",
+	"requirementsProgressionSemiColon": "Progression des exigences :",
+	"noRequirementFound": "Aucune exigence trouvée",
+	"noAuditForTheFramework": "Il n'y a pas d'audit utilisant ce référentiel"
 }
