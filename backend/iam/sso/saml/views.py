@@ -20,6 +20,7 @@ from allauth.socialaccount.providers.saml.views import (
 )
 from allauth.socialaccount.providers.saml.views import AuthError as AllauthAuthError
 from allauth.socialaccount.helpers import complete_social_login
+from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from allauth.utils import ValidationError
 from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import Http404
@@ -31,6 +32,8 @@ from rest_framework.views import csrf_exempt
 from iam.models import User
 from iam.sso.models import SSOSettings
 from iam.utils import generate_token
+
+DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL = SAMLProvider.default_attribute_mapping["email"]
 
 logger = structlog.get_logger(__name__)
 
@@ -135,8 +138,15 @@ class FinishACSView(SAMLViewMixin, View):
             login.state["process"] = AuthProcess.LOGIN
             login.state["next"] = next_url
         try:
-            emails = auth.get_attribute('http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress')
-            emails.append(auth.get_nameid()) # just in case
+            attribute_mapping = provider.app.settings.get("attribute_mapping", {})
+            # our parameter is either:
+            #   - a list with attributes (normal case)
+            #   - a list with a comma-separated string of attributes (frontend non-optimal behavior)
+            email_attributes_string = attribute_mapping.get("email", [])
+            email_attributes = [item.strip() for y in email_attributes_string for item in y.split(",")] or DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL
+            emails = [auth.get_attribute(x) or [] for x in email_attributes]
+            emails = [x for xs in emails for x in xs] # flatten
+            emails.append(auth.get_nameid()) # default behavior
             user = User.objects.get(email__in=emails)
             idp_first_names = auth.get_attribute("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname")
             idp_last_names = auth.get_attribute("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname")
@@ -149,7 +159,7 @@ class FinishACSView(SAMLViewMixin, View):
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
-            complete_social_login(request, login)
+            login._accept_login(request) # complete_social_login not working
             record_authentication(request, login)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
