@@ -142,13 +142,19 @@ class FinishACSView(SAMLViewMixin, View):
             #   - a list with attributes (normal case)
             #   - a list with a comma-separated string of attributes (frontend non-optimal behavior)
             email_attributes_string = attribute_mapping.get("email", [])
-            email_attributes = [item.strip() for y in email_attributes_string for item in y.split(",")] or DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL
+            email_attributes = [
+                item.strip() for y in email_attributes_string for item in y.split(",")
+            ] or DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL
             emails = [auth.get_attribute(x) or [] for x in email_attributes]
-            emails = [x for xs in emails for x in xs] # flatten
-            emails.append(auth.get_nameid()) # default behavior
+            emails = [x for xs in emails for x in xs]  # flatten
+            emails.append(auth.get_nameid())  # default behavior
             user = User.objects.get(email__in=emails)
-            idp_first_names = auth.get_attribute("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname")
-            idp_last_names = auth.get_attribute("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname")
+            idp_first_names = auth.get_attribute(
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+            )
+            idp_last_names = auth.get_attribute(
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+            )
             user.first_name = idp_first_names[0] if idp_first_names else user.first_name
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.is_sso = True
@@ -158,7 +164,7 @@ class FinishACSView(SAMLViewMixin, View):
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
-            login._accept_login(request) # complete_social_login not working
+            login._accept_login(request)  # complete_social_login not working
             record_authentication(request, login)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
