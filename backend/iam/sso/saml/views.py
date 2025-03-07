@@ -19,7 +19,6 @@ from allauth.socialaccount.providers.saml.views import (
     render_authentication_error,
 )
 from allauth.socialaccount.providers.saml.views import AuthError as AllauthAuthError
-from allauth.socialaccount.helpers import complete_social_login
 from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from allauth.utils import ValidationError
 from django.http import HttpRequest, HttpResponseRedirect
