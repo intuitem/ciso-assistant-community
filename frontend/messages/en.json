@@ -1189,5 +1189,9 @@
 	"confirmed": "Confirmed",
 	"dismissed": "Dismissed",
 	"assigned": "Assigned",
-	"selectEvidence": "Select evidence"
+	"selectEvidence": "Select evidence",
+	"compliantRequirementsSemiColon": "Compliant requirements:",
+	"requirementsProgressionSemiColon": "Requirements progression:",
+	"noRequirementFound": "No requirement found",
+	"noAuditForTheFramework": "There is no audit using this framework"
 }
