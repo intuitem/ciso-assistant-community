@@ -443,7 +443,6 @@ class LibraryUpdater:
             except:
                 return "dependencyNotFound"
             new_dependencies.append(new_dependency)
-
         for key, value in [
             ("name", self.new_library.name),
             ("version", self.new_library.version),
@@ -654,9 +653,6 @@ class LibraryUpdater:
                         key in matrix
                     ):  # If all keys are mandatory this condition is useless
                         matrix_dict["json_definition"][key] = matrix[key]
-                matrix_dict["json_definition"] = json.dumps(
-                    matrix_dict["json_definition"]
-                )
 
                 RiskMatrix.objects.update_or_create(
                     urn=matrix["urn"].lower(),
