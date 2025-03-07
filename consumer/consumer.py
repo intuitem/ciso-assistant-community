@@ -126,17 +126,24 @@ def auth(email, password):
         print(res.json())
 
 
-# # Create a consumer client
-# consumer = KafkaConsumer(
-#     # topic
-#     "observation",
-#     # consumer configs
-#     bootstrap_servers=os.getenv("REDPANDA_BROKERS", "localhost:9092"),
-#     group_id="my-group",
-#     auto_offset_reset="earliest",
-#     # value_deserializer=lambda v: v,
-# )
-#
-# # Consume messages from a Redpanda topic
-# for msg in consumer:
-#     rprint(f"Consumed record. key={msg.key}, value={msg.value}")
+@click.command()
+def consume():
+    consumer = KafkaConsumer(
+        # topic
+        "observation",
+        # consumer configs
+        bootstrap_servers=os.getenv("REDPANDA_BROKERS", "localhost:9092"),
+        group_id="my-group",
+        auto_offset_reset="earliest",
+        # value_deserializer=lambda v: v,
+    )
+
+    for msg in consumer:
+        rprint(f"Consumed record. key={msg.key}, value={msg.value}")
+
+
+cli.add_command(auth)
+cli.add_command(consume)
+
+if __name__ == "__main__":
+    cli()
