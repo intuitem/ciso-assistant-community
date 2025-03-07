@@ -3,6 +3,7 @@
 from django.db import migrations
 import json
 
+
 def fix_matrix_json_definition(apps, schema_editor):
     RiskMatrix = apps.get_model("core", "RiskMatrix")
 
@@ -11,10 +12,10 @@ def fix_matrix_json_definition(apps, schema_editor):
             matrix.json_definition = json.loads(matrix.json_definition)
             matrix.save()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0059_complianceassessment_assets'),
+        ("core", "0059_complianceassessment_assets"),
     ]
 
     operations = [migrations.RunPython(fix_matrix_json_definition)]

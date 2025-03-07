@@ -289,7 +289,9 @@ class StoredLibrary(LibraryMixin):
         is_loaded = LoadedLibrary.objects.filter(  # We consider the library as loaded even if the loaded version is different
             urn=urn, locale=locale
         ).exists()
-        same_version_lib = StoredLibrary.objects.filter(urn=urn, locale=locale, version=version).first()
+        same_version_lib = StoredLibrary.objects.filter(
+            urn=urn, locale=locale, version=version
+        ).first()
         if same_version_lib:
             # update hash following cosmetic change (e.g. when we added publication date)
             logger.info("update hash", urn=urn)
