@@ -120,6 +120,10 @@ urlpatterns = [
         "compliance-assessments/<uuid:pk>/suggestions/applied-controls/",
         ComplianceAssessmentViewSet.create_suggested_applied_controls,
     ),
+    path(
+        "compliance-assessments/<uuid:pk>/action-plan/",
+        ComplianceAssessmentActionPlanList.as_view(),
+    ),
 ]
 
 # Additional modules take precedence over the default modules
