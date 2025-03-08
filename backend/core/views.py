@@ -3274,12 +3274,15 @@ class FolderViewSet(BaseModelViewSet):
         return uuids, urns
 
     @action(detail=False, methods=["get"])
-    def get_accessible_folders_and_perimeters(self, request):
+    def get_accessible_objects(self, request):
         (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Folder
         )
         (viewable_perimeters_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Perimeter
+        )
+        (viewable_frameworks_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Framework
         )
         res = {
             "folders": [
@@ -3292,6 +3295,12 @@ class FolderViewSet(BaseModelViewSet):
                 {"name": str(p), "id": p.id}
                 for p in Perimeter.objects.filter(
                     id__in=viewable_perimeters_ids
+                ).order_by(Lower("name"))
+            ],
+            "frameworks": [
+                {"name": f.name, "id": f.id}
+                for f in Framework.objects.filter(
+                    id__in=viewable_frameworks_ids
                 ).order_by(Lower("name"))
             ],
         }

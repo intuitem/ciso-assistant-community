@@ -4,10 +4,9 @@ import { fail } from '@sveltejs/kit'; // Import from kit instead of assert
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
-import { message } from 'sveltekit-superforms';
 
 export const load = (async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/folders/get_accessible_folders_and_perimeters/`;
+	const endpoint = `${BASE_API_URL}/folders/get_accessible_objects/`;
 	const res = await fetch(endpoint);
 	const data = await res.json();
 	return { data: data, title: 'Data import wizard' };
@@ -23,6 +22,7 @@ export const actions: Actions = {
 		const model = formData.get('model') as string;
 		const folder = formData.get('folder') as string;
 		const perimeter = formData.get('perimeter') as string;
+		const framework = formData.get('framework') as string;
 
 		if (!file?.name || file?.name === 'undefined') {
 			// Using the fail function from SvelteKit
@@ -43,7 +43,8 @@ export const actions: Actions = {
 					'Content-Type': file.type,
 					'X-Model-Type': model,
 					'X-Folder-Id': folder,
-					'X-Perimeter-Id': perimeter
+					'X-Perimeter-Id': perimeter,
+					'X-Framework-Id': framework
 				},
 				body: file
 			});

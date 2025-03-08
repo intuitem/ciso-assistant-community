@@ -49,9 +49,9 @@
 	const authorizedExtensions = ['.xls', '.xlsx'];
 </script>
 
-<div class="grid grid-cols-2 space-y-2 p-2">
-	<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
-		<div class="card col-span-full lg:col-span-1 bg-white shadow py-4 px-6 space-y-2">
+<div class="grid grid-cols-3 gap-4">
+	<div class=" col-span-2 bg-white shadow py-4 px-6 space-y-2">
+		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<h4 class="h4 font-semibold">Load excel data <i class="fa-solid fa-upload" /></h4>
 			<div class=" py-4">
 				Choose the type of data you are importing. Check out the templates on the side
@@ -138,13 +138,27 @@
 				{/each}
 			</select>
 
+			<label for="framework" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+				>Select a Framework</label
+			>
+			<select
+				id="framework"
+				name="framework"
+				disabled={isPerimeterDisabled}
+				class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+			>
+				{#each data.data.frameworks as framework}
+					<option value={framework.id}>{framework.name}</option>
+				{/each}
+			</select>
 			<button
 				class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
 				type="button"
 				on:click={modalConfirm}>{m.upload()}</button
 			>
-		</div>
-	</form>
+		</form>
+	</div>
+	<div>Templates - expected format</div>
 </div>
 <div>
 	Parsing results:
