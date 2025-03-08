@@ -1179,5 +1179,7 @@
 	"confirmed": "Confirmé",
 	"dismissed": "Rejeté",
 	"assigned": "Assigné",
-	"selectEvidence": "Sélectionner une preuve"
+	"selectEvidence": "Sélectionner une preuve",
+	"infrastructure": "Infrastructure",
+	"build": "Build"
 }
