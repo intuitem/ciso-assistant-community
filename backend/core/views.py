@@ -3283,13 +3283,13 @@ class FolderViewSet(BaseModelViewSet):
         )
         res = {
             "folders": [
-                {"name": f.name, "id": f.id}
+                {"name": str(f), "id": f.id}
                 for f in Folder.objects.filter(id__in=viewable_folders_ids).order_by(
                     Lower("name")
                 )
             ],
             "perimeters": [
-                {"name": p.name, "id": p.id}
+                {"name": str(p), "id": p.id}
                 for p in Perimeter.objects.filter(
                     id__in=viewable_perimeters_ids
                 ).order_by(Lower("name"))

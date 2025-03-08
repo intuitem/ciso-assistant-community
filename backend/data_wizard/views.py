@@ -19,6 +19,13 @@ class LoadFileView(APIView):
 
     def process_excel_file(self, request, excel_data):
         # Parse Excel data
+        model_type = request.META.get("HTTP_X_MODEL_TYPE")
+        folder_id = request.META.get("HTTP_X_FOLDER_ID")
+        perimeter_id = request.META.get("HTTP_X_PERIMETER_ID")
+
+        logger.info(
+            f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}"
+        )
         try:
             # Read Excel file into a pandas DataFrame
             df = pd.read_excel(excel_data)
