@@ -1,0 +1,2882 @@
+urn: urn:neotrust:risk:library:candgsi-104
+locale: en
+ref_id: candgsi-104
+name: Can Dgsi 104
+description: Basic Cybersecurity Controls for Small and Medium Organizations. This
+  standard establishes the minimum cybersecurity controls intended for small and medium
+  organizations, which generally have fewer than 500 employees.
+copyright: INGN, 2024
+version: 2
+publication_date: 2024-12-31
+provider: Norme Nationale du Canada
+packager: Neotrust Cyber Securite
+translations:
+  fr:
+    name: Can Dgsi 104
+    description: "Contr\xF4les de cybers\xE9curit\xE9 de base pour les petites et\
+      \ moyennes organisations.\_Cette norme \xE9tablit les contr\xF4les de cybers\xE9\
+      curit\xE9 minimum destin\xE9s aux petites et moyennes organisations, qui comptent\
+      \ g\xE9n\xE9ralement moins de 500 employ\xE9s."
+objects:
+  framework:
+    urn: urn:neotrust:risk:framework:candgsi-104-1.01
+    ref_id: Can-Dgsi-104-r1
+    name: Can-Dgsi-104-r1
+    description: Basic Cybersecurity Controls for Small and Medium Organizations.
+      This standard establishes the minimum cybersecurity controls intended for small
+      and medium organizations, which generally have fewer than 500 employees.
+    translations:
+      fr:
+        name: Can Dgsi 104 r1
+        description: "Contr\xF4les de cybers\xE9curit\xE9 de base pour les petites\
+          \ et moyennes organisations.\_Cette norme \xE9tablit les contr\xF4les de\
+          \ cybers\xE9curit\xE9 minimum destin\xE9s aux petites et moyennes organisations,\
+          \ qui comptent g\xE9n\xE9ralement moins de 500 employ\xE9s."
+    min_score: 1
+    max_score: 3
+    scores_definition:
+    - score: 1
+      name: Not in place
+      description: Not implemented in the organization
+      translations:
+        fr:
+          name: non
+          description: "non mis en place Non mis en \u0153uvre dans l'organisation"
+    - score: 2
+      name: Partial
+      description: Project in progress or incomplete
+      translations:
+        fr:
+          name: partiel
+          description: Projet en cours ou incomplet
+    - score: 3
+      name: Implemented
+      description: Implemented in the organization
+      translations:
+        fr:
+          name: "Mis en \u0153uvre"
+          description: "Mis en \u0153uvre dans l'organisation"
+    implementation_groups_definition:
+    - ref_id: L1
+      name: Level 1
+      description: Level 1 requirements are aimed at small organizations for whom
+        cybersecurity is a new field. These organizations generally do not have enough
+        resources to invest in IT or use outsourced IT services, and possess only
+        a basic knowledge of cybersecurity.
+      translations:
+        fr:
+          description: "Les exigences de niveau 1 s\u2019adressent aux petites organisations\
+            \ pour qui la cybers\xE9curit\xE9 est un domaine nouveau. Ces organisations\
+            \ n\u2019ont g\xE9n\xE9ralement pas assez de ressources pour investir\
+            \ en TI ou utiliser des\nservices de TI externalis\xE9s, et ne poss\xE8\
+            dent qu\u2019une connaissance de base de la cybers\xE9curit\xE9."
+    - ref_id: L2
+      name: Level 2
+      description: Level 2 requirements build upon Level 1 requirements as an organization
+        matures and strengthens its cybersecurity posture. To adopt Level 2 requirements,
+        an organization must have implemented Level 1 requirements, understand the
+        fundamentals of cybersecurity and the related risks that concern it, and seek
+        to improve in this area.
+      translations:
+        fr:
+          description: "Les exigences de niveau 2 s\u2019ajoutent \xE0 celles de niveau\
+            \ 1 \xE0 mesure qu\u2019une organisation gagne en maturit\xE9 et\nrenforce\
+            \ sa posture de cybers\xE9curit\xE9. Pour adopter les exigences de niveau\
+            \ 2, une organisation doit avoir mis en\n\u0153uvre celles de niveau 1,\
+            \ conna\xEEtre les fondements de la cybers\xE9curit\xE9 et les risques\
+            \ connexes qui concernent, et chercher \xE0 s\u2019am\xE9liorer dans ce\
+            \ domaine."
+    requirement_nodes:
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Organizational controls
+      translations:
+        fr:
+          name: "Contr\xF4les organisationnels"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4
+      ref_id: '4.1'
+      name: Leadership
+      translations:
+        fr:
+          name: Direction
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1
+      ref_id: 4.1.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.1
+      ref_id: 4.1.1.1
+      name: L1-Cybersecurity leadership
+      description: Top management of the organization is ultimately responsible for
+        the cyber security program.
+      translations:
+        fr:
+          name: "Leadership en cybers\xE9curit\xE9"
+          description: "La haute direction de l\u2019organisation est ultimement responsable\
+            \ du programme de\ncybers\xE9curit\xE9."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1
+      ref_id: 4.1.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.2
+      ref_id: 4.1.2.1
+      name: L1-Security Importance
+      description: "Top management shall demonstrate their commitment to the cyber\
+        \ security program by:\n a. ensuring the cyber security policy and objectives\
+        \ are established and are aligned with strategic direction fo the organisation;\n\
+        \ b. ensuring that the resources needed for the cyber security program are\
+        \ available and are aligned with the cyber security policy and objectives;\n\
+        \ c. communicating the importance of effective cyber security and of conforming\
+        \ to the cyber seucrity program requirements;\n d. establishing cybersecurity\
+        \ program metrics and tracking progress; and\n e. supporting other relevant\
+        \ management roles to demonstrate their leadership as it applies to their\
+        \ areas of responsibility.\n"
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "Importance de la s\xE9curit\xE9"
+          description: "La haute direction doit montrer l\u2019importance qu\u2019\
+            elle accorde au programme de cybers\xE9curit\xE9 :\na) en veillant \xE0\
+            \ l\u2019\xE9tablissement d\u2019une politique et d\u2019objectifs de\
+            \ cybers\xE9curit\xE9 harmonis\xE9s\n\xE0 l\u2019orientation strat\xE9\
+            gique de l\u2019organisation;\nb) en veillant \xE0 la disponibilit\xE9\
+            \ des ressources n\xE9cessaires au programme de cybers\xE9curit\xE9\n\
+            et \xE0 leur harmonisation avec les politiques et les objectifs de cybers\xE9\
+            curit\xE9;\nc) en communiquant l\u2019importance d\u2019une cybers\xE9\
+            curit\xE9 efficace et du respect des\nexigences du programme de cybers\xE9\
+            curit\xE9;\nd) en \xE9tablissant des indicateurs pour \xE9valuer le programme\
+            \ de cybers\xE9curit\xE9 et en\nsurveillant les progr\xE8s;\ne) en aidant\
+            \ les autres gestionnaires concern\xE9s \xE0 faire preuve de leadership\
+            \ dans leurs\ndomaines de responsabilit\xE9."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1
+      ref_id: 4.1.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.1.3
+      ref_id: 4.1.3.1
+      name: No cyber L2 Cybersecurity leadership
+      description: There are no further requirements apart from those stated as Level
+        1.
+      translations:
+        fr:
+          name: No cyber L2 Cybersecurity leadership
+          description: "Aucune exigence autre que celles d\xE9finies pour le niveau\
+            \ 1."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4
+      ref_id: '4.2'
+      name: Accountability
+      translations:
+        fr:
+          name: "Responsabilit\xE9"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2
+      ref_id: 4.2.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.1
+      ref_id: 4.2.1.1
+      name: L1-Responsible Leadership
+      description: Top management of the organization is responsible for clearly defining
+        roles and responsibilities that are essential to the implementation of the
+        baseline cyber security controls.
+      translations:
+        fr:
+          name: Leadership responsable
+          description: "Il incombe \xE0 la haute direction de l\u2019organisation\
+            \ de d\xE9finir clairement les r\xF4les et les\nresponsabilit\xE9s essentiels\
+            \ \xE0 la mise en place des contr\xF4les de cybers\xE9curit\xE9 de base."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2
+      ref_id: 4.2.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.2
+      ref_id: 4.2.2.1
+      name: L1-Responsible Leadership
+      description: 'Top management shall appoint a member of the senior-level leadership
+        team to oversee and be accountable for the organisation''s cyber security.
+        Accountabilities of the member of the senior- level leadership team shall
+        include the following:
+
+        a. developing and implementing a company-wide information cyber security program
+        to meet baseline cyber security controls;
+
+        b. documenting and disseminating information security policies and procedures;
+
+        c. coordinating the development and implementation of a company-wide informatin
+        security training and awareness program;
+
+        d. coordinating a response to actual or suspected breaches in the confidentiality,
+        integrity, or availability of the organisation''s data; and
+
+        e. identifying organisational risks and prioritising risk treatment relative
+        to likelihood and potential impact of cyber threats.'
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: L1-Responsible Leadership
+          description: "La haute direction doit nommer un membre de l\u2019\xE9quipe\
+            \ de direction pour surveiller la cybers\xE9curit\xE9 de l\u2019organisation\
+            \ et en rendre compte. Celui-ci doit avoir au moins les responsabilit\xE9\
+            s suivantes :\na) \xC9laborer et mettre en place un programme de cybers\xE9\
+            curit\xE9 qui couvre les contr\xF4les\nde base et s\u2019applique \xE0\
+            \ toute l\u2019organisation.\nb) R\xE9diger et diffuser les politiques\
+            \ et proc\xE9dures concernant la s\xE9curit\xE9 de l\u2019information.\n\
+            c) Coordonner la cr\xE9ation et la mise en place d\u2019un programme de\
+            \ sensibilisation et de formation sur la s\xE9curit\xE9 de l\u2019information\
+            \ qui s\u2019applique \xE0 toute l\u2019organisation.\nd) Coordonner l\u2019\
+            intervention en cas d\u2019atteinte r\xE9elle ou pr\xE9sum\xE9e \xE0 la\
+            \ confidentialit\xE9, \xE0 l\u2019int\xE9grit\xE9 ou \xE0 la disponibilit\xE9\
+            \ des donn\xE9es de l\u2019organisation.\ne) Recenser les risques organisationnels\
+            \ et en prioriser la prise en compte selon leur probabilit\xE9 et leurs\
+            \ r\xE9percussions potentielles."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2
+      ref_id: 4.2.3
+      name: ' Level 2 requirements'
+      description: ' '
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.2.3
+      ref_id: 4.2.3.1
+      description: There are no further requirements apart from those stated as Level
+        1.
+      translations:
+        fr:
+          name: null
+          description: "Aucune exigence autre que celles d\xE9finies pour le niveau\
+            \ 1."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4
+      ref_id: '4.3'
+      name: Cyber security training
+      description: ' '
+      translations:
+        fr:
+          name: "Sensibilisation en mati\xE8re de cybers\xE9curit\xE9"
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3
+      ref_id: 4.3.1
+      name: Context
+      description: ' '
+      translations:
+        fr:
+          name: Contexte
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.1
+      ref_id: 4.3.1.1
+      name: C-Awareness
+      description: Human error while using information systems remains a pivotal element
+        of many cyber security incidents.
+      translations:
+        fr:
+          name: Sensibilisation
+          description: "Bon nombre d\u2019incidents de cybers\xE9curit\xE9 impliquent\
+            \ encore une erreur humaine commise\ndurant l\u2019utilisation de syst\xE8\
+            mes d\u2019information."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3
+      ref_id: 4.3.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.2
+      ref_id: 4.3.2.1
+      name: L1-Organisation must train employees
+      description: 'The organization shall train employees on basic security practices,
+        including but not limited to the following practices:
+
+        a. Compliance with password policies (see Subsection 5.5);
+
+        b. Identification of malicious communications and phishing;
+
+        c. Keeping employee devices and software updated.
+
+        d. Principle of least privilege and basic access controls.'
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "L\u2019organisation doit former ses employ\xE9s"
+          description: "L\u2019organisation doit former ses employ\xE9s sur les pratiques\
+            \ de s\xE9curit\xE9 de base, notamment :\na) La conformit\xE9 aux politiques\
+            \ de mot de passe (voir l\u2019article 5.5);\nb) Le rep\xE9rage des communications\
+            \ malveillantes et de l\u2019hame\xE7onnage;\nc) La mise \xE0 jour constante\
+            \ des appareils et des logiciels du personnel;\nd) L\u2019application\
+            \ du principe de droit d\u2019acc\xE8s minimal et de contr\xF4les d\u2019\
+            acc\xE8s de base."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3
+      ref_id: 4.3.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.3.3
+      ref_id: 4.3.3.1
+      name: L2-Training follow-up
+      description: The organization shall provide documentation that they provide
+        regular and ongoing cyber security awareness and training for their employees.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: Suivi des formations
+          description: "L\u2019organisation doit fournir des documents pour prouver\
+            \ qu\u2019elle assure la sensibilisation et la formation r\xE9guli\xE8\
+            res et continues de ses employ\xE9s sur la cybers\xE9curit\xE9."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4
+      ref_id: '4.4'
+      name: Cyber security risk assessment
+      translations:
+        fr:
+          name: "\xC9valuation des risques de cybers\xE9curit\xE9"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4
+      ref_id: 4.4.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.1
+      ref_id: 4.4.1.1
+      name: C-Cybersecurity risk framework
+      description: "A cyber security risk assessment forms part of an organization\u2019\
+        s framework to identify, understand, prioritise, and manage cyber security\
+        \ risk to their systems and digital assets. It supports an organisation in\
+        \ determining potential injury to the confidentiality, integrity, and availability\
+        \ of their systems and data assets."
+      translations:
+        fr:
+          name: "Cadre de gestion des risques en cybers\xE9curit\xE9"
+          description: "L\u2019\xE9valuation des risques de cybers\xE9curit\xE9 fait\
+            \ partie du cadre dont se sert l\u2019organisation pour\nrecenser, comprendre,\
+            \ prioriser et g\xE9rer les risques de cybers\xE9curit\xE9 qui menacent\
+            \ ses\nsyst\xE8mes et actifs num\xE9riques. Elle facilite la d\xE9termination\
+            \ du pr\xE9judice potentiel li\xE9 \xE0 la\nconfidentialit\xE9, \xE0 l\u2019\
+            int\xE9grit\xE9 et \xE0 la disponibilit\xE9 des syst\xE8mes et actifs\
+            \ de donn\xE9es."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.1
+      ref_id: 4.4.1.2
+      name: C-Identifying risks & controls
+      description: 'A cyber security risk assessment assists an organization with
+        identifying threats and vulnerabilities of concern and in establishing appropriate
+        security controls to ensure uninterrupted delivery of services.
+
+
+        NOTE: The organisation may perform the cyber securityrisk assessment themselves
+        or outsource to a third-party.'
+      translations:
+        fr:
+          name: "Identification des risques et des contr\xF4les"
+          description: "L\u2019\xE9valuation des risques de cybers\xE9curit\xE9 aide\
+            \ l\u2019organisation \xE0 cerner les menaces et les\nvuln\xE9rabilit\xE9\
+            s pr\xE9occupantes et \xE0 \xE9tablir des contr\xF4les de s\xE9curit\xE9\
+            \ appropri\xE9s pour veiller \xE0 la\ncontinuit\xE9 de la prestation des\
+            \ services.\n\nNOTE : L\u2019organisation peut effectuer l\u2019\xE9valuation\
+            \ des risques de cybers\xE9curit\xE9 elle-m\xEAme ou\nfaire appel \xE0\
+            \ un tiers."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4
+      ref_id: 4.4.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.2
+      ref_id: 4.4.2.1
+      name: Conducting risk assessments
+      description: 'The organization shall conduct a cyber security risk assessment.
+
+
+        NOTE: Refer to Cyber Security Risk Assessment Questionnaire in Annex B.'
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "R\xE9alisation des \xE9valuations des risques"
+          description: "L\u2019organisation doit effectuer une \xE9valuation des risques\
+            \ de cybers\xE9curit\xE9.\nNOTE : Voir le questionnaire d\u2019\xE9valuation\
+            \ des risques de cybers\xE9curit\xE9 figurant \xE0 l\u2019annexe B."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4
+      ref_id: 4.4.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.1
+      name: Risk analysis
+      description: "The member of the senior-level leadership team appointed to oversee\
+        \ the organization\u2019s cyber security shall conduct cyber security risk\
+        \ assessments and coordinate the implementation of cyber security controls\
+        \ to address potential cyber security risks.\n\nNOTE 1: The member of the\
+        \ senior-level leadership team appointed to oversee the organisation's cyber\
+        \ security should consult experts to review and provide input into the cyber\
+        \ security risk assessment and in the selection of controls to safeguard against\
+        \ cyber security risk identified and assessed.\n\nNOTE 2: The organisation\
+        \ may consider the implementation of physical controls as part of its framework\
+        \ to mitigate cyber security risks."
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: Analyse des risques
+          description: "Le membre de l\u2019\xE9quipe de direction nomm\xE9 \xE0 la\
+            \ surveillance de la cybers\xE9curit\xE9 de l\u2019organisation doit mener\
+            \ une \xE9valuation des risques de cybers\xE9curit\xE9 et coordonner la\
+            \ mise en place de mesures de protection.\n\nNOTE 1 : Le membre de l\u2019\
+            \xE9quipe de direction nomm\xE9 \xE0 la surveillance de la cybers\xE9\
+            curit\xE9 de l\u2019organisation devrait demander \xE0 des experts d\u2019\
+            examiner et de commenter son \xE9valuation des risques de cybers\xE9curit\xE9\
+            \ et le choix des contr\xF4les visant \xE0 prot\xE9ger l\u2019organisation\
+            \ contre les risques cern\xE9s et \xE9valu\xE9s.\nNOTE 2 : L\u2019organisation\
+            \ peut envisager d\u2019installer des contr\xF4les physiques, mesure qu\u2019\
+            elle ajouterait \xE0 son cadre pour att\xE9nuer les risques de cybers\xE9\
+            curit\xE9."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.2
+      name: Managing assets & documentation
+      description: The organization shall develop and maintain an asset register of
+        its information systems and IT assets, including records showing management's
+        understanding of the assets' purpose. For any information systems and assets
+        not included in their implementation of the baseline cyber security controls,
+        the organisation shall document all instances where they make the business
+        decision not to do so.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: Gestion des actifs et documentation
+          description: "L\u2019organisation doit b\xE2tir et maintenir un registre\
+            \ des actifs de ses syst\xE8mes d\u2019information et de ses actifs de\
+            \ TI, y compris des dossiers d\xE9montrant que l\u2019\xE9quipe de gestion\
+            \ comprend le r\xF4le de ces actifs. Pour tout actif et syst\xE8me exclus\
+            \ de sa mise en place des contr\xF4les de cybers\xE9curit\xE9 de base,\
+            \ elle doit consigner cette d\xE9cision."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.3
+      name: Documenting risk acceptance
+      description: Inherent and residual cyber security risks accepted by the organization
+        shall be documented and authorised by a senior official of the organisation.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Documentation de l\u2019acceptation des risques"
+          description: "Les risques de cybers\xE9curit\xE9 inh\xE9rents et r\xE9siduels\
+            \ accept\xE9s par l\u2019organisation doivent \xEAtre consign\xE9s et\
+            \ approuv\xE9s par un cadre sup\xE9rieur de l\u2019organisation."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.4
+      name: Cybersecurity financial investment
+      description: The organization shall identify their financial spending levels
+        for cyber security investment (as raw numbers and as a percent of total expenditures).
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Investissement financier en cybers\xE9curit\xE9"
+          description: "L\u2019organisation doit \xE9valuer ses d\xE9penses en cybers\xE9\
+            curit\xE9 (chiffres bruts et pourcentage des d\xE9penses totales)."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.5
+      name: Cybersecurity staffing levels
+      description: The organization shall identify their internal staffing levels
+        for cyber security (as raw numbers and as a percent of total staff).
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Niveaux de personnel en cybers\xE9curit\xE9"
+          description: "L\u2019organisation doit \xE9valuer la part de son effectif\
+            \ qui travaille en cybers\xE9curit\xE9 (chiffres bruts et pourcentage\
+            \ de l\u2019effectif total)."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.6
+      name: Continuous security improvement
+      description: The organization shall commit to progressive improvements to cyber
+        security.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Am\xE9lioration continue de la s\xE9curit\xE9"
+          description: "L\u2019organisation doit s\u2019engager \xE0 am\xE9liorer\
+            \ progressivement sa cybers\xE9curit\xE9."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.7
+      name: Defining risk assessment triggers
+      description: The organization shall determine triggers and thresholds to conduct
+        a new or update an existing cyber security risk assessment.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "D\xE9finition des d\xE9clencheurs d\u2019\xE9valuation des risques"
+          description: "L\u2019organisation doit d\xE9terminer les d\xE9clencheurs\
+            \ et les seuils de r\xE9alisation d\u2019une nouvelle \xE9valuation des\
+            \ risques de cybers\xE9curit\xE9 ou de r\xE9vision d\u2019une \xE9valuation\
+            \ existante."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.8
+      name: Implementing baseline controls
+      description: Regardless of the outcomes from the cyber security risk assessment,
+        the organization shall implement the foundational or baseline cyber security
+        controls specified in Section 5, and as appropriate, Section 6 based on its
+        business environment.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Mise en \u0153uvre des contr\xF4les de base"
+          description: "Quels que soient les r\xE9sultats de l\u2019\xE9valuation\
+            \ des risques de cybers\xE9curit\xE9, l\u2019organisation doit mettre\
+            \ en place les contr\xF4les fondamentaux ou de base d\xE9crits \xE0 l\u2019\
+            article 5 ainsi que ceux d\xE9crits \xE0 l\u2019article 6 qui s\u2019\
+            appliquent \xE0 son environnement op\xE9rationnel."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.9
+      name: Periodic cybersecurity testing
+      description: The organization shall periodically review and/or test cyber security
+        controls to ensure effectiveness. Testing and/or review shall take place at
+        a minimum annually, or if a major change occures in their system.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Tests p\xE9riodiques de cybers\xE9curit\xE9"
+          description: "L\u2019organisation doit p\xE9riodiquement revoir et/ou tester\
+            \ les contr\xF4les fondamentaux de cybers\xE9curit\xE9 afin d\u2019en\
+            \ assurer l\u2019efficacit\xE9. Les tests et/ou les revues doivent \xEA\
+            tre effectu\xE9s au minimum une fois par ann\xE9e, ou lorsque des modifications\
+            \ majeures aux syst\xE8mes ont lieu."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:4.4.3
+      ref_id: 4.4.3.10
+      name: Tracking employee & contractor access
+      description: The organization shall provide documentation attesting to the total
+        number of employees employed by the organisation as well as part-time employees
+        and contractors that may have access to the organisation's data.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Suivi des acc\xE8s des employ\xE9s et sous-traitants"
+          description: "L\u2019organisation doit fournir des documents prouvant que\
+            \ le personnel total employ\xE9 par l\u2019organisation ainsi que le personnel\
+            \ \xE0 temps partiel et les entrepreneurs peuvent avoir acc\xE8s aux donn\xE9\
+            es de l\u2019organisation."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Baseline controls
+      translations:
+        fr:
+          name: "Contr\xF4les de base"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      ref_id: '5.1'
+      name: Incident response plan
+      translations:
+        fr:
+          name: "Plan de r\xE9ponse en cas d'incident"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1
+      ref_id: 5.1.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.1
+      ref_id: 5.1.1.1
+      name: C-Developing an incident response plan
+      description: 'Incident response plans ensure organizations are prepared to manage
+        security incidents in an effective and efficient manner. This section describes
+        a model plan for responding to security incidents within an organisation.
+        It identifies the structure, roles and responsibilities, types of common incidents,
+        and the approach to preparing, identifying, containing, eradicating, recovering,
+        and conducting a lessons learned analysis in order to minimise impace of security
+        incidents.
+
+
+        The organisation may request the services of a managed services provider (MSP)
+        or other qualified external party to support the implementation of the organisation''s
+        incident response plan.'
+      translations:
+        fr:
+          name: "\xC9laboration d\u2019un plan de r\xE9ponse aux incidents"
+          description: "L\u2019organisation doit avoir un plan d\u2019intervention\
+            \ en cas d\u2019incident pour \xEAtre pr\xEAte \xE0 g\xE9rer\nefficacement\
+            \ les incidents de s\xE9curit\xE9. Le pr\xE9sent article d\xE9crit un\
+            \ plan mod\xE8le; il d\xE9finit la\nstructure du plan, les r\xF4les et\
+            \ les responsabilit\xE9s, les types d\u2019incidents communs et les\n\
+            d\xE9marches de pr\xE9paration, d\u2019identification, d\u2019endiguement,\
+            \ d\u2019\xE9radication, de reprise et\nd\u2019examen des bilans visant\
+            \ \xE0 r\xE9duire les cons\xE9quences des incidents.\n\nL\u2019organisation\
+            \ peut engager un fournisseur de services g\xE9r\xE9s ou un autre tiers\
+            \ comp\xE9tent pour\nsoutenir l\u2019ex\xE9cution du plan d\u2019intervention\
+            \ en cas d\u2019incident."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1
+      ref_id: 5.1.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2
+      ref_id: 5.1.2.1
+      name: L1-Managing Incident response
+      description: The organization shall have an incident response plan for how to
+        respond to different types of incidents of varying severity. If an organisation
+        is unable to manage some types of incidents on its own, the organisation shall
+        have a plan for what it will do.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Gestion de la r\xE9ponse aux incidents"
+          description: "L\u2019organisation doit avoir un plan d\u2019intervention\
+            \ en cas d\u2019incident visant des incidents de gravit\xE9s diverses.\
+            \ Elle devrait aussi avoir un plan pour les types d\u2019incidents qu\u2019\
+            elle est incapable de g\xE9rer elle-m\xEAme."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2
+      ref_id: 5.1.2.2
+      name: L1-Defining incident response roles
+      description: 'The incident response plan shall detail who is responsible for
+        handling incidents including any relevant contact information for communicating
+        to external parties, stakeholders and regulators (such as breach counsel),
+        as well as what mechanismes to use for communicating during an incident response.
+        The organisation shall have an up-to-date hard copy version of this plan available
+        for situations where soft copies are not available.
+
+
+        NOTE: The organisation should define a method to contact affected parties
+        (internal and external in case of an incident.'
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "D\xE9finition des r\xF4les de r\xE9ponse aux incidents"
+          description: "Le plan d\u2019intervention en cas d\u2019incident doit \xE9\
+            tablir les personnes responsables de la gestion des incidents et comprendre\
+            \ les coordonn\xE9es des parties externes, intervenants et organismes\
+            \ de r\xE9glementation pertinents (comme un conseiller en fuite de donn\xE9\
+            e) ainsi que les m\xE9canismes de communication \xE0 utiliser au cours\
+            \ d\u2019une intervention en cas d\u2019incident. L\u2019organisation\
+            \ doit rendre accessible une version papier \xE0 jour de ce plan au cas\
+            \ o\xF9 il deviendrait impossible d\u2019acc\xE9der \xE0 la version num\xE9\
+            rique.\n\nNOTE : L\u2019organisation devrait \xE9tablir la m\xE9thode\
+            \ de communication avec les parties concern\xE9es (internes et externes)\
+            \ en cas d\u2019incident."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2
+      ref_id: 5.1.2.3
+      name: L1-Testing incident response plan
+      description: The organization shall test the incident response plan to ensure
+        that the plan meets the intended outcomes. Where appropriate, this shall include
+        any third-party cyber security service providers.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Test du plan de r\xE9ponse aux incidents"
+          description: "L\u2019organisation doit tester le plan d\u2019intervention\
+            \ en cas d\u2019incident afin de s\u2019assurer qu\u2019il atteint le\
+            \ r\xE9sultat attendu. Si n\xE9cessaire, le plan doit inclure les fournisseurs\
+            \ de service de cybers\xE9curit\xE9 tiers."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2
+      ref_id: 5.1.2.4
+      name: L1-Cybersecurity insurance decision
+      description: The organization should consider purchasing a cyber security insurance
+        policy that includes coverage for incident response and recovery activities
+        or provide rationale for not purchasing one.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "D\xE9cision sur l\u2019assurance cybers\xE9curit\xE9"
+          description: "L\u2019organisation devrait envisager de souscrire \xE0 une\
+            \ police d\u2019assurance en mati\xE8re de cybers\xE9curit\xE9 qui couvre\
+            \ les activit\xE9s d\u2019intervention et de reprise en cas d\u2019incident,\
+            \ et justifier sa d\xE9cision de ne pas souscrire \xE0 une telle police,\
+            \ le cas \xE9ch\xE9ant."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.2
+      ref_id: 5.1.2.5
+      name: L1-Using incident response templates
+      description: The organization may use the incident response plan template (see
+        Annex A) as a measure of satisfying requirements contained in Subection 5.1.2.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Utilisation de mod\xE8les de r\xE9ponse aux incidents"
+          description: "L\u2019organisation peut utiliser le mod\xE8le de plan d\u2019\
+            intervention en cas d\u2019incident (annexe A) pour se conformer aux exigences\
+            \ de l\u2019article 5.1.2."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1
+      ref_id: 5.1.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.1.3
+      ref_id: 5.1.3.1
+      name: L2-Incident-reponse
+      description: There are no further requirements apart from those stated as Level
+        1.
+      translations:
+        fr:
+          name: null
+          description: "Aucune exigence autre que celles d\xE9finies pour le niveau\
+            \ 1."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      ref_id: '5.2'
+      name: Automatically patch operating systems and applications
+      translations:
+        fr:
+          name: "Application automatique de correctifs aux applications et syst\xE8\
+            mes d\u2019exploitation"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2
+      ref_id: 5.2.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.1
+      ref_id: 5.2.1.1
+      name: C-Managing security patching
+      description: IT vendors release software and firmware updates (patches) on a
+        regular basis to address defects and security vulnerabilities. Manually keeping
+        trak of what vulnerabilities exist for various products located across a network
+        is time-consuming and expensive. At the large organisation level, the costly
+        but effective practices of vulnerability and patch management reduce cybrer
+        security risks.
+      translations:
+        fr:
+          name: "Gestion des mises \xE0 jour de s\xE9curit\xE9"
+          description: "Les fournisseurs de TI diffusent r\xE9guli\xE8rement des mises\
+            \ \xE0 jour (correctifs) pour leurs logiciels\net micrologiciels afin\
+            \ d\u2019en corriger les d\xE9fauts et d\u2019en \xE9liminer les vuln\xE9\
+            rabilit\xE9s. Le suivi\nmanuel des vuln\xE9rabilit\xE9s associ\xE9es aux\
+            \ divers \xE9l\xE9ments d\u2019un r\xE9seau demande beaucoup de\ntemps\
+            \ et d\u2019argent. Pour une grande organisation, la gestion des vuln\xE9\
+            rabilit\xE9s et des correctifs\nest un moyen efficace, malgr\xE9 les co\xFB\
+            ts, de r\xE9duire les risques de cybers\xE9curit\xE9."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.1
+      ref_id: 5.2.1.2
+      name: L1-Enabling automatic updates
+      description: Small and medium organizations can enable automatic updates for
+        all software and hardware if such an option is available - or consider replacing
+        products with ones that provide the option. This includes replacing software
+        and hardware that no longer receive updates because the vendor ended support
+        (i.e., products past their end of life). This will keep standalone devices,
+        operating systems, applications, and security software up-to-date and free
+        of known vulnerabilities.
+      translations:
+        fr:
+          name: "Activation des mises \xE0 jour automatiques"
+          description: "Une petite ou moyenne organisation a la possibilit\xE9 d\u2019\
+            activer la mise \xE0 jour automatique de ses\nlogiciels et de son mat\xE9\
+            riel, si une telle option est offerte, ou d\u2019envisager de remplacer\
+            \ ses\nproduits par d\u2019autres offrant cette option. Cette mesure comprend\
+            \ le remplacement des\nlogiciels et du mat\xE9riel qui ne sont plus vis\xE9\
+            s par des mises \xE0 jour parce que le fournisseur ne\nles prend plus\
+            \ en charge (c.-\xE0-d. des produits ayant termin\xE9 leur vie utile).\
+            \ L\u2019organisation\ns\u2019assure ainsi que ses appareils autonomes,\
+            \ syst\xE8mes d\u2019exploitation, applications et logiciels de s\xE9\
+            curit\xE9 sont \xE0 jour et exempts de vuln\xE9rabilit\xE9s connues."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2
+      ref_id: 5.2.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.2
+      ref_id: 5.2.2.1
+      name: L1-Applying security patches
+      description: The organization shall have up-to-date security patches for all
+        software and hardware installed to protect assets from known vulnerabilities.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Application des correctifs de s\xE9curit\xE9"
+          description: "L\u2019organisation doit installer les correctifs de s\xE9\
+            curit\xE9 les plus r\xE9cents pour l\u2019ensemble de ses logiciels et\
+            \ de son mat\xE9riel afin de prot\xE9ger ses actifs contre les vuln\xE9\
+            rabilit\xE9s connues."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.2
+      ref_id: 5.2.2.2
+      name: L1-Automatic patching policy
+      description: 'The organization shall enable automatic patching for all software
+        and hardware or document all instances where they make the business decision
+        not to do so.
+
+        NOTE 1: This includes all servers, laptops, desktops, tablets, mobile phones
+        and network equipment products.
+
+        NOTE 2: The organisation should have a business process to ensure regular
+        manual updates for software and hardware that are not capable of automatic
+        updates.
+
+        NOTE 3: The organisation may establish a testing procedure to ensure patches
+        do not cause a disruption to business functions if a risk analysis determines
+        that such a capabiity is a sensible risk reduction measure.'
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Politique de mise \xE0 jour automatique"
+          description: "L\u2019organisation doit activer l\u2019application automatique\
+            \ de correctifs pour l\u2019ensemble de ses logiciels et de son mat\xE9\
+            riel, et consigner tous les cas o\xF9 elle d\xE9cide de ne pas le faire.\n\
+            \nNOTE 1 : Ceci comprend la totalit\xE9 des serveurs, ordinateurs portables\
+            \ et de bureau, tablettes, t\xE9l\xE9phones cellulaires et \xE9quipement\
+            \ r\xE9seau.\nNOTE 2 : L\u2019organisation devrait avoir un processus\
+            \ op\xE9rationnel assurant la mise \xE0 jour manuelle r\xE9guli\xE8re\
+            \ des logiciels et du mat\xE9riel ne pouvant \xEAtre mis \xE0 jour automatiquement.\n\
+            NOTE 3 : L\u2019organisation peut \xE9tablir une proc\xE9dure d\u2019\
+            essai pour assurer que les correctifs ne causent aucune perturbation des\
+            \ activit\xE9s op\xE9rationnelles dans les cas o\xF9 l\u2019analyse des\
+            \ risques d\xE9termine qu\u2019il s\u2019agit d\u2019une mesure judicieuse\
+            \ de r\xE9duction des risques."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.2
+      ref_id: 5.2.2.3
+      name: L1--Risk assessment on outdated systems
+      description: The organization shall perform a risk assessment to determine whether
+        to replace systems incapable of automatic patching.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "\xC9valuation des risques des syst\xE8mes obsol\xE8tes"
+          description: "L\u2019organisation doit effectuer une \xE9valuation des risques\
+            \ pour d\xE9terminer s\u2019il y a lieu de remplacer les syst\xE8mes pour\
+            \ lesquels l\u2019application automatique des correctifs est impossible."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2
+      ref_id: 5.2.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.2.3
+      ref_id: 5.2.3.1
+      name: L2-patchigng auto
+      description: There are no further requirements apart from those stated as Level
+        1.
+      translations:
+        fr:
+          name: L2-Patching auto
+          description: "Aucune exigence autre que celles d\xE9finies pour le niveau\
+            \ 1."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      ref_id: '5.3'
+      name: Enable security software
+      translations:
+        fr:
+          name: "Activation des logiciels de s\xE9curit\xE9"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3
+      ref_id: 5.3.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.1
+      ref_id: 5.3.1.1
+      name: C-Malware protection
+      description: 'Organizations shall protect themselves against malware threats
+        (e.g., viruses, worms, Trojan horses, ransomware, spyware) by securely deploying,
+        configuring, and enabling anti-virus and anti-malware software on all connected
+        devices, to the extent feasible.
+
+
+        NOTE: Organisations may activate any software firewalls included on the devices
+        that are within organisational networks. Alternatively, organisatins may install
+        and configure a comparable alternative to achieve the same result.'
+      translations:
+        fr:
+          name: Protection contre les logiciels malveillants
+          description: "Les organisations doivent se prot\xE9ger contre les maliciels\
+            \ (ex. : virus, vers, chevaux de Troie,\nran\xE7ongiciels, logiciels espions)\
+            \ en veillant \xE0 ce que la configuration de leurs appareils\nconnect\xE9\
+            s soit s\xE9curis\xE9e et en activant les logiciels antivirus et anti-maliciels,\
+            \ lorsque c\u2019est\npossible.\n\nNOTE : Les organisations peuvent activer\
+            \ le logiciel pare-feu int\xE9gr\xE9 dans tous les appareils \xE0\nl\u2019\
+            int\xE9rieur de leurs r\xE9seaux, ou encore installer et configurer une\
+            \ solution de rechange\n\xE9quivalente."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3
+      ref_id: 5.3.2
+      name: Level 1 requirements
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.2
+      ref_id: 5.3.2.1
+      name: L1-Enabling & Updating anti-malware
+      description: The organization shall enable anti-malware solutions that update
+        automatically and prevent malware from executing.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Activation et mise \xE0 jour des logiciels anti-malware"
+          description: "L\u2019organisation doit activer des antimaliciels qui se\
+            \ mettent \xE0 jour automatiquement et emp\xEAchent l\u2019ex\xE9cution\
+            \ des maliciels."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3
+      ref_id: 5.3.3
+      name: Level 2 requirements
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.3.3
+      ref_id: 5.3.3.1
+      name: L2-security software
+      description: There are no further requirements apart from those stated as Level
+        1.
+      translations:
+        fr:
+          name: null
+          description: "Aucune exigence autre que celles d\xE9finies pour le niveau\
+            \ 1."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      ref_id: '5.4'
+      name: Implement and maintain a secure configuration process
+      translations:
+        fr:
+          name: "Mettre en place et maintenir un processus de configuration s\xE9\
+            curitaire"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4
+      ref_id: 5.4.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.1
+      ref_id: 5.4.1.1
+      name: C-Secure configuration management
+      description: Default administrative passwords and insecure default settings
+        on devices are a significant problems in all networks. Vendors and even resellers
+        often configure devices with default administrative passwords, which often
+        become public.
+      translations:
+        fr:
+          name: "Gestion des configurations s\xE9curis\xE9es"
+          description: "Les mots de passe administrateur et les param\xE8tres par\
+            \ d\xE9faut qui n\u2019assurent pas la s\xE9curit\xE9\nsont un probl\xE8\
+            me important pour tous les r\xE9seaux. Les fournisseurs et m\xEAme les\
+            \ revendeurs\nconfigurent souvent les appareils avec des mots de passe\
+            \ administrateur \xE9tablis par d\xE9faut,\nlesquels deviennent souvent\
+            \ publics."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.1
+      ref_id: 5.4.1.2
+      name: L1-Enforcing secure sysem setings
+      description: 'Organizations have the ability to change all administrative passwords
+        on devices. While doing so, organisations can also review device settings
+        (which may be set to insecure defaults) to disable all unnecessary functionality
+        on devices, and to enable any necessary security features.
+
+        Organisations may adhere to best practices for configuring devices, ensuring
+        security measures are established and maintained consistently throughout operations.
+        This includes following to recommended configuration standards such as those
+        outlined by the Center for Internet Security (CIS) or adopting product security
+        best practices for configuration management.'
+      translations:
+        fr:
+          name: "Application des param\xE8tres de s\xE9curit\xE9 des syst\xE8mes"
+          description: "L\u2019organisation a la possibilit\xE9 de modifier tous les\
+            \ mots de passe administrateur des appareils.\nCette mesure lui donne\
+            \ aussi l\u2019occasion de v\xE9rifier les param\xE8tres par d\xE9faut\
+            \ de l\u2019appareil (qui\nn\u2019assurent peut-\xEAtre pas la s\xE9curit\xE9\
+            ) pour d\xE9sactiver les fonctions superflues et activer les\nfonctions\
+            \ de s\xE9curit\xE9 n\xE9cessaires. L\u2019organisation peut aussi adopter\
+            \ les pratiques exemplaires\nde configuration des appareils, en s\u2019\
+            assurant que les mesures de s\xE9curit\xE9 sont mises en place\net maintenues\
+            \ tout au long des op\xE9rations. Il s\u2019agit notamment de suivre les\
+            \ param\xE8tres par\nd\xE9faut comme ceux recommand\xE9s par le Center\
+            \ for Internet Security (CIS) ou d\u2019adopter les\npratiques exemplaires\
+            \ en mati\xE8re de s\xE9curit\xE9 de produit pour la gestion de la configuration."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4
+      ref_id: 5.4.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.2
+      ref_id: 5.4.2.1
+      description: " The organization shall implement secure configurations for all\
+        \ their devices by:\na. changing all default passwords;\nb. by turning off\
+        \ unnecessary features i.e., block unused ports, disable unused services,\
+        \ remove unused or obsolete software; and \nc. by enabling all relevant security\
+        \ features."
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Configuration s\xE9curis\xE9e des appareils"
+          description: "L\u2019organisation doit configurer tous ses appareils de\
+            \ sorte \xE0 assurer sa s\xE9curit\xE9, en :\na) modifiant tous les mots\
+            \ de passe par d\xE9faut;\nb) d\xE9sactivant toutes les fonctions superflues\
+            \ (ex. : bloquer les ports inutiles, d\xE9sactiver\nles services inutiles,\
+            \ supprimer les logiciels inutiles ou d\xE9suets);\nc) activant toutes\
+            \ les fonctions de s\xE9curit\xE9 pertinentes."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4
+      ref_id: 5.4.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.4.3
+      ref_id: 5.4.3.1
+      name: L2-config review
+      description: There are no further requirements apart from those stated as Level
+        1.
+      translations:
+        fr:
+          name: null
+          description: "Aucune exigence autre que celles d\xE9finies pour le niveau\
+            \ 1."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      ref_id: '5.5'
+      name: Use strong user authentication
+      translations:
+        fr:
+          name: "Utilisation d\u2019une authentification robuste des utilisateurs"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5
+      ref_id: 5.5.1
+      name: ' Context'
+      translations:
+        fr:
+          name: ' Contexte'
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.1
+      ref_id: 5.5.1.1
+      name: C-Enforcing multi-factor authentication
+      description: Organizations user authentication policies can balance security
+        with usability. Industry best practice is multi-factor authentication which
+        combines the use of something the user knows (e.g., a password) with something
+        that the user has (e.g., a physical token, an app-generated code, an automated
+        phone call to a telphone numbe on file), or something the user is (e.g., biometric).
+        Not all multi-factor solutions provide equal security strength, but all improve
+        an organisation's overall cyber security posture.
+      translations:
+        fr:
+          name: "Mise en \u0153uvre de l\u2019authentification multifacteur"
+          description: "Dans ses politiques d\u2019authentification des utilisateurs,\
+            \ l\u2019organisation est en mesure de veiller \xE0\n\xE9quilibrer la\
+            \ s\xE9curit\xE9 et la convivialit\xE9. Les pratiques d\u2019excellence\
+            \ de l\u2019industrie reposent sur\nl\u2019authentification \xE0 facteurs\
+            \ multiples. Il s\u2019agit d\u2019une combinaison de choses que l\u2019\
+            utilisateur\nconna\xEEt (ex. : mot de passe) ou poss\xE8de (ex. : jeton\
+            \ physique, code g\xE9n\xE9r\xE9 par une application,\nappel t\xE9l\xE9\
+            phonique automatis\xE9 \xE0 un num\xE9ro pr\xE9\xE9tabli), ou d\u2019\
+            attributs physiques (ex. :\nbiom\xE9trie). Les solutions d\u2019authentification\
+            \ \xE0 facteurs multiples diff\xE8rent dans leur protection,\nmais toutes\
+            \ am\xE9liorent la posture de cybers\xE9curit\xE9 globale d\u2019une organisation."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5
+      ref_id: 5.5.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.2
+      ref_id: 5.5.2.1
+      name: L1-Enforcing authentication policies
+      description: The organization shall implement multi-factor authentication or
+        document all instances where they cannot or make the business decision not
+        to do so.
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "Application des politiques d\u2019authentification"
+          description: "L\u2019organisation doit mettre en place l\u2019authentification\
+            \ \xE0 facteurs multiples, et consigner tous les cas o\xF9 elle est incapable\
+            \ de le faire ou d\xE9cide de ne pas le faire."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.2
+      ref_id: 5.5.2.2
+      name: L1-Enforcing password changes
+      description: The organization shall enforce password changes on suspicion or
+        evidence of compromise.
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: Application des changements de mot de passe
+          description: "L\u2019organisation doit exiger la modification du mot de\
+            \ passe dans tous les cas pr\xE9sum\xE9s ou prouv\xE9s de compromission."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.2
+      ref_id: 5.5.2.3
+      name: L1-Defining password policies
+      description: 'The organization shall have clear policies on password length
+        and reuse, the use of password managers and if, when, and how users can physically
+        write down and securely store a password.
+
+
+        NOTE: The organisation may use password selection guidance from the Canadian
+        Centre for Cyber Security, such as the ITSP.30.031 User Authentication Guidance
+        for Information Technology Systems.'
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "D\xE9finition des politiques de mot de passe"
+          description: "L\u2019organisation doit avoir des politiques claires sur\
+            \ la longueur et la r\xE9utilisation des mots de passe, l\u2019utilisation\
+            \ de gestionnaires de mots de passe et les conditions auxquelles doit\
+            \ satisfaire un utilisateur pour consigner et conserver un mot de passe\
+            \ en toute s\xE9curit\xE9.\n\nNOTE : L\u2019organisation peut se baser\
+            \ sur les lignes directrices concernant le choix des mots de passe du\
+            \ Centre canadien pour la cybers\xE9curit\xE9, comme le Guide sur l\u2019\
+            authentification des utilisateurs dans les syst\xE8mes de technologie\
+            \ de l\u2019information ITSP.30.031."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5
+      ref_id: 5.5.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.5.3
+      ref_id: 5.5.3.1
+      name: L2-Implementing authencation solutions
+      description: 'The organization shall implement a password manager or document
+        the business decision not to do so.
+
+
+        NOTE: Refer to ITSAP.30.032 for Best Practices for Passphrases and Passwords.'
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Mise en \u0153uvre de solutions d\u2019authentification"
+          description: "L\u2019organisation doit se doter d\u2019un gestionnaire de\
+            \ mots de passe ou consigner sa d\xE9cision de ne pas le faire.\n\nNOTE\
+            \ : Voir ITSAP.30.032, Pratiques exemplaires de cr\xE9ation de phrases\
+            \ de passe et de mots de passe."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      ref_id: '5.6'
+      name: Backup and encrypt data
+      description: ' '
+      translations:
+        fr:
+          name: "Sauvegarde et chiffrement des donn\xE9es"
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6
+      ref_id: 5.6.1
+      name: ' Context'
+      description: ' '
+      translations:
+        fr:
+          name: ' Contexte'
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.1
+      ref_id: 5.6.1.1
+      name: C-Data backup recovery
+      description: Data back-ups are a critical piece of the effort to ensure quick
+        recovery not only from cyber security incidents such as ransomware or malware
+        but also from natural disasters, equipment failures, or theft. Back-ups are
+        also useful in situations where you are unable to access your current systems
+        or if you believe that your data/information has been tampered with.
+      translations:
+        fr:
+          name: "R\xE9cup\xE9ration des sauvegardes de donn\xE9es"
+          description: "La sauvegarde des donn\xE9es est essentielle pour une reprise\
+            \ rapide apr\xE8s un incident de\ncybers\xE9curit\xE9 (ex. : attaque de\
+            \ ran\xE7ongiciel ou de maliciel), mais aussi en cas de catastrophe\n\
+            naturelle, de d\xE9faillance de l\u2019\xE9quipement ou de vol. La sauvegarde\
+            \ est aussi utile lorsque\nl\u2019acc\xE8s aux syst\xE8mes est impossible\
+            \ ou lorsque les donn\xE9es ou renseignements pourraient\navoir \xE9t\xE9\
+            \ falsifi\xE9s."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6
+      ref_id: 5.6.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      ref_id: 5.6.2.1
+      name: L1-Data backup recovery
+      description: 'The organization shall determine on a case-by-case basis what
+        business information and software (including but not limited to sensitive
+        information) is essential to the functioning of the organisation, and how
+        frequently this information changes.
+
+
+        NOTE: As an example, critical worksations and servers may require daily incremental
+        back-ups, whereas desktops may be recovered from on common image.'
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Sauvegarde des donn\xE9es"
+          description: "L\u2019organisation doit d\xE9terminer au cas par cas quels\
+            \ logiciels et donn\xE9es op\xE9rationnels y compris l\u2019information\
+            \ sensible) sont essentiels \xE0 son fonctionnement ainsi que la fr\xE9\
+            quence de modification de ces renseignements.\n\nNOTE : Par exemple, les\
+            \ postes de travail et serveurs essentiels pourraient n\xE9cessiter une\
+            \ sauvegarde incr\xE9mentielle quotidienne, tandis que les ordinateurs\
+            \ de bureau pourraient \xEAtre restaur\xE9s \xE0 partir d\u2019une image\
+            \ commune."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      ref_id: 5.6.2.2
+      name: L1-Defining backup policies
+      description: The organization shall determine on a case-by-case basis what systems
+        to back up and at what frequency since every system will have different back-up
+        and recovery requirements.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "D\xE9finition des politiques de sauvegarde"
+          description: "L\u2019organisation doit d\xE9cider pour chaque syst\xE8me\
+            \ la n\xE9cessit\xE9 de la sauvegarde et la fr\xE9quence de celle-ci,\
+            \ le cas \xE9ch\xE9ant, puisque les exigences de sauvegarde et de reprise\
+            \ diff\xE8rent."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      ref_id: 5.6.2.3
+      name: L1-Backing up critical business data
+      description: The organization shall backup systems that contain essential business
+        information and ensure that recovery mechanisms effectively and efficiently
+        restor these systems from backups.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Sauvegarde des donn\xE9es critiques de l\u2019entreprise"
+          description: "L\u2019organisation doit sauvegarder ses syst\xE8mes contenant\
+            \ des donn\xE9es op\xE9rationnelles essentielles et v\xE9rifier le fonctionnement\
+            \ ad\xE9quat et efficace de ses m\xE9canismes de reprise."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      ref_id: 5.6.2.4
+      name: L1-Secure backup storage
+      description: The organization shall store backups at a fully offsite location
+        at regular intervals to provide diversity in the event of a disaster (fire,
+        flood, earthquake or localised cyber security incident).
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Stockage s\xE9curis\xE9 des sauvegardes"
+          description: "L\u2019organisation doit faire r\xE9guli\xE8rement des sauvegardes\
+            \ et les conserver dans un emplacement externe s\xE9curis\xE9 pour \xEA\
+            tre en mesure de les r\xE9cup\xE9rer en cas de catastrophe (incendie,\
+            \ inondation, tremblement de terre ou incident de cybers\xE9curit\xE9\
+            \ localis\xE9)."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      ref_id: 5.6.2.5
+      name: L1-Encrypting backup data
+      description: The organization should consider the use of encrypted backups with
+        securely stored and recoverable key material. Decryption keys and/or unencrypted
+        backups should be stored securely and should be accessible only to authorised
+        employees or officers.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Chiffrement des donn\xE9es de sauvegarde"
+          description: "L\u2019organisation devrait envisager de chiffrer ses sauvegardes\
+            \ en veillant \xE0 ce que la cl\xE9 soit r\xE9cup\xE9rable et conserv\xE9\
+            e en s\xE9curit\xE9. La cl\xE9 et les sauvegardes non chiffr\xE9es, le\
+            \ cas \xE9ch\xE9ant, devraient \xEAtre conserv\xE9es en s\xE9curit\xE9\
+            \ et n\u2019\xEAtre accessibles qu\u2019aux employ\xE9s ou agents autoris\xE9\
+            s."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      ref_id: 5.6.2.6
+      name: L1-Ensuring backup integrity
+      description: Backup files shall not be modifiable to maintain data integrity.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Garantie de l\u2019int\xE9grit\xE9 des sauvegardes"
+          description: "Les fichiers de sauvegarde ne doivent pas \xEAtre modifiables\
+            \ afin de conserver l\u2019int\xE9grit\xE9 des donn\xE9es."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      ref_id: 5.6.2.7
+      name: L1-Testing backup security
+      description: The organization shall regularly test critical backups for security
+        and integrity.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Test de la s\xE9curit\xE9 des sauvegardes"
+          description: "L\u2019organisation doit \xE9valuer r\xE9guli\xE8rement la\
+            \ s\xE9curit\xE9 et l\u2019int\xE9grit\xE9 des sauvegardes critiques."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.2
+      ref_id: 5.6.2.8
+      name: L1-Verifying data recovery
+      description: The organization shall use a sampling of backup data to test and
+        verify recovery procedures at regular intervals to ensure the integrity of
+        the end-to-end backup and restoration process.
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "V\xE9rification de la r\xE9cup\xE9ration des donn\xE9es"
+          description: "L\u2019organisation doit tester r\xE9guli\xE8rement ses proc\xE9\
+            dures de reprise sur un \xE9chantillon des donn\xE9es sauvegard\xE9es\
+            \ pour v\xE9rifier l\u2019int\xE9grit\xE9 de l\u2019ensemble du processus\
+            \ de sauvegarde et de restauration."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6
+      ref_id: 5.6.3
+      name: Level 2 requirements
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.6.3
+      ref_id: 5.6.3.1
+      name: L2-backup
+      description: There are no further requirements apart from those stated as Level
+        1.
+      translations:
+        fr:
+          name: null
+          description: "Aucune exigence autre que celles d\xE9finies pour le niveau\
+            \ 1."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      ref_id: '5.7'
+      name: Establish basic perimeter defences
+      translations:
+        fr:
+          name: "\xC9tablissement de d\xE9fenses de base sur le p\xE9rim\xE8tre"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7
+      ref_id: 5.7.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.1
+      ref_id: 5.7.1.1
+      name: C-Network perimeter protection
+      description: Networks connected to the Internet require protection from online
+        threats through the use of firewalls. A firewall is a software of a hardware
+        device that monitors the flow of traffic and can defend an internal network
+        from outside intrusions. Domain Name System (DNS) firewall solutions prevent
+        connections to known malicious domains. Solutions are available to protect
+        all devices connected to a corporate network.
+      translations:
+        fr:
+          name: "Protection du p\xE9rim\xE8tre r\xE9seau"
+          description: "Il faut prot\xE9ger tout r\xE9seau connect\xE9 \xE0 Internet\
+            \ des menaces num\xE9riques au moyen d\u2019un pare-\nfeu, soit un logiciel\
+            \ ou un appareil qui surveille le trafic et est capable de d\xE9fendre\
+            \ le r\xE9seau\ncontre les intrusions. Un pare-feu DNS (syst\xE8me de\
+            \ noms de domaine) emp\xEAche la connexion\naux domaines malveillants\
+            \ connus. Il existe des solutions pour tous les appareils connect\xE9\
+            s au\nr\xE9seau d\u2019une organisation."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7
+      ref_id: 5.7.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.2.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.2
+      ref_id: 5.7.2.1
+      name: L2-non
+      description: For this section, there are no Level 1 requirements. All requirements
+        are considered Level 2.
+      translations:
+        fr:
+          name: null
+          description: "Aucune exigence de niveau 1 pour cet article. Toutes les exigences\
+            \ de cet article sont\nconsid\xE9r\xE9es comme \xE9tant de niveau 2."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7
+      ref_id: 5.7.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.1
+      name: L2-Testing data recovery
+      description: The organization shall have a firewall placed between two perimeters
+        that controls the amount and kinds of traffic that may pass between the two.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Test de r\xE9cup\xE9ration des donn\xE9es"
+          description: "L\u2019organisation doit avoir un pare-feu entre deux p\xE9\
+            rim\xE8tres pour contr\xF4ler le volume et les types de trafic qui peut\
+            \ circuler entre ces p\xE9rim\xE8tres."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.2
+      name: L2-DNS firewall mplementation
+      description: The organization shall implement a DNS firewall for outbound DNS
+        requests to the Internet.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Mise en \u0153uvre d\u2019un pare-feu DNS"
+          description: "L\u2019organisation doit mettre en place un pare-feu DNS pour\
+            \ les requ\xEAtes DNS sortantes vers l\u2019Internet."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.3
+      name: L2-Managing software firewalls
+      description: The organization shall activate any software firewalls included
+        on devices within their networks or document that alternative measures in
+        place instead of these firewalls.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: Gestion des pare-feu logiciels
+          description: "L\u2019organisation doit activer tout pare-feu logiciel des\
+            \ appareils de son r\xE9seau ou consigner toute mesure mise en place au\
+            \ lieu de ces pare-feu."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.4
+      name: L2-Securing remote access
+      description: The organization shall require encrypted connectivity to all corporate
+        IT resources and require VPN connectivity with multi-factor authentication
+        for all remote access into corporate networks.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "S\xE9curisation des acc\xE8s \xE0 distance"
+          description: "L\u2019organisation doit exiger une connexion chiffr\xE9e\
+            \ \xE0 toutes ses ressources de TI et une connexion VPN avec authentification\
+            \ \xE0 facteurs multiples pour tout acc\xE8s \xE0 distance \xE0 ses r\xE9\
+            seaux."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.5
+      name: L2-Enforcing secure Wi-Fi policies
+      description: The organization shall use secure Wi-Fi, at a minimum WPA2-AES,
+        and preferably WPA2-Enterprise or WPA3-Enterprise, and configure related passwords
+        in accordance with section 5.5.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Application des politiques Wi-Fi s\xE9curis\xE9es"
+          description: "L\u2019organisation doit utiliser un r\xE9seau Wi-Fi s\xE9\
+            curis\xE9, minimalement de type WPA2-AES et pr\xE9f\xE9rablement de type\
+            \ WPA2-Enterprise ou WPA3-Enterprise, et configurer les mots de passe\
+            \ conform\xE9ment \xE0 l\u2019article 5.5."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.6
+      name: L2-Implementing network segmentation
+      description: ' The organization shall segment their networks to ensure networks
+        provided to the public/customers are separated (and/or isolated) from the
+        corporate networks.'
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Mise en place de la segmentation du r\xE9seau"
+          description: "L\u2019organisation doit segmenter ses r\xE9seaux de sorte\
+            \ que les r\xE9seaux accessibles \xE0 la client\xE8le ou au public soient\
+            \ s\xE9par\xE9s (ou isol\xE9s) des r\xE9seaux d\u2019entreprise."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.7
+      name: L2-Enforcing email security policies
+      description: The organization shall ensure the implementation of DMARC, DKIM
+        and SPF on all organization email services.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Application des politiques de s\xE9curit\xE9 des emails"
+          description: "L\u2019organisation doit veiller \xE0 l\u2019application du\
+            \ protocole DMARC dans ses services de courriel."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.8
+      name: L2-Filtering malicious emails
+      description: The organization shall ensure email filtering is implemented.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: Filtrage des emails malveillants
+          description: "L\u2019organisation doit veiller \xE0 la mise en place du\
+            \ filtrage des courriels."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.7.3
+      ref_id: 5.7.3.9
+      name: L2-Securing work network access
+      description: The organization should ensure that their users join a separate
+        network that is independent of the home network (e.g. guest network) in conducting
+        their employment activities.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "S\xE9curisation des acc\xE8s r\xE9seau professionnels"
+          description: "L\u2019organisation devrait s\u2019assurer que les utilisateurs\
+            \ se connectent \xE0 un r\xE9seau distinct, ind\xE9pendant du r\xE9seau\
+            \ principal (ex. : r\xE9seau invit\xE9) pour effectuer leur travail."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5
+      ref_id: '5.8'
+      name: Implement access control and authorization
+      translations:
+        fr:
+          name: "Contr\xF4le et autorisation de l\u2019acc\xE8s"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8
+      ref_id: 5.8.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.1
+      ref_id: 5.8.1.1
+      name: C-Access control and authorisation
+      description: Operating under the principle of least privilege, where users have
+        only the minimal functionality required to perform their tasks, improves an
+        organisation's cyber posture.
+      translations:
+        fr:
+          name: "Mise en \u0153uvre du contr\xF4le d\u2019acc\xE8s et de l\u2019autorisation"
+          description: "Le respect du principe du droit d\u2019acc\xE8s minimal, c\u2019\
+            est-\xE0-dire une utilisation limit\xE9e aux\nfonctions n\xE9cessaires,\
+            \ am\xE9liore la posture de cybers\xE9curit\xE9 de l\u2019organisation."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8
+      ref_id: 5.8.2
+      name: Level 1 requirements
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.2
+      ref_id: 5.8.2.1
+      name: L1-Managing access controls
+      description: The organization shall provision accounts with the minimum functionality
+        necessary for tasks and shall restrict administrator privileges to an as-required
+        basis.
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "Gestion des contr\xF4les d\u2019acc\xE8s"
+          description: "L\u2019organisation ne doit accorder aux comptes que l\u2019\
+            acc\xE8s aux fonctions n\xE9cessaires \xE0 l\u2019accomplissement des\
+            \ t\xE2ches et restreindre les privil\xE8ges d\u2019administrateur \xE0\
+            \ ceux qui en ont besoin."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.2
+      ref_id: 5.8.2.2
+      name: L1-Deactivating unused accounts
+      description: The organization shall remove accounts and/or functionality when
+        users no longer require these for their tasks.
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "D\xE9sactivation des comptes inutilis\xE9s"
+          description: "L\u2019organisation doit r\xE9voquer l\u2019acc\xE8s aux comptes\
+            \ et aux fonctions lorsque celui-ci n\u2019est plus n\xE9cessaire \xE0\
+            \ l\u2019accomplissement des t\xE2ches."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.2
+      ref_id: 5.8.2.3
+      name: L1-Restricting administrator privileges
+      description: The organization shall only permit administrator accounts to perform
+        administrative activities (and not user-level activities such as accessingt
+        email or browsing the web).
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "Restriction des privil\xE8ges administratifs"
+          description: "L\u2019organisation doit r\xE9server l\u2019utilisation des\
+            \ comptes administrateur aux activit\xE9s administratives (et interdire\
+            \ les activit\xE9s typiques d\u2019utilisateur comme l\u2019acc\xE8s aux\
+            \ courriels et la navigation sur le Web)."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8
+      ref_id: 5.8.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:5.8.3
+      ref_id: 5.8.3.1
+      name: L2-Managing centralised authentication
+      description: The organization should implement a centralized authentication
+        system such as a directory or identity service.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Gestion de l\u2019authentification centralis\xE9e"
+          description: "L\u2019organisation devrait mettre en place un syst\xE8me\
+            \ d\u2019authentification centralis\xE9 comme un r\xE9pertoire ou un service\
+            \ de gestion d\u2019identit\xE9."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Baseline controls by operating environment
+      translations:
+        fr:
+          name: "Contr\xF4les de base par environnement d\u2019exploitation"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6
+      ref_id: '6.1'
+      name: Secure mobility
+      translations:
+        fr:
+          name: "S\xE9curisation de la mobilit\xE9"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1
+      ref_id: 6.1.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.1
+      ref_id: 6.1.1.1
+      name: C-Securing mobile devices
+      description: 'Mobile devices such as cellular phones are essential to most organizations.
+        Organizations need to decide on the ownership model that they wish to have
+        for mobile devices. Organisations typically either provide company-owned persosnally
+        enabled (COPE) devices or allow employees to bring their own devices (BYOD).
+        In both cases, organisations need to take steps to secure sensitive information
+        and corporate IT infrastructure access from these devices. '
+      translations:
+        fr:
+          name: "S\xE9curisation des appareils mobiles"
+          description: "Les appareils mobiles comme les t\xE9l\xE9phones cellulaires\
+            \ sont essentiels pour la plupart des\norganisations. Il revient \xE0\
+            \ chacune d\u2019elles de choisir le mod\xE8le de propri\xE9t\xE9 qu\u2019\
+            elle adoptera\npour ces appareils. Habituellement, soit elle fournit aux\
+            \ employ\xE9s un appareil, soit elle les\nautorise \xE0 utiliser leur\
+            \ propre appareil. Dans les deux cas, l\u2019organisation doit prendre\
+            \ des\nmesures pour s\xE9curiser l\u2019acc\xE8s \xE0 son information\
+            \ sensible et \xE0 son infrastructure de TI \xE0 partir\nde ces appareils. "
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.1
+      ref_id: 6.1.1.2
+      name: C-Securing mobile data separation
+      description: Many solutions exist to segregate work and personal spaces, including
+        apps, email accounts, contacts, etc., wheather mobile devices are business
+        or employee-owned, ranging from using separate apps for work and personal
+        use to native "secure folder" or "locker" functions for sensitive business
+        information. It is important for organisations to determine how to enforce
+        this separation in a manner that balances the organisation's business and
+        security needs.
+      translations:
+        fr:
+          name: "S\xE9paration des donn\xE9es mobiles s\xE9curis\xE9es"
+          description: "Il existe de nombreuses solutions pour s\xE9parer les donn\xE9\
+            es professionnelles des donn\xE9es\npersonnelles (applications, comptes\
+            \ de courriel, contacts, etc.) sur les appareils mobiles, que\nceux-ci\
+            \ appartiennent \xE0 l\u2019organisation ou aux employ\xE9s. Ces solutions\
+            \ vont de l\u2019utilisation\nd\u2019applications diff\xE9rentes pour\
+            \ le travail et la vie priv\xE9e \xE0 l\u2019emploi de dossiers s\xE9\
+            curis\xE9s natifs\nou de fonctions de verrouillage pour l\u2019information\
+            \ sensible de l\u2019organisation. Il importe que\nl\u2019organisation\
+            \ d\xE9termine comment cr\xE9er cette s\xE9paration d\u2019une mani\xE8\
+            re qui \xE9quilibre ses\nbesoins op\xE9rationnels et en mati\xE8re de\
+            \ s\xE9curit\xE9."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.1.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.1
+      ref_id: 6.1.1.3
+      name: C-Managing enterprise mobility
+      description: Applications (apps) can greatly enhance the capability and productivity
+        of mobile devices but can also introduce risk. Organisations with more mature
+        IT infrastructure and business processes may choose an enterprise mobility
+        management (EMM) solution that enables enhanced business features as well
+        as improved administration of mobile devices. EMM solutions vary in capability
+        but generally include functions to manage, audit and support mobile devices
+        in the workplace. They may also include the capability to remotely wipe devices.
+      translations:
+        fr:
+          name: "Gestion de la mobilit\xE9 d\u2019entreprise"
+          description: "Les applications am\xE9liorent parfois grandement les capacit\xE9\
+            s et la productivit\xE9 des appareils\nmobiles, mais sont aussi susceptibles\
+            \ de cr\xE9er un risque. Une organisation ayant une\ninfrastructure et\
+            \ des processus op\xE9rationnels de TI matures peut choisir d\u2019utiliser\
+            \ une solution\nde gestion de la mobilit\xE9 d\u2019entreprise lui permettant\
+            \ d\u2019am\xE9liorer ses activit\xE9s et sa gestion des\nappareils mobiles.\
+            \ Les solutions de ce type ont diverses capacit\xE9s, mais offrent en\
+            \ g\xE9n\xE9ral des\nfonctions de gestion, de v\xE9rification et de prise\
+            \ en charge des appareils mobiles utilis\xE9s au\ntravail. Certaines peuvent\
+            \ aussi effacer \xE0 distance les donn\xE9es sur les appareils."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1
+      ref_id: 6.1.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.2
+      ref_id: 6.1.2.1
+      name: L1-Securing mobile work environments
+      description: 'The organization using mobile devices (i.e., cellphones) shall
+        educate users to:
+
+        a. disable automatic connections to open networks;
+
+        b. avoide connecting to untrusted Wi-Fi networks;
+
+        c. limit the use of Bluetooth and NFC for the exchange of sensitive information;
+
+        d. use corporate Wi-Fi or cellular data network connectivity rather than public
+        Wi-Fi; and
+
+        e. use secure connectivite (VPN, Virtual Desktop etc.) when connecting to
+        public Wi-Fi networks.'
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "S\xE9curisation des environnements de travail mobiles"
+          description: "L\u2019organisation qui utilise des appareils mobiles (ex.\
+            \ : t\xE9l\xE9phone cellulaire) doit montrer aux utilisateurs \xE0 :\n\
+            a) d\xE9sactiver la connexion automatique aux r\xE9seaux ouverts;\nb)\
+            \ \xE9viter la connexion aux r\xE9seaux Wi-Fi non s\xE9curis\xE9s;\nc)\
+            \ limiter l\u2019utilisation de la technologie Bluetooth et de la communication\
+            \ en champ proche pour la transmission d\u2019information sensible;\n\
+            d) utiliser le r\xE9seau Wi-Fi de l\u2019organisation ou le r\xE9seau\
+            \ cellulaire plut\xF4t qu\u2019un r\xE9seau Wi-Fi public;\ne) utiliser\
+            \ un mode s\xE9curis\xE9 (ex. : VPN, bureau virtuel) pour la connexion\
+            \ aux r\xE9seaux Wi-Fi publics."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1
+      ref_id: 6.1.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.3
+      ref_id: 6.1.3.1
+      name: L2-Manaing mobile device security
+      description: The organization using mobile devices (i.e., cellphones) shall
+        decide on an ownership model for mobile devices and document the rationale
+        and associated risks.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Gestion de la s\xE9curit\xE9 des appareils mobiles"
+          description: "L\u2019organisation qui utilise des appareils mobiles (ex.\
+            \ : t\xE9l\xE9phones cellulaires) doit choisir un mod\xE8le de propri\xE9\
+            t\xE9 pour les appareils mobiles et consigner ses raisons et les risques\
+            \ connexes."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.1.3
+      ref_id: 6.1.3.2
+      name: L2-Securing mobile application and storage
+      description: "The organization using mobile devices (i.e., cellphones) shall:\n\
+        a. require separation between work and personal data on mobile devices with\
+        \ access to corporate IT resources and document the details of this separation;\n\
+        b. ensure that employees only download mobile device applications (i.e., apps)\
+        \ from the organisation's list of trusted sources;\nc. require that all mobile\
+        \ devices store all sensitive information in a secure, encrypted state;\n\
+        d. implement an enterprise mobility management solution for all mobile devices\
+        \ or document the risks assumed to the audit, management, and security functionality\
+        \ of mobile devices by not implementing such a soluction;\ne. enforce users\
+        \ to:\n - disable automatice connections to open networks;\n - avoid connecting\
+        \ to untrusted Wi-Fi networks;\n - limit the use of Bluetooth and NFC for\
+        \ the exchange of sensitive information;\n - use corporate Wi-Fi or cellular\
+        \ data network connectivity rather than public Wi-Fi; and\n - use secure conectivity\
+        \ (VPN, Virtual Desktop etc.) when connecting to public Wi-Fi networks or\
+        \ provide the rationale for not doing so."
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "S\xE9curisation des applications et du stockage mobiles"
+          description: "L\u2019organisation qui utilise des appareils mobiles (ex.\
+            \ : t\xE9l\xE9phones cellulaires) doit :\na) exiger la s\xE9paration entre\
+            \ les donn\xE9es professionnelles et personnelles sur les appareils mobiles\
+            \ ayant acc\xE8s \xE0 ses ressources de TI et consigner les d\xE9tails\
+            \ de cette s\xE9paration;\nb) veiller \xE0 ce que les employ\xE9s ne t\xE9\
+            l\xE9chargent des applications qu\u2019\xE0 partir de la liste de sources\
+            \ de confiance qu\u2019elle aura \xE9tablie;\nc) exiger que les appareils\
+            \ mobiles stockent l\u2019information sensible sous une forme chiffr\xE9\
+            e s\xE9curis\xE9e;\nd) mettre en \u0153uvre une solution de gestion de\
+            \ la mobilit\xE9 d\u2019entreprise sur les appareils mobiles et, si elle\
+            \ choisit de ne pas le faire, consigner les risques qu\u2019elle assume\
+            \ en ce qui concerne la v\xE9rification, la gestion et les fonctions de\
+            \ s\xE9curit\xE9 des appareils;\ne) encourager les utilisateurs \xE0 :\n\
+            - d\xE9sactiver la connexion automatique aux r\xE9seaux ouverts;\n- \xE9\
+            viter la connexion aux r\xE9seaux Wi-Fi non s\xE9curis\xE9s;\n- limiter\
+            \ l\u2019utilisation de la technologie Bluetooth et de la communication\
+            \ en champ proche pour la transmission d\u2019information sensible;\n\
+            - utiliser le r\xE9seau Wi-Fi de l\u2019organisation ou le r\xE9seau cellulaire\
+            \ plut\xF4t qu\u2019un r\xE9seau Wi-Fi public;\n- utiliser un mode s\xE9\
+            curis\xE9 (ex. : VPN, bureau virtuel) pour la connexion aux r\xE9seaux\
+            \ Wi-Fi publics et, si elle choisit de ne pas le faire, justifier ses\
+            \ raisons."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6
+      ref_id: '6.2'
+      name: Secure cloud and outsourced IT services
+      translations:
+        fr:
+          name: "S\xE9curisation du cloud et des services informatiques externalis\xE9\
+            s"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2
+      ref_id: 6.2.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.1
+      ref_id: 6.2.1.1
+      name: C-Vendor & Cloud security
+      description: Organizations typically rely on outsourced IT service providers
+        or MSPs for services such as their cloud storage and processing needs, the
+        management and/or hosting of their website, and the management of their online
+        payment systems. It is important for organisations to consider their risk
+        tolerance level, and the applicable regulations within the legal jurisdictions
+        where their outsourced providers store or use their sensitive information.
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 des fournisseurs et du cloud"
+          description: "Une organisation a g\xE9n\xE9ralement recours \xE0 un fournisseur\
+            \ tiers de services de TI ou de services g\xE9r\xE9s pour ses besoins\
+            \ de stockage et de traitement infonuagiques, la gestion ou\nl\u2019h\xE9\
+            bergement de son site Web et la gestion de ses syst\xE8mes de paiement\
+            \ en ligne. Il est\nimportant qu\u2019elle tienne compte de son seuil\
+            \ de tol\xE9rance aux risques quant \xE0 la\nr\xE9glementation en vigueur\
+            \ aux endroits o\xF9 ses fournisseurs stockent ou utilisent son\ninformation\
+            \ sensible."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2
+      ref_id: 6.2.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.2
+      ref_id: 6.2.2.1
+      name: L1-Cloud security risk assessment
+      description: Organization using cloud applications and/or outsourcing IT services
+        shall evaluate their risk tolerance level with how their outsourced IT providers
+        handle and access their sensitive information.
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "\xC9valuation des risques li\xE9s \xE0 la s\xE9curit\xE9 du cloud"
+          description: "L\u2019organisation qui utilise des services infonuagiques\
+            \ ou des services de TI externalis\xE9s doit \xE9valuer son seuil de tol\xE9\
+            rance au risque quant aux m\xE9thodes utilis\xE9es par ses fournisseurs\
+            \ pour acc\xE9der \xE0 son information sensible et traiter celle-ci."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2
+      ref_id: 6.2.3
+      name: Level 2 requirements
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.2.3
+      ref_id: 6.2.3.1
+      name: L2-Third-party security compliance
+      description: 'The organization using cloud applications and/or outsourcing IT
+        services shall:
+
+        a. complete a risk assessment of externally provided services.
+
+        NOTE: Refer to Vendor Risk Analysis Questionnaire template in Annex C.
+
+
+        b. require that all their external providers share a report that states that
+        they achieved compliance with SOC 2, ISO/IEC 27001, PCI-DSS, ISP/IEC 20000,
+        CAN/DGSI 104:2021 or equivalent, or provide a documented business case as
+        why they chose not to;
+
+        NOTE: The organisation determines equivalence to the standard depending on
+        the type of IT service that is outsourced.
+
+
+        c. complete a risk assessment of their data transmital and data storage process
+        (e.g., risk associated with legal jurisdictions);
+
+        d. ensure that their IT infrastructure and users communicate securely with
+        all cloud services and applications; and
+
+        e. ensure that all administrative accounts for cloud services use mult-factor
+        authentication and differ from internal administrator accounts.'
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Conformit\xE9 en mati\xE8re de s\xE9curit\xE9 des tiers"
+          description: "L\u2019organisation qui utilise des services infonuagiques\
+            \ ou des services de TI externalis\xE9s doit :\na) effectuer une \xE9\
+            valuation des risques pour les services fournis par des tiers. NOTE :\
+            \ Voir le mod\xE8le de questionnaire d\u2019analyse des risques associ\xE9\
+            s aux fournisseurs \xE0 l\u2019annexe C.\nb) exiger que tous leurs fournisseurs\
+            \ externes publient un rapport d\xE9montrant leur conformit\xE9 aux normes\
+            \ SOC 2, ISO/IEC 27001, PCI DSS, ISO/CEI 20000, CAN/DGSI 104:2021 ou une\
+            \ autre norme \xE9quivalente, ou fournir un dossier de d\xE9cision document\xE9\
+            \ expliquant leur refus; NOTE : L\u2019organisation d\xE9termine les normes\
+            \ \xE9quivalentes selon le type de service de TI sous-trait\xE9.\nc) effectuer\
+            \ une \xE9valuation des risques associ\xE9s \xE0 ses processus de transmission\
+            \ et de stockage des donn\xE9es (ex. : risques associ\xE9s aux obligations\
+            \ juridiques);\nd) veiller \xE0 ce que son infrastructure de TI et ses\
+            \ utilisateurs communiquent de fa\xE7on s\xE9curis\xE9e avec les applications\
+            \ et services infonuagiques;\ne) veiller \xE0 ce que les comptes administrateur\
+            \ des services infonuagiques utilisent une m\xE9thode d\u2019authentification\
+            \ \xE0 facteurs multiples et diff\xE8rent des comptes administrateur internes."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6
+      ref_id: '6.3'
+      name: Secure websites
+      translations:
+        fr:
+          name: "S\xE9curisation des sites web"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3
+      ref_id: 6.3.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.1
+      ref_id: 6.3.1.1
+      name: C-Website security
+      description: Website and web application security risks can be reduced by addressing
+        the latest edition of Open Web Application Security Project (OWASP) Top 10
+        Web Application Security Risks.
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 des sites web"
+          description: "Les risques de s\xE9curit\xE9 associ\xE9s aux sites Web et\
+            \ aux applications Web peuvent \xEAtre r\xE9duits si\nl\u2019on se concentre\
+            \ sur la derni\xE8re \xE9dition des 10 grands risques de s\xE9curit\xE9\
+            \ pour les applications Web de l\u2019Open Web Application Security Project\
+            \ (OWASP)."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.1
+      ref_id: 6.3.1.2
+      name: C-Defining web securty standards
+      description: It can be helpful (or required by their customers) for organizations
+        to understand the OWASP Application Security Verification Standard (ASVS)
+        level they need to meet for each of their websites.
+      translations:
+        fr:
+          name: "D\xE9finition des normes de s\xE9curit\xE9 web"
+          description: "Il peut \xEAtre utile pour l\u2019organisation de comprendre\
+            \ dans quelle mesure appliquer la norme de\nv\xE9rification de s\xE9curit\xE9\
+            \ des applications (Application Security Verification Standard, ASVS)\
+            \ de\nl\u2019OWASP pour chacun de ses sites Web; il peut aussi s\u2019\
+            agir d\u2019une exigence de clients."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.1.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.1
+      ref_id: 6.3.1.3
+      name: C-Ensuring web security compliance
+      description: Meeting ASVS can be included as a contractual requirement for outsourced
+        websites, or organisations should be prepared to invest to meet these cyber
+        security requirements for websites developed and operated in-house.
+      translations:
+        fr:
+          name: "Assurer la conformit\xE9 \xE0 la s\xE9curit\xE9 des sites web"
+          description: "La conformit\xE9 \xE0 l\u2019ASVS peut faire partie des exigences\
+            \ contractuelles relatives aux sites Web\nexternalis\xE9s. L\u2019organisation\
+            \ peut aussi se pr\xE9parer \xE0 investir dans la conformit\xE9 \xE0 ces\
+            \ exigences pour ses sites Web con\xE7us et exploit\xE9s \xE0 l\u2019\
+            interne."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3
+      ref_id: 6.3.2
+      name: Level 1 requirements
+      description: Level 1 requirements
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: Level 1 requirements
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.2
+      ref_id: 6.3.2.1
+      name: L1-Securing web applications
+      description: The organization shall demonstrate awareness of the OWASP Top 10
+        risks.
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "S\xE9curisation des applications web"
+          description: "L\u2019organisation doit d\xE9montrer sa connaissance des\
+            \ 10 plus grands risques recens\xE9s par l\u2019OWASP."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3
+      ref_id: 6.3.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.3
+      ref_id: 6.3.3.1
+      name: L2-Implementing OWASP web security
+      description: 'The organization shall remediate the high and medium OWASP Top
+        10 risks (for primary marketing websites) to an acceptable risk tolerance
+        level.
+
+
+        NOTE: For a comprehensive list of vulnerability scanning tools, refer to the
+        Community Page for "Vulnerability Scanning Tools" on the OWASP website.'
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Mise en \u0153uvre de la s\xE9curit\xE9 web OWASP"
+          description: "L\u2019organisation doit rem\xE9dier aux risques \xE9lev\xE9\
+            s et moyens de la liste des 10 plus grands risques de l\u2019OWASP (pour\
+            \ les sites Web principalement d\xE9di\xE9s au marketing) afin d\u2019\
+            atteindre un niveau acceptable de tol\xE9rance aux risques.\nNOTE : Pour\
+            \ une liste compl\xE8te des outils de d\xE9tection des vuln\xE9rabilit\xE9\
+            s, consulter la page \xAB Vulnerability Scanning Tools \xBB du site Web\
+            \ de l\u2019OWASP."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.3.3
+      ref_id: 6.3.3.2
+      name: L2-OWASP ASVS compliance
+      description: The organization shall define the OWASP ASVS level they need to
+        meet for each of their websites.
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "Conformit\xE9 OWASP ASVS"
+          description: "L\u2019organisation doit d\xE9finir dans quelle mesure elle\
+            \ doit appliquer l\u2019ASVS de l\u2019OWASP pour chacun de ses sites\
+            \ Web."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6
+      ref_id: '6.4'
+      name: Secure portable media
+      translations:
+        fr:
+          name: "S\xE9curisation des supports amovibles"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4
+      ref_id: 6.4.1
+      name: Context
+      translations:
+        fr:
+          name: Contexte
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.1
+      ref_id: 6.4.1.1
+      name: C-Securing portable media
+      description: Portable media such as portable hard drives, USB flash drives and
+        secure digital (SD) cards are a convenient way to transfer files between devices.
+        However, given their size and portability, they are prone to loss or theft,
+        potentially causing a data breach and the introduction of malicious files
+        to your network. Since banning their use altogether may be impractical, organisations
+        may limit the use or portable media to commercial encrypted drives provided
+        by the organisation. Organisations should consdier tools which control their
+        access and monitor files transferred.
+      translations:
+        fr:
+          name: "S\xE9curisation des supports amovibles"
+          description: "Les supports amovibles, comme les disques durs portatifs,\
+            \ les cl\xE9s USB et les cartes m\xE9moire\nflash sont pratiques pour\
+            \ transf\xE9rer des fichiers entre les appareils. Cependant, comme ils\
+            \ sont\npetits et portatifs, ils sont susceptibles d\u2019\xEAtre perdus\
+            \ ou vol\xE9s, ce qui pourrait entra\xEEner une\natteinte aux donn\xE9\
+            es et l\u2019infiltration de fichiers malveillants dans le r\xE9seau de\
+            \ l\u2019organisation.\nComme il peut \xEAtre difficile d\u2019en emp\xEA\
+            cher toute utilisation, l\u2019organisation peut n\u2019autoriser\nque\
+            \ celle de lecteurs chiffr\xE9s commerciaux qu\u2019elle fournit. Elle\
+            \ devrait envisager d\u2019employer\ndes outils lui permettant de contr\xF4\
+            ler les acc\xE8s et de surveiller les fichiers transf\xE9r\xE9s. Il importe\n\
+            que l\u2019organisation assure un contr\xF4le strict des dispositifs de\
+            \ stockage, y compris les supports\namovibles."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.1
+      ref_id: 6.4.1.2
+      name: C-Managing portable media assets
+      description: It is important that organizations maintain strong asset control
+        for all storage devices, including portable media devices. This includes the
+        proper disposal of such media.
+      translations:
+        fr:
+          name: Gestion des actifs de supports amovibles
+          description: "Il est important que les organisations maintiennent un contr\xF4\
+            le serr\xE9 des biens pour tous les\ndispositifs de stockage, y compris\
+            \ les supports portatifs, notamment l\u2019\xE9limination ad\xE9quate\
+            \ de\nces supports."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4
+      ref_id: 6.4.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.2
+      ref_id: 6.4.2.1
+      name: L1-Portable media security
+      description: Organizations using portable media shall mandate the sole use of
+        organization-owned secure portable media.
+      implementation_groups:
+      - L1
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 des supports amovibles"
+          description: "L\u2019organisation qui utilise des supports amovibles doit\
+            \ n\u2019autoriser que l\u2019utilisation des supports amovibles s\xE9\
+            curis\xE9s lui appartenant."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4
+      ref_id: 6.4.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.4.3
+      ref_id: 6.4.3.1
+      name: L2-Securing removable storage devices
+      description: 'The organization using portable media shall:
+
+        a. have strong asset controls for these devices;
+
+        b. require the use of encryption on all these devices; and
+
+        c. have processes for the sanitisation or destruction of portable media prior
+        to disposal.'
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "S\xE9curisation des dispositifs de stockage amovibles"
+          description: "L\u2019organisation qui utilise des supports amovibles doit\
+            \ :\na) en assurer un contr\xF4le strict;\nb) exiger l\u2019utilisation\
+            \ du chiffrement sur tous les supports;\nc) pr\xE9voir des processus pour\
+            \ le nettoyage ou la destruction des supports avant leur \xE9limination."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6
+      ref_id: '6.5'
+      name: Point of sale (POS) and financial systems
+      translations:
+        fr:
+          name: "Syst\xE8mes de point de vente (POS) et financiers"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5
+      ref_id: 6.5.1
+      name: Context
+      translations:
+        fr:
+          name: Context
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.1
+      ref_id: 6.5.1.1
+      name: C-Securing POS systems
+      description: It is important that organizations use a firewall to segment PoS
+        terminals and financial systems from other areas of the corporate network,
+        to protect their data assets and isolate them from the internet.
+      translations:
+        fr:
+          name: "S\xE9curisation des syst\xE8mes de point de vente (POS)"
+          description: "Il est important que l\u2019organisation utilise un pare-feu\
+            \ pour s\xE9parer les services de points de\nvente et les syst\xE8mes\
+            \ financiers des autres sections du r\xE9seau d\u2019entreprise, afin\
+            \ de prot\xE9ger\nleurs donn\xE9es et de les isoler de l\u2019Internet."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5
+      ref_id: 6.5.2
+      name: Level 1 requirement
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.2
+      ref_id: 6.5.2.1
+      name: L1-PCI DSS compliance
+      description: The organization using point of sale terminals and financial systems
+        shall follow the Payment Card Industry Data Security Standard (PCI DSS).
+      implementation_groups:
+      - L1
+      - L2
+      translations:
+        fr:
+          name: "Conformit\xE9 PCI DSS"
+          description: "L\u2019organisation qui utilise des syst\xE8mes de points\
+            \ de vente et des syst\xE8mes financiers doit se conformer \xE0 la norme\
+            \ de s\xE9curit\xE9 des donn\xE9es de l\u2019industrie des cartes de paiement\
+            \ (PCI DSS)."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5
+      ref_id: 6.5.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.5.3
+      ref_id: 6.5.3.1
+      name: L2-Securing financial systems
+      description: There are no further requirements apart from those stated as Level
+        1.
+      translations:
+        fr:
+          name: "S\xE9curisation des syst\xE8mes financiers"
+          description: "Aucune exigence autre que celles d\xE9finies pour le niveau\
+            \ 1."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6
+      ref_id: '6.6'
+      name: Computer Security Log Management
+      translations:
+        fr:
+          name: "Gestion des journaux de s\xE9curit\xE9 informatique"
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6
+      ref_id: 6.6.1
+      name: Context
+      translations:
+        fr:
+          name: Context
+          description: null
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.1
+      ref_id: 6.6.1.1
+      name: C-Security log monitoring
+      description: Logging is an integral cyber security practice that can help organizations
+        detect threats and mitigate network vulnerabilities before they are exploited
+        by threat actorrs. Some examples of logs include records of user login events,
+        security events, file or data level accesses, devices, or user configuration
+        status messages such as installed software and versions, firewall logs, and
+        intrusion detection system logs.
+      translations:
+        fr:
+          name: "Surveillance des journaux de s\xE9curit\xE9"
+          description: "La consignation fait partie int\xE9grante des pratiques de\
+            \ cybers\xE9curit\xE9 qui aident une\norganisation \xE0 identifier les\
+            \ menaces et \xE0 att\xE9nuer les vuln\xE9rabilit\xE9s de r\xE9seau avant\
+            \ que des\nfraudeurs ne puissent les exploiter. Plusieurs types de journaux\
+            \ sont possibles : registre des\nconnexions des utilisateurs, des incidents\
+            \ de s\xE9curit\xE9, des acc\xE8s aux fichiers ou aux donn\xE9es,\ndes\
+            \ appareils ou de l\u2019\xE9tat de la configuration des appareils ou\
+            \ des comptes utilisateur (ex. :\nindiquant les logiciels install\xE9\
+            s et leur version), et registre du pare-feu ou du syst\xE8me de\nd\xE9\
+            tection d\u2019intrusion."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6
+      ref_id: 6.6.2
+      name: Level 1 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 1
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.2.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.2
+      ref_id: 6.6.2.1
+      name: 'L1-logmanagement '
+      description: For this section, there are no Level 1 requirements. All requirements
+        are considered Level 2.
+      translations:
+        fr:
+          name: null
+          description: "Aucune exigence de niveau 1 pour cet article. Toutes les exigences\
+            \ de cet article sont\nconsid\xE9r\xE9es comme \xE9tant de niveau 2."
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6
+      ref_id: 6.6.3
+      name: Level 2 requirements
+      description: ' '
+      translations:
+        fr:
+          name: Exigences de niveau 2
+          description: ' '
+    - urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:neotrust:risk:req_node:candgsi-104-1.01:6.6.3
+      ref_id: 6.6.3.1
+      name: L2-Log retention and analysis.
+      description: 'The organization shall have a policy on log management (including
+        log backup), and a procedure to implement the policy.
+
+        NOTE: The retention period for logs depends on various factors, including
+        legal requirements, business needs, and best practices.'
+      implementation_groups:
+      - L2
+      translations:
+        fr:
+          name: "R\xE9tention et analyse des journaux"
+          description: "L\u2019organisation doit mettre en place une politique en\
+            \ mati\xE8re de registre (y compris pour la sauvegarde des registres),\
+            \ et une proc\xE9dure pour appliquer cette politique.\nNOTE : La dur\xE9\
+            e de conservation des registres d\xE9pend de plusieurs facteurs, comme\
+            \ les exigences l\xE9gales, les besoins de l\u2019entreprise et les pratiques\
+            \ exemplaires."
