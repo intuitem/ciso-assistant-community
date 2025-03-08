@@ -19,6 +19,7 @@ class LoadFileView(APIView):
 
     def process_excel_file(self, request, excel_data):
         # Parse Excel data
+        # Note: I can still pick the request.user for extra checks on the legit access for write operations
         model_type = request.META.get("HTTP_X_MODEL_TYPE")
         folder_id = request.META.get("HTTP_X_FOLDER_ID")
         perimeter_id = request.META.get("HTTP_X_PERIMETER_ID")

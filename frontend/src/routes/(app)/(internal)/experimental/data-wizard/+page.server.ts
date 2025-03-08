@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { Actions } from '@sveltejs/kit';
-import { fail } from 'assert';
+import { fail } from '@sveltejs/kit'; // Import from kit instead of assert
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
@@ -24,48 +24,69 @@ export const actions: Actions = {
 		const perimeter = formData.get('perimeter') as string;
 
 		if (!file?.name || file?.name === 'undefined') {
+			// Using the fail function from SvelteKit
 			return fail(400, {
-				error: true,
+				success: false,
+				error: 'noFileProvided',
 				message: 'You must provide a file to upload'
 			});
 		}
 
 		const endpoint = `${BASE_API_URL}/data-wizard/load-file/`;
-		const response = await fetch(endpoint, {
-			method: 'POST',
-			headers: {
-				'Content-Disposition': `attachment; filename="${file.name}"`,
-				'Content-Type': file.type,
-				'X-Model-Type': model,
-				'X-Folder-Id': folder,
-				'X-Perimeter-Id': perimeter
-			},
-			body: file
-		});
 
-		const data = await response.json();
+		try {
+			const response = await fetch(endpoint, {
+				method: 'POST',
+				headers: {
+					'Content-Disposition': `attachment; filename="${file.name}"`,
+					'Content-Type': file.type,
+					'X-Model-Type': model,
+					'X-Folder-Id': folder,
+					'X-Perimeter-Id': perimeter
+				},
+				body: file
+			});
 
-		if (response.status >= 400) {
-			console.error(data);
-			switch (data.error) {
-				case 'errorBackupInvalidVersion':
-					setFlash({ type: 'error', message: m.backupVersionError() }, event);
-					break;
-				case 'GreaterBackupVersion':
-					setFlash({ type: 'error', message: m.backupGreaterVersionError() }, event);
-					break;
-				case 'LowerBackupVersion':
-					setFlash({ type: 'error', message: m.backupLowerVersionError() }, event);
-					break;
-				default:
-					setFlash({ type: 'error', message: m.backupLoadingError() }, event);
-					break;
+			const data = await response.json();
+
+			if (response.status >= 400) {
+				console.error(data);
+				const errorCode = data.error || 'unknown_error';
+
+				switch (errorCode) {
+					case 'errorBackupInvalidVersion':
+						setFlash({ type: 'error', message: m.backupVersionError() }, event);
+						break;
+					case 'GreaterBackupVersion':
+						setFlash({ type: 'error', message: m.backupGreaterVersionError() }, event);
+						break;
+					case 'LowerBackupVersion':
+						setFlash({ type: 'error', message: m.backupLowerVersionError() }, event);
+						break;
+					default:
+						setFlash({ type: 'error', message: m.backupLoadingError() }, event);
+						break;
+				}
+
+				return {
+					success: false,
+					status: response.status,
+					error: errorCode
+				};
 			}
-		}
 
-		return {
-			status: response.status,
-			body: JSON.stringify(data)
-		};
+			return {
+				success: true,
+				status: response.status,
+				message: data.message || 'File uploaded successfully'
+			};
+		} catch (error) {
+			console.error('Error during upload:', error);
+			return {
+				success: false,
+				error: 'connection_error',
+				message: 'Could not connect to the server'
+			};
+		}
 	}
 };
