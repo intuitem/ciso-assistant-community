@@ -27,6 +27,7 @@ from wsgiref.util import FileWrapper
 import io
 
 import random
+from django.db.models.functions import Lower
 
 from docxtpl import DocxTemplate
 from .generators import gen_audit_context
@@ -3271,6 +3272,30 @@ class FolderViewSet(BaseModelViewSet):
             except ValueError:
                 urns.append(item)
         return uuids, urns
+
+    @action(detail=False, methods=["get"])
+    def get_accessible_folders_and_perimeters(self, request):
+        (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Folder
+        )
+        (viewable_perimeters_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Perimeter
+        )
+        res = {
+            "folders": [
+                {"name": f.name, "id": f.id}
+                for f in Folder.objects.filter(id__in=viewable_folders_ids).order_by(
+                    Lower("name")
+                )
+            ],
+            "perimeters": [
+                {"name": p.name, "id": p.id}
+                for p in Perimeter.objects.filter(
+                    id__in=viewable_perimeters_ids
+                ).order_by(Lower("name"))
+            ],
+        }
+        return Response(res)
 
 
 class UserPreferencesView(APIView):
