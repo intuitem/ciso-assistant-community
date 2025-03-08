@@ -21,7 +21,7 @@ export function unsafeTranslate(key: string, params = {}, options = {}): string 
 		return m[toCamelCase(key)](params, options);
 	}
 	if (typeof key === 'boolean') {
-		return key ? '✅' : '❌';
+		return key ? 'True' : 'False';
 	}
 }
 

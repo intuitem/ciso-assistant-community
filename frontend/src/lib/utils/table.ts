@@ -37,6 +37,23 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const REQUIREMENT_RESULT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.result,
+	extraProps: {
+		defaultOptionName: 'result'
+	},
+	alwaysDisplay: true
+};
+
+const REQUIREMENT_ASSESSABLE_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => (row.assessable ? 'true' : 'false'),
+	extraProps: {
+		defaultOptionName: 'assessable'
+	},
+	alwaysDisplay: true
+};
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -168,6 +185,13 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.compliance_assessment?.str,
+	extraProps: {
+		defaultOptionName: 'complianceAssessment'
+	}
+};
 const PROVIDER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -693,9 +717,31 @@ export const listViewFields = {
 		}
 	},
 	'requirement-assessments': {
-		head: ['name', 'description', 'complianceAssessment'],
-		body: ['name', 'description', 'compliance_assessment'],
-		breadcrumb_link_disabled: true
+		head: [
+			'complianceAssessment',
+			'ref_id',
+			'name',
+			'description',
+			'result',
+			'folder',
+			'assessable'
+		],
+		body: [
+			'compliance_assessment',
+			'ref_id',
+			'name',
+			'description',
+			'result',
+			'folder',
+			'assessable'
+		],
+		breadcrumb_link_disabled: true,
+		filters: {
+			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
+			result: REQUIREMENT_RESULT_FILTER,
+			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
+			assessable: REQUIREMENT_ASSESSABLE_FILTER
+		}
 	},
 	evidences: {
 		head: ['name', 'file', 'size', 'description', 'folder'],
