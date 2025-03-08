@@ -163,6 +163,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
     "huey.contrib.djhuey",
+    "auditlog",
 ]
 
 MIDDLEWARE = [
@@ -175,6 +176,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
 
