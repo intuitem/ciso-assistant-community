@@ -4,89 +4,88 @@ import { fail } from '@sveltejs/kit'; // Import from kit instead of assert
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
+import { message } from 'sveltekit-superforms';
 
 export const load = (async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/folders/get_accessible_folders_and_perimeters/`;
-	const res = await fetch(endpoint);
-	const data = await res.json();
-	return { data: data, title: 'Data import wizard' };
+  const endpoint = `${BASE_API_URL}/folders/get_accessible_folders_and_perimeters/`;
+  const res = await fetch(endpoint);
+  const data = await res.json();
+  return { data: data, title: 'Data import wizard' };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-	default: async (event) => {
-		const { request, fetch } = event;
-		const formData = await request.formData();
+  default: async (event) => {
+    const { request, fetch } = event;
+    const formData = await request.formData();
 
-		// Extract the file and other form values
-		const file = formData.get('file') as File;
-		const model = formData.get('model') as string;
-		const folder = formData.get('folder') as string;
-		const perimeter = formData.get('perimeter') as string;
+    // Extract the file and other form values
+    const file = formData.get('file') as File;
+    const model = formData.get('model') as string;
+    const folder = formData.get('folder') as string;
+    const perimeter = formData.get('perimeter') as string;
 
-		if (!file?.name || file?.name === 'undefined') {
-			// Using the fail function from SvelteKit
-			return fail(400, {
-				success: false,
-				error: 'noFileProvided',
-				message: 'You must provide a file to upload'
-			});
-		}
+    if (!file?.name || file?.name === 'undefined') {
+      // Using the fail function from SvelteKit
+      return fail(400, {
+        success: false,
+        error: 'noFileProvided',
+        message: 'You must provide a file to upload'
+      });
+    }
 
-		const endpoint = `${BASE_API_URL}/data-wizard/load-file/`;
+    const endpoint = `${BASE_API_URL}/data-wizard/load-file/`;
 
-		try {
-			const response = await fetch(endpoint, {
-				method: 'POST',
-				headers: {
-					'Content-Disposition': `attachment; filename="${file.name}"`,
-					'Content-Type': file.type,
-					'X-Model-Type': model,
-					'X-Folder-Id': folder,
-					'X-Perimeter-Id': perimeter
-				},
-				body: file
-			});
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Disposition': `attachment; filename="${file.name}"`,
+          'Content-Type': file.type,
+          'X-Model-Type': model,
+          'X-Folder-Id': folder,
+          'X-Perimeter-Id': perimeter
+        },
+        body: file
+      });
 
-			const data = await response.json();
+      const data = await response.json();
 
-			if (response.status >= 400) {
-				console.error(data);
-				const errorCode = data.error || 'unknown_error';
+      if (response.status >= 400) {
+        console.error(data);
+        const errorCode = data.error || 'unknown_error';
 
-				switch (errorCode) {
-					case 'errorBackupInvalidVersion':
-						setFlash({ type: 'error', message: m.backupVersionError() }, event);
-						break;
-					case 'GreaterBackupVersion':
-						setFlash({ type: 'error', message: m.backupGreaterVersionError() }, event);
-						break;
-					case 'LowerBackupVersion':
-						setFlash({ type: 'error', message: m.backupLowerVersionError() }, event);
-						break;
-					default:
-						setFlash({ type: 'error', message: m.backupLoadingError() }, event);
-						break;
-				}
+        switch (errorCode) {
+          case 'errorBackupInvalidVersion':
+            setFlash({ type: 'error', message: m.backupVersionError() }, event);
+            break;
+          case 'GreaterBackupVersion':
+            setFlash({ type: 'error', message: m.backupGreaterVersionError() }, event);
+            break;
+          default:
+            setFlash({ type: 'error', message: "error while loading your file" }, event);
+            break;
+        }
 
-				return {
-					success: false,
-					status: response.status,
-					error: errorCode
-				};
-			}
+        return {
+          success: false,
+          status: response.status,
+          error: errorCode,
+          message: data.message
+        };
+      }
 
-			return {
-				success: true,
-				status: response.status,
-				message: data.message || 'File uploaded successfully'
-			};
-		} catch (error) {
-			console.error('Error during upload:', error);
-			return {
-				success: false,
-				error: 'connection_error',
-				message: 'Could not connect to the server'
-			};
-		}
-	}
+      return {
+        success: true,
+        status: response.status,
+        message: data.message || 'File uploaded successfully'
+      };
+    } catch (error) {
+      console.error('Error during upload:', error);
+      return {
+        success: false,
+        error: 'connection_error',
+        message: 'Could not connect to the server'
+      };
+    }
+  }
 };

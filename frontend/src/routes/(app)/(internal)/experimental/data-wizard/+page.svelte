@@ -50,25 +50,6 @@
 </script>
 
 <div class="grid grid-cols-2 space-y-2 p-2">
-	{#if formSubmitted}
-		<div class="col-span-full mb-4">
-			{#if form.success}
-				<div class="alert alert-success variant-filled-success">
-					<p>{form.message || 'File uploaded successfully'}</p>
-				</div>
-			{:else}
-				<div class="alert alert-error variant-filled-error">
-					<p>
-						{form.error
-							? typeof m[form.error] === 'function'
-								? m[form.error]()
-								: form.error
-							: 'An error occurred'}
-					</p>
-				</div>
-			{/if}
-		</div>
-	{/if}
 	<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 		<div class="card col-span-full lg:col-span-1 bg-white shadow py-4 px-6 space-y-2">
 			<h4 class="h4 font-semibold">Load excel data <i class="fa-solid fa-upload" /></h4>
@@ -165,4 +146,26 @@
 		</div>
 	</form>
 </div>
-<div>Parsing results:</div>
+<div>
+	Parsing results:
+	{#if formSubmitted}
+		<div class="col-span-full mb-4">
+			{#if form?.success}
+				<div class="alert alert-success variant-filled-success">
+					<p>{form.message || 'File uploaded successfully'}</p>
+				</div>
+			{:else}
+				<div class="alert alert-error variant-filled-error">
+					<p>
+						{form?.error
+							? typeof m[form.error] === 'function'
+								? m[form.error]()
+								: form.error
+							: 'An error occurred'}
+					</p>
+					<p>{form?.message}</p>
+				</div>
+			{/if}
+		</div>
+	{/if}
+</div>
