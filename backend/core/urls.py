@@ -96,6 +96,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
     path("serdes/", include("serdes.urls")),
+    path("data-wizard/", include("data_wizard.urls")),
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("ebios-rm/", include("ebios_rm.urls")),

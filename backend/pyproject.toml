@@ -37,6 +37,7 @@ python-docx = "^1.1.2"
 docxtpl = "^0.19.0"
 numpy = "^2.1.3"
 matplotlib = "^3.9.3"
+pandas = "^2.2.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"
