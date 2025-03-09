@@ -3,7 +3,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud.js';
+	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import type {
 		ModalComponent,
@@ -15,10 +15,10 @@
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
-	import { safeTranslate } from '$lib/utils/i18n.js';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { listViewFields } from '$lib/utils/table';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	export let data;
 	const showRisks = true;
@@ -29,8 +29,12 @@
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
-
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: model.name,
+		domain: risk_assessment.folder.id
+	});
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
