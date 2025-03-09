@@ -15,6 +15,12 @@ from core.models import (
     RequirementAssessment,
     Framework,
 )
+from core.serializers import (
+    AssetWriteSerializer,
+    AppliedControlWriteSerializer,
+    ComplianceAssessmentWriteSerializer,
+    RequirementAssessmentWriteSerializer,
+)
 from iam.models import RoleAssignment
 
 logger = logging.getLogger(__name__)
@@ -81,56 +87,122 @@ class LoadFileView(APIView):
         logger.warning("I am here")
         folders_map = get_accessible_objects(request.user)
 
+        # Collection to track successes and errors
+        results = {"successful": 0, "failed": 0, "errors": []}
+
         # Assets processing
         if model_type == "Asset":
             for record in records:
                 # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
                 domain = folder_id
                 if record.get("domain") != "":
-                    domain = folders_map[record.get("domain")]
+                    domain = folders_map.get(record.get("domain"), folder_id)
+                # Check if name is provided as it's mandatory
+                if not record.get("name"):
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "Name field is mandatory"}
+                    )
+                    continue
 
-                domain_obj = Folder.objects.get(id=domain)
+                # Prepare data for serializer
+                asset_data = {
+                    "ref_id": record.get("ref_id", ""),
+                    "name": record.get("name"),  # Name is mandatory
+                    "type": record.get("type", ""),
+                    "folder": domain,
+                    "description": record.get("description", ""),
+                }
+                # Use the serializer for validation and saving
+                serializer = AssetWriteSerializer(
+                    data=asset_data, context={"request": request}
+                )
                 try:
-                    res = Asset(
-                        ref_id=record.get("ref_id"),
-                        name=record.get("name"),
-                        type=record.get("type"),
-                        folder=domain_obj,
-                        description=record.get("description"),
-                    ).save()
+                    if serializer.is_valid(raise_exception=True):
+                        serializer.save()
+                        results["successful"] += 1
+                    else:
+                        results["failed"] += 1
+                        results["errors"].append(
+                            {"record": record, "errors": serializer.errors}
+                        )
                 except Exception as e:
-                    logger.warning(e)
-                    # we can improve this by collecting the error types and aggregate them
-                # this will fail in case another object with the same name exists
+                    logger.warning(
+                        f"Error creating asset {record.get('name')}: {str(e)}"
+                    )
+                    results["failed"] += 1
+                    results["errors"].append({"record": record, "error": str(e)})
+            logger.info(
+                f"Asset import complete. Success: {results['successful']}, Failed: {results['failed']}"
+            )
 
+        # Applied Controls processing
         if model_type == "AppliedControl":
+            # Reset results counter for this model type
+            results = {"successful": 0, "failed": 0, "errors": []}
+
             for record in records:
                 domain = folder_id
                 if record.get("domain") != "":
-                    domain = folders_map[record.get("domain")]
+                    domain = folders_map.get(record.get("domain"), folder_id)
 
-                domain_obj = Folder.objects.get(id=domain)
-                # note to self: maybe we can do a dry run by just skipping the save to get the validators triggered
+                # Handle priority conversion with error checking
+                priority = None
+                if record.get("priority", ""):
+                    try:
+                        priority = int(record.get("priority"))
+                    except (ValueError, TypeError):
+                        priority = None
+
+                # Check if name is provided as it's mandatory
+                if not record.get("name"):
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "Name field is mandatory"}
+                    )
+                    continue
+
+                # Prepare data for serializer
+                control_data = {
+                    "ref_id": record.get("ref_id", ""),
+                    "name": record.get("name"),  # Name is mandatory
+                    "folder": domain,
+                    "status": record.get("status", ""),
+                    "priority": priority,
+                    "csf_function": record.get("csf_function", ""),
+                }
+
+                # Use the serializer for validation and saving
+                serializer = AppliedControlWriteSerializer(
+                    data=control_data, context={"request": request}
+                )
                 try:
-                    res = AppliedControl(
-                        ref_id=record.get("ref_id"),
-                        name=record.get("name"),
-                        folder=domain_obj,
-                        status=record.get("status"),
-                        priority=int(record.get("priority"))
-                        if record.get("priority") != ""
-                        else None,
-                        csf_function=record.get("csf_function"),
-                    ).save()
-
+                    if serializer.is_valid(raise_exception=True):
+                        serializer.save()
+                        results["successful"] += 1
+                    else:
+                        results["failed"] += 1
+                        results["errors"].append(
+                            {"record": record, "errors": serializer.errors}
+                        )
                 except Exception as e:
-                    logger.warning(e)
+                    logger.warning(
+                        f"Error creating applied control {record.get('name')}: {str(e)}"
+                    )
+                    results["failed"] += 1
+                    results["errors"].append({"record": record, "error": str(e)})
+
+            logger.info(
+                f"Applied Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
+            )
 
         if model_type == "ComplianceAssessment":
             # create an audit on the perimeter_id with the framework_id - use a timestamp based name
             # get back the compliance assessment id
             # crawl the records and update the requirement assessment matching the ref_id if available and fallback to the urn otherwise
             pass
+
+        return Response(results)
 
     def post(self, request, *args, **kwargs):
         # if not request.user.has_file_permission:
