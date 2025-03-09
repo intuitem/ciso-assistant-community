@@ -52,15 +52,17 @@
 >
 	{#if data.requirementAssessments.length > 0}
 		{@const firstAssessment = data.requirementAssessments[0]}
-		{#if firstAssessment?.name}
-			<span class="text-2xl font-bold text-gray-800">{firstAssessment.name}</span>
-		{/if}
-		{#if firstAssessment?.description}
-			<span class="text-sm text-center text-gray-600">{firstAssessment.description}</span>
-		{/if}
+		<div class="flex flex-col text-center pt-2 pb-4">
+			{#if firstAssessment?.name}
+				<span class="text-2xl font-bold text-gray-800">{firstAssessment.name}</span>
+			{/if}
+			{#if firstAssessment?.description}
+				<span class="text-gray-600 blockquote">{firstAssessment.description}</span>
+			{/if}
+		</div>
 
 		{#each data.metrics as domain, domainIndex}
-			<Accordion>
+			<Accordion class="my-4">
 				<AccordionItem open>
 					<svelte:fragment slot="lead">
 						<i class="fa-solid fa-sitemap text-primary-500"></i>
