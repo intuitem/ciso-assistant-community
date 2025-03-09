@@ -227,6 +227,7 @@ class LoadFileView(APIView):
                 if serializer.is_valid(raise_exception=True):
                     # Save the compliance assessment
                     compliance_assessment = serializer.save()
+                    compliance_assessment.create_requirement_assessments()
                     logger.info(
                         f"Created compliance assessment: {assessment_name} with ID {compliance_assessment.id}"
                     )
@@ -284,9 +285,15 @@ class LoadFileView(APIView):
                             if requirement_assessment:
                                 # Update the requirement assessment with the data from the record
                                 requirement_data = {
-                                    "result": record.get("compliance_result", ""),
-                                    "status": record.get("requirement_progress", ""),
-                                    "score": record.get("score", ""),
+                                    "result": record.get("compliance_result")
+                                    if record.get("compliance_result") != ""
+                                    else "not_assessed",
+                                    "status": record.get("requirement_progress")
+                                    if record.get("requirement_progress") != ""
+                                    else "to_do",
+                                    "score": record.get("score")
+                                    if record.get("score") != ""
+                                    else 0,
                                     "observations": record.get("observations", ""),
                                 }
                                 # Use the serializer for validation and saving
