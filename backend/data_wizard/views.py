@@ -126,6 +126,12 @@ class LoadFileView(APIView):
                 except Exception as e:
                     logger.warning(e)
 
+        if model_type == "ComplianceAssessment":
+            # create an audit on the perimeter_id with the framework_id - use a timestamp based name
+            # get back the compliance assessment id
+            # crawl the records and update the requirement assessment matching the ref_id if available and fallback to the urn otherwise
+            pass
+
     def post(self, request, *args, **kwargs):
         # if not request.user.has_file_permission:
         #     logger.error("Unauthorized user tried to load a file", user=request.user)
