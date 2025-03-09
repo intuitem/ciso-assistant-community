@@ -1,3 +1,6 @@
+volumes:
+  db:
+  caddy_data:
 services:
   backend:
     container_name: backend
@@ -13,13 +16,15 @@ services:
       - LICENSE_EXPIRATION=2025-12-21
       - DJANGO_SETTINGS_MODULE=enterprise_core.settings
     volumes:
-      - ./db:/code/db
+      - db:/code/db
 
   huey:
     container_name: huey
     build:
       context: ../
       dockerfile: ./enterprise/backend/Dockerfile
+    depends_on:
+      - backend    
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -27,7 +32,7 @@ services:
       - LICENSE_SEATS=5
       - LICENSE_EXPIRATION=2025-12-21
     volumes:
-      - ./db:/code/db
+      - db:/code/db
     entrypoint:
       - /bin/sh
       - -c
@@ -57,7 +62,7 @@ services:
     ports:
       - 8443:8443
     volumes:
-      - ./db:/data
+      - caddy_data:/data
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000

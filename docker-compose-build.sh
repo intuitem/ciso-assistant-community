@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOCKER_COMPOSE_FILE=docker-compose-build.yml
+DOCKER_COMPOSE_FILE="${1:-docker-compose-build.yml}"
 
 prepare_meta_file() {
   VERSION=$(git describe --tags --always)
@@ -16,28 +16,24 @@ prepare_meta_file() {
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
 
-# Check if database already exists
-if [ -f db/ciso-assistant.sqlite3 ]; then
-  echo "The database seems already created."
-  echo "For successive runs, you can now use 'docker compose up'."
-else
-  prepare_meta_file
+prepare_meta_file
 
-  # Build and start the containers
-  echo "Building containers..."
-  docker compose -f "${DOCKER_COMPOSE_FILE}" build --pull
+# Build and start the containers
+echo "Building containers..."
+docker compose -f "${DOCKER_COMPOSE_FILE}" build --pull
 
-  echo "Starting services..."
-  docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
+echo "Starting services..."
+docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
 
-  # Simple wait for database migrations
-  echo "Giving some time for the database to be ready, please wait ..."
-  sleep 50
+echo "Waiting for CISO Assistant backend to be ready..."
+until docker compose -f "${DOCKER_COMPOSE_FILE}" exec -T backend curl -f http://localhost:8000/api/build >/dev/null 2>&1; do
+  echo "Backend is not ready - waiting 10s..."
+  sleep 10
+done
 
-  echo "Initialize your superuser account..."
-  docker compose exec backend poetry run python manage.py createsuperuser
+echo "Initialize your superuser account..."
+docker compose -f "${DOCKER_COMPOSE_FILE}" exec backend poetry run python manage.py createsuperuser
 
-  echo "🚀 CISO Assistant is ready!"
-  echo "Connect to CISO Assistant on https://localhost:8443"
-  echo "For successive runs, you can now use 'docker compose up'."
-fi
+echo "🚀 CISO Assistant is ready!"
+echo "Connect to CISO Assistant on https://localhost:8443"
+echo "For successive runs, you can now use 'docker compose -f ${DOCKER_COMPOSE_FILE} up -d'."

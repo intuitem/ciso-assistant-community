@@ -5,7 +5,8 @@ ENV PYTHONUNBUFFERED=1 \
    POETRY_VIRTUALENVS_IN_PROJECT=1 \
    POETRY_VIRTUALENVS_CREATE=1 \
    POETRY_CACHE_DIR=/tmp/poetry_cache \
-   DJANGO_SETTINGS_MODULE=enterprise_core.settings
+   DJANGO_SETTINGS_MODULE=enterprise_core.settings \
+   HOME=/tmp
 
 WORKDIR /code
 
@@ -52,6 +53,10 @@ RUN poetry install --no-root \
 COPY backend /code/
 COPY enterprise/backend/enterprise_core /code/enterprise_core
 COPY backend/startup.sh /code/
+
+RUN groupadd --gid 1001 app && useradd --uid 1001 --gid 1001 app && mkdir -p /code/db && chown 1001:1001 /code/db
+USER app
+VOLUME /code/db
 
 EXPOSE 8000
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
