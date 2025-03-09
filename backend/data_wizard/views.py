@@ -1,16 +1,40 @@
 import io
 import logging
-import sys
 import pandas as pd
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
-from django.core import management
-import json
 from .serializers import LoadFileSerializer
+from core.models import (
+    AppliedControl,
+    Folder,
+    Perimeter,
+    Asset,
+    ComplianceAssessment,
+    RequirementAssessment,
+    Framework,
+)
+from iam.models import RoleAssignment
 
 logger = logging.getLogger(__name__)
+
+
+def get_accessible_objects(user):
+    (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Folder
+    )
+    (viewable_perimeters_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Perimeter
+    )
+    (viewable_frameworks_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Framework
+    )
+
+    folders_map = {
+        f.name: f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
+    }
+    return folders_map
 
 
 class LoadFileView(APIView):
@@ -28,10 +52,15 @@ class LoadFileView(APIView):
         logger.info(
             f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}, framework: {framework_id}"
         )
+
+        # get viewable and actionable folders, perimeters and frameworks
+        # build a map from the name to the id
         try:
             # Read Excel file into a pandas DataFrame
-            df = pd.read_excel(excel_data)
-            processed_data = self.convert_excel_to_db_format(df)
+            df = pd.read_excel(excel_data).fillna("")
+            res = self.process_data(
+                request, df, model_type, folder_id, perimeter_id, framework_id
+            )
 
         except Exception as e:
             logger.error("Error parsing Excel file", exc_info=e)
@@ -44,21 +73,58 @@ class LoadFileView(APIView):
             {"message": "File loaded successfully"}, status=status.HTTP_200_OK
         )
 
-    def convert_excel_to_db_format(self, dataframe):
+    def process_data(
+        self, request, dataframe, model_type, folder_id, perimeter_id, framework_id
+    ):
         records = dataframe.to_dict(orient="records")
         print(records)
         logger.warning("I am here")
+        folders_map = get_accessible_objects(request.user)
 
-        formatted_data = []
-        for record in records:
-            model_data = {
-                "model": "yourapp.yourmodel",
-                "pk": None,  # You might need to generate or extract this
-                "fields": record,
-            }
-            formatted_data.append(model_data)
+        # Assets processing
+        if model_type == "Asset":
+            for record in records:
+                # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
+                domain = folder_id
+                if record.get("domain") != "":
+                    domain = folders_map[record.get("domain")]
 
-        return json.dumps(formatted_data)
+                domain_obj = Folder.objects.get(id=domain)
+                try:
+                    res = Asset(
+                        ref_id=record.get("ref_id"),
+                        name=record.get("name"),
+                        type=record.get("type"),
+                        folder=domain_obj,
+                        description=record.get("description"),
+                    ).save()
+                except Exception as e:
+                    logger.warning(e)
+                    # we can improve this by collecting the error types and aggregate them
+                # this will fail in case another object with the same name exists
+
+        if model_type == "AppliedControl":
+            for record in records:
+                domain = folder_id
+                if record.get("domain") != "":
+                    domain = folders_map[record.get("domain")]
+
+                domain_obj = Folder.objects.get(id=domain)
+                # note to self: maybe we can do a dry run by just skipping the save to get the validators triggered
+                try:
+                    res = AppliedControl(
+                        ref_id=record.get("ref_id"),
+                        name=record.get("name"),
+                        folder=domain_obj,
+                        status=record.get("status"),
+                        priority=int(record.get("priority"))
+                        if record.get("priority") != ""
+                        else None,
+                        csf_function=record.get("csf_function"),
+                    ).save()
+
+                except Exception as e:
+                    logger.warning(e)
 
     def post(self, request, *args, **kwargs):
         # if not request.user.has_file_permission:

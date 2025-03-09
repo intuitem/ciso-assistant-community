@@ -112,7 +112,7 @@
 			</div>
 
 			<label for="folder" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-				>Select a Domain</label
+				>Select a fallback Domain (if not set on the file)</label
 			>
 			<select
 				id="folder"
