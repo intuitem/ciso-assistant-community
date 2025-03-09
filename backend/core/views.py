@@ -26,6 +26,7 @@ import humanize
 
 from wsgiref.util import FileWrapper
 
+import pandas as pd
 import io
 
 import random
@@ -3532,6 +3533,79 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
         return Response({p: p for p in providers})
+
+    @action(detail=True, methods=["get"], name="Framework as an Excel template")
+    def excel_template(self, request, pk):
+        fwk = Framework.objects.get(id=pk)
+        req_nodes = RequirementNode.objects.filter(framework=fwk)
+        entries = []
+        for rn in req_nodes:
+            entry = {
+                "urn": rn.urn,
+                "assessable": rn.assessable,
+                "ref_id": rn.ref_id,
+                "name": rn.name,
+                "description": rn.description,
+                "compliance_result": "",
+                "requirement_progress": "",
+                "score": "",
+                "observations": "",
+            }
+            entries.append(entry)
+
+        # Create DataFrame from entries
+        df = pd.DataFrame(entries)
+
+        # Create BytesIO object
+        buffer = io.BytesIO()
+
+        # Create ExcelWriter with openpyxl engine
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+
+            # Get the worksheet
+            worksheet = writer.sheets["Sheet1"]
+
+            # For text wrapping, we need to define which columns need wrapping
+            # Assuming 'description' and 'observations' columns need text wrapping
+            wrap_columns = ["name", "description", "observations"]
+
+            # Find the indices of the columns that need wrapping
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            # Apply text wrapping to those columns
+            from openpyxl.styles import Alignment
+
+            for col_idx in wrap_indices:
+                for row_idx in range(
+                    2, len(df) + 2
+                ):  # +2 because of header row and 1-indexing
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            # Adjust column widths for better readability
+            for idx, col in enumerate(df.columns):
+                column_width = 40  # default width
+                if col in wrap_columns:
+                    column_width = 60  # wider for wrapped text columns
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        # Get the value of the buffer and return as response
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="{fwk.name}_template.xlsx"'
+        )
+
+        return response
 
 
 class RequirementNodeViewSet(BaseModelViewSet):
