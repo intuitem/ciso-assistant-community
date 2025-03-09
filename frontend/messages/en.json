@@ -1192,6 +1192,6 @@
 	"selectEvidence": "Select evidence",
 	"compliantRequirementsSemiColon": "Compliant requirements:",
 	"requirementsProgressionSemiColon": "Requirements progression:",
-	"noRequirementFound": "No requirement found",
+	"noRequirementFound": "No requirement assessment found",
 	"noAuditForTheFramework": "There is no audit using this framework"
 }

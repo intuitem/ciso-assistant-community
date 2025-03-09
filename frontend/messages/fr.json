@@ -1182,6 +1182,6 @@
 	"selectEvidence": "Sélectionner une preuve",
 	"compliantRequirementsSemiColon": "Exigences conformes :",
 	"requirementsProgressionSemiColon": "Progression des exigences :",
-	"noRequirementFound": "Aucune exigence trouvée",
+	"noRequirementFound": "Aucune revue de cette exigence trouvée",
 	"noAuditForTheFramework": "Il n'y a pas d'audit utilisant ce référentiel"
 }
