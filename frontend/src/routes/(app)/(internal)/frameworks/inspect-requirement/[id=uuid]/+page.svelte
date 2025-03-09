@@ -54,7 +54,7 @@
 		{@const firstAssessment = data.requirementAssessments[0]}
 		<div class="flex flex-col text-center pt-2 pb-4">
 			{#if firstAssessment?.name}
-				<span class="text-2xl font-bold text-gray-800">{firstAssessment.name}</span>
+				<span class="text-2xl font-black text-gray-800">{firstAssessment.name}</span>
 			{/if}
 			{#if firstAssessment?.description}
 				<span class="text-gray-600 blockquote">{firstAssessment.description}</span>
@@ -143,9 +143,9 @@
 														breadcrumbAction="push"
 														href={`/compliance-assessments/${assessment.id}?next=${$page.url.pathname}`}
 														label={assessment.name}
-														class="font-bold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
+														class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
 													>
-														<i class="fa-solid fa-certificate mr-2 text-gray-800"></i>
+														<i class="fa-solid fa-list-check mr-2 text-gray-800"></i>
 														{assessment.name} - {assessment.version}
 													</Anchor>
 
@@ -163,9 +163,9 @@
 														breadcrumbAction="push"
 														href={`/compliance-assessments/${assessment.id}?next=${$page.url.pathname}`}
 														label={assessment.name}
-														class="font-bold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
+														class="font-semibold text-lg text-primary-500 whitespace-nowrap text-ellipsis overflow-hidden"
 													>
-														<i class="fa-solid fa-certificate mr-2 text-gray-800"></i>
+														<i class="fa-solid fa-list-check mr-2 text-gray-800"></i>
 														{assessment.name} - {assessment.version}
 													</Anchor>
 												</div>
