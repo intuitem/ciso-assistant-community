@@ -87,267 +87,287 @@ class LoadFileView(APIView):
         self, request, dataframe, model_type, folder_id, perimeter_id, framework_id
     ):
         records = dataframe.to_dict(orient="records")
-        # print(records)
         logger.warning("I am here")
         folders_map = get_accessible_objects(request.user)
 
+        # Dispatch to appropriate handler
+        if model_type == "Asset":
+            return self._process_assets(request, records, folders_map, folder_id)
+        elif model_type == "AppliedControl":
+            return self._process_applied_controls(
+                request, records, folders_map, folder_id
+            )
+        elif model_type == "ComplianceAssessment":
+            return self._process_compliance_assessment(
+                request, records, folder_id, perimeter_id, framework_id
+            )
+        else:
+            return {
+                "successful": 0,
+                "failed": 0,
+                "errors": [{"error": f"Unknown model type: {model_type}"}],
+            }
+
+    def _process_assets(self, request, records, folders_map, folder_id):
         # Collection to track successes and errors
         results = {"successful": 0, "failed": 0, "errors": []}
 
         # Assets processing
-        if model_type == "Asset":
-            for record in records:
-                # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
-                domain = folder_id
-                if record.get("domain") != "":
-                    domain = folders_map.get(record.get("domain"), folder_id)
-                # Check if name is provided as it's mandatory
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "Name field is mandatory"}
-                    )
-                    continue
-
-                # Prepare data for serializer
-                asset_data = {
-                    "ref_id": record.get("ref_id", ""),
-                    "name": record.get("name"),  # Name is mandatory
-                    "type": record.get("type", "SP"),
-                    "folder": domain,
-                    "description": record.get("description", ""),
-                }
-                # Use the serializer for validation and saving
-                serializer = AssetWriteSerializer(
-                    data=asset_data, context={"request": request}
+        for record in records:
+            # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
                 )
-                try:
-                    if serializer.is_valid(raise_exception=True):
-                        serializer.save()
-                        results["successful"] += 1
-                    else:
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {"record": record, "errors": serializer.errors}
-                        )
-                except Exception as e:
-                    logger.warning(
-                        f"Error creating asset {record.get('name')}: {str(e)}"
-                    )
-                    results["failed"] += 1
-                    results["errors"].append({"record": record, "error": str(e)})
-            logger.info(
-                f"Asset import complete. Success: {results['successful']}, Failed: {results['failed']}"
+                continue
+
+            # Prepare data for serializer
+            asset_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "type": record.get("type", "SP"),
+                "folder": domain,
+                "description": record.get("description", ""),
+            }
+            # Use the serializer for validation and saving
+            serializer = AssetWriteSerializer(
+                data=asset_data, context={"request": request}
             )
-
-        # Applied Controls processing
-        if model_type == "AppliedControl":
-            for record in records:
-                domain = folder_id
-                if record.get("domain") != "":
-                    domain = folders_map.get(record.get("domain"), folder_id)
-
-                # Handle priority conversion with error checking
-                priority = None
-                if record.get("priority", ""):
-                    try:
-                        priority = int(record.get("priority"))
-                    except (ValueError, TypeError):
-                        priority = None
-
-                # Check if name is provided as it's mandatory
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "Name field is mandatory"}
-                    )
-                    continue
-
-                # Prepare data for serializer
-                control_data = {
-                    "ref_id": record.get("ref_id", ""),
-                    "name": record.get("name"),  # Name is mandatory
-                    "folder": domain,
-                    "status": record.get("status", "to_do"),
-                    "priority": priority,
-                    "csf_function": record.get("csf_function", "govern"),
-                }
-
-                # Use the serializer for validation and saving
-                serializer = AppliedControlWriteSerializer(
-                    data=control_data, context={"request": request}
-                )
-                try:
-                    if serializer.is_valid(raise_exception=True):
-                        serializer.save()
-                        results["successful"] += 1
-                    else:
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {"record": record, "errors": serializer.errors}
-                        )
-                except Exception as e:
-                    logger.warning(
-                        f"Error creating applied control {record.get('name')}: {str(e)}"
-                    )
-                    results["failed"] += 1
-                    results["errors"].append({"record": record, "error": str(e)})
-
-            logger.info(
-                f"Applied Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
-            )
-
-        # ComplianceAssessment processing
-        if model_type == "ComplianceAssessment":
             try:
-                # Get the perimeter object to extract its folder ID
-                perimeter = Perimeter.objects.get(id=perimeter_id)
-                folder_id = perimeter.folder.id
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(f"Error creating asset {record.get('name')}: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+        logger.info(
+            f"Asset import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
 
-                # Generate a timestamp-based name if not provided
-                from datetime import datetime
+    def _process_applied_controls(self, request, records, folders_map, folder_id):
+        # Applied Controls processing
 
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                assessment_name = f"Assessment_{timestamp}"
+        results = {"successful": 0, "failed": 0, "errors": []}
 
-                # Prepare data for serializer
-                assessment_data = {
-                    "name": assessment_name,
-                    "perimeter": perimeter_id,
-                    "framework": framework_id,
-                    "folder": folder_id,
-                }
+        for record in records:
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
 
-                # Use the serializer for validation and saving
-                serializer = ComplianceAssessmentWriteSerializer(
-                    data=assessment_data,
-                    context={"request": request},
+            # Handle priority conversion with error checking
+            priority = None
+            if record.get("priority", ""):
+                try:
+                    priority = int(record.get("priority"))
+                except (ValueError, TypeError):
+                    priority = None
+
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Prepare data for serializer
+            control_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "folder": domain,
+                "status": record.get("status", "to_do"),
+                "priority": priority,
+                "csf_function": record.get("csf_function", "govern"),
+            }
+
+            # Use the serializer for validation and saving
+            serializer = AppliedControlWriteSerializer(
+                data=control_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating applied control {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Applied Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_compliance_assessment(
+        self, request, records, folder_id, perimeter_id, framework_id
+    ):
+        results = {"successful": 0, "failed": 0, "errors": []}
+        try:
+            # Get the perimeter object to extract its folder ID
+            perimeter = Perimeter.objects.get(id=perimeter_id)
+            folder_id = perimeter.folder.id
+
+            # Generate a timestamp-based name if not provided
+            from datetime import datetime
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            assessment_name = f"Assessment_{timestamp}"
+
+            # Prepare data for serializer
+            assessment_data = {
+                "name": assessment_name,
+                "perimeter": perimeter_id,
+                "framework": framework_id,
+                "folder": folder_id,
+            }
+
+            # Use the serializer for validation and saving
+            serializer = ComplianceAssessmentWriteSerializer(
+                data=assessment_data,
+                context={"request": request},
+            )
+
+            if serializer.is_valid(raise_exception=True):
+                # Save the compliance assessment
+                compliance_assessment = serializer.save()
+                compliance_assessment.create_requirement_assessments()
+                logger.info(
+                    f"Created compliance assessment: {assessment_name} with ID {compliance_assessment.id}"
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    # Save the compliance assessment
-                    compliance_assessment = serializer.save()
-                    compliance_assessment.create_requirement_assessments()
-                    logger.info(
-                        f"Created compliance assessment: {assessment_name} with ID {compliance_assessment.id}"
-                    )
+                # Now process all the requirement assessments from the records
+                for record in records:
+                    # Check if we have a requirement reference
+                    ref_id = record.get("ref_id")
+                    urn = record.get("urn")
+                    if not record.get("assessable"):
+                        logger.debug("Skipping unassessable item.")
+                        continue
+                    if not (ref_id or urn):
+                        results["failed"] += 1
+                        results["errors"].append(
+                            {
+                                "record": record,
+                                "error": "Neither ref_id nor urn provided for requirement",
+                            }
+                        )
+                        continue
 
-                    # Now process all the requirement assessments from the records
-                    for record in records:
-                        # Check if we have a requirement reference
-                        ref_id = record.get("ref_id")
-                        urn = record.get("urn")
-                        if not record.get("assessable"):
-                            logger.debug("Skipping unassessable item.")
-                            continue
-                        if not (ref_id or urn):
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Neither ref_id nor urn provided for requirement",
-                                }
-                            )
-                            continue
-
-                        try:
-                            requirement_assessment = None
-                            # Try to find the requirement assessment using ref_id first, then urn
-                            if ref_id:
-                                ReqNode = RequirementNode.objects.filter(
-                                    framework__id=framework_id, ref_id=ref_id
-                                ).first()
-                                if ReqNode:
-                                    requirement_assessment = (
-                                        RequirementAssessment.objects.filter(
-                                            compliance_assessment=compliance_assessment
-                                        )
-                                        .filter(requirement=ReqNode)
-                                        .first()
+                    try:
+                        requirement_assessment = None
+                        # Try to find the requirement assessment using ref_id first, then urn
+                        if ref_id:
+                            ReqNode = RequirementNode.objects.filter(
+                                framework__id=framework_id, ref_id=ref_id
+                            ).first()
+                            if ReqNode:
+                                requirement_assessment = (
+                                    RequirementAssessment.objects.filter(
+                                        compliance_assessment=compliance_assessment
                                     )
-                                else:
-                                    logger.warn("Import attempt: unknown ref_id ")
-                            elif urn:
-                                ReqNode = RequirementNode.objects.filter(
-                                    framework__id=framework_id, urn=urn
-                                ).first()
-                                if ReqNode:
-                                    requirement_assessment = (
-                                        RequirementAssessment.objects.filter(
-                                            compliance_assessment=compliance_assessment
-                                        )
-                                        .filter(requirement=ReqNode)
-                                        .first()
-                                    )
-                                else:
-                                    logger.error("Import attempt: unknown urn")
-
-                            if requirement_assessment:
-                                # Update the requirement assessment with the data from the record
-                                requirement_data = {
-                                    "result": record.get("compliance_result")
-                                    if record.get("compliance_result") != ""
-                                    else "not_assessed",
-                                    "status": record.get("requirement_progress")
-                                    if record.get("requirement_progress") != ""
-                                    else "to_do",
-                                    "score": record.get("score")
-                                    if record.get("score") != ""
-                                    else 0,
-                                    "observations": record.get("observations", ""),
-                                }
-                                # Use the serializer for validation and saving
-                                req_serializer = RequirementAssessmentWriteSerializer(
-                                    instance=requirement_assessment,
-                                    data=requirement_data,
-                                    partial=True,
-                                    context={"request": request},
+                                    .filter(requirement=ReqNode)
+                                    .first()
                                 )
-                                if req_serializer.is_valid(raise_exception=True):
-                                    req_serializer.save()
-                                    results["successful"] += 1
-                                else:
-                                    results["failed"] += 1
-                                    results["errors"].append(
-                                        {
-                                            "record": record,
-                                            "errors": req_serializer.errors,
-                                        }
+                            else:
+                                logger.warn("Import attempt: unknown ref_id ")
+                        elif urn:
+                            ReqNode = RequirementNode.objects.filter(
+                                framework__id=framework_id, urn=urn
+                            ).first()
+                            if ReqNode:
+                                requirement_assessment = (
+                                    RequirementAssessment.objects.filter(
+                                        compliance_assessment=compliance_assessment
                                     )
+                                    .filter(requirement=ReqNode)
+                                    .first()
+                                )
+                            else:
+                                logger.error("Import attempt: unknown urn")
+
+                        if requirement_assessment:
+                            # Update the requirement assessment with the data from the record
+                            requirement_data = {
+                                "result": record.get("compliance_result")
+                                if record.get("compliance_result") != ""
+                                else "not_assessed",
+                                "status": record.get("requirement_progress")
+                                if record.get("requirement_progress") != ""
+                                else "to_do",
+                                "score": record.get("score")
+                                if record.get("score") != ""
+                                else 0,
+                                "observations": record.get("observations", ""),
+                            }
+                            # Use the serializer for validation and saving
+                            req_serializer = RequirementAssessmentWriteSerializer(
+                                instance=requirement_assessment,
+                                data=requirement_data,
+                                partial=True,
+                                context={"request": request},
+                            )
+                            if req_serializer.is_valid(raise_exception=True):
+                                req_serializer.save()
+                                results["successful"] += 1
                             else:
                                 results["failed"] += 1
                                 results["errors"].append(
                                     {
                                         "record": record,
-                                        "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
+                                        "errors": req_serializer.errors,
                                     }
                                 )
-                        except Exception as e:
-                            logger.warning(
-                                f"Error updating requirement assessment: {str(e)}"
-                            )
+                        else:
                             results["failed"] += 1
                             results["errors"].append(
-                                {"record": record, "error": str(e)}
+                                {
+                                    "record": record,
+                                    "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
+                                }
                             )
-                    logger.info(
-                        f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
-                    )
-                    # print(results)
-                    return results
+                    except Exception as e:
+                        logger.warning(
+                            f"Error updating requirement assessment: {str(e)}"
+                        )
+                        results["failed"] += 1
+                        results["errors"].append({"record": record, "error": str(e)})
+                logger.info(
+                    f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
+                )
+                # print(results)
+                return results
 
-            except Perimeter.DoesNotExist:
-                logger.error(f"Perimeter with ID {perimeter_id} does not exist")
-                return Response(
-                    {"error": f"Perimeter with ID {perimeter_id} does not exist"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            except Exception as e:
-                logger.error(f"Error creating compliance assessment: {str(e)}")
-                return Response(
-                    {"error": f"Failed to create compliance assessment: {str(e)}"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        except Perimeter.DoesNotExist:
+            logger.error(f"Perimeter with ID {perimeter_id} does not exist")
+            return Response(
+                {"error": f"Perimeter with ID {perimeter_id} does not exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            logger.error(f"Error creating compliance assessment: {str(e)}")
+            return Response(
+                {"error": f"Failed to create compliance assessment: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         return results
 
