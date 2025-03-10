@@ -31,7 +31,7 @@ spec:
               number: {{ .Values.backend.service.port }}
         path: /api/
         pathType: Prefix
-  {{- if .Values.global.tls }}
+  {{- if and .Values.global.tls .Values.ingress.certificateSecret }}
   tls:
     - hosts:
       - {{ .Values.global.domain }}
