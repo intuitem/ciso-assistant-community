@@ -3826,6 +3826,10 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(
+    Threat,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
     ComplianceAssessment,
     m2m_fields={"owner"},
     exclude_fields=common_exclude,
