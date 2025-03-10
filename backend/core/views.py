@@ -1339,7 +1339,8 @@ class AppliedControlViewSet(BaseModelViewSet):
     def owner(self, request):
         return Response(
             UserReadSerializer(
-                User.objects.filter(applied_controls__isnull=False), many=True
+                User.objects.filter(applied_controls__isnull=False).distinct(),
+                many=True,
             ).data
         )
 
