@@ -24,4 +24,10 @@
 		link="experimental/ecosystem"
 		tags={['analysis', 'tprm']}
 	/>
+	<Article
+		title="Data Import Wizard"
+		desc="Manage data import for various object"
+		link="experimental/data-wizard"
+		tags={['data', 'automation', 'pro']}
+	/>
 </div>
