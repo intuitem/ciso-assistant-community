@@ -3831,7 +3831,6 @@ auditlog.register(
 )
 auditlog.register(
     ComplianceAssessment,
-    m2m_fields={"owner"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
@@ -3841,7 +3840,6 @@ auditlog.register(
 )
 auditlog.register(
     RiskAssessment,
-    m2m_fields={"owner"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
@@ -3851,7 +3849,6 @@ auditlog.register(
 )
 auditlog.register(
     FindingsAssessment,
-    m2m_fields={"owner"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
