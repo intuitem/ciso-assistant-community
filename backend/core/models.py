@@ -3814,26 +3814,79 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.save()
 
 
-# TODO: common exclusion?
+common_exclude = ["created_at", "updated_at"]
+
+auditlog.register(
+    ReferenceControl,
+    exclude_fields=common_exclude,
+)
 auditlog.register(
     AppliedControl,
     m2m_fields={"owner", "evidences"},
-    exclude_fields=["created_at", "updated_at"],
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    ComplianceAssessment,
+    m2m_fields={"owner"},
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     RequirementAssessment,
     m2m_fields={"applied_controls"},
-    exclude_fields=["created_at", "updated_at"],
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RiskAssessment,
+    m2m_fields={"owner"},
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     RiskScenario,
     m2m_fields={"owner", "applied_controls", "existing_applied_controls"},
-    exclude_fields=["created_at", "updated_at"],
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    FindingsAssessment,
+    m2m_fields={"owner"},
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     Finding,
-    m2m_fields={"applied_controls"},
-    exclude_fields=["created_at", "updated_at"],
+    m2m_fields={"applied_controls", "owner"},
+    exclude_fields=common_exclude,
 )
-
+auditlog.register(
+    Framework,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RiskAcceptance,
+    m2m_fields={"risk_scenarios"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Folder,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Perimeter,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Evidence,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Asset,
+    exclude_fields=common_exclude,
+    m2m_fields={"parent_assets"},
+)
+auditlog.register(
+    SecurityException,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Vulnerability,
+    exclude_fields=common_exclude,
+)
 # actions - 0: create, 1: update, 2: delete
