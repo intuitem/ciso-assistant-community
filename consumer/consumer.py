@@ -3,6 +3,7 @@ from pathlib import Path
 
 import click
 import os
+from kafka.errors import UnsupportedCodecError
 import requests
 import yaml
 import json
@@ -126,6 +127,16 @@ def auth(email, password):
         print(res.json())
 
 
+class EventRegistry:
+    REGISTRY = {}
+
+    def add(self, event):
+        self.REGISTRY[event.__name__] = event
+
+
+event_registry = EventRegistry()
+
+
 @click.command()
 def consume():
     consumer = KafkaConsumer(
@@ -138,12 +149,34 @@ def consume():
         # value_deserializer=lambda v: v,
     )
 
-    for msg in consumer:
-        rprint(f"Consumed record. key={msg.key}, value={msg.value}")
+    try:
+        for msg in consumer:
+            rprint(f"Consumed record. key={msg.key}, value={msg.value}")
+            try:
+                message = json.loads(msg.value.decode("utf-8"))
+            except Exception as e:
+                rprint(f"Error decoding message: {e}")
+            else:
+                if message.get("event_type") not in event_registry.REGISTRY:
+                    rprint(
+                        "Event type not supported. Skipping. Check the event_registry for supported events."
+                    )
+                    continue
+
+    except UnsupportedCodecError:
+        print("KO")
 
 
 cli.add_command(auth)
 cli.add_command(consume)
+
+
+def update_applied_control(message: dict):
+    pass
+
+
+event_registry.add(update_applied_control)
+
 
 if __name__ == "__main__":
     cli()
