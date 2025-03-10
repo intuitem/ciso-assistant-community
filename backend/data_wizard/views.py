@@ -62,6 +62,8 @@ class LoadFileView(APIView):
 
         # get viewable and actionable folders, perimeters and frameworks
         # build a map from the name to the id
+
+        res = None
         try:
             # Read Excel file into a pandas DataFrame
             df = pd.read_excel(excel_data).fillna("")
@@ -77,7 +79,8 @@ class LoadFileView(APIView):
             )
 
         return Response(
-            {"message": "File loaded successfully"}, status=status.HTTP_200_OK
+            {"message": "File loaded successfully", "results": res},
+            status=status.HTTP_200_OK,
         )
 
     def process_data(

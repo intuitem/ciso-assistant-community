@@ -71,14 +71,16 @@ export const actions: Actions = {
 					success: false,
 					status: response.status,
 					error: errorCode,
-					message: data.message
+					message: data.message,
+					results: data.results
 				};
 			}
 
 			return {
 				success: true,
 				status: response.status,
-				message: data.message || 'File uploaded successfully'
+				message: data.message || 'File uploaded successfully',
+				results: data.results
 			};
 		} catch (error) {
 			console.error('Error during upload:', error);

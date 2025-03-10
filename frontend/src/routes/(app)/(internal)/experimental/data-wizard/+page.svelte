@@ -49,11 +49,12 @@
 	const authorizedExtensions = ['.xls', '.xlsx'];
 </script>
 
+{@debug form}
 <div class="grid grid-cols-4 gap-4">
 	<div class=" col-span-2 bg-white shadow py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
-				<h4 class="h4 font-bold"><i class="fa-solid fa-upload mr-2" />Load excel data</h4>
+				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2" />Load excel data</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400"
 					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
@@ -203,8 +204,9 @@
 			<div class="col-span-full mb-4">
 				{#if form?.success}
 					<div class="alert alert-success variant-filled-success">
-						<p>{form.message || 'File uploaded successfully'}</p>
+						<div>{form.message || 'File uploaded successfully'}</div>
 					</div>
+					<div class="text-xs font-mono p-2">{JSON.stringify(form?.results, null, 2)}</div>
 				{:else}
 					<div class="alert alert-error variant-filled-error">
 						<p>
@@ -215,6 +217,7 @@
 								: 'An error occurred'}
 						</p>
 						<p>{form?.message}</p>
+						<p>{JSON.stringify(form?.results, null, 2)}</p>
 					</div>
 				{/if}
 			</div>
