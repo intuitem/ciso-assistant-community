@@ -5,6 +5,8 @@ from core.models import Assessment, ComplianceAssessment, Evidence
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
 
+from auditlog.registry import auditlog
+
 
 class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
@@ -134,3 +136,23 @@ class Solution(NameDescriptionMixin):
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
+
+
+common_exclude = ["created_at", "updated_at"]
+
+auditlog.register(
+    Entity,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EntityAssessment,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Representative,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Solution,
+    exclude_fields=common_exclude,
+)
