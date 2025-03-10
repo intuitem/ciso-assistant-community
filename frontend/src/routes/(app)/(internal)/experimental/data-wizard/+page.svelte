@@ -25,8 +25,8 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: 'Data import',
-			body: 'The following will create objects in batch mode and cannot be undone...',
+			title: 'Caution',
+			body: 'The following will create multiple objects in batch mode and possibly on differnt domains. This operation cannot be undone and you will need to do the clean up in case of an issue.',
 			response: (r: boolean) => {
 				if (r) formElement.requestSubmit();
 			}
@@ -49,12 +49,24 @@
 	const authorizedExtensions = ['.xls', '.xlsx'];
 </script>
 
-<div class="grid grid-cols-3 gap-4">
+<div class="grid grid-cols-4 gap-4">
 	<div class=" col-span-2 bg-white shadow py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
-			<h4 class="h4 font-semibold">Load excel data <i class="fa-solid fa-upload" /></h4>
+			<div>
+				<h4 class="h4 font-bold"><i class="fa-solid fa-upload mr-2" />Load excel data</h4>
+				<a
+					class="text-indigo-600 hover:text-indigo-400"
+					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
+					>Templates and guidelines</a
+				>
+			</div>
 			<div class=" py-4">
-				Choose the type of data you are importing. Check out the templates on the side
+				<ol class="list-decimal list-inside">
+					<li>Select your file and make sure it matches the templates</li>
+					<li>Choose the corresponding model</li>
+					<li>Select the scope</li>
+					<li>Click Upload</li>
+				</ol>
 			</div>
 			<input
 				id="file"
@@ -64,122 +76,148 @@
 				required
 				bind:value={file}
 			/>
-			<div class="p-4 border">
-				<div class="flex items-center mb-4">
-					<input
-						checked
-						id="Asset"
-						type="radio"
-						value="Asset"
-						name="model"
-						bind:group={selectedModel}
-						class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-					/>
-					<label for="Asset" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-						>{m.assets()}</label
-					>
-				</div>
-				<div class="flex items-center mb-4">
-					<input
-						id="AppliedControl"
-						type="radio"
-						value="AppliedControl"
-						name="model"
-						bind:group={selectedModel}
-						class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-					/>
-					<label
-						for="AppliedControl"
-						class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-						>{m.appliedControls()}</label
-					>
-				</div>
-				<div class="flex items-center">
-					<input
-						id="ComplianceAssessment"
-						type="radio"
-						value="ComplianceAssessment"
-						name="model"
-						bind:group={selectedModel}
-						class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-					/>
-					<label
-						for="ComplianceAssessment"
-						class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-						>{m.complianceAssessment()}</label
-					>
-				</div>
+
+			<div class="rounded-lg p-4 mt-4 border-green-500 border-2">
+				<!--Model radio-->
+				<fieldset class="space-y-4">
+					<legend class="sr-only">Object</legend>
+
+					<div>
+						<label
+							for="Asset"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.assets()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="Asset"
+								id="Asset"
+								class="size-5 border-gray-300 text-blue-500"
+								checked
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="AppliedControl"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.appliedControls()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="AppliedControl"
+								id="AppliedControl"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="ComplianceAssessment"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.complianceAssessment()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="ComplianceAssessment"
+								id="ComplianceAssessment"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+				</fieldset>
 			</div>
 
-			<label for="folder" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-				>Select a fallback Domain (if not set on the file)</label
-			>
-			<select
-				id="folder"
-				name="folder"
-				disabled={isDomainDisabled}
-				class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-			>
-				{#each data.data.folders as folder}
-					<option value={folder.id}>{folder.name}</option>
-				{/each}
-			</select>
-			<label for="perimeter" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-				>Select a Perimeter</label
-			>
-			<select
-				id="perimeter"
-				name="perimeter"
-				disabled={isPerimeterDisabled}
-				class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-			>
-				{#each data.data.perimeters as perimeter}
-					<option value={perimeter.id}>{perimeter.name}</option>
-				{/each}
-			</select>
+			<div class="rounded-lg p-4 mt-4 border-pink-500 border-2">
+				<!--Select targets -->
+				<label for="folder" class="block text-sm font-medium text-gray-900"
+					>Select a fallback Domain (if not set on the file)</label
+				>
+				<select
+					id="folder"
+					name="folder"
+					disabled={isDomainDisabled}
+					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+				>
+					{#each data.data.folders as folder}
+						<option value={folder.id}>{folder.name}</option>
+					{/each}
+				</select>
+				<label for="perimeter" class="block text-sm font-medium text-gray-900"
+					>Select a Perimeter</label
+				>
+				<select
+					id="perimeter"
+					name="perimeter"
+					disabled={isPerimeterDisabled}
+					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+				>
+					{#each data.data.perimeters as perimeter}
+						<option value={perimeter.id}>{perimeter.name}</option>
+					{/each}
+				</select>
 
-			<label for="framework" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-				>Select a Framework</label
-			>
-			<select
-				id="framework"
-				name="framework"
-				disabled={isPerimeterDisabled}
-				class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-			>
-				{#each data.data.frameworks as framework}
-					<option value={framework.id}>{framework.name}</option>
-				{/each}
-			</select>
-			<button
-				class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
-				type="button"
-				on:click={modalConfirm}>{m.upload()}</button
-			>
+				<label for="framework" class="block text-sm font-medium text-gray-900"
+					>Select a Framework</label
+				>
+				<select
+					id="framework"
+					name="framework"
+					disabled={isPerimeterDisabled}
+					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+				>
+					{#each data.data.frameworks as framework}
+						<option value={framework.id}>{framework.name}</option>
+					{/each}
+				</select>
+			</div>
+			<div class="flex py-4">
+				<button
+					class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
+					type="button"
+					on:click={modalConfirm}><i class="fa-solid fa-file-arrow-up mr-2"></i>{m.upload()}</button
+				>
+			</div>
 		</form>
 	</div>
-	<div>Templates - expected format</div>
-</div>
-<div>
-	Parsing results:
-	{#if formSubmitted}
-		<div class="col-span-full mb-4">
-			{#if form?.success}
-				<div class="alert alert-success variant-filled-success">
-					<p>{form.message || 'File uploaded successfully'}</p>
-				</div>
-			{:else}
-				<div class="alert alert-error variant-filled-error">
-					<p>
-						{form?.error
-							? typeof m[form.error] === 'function'
-								? m[form.error]()
-								: form.error
-							: 'An error occurred'}
-					</p>
-					<p>{form?.message}</p>
-				</div>
-			{/if}
-		</div>
-	{/if}
+	<div class="col-span-2 p-4">
+		Parsing results:
+		{#if formSubmitted}
+			<div class="col-span-full mb-4">
+				{#if form?.success}
+					<div class="alert alert-success variant-filled-success">
+						<p>{form.message || 'File uploaded successfully'}</p>
+					</div>
+				{:else}
+					<div class="alert alert-error variant-filled-error">
+						<p>
+							{form?.error
+								? typeof m[form.error] === 'function'
+									? m[form.error]()
+									: form.error
+								: 'An error occurred'}
+						</p>
+						<p>{form?.message}</p>
+					</div>
+				{/if}
+			</div>
+		{/if}
+	</div>
 </div>

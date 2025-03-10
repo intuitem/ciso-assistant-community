@@ -110,7 +110,7 @@ class LoadFileView(APIView):
                 asset_data = {
                     "ref_id": record.get("ref_id", ""),
                     "name": record.get("name"),  # Name is mandatory
-                    "type": record.get("type", ""),
+                    "type": record.get("type", "SP"),
                     "folder": domain,
                     "description": record.get("description", ""),
                 }
@@ -139,9 +139,6 @@ class LoadFileView(APIView):
 
         # Applied Controls processing
         if model_type == "AppliedControl":
-            # Reset results counter for this model type
-            results = {"successful": 0, "failed": 0, "errors": []}
-
             for record in records:
                 domain = folder_id
                 if record.get("domain") != "":
@@ -168,9 +165,9 @@ class LoadFileView(APIView):
                     "ref_id": record.get("ref_id", ""),
                     "name": record.get("name"),  # Name is mandatory
                     "folder": domain,
-                    "status": record.get("status", ""),
+                    "status": record.get("status", "to_do"),
                     "priority": priority,
-                    "csf_function": record.get("csf_function", ""),
+                    "csf_function": record.get("csf_function", "govern"),
                 }
 
                 # Use the serializer for validation and saving
