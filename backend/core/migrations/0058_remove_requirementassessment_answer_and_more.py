@@ -3,29 +3,122 @@
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+def convert_question_to_questions(node_urn, old_data):
+    """
+    Converts the old format (format 1) to the target format (format 2).
+    The old format contains "question" (with question_type and question_choices)
+    and "questions" (a list of questions with urn and text).
+    """
+    if not old_data:
+        return {}
 
+    question_section = old_data.get("question", {})
+    question_type = question_section.get("question_type")
+    choices_texts = question_section.get("question_choices", [])
+
+    new_questions = {}
+    for q in old_data.get("questions", []):
+        urn = q.get("urn")
+        text = q.get("text")
+        choices = []
+        for idx, choice_text in enumerate(choices_texts):
+            choice_urn = (
+                f"urn:intuitem:risk:framework:{node_urn.split(':')[-1]}:choice:{idx}"
+            )
+            choices.append({"urn": choice_urn, "value": choice_text})
+
+        new_questions[urn] = {"type": question_type, "choices": choices, "text": text}
+
+    return new_questions
+
+def migrate_questions(apps, schema_editor):
+    """
+    For each instance of Requirementnode, read the old "question" field,
+    convert it, and store the result in the new "questions" field.
+    """
+    Requirementnode = apps.get_model("core", "Requirementnode")
+    for instance in Requirementnode.objects.all():
+        old_questions = getattr(instance, "question", None)
+        if old_questions:
+            instance.questions = convert_question_to_questions(
+                instance.urn, old_questions
+            )
+            instance.save(update_fields=["questions"])
+
+def migrate_answers_format(apps, schema_editor):
+    """
+    Converts the old 'answer' field format to the new 'answers' format.
+    """
+    RequirementAssessment = apps.get_model("core", "Requirementassessment")
+    RequirementNode = apps.get_model("core", "Requirementnode")
+
+    node_choices_map = {}
+
+    # Build a mapping of node URNs to their choice texts and indices
+    for node in RequirementNode.objects.all():
+        if node.questions:
+            for q_urn, q_data in node.questions.items():
+                node_choices_map[q_urn] = {
+                    "node_urn": node.urn,  # Store the node URN for ID generation
+                    "choices": {choice["value"]: idx for idx, choice in enumerate(q_data.get("choices", []))}
+                }
+
+    for instance in RequirementAssessment.objects.all():
+        old_answer_data = getattr(instance, "answer", None)
+        new_answers = {}
+
+        if not old_answer_data or not isinstance(old_answer_data, dict):
+            continue  # Skip if the format is unexpected
+
+        for question_data in old_answer_data.get("questions", []):
+            question_urn = question_data.get("urn")
+            answer_value = question_data.get("answer")  # The actual user response
+
+            # Get the corresponding node and choices mapping
+            if question_urn not in node_choices_map:
+                continue
+
+            node_urn = node_choices_map[question_urn]["node_urn"]
+            choices_map = node_choices_map[question_urn]["choices"]
+
+            # Handle single-choice answers
+            if isinstance(answer_value, str):
+                if answer_value in choices_map:
+                    new_answers[question_urn] = f"urn:intuitem:risk:framework:{node_urn.split(':')[-1]}:choice:{choices_map[answer_value]}"
+                else:
+                    new_answers[question_urn] = answer_value  # Keep free-text answers as they are
+
+        # Update the new field
+        instance.answers = new_answers
+        instance.save(update_fields=["answers"])
+
+
+class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0057_store_storedlibrary_content_as_dict_not_str'),
+        ("core", "0057_store_storedlibrary_content_as_dict_not_str"),
     ]
 
     operations = [
+        migrations.AddField(
+            model_name="requirementnode",
+            name="questions",
+            field=models.JSONField(blank=True, null=True, verbose_name="Questions"),
+        ),
+        migrations.RunPython(migrate_questions),
         migrations.RemoveField(
-            model_name='requirementassessment',
-            name='answer',
+            model_name="requirementnode",
+            name="question",
         ),
         migrations.RemoveField(
-            model_name='requirementnode',
-            name='question',
+            model_name="requirementassessment",
+            name="answer",
         ),
         migrations.AddField(
-            model_name='requirementassessment',
-            name='answers',
-            field=models.JSONField(blank=True, null=True, verbose_name='Answers'),
+            model_name="requirementassessment",
+            name="answers",
+            field=models.JSONField(blank=True, null=True, verbose_name="Answers"),
         ),
-        migrations.AddField(
-            model_name='requirementnode',
-            name='questions',
-            field=models.JSONField(blank=True, null=True, verbose_name='Questions'),
+        migrations.RunPython(
+            migrate_answers_format
         ),
     ]

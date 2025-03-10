@@ -324,7 +324,7 @@ def get_color(wb, cell):
     color = theme_and_tint_to_rgb(wb, theme, tint)
     return "#" + color
 
-def get_answers(tab):
+def get_answers(urn, tab):
     print("processing answers")
     found_answers = {}
     is_header = True
@@ -340,14 +340,14 @@ def get_answers(tab):
                 else None
             )
             type = (
-                row[header.get("type")].value
-                if "type" in header
+                row[header.get("question_type")].value
+                if "question_type" in header
                 else None
             )
             choices = (
-                [{"urn": f"{library_vars['framework_urn']}:{row_id}:choice:{i}", "value": choice.strip()} for i, choice in enumerate(row[header.get("choices")].value.split("\n"))]
-                if "choices" in header
-                and row[header["choices"]].value
+                [{"urn": f"{library_vars['framework_urn']}:{urn.split(':')[-1]}:choice:{i}", "value": choice.strip()} for i, choice in enumerate(row[header.get("question_choices")].value.split("\n"))]
+                if "question_choices" in header
+                and row[header["question_choices"]].value
                 else None
             )
             found_answers[row_id] = {
@@ -367,10 +367,6 @@ def build_ids_set(tab_name):
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
-    try:
-        answers = get_answers(dataframe["answers"])
-    except KeyError:
-        answers = {}
     if title.lower() == "library_content":
         print("processing library content")
         for row in tab:
@@ -486,6 +482,10 @@ for tab in dataframe:
                 parent_urn = parent_for_depth[depth]
                 current_depth = depth
                 req_node = {"urn": urn, "assessable": assessable, "depth": depth}
+                try:
+                    answers = get_answers(urn, dataframe["answers"])
+                except KeyError:
+                    answers = {}
                 if parent_urn:
                     req_node["parent_urn"] = parent_urn
                 if ref_id:

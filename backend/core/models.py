@@ -72,6 +72,7 @@ def transform_questions_to_answers(questions):
         }
     return answers
 
+
 ########################### Referential objects #########################
 
 
@@ -574,29 +575,43 @@ class LibraryUpdater:
                                 continue
 
                             answer_val = answers[urn]
-                            type = question.get('type')
+                            type = question.get("type")
 
-                            if type == 'multiple_choices':
+                            if type == "multiple_choices":
                                 # Keep only the choices that exist in the question
                                 if isinstance(answer_val, list):
-                                    valid_choices = {choice['urn'] for choice in question.get('choices', [])}
-                                    answers[urn] = [choice for choice in answer_val if choice in valid_choices]
+                                    valid_choices = {
+                                        choice["urn"]
+                                        for choice in question.get("choices", [])
+                                    }
+                                    answers[urn] = [
+                                        choice
+                                        for choice in answer_val
+                                        if choice in valid_choices
+                                    ]
                                 else:
                                     answers[urn] = None
 
-                            elif type == 'unique_choice':
+                            elif type == "unique_choice":
                                 # If the answer does not match a valid choice, reset it to None
-                                valid_choices = {choice['urn'] for choice in question.get('choices', [])}
-                                answers[urn] = answer_val if answer_val in valid_choices else None
+                                valid_choices = {
+                                    choice["urn"]
+                                    for choice in question.get("choices", [])
+                                }
+                                answers[urn] = (
+                                    answer_val if answer_val in valid_choices else None
+                                )
 
-                            elif type == 'text':
+                            elif type == "text":
                                 # For a text question, simply check that it is a string
-                                answers[urn] = answer_val if isinstance(answer_val, str) else None
+                                answers[urn] = (
+                                    answer_val if isinstance(answer_val, str) else None
+                                )
 
-                            elif type == 'date':
+                            elif type == "date":
                                 # For a date question, check the expected format (e.g., "YYYY-MM-DD")
                                 try:
-                                    datetime.strptime(answer_val, '%Y-%m-%d')
+                                    datetime.strptime(answer_val, "%Y-%m-%d")
                                     answers[urn] = answer_val
                                 except Exception:
                                     answers[urn] = None
