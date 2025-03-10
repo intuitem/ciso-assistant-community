@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
 from core.models import AppliedControl
@@ -11,6 +11,10 @@ from global_settings.models import GlobalSettings
 
 import logging.config
 import structlog
+
+from auditlog.registry import auditlog
+
+from django.core.management import call_command
 
 logging.config.dictConfig(settings.LOGGING)
 logger = structlog.getLogger(__name__)
@@ -136,3 +140,15 @@ def check_email_configuration(owner_email, controls):
         return False
 
     return True
+
+
+@periodic_task(crontab(hour="22", minute="30"))
+def auditlog_cleanup():
+    # run the auditlogflush with --before-date of today minus 30 days
+    before_date = date.today() - timedelta(days=30)
+
+    try:
+        call_command("auditlogflush", "--before-date", before_date.isoformat())
+        logger.info(f"Successfully cleaned up audit logs before {before_date}")
+    except Exception as e:
+        logger.error(f"Failed to clean up audit logs: {str(e)}")

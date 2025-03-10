@@ -4,6 +4,10 @@ from auditlog.models import LogEntry
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+import structlog
+
+logger = structlog.getLogger(__name__)
+
 
 # Fix the actor resolution with the custom middleware
 # Based on https://stackoverflow.com/questions/40740061/auditlog-with-django-and-drf
@@ -30,4 +34,5 @@ def add_user_info_to_log_entry(sender, instance, created, **kwargs):
             )
         except Exception:
             # Fail silently if there's any issue
+            logger.debug("audit log enrichment with actor failed.")
             pass
