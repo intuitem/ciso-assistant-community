@@ -68,7 +68,7 @@ def transform_questions_to_answers(questions):
     answers = {}
     for question_urn, question in questions.items():
         answers[question_urn] = {
-            "value": [] if question["question_type"] == "multiple_choice" else None,
+            "value": [] if question["type"] == "multiple_choice" else None,
         }
     return answers
 
@@ -574,26 +574,26 @@ class LibraryUpdater:
                                 continue
 
                             answer_val = answers[urn]
-                            question_type = question.get('question_type')
+                            type = question.get('type')
 
-                            if question_type == 'multiple_choices':
+                            if type == 'multiple_choices':
                                 # Keep only the choices that exist in the question
                                 if isinstance(answer_val, list):
-                                    valid_choices = {choice['urn'] for choice in question.get('question_choices', [])}
+                                    valid_choices = {choice['urn'] for choice in question.get('choices', [])}
                                     answers[urn] = [choice for choice in answer_val if choice in valid_choices]
                                 else:
                                     answers[urn] = None
 
-                            elif question_type == 'unique_choice':
+                            elif type == 'unique_choice':
                                 # If the answer does not match a valid choice, reset it to None
-                                valid_choices = {choice['urn'] for choice in question.get('question_choices', [])}
+                                valid_choices = {choice['urn'] for choice in question.get('choices', [])}
                                 answers[urn] = answer_val if answer_val in valid_choices else None
 
-                            elif question_type == 'text':
+                            elif type == 'text':
                                 # For a text question, simply check that it is a string
                                 answers[urn] = answer_val if isinstance(answer_val, str) else None
 
-                            elif question_type == 'date':
+                            elif type == 'date':
                                 # For a date question, check the expected format (e.g., "YYYY-MM-DD")
                                 try:
                                     datetime.strptime(answer_val, '%Y-%m-%d')

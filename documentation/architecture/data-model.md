@@ -1236,8 +1236,8 @@ The format for questions and answers json fields will evolve over time. The init
 ```json
 {
     "urn:intuitem:risk:req_node:example:a.1:question:1": {
-        "question_type": "unique_choice",
-        "question_choices": [
+        "type": "unique_choice",
+        "choices": [
             {
                 "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
                 "value": "yes"

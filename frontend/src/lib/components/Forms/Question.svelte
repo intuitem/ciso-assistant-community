@@ -39,13 +39,13 @@
 		{#each Object.entries(questions) as [urn, question]}
 			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 				<p class="font-semibold p-2">{question.text}</p>
-				{#if question.question_type === 'unique_choice'}
+				{#if question.type === 'unique_choice'}
 					<RadioGroup
 						class="flex-col"
 						active="variant-filled-primary"
 						hover="hover:variant-soft-primary"
 					>
-						{#each question.question_choices as option}
+						{#each question.choices as option}
 							<RadioItem
 								class="shadow-md"
 								bind:group={$value[urn]}
@@ -56,7 +56,7 @@
 							>
 						{/each}
 					</RadioGroup>
-				{:else if question.question_type === 'date'}
+				{:else if question.type === 'date'}
 					<input
 						type="date"
 						placeholder=""

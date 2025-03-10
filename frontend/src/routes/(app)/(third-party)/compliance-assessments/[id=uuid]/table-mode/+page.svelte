@@ -329,13 +329,13 @@
 											{:else}
 												<p class="text-gray-400 italic">{m.noAnswer()}</p>
 											{/if}
-										{:else if question.question_type === 'unique_choice'}
+										{:else if question.type === 'unique_choice'}
 											<RadioGroup
 												class="flex-col"
 												active="variant-filled-primary"
 												hover="hover:variant-soft-primary"
 											>
-												{#each question.question_choices as option}
+												{#each question.choices as option}
 													<RadioItem
 														class="shadow-md flex"
 														bind:group={requirementAssessment.answers[urn]}
@@ -350,7 +350,7 @@
 													</RadioItem>
 												{/each}
 											</RadioGroup>
-										{:else if question.question_type === 'date'}
+										{:else if question.type === 'date'}
 											<input
 												type="date"
 												placeholder=""

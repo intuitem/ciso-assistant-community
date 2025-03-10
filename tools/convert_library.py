@@ -100,8 +100,8 @@ Conventions:
     For Answers:
         The first line is a header, with the following possible fields (* for required):
             - id(*)
-            - question_type(*)
-            - question_choices(*)
+            - type(*)
+            - choices(*)
     A library has a single locale, which is the reference language. Translations are given in columns with header like "name[fr]"
     Dependencies are given as a comma or blank separated list of urns.
 """
@@ -339,20 +339,20 @@ def get_answers(tab):
                 if row[header["id"]].value
                 else None
             )
-            question_type = (
-                row[header.get("question_type")].value
-                if "question_type" in header
+            type = (
+                row[header.get("type")].value
+                if "type" in header
                 else None
             )
-            question_choices = (
-                [{"urn": f"{library_vars['framework_urn']}:{row_id}:choice:{i}", "value": choice.strip()} for i, choice in enumerate(row[header.get("question_choices")].value.split("\n"))]
-                if "question_choices" in header
-                and row[header["question_choices"]].value
+            choices = (
+                [{"urn": f"{library_vars['framework_urn']}:{row_id}:choice:{i}", "value": choice.strip()} for i, choice in enumerate(row[header.get("choices")].value.split("\n"))]
+                if "choices" in header
+                and row[header["choices"]].value
                 else None
             )
             found_answers[row_id] = {
-                "question_type": question_type,
-                "question_choices": question_choices,
+                "type": type,
+                "choices": choices,
             }
 
     return found_answers
@@ -552,8 +552,8 @@ for tab in dataframe:
                 if answer and questions:
                     req_node["questions"] = {
                         f"{req_node['urn']}:question:{i + 1}": {
-                            "question_type": answers[answer[i]]["question_type"] if len(answer) > 1 else answers[answer[0]]["question_type"],
-                            "question_choices": answers[answer[i] or answer[0]]["question_choices"] if len(answer) > 1 else answers[answer[0]]["question_choices"],
+                            "type": answers[answer[i]]["type"] if len(answer) > 1 else answers[answer[0]]["type"],
+                            "choices": answers[answer[i] or answer[0]]["choices"] if len(answer) > 1 else answers[answer[0]]["choices"],
                             "text": question,
                         }
                         for i, question in enumerate(questions)
