@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-kafka-python = "^2.0.6"
+kafka-python = { version = "^2.0.6", extras = ["snappy"] }
 click = "^8.1.8"
 requests = "^2.32.3"
 rich = "^13.9.4"

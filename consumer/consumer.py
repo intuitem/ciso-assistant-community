@@ -150,6 +150,7 @@ def consume():
     )
 
     try:
+        rprint("Starting consumer")
         for msg in consumer:
             rprint(f"Consumed record. key={msg.key}, value={msg.value}")
             try:
@@ -162,9 +163,11 @@ def consume():
                         "Event type not supported. Skipping. Check the event_registry for supported events."
                     )
                     continue
+                rprint(f"Processing event: {message.get('event_type')}")
+                event_registry.REGISTRY[message.get("event_type")](message)
 
-    except UnsupportedCodecError:
-        print("KO")
+    except UnsupportedCodecError as e:
+        rprint("KO", e)
 
 
 cli.add_command(auth)
@@ -172,7 +175,24 @@ cli.add_command(consume)
 
 
 def update_applied_control(message: dict):
-    pass
+    applied_control_id = message.get("applied_control_id")
+    new_status = message.get("new_status")
+    url = f"{API_URL}/applied-controls/{applied_control_id}/"
+    data = json.dumps({"status": new_status})
+
+    res = requests.patch(
+        url,
+        data,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Token {TOKEN}",
+        },
+        verify=VERIFY_CERTIFICATE,
+    )
+
+    rprint(res.status_code)
+    rprint(res.json())
 
 
 event_registry.add(update_applied_control)
