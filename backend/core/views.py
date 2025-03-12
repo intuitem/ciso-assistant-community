@@ -4248,6 +4248,9 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "compliance_assessment",
         "applied_controls",
         "security_exceptions",
+        "requirement__ref_id",
+        "compliance_assessment__ref_id",
+        "compliance_assessment__assets__ref_id",
     ]
     search_fields = ["requirement__name", "requirement__description"]
 
