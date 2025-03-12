@@ -5,6 +5,7 @@ def process_selector(
     selector: dict[str, str],
     endpoint: str,
     token: str,
+    selector_mapping: dict[str, str] = {},
     verify_certificate: bool = True,
 ):
     """
@@ -15,6 +16,7 @@ def process_selector(
                          and optionally 'target' (default: 'single').
         endpoint (str): The API endpoint URL to query for objects.
         token (str): API token for authentication.
+        selector_mapping (dict): Mapping of selector keys to the API filterset fields.
         verify_certificate (bool): Whether to verify the TLS certificate.
 
     Returns:
@@ -26,6 +28,12 @@ def process_selector(
                    does not match the expected target.
     """
     target = selector.pop("target", "single")
+
+    if selector_mapping:
+        for key, value in selector.items():
+            if key in selector_mapping:
+                selector[selector_mapping[key]] = selector.pop(key)
+
     query_params = selector
 
     headers = {

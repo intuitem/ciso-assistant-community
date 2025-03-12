@@ -16,7 +16,9 @@ class EventRegistry:
 event_registry = EventRegistry()
 
 
-def update_object(message: dict, resource_endpoint: str = None):
+def update_object(
+    message: dict, resource_endpoint: str | None = None, selector_mapping: dict = {}
+):
     """
     Generic function to update an object.
 
@@ -56,7 +58,13 @@ def update_object(message: dict, resource_endpoint: str = None):
         raise Exception("No selector provided.")
 
     search_endpoint = f"{API_URL}/{resource_endpoint}/"
-    result = process_selector(selector, search_endpoint, TOKEN, VERIFY_CERTIFICATE)
+    result = process_selector(
+        selector,
+        selector_mapping=selector_mapping,
+        endpoint=search_endpoint,
+        token=TOKEN,
+        verify_certificate=VERIFY_CERTIFICATE,
+    )
     if isinstance(result, list):
         object_ids = result
     else:
