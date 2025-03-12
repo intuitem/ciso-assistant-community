@@ -148,7 +148,16 @@ def auditlog_cleanup():
     before_date = date.today() - timedelta(days=30)
 
     try:
-        call_command("auditlogflush", "--before-date", before_date.isoformat())
+        call_command("auditlogflush", "--before-date", before_date.isoformat(), "--yes")
         logger.info(f"Successfully cleaned up audit logs before {before_date}")
     except Exception as e:
         logger.error(f"Failed to clean up audit logs: {str(e)}")
+
+
+@periodic_task(crontab(hour="*/3"))
+def auditlog_prune():
+    try:
+        call_command("prune_auditlog")
+        logger.info(f"Successfully pruned audit logs")
+    except Exception as e:
+        logger.error(f"Failed to prune the audit logs: {str(e)}")
