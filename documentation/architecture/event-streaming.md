@@ -57,6 +57,7 @@ The following fields are common to all events:
 - `event_id: UUID4`: Unique identifier for the event
 - `event_type: string`: Use case to trigger (e.g. `update_applied_control_status`, `update_requirement_assessment_status`, `attach_evidence_to_applied_control`...)
 - `version: int`: Schema version
+- `selectors: object`: Key-value pairs to pass to the API as filters (e.g. `{"ref_id": "ID.AM-01", "folder": "global/mydomain", "target": "single"}`)
 
 ---
 
