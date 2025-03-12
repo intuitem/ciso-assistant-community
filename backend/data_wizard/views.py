@@ -316,7 +316,10 @@ class LoadFileView(APIView):
                                 "score": record.get("score")
                                 if record.get("score") != ""
                                 else 0,
-                                "observations": record.get("observations", ""),
+                                "is_scored": True
+                                if record.get("score") != ""
+                                else False,
+                                "observation": record.get("observations", ""),
                             }
                             # Use the serializer for validation and saving
                             req_serializer = RequirementAssessmentWriteSerializer(
