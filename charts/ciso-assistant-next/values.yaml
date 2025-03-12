@@ -269,6 +269,8 @@ ingress:
   path: /
   # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
   pathType: Prefix
+  # -- Use existing TLS secret
+  existingSecret: ""
   # -- Custom TLS certificate as secret
   ## Note: 'key' and 'certificate' are expected in PEM format
   certificateSecret: {}
