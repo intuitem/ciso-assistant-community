@@ -177,7 +177,7 @@ huey:
   # -- Huey name
   name: huey
 
-  # -- The number of frontend pods to run
+  # -- The number of Huey pods to run
   replicas: 1
 
   ## Backend persistence configuration (used for sqlite db and local storage)

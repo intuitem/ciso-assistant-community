@@ -119,7 +119,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | huey.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence (for Huey) |
 | huey.persistence.sqlite.size | string | `"1Gi"` | SQLite persistant volume size |
 | huey.persistence.sqlite.storageClass | string | `""` | SQLite persistant volume storageClass |
-| huey.replicas | int | `1` | The number of frontend pods to run |
+| huey.replicas | int | `1` | The number of Huey pods to run |
 | huey.resources | object | `{}` | Resources for the Huey |
 | huey.service.annotations | object | `{}` | Huey service annotations |
 | huey.service.labels | object | `{}` | Huey service labels |
