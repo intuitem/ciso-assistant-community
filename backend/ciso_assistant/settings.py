@@ -432,7 +432,11 @@ HUEY_FILE_PATH = os.environ.get("HUEY_FILE_PATH", BASE_DIR / "db" / "huey.db")
 HUEY = {
     "huey_class": "huey.SqliteHuey",
     "name": "ciso_assistant",
+    "utc": True,
     "filename": HUEY_FILE_PATH,
     "results": True,  # would be interesting for debug
     "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
 }
+
+AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
+AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))

@@ -2,17 +2,14 @@ from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
 from core.models import AppliedControl
-from django.db.models import Q
 from django.core.mail import send_mail
 from django.conf import settings
 import logging
-import random
 from global_settings.models import GlobalSettings
 
 import logging.config
 import structlog
 
-from auditlog.registry import auditlog
 
 from django.core.management import call_command
 
@@ -144,7 +141,8 @@ def check_email_configuration(owner_email, controls):
 
 @periodic_task(crontab(hour="22", minute="30"))
 def auditlog_retention_cleanup():
-    before_date = date.today() - timedelta(days=90)
+    retention_days = getattr(settings, "AUDITLOG_RETENTION_DAYS", 90)
+    before_date = date.today() - timedelta(days=retention_days)
 
     try:
         call_command("auditlogflush", "--before-date", before_date.isoformat(), "--yes")
@@ -157,6 +155,6 @@ def auditlog_retention_cleanup():
 def auditlog_prune():
     try:
         call_command("prune_auditlog")
-        logger.info(f"Successfully pruned audit logs")
+        logger.info("Successfully pruned audit logs")
     except Exception as e:
         logger.error(f"Failed to prune the audit logs: {str(e)}")

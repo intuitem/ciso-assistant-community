@@ -1,12 +1,14 @@
 from django.core.management.base import BaseCommand
 from auditlog.models import LogEntry
 
+from django.conf import settings
+
 
 class Command(BaseCommand):
     help = "Prunes auditlog entries to maintain maximum count"
 
     def handle(self, *args, **options):
-        MAX_RECORDS = 50000 + 1000
+        MAX_RECORDS = getattr(settings, "AUDITLOG_MAX_RECORDS", 50000) + 1000
 
         # Count all records
         count = LogEntry.objects.count()
