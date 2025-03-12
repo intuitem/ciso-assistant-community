@@ -984,6 +984,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def create(self, validated_data: Any):
+        validated_data.pop("create_applied_controls_from_suggestions", None)
         return super().create(validated_data)
 
     class Meta:
