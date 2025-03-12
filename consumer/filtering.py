@@ -25,14 +25,8 @@ def process_selector(
         Exception: If the API call fails, the response is not as expected, or if the result count
                    does not match the expected target.
     """
-    query_params = {}
-    target = "single"  # default target
-
-    for key, value in selector.items():
-        if key == "target":
-            target = value
-        else:
-            query_params[key] = value
+    target = selector.pop("target", "single")
+    query_params = selector
 
     headers = {
         "Accept": "application/json",
