@@ -143,9 +143,8 @@ def check_email_configuration(owner_email, controls):
 
 
 @periodic_task(crontab(hour="22", minute="30"))
-def auditlog_cleanup():
-    # run the auditlogflush with --before-date of today minus 30 days
-    before_date = date.today() - timedelta(days=30)
+def auditlog_retention_cleanup():
+    before_date = date.today() - timedelta(days=90)
 
     try:
         call_command("auditlogflush", "--before-date", before_date.isoformat(), "--yes")
