@@ -175,8 +175,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "auditlog.middleware.AuditlogMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
@@ -458,3 +458,5 @@ HUEY = {
     "results": True,  # would be interesting for debug
     "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
 }
+AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
+AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
