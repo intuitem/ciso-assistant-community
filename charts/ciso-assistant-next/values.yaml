@@ -15,6 +15,9 @@ global:
   # -- Globally enable TLS (Ingress, URLs, etc.)
   tls: false
 
+  # -- Extra allowed hosts (comma separated, without spaces)
+  extraAllowedHosts: ""
+
   # Default image used by all components
   image:
     # -- If defined, a registry applied to all CISO Assistant deployments

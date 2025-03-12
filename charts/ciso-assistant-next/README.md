@@ -98,6 +98,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | global.clusterDomain | string | `"cluster.local"` | Kubernetes cluster domain name |
 | global.commonLabels | object | `{}` | Labels to add to all deployed objects |
 | global.domain | string | `"octopus.foo.bar"` | Default domain used by all components # Used for ingresses, certificates, environnement vars, etc. |
+| global.extraAllowedHosts | string | `""` | Extra allowed hosts (comma separated, without spaces) |
 | global.image.imagePullPolicy | string | `"IfNotPresent"` | If defined, a imagePullPolicy applied to all CISO Assistant deployments |
 | global.image.registry | string | `"ghcr.io"` | If defined, a registry applied to all CISO Assistant deployments |
 | global.image.tag | string | `""` | Overrides the global CISO Assistant image tag whose default is the chart appVersion |
