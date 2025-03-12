@@ -2,7 +2,7 @@ import requests
 
 
 def process_selector(
-    selector: dict,
+    selector: dict[str, str],
     endpoint: str,
     token: str,
     verify_certificate: bool = True,
