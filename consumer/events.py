@@ -39,7 +39,7 @@ def update_applied_control(message: dict):
             object_ids = [result]
     else:
         if not object_id:
-            raise Exception("No applied_control_id provided and no selector available.")
+            raise Exception("No object_id provided and no selector available.")
         object_ids = [object_id]
 
     # Process each applied control update
