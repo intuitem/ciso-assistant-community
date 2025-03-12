@@ -313,14 +313,12 @@ class LoadFileView(APIView):
                                 "status": record.get("requirement_progress")
                                 if record.get("requirement_progress") != ""
                                 else "to_do",
-                                "score": record.get("score")
-                                if record.get("score") != ""
-                                else 0,
-                                "is_scored": True
-                                if record.get("score") != ""
-                                else False,
                                 "observation": record.get("observations", ""),
                             }
+                            if record.get("score") != "":
+                                requirement_data.update(
+                                    {"score": record.get("score"), "is_scored": True}
+                                )
                             # Use the serializer for validation and saving
                             req_serializer = RequirementAssessmentWriteSerializer(
                                 instance=requirement_assessment,
