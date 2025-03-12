@@ -1298,6 +1298,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "risk_assessments",
             "findings",
             "findings_assessments",
+            "ref_id",
         ]
 
 
