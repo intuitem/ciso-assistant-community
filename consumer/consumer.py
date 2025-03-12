@@ -1,99 +1,24 @@
+import json
+import os
 import sys
-from pathlib import Path
 
 import click
-import os
-from kafka.errors import UnsupportedCodecError
 import requests
 import yaml
-import json
+from kafka import KafkaConsumer
+from kafka.errors import UnsupportedCodecError
 from rich import print as rprint
 
-from icecream import ic
+from events import event_registry
+from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD
 
-from kafka import KafkaConsumer
-
-cli_cfg = dict()
 auth_data = dict()
-
-API_URL = ""
-GLOBAL_FOLDER_ID = None
-TOKEN = ""
-EMAIL = ""
-PASSWORD = ""
-
-CONSUMER_CONFG_PATH = ".consumer_config.yaml"
 
 
 @click.group()
 def cli():
     """CLICA is the CLI tool to interact with CISO Assistant REST API."""
     pass
-
-
-@click.command()
-def init_config():
-    """Create/Reset the config file."""
-    template_data = {
-        "rest": {
-            "url": "https://localhost:8443/api",
-            "verify_certificate": True,
-        },
-        "credentials": {"email": "user@company.org", "password": ""},
-    }
-    if click.confirm(
-        f"This will create {CONSUMER_CONFG_PATH} for you to fill and will RESET any exisiting one. Do you wish to continue?"
-    ):
-        with open(CONSUMER_CONFG_PATH, "w") as yfile:
-            yaml.safe_dump(
-                template_data, yfile, default_flow_style=False, sort_keys=False
-            )
-            print(
-                f"Config file is available at {CONSUMER_CONFG_PATH}. Please update it with your credentials."
-            )
-
-
-try:
-    with open(CONSUMER_CONFG_PATH, "r") as yfile:
-        cli_cfg = yaml.safe_load(yfile)
-except FileNotFoundError:
-    print(
-        "Config file not found. Running the init command to create it but you need to fill it.",
-        file=sys.stderr,
-    )
-    init_config()
-
-try:
-    API_URL = cli_cfg["rest"]["url"]
-except KeyError:
-    print(
-        "Missing API URL. Check that the config.yaml file is properly set or trigger init command to create a new one.",
-        file=sys.stderr,
-    )
-    sys.exit(1)
-
-try:
-    EMAIL = cli_cfg["credentials"]["email"]
-    PASSWORD = cli_cfg["credentials"]["password"]
-except KeyError:
-    print(
-        "Missing credentials in the config file. You need to pass them to the CLI in this case.",
-        file=sys.stderr,
-    )
-
-VERIFY_CERTIFICATE = cli_cfg["rest"].get("verify_certificate", True)
-
-
-def check_auth():
-    if Path(".tmp.yaml").exists():
-        with open(".tmp.yaml", "r") as yfile:
-            auth_data = yaml.safe_load(yfile)
-            return auth_data["token"]
-    else:
-        click.echo("Could not find authentication data.", err=True)
-
-
-TOKEN = check_auth()
 
 
 @click.command()
@@ -125,16 +50,6 @@ def auth(email, password):
             file=sys.stderr,
         )
         print(res.json())
-
-
-class EventRegistry:
-    REGISTRY = {}
-
-    def add(self, event):
-        self.REGISTRY[event.__name__] = event
-
-
-event_registry = EventRegistry()
 
 
 @click.command()
@@ -172,30 +87,6 @@ def consume():
 
 cli.add_command(auth)
 cli.add_command(consume)
-
-
-def update_applied_control(message: dict):
-    applied_control_id = message.get("applied_control_id")
-    new_status = message.get("new_status")
-    url = f"{API_URL}/applied-controls/{applied_control_id}/"
-    data = json.dumps({"status": new_status})
-
-    res = requests.patch(
-        url,
-        data,
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": f"Token {TOKEN}",
-        },
-        verify=VERIFY_CERTIFICATE,
-    )
-
-    rprint(res.status_code)
-    rprint(res.json())
-
-
-event_registry.add(update_applied_control)
 
 
 if __name__ == "__main__":
