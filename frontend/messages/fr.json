@@ -1163,6 +1163,7 @@
 	"expirationDate": "Date d'expiration",
 	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur.",
 	"filterBy": "Filtrer par",
+	"demoDataAlreadyImported": "Les données de démonstration ont déjà été importées. Effacez ou renommez le domaine DEMO existant.",
 	"finding": "Constat",
 	"findings": "Constats",
 	"associatedFindings": "Constats associés",
@@ -1178,5 +1179,9 @@
 	"confirmed": "Confirmé",
 	"dismissed": "Rejeté",
 	"assigned": "Assigné",
-	"selectEvidence": "Sélectionner une preuve"
+	"selectEvidence": "Sélectionner une preuve",
+	"compliantRequirementsSemiColon": "Exigences conformes :",
+	"requirementsProgressionSemiColon": "Progression des exigences :",
+	"noRequirementFound": "Aucune revue de cette exigence trouvée",
+	"noAuditForTheFramework": "Il n'y a pas d'audit utilisant ce référentiel"
 }

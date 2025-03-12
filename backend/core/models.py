@@ -291,6 +291,16 @@ class StoredLibrary(LibraryMixin):
         is_loaded = LoadedLibrary.objects.filter(  # We consider the library as loaded even if the loaded version is different
             urn=urn, locale=locale
         ).exists()
+        same_version_lib = StoredLibrary.objects.filter(
+            urn=urn, locale=locale, version=version
+        ).first()
+        if same_version_lib:
+            # update hash following cosmetic change (e.g. when we added publication date)
+            logger.info("update hash", urn=urn)
+            same_version_lib.hash_checksum = hash_checksum
+            same_version_lib.save()
+            return None
+
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
             return None  # We do not accept to store outdated libraries
 
@@ -437,7 +447,6 @@ class LibraryUpdater:
             except:
                 return "dependencyNotFound"
             new_dependencies.append(new_dependency)
-
         for key, value in [
             ("name", self.new_library.name),
             ("version", self.new_library.version),
@@ -648,9 +657,6 @@ class LibraryUpdater:
                         key in matrix
                     ):  # If all keys are mandatory this condition is useless
                         matrix_dict["json_definition"][key] = matrix[key]
-                matrix_dict["json_definition"] = json.dumps(
-                    matrix_dict["json_definition"]
-                )
 
                 RiskMatrix.objects.update_or_create(
                     urn=matrix["urn"].lower(),

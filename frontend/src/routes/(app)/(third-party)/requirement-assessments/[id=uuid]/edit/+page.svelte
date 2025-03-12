@@ -206,6 +206,13 @@
 		$formStore.applied_controls.push(form.newControl);
 	}
 
+	$: if (form && form.newControls) {
+		forceRefresh();
+		for (const control of form.newControls) {
+			$formStore.applied_controls.push(control);
+		}
+	}
+
 	$: if (form && form.newEvidence) {
 		forceRefresh();
 		$formStore.evidences.push(form.newEvidence);
