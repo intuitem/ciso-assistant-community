@@ -8,7 +8,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   labels:
-    {{- include "ciso-assistant.labels" (dict "context" . "component" .Values.frontend.name) | nindent 4 }}
+    {{- include "ciso-assistant.labels" (dict "context" .) | nindent 4 }}
 spec:
   {{- with .Values.ingress.ingressClassName }}
   ingressClassName: {{ . }}

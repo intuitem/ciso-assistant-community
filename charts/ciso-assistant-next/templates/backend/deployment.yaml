@@ -4,18 +4,18 @@ metadata:
   name: {{ template "ciso-assistant.fullname" . }}-backend
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
+    {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 4 }}
 spec:
   replicas: {{ .Values.backend.replicas }}
   selector:
     matchLabels:
-      {{- include "ciso-assistant.selectorLabels" (dict "context" . "component" .Values.backend.name) | nindent 6 }}
+      {{- include "ciso-assistant.selectorLabels" (dict "context" . "component" "backend") | nindent 6 }}
   template:
     metadata:
       annotations:
         checksum/secret-backend: {{ include (print $.Template.BasePath "/backend/secret.yaml") . | sha256sum }}
       labels:
-        {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 8 }}
+        {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 8 }}
     spec:
       {{- with .Values.backend.imagePullSecrets | default .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -36,8 +36,6 @@ spec:
           {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
           - name: SQLITE_FILE
             value: /ciso/db/ciso-assistant.sqlite3
-          - name: HUEY_FILE_PATH
-            value: /ciso/db/huey.db
           {{- else if eq .Values.backend.config.databaseType "pgsql" }}
           - name: DB_HOST
             value: {{ template "ciso-assistant.fullname" . }}-postgresql
@@ -71,7 +69,12 @@ spec:
           - name: POSTGRES_PASSWORD
             value: {{ .Values.externalPgsql.password | quote }}
           {{- end }}
+          {{- else }}
+          - name: SQLITE_FILE
+            value: /tmp/ciso-assistant.sqlite3
           {{- end }}
+          - name: HUEY_FILE_PATH
+            value: /tmp/huey.db
           {{- if .Values.backend.persistence.localStorage.enabled }}
           - name: LOCAL_STORAGE_DIRECTORY
             value: /ciso/localStorage
@@ -92,7 +95,7 @@ spec:
           - name: CISO_ASSISTANT_URL
             value: {{ template "ciso-assistant.url" . }}
           - name: ALLOWED_HOSTS
-            value: localhost,127.0.0.1,{{ include "ciso-assistant.fullname" . }}-backend,{{ template "ciso-assistant.url" . }},{{ .Values.global.domain }}
+            value: localhost,127.0.0.1,{{ include "ciso-assistant.fullname" . }}-backend,{{ .Values.global.domain }}{{ if .Values.global.extraAllowedHosts }},{{ .Values.global.extraAllowedHosts }}{{ end }}
           - name: DEFAULT_FROM_EMAIL
             value: {{ .Values.backend.config.smtp.defaultFrom | quote }}
           - name: EMAIL_HOST
@@ -117,31 +120,6 @@ spec:
               secretKeyRef:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-primary-password
-          {{- end }}
-          {{- if .Values.backend.config.smtp.rescue.enabled }}
-          - name: EMAIL_HOST_RESCUE
-            value: {{ .Values.backend.config.smtp.rescue.host | quote }}
-          - name: EMAIL_PORT_RESCUE
-            value: {{ .Values.backend.config.smtp.rescue.port | quote }}
-          - name: EMAIL_USE_TLS_RESCUE
-            value: {{ .Values.backend.config.smtp.rescue.useTls | quote }}
-          {{- if .Values.backend.config.smtp.rescue.username }}
-          - name: EMAIL_HOST_USER_RESCUE
-            value: {{ .Values.backend.config.smtp.rescue.username | quote }}
-          {{- end }}
-          {{- if .Values.backend.config.smtp.existingSecret }}
-          - name: EMAIL_HOST_PASSWORD_RESCUE
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.backend.config.smtp.existingSecret }}
-                key: email-rescue-password
-          {{- else if .Values.backend.config.smtp.rescue.password }}
-          - name: EMAIL_HOST_PASSWORD_RESCUE
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "ciso-assistant.fullname" . }}-backend
-                key: email-rescue-password
-          {{- end }}
           {{- end }}
         volumeMounts:
         - name: tmp-data
