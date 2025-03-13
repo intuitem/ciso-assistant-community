@@ -59,7 +59,7 @@ def migrate_answers_format(apps, schema_editor):
             for q_urn, q_data in node.questions.items():
                 node_choices_map[q_urn] = {
                     "node_urn": node.urn,  # Store the node URN for ID generation
-                    "choices": {choice["value"]: idx for idx, choice in enumerate(q_data.get("choices", []))}
+                    "choices": {choice["value"]: idx + 1 for idx, choice in enumerate(q_data.get("choices", []))}
                 }
 
     for instance in RequirementAssessment.objects.all():
