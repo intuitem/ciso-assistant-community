@@ -159,7 +159,7 @@
 						<Card
 							count={metrics.controls.p1}
 							label={m.sumpageP1()}
-							href="/applied-controls/?priority=p1"
+							href="/applied-controls/?priority=1"
 							icon="fa-solid fa-shield-halved"
 							section={m.sumpageSectionControls()}
 							emphasis={true}
