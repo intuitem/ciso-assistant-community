@@ -324,7 +324,7 @@ def get_color(wb, cell):
     color = theme_and_tint_to_rgb(wb, theme, tint)
     return "#" + color
 
-def get_answers(urn, tab):
+def get_answers(tab):
     print("processing answers")
     found_answers = {}
     is_header = True
@@ -345,7 +345,7 @@ def get_answers(urn, tab):
                 else None
             )
             choices = (
-                [{"urn": f"{library_vars['framework_urn']}:{urn.split(':')[-1]}:choice:{i}", "value": choice.strip()} for i, choice in enumerate(row[header.get("question_choices")].value.split("\n"))]
+                [{"urn": "", "value": choice.strip()} for i, choice in enumerate(row[header.get("question_choices")].value.split("\n"))]
                 if "question_choices" in header
                 and row[header["question_choices"]].value
                 else None
@@ -367,6 +367,10 @@ def build_ids_set(tab_name):
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
+    try:
+        answers = get_answers(dataframe["answers"])
+    except KeyError:
+        answers = {}
     if title.lower() == "library_content":
         print("processing library content")
         for row in tab:
@@ -482,10 +486,6 @@ for tab in dataframe:
                 parent_urn = parent_for_depth[depth]
                 current_depth = depth
                 req_node = {"urn": urn, "assessable": assessable, "depth": depth}
-                try:
-                    answers = get_answers(urn, dataframe["answers"])
-                except KeyError:
-                    answers = {}
                 if parent_urn:
                     req_node["parent_urn"] = parent_urn
                 if ref_id:
@@ -553,7 +553,13 @@ for tab in dataframe:
                     req_node["questions"] = {
                         f"{req_node['urn']}:question:{i + 1}": {
                             "type": answers[answer[i]]["type"] if len(answer) > 1 else answers[answer[0]]["type"],
-                            "choices": answers[answer[i] or answer[0]]["choices"] if len(answer) > 1 else answers[answer[0]]["choices"],
+                            "choices": [
+                                {
+                                    "urn": f"{req_node['urn']}:question:{i + 1}:choice:{j + 1}",
+                                    "value": choice["value"]
+                                }
+                                for j, choice in enumerate(answers[answer[i] or answer[0]]["choices"] if len(answer) > 1 else answers[answer[0]]["choices"])
+                            ],
                             "text": question,
                         }
                         for i, question in enumerate(questions)

@@ -3,7 +3,7 @@
 from django.db import migrations, models
 
 
-def convert_question_to_questions(node_urn, old_data):
+def convert_question_to_questions(old_data):
     """
     Converts the old format (format 1) to the target format (format 2).
     The old format contains "question" (with question_type and question_choices)
@@ -19,16 +19,14 @@ def convert_question_to_questions(node_urn, old_data):
     for q in old_data.get("questions", []):
         urn = q.get("urn")
         text = q.get("text")
-        choices = []
-        for idx, choice_text in enumerate(choices_texts):
-            choice_urn = (
-                f"urn:intuitem:risk:framework:{node_urn.split(':')[-1]}:choice:{idx}"
-            )
-            choices.append({"urn": choice_urn, "value": choice_text})
-
+        choices = [
+            {"urn": f"{urn}:choice:{idx}", "value": choice_text}
+            for idx, choice_text in enumerate(choices_texts)
+        ]
         new_questions[urn] = {"type": question_type, "choices": choices, "text": text}
 
     return new_questions
+
 
 def migrate_questions(apps, schema_editor):
     """
@@ -39,10 +37,9 @@ def migrate_questions(apps, schema_editor):
     for instance in Requirementnode.objects.all():
         old_questions = getattr(instance, "question", None)
         if old_questions:
-            instance.questions = convert_question_to_questions(
-                instance.urn, old_questions
-            )
+            instance.questions = convert_question_to_questions(old_questions)
             instance.save(update_fields=["questions"])
+
 
 def migrate_answers_format(apps, schema_editor):
     """
@@ -51,16 +48,18 @@ def migrate_answers_format(apps, schema_editor):
     RequirementAssessment = apps.get_model("core", "Requirementassessment")
     RequirementNode = apps.get_model("core", "Requirementnode")
 
-    node_choices_map = {}
-
-    # Build a mapping of node URNs to their choice texts and indices
-    for node in RequirementNode.objects.all():
-        if node.questions:
-            for q_urn, q_data in node.questions.items():
-                node_choices_map[q_urn] = {
-                    "node_urn": node.urn,  # Store the node URN for ID generation
-                    "choices": {choice["value"]: idx for idx, choice in enumerate(q_data.get("choices", []))}
-                }
+    node_choices_map = {
+        q_urn: {
+            "node_urn": node.urn,
+            "choices": {
+                choice["value"]: idx
+                for idx, choice in enumerate(q_data.get("choices", []))
+            },
+        }
+        for node in RequirementNode.objects.all()
+        for q_urn, q_data in node.questions.items()
+        if node.questions
+    }
 
     for instance in RequirementAssessment.objects.all():
         old_answer_data = getattr(instance, "answer", None)
@@ -73,19 +72,18 @@ def migrate_answers_format(apps, schema_editor):
             question_urn = question_data.get("urn")
             answer_value = question_data.get("answer")  # The actual user response
 
-            # Get the corresponding node and choices mapping
             if question_urn not in node_choices_map:
                 continue
 
-            node_urn = node_choices_map[question_urn]["node_urn"]
             choices_map = node_choices_map[question_urn]["choices"]
 
             # Handle single-choice answers
             if isinstance(answer_value, str):
-                if answer_value in choices_map:
-                    new_answers[question_urn] = f"urn:intuitem:risk:framework:{node_urn.split(':')[-1]}:choice:{choices_map[answer_value]}"
-                else:
-                    new_answers[question_urn] = answer_value  # Keep free-text answers as they are
+                new_answers[question_urn] = (
+                    f"{question_urn}:choice:{choices_map[answer_value]}"
+                    if answer_value in choices_map
+                    else answer_value  # Keep free-text answers as they are
+                )
 
         # Update the new field
         instance.answers = new_answers
@@ -108,16 +106,14 @@ class Migration(migrations.Migration):
             model_name="requirementnode",
             name="question",
         ),
-        migrations.RunPython(
-            migrate_answers_format
-        ),
-        migrations.RemoveField(
-            model_name="requirementassessment",
-            name="answer",
-        ),
         migrations.AddField(
             model_name="requirementassessment",
             name="answers",
             field=models.JSONField(blank=True, null=True, verbose_name="Answers"),
+        ),
+        migrations.RunPython(migrate_answers_format),
+        migrations.RemoveField(
+            model_name="requirementassessment",
+            name="answer",
         ),
     ]
