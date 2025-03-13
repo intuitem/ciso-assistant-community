@@ -2,6 +2,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from auditlog.registry import auditlog
+
+
 from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from core.models import (
     AppliedControl,
@@ -740,3 +743,34 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             **risk_matrix["risk"][risk_index],
             "value": risk_index,
         }
+
+
+common_exclude = ["created_at", "updated_at"]
+auditlog.register(
+    EbiosRMStudy,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    FearedEvent,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RoTo,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Stakeholder,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    StrategicScenario,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    AttackPath,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OperationalScenario,
+    exclude_fields=common_exclude,
+)

@@ -2,7 +2,7 @@
 
 
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.0.6](https://img.shields.io/badge/AppVersion-v2.0.6-informational?style=flat-square) 
+![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.2.4](https://img.shields.io/badge/AppVersion-v2.2.4-informational?style=flat-square) 
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -25,11 +25,14 @@ A Helm chart for CISO Assistant k8s's deployment
 To install the chart, firt get the values.yaml file and customize values.
 
 ```
-helm show values oci://ghcr.io/intuitem/ciso-assistant > custom.yaml
+helm show values oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant > custom.yaml
 ```
+
+Make sure to pin the appVersion to one of the official releases, if you don't want the app to auto-update each time you restart the deployment.
+
 To deploy the release :
 ```
-helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f custom.yaml
+helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant -f custom.yaml
 ```
 
 ## Values
@@ -38,20 +41,17 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 |-----|------|---------|-------------|
 | backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
 | backend.config.djangoDebug | bool | `false` | Enable Django debug mode |
+| backend.config.djangoExistingSecretKey | string | `""` | Name of an existing secret resource containing the django secret in a 'django-secret-key' key |
 | backend.config.djangoSecretKey | string | `"changeme"` | Set Django secret key |
 | backend.config.emailAdmin | string | `"admin@example.net"` | Admin email for initial configuration |
 | backend.config.smtp.defaultFrom | string | `"no-reply@ciso-assistant.net"` | Default from email address |
+| backend.config.smtp.existingSecret | string | `""` | Name of an existing secret resource containing the primary SMTP password in a 'email-primary-password' key |
 | backend.config.smtp.primary.host | string | `"primary.cool-mailer.net"` | Primary SMTP hostname |
 | backend.config.smtp.primary.password | string | `"primary_password_here"` | Primary SMTP password |
 | backend.config.smtp.primary.port | int | `587` | Primary SMTP post |
 | backend.config.smtp.primary.useTls | bool | `true` | Enable TLS for primary SMTP |
 | backend.config.smtp.primary.username | string | `"apikey"` | Primary SMTP username |
-| backend.config.smtp.rescue.host | string | `"smtp.secondary.mailer.cloud"` | Rescue SMTP hostname |
-| backend.config.smtp.rescue.password | string | `"rescue_password_here"` | Rescue SMTP hostname |
-| backend.config.smtp.rescue.port | int | `587` | Rescue SMTP hostname |
-| backend.config.smtp.rescue.useTls | bool | `true` | Enable TLS for rescue SMTP |
-| backend.config.smtp.rescue.username | string | `"username"` | Rescue SMTP hostname |
-| backend.containerSecurityContext | object | `{}`  | Toggle and define container-level security context |
+| backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | backend.env | list | `[]` | Environment variables to pass to backend |
 | backend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the backend |
 | backend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the backend |
@@ -64,7 +64,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | backend.persistence.localStorage.size | string | `"5Gi"` | Local Storage persistant volume size |
 | backend.persistence.localStorage.storageClass | string | `""` | Local Storage persistant volume storageClass |
 | backend.persistence.sqlite.accessMode | string | `"ReadWriteOnce"` | SQLite persistant volume accessMode |
-| backend.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence Note: only when `backend.config.databaseType` use `sqlite` value |
+| backend.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence # Note: only when `backend.config.databaseType` use `sqlite` value |
 | backend.persistence.sqlite.size | string | `"5Gi"` | SQLite persistant volume size |
 | backend.persistence.sqlite.storageClass | string | `""` | SQLite persistant volume storageClass |
 | backend.replicas | int | `1` | The number of backend pods to run |
@@ -80,7 +80,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | externalPgsql.port | int | `5432` | Port of an external PostgreSQL to connect |
 | externalPgsql.user | string | `"ciso-assistant"` | User of an external PostgreSQL instance to connect |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
-| frontend.containerSecurityContext | object | `{}`  | Toggle and define container-level security context |
+| frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
 | frontend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the frontend |
 | frontend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the frontend |
@@ -98,17 +98,37 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/ciso-assistant -f cus
 | global.clusterDomain | string | `"cluster.local"` | Kubernetes cluster domain name |
 | global.commonLabels | object | `{}` | Labels to add to all deployed objects |
 | global.domain | string | `"octopus.foo.bar"` | Default domain used by all components # Used for ingresses, certificates, environnement vars, etc. |
+| global.extraAllowedHosts | string | `""` | Extra allowed hosts (comma separated, without spaces) |
 | global.image.imagePullPolicy | string | `"IfNotPresent"` | If defined, a imagePullPolicy applied to all CISO Assistant deployments |
 | global.image.registry | string | `"ghcr.io"` | If defined, a registry applied to all CISO Assistant deployments |
 | global.image.tag | string | `""` | Overrides the global CISO Assistant image tag whose default is the chart appVersion |
 | global.imagePullSecrets | list | `[]` | Secrets with credentials to pull images from a private registry |
 | global.nodeSelector | object | `{}` | Default node selector for all components |
-| global.securityContext | object | `{}`  | Toggle and define pod-level security context |
+| global.securityContext | object | `{}` | Toggle and define pod-level security context |
 | global.tls | bool | `false` | Globally enable TLS (Ingress, URLs, etc.) |
 | global.tolerations | list | `[]` | Default tolerations for all components |
+| huey.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
+| huey.env | list | `[]` | Environment variables to pass to Huey |
+| huey.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the Huey |
+| huey.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the Huey |
+| huey.image.repository | string | `"intuitem/ciso-assistant-community/backend"` | Repository to use for the Huey |
+| huey.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the Huey |
+| huey.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
+| huey.name | string | `"huey"` | Huey name |
+| huey.persistence.sqlite.accessMode | string | `"ReadWriteOnce"` | SQLite persistant volume accessMode |
+| huey.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence (for Huey) |
+| huey.persistence.sqlite.size | string | `"1Gi"` | SQLite persistant volume size |
+| huey.persistence.sqlite.storageClass | string | `""` | SQLite persistant volume storageClass |
+| huey.replicas | int | `1` | The number of Huey pods to run |
+| huey.resources | object | `{}` | Resources for the Huey |
+| huey.service.annotations | object | `{}` | Huey service annotations |
+| huey.service.labels | object | `{}` | Huey service labels |
+| huey.service.port | int | `80` | Huey service http port |
+| huey.service.portName | string | `"http"` | Huey service port name |
 | ingress.annotations | object | `{}` | Additional ingress annotations |
 | ingress.certificateSecret | object | `{}` | Custom TLS certificate as secret # Note: 'key' and 'certificate' are expected in PEM format |
 | ingress.enabled | bool | `true` | Enable an ingress resource for the CISO Assistant |
+| ingress.existingSecret | string | `""` | Use existing TLS secret |
 | ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | ingress.labels | object | `{}` | Additional ingress labels |
 | ingress.path | string | `"/"` | The path to CISO Assistant |

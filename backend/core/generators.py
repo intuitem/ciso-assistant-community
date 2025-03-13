@@ -514,6 +514,7 @@ def gen_audit_context(id, doc, tree, lang):
         {"category": item["status"], "value": item["count"]} for item in status_cnt
     ]
     p1_controls = list()
+    full_controls = list()
     for ac in applied_controls.filter(priority=1):
         requirements_count = (
             RequirementAssessment.objects.filter(compliance_assessment=audit)
@@ -525,6 +526,24 @@ def gen_audit_context(id, doc, tree, lang):
                 "name": ac.name,
                 "description": ac.description,
                 "status": ac.status,
+                "category": ac.category,
+                "coverage": requirements_count,
+            }
+        )
+
+    for ac in applied_controls.all():
+        requirements_count = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .filter(applied_controls=ac.id)
+            .count()
+        )
+        full_controls.append(
+            {
+                "name": ac.name,
+                "description": ac.description,
+                "prio": f"P{ac.priority}" if ac.priority else "-",
+                "status": ac.status,
+                "eta": ac.eta,
                 "category": ac.category,
                 "coverage": requirements_count,
             }
@@ -559,6 +578,7 @@ def gen_audit_context(id, doc, tree, lang):
         "drifts_per_domain": agg_drifts,
         "chart_controls": ac_chart,
         "p1_controls": p1_controls,
+        "full_controls": full_controls,
         "ac_count": ac_total,
         "igs": IGs,
         "category_scores": category_scores,

@@ -5,7 +5,7 @@ import { getSecureRedirect } from '$lib/utils/helpers';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import * as m from '$paraglide/messages';
-import { tableSourceMapper } from '@skeletonlabs/skeleton';
+import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -100,23 +100,12 @@ export const load = (async ({ fetch, params }) => {
 
 	await Promise.all(
 		['applied-controls', 'evidences', 'security-exceptions'].map(async (key) => {
-			const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
-			const response = await fetch(keyEndpoint);
-
-			if (response.ok) {
-				const data = await response.json().then((data) => data.results);
-
-				const bodyData = tableSourceMapper(data, listViewFields[key].body);
-
-				const table: TableSource = {
-					head: listViewFields[key].head,
-					body: bodyData,
-					meta: data
-				};
-				tables[key] = table;
-			} else {
-				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-			}
+			const table: TableSource = {
+				head: listViewFields[key].head,
+				body: [],
+				meta: []
+			};
+			tables[key] = table;
 		})
 	);
 
@@ -311,7 +300,9 @@ export const actions: Actions = {
 				},
 				event
 			);
+			return fail(400, { form });
 		}
-		return { form };
+		const newControls = await response.json().then((data) => data.map((e) => e.id));
+		return { form, newControls };
 	}
 };

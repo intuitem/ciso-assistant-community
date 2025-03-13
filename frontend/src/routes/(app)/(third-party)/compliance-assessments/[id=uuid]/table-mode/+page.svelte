@@ -3,6 +3,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import {
 		complianceResultTailwindColorMap,
@@ -93,6 +94,11 @@
 		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
+
+		// Update requirementAssessment.updateForm.data with the specified field and value
+		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
+			requirementAssessment.updateForm.data[field] = value;
+		}
 	}
 
 	function addColor(result: string, map: Record<string, string>) {
@@ -141,34 +147,6 @@
 		addedEvidence = +1;
 	}
 
-	function modalConfirmDelete(id: string, name: string): void {
-		const modalComponent: ModalComponent = {
-			ref: DeleteConfirmModal,
-			props: {
-				_form: data.deleteForm,
-				formAction: `/evidences?/delete`,
-				id: id,
-				invalidateAll: invalidateAll,
-				debug: false,
-				URLModel: getModelInfo('evidences').urlModel
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.deleteModalTitle(),
-			body: `${m.deleteModalMessage({ name })}`
-		};
-		modalStore.trigger(modal);
-		data.requirements.forEach((requirementAssessment) => {
-			console.log(requirementAssessment.evidences);
-			requirementAssessment.evidences = requirementAssessment.evidences.filter(
-				(evidence) => evidence.id !== id
-			);
-		});
-	}
-
 	const requirementAssessmentScores = Object.fromEntries(
 		data.requirement_assessments.map((requirement) => {
 			return [requirement.id, [requirement.is_scored, requirement.score]];
@@ -194,6 +172,25 @@
 				});
 			}
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
+	}
+
+	function modalUpdateForm(requirementAssessment): void {
+		let modalComponent: ModalComponent = {
+			ref: UpdateModal,
+			props: {
+				form: requirementAssessment.updateForm,
+				model: requirementAssessment.updatedModel,
+				object: requirementAssessment.object,
+				formAction: '?/update&id=' + requirementAssessment.id,
+				context: 'selectEvidences'
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: title(requirementAssessment)
+		};
+		modalStore.trigger(modal);
 	}
 </script>
 
@@ -549,22 +546,23 @@
 														type="button"
 														><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 													>
+													<button
+														class="btn variant-filled-secondary self-start"
+														type="button"
+														on:click={() => modalUpdateForm(requirementAssessment)}
+														><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
+													</button>
 												{/if}
+											</div>
+											<div class="flex flex-wrap space-x-2 items-center">
 												{#key addedEvidence}
 													{#each requirementAssessment.evidences as evidence}
-														<p class="card p-2">
-															<a class="hover:text-primary-500" href="/evidences/{evidence.id}"
+														<p class="p-2">
+															<a
+																class="text-primary-700 hover:text-primary-500"
+																href="/evidences/{evidence.id}"
 																><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
 															>
-															{#if !shallow}
-																<button
-																	class="cursor-pointer"
-																	on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
-																	type="button"
-																>
-																	<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
-																</button>
-															{/if}
 														</p>
 													{/each}
 												{/key}

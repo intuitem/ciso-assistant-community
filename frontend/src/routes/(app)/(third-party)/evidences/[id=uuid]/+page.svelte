@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -11,6 +9,9 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import * as m from '$paraglide/messages';
+	import { defaults } from 'sveltekit-superforms';
+	import { z } from 'zod';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 
@@ -27,7 +28,10 @@
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: data.attachmentDeleteForm,
+				_form: defaults(
+					{ id, urlmodel: 'evidences' },
+					zod(z.object({ id: z.string(), urlmodel: z.string() }))
+				),
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel,

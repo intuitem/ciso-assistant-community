@@ -266,7 +266,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
@@ -383,8 +384,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assets',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
+		reverseForeignKeyFields: [
+			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
+		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -474,7 +479,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' },
-			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' }
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' },
+			{ field: 'assets', urlModel: 'assets' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
@@ -773,6 +779,36 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'security_exceptions', urlModel: 'risk-scenarios', disableAddDeleteButtons: true }
 		]
+	},
+	'findings-assessments': {
+		name: 'findingsassessment',
+		localName: 'findingsAssessment',
+		localNamePlural: 'findingsAssessments',
+		verboseName: 'Findings assessment',
+		verboseNamePlural: 'Findings assessments',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' }],
+		selectFields: [{ field: 'status' }, { field: 'category' }]
+	},
+	findings: {
+		name: 'finding',
+		localName: 'finding',
+		localNamePlural: 'findings',
+		verboseName: 'Finding',
+		verboseNamePlural: 'Findings',
+		foreignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings-assessments' }],
+		// reverseForeignKeyFields: [
+		// 	{ field: 'findings', urlModel: 'vulnerabilities' },
+		// 	{ field: 'findings', urlModel: 'reference-controls' },
+		// 	{ field: 'findings', urlModel: 'applied-controls' }
+		// ],
+		selectFields: [{ field: 'status' }]
 	}
 };
 

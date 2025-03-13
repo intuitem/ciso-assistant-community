@@ -868,5 +868,6 @@
 	"useDocumentationScore": "Korzystanie z punktacji dokumentacji",
 	"useDocumentationScoreHelpText": "Drugi wynik (wynik dokumentacji) będzie dostępny do oceny wymagań.",
 	"publicationDate": "Data publikacji",
-	"filterby": "Filtruj według"
+	"filterby": "Filtruj według",
+	"selectEvidence": "Wybierz dowody"
 }

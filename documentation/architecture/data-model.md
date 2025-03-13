@@ -52,6 +52,8 @@ erDiagram
     DOMAIN                ||--o{ PROJECT_OBJECT              : contains
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
+    DOMAIN                ||--o{ FINDINGS_ASSESSMENT         : contains
+    DOMAIN                ||--o{ FINDING                     : contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
     ROOT_FOLDER           ||--o{ STORED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ LOADED_LIBRARY              : contains
@@ -122,6 +124,7 @@ erDiagram
     REQUIREMENT_NODE             }o--o{ REFERENCE_CONTROL     : leverages
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
+    COMPLIANCE_ASSESSMENT        }o--o{ ASSET                 : relates_to
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
@@ -152,6 +155,13 @@ erDiagram
     SECURITY_EXCEPTION           }o--o{ RISK_SCENARIO         : concerns
     SECURITY_EXCEPTION           }o--o{ APPLIED_CONTROL       : concerns
     APPLIED_CONTROL              }o--o{ SECURITY_EXCEPTION    : mitigates
+    FINDINGS_ASSESSMENT          ||--o{ FINDING               : contains
+    PERIMETER                    |o--o{ FINDINGS_ASSESSMENT   : contains
+    USER                         }o--o{ FINDINGS_ASSESSMENT   : owns
+    FINDING                      }o--o{ VULNERABILITY         : relates
+    FINDING                      }o--o{ REFERENCE_CONTROL     : is_mitigated_by
+    FINDING                      }o--o{ APPLIED_CONTROL       : is_mitigated_by
+    USER                         }o--o{ FINDING               : owns
 
     FRAMEWORK {
         string  urn
@@ -201,7 +211,6 @@ erDiagram
         principal[] author
         principal[] reviewer
         string      observation
-        boolean     embedded
     }
 
     PERIMETER {
@@ -391,6 +400,30 @@ erDiagram
         int value
     }
 
+    FINDINGS_ASSESSMENT  {
+        string      ref_id
+        string      name
+        string      description
+
+        string      version
+        date        eta
+        date        due_date
+        string      status
+        principal[] author
+        principal[] reviewer
+        string      observation
+
+        string      category
+    }
+
+    FINDING {
+        string ref_id
+        string name
+        string description
+        int    severity
+        string status
+    }
+
 ```
 
 ### Requirement mappings
@@ -432,7 +465,7 @@ erDiagram
 
 In all views and analytics, a filter on label shall be displayed.
 
-Note: in MVP, labels are attached only to vulnerabilities.
+Note: For now, labels are attached to the following objects: vulnerabilities, assets, findings, threats, reference controls, applied controls.
 
 ## Global fields
 
@@ -699,7 +732,7 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 
 ### Requirement Mapping set
 
-Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see <https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf>).
 
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
@@ -1546,6 +1579,21 @@ erDiagram
 - It shall be possible to see the list of objects that would be exported, and to select/deselect some of them while keeping consistency. This should include evidences with their size.
 - It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency.  This should include evidences with their size.
 - It shall be possible to optionally export subdomains along with the domain. The import shall be flattened if the target is not a PRO version.
+
+## Findings assessments
+
+This new type of assessments is intended to gather and manage findinds. The section is present in governance with the name "follow-up"/"Suivi".
+
+A findings assessment has the following specific fields:
+- category: --/pentest/audit/internal
+
+A finding ("constat" has the following fields:
+- ref_id/name/description
+- severity, like for vulnerabilities
+- a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
+
+A finding can have related reference controls, applied controls, vulnerabilities.
+
 
 ## Asset compliance (draft)
 

@@ -15,6 +15,9 @@ global:
   # -- Globally enable TLS (Ingress, URLs, etc.)
   tls: false
 
+  # -- Extra allowed hosts (comma separated, without spaces)
+  extraAllowedHosts: ""
+
   # Default image used by all components
   image:
     # -- If defined, a registry applied to all CISO Assistant deployments
@@ -65,7 +68,6 @@ backend:
       # -- Default from email address
       defaultFrom: no-reply@ciso-assistant.net
       # -- Name of an existing secret resource containing the primary SMTP password in a 'email-primary-password' key
-      # -- and the rescue SMTP username in a 'email-rescue-username' key
       existingSecret: ""
       primary:
         # -- Primary SMTP hostname
@@ -78,19 +80,6 @@ backend:
         username: apikey
         # -- Primary SMTP password
         password: "primary_password_here"
-      rescue:
-        # -- Rescue SMTP hostname
-        enabled: true
-        # -- Rescue SMTP hostname
-        host: smtp.secondary.mailer.cloud
-        # -- Rescue SMTP hostname
-        port: 587
-        # -- Enable TLS for rescue SMTP
-        useTls: true
-        # -- Rescue SMTP hostname
-        username: username
-        # -- Rescue SMTP hostname
-        password: "rescue_password_here"
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
     ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
@@ -104,11 +93,11 @@ backend:
     # -- Enable Django debug mode
     djangoDebug: false
 
-  ## Backend persistence configuration (used for sqlitedb and local storage)
+  ## Backend persistence configuration (used for sqlite db and local storage)
   persistence:
     sqlite:
       # -- Enable SQLite persistence
-      # Note: only when `backend.config.databaseType` use `sqlite` value
+      ## Note: only when `backend.config.databaseType` use `sqlite` value
       enabled: true
       # -- SQLite persistant volume size
       size: 5Gi
@@ -180,6 +169,83 @@ backend:
     # -- Backend service http port
     port: 80
     # -- Backend service port name
+    portName: http
+
+## CISO Assistant Huey
+## Note : Huey will use config from backend
+huey:
+  # -- Huey name
+  name: huey
+
+  # -- The number of Huey pods to run
+  replicas: 1
+
+  ## Backend persistence configuration (used for sqlite db and local storage)
+  persistence:
+    sqlite:
+      # -- Enable SQLite persistence (for Huey)
+      enabled: true
+      # -- SQLite persistant volume size
+      size: 1Gi
+      # -- SQLite persistant volume storageClass
+      storageClass: ""
+      # -- SQLite persistant volume accessMode
+      accessMode: ReadWriteOnce
+
+  ## Huey image
+  image:
+    # -- Registry to use for the Huey
+    # @default -- `""` (defaults to global.image.registry)
+    registry: ""
+    # -- Repository to use for the Huey
+    repository: intuitem/ciso-assistant-community/backend
+    # -- Tag to use for the Huey
+    # @default -- `""` (defaults to global.image.tag)
+    tag: ""
+    # -- Image pull policy for the Huey
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Secrets with credentials to pull images from a private registry
+  # @default -- `[]` (defaults to global.imagePullSecrets)
+  imagePullSecrets: []
+
+  # -- Resources for the Huey
+  resources: {}
+    #   requests:
+    #     cpu: 100m
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 256m
+    #     memory: 1024Mi
+
+  # -- Environment variables to pass to Huey
+  env: []
+
+  # -- Toggle and define container-level security context
+  # @default -- `{}`
+  containerSecurityContext: {}
+  #  seLinuxOptions: {}
+  #  runAsUser: 1001
+  #  runAsGroup: 1001
+  #  runAsNonRoot: true
+  #  privileged: false
+  #  readOnlyRootFilesystem: true
+  #  allowPrivilegeEscalation: false
+  #  capabilities:
+  #    drop: ["ALL"]
+  #  seccompProfile:
+  #    type: "RuntimeDefault"
+
+  ## Huey service configuration
+  service:
+    # -- Huey service annotations
+    annotations: {}
+    # -- Huey service labels
+    labels: {}
+    # -- Huey service http port
+    port: 80
+    # -- Huey service port name
     portName: http
 
 
@@ -269,6 +335,8 @@ ingress:
   path: /
   # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
   pathType: Prefix
+  # -- Use existing TLS secret
+  existingSecret: ""
   # -- Custom TLS certificate as secret
   ## Note: 'key' and 'certificate' are expected in PEM format
   certificateSecret: {}
