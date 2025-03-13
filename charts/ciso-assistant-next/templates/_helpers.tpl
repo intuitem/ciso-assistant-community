@@ -47,7 +47,7 @@ Common labels
 */}}
 {{- define "ciso-assistant.labels" -}}
 helm.sh/chart: {{ include "ciso-assistant.chart" .context }}
-{{ include "ciso-assistant.selectorLabels" (dict "context" .context "component" .component "name" .name) }}
+{{ include "ciso-assistant.selectorLabels" (dict "context" .context "component" .component) }}
 app.kubernetes.io/managed-by: {{ .context.Release.Service }}
 app.kubernetes.io/version: {{ include "ciso-assistant.versionLabelValue" .context }}
 {{- with .context.Values.global.commonLabels }}

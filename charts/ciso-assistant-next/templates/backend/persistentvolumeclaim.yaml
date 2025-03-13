@@ -5,7 +5,7 @@ metadata:
   name: {{ include "ciso-assistant.fullname" . }}-sqlite
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
+    {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 4 }}
 spec:
   accessModes: 
     - {{ .Values.backend.persistence.sqlite.accessMode }}
@@ -24,7 +24,7 @@ metadata:
   name: {{ include "ciso-assistant.fullname" . }}-localstorage
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
+    {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 4 }}
 spec:
   accessModes: 
     - {{ .Values.backend.persistence.localStorage.accessMode }}
