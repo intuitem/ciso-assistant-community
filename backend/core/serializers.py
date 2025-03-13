@@ -1126,7 +1126,7 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "requirement",
             "selected",
             "mapping_inference",
-            "answer",
+            "answers",
             "evidences",
             "applied_controls",
         ]
