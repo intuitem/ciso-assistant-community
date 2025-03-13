@@ -555,7 +555,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
 		reverseForeignKeyFields: [
-			{ field: 'entity', urlModel: 'solutions' },
+			{ field: 'provider_entity', urlModel: 'solutions' },
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'entity', urlModel: 'entity-assessments' }
 		],

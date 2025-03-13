@@ -227,19 +227,21 @@
 			>
 				<SuperForm {_form} validators={zod(z.object({}))} let:form>
 					{#each filteredFields as field}
-						<svelte:component
-							this={filters[field].component}
-							{form}
-							{field}
-							{...filters[field].props}
-							fieldContext="filter"
-							label={safeTranslate(filters[field].props?.label)}
-							on:change={(e) => {
-								const value = e.detail;
-								filterValues[field] = value.map((v) => ({ value: v }));
-								invalidateTable = true;
-							}}
-						/>
+						{#if filters[field]?.component}
+							<svelte:component
+								this={filters[field].component}
+								{form}
+								{field}
+								{...filters[field].props}
+								fieldContext="filter"
+								label={safeTranslate(filters[field].props?.label)}
+								on:change={(e) => {
+									const value = e.detail;
+									filterValues[field] = value.map((v) => ({ value: v }));
+									invalidateTable = true;
+								}}
+							/>
+						{/if}
 					{/each}
 				</SuperForm>
 			</div>
