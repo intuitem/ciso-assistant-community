@@ -53,18 +53,21 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.config.smtp.primary.username | string | `"apikey"` | Primary SMTP username |
 | backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | backend.env | list | `[]` | Environment variables to pass to backend |
+| backend.huey.env | list | `[]` | Environment variables to pass to Huey |
+| backend.huey.name | string | `"huey"` | Huey container name |
+| backend.huey.resources | object | `{}` | Resources for Huey |
 | backend.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the backend |
 | backend.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the backend |
 | backend.image.repository | string | `"intuitem/ciso-assistant-community/backend"` | Repository to use for the backend |
 | backend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the backend |
 | backend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
-| backend.name | string | `"backend"` | Backend name |
+| backend.name | string | `"backend"` | Backend container name |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
 | backend.persistence.localStorage.enabled | bool | `true` | Enable Local Storage persistence |
 | backend.persistence.localStorage.size | string | `"5Gi"` | Local Storage persistant volume size |
 | backend.persistence.localStorage.storageClass | string | `""` | Local Storage persistant volume storageClass |
 | backend.persistence.sqlite.accessMode | string | `"ReadWriteOnce"` | SQLite persistant volume accessMode |
-| backend.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence # Note: only when `backend.config.databaseType` use `sqlite` value |
+| backend.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence (for backend and/or Huey) # Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite` |
 | backend.persistence.sqlite.size | string | `"5Gi"` | SQLite persistant volume size |
 | backend.persistence.sqlite.storageClass | string | `""` | SQLite persistant volume storageClass |
 | backend.replicas | int | `1` | The number of backend pods to run |
@@ -87,7 +90,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | frontend.image.repository | string | `"intuitem/ciso-assistant-community/frontend"` | Repository to use for the frontend |
 | frontend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the frontend |
 | frontend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
-| frontend.name | string | `"frontend"` | Frontend name |
+| frontend.name | string | `"frontend"` | Frontend container name |
 | frontend.replicas | int | `1` | The number of frontend pods to run |
 | frontend.resources | object | `{}` | Resources for the frontend |
 | frontend.service.annotations | object | `{}` | Frontend service annotations |
@@ -107,24 +110,6 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | global.securityContext | object | `{}` | Toggle and define pod-level security context |
 | global.tls | bool | `false` | Globally enable TLS (Ingress, URLs, etc.) |
 | global.tolerations | list | `[]` | Default tolerations for all components |
-| huey.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
-| huey.env | list | `[]` | Environment variables to pass to Huey |
-| huey.image.imagePullPolicy | string | `""` (defaults to global.image.imagePullPolicy) | Image pull policy for the Huey |
-| huey.image.registry | string | `""` (defaults to global.image.registry) | Registry to use for the Huey |
-| huey.image.repository | string | `"intuitem/ciso-assistant-community/backend"` | Repository to use for the Huey |
-| huey.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the Huey |
-| huey.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
-| huey.name | string | `"huey"` | Huey name |
-| huey.persistence.sqlite.accessMode | string | `"ReadWriteOnce"` | SQLite persistant volume accessMode |
-| huey.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence (for Huey) |
-| huey.persistence.sqlite.size | string | `"1Gi"` | SQLite persistant volume size |
-| huey.persistence.sqlite.storageClass | string | `""` | SQLite persistant volume storageClass |
-| huey.replicas | int | `1` | The number of Huey pods to run |
-| huey.resources | object | `{}` | Resources for the Huey |
-| huey.service.annotations | object | `{}` | Huey service annotations |
-| huey.service.labels | object | `{}` | Huey service labels |
-| huey.service.port | int | `80` | Huey service http port |
-| huey.service.portName | string | `"http"` | Huey service port name |
 | ingress.annotations | object | `{}` | Additional ingress annotations |
 | ingress.certificateSecret | object | `{}` | Custom TLS certificate as secret # Note: 'key' and 'certificate' are expected in PEM format |
 | ingress.enabled | bool | `true` | Enable an ingress resource for the CISO Assistant |
