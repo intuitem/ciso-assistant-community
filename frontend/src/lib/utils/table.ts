@@ -576,7 +576,8 @@ export const listViewFields = {
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
 			priority: PRIORITY_FILTER,
-			effort: EFFORT_FILTER
+			effort: EFFORT_FILTER,
+			eta__lte: undefined
 		}
 	},
 	policies: {
