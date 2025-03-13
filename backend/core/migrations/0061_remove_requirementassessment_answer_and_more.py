@@ -5,6 +5,7 @@ from django.db import migrations, models, transaction
 
 logger = logging.getLogger(__name__)
 
+
 def convert_question_to_questions(node_urn, old_data):
     """
     Converts the old format (format 1) to the target format (format 2).
@@ -28,7 +29,7 @@ def convert_question_to_questions(node_urn, old_data):
         if not urn:
             logger.warning(f"Skipping question with missing URN in node {node_urn}")
             continue
-            
+
         text = q.get("text")
         # Reference the pre-built choices
         choices = []
@@ -40,6 +41,7 @@ def convert_question_to_questions(node_urn, old_data):
 
     return new_questions
 
+
 @transaction.atomic
 def migrate_questions(apps, schema_editor):
     """
@@ -49,7 +51,7 @@ def migrate_questions(apps, schema_editor):
     Requirementnode = apps.get_model("core", "Requirementnode")
     batch_size = 1000
     nodes_to_update = []
-    
+
     try:
         # Process nodes in batches for better performance
         for instance in Requirementnode.objects.iterator():
@@ -60,21 +62,26 @@ def migrate_questions(apps, schema_editor):
                         instance.urn, old_questions
                     )
                     nodes_to_update.append(instance)
-                    
+
                     # Process in batches to reduce database load
                     if len(nodes_to_update) >= batch_size:
-                        Requirementnode.objects.bulk_update(nodes_to_update, ["questions"])
+                        Requirementnode.objects.bulk_update(
+                            nodes_to_update, ["questions"]
+                        )
                         nodes_to_update = []
                 except Exception as e:
-                    logger.error(f"Failed to migrate questions for node {instance.urn}: {str(e)}")
-        
+                    logger.error(
+                        f"Failed to migrate questions for node {instance.urn}: {str(e)}"
+                    )
+
         # Update any remaining nodes
         if nodes_to_update:
             Requirementnode.objects.bulk_update(nodes_to_update, ["questions"])
-            
+
     except Exception as e:
         logger.error(f"Migration failed: {str(e)}")
         raise
+
 
 @transaction.atomic
 def migrate_answers_format(apps, schema_editor):
@@ -91,26 +98,23 @@ def migrate_answers_format(apps, schema_editor):
         for node in RequirementNode.objects.all():
             if not node.questions:
                 continue
-                
+
             for q_urn, q_data in node.questions.items():
                 choices = q_data.get("choices", [])
                 if not choices:
                     continue
-                    
+
                 # Create a lookup dictionary for choice values to their URNs
                 choice_map = {}
                 for choice in choices:
                     choice_map[choice["value"]] = choice["urn"]
-                
-                node_choices_map[q_urn] = {
-                    "node_urn": node.urn,
-                    "choices": choice_map
-                }
-                
+
+                node_choices_map[q_urn] = {"node_urn": node.urn, "choices": choice_map}
+
         # Process assessments in batches
         batch_size = 1000
         assessments_to_update = []
-        
+
         for instance in RequirementAssessment.objects.iterator():
             old_answer_data = getattr(instance, "answer", None)
             new_answers = {}
@@ -122,13 +126,13 @@ def migrate_answers_format(apps, schema_editor):
                 for question_data in old_answer_data.get("questions", []):
                     question_urn = question_data.get("urn")
                     answer_value = question_data.get("answer")
-                    
+
                     # Skip if missing data or mapping
                     if not question_urn or question_urn not in node_choices_map:
                         continue
-                        
+
                     choices_map = node_choices_map[question_urn]["choices"]
-                    
+
                     # Handle single-choice answers
                     if isinstance(answer_value, str):
                         if answer_value in choices_map:
@@ -136,26 +140,33 @@ def migrate_answers_format(apps, schema_editor):
                         else:
                             # Keep free-text answers as they are
                             new_answers[question_urn] = answer_value
-                
+
                 if new_answers:
                     instance.answers = new_answers
                     assessments_to_update.append(instance)
-                    
+
                     # Commit in batches
                     if len(assessments_to_update) >= batch_size:
-                        RequirementAssessment.objects.bulk_update(assessments_to_update, ["answers"])
+                        RequirementAssessment.objects.bulk_update(
+                            assessments_to_update, ["answers"]
+                        )
                         assessments_to_update = []
-                        
+
             except Exception as e:
-                logger.error(f"Failed to migrate answers for assessment {instance.id}: {str(e)}")
-        
+                logger.error(
+                    f"Failed to migrate answers for assessment {instance.id}: {str(e)}"
+                )
+
         # Update any remaining assessments
         if assessments_to_update:
-            RequirementAssessment.objects.bulk_update(assessments_to_update, ["answers"])
-            
+            RequirementAssessment.objects.bulk_update(
+                assessments_to_update, ["answers"]
+            )
+
     except Exception as e:
         logger.error(f"Migration failed: {str(e)}")
         raise
+
 
 def reverse_migrations(apps, schema_editor):
     """
@@ -186,9 +197,7 @@ class Migration(migrations.Migration):
             name="answers",
             field=models.JSONField(blank=True, null=True, verbose_name="Answers"),
         ),
-        migrations.RunPython(
-            migrate_answers_format, reverse_migrations
-        ),
+        migrations.RunPython(migrate_answers_format, reverse_migrations),
         migrations.RemoveField(
             model_name="requirementassessment",
             name="answer",

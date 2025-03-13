@@ -87,7 +87,7 @@
 		requirementAssessment,
 		field: string,
 		answers: {
-			urn: {value: string | string[]};
+			urn: { value: string | string[] };
 		} | null = null
 	) {
 		const value = answers ? requirementAssessment.answers : requirementAssessment[field];
@@ -322,7 +322,9 @@
 										<p>{question.text}</p>
 										{#if shallow}
 											{#if requirementAssessment.answers[urn]}
-												<p class="text-primary-500 font-semibold">{requirementAssessment.answers[urn]}</p>
+												<p class="text-primary-500 font-semibold">
+													{requirementAssessment.answers[urn]}
+												</p>
 											{:else}
 												<p class="text-gray-400 italic">{m.noAnswer()}</p>
 											{/if}
@@ -339,9 +341,16 @@
 														name="question"
 														value={option.urn}
 														on:click={async () => {
-															const newAnswer = requirementAssessment.answers[urn] === option.urn ? null : option.urn;
+															const newAnswer =
+																requirementAssessment.answers[urn] === option.urn
+																	? null
+																	: option.urn;
 															requirementAssessment.answers[urn] = newAnswer;
-															await update(requirementAssessment, 'answers', requirementAssessment.answers);
+															await update(
+																requirementAssessment,
+																'answers',
+																requirementAssessment.answers
+															);
 														}}
 														><span class="text-left">{option.value}</span>
 													</RadioItem>
@@ -354,7 +363,11 @@
 												class="input w-fit"
 												bind:value={requirementAssessment.answers[urn]}
 												on:change={async () =>
-													await update(requirementAssessment, 'answers', requirementAssessment.answers)}
+													await update(
+														requirementAssessment,
+														'answers',
+														requirementAssessment.answers
+													)}
 												{...$$restProps}
 											/>
 										{:else}
@@ -364,7 +377,11 @@
 												bind:value={requirementAssessment.answers[urn]}
 												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
 												on:change={async () =>
-													await update(requirementAssessment, 'answers', requirementAssessment.answers)}
+													await update(
+														requirementAssessment,
+														'answers',
+														requirementAssessment.answers
+													)}
 												{...$$restProps}
 											/>
 										{/if}

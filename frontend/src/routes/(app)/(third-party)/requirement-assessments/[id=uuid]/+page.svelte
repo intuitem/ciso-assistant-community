@@ -299,7 +299,9 @@
 			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
 				{data.requirementAssessment.requirement.questions[key].text}
 				{#if data.requirementAssessment.answers[key].value}
-					<p class="text-sm font-semibold text-primary-500">{data.requirementAssessment.answers[key].value}</p>
+					<p class="text-sm font-semibold text-primary-500">
+						{data.requirementAssessment.answers[key].value}
+					</p>
 				{:else}
 					<p class="text-sm font-semibold text-primary-500">{m.undefined()}</p>
 				{/if}

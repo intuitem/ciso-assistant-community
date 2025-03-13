@@ -531,7 +531,12 @@
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col my-8 space-y-6">
 				{#if $page.data.requirementAssessment.requirement.questions != null && Object.keys($page.data.requirementAssessment.requirement.questions).length !== 0}
-					<Question {form} field="answers" questions={$page.data.requirementAssessment.requirement.questions} label={m.question()} />
+					<Question
+						{form}
+						field="answers"
+						questions={$page.data.requirementAssessment.requirement.questions}
+						label={m.question()}
+					/>
 				{/if}
 				<Select
 					{form}
