@@ -159,7 +159,7 @@
 						<Card
 							count={metrics.controls.p1}
 							label={m.sumpageP1()}
-							href="/applied-controls/?priority=1"
+							href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
 							icon="fa-solid fa-shield-halved"
 							section={m.sumpageSectionControls()}
 							emphasis={true}

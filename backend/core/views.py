@@ -1217,6 +1217,9 @@ class AppliedControlFilterSet(df.FilterSet):
         method="filter_findings_assessments",
         queryset=FindingsAssessment.objects.all(),
     )
+    status = df.MultipleChoiceFilter(
+        choices=AppliedControl.Status.choices, lookup_expr="icontains"
+    )
 
     def filter_findings_assessments(self, queryset, name, value):
         if value:
@@ -1283,7 +1286,6 @@ class AppliedControlFilterSet(df.FilterSet):
             "category": ["exact"],
             "csf_function": ["exact"],
             "priority": ["exact"],
-            "status": ["exact"],
             "reference_control": ["exact"],
             "effort": ["exact"],
             "cost": ["exact"],
