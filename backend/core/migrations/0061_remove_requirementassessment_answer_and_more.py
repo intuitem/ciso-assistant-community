@@ -64,14 +64,12 @@ def migrate_answers_format(apps, schema_editor):
 
     for instance in RequirementAssessment.objects.all():
         old_answer_data = getattr(instance, "answer", None)
-        print(old_answer_data)
         new_answers = {}
 
         if not old_answer_data or not isinstance(old_answer_data, dict):
             continue  # Skip if the format is unexpected
 
         for question_data in old_answer_data.get("questions", []):
-            print(question_data)
             question_urn = question_data.get("urn")
             answer_value = question_data.get("answer")  # The actual user response
 
@@ -110,6 +108,9 @@ class Migration(migrations.Migration):
             model_name="requirementnode",
             name="question",
         ),
+        migrations.RunPython(
+            migrate_answers_format
+        ),
         migrations.RemoveField(
             model_name="requirementassessment",
             name="answer",
@@ -118,8 +119,5 @@ class Migration(migrations.Migration):
             model_name="requirementassessment",
             name="answers",
             field=models.JSONField(blank=True, null=True, verbose_name="Answers"),
-        ),
-        migrations.RunPython(
-            migrate_answers_format
         ),
     ]
