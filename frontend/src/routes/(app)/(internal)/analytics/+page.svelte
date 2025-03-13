@@ -168,7 +168,7 @@
 						<Card
 							count={metrics.controls.eta_missed}
 							label={m.sumpageEtaMissed()}
-							href="/applied-controls/?status=on_hold"
+							href="/applied-controls/?eta__lte={new Date().toISOString().split('T')[0]}"
 							icon="fa-solid fa-shield-halved"
 							section={m.sumpageSectionControls()}
 							emphasis={true}

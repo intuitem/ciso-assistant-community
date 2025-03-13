@@ -1278,29 +1278,25 @@ class AppliedControlFilterSet(df.FilterSet):
 
     class Meta:
         model = AppliedControl
-        fields = [
-            "folder",
-            "category",
-            "csf_function",
-            "priority",
-            "status",
-            "reference_control",
-            "effort",
-            "cost",
-            "risk_scenarios",
-            "risk_scenarios_e",
-            "requirement_assessments",
-            "evidences",
-            "progress_field",
-            "security_exceptions",
-            "owner",
-            "todo",
-            "to_review",
-            "compliance_assessments",
-            "risk_assessments",
-            "findings",
-            "findings_assessments",
-        ]
+        fields = {
+            "folder": ["exact"],
+            "category": ["exact"],
+            "csf_function": ["exact"],
+            "priority": ["exact"],
+            "status": ["exact"],
+            "reference_control": ["exact"],
+            "effort": ["exact"],
+            "cost": ["exact"],
+            "risk_scenarios": ["exact"],
+            "risk_scenarios_e": ["exact"],
+            "requirement_assessments": ["exact"],
+            "evidences": ["exact"],
+            "progress_field": ["exact"],
+            "security_exceptions": ["exact"],
+            "owner": ["exact"],
+            "findings": ["exact"],
+            "eta": ["exact", "lte", "gte", "lt", "gt"],
+        }
 
 
 class AppliedControlViewSet(BaseModelViewSet):
