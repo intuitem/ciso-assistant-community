@@ -69,7 +69,7 @@ def transform_questions_to_answers(questions):
     """
     answers = {}
     for question_urn, question in questions.items():
-        answers[question_urn] = ([] if question["type"] == "multiple_choice" else None,)
+        answers[question_urn] = [] if question["type"] == "multiple_choice" else None
     return answers
 
 
