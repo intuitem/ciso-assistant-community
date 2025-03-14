@@ -8,9 +8,11 @@ logger = logging.getLogger(__name__)
 
 def convert_question_to_questions(node_urn, old_data):
     """
-    Converts the old format (format 1) to the target format (format 2).
+    Converts the old question format to the new questions format.
     The old format contains "question" (with question_type and question_choices)
     and "questions" (a list of questions with urn and text).
+    
+    Handles text and date question types which don't have choices.
     """
     if not old_data:
         return {}
@@ -31,13 +33,19 @@ def convert_question_to_questions(node_urn, old_data):
             continue
 
         text = q.get("text")
-        # Reference the pre-built choices
-        choices = []
-        for idx, choice_text in enumerate(choices_texts):
-            choice_urn = f"{urn}:choice:{idx + 1}"
-            choices.append({"urn": choice_urn, "value": choice_text})
+        
+        # Handle different question types
+        if question_type in ["text", "date"]:
+            # Text and date types don't have choices
+            new_questions[urn] = {"type": question_type, "text": text}
+        else:
+            # For choice-based questions, reference the pre-built choices
+            choices = []
+            for idx, choice_text in enumerate(choices_texts):
+                choice_urn = f"{urn}:choice:{idx + 1}"
+                choices.append({"urn": choice_urn, "value": choice_text})
 
-        new_questions[urn] = {"type": question_type, "choices": choices, "text": text}
+            new_questions[urn] = {"type": question_type, "choices": choices, "text": text}
 
     return new_questions
 
@@ -88,28 +96,33 @@ def migrate_answers_format(apps, schema_editor):
     """
     Converts the old 'answer' field format to the new 'answers' format.
     Uses batch processing and more efficient data structures.
+    Handles text and date type questions which don't have choices.
     """
     RequirementAssessment = apps.get_model("core", "Requirementassessment")
     RequirementNode = apps.get_model("core", "Requirementnode")
 
-    # Build a complete mapping of node URNs to their choice texts and indices
-    node_choices_map = {}
+    # Build a complete mapping of node URNs to their question types and choices
+    node_questions_map = {}
     try:
         for node in RequirementNode.objects.all():
             if not node.questions:
                 continue
 
             for q_urn, q_data in node.questions.items():
+                question_type = q_data.get("type")
                 choices = q_data.get("choices", [])
-                if not choices:
-                    continue
-
+                
                 # Create a lookup dictionary for choice values to their URNs
                 choice_map = {}
-                for choice in choices:
-                    choice_map[choice["value"]] = choice["urn"]
-
-                node_choices_map[q_urn] = {"node_urn": node.urn, "choices": choice_map}
+                if choices:
+                    for choice in choices:
+                        choice_map[choice["value"]] = choice["urn"]
+                
+                node_questions_map[q_urn] = {
+                    "node_urn": node.urn, 
+                    "type": question_type,
+                    "choices": choice_map
+                }
 
         # Process assessments in batches
         batch_size = 1000
@@ -128,18 +141,25 @@ def migrate_answers_format(apps, schema_editor):
                     answer_value = question_data.get("answer")
 
                     # Skip if missing data or mapping
-                    if not question_urn or question_urn not in node_choices_map:
+                    if not question_urn or question_urn not in node_questions_map:
                         continue
 
-                    choices_map = node_choices_map[question_urn]["choices"]
+                    question_info = node_questions_map[question_urn]
+                    question_type = question_info["type"]
+                    choices_map = question_info["choices"]
 
-                    # Handle single-choice answers
-                    if isinstance(answer_value, str):
-                        if answer_value in choices_map:
-                            new_answers[question_urn] = choices_map[answer_value]
-                        else:
-                            # Keep free-text answers as they are
-                            new_answers[question_urn] = answer_value
+                    # Handle different question types
+                    if question_type in ["text", "date"]:
+                        # For text and date types, keep the answer value as is
+                        new_answers[question_urn] = answer_value
+                    else:
+                        # Handle single-choice answers
+                        if isinstance(answer_value, str):
+                            if answer_value in choices_map:
+                                new_answers[question_urn] = choices_map[answer_value]
+                            else:
+                                # Keep free-text answers as they are
+                                new_answers[question_urn] = answer_value
 
                 if new_answers:
                     instance.answers = new_answers
