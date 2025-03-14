@@ -319,7 +319,7 @@
 							<div class="flex flex-col w-full space-y-2">
 								{#each Object.entries(requirementAssessment.requirement.questions) as [urn, question]}
 									<li class="flex flex-col space-y-2 rounded-xl">
-										<p>{question.text}</p>
+										<p>{question.text} ({safeTranslate(question.type)})</p>
 										{#if shallow}
 											{#if Array.isArray(requirementAssessment.answers[urn])}
 												{#each requirementAssessment.answers[urn] as answerUrn}

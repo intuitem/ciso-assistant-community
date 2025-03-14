@@ -873,5 +873,9 @@
 	"compliantRequirementsSemiColon": "Requisitos conforme:",
 	"requirementsProgressionSemiColon": "Progresión de requisitos:",
 	"noRequirementFound": "No se encontró ningún requisito",
-	"noAuditForTheFramework": "No hay auditoría utilizando este marco"
+	"noAuditForTheFramework": "No hay auditoría utilizando este marco",
+	"multipleChoice": "Opción múltiple",
+	"uniqueChoice": "Opción única",
+	"text": "Texto",
+	"date": "Fecha"
 }

@@ -2,6 +2,7 @@
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import { safeTranslate } from '$lib/utils/i18n';
 	let _class = 'w-fit';
 
 	export { _class as class };
@@ -51,7 +52,7 @@
 	<div class="control">
 		{#each Object.entries(questions) as [urn, question]}
 			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
-				<p class="font-semibold p-2">{question.text}</p>
+				<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
 				{#if question.type === 'unique_choice'}
 					<RadioGroup
 						class="flex-col"

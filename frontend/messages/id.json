@@ -1086,5 +1086,9 @@
 	"documentationScore": "Skor dokumentasi",
 	"useDocumentationScore": "Gunakan skor dokumentasi",
 	"useDocumentationScoreHelpText": "Skor kedua (skor dokumentasi) akan tersedia untuk menilai persyaratan.",
-	"selectEvidence": "Pilih bukti"
+	"selectEvidence": "Pilih bukti",
+	"multipleChoice": "Pilihan ganda",
+	"uniqueChoice": "Pilihan unik",
+	"text": "Teks",
+	"date": "Tanggal"
 }

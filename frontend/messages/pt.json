@@ -868,5 +868,9 @@
 	"useDocumentationScore": "Utilizar a pontuação da documentação",
 	"useDocumentationScoreHelpText": "Uma segunda pontuação (a pontuação da documentação) estará disponível para avaliar os requisitos.",
 	"publicationDate": "Data de publicação",
-	"selectEvidence": "Selecionar evidência"
+	"selectEvidence": "Selecionar evidência",
+	"multipleChoice": "Múltipla escolha",
+	"uniqueChoice": "Escolha única",
+	"text": "Texto",
+	"date": "Data"
 }

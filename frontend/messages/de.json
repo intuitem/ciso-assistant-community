@@ -873,5 +873,9 @@
 	"compliantRequirementsSemiColon": "Konforme Anforderungen:",
 	"requirementsProgressionSemiColon": "Fortschritt der Anforderungen:",
 	"noRequirementFound": "Keine Anforderung gefunden",
-	"noAuditForTheFramework": "Es gibt kein Audit, das dieses Framework verwendet"
+	"noAuditForTheFramework": "Es gibt kein Audit, das dieses Framework verwendet",
+	"multipleChoice": "Mehrfachauswahl",
+	"uniqueChoice": "Einzigartige Wahl",
+	"text": "Text",
+	"date": "Datum"
 }
