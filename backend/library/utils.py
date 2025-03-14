@@ -55,7 +55,7 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
-                    question=requirement_node.get("question"),
+                    questions=requirement_node.get("questions"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
