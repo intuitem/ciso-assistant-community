@@ -16,6 +16,19 @@
 
 	$: classesTextField = (errors: string[] | undefined) =>
 		errors && errors.length > 0 ? 'input-error' : '';
+
+	function toggleSelection(urn, optionUrn) {
+		// Initialize the array if it hasn't been already.
+		if (!Array.isArray($value[urn])) {
+			$value[urn] = [];
+		}
+		// Toggle the option's selection
+		if ($value[urn].includes(optionUrn)) {
+			$value[urn] = $value[urn].filter((val) => val !== optionUrn);
+		} else {
+			$value[urn] = [...$value[urn], optionUrn];
+		}
+	}
 </script>
 
 <div>
@@ -56,6 +69,24 @@
 							>
 						{/each}
 					</RadioGroup>
+				{:else if question.type === 'multiple_choice'}
+					<div
+						class="flex flex-col gap-1 p-1 bg-surface-200-700-token border-token border-surface-400-500-token rounded-token"
+					>
+						{#each question.choices as option}
+							<button
+								type="button"
+								name="question"
+								class="shadow-md p-1
+									{$value[urn] && $value[urn].includes(option.urn)
+									? 'variant-filled-primary rounded-token'
+									: 'hover:variant-soft-primary bg-surface-200-700-token rounded-token'}"
+								on:click={() => toggleSelection(urn, option.urn)}
+							>
+								{option.value}
+							</button>
+						{/each}
+					</div>
 				{:else if question.type === 'date'}
 					<input
 						type="date"
@@ -65,7 +96,7 @@
 						{...$constraints}
 						{...$$restProps}
 					/>
-				{:else}
+				{:else if question.type === 'text'}
 					<textarea
 						placeholder=""
 						class="{'input w-full' + _class} {classesTextField($errors)}"

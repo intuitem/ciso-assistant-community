@@ -321,9 +321,23 @@
 									<li class="flex flex-col space-y-2 rounded-xl">
 										<p>{question.text}</p>
 										{#if shallow}
-											{#if requirementAssessment.answers[urn]}
+											{#if Array.isArray(requirementAssessment.answers[urn])}
+												{#each requirementAssessment.answers[urn] as answerUrn}
+													{#if question.choices.find((choice) => choice.urn === answerUrn)}
+														<p class="text-primary-500 font-semibold">
+															{question.choices.find((choice) => choice.urn === answerUrn).value}
+														</p>
+													{:else}
+														<p class="text-primary-500 font-semibold">
+															{answerUrn}
+														</p>
+													{/if}
+												{/each}
+											{:else if question.choices.find((choice) => choice.urn === requirementAssessment.answers[urn])}
 												<p class="text-primary-500 font-semibold">
-													{requirementAssessment.answers[urn]}
+													{question.choices.find(
+														(choice) => choice.urn === requirementAssessment.answers[urn]
+													).value}
 												</p>
 											{:else}
 												<p class="text-gray-400 italic">{m.noAnswer()}</p>
@@ -356,6 +370,46 @@
 													</RadioItem>
 												{/each}
 											</RadioGroup>
+										{:else if question.type === 'multiple_choice'}
+											<div
+												class="flex flex-col gap-1 p-1 bg-surface-200-700-token border-token border-surface-400-500-token rounded-token"
+											>
+												{#each question.choices as option}
+													<button
+														type="button"
+														name="question"
+														class="shadow-md p-1
+															{requirementAssessment.answers[urn] && requirementAssessment.answers[urn].includes(option.urn)
+															? 'variant-filled-primary rounded-token'
+															: 'hover:variant-soft-primary bg-surface-200-700-token rounded-token'}"
+														on:click={async () => {
+															// Initialize the array if it hasn't been already.
+															if (!Array.isArray(requirementAssessment.answers[urn])) {
+																requirementAssessment.answers[urn] = [];
+															}
+															// Toggle the option's selection
+															if (requirementAssessment.answers[urn].includes(option.urn)) {
+																requirementAssessment.answers[urn] = requirementAssessment.answers[
+																	urn
+																].filter((val) => val !== option.urn);
+															} else {
+																requirementAssessment.answers[urn] = [
+																	...requirementAssessment.answers[urn],
+																	option.urn
+																];
+															}
+															// Update the requirement assessment with the new answers
+															await update(
+																requirementAssessment,
+																'answers',
+																requirementAssessment.answers
+															);
+														}}
+													>
+														{option.value}
+													</button>
+												{/each}
+											</div>
 										{:else if question.type === 'date'}
 											<input
 												type="date"
