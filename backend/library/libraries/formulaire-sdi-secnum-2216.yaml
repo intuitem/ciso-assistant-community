@@ -14,7 +14,7 @@ description: "Le ministère des Armées et les 8 grands maîtres d’œuvre indu
   \t•\tune description du contexte et de la manière d’utiliser le référentiel (https://armement.defense.gouv.fr/sites/default/files/2024-09/20230905_NP_Guide-SDI-SecNum-2217-Ed.02_R%C3%A9frentiel%20maturit%C3%A9%20Cyber%20fondamental.pdf)\n
   \t•\tun tableau des exigences  commentées (https://armement.defense.gouv.fr/sites/default/files/2023-10/20231006_NP_Formulaire-SDI-SecNum-2216-Ed.08_Socle%20Commun%20automatis%C3%A9.xlsx)"
 copyright: DGA/SSDI
-version: 1
+version: 2
 publication_date: 2024-10-22
 provider: DGA/SSDI
 packager: intuitem
