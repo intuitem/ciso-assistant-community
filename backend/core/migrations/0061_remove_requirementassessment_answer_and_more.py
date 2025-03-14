@@ -11,7 +11,7 @@ def convert_question_to_questions(node_urn, old_data):
     Converts the old question format to the new questions format.
     The old format contains "question" (with question_type and question_choices)
     and "questions" (a list of questions with urn and text).
-    
+
     Handles text and date question types which don't have choices.
     """
     if not old_data:
@@ -33,7 +33,7 @@ def convert_question_to_questions(node_urn, old_data):
             continue
 
         text = q.get("text")
-        
+
         # Handle different question types
         if question_type in ["text", "date"]:
             # Text and date types don't have choices
@@ -45,7 +45,11 @@ def convert_question_to_questions(node_urn, old_data):
                 choice_urn = f"{urn}:choice:{idx + 1}"
                 choices.append({"urn": choice_urn, "value": choice_text})
 
-            new_questions[urn] = {"type": question_type, "choices": choices, "text": text}
+            new_questions[urn] = {
+                "type": question_type,
+                "choices": choices,
+                "text": text,
+            }
 
     return new_questions
 
@@ -111,17 +115,17 @@ def migrate_answers_format(apps, schema_editor):
             for q_urn, q_data in node.questions.items():
                 question_type = q_data.get("type")
                 choices = q_data.get("choices", [])
-                
+
                 # Create a lookup dictionary for choice values to their URNs
                 choice_map = {}
                 if choices:
                     for choice in choices:
                         choice_map[choice["value"]] = choice["urn"]
-                
+
                 node_questions_map[q_urn] = {
-                    "node_urn": node.urn, 
+                    "node_urn": node.urn,
                     "type": question_type,
-                    "choices": choice_map
+                    "choices": choice_map,
                 }
 
         # Process assessments in batches

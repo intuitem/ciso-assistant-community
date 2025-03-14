@@ -69,7 +69,7 @@ def transform_questions_to_answers(questions):
     """
     answers = {}
     for question_urn, question in questions.items():
-        answers[question_urn] = [] if question["type"] == "multiple_choice" else None,
+        answers[question_urn] = ([] if question["type"] == "multiple_choice" else None,)
     return answers
 
 
@@ -611,7 +611,9 @@ class LibraryUpdater:
                                     answers[urn] = None
                                 else:
                                     answers[urn] = (
-                                        answer_val if answer_val in valid_choices else None
+                                        answer_val
+                                        if answer_val in valid_choices
+                                        else None
                                     )
 
                             elif type == "text":
@@ -620,7 +622,10 @@ class LibraryUpdater:
                                     answers[urn] = None
                                 else:
                                     answers[urn] = (
-                                        answer_val if isinstance(answer_val, str) and answer_val.split(":")[0] != "urn" else None
+                                        answer_val
+                                        if isinstance(answer_val, str)
+                                        and answer_val.split(":")[0] != "urn"
+                                        else None
                                     )
 
                             elif type == "date":
