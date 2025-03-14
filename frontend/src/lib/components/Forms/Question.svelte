@@ -49,7 +49,7 @@
 			{/each}
 		</div>
 	{/if}
-	<div class="control">
+	<div class="control whitespace-pre-line">
 		{#each Object.entries(questions) as [urn, question]}
 			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 				<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
@@ -61,12 +61,12 @@
 					>
 						{#each question.choices as option}
 							<RadioItem
-								class="shadow-md"
+								class="shadow-md flex"
 								bind:group={$value[urn]}
 								name="question"
 								value={option.urn}
 								on:click={() => ($value[urn] = $value[urn] === option.urn ? null : option.urn)}
-								>{option.value}</RadioItem
+								><span class="text-left">{option.value}</span></RadioItem
 							>
 						{/each}
 					</RadioGroup>

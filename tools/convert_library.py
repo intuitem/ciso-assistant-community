@@ -344,12 +344,21 @@ def get_answers(tab):
                 if "question_type" in header
                 else None
             )
-            choices = (
-                [{"urn": "", "value": choice.strip()} for i, choice in enumerate(row[header.get("question_choices")].value.split("\n"))]
+            choices_lines = (
+                (
+                    row[header["question_choices"]].value.split("\n")
+                    if row[header["question_choices"]].value
+                    else []
+                )
                 if "question_choices" in header
-                and row[header["question_choices"]].value
-                else None
-            )
+                    else None
+                )
+            choices = []
+            for line in choices_lines:
+                if line.startswith("|"):
+                    choices[-1]["value"] += "\n" + line[1:]
+                else:
+                    choices.append({"urn": "", "value": line.strip()})
             found_answers[row_id] = {
                 "type": type,
                 "choices": choices,
@@ -506,7 +515,7 @@ for tab in dataframe:
                     if "reference_controls" in header
                     else None
                 )
-                questions = (
+                questions_lines = (
                     (
                         row[header["questions"]].value.split("\n")
                         if row[header["questions"]].value
@@ -515,6 +524,12 @@ for tab in dataframe:
                     if "questions" in header
                     else None
                 )
+                questions = []
+                for line in questions_lines:
+                    if line.startswith("|"):
+                        questions[-1] += "\n" + line[1:]
+                    else:
+                        questions.append(line)
                 answer = (
                     (
                         row[header["answer"]].value.split("\n")
