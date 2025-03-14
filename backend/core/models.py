@@ -604,8 +604,6 @@ class LibraryUpdater:
                                     answers[urn] = None
 
                             elif type == "unique_choice":
-                                if answer_val["value"] is None:
-                                    continue
                                 # If the answer does not match a valid choice, reset it to None
                                 valid_choices = {
                                     choice["urn"]
