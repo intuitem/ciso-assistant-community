@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "redpanda-consumer"
+name = "ciso-assistant-dispatcher"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
