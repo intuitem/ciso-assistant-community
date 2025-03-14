@@ -900,9 +900,13 @@ def get_metrics(user: User):
     progress_avg = math.ceil(
         mean([x.progress() for x in viewable_items(ComplianceAssessment)] or [0])
     )
-    missed_eta_count = viewable_controls.filter(
-        eta__lt=date.today(),
-    ).count()
+    missed_eta_count = (
+        viewable_controls.filter(
+            eta__lt=date.today(),
+        )
+        .exclude(status="active")
+        .count()
+    )
 
     data = {
         "controls": {
