@@ -18,7 +18,7 @@ def convert_question_to_questions(node_urn, old_data):
         return {}
 
     question_type = old_data.get("question_type")
-    choices_texts = old_data.get("question_choices", [])
+    choices_texts = old_data.get("question_choices") or []
 
     # Pre-build choices map for efficiency
     choices_maps = {}
@@ -26,7 +26,7 @@ def convert_question_to_questions(node_urn, old_data):
         choices_maps[idx] = {"urn": f"choice:{idx + 1}", "value": choice_text}
 
     new_questions = {}
-    for q in old_data.get("questions", []):
+    for q in old_data.get("questions") or []:
         urn = q.get("urn")
         if not urn:
             logger.warning(f"Skipping question with missing URN in node {node_urn}")
