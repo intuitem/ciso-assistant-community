@@ -69,9 +69,7 @@ def transform_questions_to_answers(questions):
     """
     answers = {}
     for question_urn, question in questions.items():
-        answers[question_urn] = {
-            "value": [] if question["type"] == "multiple_choice" else None,
-        }
+        answers[question_urn] = [] if question["type"] == "multiple_choice" else None,
     return answers
 
 
@@ -601,7 +599,7 @@ class LibraryUpdater:
                                         if choice in valid_choices
                                     ]
                                 else:
-                                    answers[urn] = None
+                                    answers[urn] = []
 
                             elif type == "unique_choice":
                                 # If the answer does not match a valid choice, reset it to None
@@ -609,23 +607,32 @@ class LibraryUpdater:
                                     choice["urn"]
                                     for choice in question.get("choices", [])
                                 }
-                                answers[urn] = (
-                                    answer_val if answer_val in valid_choices else None
-                                )
+                                if isinstance(answer_val, list):
+                                    answers[urn] = None
+                                else:
+                                    answers[urn] = (
+                                        answer_val if answer_val in valid_choices else None
+                                    )
 
                             elif type == "text":
                                 # For a text question, simply check that it is a string
-                                answers[urn] = (
-                                    answer_val if isinstance(answer_val, str) else None
-                                )
+                                if isinstance(answer_val, list):
+                                    answers[urn] = None
+                                else:
+                                    answers[urn] = (
+                                        answer_val if isinstance(answer_val, str) and answer_val.split(":")[0] != "urn" else None
+                                    )
 
                             elif type == "date":
                                 # For a date question, check the expected format (e.g., "YYYY-MM-DD")
-                                try:
-                                    datetime.strptime(answer_val, "%Y-%m-%d")
-                                    answers[urn] = answer_val
-                                except Exception:
+                                if isinstance(answer_val, list):
                                     answers[urn] = None
+                                else:
+                                    try:
+                                        datetime.strptime(answer_val, "%Y-%m-%d")
+                                        answers[urn] = answer_val
+                                    except Exception:
+                                        answers[urn] = None
                         ra.answers = answers
                         ra.save()
 
