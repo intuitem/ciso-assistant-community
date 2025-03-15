@@ -36,10 +36,16 @@
 	}
 
 	// Determine if domain selection should be disabled
-	$: isDomainDisabled = selectedModel === 'ComplianceAssessment';
+	$: isDomainDisabled =
+		selectedModel === 'ComplianceAssessment' || selectedModel === 'FindingsAssessment';
+
+	$: isFrameworkDisabled = selectedModel !== 'ComplianceAssessment';
 
 	// Determine if perimeter selection should be disabled
-	$: isPerimeterDisabled = selectedModel === 'Asset' || selectedModel === 'AppliedControl';
+	$: isPerimeterDisabled =
+		selectedModel === 'Asset' ||
+		selectedModel === 'AppliedControl' ||
+		selectedModel === 'Perimeter';
 
 	$: uploadButtonStyles = file ? '' : 'chip-disabled';
 
@@ -126,6 +132,26 @@
 
 					<div>
 						<label
+							for="Perimeter"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.perimeters()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="Perimeter"
+								id="Perimeter"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
 							for="ComplianceAssessment"
 							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
 						>
@@ -138,6 +164,26 @@
 								name="model"
 								value="ComplianceAssessment"
 								id="ComplianceAssessment"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="FindingsAssessment"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.findingsAssessment()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="FindingsAssessment"
+								id="FindingsAssessment"
 								class="size-5 border-gray-300 text-blue-500"
 								bind:group={selectedModel}
 							/>
@@ -181,7 +227,7 @@
 				<select
 					id="framework"
 					name="framework"
-					disabled={isPerimeterDisabled}
+					disabled={isFrameworkDisabled}
 					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
 				>
 					{#each data.data.frameworks as framework}

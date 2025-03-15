@@ -18,6 +18,7 @@ from core.models import (
 )
 from core.serializers import (
     AssetWriteSerializer,
+    PerimeterWriteSerializer,
     AppliedControlWriteSerializer,
     ComplianceAssessmentWriteSerializer,
     RequirementAssessmentWriteSerializer,
@@ -97,6 +98,8 @@ class LoadFileView(APIView):
             return self._process_applied_controls(
                 request, records, folders_map, folder_id
             )
+        elif model_type == "Perimeter":
+            return self._process_perimeters(request, records, folders_map, folder_id)
         elif model_type == "ComplianceAssessment":
             return self._process_compliance_assessment(
                 request, records, folder_id, perimeter_id, framework_id
@@ -214,6 +217,56 @@ class LoadFileView(APIView):
 
         logger.info(
             f"Applied Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_perimeters(self, request, records, folders_map, folder_id):
+        # Collection to track successes and errors
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Assets processing
+        for record in records:
+            # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Prepare data for serializer
+            perimeter_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "folder": domain,
+                "description": record.get("description", ""),
+                "status": record.get("status"),
+            }
+            # Use the serializer for validation and saving
+            serializer = PerimeterWriteSerializer(
+                data=perimeter_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating perimeter {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+        logger.info(
+            f"Perimeter import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
         return results
 
