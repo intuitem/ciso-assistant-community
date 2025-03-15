@@ -49,7 +49,7 @@ spec:
           protocol: TCP
         {{- if .Values.frontend.resources }}
         resources:
-          {{ toYaml .Values.frontend.resources | indent 10 }}
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
         {{- end }}
         {{- with .Values.frontend.containerSecurityContext }}
         securityContext:

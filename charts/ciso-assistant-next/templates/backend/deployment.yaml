@@ -138,7 +138,7 @@ spec:
           protocol: TCP
         {{- if .Values.backend.resources }}
         resources:
-          {{ toYaml .Values.backend.resources | indent 10 }}
+          {{- toYaml .Values.backend.resources | nindent 10 }}
         {{- end }}
         {{- with .Values.backend.containerSecurityContext }}
         securityContext:
@@ -254,7 +254,7 @@ spec:
         {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
-          {{ toYaml .Values.backend.huey.resources | indent 10 }}
+          {{- toYaml .Values.backend.huey.resources | nindent 10 }}
         {{- end }}
         {{- with .Values.backend.containerSecurityContext }}
         securityContext:
