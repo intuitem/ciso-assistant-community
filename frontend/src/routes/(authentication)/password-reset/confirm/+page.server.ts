@@ -11,7 +11,7 @@ import { setLocale } from '$paraglide/runtime';
 import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 export const load: PageServerLoad = async (event) => {
-	setLocale(event.cookies.get('ciso_lang') || DEFAULT_LANGUAGE);
+	setLocale(event.cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE);
 	const form = await superValidate(event.request, zod(ResetPasswordSchema));
 
 	return { form };

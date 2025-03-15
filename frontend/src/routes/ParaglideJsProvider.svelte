@@ -7,15 +7,15 @@
 
 	onMount(() => {
 		// const valueFromSession = sessionStorage.getItem('lang') || DEFAULT_LANGUAGE;
-		const valueFromCookies = getCookie('ciso_lang') || DEFAULT_LANGUAGE;
+		const valueFromCookies = getCookie('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE;
 		// @ts-ignore
-		setCookie('ciso_lang', valueFromCookies);
+		setCookie('PARAGLIDE_LOCALE', valueFromCookies);
 		setLocale(valueFromCookies);
 	});
 
 	onDestroy(() => {
 		if (browser) {
-			deleteCookie('ciso_lang');
+			deleteCookie('PARAGLIDE_LOCALE');
 			// sessionStorage.removeItem('lang');
 		}
 	});

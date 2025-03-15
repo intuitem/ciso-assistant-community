@@ -61,7 +61,7 @@
 			})
 		});
 		// sessionStorage.setItem('lang', value);
-		setCookie('ciso_lang', value);
+		setCookie('PARAGLIDE_LOCALE', value);
 		window.location.reload();
 	}
 

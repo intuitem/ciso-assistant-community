@@ -67,7 +67,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const errorId = new URL(event.request.url).searchParams.get('error');
 	if (errorId) {
-		setLocale(event.cookies.get('ciso_lang') || DEFAULT_LANGUAGE);
+		setLocale(event.cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE);
 		setFlash({ type: 'error', message: safeTranslate(errorId) }, event);
 		redirect(302, '/login');
 	}
