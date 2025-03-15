@@ -318,6 +318,12 @@ class LoadFileView(APIView):
                 # Now process all the requirement assessments from the records
                 for record in records:
                     try:
+                        if record.get("name") == "":
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {"record": record, "error": "Name field is mandatory"}
+                            )
+                            continue
                         finding_data = {
                             "ref_id": record.get("ref_id"),
                             "name": record.get("name"),
@@ -345,13 +351,13 @@ class LoadFileView(APIView):
                                 }
                             )
                     except Exception as e:
-                        logger.warning(
-                            f"Error updating requirement assessment: {str(e)}"
-                        )
+                        logger.warning(f"Error creating finding: {str(e)}")
                         results["failed"] += 1
                         results["errors"].append({"record": record, "error": str(e)})
-        except:
-            pass
+        except Exception as e:
+            logger.error(f"Error in findings assessment processing: {str(e)}")
+            results["failed"] += len(records)
+            results["errors"].append({"error": str(e)})
         return results
 
     def _process_compliance_assessment(
