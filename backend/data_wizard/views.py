@@ -7,20 +7,20 @@ from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
 from .serializers import LoadFileSerializer
 from core.models import (
-    AppliedControl,
     Folder,
     Perimeter,
-    Asset,
-    ComplianceAssessment,
     RequirementAssessment,
     Framework,
     RequirementNode,
 )
 from core.serializers import (
     AssetWriteSerializer,
+    PerimeterWriteSerializer,
     AppliedControlWriteSerializer,
     ComplianceAssessmentWriteSerializer,
     RequirementAssessmentWriteSerializer,
+    FindingsAssessmentWriteSerializer,
+    FindingWriteSerializer,
 )
 from iam.models import RoleAssignment
 
@@ -97,9 +97,18 @@ class LoadFileView(APIView):
             return self._process_applied_controls(
                 request, records, folders_map, folder_id
             )
+        elif model_type == "Perimeter":
+            return self._process_perimeters(request, records, folders_map, folder_id)
         elif model_type == "ComplianceAssessment":
             return self._process_compliance_assessment(
                 request, records, folder_id, perimeter_id, framework_id
+            )
+        elif model_type == "FindingsAssessment":
+            return self._process_findings_assessment(
+                request,
+                records,
+                folder_id,
+                perimeter_id,
             )
         else:
             return {
@@ -215,6 +224,134 @@ class LoadFileView(APIView):
         logger.info(
             f"Applied Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
+        return results
+
+    def _process_perimeters(self, request, records, folders_map, folder_id):
+        # Collection to track successes and errors
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Assets processing
+        for record in records:
+            # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Prepare data for serializer
+            perimeter_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "folder": domain,
+                "description": record.get("description", ""),
+                "status": record.get("status"),
+            }
+            # Use the serializer for validation and saving
+            serializer = PerimeterWriteSerializer(
+                data=perimeter_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating perimeter {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+        logger.info(
+            f"Perimeter import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_findings_assessment(self, request, records, folder_id, perimeter_id):
+        results = {"successful": 0, "failed": 0, "errors": []}
+        try:
+            perimeter = Perimeter.objects.get(id=perimeter_id)
+            folder_id = perimeter.folder.id
+
+            from datetime import datetime
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            assessment_name = f"Followup_{timestamp}"
+            assessment_data = {
+                "name": assessment_name,
+                "perimeter": perimeter_id,
+                "folder": folder_id,
+            }
+
+            # Use the serializer for validation and saving
+            serializer = FindingsAssessmentWriteSerializer(
+                data=assessment_data,
+                context={"request": request},
+            )
+
+            if serializer.is_valid(raise_exception=True):
+                # Save the compliance assessment
+                findings_assessment = serializer.save()
+                logger.info(
+                    f"Created follow-up: {assessment_name} with ID {findings_assessment.id}"
+                )
+                # UNDEFINED = -1, "undefined"
+                # LOW = 0, "low"
+                # MEDIUM = 1, "medium"
+                # HIGH = 2, "high"
+                # CRITICAL = 3, "critical"
+                SEVERITY_MAP = {
+                    "low": 0,
+                    "medium": 1,
+                    "high": 2,
+                    "critical": 3,
+                }
+                # Now process all the requirement assessments from the records
+                for record in records:
+                    try:
+                        finding_data = {
+                            "ref_id": record.get("ref_id"),
+                            "name": record.get("name"),
+                            "description": record.get("description"),
+                            "status": record.get("status"),
+                            "findings_assessment": findings_assessment.id,
+                        }
+                        severity = -1
+                        if record.get("severity") != "":
+                            severity = SEVERITY_MAP.get(record.get("severity"), -1)
+                        finding_data.update({"severity": severity})
+
+                        finding_writer = FindingWriteSerializer(
+                            data=finding_data, context={"request": request}
+                        )
+                        if finding_writer.is_valid(raise_exception=True):
+                            finding_writer.save()
+                            results["successful"] += 1
+                        else:
+                            logger.info(f"Data validation failed for finding creation")
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                }
+                            )
+                    except Exception as e:
+                        logger.warning(
+                            f"Error updating requirement assessment: {str(e)}"
+                        )
+                        results["failed"] += 1
+                        results["errors"].append({"record": record, "error": str(e)})
+        except:
+            pass
         return results
 
     def _process_compliance_assessment(
