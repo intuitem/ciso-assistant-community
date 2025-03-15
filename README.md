@@ -47,7 +47,7 @@ The vision of the tool is based on these fundamental objects:
 
 ![](core_objects.png)
 
-There are other concepts and models to provide other features. The full details are available in the [data model](documentation/architecture/data-model.md).
+There are other concepts and models used to provide other features. The full details are available in the [data model](documentation/architecture/data-model.md).
 
 The decoupling concept is a pillar of the app and allows you to save a considerable amount of time:
 
