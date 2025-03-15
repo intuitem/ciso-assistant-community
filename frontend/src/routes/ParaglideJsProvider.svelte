@@ -1,5 +1,5 @@
 <script>
-	import { languageTag, onSetLanguageTag, setLanguageTag } from '$paraglide/runtime';
+	import { getLocale, overwriteSetLocale, setLocale } from '$paraglide/runtime';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { getCookie, deleteCookie, setCookie } from '$lib/utils/cookies';
@@ -10,7 +10,7 @@
 		const valueFromCookies = getCookie('ciso_lang') || DEFAULT_LANGUAGE;
 		// @ts-ignore
 		setCookie('ciso_lang', valueFromCookies);
-		setLanguageTag(valueFromCookies);
+		setLocale(valueFromCookies);
 	});
 
 	onDestroy(() => {
@@ -21,9 +21,9 @@
 	});
 
 	// initialize the language tag
-	$: _languageTag = languageTag;
+	$: _languageTag = getLocale;
 
-	onSetLanguageTag((newLanguageTag) => {
+	overwriteSetLocale((newLanguageTag) => {
 		// @ts-ignore
 		_languageTag = newLanguageTag;
 	});

@@ -3,7 +3,7 @@
 	import * as m from '$paraglide/messages';
 	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { languageTag } from '$paraglide/runtime';
+	import { getLocale } from '$paraglide/runtime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	function filterUserData() {
@@ -15,7 +15,7 @@
 			if (!filter.includes(key) && Object.prototype.hasOwnProperty.call($page.data.user, key)) {
 				const str = toCamelCase(key);
 				if (key === 'date_joined')
-					filtered[str] = new Date($page.data.user[key]).toLocaleString(languageTag());
+					filtered[str] = new Date($page.data.user[key]).toLocaleString(getLocale());
 				else filtered[str] = $page.data.user[key];
 			}
 		});

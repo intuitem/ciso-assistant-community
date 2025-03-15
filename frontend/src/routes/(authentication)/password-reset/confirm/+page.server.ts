@@ -7,11 +7,11 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import { setLanguageTag } from '$paraglide/runtime';
+import { setLocale } from '$paraglide/runtime';
 import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 export const load: PageServerLoad = async (event) => {
-	setLanguageTag(event.cookies.get('ciso_lang') || DEFAULT_LANGUAGE);
+	setLocale(event.cookies.get('ciso_lang') || DEFAULT_LANGUAGE);
 	const form = await superValidate(event.request, zod(ResetPasswordSchema));
 
 	return { form };
