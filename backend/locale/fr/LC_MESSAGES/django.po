@@ -169,7 +169,7 @@ msgid "Activist"
 msgstr ""
 
 #: ebios_rm/models.py:173
-msgid "Professional"
+msgid "Competitor"
 msgstr ""
 
 #: ebios_rm/models.py:174

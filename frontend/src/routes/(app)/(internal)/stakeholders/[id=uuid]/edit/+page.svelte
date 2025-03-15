@@ -6,12 +6,13 @@
 	export let data: PageData;
 </script>
 
-<ModelForm
-	form={data.form}
-	action="?/updateStakeholder&next={$page.url.searchParams.get('next')}"
-	object={data.object}
-	selectOptions={data.selectOptions}
-	foreignKeys={data.foreignKeys}
-	model={data.model}
-	context="edit"
-/>
+{#key data.form}
+	<ModelForm
+		form={data.form}
+		action="?/updateStakeholder&next={$page.url.searchParams.get('next')}"
+		object={data.object}
+		selectOptions={data.selectOptions}
+		model={data.model}
+		context="edit"
+	/>
+{/key}

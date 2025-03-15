@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Perimeter-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-12-11 18:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -117,8 +117,8 @@ msgid "Description (descending)"
 msgstr "Description (décroissant)"
 
 #: core/filters.py:183
-msgid "Search project..."
-msgstr "Rechercher un projet..."
+msgid "Search perimeter..."
+msgstr "Rechercher un périmètre..."
 
 #: core/filters.py:212
 msgid "Search threat..."
@@ -573,12 +573,12 @@ msgstr "Statut"
 #: core/models.py:1322 core/models.py:1947 core/models.py:2498
 #: core/templates/core/action_plan_pdf.html:16
 #: core/templates/snippets/mp_data.html:7
-msgid "Project"
-msgstr "Projet"
+msgid "Perimeter"
+msgstr "Périmètre"
 
 #: core/models.py:1323
-msgid "Projects"
-msgstr "Projets"
+msgid "Perimeters"
+msgstr "Périmètres"
 
 #: core/models.py:1358
 msgid "Primary"

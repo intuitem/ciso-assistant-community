@@ -25,32 +25,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);
-	const foreignKeyFields = urlParamModelForeignKeyFields(URLModel);
 	const selectFields = urlParamModelSelectFields(URLModel);
-
-	const foreignKeys: Record<string, any> = {};
-
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_study=${params.id}`;
-	const res = await fetch(endpoint);
-	const data = await res.json().then((res) => res.results);
-
-	for (const keyField of foreignKeyFields) {
-		const keyModel = getModelInfo(keyField.urlModel);
-		const queryParams = keyField.urlParams
-			? `?${keyField.urlParams}${keyField.detail ? params.id : ''}`
-			: '';
-		const url = keyModel.endpointUrl
-			? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
-			: `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}`;
-		const response = await fetch(url);
-		if (response.ok) {
-			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-		} else {
-			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-		}
-	}
-
-	model['foreignKeys'] = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
 
@@ -86,8 +61,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
-
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
 			obj[key] = listViewFields[URLModel as urlModel].head[index];
@@ -98,8 +71,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const table: TableSource = {
 		head: headData,
-		body: bodyData,
-		meta: data // metaData
+		body: [],
+		meta: []
 	};
 
 	return { createForm, deleteForm, model, URLModel, table };

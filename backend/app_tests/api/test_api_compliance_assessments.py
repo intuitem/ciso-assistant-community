@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 from core.models import ComplianceAssessment, Framework
-from core.models import Project
+from core.models import Perimeter
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
@@ -29,7 +29,7 @@ class TestComplianceAssessmentsUnauthenticated:
             {
                 "name": COMPLIANCE_ASSESSMENT_NAME,
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "framework": Framework.objects.all()[0],
@@ -46,7 +46,7 @@ class TestComplianceAssessmentsUnauthenticated:
             {
                 "name": COMPLIANCE_ASSESSMENT_NAME,
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test", folder=Folder.objects.create(name="test")
                 ).id,
             },
@@ -63,7 +63,7 @@ class TestComplianceAssessmentsUnauthenticated:
             {
                 "name": COMPLIANCE_ASSESSMENT_NAME,
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "framework": Framework.objects.all()[0],
@@ -71,7 +71,7 @@ class TestComplianceAssessmentsUnauthenticated:
             {
                 "name": "new " + COMPLIANCE_ASSESSMENT_NAME,
                 "description": "new " + COMPLIANCE_ASSESSMENT_DESCRIPTION,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test2", folder=Folder.objects.create(name="test2")
                 ).id,
             },
@@ -87,7 +87,7 @@ class TestComplianceAssessmentsUnauthenticated:
             ComplianceAssessment,
             {
                 "name": COMPLIANCE_ASSESSMENT_NAME,
-                "project": Project.objects.create(
+                "perimeter": Perimeter.objects.create(
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "framework": Framework.objects.all()[0],
@@ -103,7 +103,7 @@ class TestComplianceAssessmentsAuthenticated:
         """test to get compliance assessments from the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
-        project = Project.objects.create(name="test", folder=test.folder)
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.get_object(
             test.client,
@@ -113,16 +113,16 @@ class TestComplianceAssessmentsAuthenticated:
                 "name": COMPLIANCE_ASSESSMENT_NAME,
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION,
-                "project": project,
+                "perimeter": perimeter,
                 "framework": Framework.objects.all()[0],
             },
             {
-                "project": {
-                    "id": str(project.id),
-                    "str": project.folder.name + "/" + project.name,
+                "perimeter": {
+                    "id": str(perimeter.id),
+                    "str": perimeter.folder.name + "/" + perimeter.name,
                     "folder": {
-                        "id": str(project.folder.id),
-                        "str": project.folder.name,
+                        "id": str(perimeter.folder.id),
+                        "str": perimeter.folder.name,
                     },
                 },
                 "framework": {
@@ -143,7 +143,7 @@ class TestComplianceAssessmentsAuthenticated:
         """test to create compliance assessments with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
-        project = Project.objects.create(name="test", folder=test.folder)
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.create_object(
             test.client,
@@ -153,16 +153,16 @@ class TestComplianceAssessmentsAuthenticated:
                 "name": COMPLIANCE_ASSESSMENT_NAME,
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION,
-                "project": str(project.id),
+                "perimeter": str(perimeter.id),
                 "framework": str(Framework.objects.all()[0].id),
             },
             {
-                "project": {
-                    "id": str(project.id),
-                    "str": project.folder.name + "/" + project.name,
+                "perimeter": {
+                    "id": str(perimeter.id),
+                    "str": perimeter.folder.name + "/" + perimeter.name,
                     "folder": {
-                        "id": str(project.folder.id),
-                        "str": project.folder.name,
+                        "id": str(perimeter.folder.id),
+                        "str": perimeter.folder.name,
                     },
                 },
                 "framework": {
@@ -185,8 +185,8 @@ class TestComplianceAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Documents")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework2")
-        project = Project.objects.create(name="test", folder=test.folder)
-        project2 = Project.objects.create(
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
+        perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
 
@@ -198,23 +198,23 @@ class TestComplianceAssessmentsAuthenticated:
                 "name": COMPLIANCE_ASSESSMENT_NAME,
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION,
-                "project": project,
+                "perimeter": perimeter,
                 "framework": Framework.objects.all()[0],
             },
             {
                 "name": "new " + COMPLIANCE_ASSESSMENT_NAME,
                 "description": "new " + COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION + ".1",
-                "project": str(project2.id),
+                "perimeter": str(perimeter2.id),
                 "framework": str(Framework.objects.all()[1].id),
             },
             {
-                "project": {
-                    "id": str(project.id),
-                    "str": project.folder.name + "/" + project.name,
+                "perimeter": {
+                    "id": str(perimeter.id),
+                    "str": perimeter.folder.name + "/" + perimeter.name,
                     "folder": {
-                        "id": str(project.folder.id),
-                        "str": project.folder.name,
+                        "id": str(perimeter.folder.id),
+                        "str": perimeter.folder.name,
                     },
                 },
                 "framework": {
@@ -235,7 +235,7 @@ class TestComplianceAssessmentsAuthenticated:
         """test to delete compliance assessments with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
-        project = Project.objects.create(name="test", folder=test.folder)
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.delete_object(
             test.client,
@@ -243,7 +243,7 @@ class TestComplianceAssessmentsAuthenticated:
             ComplianceAssessment,
             {
                 "name": COMPLIANCE_ASSESSMENT_NAME,
-                "project": project,
+                "perimeter": perimeter,
                 "framework": Framework.objects.all()[0],
             },
             user_group=test.user_group,

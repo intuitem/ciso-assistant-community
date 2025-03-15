@@ -1,10 +1,9 @@
 <script lang="ts">
-	import type { SuperForm, SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { getModelInfo, getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroupInput from '../RadioGroupInput.svelte';
@@ -95,15 +94,17 @@
 					label={m.category()}
 					cacheLock={cacheLocks['category']}
 					bind:cachedValue={formDataCache['category']}
+					helpText={m.stakeholderCategoryHelpText()}
 				/>
 				<AutocompleteSelect
 					{form}
-					options={getOptions({ objects: model.foreignKeys['entity'] })}
+					optionsEndpoint="entities"
 					field="entity"
 					cacheLock={cacheLocks['entity']}
 					bind:cachedValue={formDataCache['entity']}
 					label={m.entity()}
 					hidden={initialData.entity}
+					helpText={m.stakeholderEntityHelpText()}
 				/>
 			</span>
 
@@ -124,6 +125,7 @@
 							field="current_dependency"
 							cacheLock={cacheLocks['current_dependency']}
 							bind:cachedValue={formDataCache['current_dependency']}
+							helpText={m.dependencyHelpText()}
 						/>
 						<i class="fa-solid fa-times" />
 						<RadioGroupInput
@@ -139,6 +141,7 @@
 							label={m.penetration()}
 							cacheLock={cacheLocks['current_penetration']}
 							bind:cachedValue={formDataCache['current_penetration']}
+							helpText={m.penetrationHelpText()}
 						/>
 					</span>
 
@@ -157,6 +160,7 @@
 							label={m.maturity()}
 							cacheLock={cacheLocks['current_maturity']}
 							bind:cachedValue={formDataCache['current_maturity']}
+							helpText={m.maturityHelpText()}
 						/>
 						<i class="fa-solid fa-times" />
 						<RadioGroupInput
@@ -171,6 +175,7 @@
 							label={m.trust()}
 							cacheLock={cacheLocks['current_trust']}
 							bind:cachedValue={formDataCache['current_trust']}
+							helpText={m.trustHelpText()}
 						/></span
 					>
 				</div>
@@ -186,7 +191,12 @@
 			</div>
 		</div>
 		<div class="flex flex-col flex-grow">
-			<Checkbox {form} field="is_selected" label={m.selected()} />
+			<Checkbox
+				{form}
+				field="is_selected"
+				label={m.selected()}
+				helpText={m.stakeholderIsSelectedHelpText()}
+			/>
 			<TextArea
 				{form}
 				field="justification"
@@ -216,10 +226,8 @@
 				<AutocompleteSelect
 					multiple
 					{form}
-					options={getOptions({
-						objects: model.foreignKeys['applied_controls'],
-						extra_fields: [['folder', 'str']]
-					})}
+					optionsEndpoint="applied-controls"
+					optionsExtraFields={[['folder', 'str']]}
 					field="applied_controls"
 					label={m.appliedControls()}
 				/>

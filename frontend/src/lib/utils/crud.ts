@@ -17,15 +17,6 @@ type GetOptionsParams = {
 	selfSelect?: boolean;
 };
 
-export function checkConstraints(constraints: { [key: string]: any }, foreignKeys: any): string[] {
-	const emptyConstraintsList = [];
-	for (const [key, constraint] of Object.entries(constraints)) {
-		if (constraint.required && foreignKeys[key])
-			if (foreignKeys[key].length === 0) emptyConstraintsList.push(key);
-	}
-	return emptyConstraintsList;
-}
-
 function getValue(object: { [key: string]: any }, keys: string | string[]) {
 	if (typeof keys === 'string') {
 		return object[keys];
@@ -57,8 +48,9 @@ export const getOptions = ({
 		.map((object) => {
 			const my_label =
 				label != 'auto'
-					? object[label]
-					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
+					? (object[label] ?? '')
+					: (append(object['ref_id'], object['name'] ? object['name'] : object['description']) ??
+						'');
 			return {
 				label:
 					extra_fields.length > 0
@@ -107,6 +99,7 @@ interface ForeignKeyField {
 	urlParams?: string;
 	detail?: boolean;
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
+	disableAddDeleteButtons?: boolean;
 }
 
 interface Field {
@@ -152,22 +145,22 @@ export const URL_MODEL_MAP: ModelMap = {
 		listViewUrlParams: '?content_type=DO&content_type=GL',
 		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
 		reverseForeignKeyFields: [
-			{ field: 'folder', urlModel: 'projects' },
+			{ field: 'folder', urlModel: 'perimeters' },
 			{ field: 'folder', urlModel: 'entities' }
 		]
 	},
-	projects: {
-		name: 'project',
-		localName: 'project',
-		localNamePlural: 'projects',
-		verboseName: 'Project',
-		verboseNamePlural: 'Projects',
+	perimeters: {
+		name: 'perimeter',
+		localName: 'perimeter',
+		localNamePlural: 'perimeters',
+		verboseName: 'Perimeter',
+		verboseNamePlural: 'Perimeters',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
 		selectFields: [{ field: 'lc_status' }],
 		reverseForeignKeyFields: [
-			{ field: 'project', urlModel: 'risk-assessments' },
-			{ field: 'project', urlModel: 'compliance-assessments' },
-			{ field: 'project', urlModel: 'entity-assessments' }
+			{ field: 'perimeter', urlModel: 'risk-assessments' },
+			{ field: 'perimeter', urlModel: 'compliance-assessments' },
+			{ field: 'perimeter', urlModel: 'entity-assessments' }
 		],
 		filters: [{ field: 'lc_status' }, { field: 'folder' }]
 	},
@@ -190,7 +183,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Risk assessments',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
-			{ field: 'project', urlModel: 'projects' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
@@ -199,7 +192,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
 		selectFields: [{ field: 'status' }],
-		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
+		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }]
 	},
 	'risk-assessment_duplicate': {
 		name: 'riskassessment',
@@ -207,7 +200,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'riskAssessments',
 		verboseName: 'Risk assessment',
 		verboseNamePlural: 'Risk assessments',
-		foreignKeyFields: [{ field: 'project', urlModel: 'projects' }]
+		foreignKeyFields: [{ field: 'perimeter', urlModel: 'perimeters' }]
 	},
 	threats: {
 		name: 'threat',
@@ -231,10 +224,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'project', urlModel: 'projects' },
+			{ field: 'existing_applied_controls', urlModel: 'applied-controls' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
@@ -262,13 +257,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'eta', type: 'date' },
 			{ field: 'owner' },
 			{ field: 'expiry_date', type: 'date' },
-			{ field: 'link' }
+			{ field: 'link' },
+			{ field: 'progress_field' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
@@ -337,7 +336,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
@@ -384,12 +384,17 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assets',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
+		reverseForeignKeyFields: [
+			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
+		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' }
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [
@@ -453,7 +458,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'folders',
 				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
 			},
-			{ field: 'applied_controls', urlModel: 'applied-controls' }
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'evidences', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'requirement-assessments' }
 		]
 	},
 	'compliance-assessments': {
@@ -464,12 +474,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Compliance assessments',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
-			{ field: 'project', urlModel: 'projects' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' },
-			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' }
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' },
+			{ field: 'assets', urlModel: 'assets' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
@@ -491,7 +502,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
+			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		]
 	},
 	'stored-libraries': {
@@ -543,7 +555,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
 		reverseForeignKeyFields: [
-			{ field: 'entity', urlModel: 'solutions' },
+			{ field: 'provider_entity', urlModel: 'solutions' },
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'entity', urlModel: 'entity-assessments' }
 		],
@@ -559,7 +571,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Entity assessment',
 		verboseNamePlural: 'Entity assessments',
 		foreignKeyFields: [
-			{ field: 'project', urlModel: 'projects' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'solutions', urlModel: 'solutions' },
 			{ field: 'framework', urlModel: 'frameworks' },
@@ -743,6 +755,60 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }]
+	},
+	'security-exceptions': {
+		name: 'securityexception',
+		localName: 'securityException',
+		localNamePlural: 'securityExceptions',
+		verboseName: 'Security exception',
+		verboseNamePlural: 'Security exceptions',
+		foreignKeyFields: [
+			{ field: 'owners', urlModel: 'users' },
+			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
+		reverseForeignKeyFields: [
+			{ field: 'security_exceptions', urlModel: 'applied-controls', disableAddDeleteButtons: true },
+			{ field: 'security_exceptions', urlModel: 'assets', disableAddDeleteButtons: true },
+			{ field: 'security_exceptions', urlModel: 'vulnerabilities', disableAddDeleteButtons: true },
+			{
+				field: 'security_exceptions',
+				urlModel: 'requirement-assessments',
+				disableAddDeleteButtons: true
+			},
+			{ field: 'security_exceptions', urlModel: 'risk-scenarios', disableAddDeleteButtons: true }
+		]
+	},
+	'findings-assessments': {
+		name: 'findingsassessment',
+		localName: 'findingsAssessment',
+		localNamePlural: 'findingsAssessments',
+		verboseName: 'Findings assessment',
+		verboseNamePlural: 'Findings assessments',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' }],
+		selectFields: [{ field: 'status' }, { field: 'category' }]
+	},
+	findings: {
+		name: 'finding',
+		localName: 'finding',
+		localNamePlural: 'findings',
+		verboseName: 'Finding',
+		verboseNamePlural: 'Findings',
+		foreignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings-assessments' }],
+		// reverseForeignKeyFields: [
+		// 	{ field: 'findings', urlModel: 'vulnerabilities' },
+		// 	{ field: 'findings', urlModel: 'reference-controls' },
+		// 	{ field: 'findings', urlModel: 'applied-controls' }
+		// ],
+		selectFields: [{ field: 'status' }]
 	}
 };
 
@@ -752,18 +818,14 @@ export const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
-	libraries: {
+	'stored-libraries': {
 		locales: LanguageDisplay,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
-	// "stored-libraries": {
-	// 	locale: LanguageDisplay,
-	// 	[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	// },
-	// "loaded-libraries": {
-	// 	locale: LanguageDisplay
-	// 	// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
-	// },
+	'loaded-libraries': {
+		locales: LanguageDisplay,
+		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
+	},
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
 	}
@@ -876,7 +938,7 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 			}
 		}
 	},
-	projects: {
+	perimeters: {
 		name: {
 			keys: {
 				lc_status: {
@@ -898,30 +960,6 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		}
 	}
 };
-
-export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any, language: string) => any } =
-	{
-		frameworks: async ({ fetch }) => {
-			// ({ fetch }, language)
-			const endpoint = `${BASE_API_URL}/frameworks/`;
-			const res = await fetch(endpoint);
-			const response_data = await res.json();
-			const frameworks = response_data.results;
-
-			let compliance_assessment_req = null;
-			let compliance_assessment_data = null;
-
-			for (const framework of frameworks) {
-				compliance_assessment_req = await fetch(
-					`${BASE_API_URL}/compliance-assessments/?framework=${framework.id}`
-				);
-				compliance_assessment_data = await compliance_assessment_req.json();
-				framework.compliance_assessments = compliance_assessment_data.count;
-			}
-
-			return frameworks;
-		}
-	};
 
 export const urlParamModelVerboseName = (model: string): string => {
 	return URL_MODEL_MAP[model]?.verboseName || '';

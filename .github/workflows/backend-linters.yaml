@@ -7,17 +7,19 @@ on:
 
 env:
   GITHUB_WORKFLOW: github_actions
+  PYTHON_VERSION: "3.12"
+  UBUNTU_VERSION: "ubuntu-24.04"
 
 jobs:
   ruff:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       working-directory: ./backend
 
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +31,7 @@ jobs:
       - name: Install ruff
         working-directory: ${{env.working-directory}}
         run: |
-          python -m pip install ruff
+          python -m pip install ruff==0.9.2
       - name: Run ruff format check
         working-directory: ${{env.working-directory}}
         run: ruff format --check .

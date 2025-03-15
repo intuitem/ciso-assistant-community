@@ -17,6 +17,7 @@ description: "Le minist\xE8re des Arm\xE9es et les 8 grands ma\xEEtres d\u2019\u
   \t\u2022\tun tableau des exigences \_comment\xE9es (https://armement.defense.gouv.fr/sites/default/files/2023-10/20231006_NP_Formulaire-SDI-SecNum-2216-Ed.08_Socle%20Commun%20automatis%C3%A9.xlsx)"
 copyright: DGA/SSDI
 version: 1
+publication_date: 2024-10-22
 provider: DGA/SSDI
 packager: intuitem
 objects:

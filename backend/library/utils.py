@@ -38,9 +38,9 @@ def preview_library(framework: dict) -> dict[str, list]:
     """
     preview = {}
     requirement_nodes_list = []
-    if framework.get("requirement_nodes"):
+    if (requirement_nodes := framework.get("requirement_nodes")) is not None:
         index = 0
-        for requirement_node in framework["requirement_nodes"]:
+        for requirement_node in requirement_nodes:
             parent_urn = requirement_node.get("parent_urn")
             if parent_urn:
                 parent_urn = parent_urn.lower()
@@ -55,6 +55,7 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
+                    question=requirement_node.get("question"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
@@ -418,7 +419,7 @@ class RiskMatrixImporter:
             urn=self.risk_matrix_data["urn"].lower(),
             provider=library_object.provider,
             ref_id=self.risk_matrix_data.get("ref_id"),
-            json_definition=json.dumps(matrix_data),
+            json_definition=matrix_data,
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -537,7 +538,7 @@ class LibraryImporter:
                 ", ".join(missing_fields)
             )"""
 
-        library_objects = json.loads(self._library.content)
+        library_objects = self._library.content
 
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
@@ -586,12 +587,15 @@ class LibraryImporter:
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
-                dependency = StoredLibrary.objects.get(
-                    urn=dependency_urn
-                )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
-                error_msg = dependency.load()
-                if error_msg is not None:
-                    return error_msg
+                try:
+                    dependency = StoredLibrary.objects.get(urn=dependency_urn)
+                    error_msg = dependency.load()
+                    if error_msg is not None:
+                        return error_msg
+                except StoredLibrary.DoesNotExist:
+                    err_msg = f"ERROR: Stored Library with URN {dependency_urn} does not exist"
+                    print(err_msg)
+                    raise Http404(err_msg)
             else:
                 # try to update the dependency, because we might need the last version for the main library
                 dependency = LoadedLibrary.objects.get(urn=dependency_urn)
@@ -622,6 +626,7 @@ class LibraryImporter:
                 "version": self._library.version,
                 "provider": self._library.provider,
                 "packager": self._library.packager,
+                "publication_date": self._library.publication_date,
                 "copyright": self._library.copyright,
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
                 "is_published": True,
@@ -641,7 +646,6 @@ class LibraryImporter:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
-            print(reference_control)
             reference_control.import_reference_control(library_object)
 
         for risk_matrix in self._risk_matrices:
@@ -678,7 +682,7 @@ class LibraryImporter:
                 break
             except OperationalError as e:
                 if e.args and e.args[0] == "database is locked":
-                    time.sleep(1)
+                    time.sleep(3)
                 else:
                     raise e
             except Exception as e:

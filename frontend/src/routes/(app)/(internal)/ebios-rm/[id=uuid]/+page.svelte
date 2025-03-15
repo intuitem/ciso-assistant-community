@@ -1,10 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
-	import { checkConstraints } from '$lib/utils/crud';
-	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
@@ -106,22 +102,30 @@
 			{
 				title: safeTranslate(m.ebiosWs5_2()),
 				status: data.data.meta.workshops[4].steps[1].status,
-				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=two&next=${$page.url.pathname}`,
+				disabled: data.data.last_risk_assessment == null,
+				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_3()),
 				status: data.data.meta.workshops[4].steps[2].status,
-				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=three&next=${$page.url.pathname}`,
+				disabled: data.data.last_risk_assessment == null,
+				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_4()),
 				status: data.data.meta.workshops[4].steps[3].status,
-				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=four&next=${$page.url.pathname}`,
+				disabled: data.data.last_risk_assessment == null,
+				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_5()),
 				status: data.data.meta.workshops[4].steps[4].status,
-				href: `${$page.url.pathname}/workshop-5/risk-analyses?next=${$page.url.pathname}`
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/remediation-plan?next=${$page.url.pathname}`,
+				disabled: data.data.last_risk_assessment == null,
+				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			}
 		]
 	};
@@ -140,26 +144,7 @@
 			// Data
 			title: safeTranslate('add-' + data.riskModel.localName)
 		};
-		if (
-			checkConstraints(data.createRiskAnalysisForm.constraints, data.riskModel.foreignKeys).length >
-			0
-		) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.riskModel.localName).toLowerCase(),
-				value: checkConstraints(data.createRiskAnalysisForm.constraints, data.riskModel.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
-	}
-
-	$: if (form && form.redirect) {
-		goto(getSecureRedirect(form.redirect));
 	}
 </script>
 

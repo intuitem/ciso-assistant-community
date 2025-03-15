@@ -5,9 +5,6 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
-	import { checkConstraints } from '$lib/utils/crud';
-	import * as m from '$paraglide/messages.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -29,25 +26,6 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		if (
-			checkConstraints(
-				data.createForm.constraints,
-				Object.fromEntries(
-					Object.entries(data.model.foreignKeys).filter(([key]) => key !== 'risk_matrix')
-				)
-			).length > 0
-		) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
-				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 </script>

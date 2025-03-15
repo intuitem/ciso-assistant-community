@@ -4,7 +4,6 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
 	import { page } from '$app/stores';
 
@@ -53,7 +52,7 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		options={getOptions({ objects: model.foreignKeys['folder'] })}
+		optionsEndpoint="folders?content_type=DO"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
@@ -62,7 +61,7 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
+		optionsEndpoint="risk-matrices"
 		field="risk_matrix"
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}
@@ -107,7 +106,8 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+			optionsEndpoint="users?is_third_party=false"
+			optionsLabelField="email"
 			field="authors"
 			cacheLock={cacheLocks['authors']}
 			bind:cachedValue={formDataCache['authors']}
@@ -116,7 +116,8 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+			optionsEndpoint="users?is_third_party=false"
+			optionsLabelField="email"
 			field="reviewers"
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}
@@ -138,13 +139,12 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			options={getOptions({
-				objects: model.foreignKeys['assets'],
-				extra_fields: [['folder', 'str']],
-				label: 'auto'
-			})}
+			optionsEndpoint="assets"
+			optionsLabelField="auto"
+			optionsExtraFields={[['folder', 'str']]}
 			field="assets"
 			label={m.assets()}
+			helpText={m.studyAssetHelpText()}
 		/>
 	</div>
 	<TextArea
@@ -158,7 +158,7 @@
 	<AutocompleteSelect
 		multiple
 		{form}
-		options={getOptions({ objects: model.foreignKeys['compliance_assessments'] })}
+		optionsEndpoint="compliance-assessments"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}
 		bind:cachedValue={formDataCache['compliance_assessments']}

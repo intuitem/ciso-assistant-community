@@ -3,7 +3,7 @@ import * as m from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/projects/quality_check/`;
+	const endpoint = `${BASE_API_URL}/perimeters/quality_check/`;
 
 	const res = await fetch(endpoint);
 	const data = await res.json().then((res) => res.results);

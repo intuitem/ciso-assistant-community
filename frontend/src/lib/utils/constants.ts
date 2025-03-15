@@ -34,7 +34,7 @@ export const complianceResultTailwindColorMap: { [key: string]: string } = {
 	compliant: 'bg-green-300'
 };
 
-export const complianceStatusColorMap = {
+export const complianceStatusColorMap: { [key: string]: string } = {
 	to_do: '#9ca3af',
 	in_progress: '#f59e0b',
 	in_review: '#3b82f6',
@@ -81,7 +81,8 @@ export const LOCALE_DISPLAY_MAP = {
 	pt: '🇵🇹 Português',
 	pl: '🇵🇱 Polski',
 	ro: '🇷🇴 Română',
-	ar: '🇸🇦 العربية'
+	ar: '🇸🇦 العربية',
+	cs: '🇨🇿 Český'
 };
 
 export const ISO_8601_REGEX =

@@ -16,6 +16,7 @@ from datetime import timedelta
 import logging.config
 import structlog
 from django.core.management.utils import get_random_secret_key
+from ciso_assistant import meta
 
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 
@@ -23,6 +24,7 @@ load_dotenv(BASE_DIR / ".meta")
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
 BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
+SCHEMA_VERSION = meta.SCHEMA_VERSION
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
@@ -102,6 +104,7 @@ logger.info("Launching CISO Assistant Enterprise")
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
 logger.info("BUILD: %s", BUILD)
+logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 
 # TODO: multiple paths are explicit, it should use path join to be more generic
 
@@ -113,6 +116,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
@@ -127,7 +131,7 @@ ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
 MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
 MEDIA_URL = ""
 
-PAGINATE_BY = os.environ.get("PAGINATE_BY", default=5000)
+PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 
 # Application definition
 
@@ -157,6 +161,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
+    "huey.contrib.djhuey",
+    "auditlog",
 ]
 
 MIDDLEWARE = [
@@ -169,6 +175,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
 
@@ -214,7 +221,7 @@ REST_FRAMEWORK = {
         "enterprise_core.permissions.LicensePermission",
     ],
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": PAGINATE_BY,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.helpers.handle",
@@ -308,9 +315,16 @@ LANGUAGES = [
     ("es", "Spanish"),
     ("de", "German"),
     ("it", "Italian"),
-    ("nd", "Dutch"),
+    ("nl", "Dutch"),
     ("pl", "Polish"),
     ("pt", "Portuguese"),
+    ("ar", "Arabic"),
+    ("ro", "Romanian"),
+    ("hi", "Hindi"),
+    ("ur", "Urdu"),
+    ("cs", "Czech"),
+    ("sv", "Swedish"),
+    ("id", "Indonesian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -339,6 +353,7 @@ if "POSTGRES_NAME" in os.environ:
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],
             "HOST": os.environ["DB_HOST"],
             "PORT": os.environ.get("DB_PORT", "5432"),
+            "CONN_MAX_AGE": os.environ.get("CONN_MAX_AGE", 300),
         }
     }
 else:
@@ -427,3 +442,21 @@ LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
 logger.info("License information", seats=LICENSE_SEATS, expiration=LICENSE_EXPIRATION)
 
 INSTALLED_APPS.append("enterprise_core")
+
+if MAIL_DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
+
+
+## Huey settings
+HUEY_FILE_PATH = os.environ.get("HUEY_FILE_PATH", BASE_DIR / "db" / "huey.db")
+
+HUEY = {
+    "huey_class": "huey.SqliteHuey",
+    "name": "ciso_assistant",
+    "filename": HUEY_FILE_PATH,
+    "results": True,  # would be interesting for debug
+    "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
+}
+AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
+AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))

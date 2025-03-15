@@ -32,7 +32,7 @@ else
 
   # Simple wait for database migrations
   echo "Giving some time for the database to be ready, please wait ..."
-  sleep 30
+  sleep 50
 
   echo "Initialize your superuser account..."
   docker compose exec backend poetry run python manage.py createsuperuser

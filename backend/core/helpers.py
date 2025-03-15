@@ -2,6 +2,7 @@ import json
 from collections.abc import MutableMapping
 from datetime import date, timedelta
 from typing import Optional
+from typing import Dict, List
 
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
@@ -116,9 +117,9 @@ def measures_to_review(user: User):
     return measures
 
 
-def compile_project_for_composer(user: User, projects_list: list):
+def compile_perimeter_for_composer(user: User, perimeters_list: list):
     """
-    Compiling information from choosen projects for composer
+    Compiling information from choosen perimeters for composer
     """
     compliance_assessments_status = {"values": [], "labels": []}
     applied_control_status = {"values": [], "labels": []}
@@ -135,7 +136,7 @@ def compile_project_for_composer(user: User, projects_list: list):
     for st in RequirementAssessment.Status:
         count = (
             RequirementAssessment.objects.filter(status=st)
-            .filter(compliance_assessment__project__in=projects_list)
+            .filter(compliance_assessment__perimeter__in=perimeters_list)
             .count()
         )
         v = {"value": count, "itemStyle": {"color": color_map[st]}}
@@ -152,19 +153,21 @@ def compile_project_for_composer(user: User, projects_list: list):
     for st in AppliedControl.Status.choices:
         count = (
             AppliedControl.objects.filter(status=st[0])
-            .filter(requirement_assessments__assessment__project__in=projects_list)
+            .filter(requirement_assessments__assessment__perimeter__in=perimeters_list)
             .count()
         )
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         applied_control_status["values"].append(v)
         applied_control_status["labels"].append(st[1])
 
-    project_objects = []
-    for project in projects_list:
-        project_objects.append({"project": get_object_or_404(Project, pk=project)})
+    perimeter_objects = []
+    for perimeter in perimeters_list:
+        perimeter_objects.append(
+            {"perimeter": get_object_or_404(Perimeter, pk=perimeter)}
+        )
 
     return {
-        "project_objects": project_objects,
+        "perimeter_objects": perimeter_objects,
         "compliance_assessments_status": compliance_assessments_status,
         "applied_control_status": applied_control_status,
         "change_usergroup": RoleAssignment.is_access_allowed(
@@ -286,8 +289,9 @@ def get_sorted_requirement_nodes(
                 "result": req_as.result if req_as else None,
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
+                "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
-                "question": req_as.answer if req_as else None,
+                "question": req_as.answer if req_as else node.question,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
@@ -324,8 +328,11 @@ def get_sorted_requirement_nodes(
                     "status": child_req_as.status if child_req_as else None,
                     "is_scored": child_req_as.is_scored if child_req_as else None,
                     "score": child_req_as.score if child_req_as else None,
+                    "documentation_score": child_req_as.documentation_score
+                    if child_req_as
+                    else None,
                     "max_score": max_score if child_req_as else None,
-                    "question": child_req_as.answer if child_req_as else None,
+                    "question": child_req_as.answer if child_req_as else child.question,
                     "mapping_inference": child_req_as.mapping_inference
                     if child_req_as
                     else None,
@@ -387,22 +394,20 @@ def get_parsed_matrices(user: User, risk_assessments: list | None = None):
     ) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, RiskScenario
     )
-    risk_matrices = list()
     if risk_assessments is None:
-        risk_matrices = (
+        risk_matrices = list(
             RiskScenario.objects.filter(id__in=object_ids_view)
             .values_list("risk_assessment__risk_matrix__json_definition", flat=True)
             .distinct()
         )
     else:
-        risk_matrices = (
+        risk_matrices = list(
             RiskScenario.objects.filter(id__in=object_ids_view)
             .filter(risk_assessment__in=risk_assessments)
             .values_list("risk_assessment__risk_matrix__json_definition", flat=True)
             .distinct()
         )
-    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
-    return sorted(parsed_matrices, key=lambda m: len(m["risk"]), reverse=True)
+    return sorted(risk_matrices, key=lambda m: len(m["risk"]), reverse=True)
 
 
 def get_risk_field(user: User, field: str):
@@ -730,7 +735,7 @@ def p_risks_2(user: User):
     return data
 
 
-def risks_per_project_groups(user: User):
+def risks_per_perimeter_groups(user: User):
     output = list()
     (
         object_ids_view,
@@ -742,7 +747,7 @@ def risks_per_project_groups(user: User):
     for folder in Folder.objects.all().order_by("name"):
         ri_level = (
             RiskScenario.objects.filter(id__in=object_ids_view)
-            .filter(risk_assessment__project__folder=folder)
+            .filter(risk_assessment__perimeter__folder=folder)
             .values("current_level")
             .annotate(total=Count("current_level"))
         )
@@ -762,9 +767,9 @@ def get_counters(user: User):
                 Folder.get_root_folder(), user, Folder
             )[0]
         ),
-        "projects": len(
+        "perimeters": len(
             RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Project
+                Folder.get_root_folder(), user, Perimeter
             )[0]
         ),
         "applied_controls": controls_count,
@@ -797,10 +802,10 @@ def build_audits_tree_metrics(user):
     for domain in viewable_domains.exclude(name="Global"):
         block_domain = {"name": domain.name, "children": []}
         domain_prj_children = []
-        for project in Project.objects.filter(folder=domain):
-            block_prj = {"name": project.name, "domain": domain.name, "children": []}
+        for perimeter in Perimeter.objects.filter(folder=domain):
+            block_prj = {"name": perimeter.name, "domain": domain.name, "children": []}
             children = []
-            for audit in ComplianceAssessment.objects.filter(project=project):
+            for audit in ComplianceAssessment.objects.filter(perimeter=perimeter):
                 cnt_res = {}
                 for result in RequirementAssessment.Result.choices:
                     requirement_assessments = audit.get_requirement_assessments(
@@ -895,9 +900,13 @@ def get_metrics(user: User):
     progress_avg = math.ceil(
         mean([x.progress() for x in viewable_items(ComplianceAssessment)] or [0])
     )
-    missed_eta_count = viewable_controls.filter(
-        eta__lt=date.today(),
-    ).count()
+    missed_eta_count = (
+        viewable_controls.filter(
+            eta__lt=date.today(),
+        )
+        .exclude(status="active")
+        .count()
+    )
 
     data = {
         "controls": {
@@ -1002,7 +1011,9 @@ def risk_status(user: User, risk_assessment_list):
                 {"value": cnt, "itemStyle": {"color": STATUS_COLOR_MAP[status[0]]}}
             )
 
-        names.append(str(risk_assessment.project) + " " + str(risk_assessment.version))
+        names.append(
+            str(risk_assessment.perimeter) + " " + str(risk_assessment.version)
+        )
 
     y_max_rsk = max(max_tmp, default=0) + 1
 
@@ -1135,32 +1146,32 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
     }
 
 
-def threats_count_per_name(user: User):
-    labels = list()
-    values = list()
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, Threat)
+def threats_count_per_name(user: User) -> Dict[str, List]:
+    object_ids_view, _, _ = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Threat
+    )
     viewable_scenarios = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, RiskScenario
     )[0]
 
-    # expected by echarts to send the threats names in labels and the count of each threat in values
-
-    for threat in Threat.objects.filter(id__in=object_ids_view).order_by("name"):
-        val = (
-            RiskScenario.objects.filter(threats=threat)
-            .filter(id__in=viewable_scenarios)
-            .count()
+    # Updated field name from 'riskscenario' to 'risk_scenarios'
+    threats_with_counts = (
+        Threat.objects.filter(id__in=object_ids_view)
+        .annotate(
+            scenario_count=Count(
+                "risk_scenarios",
+                filter=models.Q(risk_scenarios__id__in=viewable_scenarios),
+            )
         )
-        if val > 0:
-            labels.append({"name": threat.name})
-            values.append(val)
-    max_offset = max(values, default=0)  # we can add x later on to improve visibility
+        .filter(scenario_count__gt=0)
+        .order_by("name")
+        .values("name", "scenario_count")
+    )
 
-    # update each label to include the max_offset
+    labels = [{"name": threat["name"]} for threat in threats_with_counts]
+    values = [threat["scenario_count"] for threat in threats_with_counts]
+
+    max_offset = max(values, default=0)
     for label in labels:
         label["max"] = max_offset
 
@@ -1171,18 +1182,20 @@ def get_folder_content(folder: Folder):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
         content.append({"name": f.name, "children": get_folder_content(f)})
-    for p in Project.objects.filter(folder=folder).distinct():
+    for p in Perimeter.objects.filter(folder=folder).distinct():
         content.append(
             {
                 "name": p.name,
                 "children": [
                     {
                         "name": "audits",
-                        "value": ComplianceAssessment.objects.filter(project=p).count(),
+                        "value": ComplianceAssessment.objects.filter(
+                            perimeter=p
+                        ).count(),
                     },
                     {
                         "name": "risk assessments",
-                        "value": RiskAssessment.objects.filter(project=p).count(),
+                        "value": RiskAssessment.objects.filter(perimeter=p).count(),
                     },
                 ],
             }

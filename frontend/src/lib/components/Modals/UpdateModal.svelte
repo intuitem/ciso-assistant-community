@@ -19,7 +19,6 @@
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
 	export let selectOptions: Record<string, any> = {};
-	export let foreignKeys: Record<string, any> = {};
 
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
@@ -60,7 +59,6 @@
 			{context}
 			caching={true}
 			{selectOptions}
-			{foreignKeys}
 			{debug}
 		/>
 	</div>

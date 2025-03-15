@@ -19,7 +19,7 @@ export const navData = {
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics',
 					permissions: [
-						'view_project',
+						'view_perimeter',
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
@@ -31,7 +31,7 @@ export const navData = {
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
 					permissions: [
-						'view_project',
+						'view_perimeter',
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
@@ -50,9 +50,9 @@ export const navData = {
 					exclude: ['BI-RL-TPR']
 				},
 				{
-					name: 'projects',
+					name: 'perimeters',
 					fa_icon: 'fa-solid fa-cubes',
-					href: '/projects'
+					href: '/perimeters'
 				},
 				{
 					name: 'users',
@@ -147,6 +147,16 @@ export const navData = {
 					name: 'riskAcceptances',
 					fa_icon: 'fa-solid fa-signature',
 					href: '/risk-acceptances'
+				},
+				{
+					name: 'securityExceptions',
+					fa_icon: 'fa-solid fa-circle-exclamation',
+					href: '/security-exceptions'
+				},
+				{
+					name: 'followUp',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/findings-assessments'
 				}
 			]
 		},
@@ -195,6 +205,12 @@ export const navData = {
 					name: 'evidences',
 					fa_icon: 'fa-solid fa-receipt',
 					href: '/evidences'
+				},
+				{
+					name: 'recap',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/recap',
+					permissions: ['view_complianceassessment']
 				}
 			]
 		},

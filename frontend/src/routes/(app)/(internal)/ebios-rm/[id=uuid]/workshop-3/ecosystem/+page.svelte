@@ -5,9 +5,10 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
-	import { checkConstraints } from '$lib/utils/crud';
 	import * as m from '$paraglide/messages.js';
+	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
+	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import { page } from '$app/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -29,39 +30,56 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		if (
-			checkConstraints(
-				data.createForm.constraints,
-				Object.fromEntries(
-					Object.entries(data.model.foreignKeys).filter(([key]) => key !== 'risk_matrix')
-				)
-			).length > 0
-		) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
-				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 </script>
 
-<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
-	<div slot="addButton">
-		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-			<button
-				class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-				data-testid="add-button"
-				title={safeTranslate('add-' + data.model.localName)}
-				on:click={modalCreateForm}
-				><i class="fa-solid fa-file-circle-plus"></i>
-			</button>
-		</span>
-	</div>
-</ModelTable>
+<div class="space-y-2">
+	<Accordion
+		class="bg-white rounded-md border hover:text-primary-700 text-gray-800"
+		hover="bg-white"
+	>
+		<AccordionItem>
+			<svelte:fragment slot="lead"><i class="fa-solid fa-bullseye"></i></svelte:fragment>
+			<svelte:fragment slot="summary">{m.ecosystemRadar()}</svelte:fragment>
+			<svelte:fragment slot="content">
+				<div class="bg-white flex">
+					<div class="flex w-full h-fit">
+						<EcosystemRadarChart
+							title={m.current()}
+							name="c_ecosystem"
+							data={data.radar.current}
+							classesContainer="w-full"
+							height="h-screen"
+						/>
+						<EcosystemRadarChart
+							title={m.residual()}
+							name="r_ecosystem"
+							classesContainer="w-full"
+							height="h-screen"
+							data={data.radar.residual}
+						/>
+					</div>
+				</div>
+			</svelte:fragment>
+		</AccordionItem>
+	</Accordion>
+	<ModelTable
+		source={data.table}
+		deleteForm={data.deleteForm}
+		{URLModel}
+		baseEndpoint="/stakeholders?ebios_rm_study={$page.params.id}"
+	>
+		<div slot="addButton">
+			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+				<button
+					class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+					data-testid="add-button"
+					title={safeTranslate('add-' + data.model.localName)}
+					on:click={modalCreateForm}
+					><i class="fa-solid fa-file-circle-plus"></i>
+				</button>
+			</span>
+		</div>
+	</ModelTable>
+</div>

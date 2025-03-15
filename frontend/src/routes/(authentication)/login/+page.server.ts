@@ -1,6 +1,6 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
-import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
@@ -8,7 +8,6 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { mfaAuthenticateSchema } from './mfa/utils/schemas';
-import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 interface AuthenticationFlow {
 	id:
@@ -118,6 +117,13 @@ export const actions: Actions = {
 
 		cookies.set('allauth_session_token', res.meta.session_token, {
 			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+
+		cookies.set('show_first_login_modal', 'true', {
+			httpOnly: false,
 			sameSite: 'lax',
 			path: '/',
 			secure: true

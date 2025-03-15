@@ -8,6 +8,7 @@
 	interface Attachment {
 		type: string;
 		url: string;
+		fileExists: boolean;
 	}
 
 	let attachment: Attachment | undefined;
@@ -15,7 +16,11 @@
 	const fetchAttachment = async () => {
 		const res = await fetch(`/evidences/${meta.id}/attachment`);
 		const blob = await res.blob();
-		return { type: blob.type, url: URL.createObjectURL(blob) };
+		return {
+			type: blob.type,
+			url: URL.createObjectURL(blob),
+			fileExists: res.ok
+		};
 	};
 
 	let mounted = false;
@@ -41,6 +46,8 @@
 			<img src={attachment.url} alt="attachment" class="h-24" />
 		{:else if attachment.type === 'application/pdf'}
 			<embed src={attachment.url} type="application/pdf" class="h-24" />
+		{:else if !attachment.fileExists}
+			<p class="text-error-500 font-bold">{m.couldNotFindAttachmentMessage()}</p>
 		{:else}
 			<p>{m.NoPreviewMessage()}</p>
 		{/if}

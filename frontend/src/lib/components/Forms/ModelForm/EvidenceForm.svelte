@@ -3,7 +3,6 @@
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -31,7 +30,7 @@
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect
 		{form}
-		options={getOptions({ objects: model.foreignKeys['folder'] })}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}

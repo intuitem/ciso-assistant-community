@@ -8,6 +8,7 @@ description: 'Protecting Controlled Unclassified Information in Nonfederal Syste
   https://csrc.nist.gov/pubs/sp/800/171/r3/final'
 copyright: NIST
 version: 1
+publication_date: 2024-05-19
 provider: NIST
 packager: intuitem
 objects:

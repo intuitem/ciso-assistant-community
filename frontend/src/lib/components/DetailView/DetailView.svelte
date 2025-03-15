@@ -4,10 +4,9 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { URL_MODEL_MAP, checkConstraints } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
@@ -16,19 +15,26 @@
 	import * as m from '$paraglide/messages.js';
 	import { languageTag } from '$paraglide/runtime.js';
 	import type {
+		PopupSettings,
 		ModalComponent,
 		ModalSettings,
-		ModalStore,
-		ToastStore
+		ModalStore
 	} from '@skeletonlabs/skeleton';
-	import { Tab, TabGroup, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
+	import { popup, Tab, TabGroup, getModalStore } from '@skeletonlabs/skeleton';
 
 	import { onMount } from 'svelte';
 
+	import { goto } from '$app/navigation';
+	import { listViewFields } from '$lib/utils/table';
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
+
+	const popupHover: PopupSettings = {
+		event: 'hover',
+		target: 'popupHover',
+		placement: 'left'
+	};
 
 	export let data;
 	export let mailing = false;
@@ -39,7 +45,7 @@
 
 	$: data.relatedModels = Object.fromEntries(Object.entries(data.relatedModels).sort());
 
-	if (data.model.detailViewFields) {
+	if (data.model?.detailViewFields) {
 		data.data = Object.fromEntries(
 			Object.entries(data.data).filter(
 				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
@@ -49,35 +55,15 @@
 
 	let tabSet = 0;
 
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
+		if (document.activeElement?.tagName !== 'BODY') return;
 		// Check if the pressed key is 'e' and the edit button should be displayed
 
-		// if (event.key === 'e' && displayEditButton()) {
-		// event.preventDefault();
-		// goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
-		//}
+		if (event.key === 'e' && displayEditButton()) {
+			event.preventDefault();
+			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+		}
 	}
 
 	onMount(() => {
@@ -96,7 +82,9 @@
 			props: {
 				form: model.createForm,
 				model: model,
-				debug: false
+				debug: false,
+				additionalInitialData: model.initialData,
+				formAction: `/${model.urlModel}?/create`
 			}
 		};
 		let modal: ModalSettings = {
@@ -105,18 +93,6 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + model.info.localName).toLowerCase(),
-				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 
@@ -194,31 +170,35 @@
 	$: displayEditButton = function () {
 		return (
 			canEditObject &&
-			!['Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
+			!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
 			!data.data.urn &&
 			!data.data.builtin
 		);
 	};
 
 	export let orderRelatedModels = [''];
-	if (data.urlModel === 'projects') {
+	if (data.urlModel === 'perimeters') {
 		orderRelatedModels = ['compliance-assessments', 'risk-assessments', 'entity-assessments'];
 	}
 	if (data.urlModel === 'entities') {
 		orderRelatedModels = ['entity-assessments', 'representatives', 'solutions'];
 	}
 	if (data.urlModel === 'folders') {
-		orderRelatedModels = ['projects', 'entities'];
+		orderRelatedModels = ['perimeters', 'entities'];
+	}
+
+	function truncateString(str: string, maxLength: number = 50): string {
+		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
 	}
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === m.submitted() && $page.data.user.id === data.data.approver.id}
+	{#if data.data.state === 'Submitted' && $page.data.user.id === data.data.approver.id}
 		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
+			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 justify-between"
 		>
 			<div class="text-yellow-900">
-				{m.riskAcceptanceReviewMessage()}
+				{m.riskAcceptanceValidatingReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
 				<button
@@ -241,7 +221,7 @@
 				>
 			</div>
 		</div>
-	{:else if data.data.state === m.accept()}
+	{:else if data.data.state === 'Accepted'}
 		<div
 			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container-token shadow-lg px-6 py-2 mt-2 justify-between"
 		>
@@ -281,7 +261,7 @@
 								>
 									{#if value !== null && value !== undefined && value !== ''}
 										{#if key === 'library'}
-											{@const itemHref = `/libraries/${value.id}?loaded`}
+											{@const itemHref = `/loaded-libraries/${value.id}`}
 											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 												>{value.name}</Anchor
 											>
@@ -294,6 +274,31 @@
 													: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
 														m.undefined())}
 											{stringifiedSeverity}
+										{:else if key === 'children_assets'}
+											{#if Object.keys(value).length > 0}
+												<ul class="inline-flex flex-wrap space-x-4">
+													{#each value as val}
+														<li data-testid={key.replace('_', '-') + '-field-value'}>
+															{#if val.str && val.id}
+																{@const itemHref = `/${
+																	URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+																		(item) => item.field === key
+																	)?.urlModel
+																}/${val.id}`}
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
+																	{truncateString(val.str)}</Anchor
+																>
+															{:else if val.str}
+																{safeTranslate(val.str)}
+															{:else}
+																{value}
+															{/if}
+														</li>
+													{/each}
+												</ul>
+											{:else}
+												--
+											{/if}
 										{:else if Array.isArray(value)}
 											{#if Object.keys(value).length > 0}
 												<ul>
@@ -325,9 +330,17 @@
 													(item) => item.field === key
 												)?.urlModel
 											}/${value.id}`}
-											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-												>{value.str}</Anchor
-											>
+											{#if key === 'ro_to_couple'}
+												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+													>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+														'-'
+													)[1]}</Anchor
+												>
+											{:else}
+												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+													>{value.str}</Anchor
+												>
+											{/if}
 											<!-- Shortcut before DetailView refactoring -->
 										{:else if value === 'P1'}
 											<li class="fa-solid fa-flag text-red-500"></li>
@@ -345,7 +358,7 @@
 											<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 												>{value}</Anchor
 											>
-										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date')}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else if m[toCamelCase(value.str || value.name)]}
 											{safeTranslate((value.str || value.name) ?? value)}
@@ -384,7 +397,45 @@
 					{m.sendQuestionnaire()}
 				</button>
 			{/if}
+
+			{#if data.data.state === 'Submitted' && canEditObject}
+				<div class="flex flex-col space-y-2 ml-4">
+					<button
+						on:click={(_) => {
+							modalConfirm(data.data.id, data.data.name, '?/draft');
+						}}
+						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/draft')}
+						class="btn variant-filled-primary"
+						disabled={!data.data.approver}
+					>
+						<i class="fas fa-arrow-alt-circle-left mr-2" /> {m.draft()}</button
+					>
+				</div>
+			{/if}
+
 			{#if displayEditButton()}
+				{#if data.data.state === 'Created'}
+					<div class="flex flex-col space-y-2 ml-4">
+						<button
+							on:click={(_) => {
+								modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
+							class="btn variant-filled-primary [&>*]:pointer-events-none"
+							disabled={!data.data.approver}
+							use:popup={popupHover}
+						>
+							<i class="fas fa-paper-plane mr-2" />
+							{m.submit()}
+						</button>
+						{#if !data.data.approver}
+							<div class="card variant-ghost-surface p-4 z-20" data-popup="popupHover">
+								<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
+								<div class="arrow variant-filled-surface" />
+							</div>
+						{/if}
+					</div>
+				{/if}
 				<div class="flex flex-col space-y-2 ml-4">
 					<Anchor
 						breadcrumbAction="push"
@@ -409,6 +460,7 @@
 					{/if}
 				</div>
 			{/if}
+			<slot name="actions" />
 		</div>
 	</div>
 </div>
@@ -436,8 +488,18 @@
 								{safeTranslate('associated-' + model.info.localNamePlural)}
 							</h4>
 						</div>
-						{#if model.table}
-							<ModelTable source={model.table} deleteForm={model.deleteForm} URLModel={urlmodel}>
+						{@const field = data.model.reverseForeignKeyFields.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
+						{#if model.table && !model.disableAddDeleteButtons}
+							<ModelTable
+								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+								source={model.table}
+								deleteForm={model.deleteForm}
+								URLModel={urlmodel}
+								fields={fieldsToUse}
+							>
 								<button
 									slot="addButton"
 									class="btn variant-filled-primary self-end my-auto"
@@ -447,6 +509,13 @@
 									)}</button
 								>
 							</ModelTable>
+						{:else if model.table}
+							<ModelTable
+								source={model.table}
+								URLModel={urlmodel}
+								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+								fields={fieldsToUse}
+							/>
 						{/if}
 					{/if}
 				{/each}

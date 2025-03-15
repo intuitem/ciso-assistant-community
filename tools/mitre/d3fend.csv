@@ -1,0 +1,219 @@
+ID,D3FEND Tactic,D3FEND Technique,D3FEND Technique Level 0,D3FEND Technique Level 1,Definition
+D3-OAM,Model,Operational Activity Mapping,,,
+D3-OM,Model,,Organization Mapping,,"Organization mapping identifies and models the people, roles, and groups with an organization and the relations between them."
+D3-ORA,Model,,Operational Risk Assessment,,"Operational risk assessment identifies and models the vulnerabilities of, and risks to, an organization's activities individually and as a whole."
+D3-ODM,Model,,Operational Dependency Mapping,,"Operational dependency mapping identifies and models the dependencies of the organization's activities on each other and on the organization's performers (people, systems, and services.)  This may include modeling the higher- and lower-level activities of an organization forming a hierarchy, or layering, of the dependencies in an organization's activities."
+D3-AM,Model,,Access Modeling,,"Access modeling identifies and records the access permissions granted to administrators, users, groups, and systems."
+D3-NM,Model,Network Mapping,,,
+D3-PLM,Model,,Physical Link Mapping,,Physical link mapping identifies and models the link connectivity of the network devices within a physical network.
+D3-DPLM,Model,,,Direct Physical Link Mapping,Direct physical link mapping creates a physical link map by direct observation and recording of the physical network links.
+D3-APLM,Model,,,Active Physical Link Mapping,Active physical link mapping sends and receives network traffic as a means to map the physical layer.
+D3-NVA,Model,,Network Vulnerability Assessment,,"Network vulnerability assessment relates all the vulnerabilities of a network's components in the context of their configuration and interdependencies and can also include assessing risk emerging from the network's design as a whole, not just the sum of individual network node or network segment vulnerabilities."
+D3-NTPM,Model,,Network Traffic Policy Mapping,,"Network traffic policy mapping identifies and models the allowed pathways of data at the network, tranport, and/or application levels."
+D3-LLM,Model,,Logical Link Mapping,,Logical link mapping creates a model of existing or previous node-to-node connections using network-layer data or metadata.
+D3-PLLM,Model,,,Passive Logical Link Mapping,"Passive logical link mapping only listens to network traffic as a means to map the the whole data link layer, where the links represent logical data flows rather than physical connections."
+D3-ALLM,Model,,,Active Logical Link Mapping,"Active logical link mapping sends and receives network traffic as a means to map the whole data link layer, where the links represent logical data flows rather than physical connection"
+D3-AI,Model,Asset Inventory,,,
+D3-SWI,Model,,Software Inventory,,Software inventorying identifies and records the software items in the organization's architecture.
+D3-NNI,Model,,Network Node Inventory,,"Network node inventorying identifies and records all the network nodes (hosts, routers, switches, firewalls, etc.) in the organization's architecture."
+D3-HCI,Model,,Hardware Component Inventory,,Hardware component inventorying identifies and records the hardware items in the organization's architecture.
+D3-DI,Model,,Data Inventory,,"Data inventorying identifies and records the schemas, formats, volumes, and locations of data stored and used on the organization's architecture."
+D3-CI,Model,,Configuration Inventory,,Configuration inventory identifies and records the configuration of software and hardware and their components throughout the organization.
+D3-AVE,Model,,Asset Vulnerability Enumeration,,Asset vulnerability enumeration enriches inventory items with knowledge identifying their vulnerabilities.
+D3-CIA,Model,,,Container Image Analysis,Analyzing a Container Image with respect to a set of policies.
+D3-SYSM,Model,System Mapping,,,
+D3-SYSVA,Model,,System Vulnerability Assessment,,"System vulnerability assessment relates all the vulnerabilities of a system's components in the context of their configuration and internal dependencies and can also include assessing risk emerging from the system's design as a whole, not just the sum of individual component vulnerabilities."
+D3-SYSDM,Model,,System Dependency Mapping,,System dependency mapping identifies and models the dependencies of system components on each other to carry out their function.
+D3-SVCDM,Model,,Service Dependency Mapping,,Service dependency mapping determines the services on which each given service relies.
+D3-DEM,Model,,Data Exchange Mapping,,"Data exchange mapping identifies and models the organization's intended design for the flows of the data types, formats, and volumes between systems at the application layer."
+D3-SCH,Harden,Source Code Hardening,,,
+D3-VTV,Harden,,Variable Type Validation,,Ensuring that a variable has the correct type.
+D3-VI,Harden,,Variable Initialization,,Setting variables to a known value before use.
+D3-TL,Harden,,Trusted Library,,"A trusted library is a collection of pre-verified and secure code modules or components that are used within software applications to perform specific functions. These libraries are considered reliable and have been vetted for security vulnerabilities, ensuring they do not introduce risks into the application."
+D3-RN,Harden,,Reference Nullification,,"Invalidating all pointers that reference a specific memory block, ensuring that the block cannot be accessed or modified after deallocation."
+D3-PV,Harden,,Pointer Validation,,Ensuring that a pointer variable has the required properties for use.
+D3-NPC,Harden,,,Null Pointer Checking,Checking if a pointer is NULL.
+D3-MBSV,Harden,,,Memory Block Start Validation,Ensuring that a pointer accurately references the beginning of a designated memory block.
+D3-IRV,Harden,,Integer Range Validation,,Ensuring that an integer is within a valid range.
+D3-CS,Harden,,Credential Scrubbing,,The systematic removal of hard-coded credentials from source code to prevent accidental exposure and unauthorized access.
+D3-AA,Harden,Agent Authentication,,,
+D3-TBA,Harden,,Token-based Authentication,,"Token-based authentication is an authentication protocol where users verify their identity in exchange for a unique access token. Users can then access the website, application, or resource for the life of the token without having to re-enter their credentials."
+D3-PWA,Harden,,Password Authentication,,"Password authentication is a security mechanism used to verify the identity of a user or entity attempting to access a system or resource by requiring the input of a secret string of characters, known as a password, that is associated with the user or entity."
+D3-MFA,Harden,,Multi-factor Authentication,,Requiring proof of two or more pieces of evidence in order to authenticate a user.
+D3-CBAN,Harden,,Certificate-based Authentication,,Requiring a digital certificate in order to authenticate a user.
+D3-BAN,Harden,,Biometric Authentication,,Using biological measures in order to authenticate a user.
+D3-MH,Harden,Message Hardening,,,
+D3-TAAN,Harden,,Transfer Agent Authentication,,Validating that server components of a messaging infrastructure are authorized to send a particular message.
+D3-MENCR,Harden,,Message Encryption,,Encrypting a message body using a cryptographic key.
+D3-MAN,Harden,,Message Authentication,,Authenticating the sender of a message and ensuring message integrity.
+D3-CH,Harden,Credential Hardening,,,
+D3-TB,Harden,,Token Binding,,"Token binding is a security mechanism used to enhance the protection of tokens, such as cookies or OAuth tokens, by binding them to a specific connection."
+D3-SPP,Harden,,Strong Password Policy,,Modifying system configuration to increase password strength.
+D3-CRO,Harden,,Credential Rotation,,"Credential rotation is a security procedure in which authentication credentials, such as passwords, API keys, or certificates, are regularly changed or replaced to minimize the risk of unauthorized access."
+D3-PR,Harden,,,Password Rotation,Password rotation is a security policy that mandates the periodic change of user account passwords to mitigate the risk of unauthorized access due to compromised credentials.
+D3-OTP,Harden,,,One-time Password,A one-time password is valid for only one user authentication.
+D3-CERO,Harden,,,Certificate Rotation,"Certificate rotation involves replacing digital certificates and their private keys to maintain cryptographic integrity and trust, mitigating key compromise risks and ensuring continuous secure communications."
+D3-CP,Harden,,Certificate Pinning,,Persisting either a server's X.509 certificate or their public key and comparing that to server's presented identity to allow for greater client confidence in the remote server's identity for SSL connections.
+D3-PH,Harden,Platform Hardening,,,
+D3-DENCR,Harden,,Disk Encryption,,Encrypting a hard disk partition to prevent cleartext access to a file system.
+D3-TBI,Harden,,TPM Boot Integrity,,Assuring the integrity of a platform by demonstrating that the boot process starts from a trusted combination of hardware and software and continues until the operating system has fully booted and applications are running.  Sometimes called Static Root of Trust Measurement (STRM).
+D3-RFS,Harden,,RF Shielding,,Adding physical barriers to a platform to prevent undesired radio interference.
+D3-BA,Harden,,Bootloader Authentication,,Cryptographically authenticating the bootloader software before system boot.
+D3-SCP,Harden,,System Configuration Permissions,,Restricting system configuration modifications to a specific user or group of users.
+D3-FE,Harden,,File Encryption,,Encrypting a file using a cryptographic key.
+D3-SU,Harden,,Software Update,,Replacing old software on a computer system component.
+D3-DLIC,Harden,,Driver Load Integrity Checking,,Ensuring the integrity of drivers loaded during initialization of the operating system.
+D3-AH,Harden,Application Hardening,,,
+D3-SFCV,Harden,,Stack Frame Canary Validation,,Comparing a value stored in a stack frame with a known good value in order to prevent or detect a memory segment overwrite.
+D3-SAOR,Harden,,Segment Address Offset Randomization,,Randomizing the base (start) address of one or more segments of memory during the initialization of a process.
+D3-PSEP,Harden,,Process Segment Execution Prevention,,Preventing execution of any address in a memory region other than the code segment.
+D3-PAN,Harden,,Pointer Authentication,,Comparing the cryptographic hash or derivative of a pointer's value to an expected value.
+D3-EHPV,Harden,,Exception Handler Pointer Validation,,Validates that a referenced exception handler pointer is a valid exception handler.
+D3-DCE,Harden,,Dead Code Elimination,,"Removing unreachable or ""dead code"" from compiled source code."
+D3-ACH,Harden,,Application Configuration Hardening,,Modifying an application's configuration to reduce its attack surface.
+D3-NTA,Detect,Network Traffic Analysis,,,
+D3-RTA,Detect,,RPC Traffic Analysis,,Monitoring the activity of remote procedure calls in communication traffic to establish standard protocol operations and potential attacker activities.
+D3-IPCTA,Detect,,IPC Traffic Analysis,,Analyzing standard inter process communication (IPC) protocols to detect deviations from normal protocol activity.
+D3-RTSD,Detect,,Remote Terminal Session Detection,,Detection of an unauthorized remote live terminal console session by examining network traffic to a network host.
+D3-RPA,Detect,,Relay Pattern Analysis,,The detection of an internal host relaying traffic between the internal network and the external network.
+D3-PMAD,Detect,,Protocol Metadata Anomaly Detection,,Collecting network communication protocol metadata and identifying statistical outliers.
+D3-PHDURA,Detect,,Per Host Download-Upload Ratio Analysis,,Detecting anomalies that indicate malicious activity by comparing the amount of data downloaded versus data uploaded by a host.
+D3-DNSTA,Detect,,DNS Traffic Analysis,,"Analysis of domain name metadata, including name and DNS records, to determine whether the domain is likely to resolve to an undesirable host."
+D3-FC,Detect,,File Carving,,Identifying and extracting files from network application protocols through the use of network stream reassembly software.
+D3-ISVA,Detect,,Inbound Session Volume Analysis,,Analyzing inbound network session or connection attempt volume.
+D3-NTCD,Detect,,Network Traffic Community Deviation,,Establishing baseline communities of network hosts and identifying statistically divergent inter-community communication.
+D3-CSPP,Detect,,Client-server Payload Profiling,,Comparing client-server request and response payloads to a baseline profile to identify outliers.
+D3-ANAA,Detect,,Administrative Network Activity Analysis,,Detection of unauthorized use of administrative network protocols by analyzing network activity against a baseline.
+D3-CAA,Detect,,Connection Attempt Analysis,,Analyzing failed connections in a network to detect unauthorized activity.
+D3-NTSA,Detect,,Network Traffic Signature Analysis,,Analyzing network traffic and compares it to known signatures
+D3-BSE,Detect,,Byte Sequence Emulation,,Analyzing sequences of bytes and determining if they likely represent malicious shellcode.
+D3-CA,Detect,,Certificate Analysis,,"Analyzing Public Key Infrastructure certificates to detect if they have been misconfigured or spoofed using both network traffic, certificate fields and third-party logs."
+D3-PCA,Detect,,,Passive Certificate Analysis,Collecting host certificates from network traffic or other passive sources like a certificate transparency log and analyzing them for unauthorized activity.
+D3-ACA,Detect,,,Active Certificate Analysis,Actively collecting PKI certificates by connecting to the server and downloading its server certificates for analysis.
+D3-MA,Detect,Message Analysis,,,
+D3-SRA,Detect,,Sender Reputation Analysis,,Ascertaining sender reputation based on information associated with a message (e.g. email/instant messaging).
+D3-SMRA,Detect,,Sender MTA Reputation Analysis,,Characterizing the reputation of mail transfer agents (MTA) to determine the security risk in emails.
+D3-PA,Detect,Process Analysis,,,
+D3-FAPA,Detect,,File Access Pattern Analysis,,Analyzing the files accessed by a process to identify unauthorized activity.
+D3-DQSA,Detect,,Database Query String Analysis,,Analyzing database queries to detect [SQL Injection](https://capec.mitre.org/data/definitions/66.html).
+D3-SSC,Detect,,Shadow Stack Comparisons,,Comparing a call stack in system memory with a shadow call stack maintained by the processor to determine unauthorized shellcode activity.
+D3-SEA,Detect,,Script Execution Analysis,,Analyzing the execution of a script to detect unauthorized user activity.
+D3-PSA,Detect,,Process Spawn Analysis,,Analyzing spawn arguments or attributes of a process to detect processes that are unauthorized.
+D3-PLA,Detect,,,Process Lineage Analysis,"Identification of suspicious processes executing on an end-point device by examining the ancestry and siblings of a process, and the associated metadata of each node on the tree, such as process execution, duration, and order relative to siblings and ancestors."
+D3-IBCA,Detect,,Indirect Branch Call Analysis,,Analyzing vendor specific branch call recording in order to detect ROP style attacks.
+D3-SCA,Detect,,System Call Analysis,,Analyzing system calls to determine whether a process is exhibiting unauthorized behavior.
+D3-FCA,Detect,,,File Creation Analysis,Analyzing the properties of file create system call invocations.
+D3-PSMD,Detect,,Process Self-Modification Detection,,"Detects processes that modify, change, or replace their own code at runtime."
+D3-PCSV,Detect,,Process Code Segment Verification,,"Comparing the ""text"" or ""code"" memory segments to a source of truth."
+D3-FA,Detect,File Analysis,,,
+D3-FH,Detect,,File Hashing,,Employing file hash comparisons to detect known malware.
+D3-FCOA,Detect,,File Content Analysis,,Employing a pattern matching algorithm to statically analyze the content of files.
+D3-FCR,Detect,,,File Content Rules,Employing a pattern matching rule language to analyze the content of files.
+D3-EFA,Detect,,Emulated File Analysis,,Emulating instructions in a file looking for specific patterns.
+D3-DA,Detect,,Dynamic Analysis,,"Executing or opening a file in a synthetic ""sandbox"" environment to determine if the file is a malicious program or if the file exploits another program such as a document reader."
+D3-UBA,Detect,User Behavior Analysis,,,
+D3-DAM,Detect,,Domain Account Monitoring,,Monitoring the existence of or changes to Domain User Accounts.
+D3-SDA,Detect,,Session Duration Analysis,,Analyzing the duration of user sessions in order to detect unauthorized  activity.
+D3-UGLPA,Detect,,User Geolocation Logon Pattern Analysis,,Monitoring geolocation data of user logon attempts and comparing it to a baseline user behavior profile to identify anomalies in logon location.
+D3-WSAA,Detect,,Web Session Activity Analysis,,Monitoring changes in user web session behavior by comparing current web session activity to a baseline behavior profile or a catalog of predetermined malicious behavior.
+D3-JFAPA,Detect,,Job Function Access Pattern Analysis,,"Detecting anomalies in user access patterns by comparing user access activity to behavioral profiles that categorize users by role such as job title, function, department."
+D3-CCSA,Detect,,Credential Compromise Scope Analysis,,Determining which credentials may have been compromised by analyzing the user logon history of a particular system.
+D3-AZET,Detect,,Authorization Event Thresholding,,"Collecting authorization events, creating a baseline user profile, and determining whether authorization events are consistent with the baseline profile."
+D3-ANET,Detect,,Authentication Event Thresholding,,"Collecting authentication events, creating a baseline user profile, and determining whether authentication events are consistent with the baseline profile."
+D3-RAPA,Detect,,Resource Access Pattern Analysis,,Analyzing the resources accessed by a user to identify unauthorized activity.
+D3-LAM,Detect,,Local Account Monitoring,,Analyzing local user accounts to detect unauthorized activity.
+D3-UDTA,Detect,,User Data Transfer Analysis,,Analyzing the amount of data transferred by a user.
+D3-ID,Detect,Identifier Analysis,,,
+D3-UA,Detect,,URL Analysis,,Determining if a URL is benign or malicious by analyzing the URL or its components.
+D3-IRA,Detect,,Identifier Reputation Analysis,,Analyzing the reputation of an identifier.
+D3-URA,Detect,,,URL Reputation Analysis,Analyzing the reputation of a URL.
+D3-IPRA,Detect,,,IP Reputation Analysis,Analyzing the reputation of an IP address.
+D3-FHRA,Detect,,,File Hash Reputation Analysis,Analyzing the reputation of a file hash.
+D3-DNRA,Detect,,,Domain Name Reputation Analysis,Analyzing the reputation of a domain name.
+D3-IAA,Detect,,Identifier Activity Analysis,,Taking known malicious identifiers and determining if they are present in a system.
+D3-HD,Detect,,Homoglyph Detection,,Comparing strings using a variety of techniques to determine if a deceptive or malicious string is being presented to a user.
+D3-PM,Detect,Platform Monitoring,,,
+D3-OSM,Detect,,Operating System Monitoring,,"The operating system software, for D3FEND's purposes, includes the kernel and its process management functions, hardware drivers, initialization or boot logic. It also includes and other key system daemons and their configuration. The monitoring or analysis of these components for unauthorized activity constitute **Operating System Monitoring**."
+D3-USICA,Detect,,,User Session Init Config Analysis,Analyzing modifications to user session config files such as .bashrc or .bash_profile.
+D3-SICA,Detect,,,System Init Config Analysis,Analysis of any system process startup configuration.
+D3-SFA,Detect,,,System File Analysis,"Monitoring system files such as authentication databases, configuration files, system logs, and system executables for modification or tampering."
+D3-SBV,Detect,,,Service Binary Verification,Analyzing changes in service binary files by comparing to a source of truth.
+D3-SDM,Detect,,,System Daemon Monitoring,Tracking changes to the state or configuration of critical system level processes.
+D3-SJA,Detect,,,Scheduled Job Analysis,"Analysis of source files, processes, destination files, or destination servers associated with a scheduled job to detect unauthorized use of job scheduling."
+D3-MBT,Detect,,,Memory Boundary Tracking,Analyzing a call stack for return addresses which point to unexpected  memory locations.
+D3-IDA,Detect,,,Input Device Analysis,Operating system level mechanisms to prevent abusive input device exploitation.
+D3-EHB,Detect,,,Endpoint Health Beacon,"Monitoring the security status of an endpoint by sending periodic messages with health status, where absence of a response may indicate that the endpoint has been compromised."
+D3-FV,Detect,,Firmware Verification,,Cryptographically verifying firmware integrity.
+D3-SFV,Detect,,,System Firmware Verification,Cryptographically verifying installed system firmware integrity.
+D3-PFV,Detect,,,Peripheral Firmware Verification,Cryptographically verifying peripheral firmware integrity.
+D3-FEMC,Detect,,Firmware Embedded Monitoring Code,,Monitoring code is injected into firmware for integrity monitoring of firmware and firmware data.
+D3-FBA,Detect,,Firmware Behavior Analysis,,Analyzing the behavior of embedded code in firmware and looking for anomalous behavior and suspicious activity.
+D3-FIM,Detect,,File Integrity Monitoring,,Detecting any suspicious changes to files in a computer system.
+D3-AMED,Isolate,Access Mediation,,,
+D3-SCF,Isolate,,System Call Filtering,,Controlling access to local computer system resources with kernel-level capabilities.
+D3-LFAM,Isolate,,,Local File Access Mediation,Restricting access to a local file by configuring operating system functionality.
+D3-PAM,Isolate,,Physical Access Mediation,,"Physical access mediation is the process of granting or denying specific requests to enter specific physical facilities (e.g., Federal buildings, military establishments, border crossing entrances.)"
+D3-NRAM,Isolate,,Network Resource Access Mediation,,Control of access to organizational systems and services by users or processes over a network.
+D3-WSAM,Isolate,,,Web Session Access Mediation,"Web session access mediation secures user sessions in web applications by employing robust authentication and integrity validation, along with adaptive threat mitigation techniques, to ensure that access to web resources is authorized and protected from session-related attacks."
+D3-PBWSAM,Isolate,,,Proxy-based Web Server Access Mediation,Proxy-based web server access mediation focuses on the regulation of web server access through intermediary proxy servers.
+D3-EBWSAM,Isolate,,,Endpoint-based Web Server Access Mediation,Endpoint-based web server access mediation regulates web server access directly from user endpoints by implementing mechanisms such as client-side certificates and endpoint security software to authenticate devices and ensure compliant access.
+D3-RFAM,Isolate,,,Remote File Access Mediation,Remote file access mediation is the process of managing and securing access to file systems over a network to ensure that only authorized users or processes can interact with remote files.
+D3-NAM,Isolate,,Network Access Mediation,,"Network access mediation is the control method for authorizing access to a system by a user (or a process acting on behalf of a user) communicating through a network, including a local area network, a wide area network, and the Internet."
+D3-RAM,Isolate,,,Routing Access Mediation,"Routing access mediation is a network security approach that manages and controls access at the network layer using VPNs, tunneling protocols, firewall rules, and traffic inspection to ensure secure and efficient data routing."
+D3-LAMED,Isolate,,,LAN Access Mediation,"LAN access mediation encompasses the application of strict access control policies, systematic verification of devices, and authentication mechanisms to govern connectivity to a Local Area Network."
+D3-IOPR,Isolate,,IO Port Restriction,,Limiting access to computer input/output (IO) ports to restrict unauthorized devices.
+D3-CTS,Isolate,,Credential Transmission Scoping,,Limiting the transmission of a credential to a scoped set of relying parties.
+D3-EI,Isolate,Execution Isolation,,,
+D3-KBPI,Isolate,,Kernel-based Process Isolation,,Using kernel-level capabilities to isolate processes.
+D3-HBPI,Isolate,,Hardware-based Process Isolation,,Preventing one process from writing to the memory space of another process through hardware based address manager implementations.
+D3-EDL,Isolate,,Executable Denylisting,,Blocking the execution of files on a host in accordance with defined application policy rules.
+D3-EAL,Isolate,,Executable Allowlisting,,Using a digital signature to authenticate a file before opening.
+D3-ABPI,Isolate,,Application-based Process Isolation,,Application code which prevents its own subroutines from accessing intra-process / internal memory space.
+D3-APA,Isolate,Access Policy Administration,,,
+D3-UAP,Isolate,,User Account Permissions,,Restricting a user account's access to resources.
+D3-LFP,Isolate,,Local File Permissions,,Restricting access to a local file by configuring operating system functionality.
+D3-DTP,Isolate,,Domain Trust Policy,,Restricting inter-domain trust by modifying domain configuration.
+D3-NI,Isolate,Network Isolation,,,
+D3-NTF,Isolate,,Network Traffic Filtering,,Restricting network traffic originating from any location.
+D3-OTF,Isolate,,,Outbound Traffic Filtering,Restricting network traffic originating from a private host or enclave destined towards untrusted networks.
+D3-ITF,Isolate,,,Inbound Traffic Filtering,Restricting network traffic originating from untrusted networks destined towards a private host or enclave.
+D3-EF,Isolate,,,Email Filtering,Filtering incoming email traffic based on specific criteria.
+D3-ET,Isolate,,Encrypted Tunnels,,Encrypted encapsulation of routable network traffic.
+D3-DNSDL,Isolate,,DNS Denylisting,,"Blocking DNS Network Traffic based on criteria such as IP address, domain name, or DNS query type."
+D3-RRID,Isolate,,,Reverse Resolution IP Denylisting,Blocking a reverse lookup based on the query's IP address value.
+D3-FRIDL,Isolate,,,Forward Resolution IP Denylisting,Blocking a DNS lookup's answer's IP address value.
+D3-FRDDL,Isolate,,,Forward Resolution Domain Denylisting,Blocking a lookup based on the query's domain name value.
+D3-HDL,Isolate,,,Homoglyph Denylisting,Blocking DNS queries that are deceptively similar to legitimate domain names.
+D3-HDDL,Isolate,,,Hierarchical Domain Denylisting,Blocking the resolution of any subdomain of a specified domain name.
+D3-DNSAL,Isolate,,DNS Allowlisting,,Permitting only approved domains and their subdomains to be resolved.
+D3-BDI,Isolate,,Broadcast Domain Isolation,,Broadcast isolation restricts the number of computers a host can contact on their LAN.
+D3-DO,Deceive,Decoy Object,,,
+D3-DUC,Deceive,,Decoy User Credential,,A Credential created for the purpose of deceiving an adversary.
+D3-DST,Deceive,,Decoy Session Token,,An authentication token created for the purposes of deceiving an adversary.
+D3-DPR,Deceive,,Decoy Public Release,,Issuing publicly released media to deceive adversaries.
+D3-DP,Deceive,,Decoy Persona,,"Establishing a fake online identity to misdirect, deceive, and or interact with adversaries."
+D3-DNR,Deceive,,Decoy Network Resource,,Deploying a network resource for the purposes of deceiving an adversary.
+D3-DF,Deceive,,Decoy File,,A file created for the purposes of deceiving an adversary.
+D3-DE,Deceive,Decoy Environment,,,
+D3-SHN,Deceive,,Standalone Honeynet,,An environment created for the purpose of attracting attackers and eliciting their behaviors that is not connected to any production enterprise systems.
+D3-IHN,Deceive,,Integrated Honeynet,,The practice of setting decoys in a production environment to entice interaction from attackers.
+D3-CHN,Deceive,,Connected Honeynet,,"A decoy service, system, or environment, that is connected to the enterprise network, and simulates or emulates certain functionality to the network, without exposing full access to a production system."
+D3-PE,Evict,Process Eviction,,,
+D3-ST,Evict,,Session Termination,,Forcefully end all active sessions associated with compromised accounts or devices.
+D3-PT,Evict,,Process Termination,,Terminating a running application process on a computer system.
+D3-PS,Evict,,Process Suspension,,Suspending a running process on a computer system.
+D3-HS,Evict,,Host Shutdown,,Initiating a host's shutdown sequence to terminate all running processes.
+D3-HR,Evict,,,Host Reboot,Initiating a host's reboot sequence to terminate all running processes.
+D3-OE,Evict,Object Eviction,,,
+D3-RKD,Evict,,Registry Key Deletion,,Delete a registry key.
+D3-FEV,Evict,,File Eviction,,File eviction techniques delete files from system storage.
+D3-ER,Evict,,,Email Removal,The email removal technique deletes email files from system storage.
+D3-DRT,Evict,,Domain Registration Takedown,,The process of performing a takedown of the attacker's domain registration infrastructure.
+D3-DKF,Evict,,Disk Formatting,,"Disk Formatting is the process of preparing a data storage device, such as a hard drive, solid-state drive, or USB flash drive, for initial use."
+D3-DKP,Evict,,,Disk Partitioning,"Disk Partitioning is the process of dividing a disk into multiple distinct sections, known as partitions."
+D3-DKE,Evict,,,Disk Erasure,Disk Erasure is the process of securely deleting all data on a disk to ensure that it cannot be recovered by any means.
+D3-DNSCE,Evict,,DNS Cache Eviction,,Flushing DNS to clear any IP addresses or other DNS records from the cache.
+D3-CE,Evict,Credential Eviction,,,
+D3-CR,Evict,,Credential Revocation,,Deleting a set of credentials permanently to prevent them from being used to authenticate.
+D3-ANCI,Evict,,Authentication Cache Invalidation,,Removing tokens or credentials from an authentication cache to prevent further user associated account accesses.
+D3-AL,Evict,,Account Locking,,The process of temporarily disabling user accounts on a system or domain.

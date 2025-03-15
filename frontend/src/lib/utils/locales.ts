@@ -47,11 +47,15 @@ export const LOCALE_MAP = {
 	ur: {
 		name: 'urdu'
 	},
-	cz: {
-		name: 'czech'
+	cs: {
+		name: 'czech',
+		flag: '🇨🇿'
 	},
 	sv: {
 		name: 'swedish'
+	},
+	id: {
+		name: 'indonesian'
 	}
 };
 

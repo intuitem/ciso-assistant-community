@@ -159,9 +159,9 @@ def get_folders():
 
 
 @click.command()
-def get_projects():
-    """getting projects as a json"""
-    print(json.dumps(ids_map("projects"), ensure_ascii=False))
+def get_perimeters():
+    """getting perimeters as a json"""
+    print(json.dumps(ids_map("perimeters"), ensure_ascii=False))
 
 
 @click.command()
@@ -205,7 +205,7 @@ def batch_create(model, items, folder_id):
 @click.command()
 @click.option("--file", required=True, help="")
 @click.option("--folder", required=True, help="")
-@click.option("--project", required=True, help="")
+@click.option("--perimeter", required=True, help="")
 @click.option("--matrix", required=True, help="")
 @click.option("--name", required=True, help="")
 @click.option(
@@ -215,21 +215,21 @@ def batch_create(model, items, folder_id):
     default=True,
     help="Create all associated objects (threats, assets)",
 )
-def import_risk_assessment(file, folder, project, name, matrix, create_all):
+def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
     """crawl a risk assessment (see template) and create the assoicated objects"""
     df = pd.read_csv(file, delimiter=";")
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
     folder_id = ids_map("folders").get(folder)
-    project_id = ids_map("projects", folder=folder).get(project)
+    perimeter_id = ids_map("perimeters", folder=folder).get(perimeter)
     matrix_id = ids_map("risk-matrices", folder="Global").get(matrix)
 
     # post to create risk assessment
     data = {
         "name": name,
         "folder": folder_id,
-        "project": project_id,
+        "perimeter": perimeter_id,
         "risk_matrix": matrix_id,
     }
     res = requests.post(
@@ -476,7 +476,7 @@ def upload_attachment(file, name):
 
 
 cli.add_command(get_folders)
-cli.add_command(get_projects)
+cli.add_command(get_perimeters)
 cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)

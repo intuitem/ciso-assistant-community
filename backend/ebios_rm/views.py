@@ -1,7 +1,7 @@
 import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from core.serializers import RiskMatrixReadSerializer
+from .helpers import ecosystem_radar_chart_data
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -84,11 +84,24 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         )
         return Response(EbiosRMStudyReadSerializer(ebios_rm_study).data)
 
+    @action(detail=True, name="Get ecosystem radar chart data")
+    def ecosystem_chart_data(self, request, pk):
+        return Response(
+            ecosystem_radar_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
+        )
+
 
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
 
-    filterset_fields = ["ebios_rm_study", "ro_to_couples", "is_selected"]
+    filterset_fields = [
+        "ebios_rm_study",
+        "ro_to_couples",
+        "is_selected",
+        "assets",
+        "gravity",
+        "qualifications",
+    ]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
@@ -120,7 +133,14 @@ class RoToFilter(df.FilterSet):
 
     class Meta:
         model = RoTo
-        fields = ["ebios_rm_study", "is_selected", "used"]
+        fields = [
+            "ebios_rm_study",
+            "is_selected",
+            "used",
+            "risk_origin",
+            "motivation",
+            "feared_events",
+        ]
 
 
 class RoToViewSet(BaseModelViewSet):
@@ -144,18 +164,23 @@ class RoToViewSet(BaseModelViewSet):
     def activity(self, request):
         return Response(dict(RoTo.Activity.choices))
 
+    @action(detail=False, name="Get pertinence choices")
+    def pertinence(self, request):
+        return Response(dict(RoTo.Pertinence.choices))
+
 
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
 
-    filterset_fields = [
-        "ebios_rm_study",
-        "is_selected",
-    ]
+    filterset_fields = ["ebios_rm_study", "is_selected", "applied_controls", "category"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(Stakeholder.Category.choices))
+
+    @action(detail=False, name="Get chart data")
+    def chart_data(self, request):
+        return Response(ecosystem_radar_chart_data(Stakeholder.objects.all()))
 
 
 class StrategicScenarioViewSet(BaseModelViewSet):
@@ -176,7 +201,13 @@ class AttackPathFilter(df.FilterSet):
 
     class Meta:
         model = AttackPath
-        fields = ["ebios_rm_study", "is_selected", "used", "strategic_scenario"]
+        fields = [
+            "ebios_rm_study",
+            "is_selected",
+            "used",
+            "strategic_scenario",
+            "stakeholders",
+        ]
 
 
 class AttackPathViewSet(BaseModelViewSet):
@@ -188,9 +219,7 @@ class AttackPathViewSet(BaseModelViewSet):
 class OperationalScenarioViewSet(BaseModelViewSet):
     model = OperationalScenario
 
-    filterset_fields = [
-        "ebios_rm_study",
-    ]
+    filterset_fields = ["ebios_rm_study", "likelihood"]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):

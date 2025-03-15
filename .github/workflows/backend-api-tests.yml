@@ -11,17 +11,19 @@ on:
 
 env:
   GITHUB_WORKFLOW: github_actions
+  PYTHON_VERSION: "3.12"
+  UBUNTU_VERSION: "ubuntu-24.04"
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       backend-directory: ./backend
 
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v3
@@ -62,9 +64,15 @@ jobs:
         run: |
           export $(grep -v '^#' .env | xargs)
           poetry run pytest app_tests/api --html=pytest-report.html --self-contained-html
+      - name: Set current date as env variable
+        if: ${{ !cancelled() }}
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Sanitize branch name
+        if: ${{ !cancelled() }}
+        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
-          name: api-tests-report
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.python-version }}
           path: ${{ env.backend-directory }}/pytest-report.html
           retention-days: 5

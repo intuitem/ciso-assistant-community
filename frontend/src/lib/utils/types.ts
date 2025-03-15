@@ -9,6 +9,12 @@ export interface User {
 	last_name: string;
 	is_active: boolean;
 	date_joined: string;
+	user_groups: Record<string, any>[];
+	roles: Record<string, any>[];
+	permissions: Record<string, any>[];
+	is_third_party: boolean;
+	is_admin: boolean;
+	accessible_domains: string[];
 }
 
 export interface GlobalSettings {
@@ -23,7 +29,7 @@ export interface LoginRequestBody {
 
 export const URL_MODEL = [
 	'folders',
-	'projects',
+	'perimeters',
 	'risk-matrices',
 	'risk-assessments',
 	'threats',
@@ -42,6 +48,8 @@ export const URL_MODEL = [
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
+	'stored-libraries',
+	'loaded-libraries',
 	'libraries',
 	'sso-settings',
 	'general-settings',
@@ -57,8 +65,12 @@ export const URL_MODEL = [
 	'stakeholders',
 	'strategic-scenarios',
 	'attack-paths',
-	'operational-scenarios'
+	'operational-scenarios',
+	'qualifications',
 	// 'ebios-rm',
+	'security-exceptions',
+	'findings',
+	'findings-assessments'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
@@ -96,7 +108,7 @@ export interface RiskMatrix {
 	json_definition: string; // stringified
 }
 
-export interface Project {
+export interface Perimeter {
 	id: string;
 	folder: Record<string, any>;
 	lc_status: string;

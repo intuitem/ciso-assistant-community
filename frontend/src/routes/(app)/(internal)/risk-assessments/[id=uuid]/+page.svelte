@@ -9,72 +9,27 @@
 		ModalComponent,
 		ModalSettings,
 		ModalStore,
-		PopupSettings,
-		ToastStore
+		PopupSettings
 	} from '@skeletonlabs/skeleton';
-	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms';
+	import { getModalStore, popup } from '@skeletonlabs/skeleton';
 
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { listViewFields } from '$lib/utils/table';
 
 	export let data;
 	const showRisks = true;
+	const useBubbles = data.useBubbles;
 	const risk_assessment = data.risk_assessment;
 
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
 	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
-
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
-	let { form: deleteForm, message: deleteMessage } = {
-		form: {},
-		message: {}
-	};
-
-	let { form: createForm, message: createMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: createForm, message: createMessage } = superForm(data.scenarioCreateForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-		({ form: deleteForm, message: deleteMessage } = superForm(data.scenarioDeleteForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-	}
 
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -155,7 +110,7 @@
 		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{risk_assessment.project.str}/{risk_assessment.name} - {risk_assessment.version}
+					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
 				</div>
 				<br />
 				<div class="text-sm">
@@ -291,6 +246,16 @@
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
 				search={false}
+				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				fields={[
+					'ref_id',
+					'name',
+					'threats',
+					'existing_applied_controls',
+					'current_level',
+					'applied_controls',
+					'residual_level'
+				]}
 			>
 				<button
 					slot="addButton"
@@ -311,9 +276,11 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
+					{useBubbles}
 				/>
 			</div>
 			<div class="flex-1">
@@ -321,9 +288,11 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
+					{useBubbles}
 				/>
 			</div>
 		</div>

@@ -3,12 +3,12 @@
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import Checkbox from '../Checkbox.svelte';
 
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
@@ -18,15 +18,21 @@
 	export let context: string;
 
 	let suggestions = false;
-</script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
+	async function handleFrameworkChange(id: string) {
+		if (id) {
+			await fetch(`/frameworks/${id}`)
+				.then((r) => r.json())
+				.then((r) => {
+					const implementation_groups = r['implementation_groups_definition'] || [];
+					model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
+						(group) => ({ label: group.name, value: group.ref_id })
+					);
+					suggestions = r['reference_controls'].length > 0;
+				});
+		}
+	}
+</script>
 
 {#if context === 'fromBaseline' && initialData.baseline}
 	<AutocompleteSelect
@@ -35,7 +41,7 @@
 		cacheLock={cacheLocks['baseline']}
 		bind:cachedValue={formDataCache['baseline']}
 		label={m.baseline()}
-		options={getOptions({ objects: model.foreignKeys['baseline'] })}
+		optionsEndpoint="compliance-assessments"
 	/>
 {/if}
 {#if initialData.ebios_rm_studies}
@@ -46,58 +52,30 @@
 		cacheLock={cacheLocks['ebios_rm_studies']}
 		bind:cachedValue={formDataCache['ebios_rm_studies']}
 		label={m.ebiosRmStudies()}
-		options={getOptions({ objects: model.foreignKeys['ebios_rm_studies'] })}
 		hidden
 	/>
 {/if}
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['project'],
-		extra_fields: [['folder', 'str']]
-	})}
-	field="project"
-	cacheLock={cacheLocks['project']}
-	bind:cachedValue={formDataCache['project']}
-	label={m.project()}
-	hidden={initialData.project}
-/>
-<TextField
-	{form}
-	field="version"
-	label={m.version()}
-	cacheLock={cacheLocks['version']}
-	bind:cachedValue={formDataCache['version']}
-/>
-<Select
-	{form}
-	options={model.selectOptions['status']}
-	field="status"
-	label={m.status()}
-	cacheLock={cacheLocks['status']}
-	bind:cachedValue={formDataCache['status']}
+	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
+	field="perimeter"
+	cacheLock={cacheLocks['perimeter']}
+	bind:cachedValue={formDataCache['perimeter']}
+	label={m.perimeter()}
+	hidden={initialData.perimeter}
 />
 <AutocompleteSelect
 	{form}
 	disabled={object.id}
-	options={getOptions({ objects: model.foreignKeys['framework'] })}
+	optionsEndpoint="frameworks"
+	optionsDetailedUrlParameters={[['baseline', initialData.baseline]]}
 	field="framework"
 	cacheLock={cacheLocks['framework']}
 	bind:cachedValue={formDataCache['framework']}
-	label={m.framework()}
-	on:change={async (e) => {
-		if (e.detail) {
-			await fetch(`/frameworks/${e.detail}`)
-				.then((r) => r.json())
-				.then((r) => {
-					const implementation_groups = r['implementation_groups_definition'] || [];
-					model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
-						(group) => ({ label: group.name, value: group.ref_id })
-					);
-					suggestions = r['reference_controls'].length > 0;
-				});
-		}
-	}}
+	label={m.targetFramework()}
+	on:change={async (e) => handleFrameworkChange(e.detail)}
+	on:mount={async (e) => handleFrameworkChange(e.detail)}
 />
 {#if model.selectOptions['selected_implementation_groups'] && model.selectOptions['selected_implementation_groups'].length}
 	<AutocompleteSelect
@@ -114,20 +92,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
 	field="authors"
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
-	field="reviewers"
-	cacheLock={cacheLocks['reviewers']}
-	bind:cachedValue={formDataCache['reviewers']}
-	label={m.reviewers()}
 />
 <TextField
 	type="date"
@@ -138,29 +108,80 @@
 	cacheLock={cacheLocks['eta']}
 	bind:cachedValue={formDataCache['eta']}
 />
-<TextField
-	type="date"
-	{form}
-	field="due_date"
-	label={m.dueDate()}
-	helpText={m.dueDateHelpText()}
-	cacheLock={cacheLocks['due_date']}
-	bind:cachedValue={formDataCache['due_date']}
-/>
-<TextArea
-	{form}
-	field="observation"
-	label={m.observation()}
-	cacheLock={cacheLocks['observation']}
-	bind:cachedValue={formDataCache['observation']}
-/>
-{#if context === 'create' && suggestions}
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	{#if context === 'create' && suggestions}
+		<Checkbox
+			{form}
+			field="create_applied_controls_from_suggestions"
+			label={m.suggestControls()}
+			helpText={m.createAppliedControlsFromSuggestionsHelpText()}
+			cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
+			bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+		/>
+	{/if}
 	<Checkbox
 		{form}
-		field="create_applied_controls_from_suggestions"
-		label={m.suggestControls()}
-		helpText={m.createAppliedControlsFromSuggestionsHelpText()}
-		cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
-		bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+		field="show_documentation_score"
+		label={m.useDocumentationScore()}
+		helpText={m.useDocumentationScoreHelpText()}
+		cacheLock={cacheLocks['show_documentation_score']}
+		bind:cachedValue={formDataCache['show_documentation_score']}
 	/>
-{/if}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="assets"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="assets"
+		label={m.assets()}
+	/>
+	<TextField
+		{form}
+		field="ref_id"
+		label={m.refId()}
+		cacheLock={cacheLocks['ref_id']}
+		bind:cachedValue={formDataCache['ref_id']}
+	/>
+	<TextField
+		{form}
+		field="version"
+		label={m.version()}
+		cacheLock={cacheLocks['version']}
+		bind:cachedValue={formDataCache['version']}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="users?is_third_party=false"
+		optionsLabelField="email"
+		field="reviewers"
+		cacheLock={cacheLocks['reviewers']}
+		bind:cachedValue={formDataCache['reviewers']}
+		label={m.reviewers()}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="due_date"
+		label={m.dueDate()}
+		helpText={m.dueDateHelpText()}
+		cacheLock={cacheLocks['due_date']}
+		bind:cachedValue={formDataCache['due_date']}
+	/>
+	<TextArea
+		{form}
+		field="observation"
+		label={m.observation()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+</Dropdown>

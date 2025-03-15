@@ -11,8 +11,8 @@ import { dirname } from 'path';
 let items: { [k: string]: any } = TestContent.itemBuilder();
 let history: any = {};
 
-function setFilePath(projectName: string, retry: number) {
-	file_path = `./tests/utils/.testhistory/${projectName}/hist${retry}.json`;
+function setFilePath(perimeterName: string, retry: number) {
+	file_path = `./tests/utils/.testhistory/${perimeterName}/hist${retry}.json`;
 	mkdirSync(dirname(file_path), { recursive: true });
 	return file_path;
 }
@@ -51,8 +51,9 @@ for (const key of testPages) {
 				);
 				await pages[key].goto();
 				await expect(page).toHaveURL(pages[key].url);
-
+				await page.waitForTimeout(1000); // try mitigating race condition on isHidden
 				if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
+					await page.waitForTimeout(3000);
 					await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);
 				}
 
@@ -90,7 +91,7 @@ for (const key of testPages) {
 				replaceValues(
 					history[testInfo.line],
 					items[key].build.name || items[key].build.email,
-					items[key].build.name + ' edited' || '_' + items[key].build.email
+					items[key].build.name ? items[key].build.name + ' edited' : '_' + items[key].build.email
 				);
 				if (key === 'riskAssessmentsPage') {
 					replaceValues(

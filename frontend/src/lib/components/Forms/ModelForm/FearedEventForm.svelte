@@ -5,7 +5,6 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
@@ -16,9 +15,9 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
+<p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['ebios_rm_study'] })}
 	field="ebios_rm_study"
 	cacheLock={cacheLocks['ebios_rm_study']}
 	bind:cachedValue={formDataCache['ebios_rm_study']}
@@ -39,6 +38,7 @@
 	label={m.gravity()}
 	cacheLock={cacheLocks['gravity']}
 	bind:cachedValue={formDataCache['gravity']}
+	helpText={m.gravityHelpText()}
 />
 <TextArea
 	{form}
@@ -50,21 +50,25 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['assets'],
-		extra_fields: [['folder', 'str']],
-		label: 'auto'
-	})}
+	optionsEndpoint="assets?type=PR"
+	optionsDetailedUrlParameters={[['ebios_rm_studies', initialData.ebios_rm_study]]}
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
 	field="assets"
 	label={m.assets()}
+	helpText={m.fearedEventAssetHelpText()}
 />
 <AutocompleteSelect
 	multiple
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['qualifications']
-	})}
+	optionsEndpoint="qualifications"
 	field="qualifications"
 	label={m.qualifications()}
+	helpText={m.fearedEventQualificationHelpText()}
 />
-<Checkbox {form} field="is_selected" label={m.isSelected()} />
+<Checkbox
+	{form}
+	field="is_selected"
+	label={m.isSelected()}
+	helpText={m.fearedEventIsSelectedHelpText()}
+/>

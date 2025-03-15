@@ -1,19 +1,24 @@
 import pytest
 
 from core.models import (
-    Project,
+    Perimeter,
     StoredLibrary,
+    FilteringLabel,
+    AppliedControl,
 )
 from iam.models import Folder
 
 
 @pytest.fixture
-def domain_project_fixture():
+def domain_perimeter_fixture():
+    root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
     folder = Folder.objects.create(
-        name="test folder", description="test folder description"
+        parent_folder=root_folder,
+        name="test folder",
+        description="test folder description",
     )
-    project = Project.objects.create(name="test project", folder=folder)
-    return project
+    perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
+    return perimeter
 
 
 @pytest.fixture
@@ -37,3 +42,28 @@ def iso27001_csf1_1_frameworks_fixture():
     )
     assert csf_1_1_library is not None
     csf_1_1_library.load()
+
+
+@pytest.fixture
+def filtering_labels():
+    labels = [
+        FilteringLabel.objects.create(label="critical"),
+        FilteringLabel.objects.create(label="internal"),
+        FilteringLabel.objects.create(label="external"),
+    ]
+    return labels
+
+
+@pytest.fixture
+def applied_controls():
+    return [
+        AppliedControl.objects.create(
+            name="Bastion",
+        ),
+        AppliedControl.objects.create(
+            name="Firewall",
+        ),
+        AppliedControl.objects.create(
+            name="IDS",
+        ),
+    ]

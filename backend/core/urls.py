@@ -23,7 +23,7 @@ router.register(
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
-router.register(r"projects", ProjectViewSet, basename="projects")
+router.register(r"perimeters", PerimeterViewSet, basename="perimeters")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
@@ -71,6 +71,15 @@ router.register(
     QualificationViewSet,
     basename="qualifications",
 )
+router.register(
+    r"security-exceptions",
+    SecurityExceptionViewSet,
+    basename="security-exceptions",
+)
+router.register(
+    r"findings-assessments", FindingsAssessmentViewSet, basename="findings-assessments"
+)
+router.register(r"findings", FindingViewSet, basename="findings")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -87,6 +96,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
     path("serdes/", include("serdes.urls")),
+    path("data-wizard/", include("data_wizard.urls")),
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("ebios-rm/", include("ebios_rm.urls")),
@@ -110,6 +120,10 @@ urlpatterns = [
     path(
         "compliance-assessments/<uuid:pk>/suggestions/applied-controls/",
         ComplianceAssessmentViewSet.create_suggested_applied_controls,
+    ),
+    path(
+        "compliance-assessments/<uuid:pk>/action-plan/",
+        ComplianceAssessmentActionPlanList.as_view(),
     ),
 ]
 

@@ -1,19 +1,19 @@
 import importlib
 from typing import Any
+
+import structlog
+from django.contrib.auth import get_user_model
+from django.db import models
+
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
-
-
 from core.models import *
-from iam.models import *
+from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
+from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy
+from iam.models import *
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from django.contrib.auth import get_user_model
-from django.db import models
-from core.serializer_fields import FieldsRelatedField
-
-import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -28,7 +28,8 @@ class SerializerFactory:
     """
 
     def __init__(self, *modules: str):
-        self.modules = list(reversed(modules))  # Reverse to prioritize later modules
+        # Reverse to prioritize later modules
+        self.modules = list(reversed(modules))
 
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
@@ -108,9 +109,10 @@ class ReferentialSerializer(BaseModelSerializer):
 
 
 class AssessmentReadSerializer(BaseModelSerializer):
-    project = FieldsRelatedField()
+    perimeter = FieldsRelatedField(["id", "folder"])
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
 
 
 # Risk Assessment
@@ -130,10 +132,34 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
     pass
 
 
+class RiskMatrixImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    class Meta:
+        model = RiskMatrix
+        fields = [
+            "created_at",
+            "updated_at",
+            "urn",
+            "name",
+            "description",
+            "ref_id",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "library",
+            "is_enabled",
+            "provider",
+            "json_definition",
+        ]
+
+
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
+    security_exceptions = FieldsRelatedField(many=True)
 
     class Meta:
         model = Vulnerability
@@ -146,20 +172,26 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at", "is_published"]
 
 
-class RiskAcceptanceWriteSerializer(BaseModelSerializer):
-    # NOTE: This is a workaround to filter the approvers on api view
-    #       but it causes some problems in api_tests. Serializers are
-    #       called before to create users, so the approvers_id list
-    #       is empty and the api_tests fail.
-    # approvers_id = []
-    # try:
-    #     for candidate in User.objects.all():
-    #         if RoleAssignment.has_permission(candidate, 'approve_riskacceptance'):
-    #             approvers_id.append(candidate.id)
-    # except:
-    #     pass
-    # approver = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(id__in=approvers_id))
+class VulnerabilityImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
+    class Meta:
+        model = Vulnerability
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "status",
+            "severity",
+            "applied_controls",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class RiskAcceptanceWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAcceptance
         exclude = ["accepted_at", "rejected_at", "revoked_at", "state"]
@@ -176,19 +208,35 @@ class RiskAcceptanceReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class ProjectWriteSerializer(BaseModelSerializer):
+class PerimeterWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = Project
+        model = Perimeter
         exclude = ["created_at"]
 
 
-class ProjectReadSerializer(BaseModelSerializer):
+class PerimeterReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     lc_status = serializers.CharField(source="get_lc_status_display")
 
     class Meta:
-        model = Project
+        model = Perimeter
         fields = "__all__"
+
+
+class PerimeterImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = Perimeter
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "lc_status",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class RiskAssessmentWriteSerializer(BaseModelSerializer):
@@ -200,14 +248,14 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "project", "description"]
+        fields = ["name", "version", "perimeter", "description"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
-    project = FieldsRelatedField(["id", "folder"])
+    perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
-    risk_scenarios = FieldsRelatedField(many=True)
+    risk_scenarios = FieldsRelatedField(many=True, fields=["id", "name", "ref_id"])
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
     ebios_rm_study = FieldsRelatedField(["id", "name"])
@@ -215,6 +263,33 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     class Meta:
         model = RiskAssessment
         exclude = []
+
+
+class RiskAssessmentImportExportSerializer(BaseModelSerializer):
+    risk_matrix = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
+    ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = RiskAssessment
+        fields = [
+            "ref_id",
+            "name",
+            "version",
+            "description",
+            "folder",
+            "perimeter",
+            "eta",
+            "due_date",
+            "status",
+            "observation",
+            "risk_matrix",
+            "ebios_rm_study",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class AssetWriteSerializer(BaseModelSerializer):
@@ -248,6 +323,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    children_assets = FieldsRelatedField(["id"], many=True)
     owner = FieldsRelatedField(many=True)
     security_objectives = serializers.JSONField(
         source="get_security_objectives_display"
@@ -257,6 +333,28 @@ class AssetReadSerializer(AssetWriteSerializer):
     )
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
+    security_exceptions = FieldsRelatedField(many=True)
+
+
+class AssetImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = Asset
+        fields = [
+            "type",
+            "name",
+            "description",
+            "business_value",
+            "reference_link",
+            "security_objectives",
+            "disaster_recovery_objectives",
+            "parent_assets",
+            "folder",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
@@ -272,6 +370,33 @@ class ReferenceControlReadSerializer(ReferentialSerializer):
     class Meta:
         model = ReferenceControl
         exclude = ["translations"]
+
+
+class ReferenceControlImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = ReferenceControl
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "urn",
+            "provider",
+            "category",
+            "csf_function",
+            "typical_evidence",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "folder",
+            "library",
+            "created_at",
+            "updated_at",
+        ]
 
 
 """class LibraryReadSerializer(BaseModelSerializer):
@@ -292,8 +417,6 @@ class ThreatWriteSerializer(BaseModelSerializer):
         model = Threat
         exclude = ["translations"]
 
-    # ["id", "folder", "ref_id", "name", "description", "provider"] # TODO: check why not all?
-
 
 class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
@@ -302,6 +425,30 @@ class ThreatReadSerializer(ReferentialSerializer):
     class Meta:
         model = Threat
         exclude = ["translations"]
+
+
+class ThreatImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = Threat
+        fields = [
+            "created_at",
+            "updated_at",
+            "folder",
+            "urn",
+            "ref_id",
+            "provider",
+            "name",
+            "description",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "library",
+        ]
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
@@ -317,8 +464,8 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     risk_assessment = FieldsRelatedField(["id", "name"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
-    project = FieldsRelatedField(
-        source="risk_assessment.project", fields=["id", "name", "folder"]
+    perimeter = FieldsRelatedField(
+        source="risk_assessment.perimeter", fields=["id", "name", "folder"]
     )
     version = serializers.StringRelatedField(source="risk_assessment.version")
     threats = FieldsRelatedField(many=True)
@@ -339,9 +486,57 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     existing_applied_controls = FieldsRelatedField(many=True)
 
     owner = FieldsRelatedField(many=True)
+    security_exceptions = FieldsRelatedField(many=True)
+
+
+class RiskScenarioImportExportSerializer(BaseModelSerializer):
+    threats = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    risk_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    existing_applied_controls = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = RiskScenario
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "risk_assessment",
+            "treatment",
+            "threats",
+            "vulnerabilities",
+            "assets",
+            "existing_controls",
+            "existing_applied_controls",
+            "applied_controls",
+            "current_proba",
+            "current_impact",
+            "residual_proba",
+            "residual_impact",
+            "strength_of_knowledge",
+            "justification",
+            "created_at",
+            "updated_at",
+            "qualifications",
+        ]
 
 
 class AppliedControlWriteSerializer(BaseModelSerializer):
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
+    )
+
+    def create(self, validated_data: Any):
+        applied_control = super().create(validated_data)
+        findings = validated_data.pop("findings", [])
+        if findings:
+            applied_control.findings.set(findings)
+        return applied_control
+
     class Meta:
         model = AppliedControl
         fields = "__all__"
@@ -363,15 +558,108 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
-    # These properties shouldn't be displayed in the frontend detail view as they are simple derivations from fields already displayed in the detail view.
-    # has_evidences = serializers.BooleanField()
-    # eta_missed = serializers.BooleanField()
+    security_exceptions = FieldsRelatedField(many=True)
+    state = serializers.SerializerMethodField()
+    findings_count = serializers.IntegerField(source="findings.count")
+
+    def get_state(self, obj):
+        if not obj.eta:
+            return None
+        return time_state(obj.eta.isoformat())
+
+
+class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    reference_control = FieldsRelatedField()
+    priority = serializers.CharField(source="get_priority_display")
+    category = serializers.CharField(
+        source="get_category_display"
+    )  # type : get_type_display
+    csf_function = serializers.CharField(
+        source="get_csf_function_display"
+    )  # type : get_type_display
+    evidences = FieldsRelatedField(many=True)
+    effort = serializers.CharField(source="get_effort_display")
+    cost = serializers.FloatField()
+
+    ranking_score = serializers.IntegerField(source="get_ranking_score")
+    owner = FieldsRelatedField(many=True)
+    requirement_assessments = serializers.SerializerMethodField(
+        method_name="get_requirement_assessments"
+    )
+
+    def get_requirement_assessments(self, obj):
+        pk = self.context.get("pk")
+        if pk is None:
+            return None
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=pk, applied_controls=obj
+        )
+        return [
+            {
+                "str": str(req.requirement.display_short or req.requirement.urn),
+                "id": str(req.id),
+            }
+            for req in requirement_assessments
+        ]
+
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "id",
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "status",
+            "eta",
+            "expiry_date",
+            "priority",
+            "category",
+            "csf_function",
+            "effort",
+            "cost",
+            "ranking_score",
+            "requirement_assessments",
+            "reference_control",
+            "evidences",
+            "owner",
+        ]
 
 
 class AppliedControlDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = AppliedControl
         fields = ["name", "description", "folder"]
+
+
+class AppliedControlImportExportSerializer(BaseModelSerializer):
+    reference_control = HashSlugRelatedField(slug_field="pk", read_only=True)
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "folder",
+            "ref_id",
+            "name",
+            "description",
+            "priority",
+            "reference_control",
+            "created_at",
+            "updated_at",
+            "category",
+            "csf_function",
+            "status",
+            "start_date",
+            "eta",
+            "expiry_date",
+            "link",
+            "effort",
+            "cost",
+            "evidences",
+        ]
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
@@ -530,6 +818,21 @@ class FolderReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class FolderImportExportSerializer(BaseModelSerializer):
+    parent_folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = Folder
+        fields = [
+            "parent_folder",
+            "name",
+            "description",
+            "content_type",
+            "created_at",
+            "updated_at",
+        ]
+
+
 # Compliance Assessment
 
 
@@ -545,6 +848,29 @@ class FrameworkReadSerializer(ReferentialSerializer):
 
 class FrameworkWriteSerializer(FrameworkReadSerializer):
     pass
+
+
+class FrameworkImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    class Meta:
+        model = Framework
+        fields = [
+            "urn",
+            "ref_id",
+            "name",
+            "library",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "provider",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class RequirementNodeReadSerializer(ReferentialSerializer):
@@ -576,15 +902,35 @@ class EvidenceReadSerializer(BaseModelSerializer):
 
 class EvidenceWriteSerializer(BaseModelSerializer):
     applied_controls = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=AppliedControl.objects.all()
+        many=True, queryset=AppliedControl.objects.all(), required=False
     )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=RequirementAssessment.objects.all()
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
     )
 
     class Meta:
         model = Evidence
         fields = "__all__"
+
+
+class EvidenceImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    attachment = serializers.CharField(allow_blank=True)
+    size = serializers.CharField(source="get_size", read_only=True)
+    attachment_hash = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Evidence
+        fields = [
+            "folder",
+            "name",
+            "description",
+            "attachment",
+            "created_at",
+            "updated_at",
+            "size",
+            "attachment_hash",
+        ]
 
 
 class AttachmentUploadSerializer(serializers.Serializer):
@@ -596,7 +942,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
-    project = FieldsRelatedField(["id", "folder"])
+    perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     framework = FieldsRelatedField(
         [
@@ -612,6 +958,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         source="get_selected_implementation_groups"
     )
     progress = serializers.ReadOnlyField()
+    assets = FieldsRelatedField(many=True)
 
     class Meta:
         model = ComplianceAssessment
@@ -637,11 +984,41 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def create(self, validated_data: Any):
+        validated_data.pop("create_applied_controls_from_suggestions", None)
         return super().create(validated_data)
 
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
+
+
+class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
+    framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "ref_id",
+            "name",
+            "version",
+            "description",
+            "folder",
+            "perimeter",
+            "eta",
+            "due_date",
+            "status",
+            "observation",
+            "framework",
+            "selected_implementation_groups",
+            "min_score",
+            "max_score",
+            "scores_definition",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
@@ -668,6 +1045,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FilteredNodeSerializer()
+    security_exceptions = FieldsRelatedField(many=True)
 
     class Meta:
         model = RequirementAssessment
@@ -722,6 +1100,37 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
+    requirement = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+
+    class Meta:
+        model = RequirementAssessment
+        fields = [
+            "created_at",
+            "updated_at",
+            "eta",
+            "due_date",
+            "folder",
+            "status",
+            "result",
+            "score",
+            "is_scored",
+            "observation",
+            "compliance_assessment",
+            "requirement",
+            "selected",
+            "mapping_inference",
+            "answer",
+            "evidences",
+            "applied_controls",
+        ]
+
+
 class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
     pass
 
@@ -757,3 +1166,64 @@ class QualificationReadSerializer(ReferentialSerializer):
 
 class QualificationWriteSerializer(QualificationReadSerializer):
     pass
+
+
+class SecurityExceptionWriteSerializer(BaseModelSerializer):
+    requirement_assessments = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
+    )
+    applied_controls = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=AppliedControl.objects.all(), required=False
+    )
+
+    class Meta:
+        model = SecurityException
+        fields = "__all__"
+
+
+class SecurityExceptionReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    owners = FieldsRelatedField(many=True)
+    approver = FieldsRelatedField()
+    severity = serializers.CharField(source="get_severity_display")
+
+    class Meta:
+        model = SecurityException
+        fields = "__all__"
+
+
+class FindingsAssessmentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = FindingsAssessment
+        exclude = ["created_at", "updated_at"]
+
+
+class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
+    str = serializers.CharField(source="__str__")
+    owner = FieldsRelatedField(many=True)
+    findings_count = serializers.IntegerField(source="findings.count")
+
+    class Meta:
+        model = FindingsAssessment
+        fields = "__all__"
+
+
+class FindingWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Finding
+        exclude = ["created_at", "updated_at"]
+
+
+class FindingReadSerializer(FindingWriteSerializer):
+    str = serializers.CharField(source="__str__")
+    owner = FieldsRelatedField(many=True)
+    findings_assessment = FieldsRelatedField()
+    vulnerabilities = FieldsRelatedField(many=True)
+    reference_controls = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Finding
+        fields = "__all__"

@@ -5,5 +5,5 @@ export const ClientSettingsSchema = z.object({
 	name: z.string().optional().nullable().default(''),
 	logo: z.any().optional().nullable(),
 	favicon: z.any().optional().nullable(),
-  show_images_unauthenticated: z.boolean().default(true),
+	show_images_unauthenticated: z.boolean().default(true)
 });

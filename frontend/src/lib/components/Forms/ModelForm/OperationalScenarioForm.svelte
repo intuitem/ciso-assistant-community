@@ -4,7 +4,6 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import * as m from '$paraglide/messages.js';
-	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
 	import { page } from '$app/stores';
@@ -32,7 +31,6 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['ebios_rm_study'] })}
 	field="ebios_rm_study"
 	cacheLock={cacheLocks['ebios_rm_study']}
 	bind:cachedValue={formDataCache['ebios_rm_study']}
@@ -58,26 +56,25 @@
 		cacheLock={cacheLocks['operating_modes_description']}
 		bind:cachedValue={formDataCache['operating_modes_description']}
 		data-focusindex="1"
+		helpText={m.operatingModesDescriptionHelpText()}
 	/>
 	<AutocompleteSelect
 		{form}
 		multiple
-		options={getOptions({
-			objects: model.foreignKeys['threats'],
-			extra_fields: [['folder', 'str']],
-			label: 'auto'
-		})}
+		optionsEndpoint="threats"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
 		field="threats"
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}
 		label={m.threats()}
+		helpText={m.operationalScenarioThreatsHelpText()}
 	/>
 	{#if context !== 'edit'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({
-				objects: model.foreignKeys['attack_path']
-			})}
+			optionsEndpoint="attack-paths?is_selected=true&used=false"
+			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
 			field="attack_path"
 			label={m.attackPath()}
 		/>
@@ -102,6 +99,7 @@
 		label={m.likelihood()}
 		cacheLock={cacheLocks['likelihood']}
 		bind:cachedValue={formDataCache['likelihood']}
+		helpText={m.likelihoodHelpText()}
 	/>
 	<TextArea
 		{form}
@@ -111,4 +109,9 @@
 		bind:cachedValue={formDataCache['justification']}
 	/>
 </div>
-<Checkbox {form} field="is_selected" label={m.isSelected()} />
+<Checkbox
+	{form}
+	field="is_selected"
+	label={m.isSelected()}
+	helpText={m.operationalScenarioIsSelectedHelpText()}
+/>

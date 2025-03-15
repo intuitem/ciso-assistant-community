@@ -6,6 +6,7 @@ description: 'Payment Card Industry Data Security Standard: Requirements and Tes
   Procedures, v4.0 '
 copyright: "\xA92006 - 2022 PCI Security Standards Council, LLC. All Rights Reserved. "
 version: 1
+publication_date: 2024-03-02
 provider: PCI Security Standards Council
 packager: intuitem
 objects:

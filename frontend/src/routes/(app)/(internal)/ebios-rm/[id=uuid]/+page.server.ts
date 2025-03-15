@@ -33,26 +33,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		errors: false
 	});
 	const riskModel = getModelInfo('risk-assessments');
-	const foreignKeyFields = urlParamModelForeignKeyFields(riskModel.urlModel);
 	const selectFields = urlParamModelSelectFields(riskModel.urlModel);
-
-	const foreignKeys: Record<string, any> = {};
-
-	for (const keyField of foreignKeyFields) {
-		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-		const keyModel = getModelInfo(keyField.urlModel);
-		const url = keyModel.endpointUrl
-			? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
-			: `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-		const response = await fetch(url);
-		if (response.ok) {
-			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-		} else {
-			console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-		}
-	}
-
-	riskModel['foreignKeys'] = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
 
@@ -81,6 +62,23 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
+		const requestInitOptions: RequestInit = {
+			method: 'PATCH',
+			body: JSON.stringify({
+				status: 'done',
+				step: 1,
+				workshop: 5
+			})
+		};
+
+		const endpoint = `${BASE_API_URL}/ebios-rm/studies/${event.params.id}/workshop/5/step/1/`;
+		const res = await event.fetch(endpoint, requestInitOptions);
+
+		if (!res.ok) {
+			const response = await res.text();
+			console.error(response);
+		}
+
 		return defaultWriteFormAction({
 			event,
 			urlModel: 'risk-assessments',

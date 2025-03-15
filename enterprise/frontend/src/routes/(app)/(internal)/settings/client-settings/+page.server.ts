@@ -27,7 +27,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	});
 
 	const URLModel = 'client-settings';
-	const attachmentDeleteSchema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+	const attachmentDeleteSchema = z.object({
+		urlmodel: z.string(),
+		id: z.string().uuid()
+	});
 	const attachmentDeleteForm = await superValidate(
 		{
 			urlmodel: URLModel,
@@ -36,7 +39,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		zod(attachmentDeleteSchema)
 	);
 
-	return { settings, form, model, attachmentDeleteForm};
+	return { settings, form, model, attachmentDeleteForm };
 };
 
 export const actions: Actions = {
@@ -110,14 +113,12 @@ export const actions: Actions = {
 			}
 		}
 
-
 		return setFlash(
 			{
 				type: 'success',
 				message: m.successfullyUpdatedClientSettings()
 			},
 			event
-
 		);
 	},
 
@@ -129,8 +130,8 @@ export const actions: Actions = {
 		const endpoint = `${BASE_API_URL}/client-settings/${form.data.id}/logo/delete/`;
 
 		await event.fetch(endpoint, { method: 'PUT' });
-		return { success: true , form };
-	  },
+		return { success: true, form };
+	},
 
 	deleteFavicon: async (event) => {
 		const formData = await event.request.formData();
@@ -140,8 +141,6 @@ export const actions: Actions = {
 		const endpoint = `${BASE_API_URL}/client-settings/${form.data.id}/favicon/delete/`;
 
 		await event.fetch(endpoint, { method: 'PUT' });
-		return { success: true , form };
-	  }
-
-
+		return { success: true, form };
+	}
 };

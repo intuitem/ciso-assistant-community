@@ -11,6 +11,9 @@
 	import { isDark } from '$lib/utils/helpers';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
+	import { goto } from '$app/navigation';
+
+	import { onMount } from 'svelte';
 	export let data: PageData;
 
 	const user = $page.data.user;
@@ -26,6 +29,25 @@
 	$: classesCellText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
 	};
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.metaKey || event.ctrlKey) return;
+		if (document.activeElement?.tagName !== 'BODY') return;
+		// Check if the pressed key is 'e' and the edit button should be displayed
+
+		if (event.key === 'e' && canEditObject) {
+			event.preventDefault();
+			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+		}
+	}
+	onMount(() => {
+		// Add event listener when component mounts
+		window.addEventListener('keydown', handleKeydown);
+
+		// Cleanup event listener when component is destroyed
+		return () => {
+			window.removeEventListener('keydown', handleKeydown);
+		};
+	});
 </script>
 
 <div class="flex flex-col space-y-3">
@@ -64,9 +86,10 @@
 			<h4 class="h4 font-semibold">{m.scope()}</h4>
 			<div class="flex flex-row justify-between">
 				<span>
-					<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-					<Anchor class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
-						>{data.scenario.project.str}</Anchor
+					<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
+					<Anchor
+						class="anchor text-sm font-semibold"
+						href="/perimeters/{data.scenario.perimeter.id}">{data.scenario.perimeter.str}</Anchor
 					>
 				</span>
 				<span>
@@ -110,21 +133,41 @@
 		</div>
 	</div>
 	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg w-2/5 max-h-96 overflow-y-scroll">
+		<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
-			<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
+			<ModelTable
+				source={data.tables['assets']}
+				hideFilters={true}
+				URLModel="assets"
+				baseEndpoint="/assets?risk_scenarios={$page.params.id}"
+			/>
 		</div>
-		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5 max-h-96 overflow-y-scroll">
+		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.threats()}</h4>
-			<ModelTable source={data.tables['threats']} hideFilters={true} URLModel="threats" />
+			<ModelTable
+				source={data.tables['threats']}
+				hideFilters={true}
+				URLModel="threats"
+				baseEndpoint="/threats?risk_scenarios={$page.params.id}"
+			/>
 		</div>
 	</div>
-	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-scroll">
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
 		<h4 class="h4 font-semibold">{m.vulnerabilities()}</h4>
 		<ModelTable
 			source={data.tables['vulnerabilities']}
 			hideFilters={true}
 			URLModel="vulnerabilities"
+			baseEndpoint="/vulnerabilities?risk_scenarios={$page.params.id}"
+		/>
+	</div>
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
+		<h4 class="h4 font-semibold">{m.securityExceptions()}</h4>
+		<ModelTable
+			source={data.tables['security-exceptions']}
+			hideFilters={true}
+			URLModel="security-exceptions"
+			baseEndpoint="/security-exceptions?risk_scenarios={$page.params.id}"
 		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
@@ -141,6 +184,7 @@
 				source={data.tables['risk_scenarios_e']}
 				hideFilters={true}
 				URLModel="applied-controls"
+				baseEndpoint="/applied-controls?risk_scenarios_e={$page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
@@ -187,6 +231,7 @@
 				source={data.tables['risk_scenarios']}
 				hideFilters={true}
 				URLModel="applied-controls"
+				baseEndpoint="/applied-controls?risk_scenarios={$page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">

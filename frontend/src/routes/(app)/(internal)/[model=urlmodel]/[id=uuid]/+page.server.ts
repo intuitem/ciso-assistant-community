@@ -20,28 +20,7 @@ import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	const modelInfo = getModelInfo(event.params.model + '_duplicate');
-	const foreignKeys: Record<string, any> = {};
-
-	if (modelInfo.foreignKeyFields) {
-		await Promise.all(
-			modelInfo.foreignKeyFields.map(async (keyField) => {
-				const keyModel = getModelInfo(keyField.urlModel);
-				const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-				const url = keyModel.endpointUrl
-					? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
-					: `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-				const response = await event.fetch(url);
-				if (response.ok) {
-					foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-				} else {
-					console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-				}
-			})
-		);
-	}
-
-	modelInfo['foreignKeys'] = foreignKeys;
+	const modelInfo = getModelInfo(event.params.model);
 
 	const data = await loadDetail({
 		event,
@@ -73,10 +52,11 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(event.params.model === 'projects');
+		const redirectToWrittenObject = Boolean(event.params.model === 'perimeters');
 		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject });
 	},
 	delete: async (event) => {
+		console.log('delete');
 		return nestedDeleteFormAction({ event });
 	},
 	duplicate: async (event) => {
@@ -145,6 +125,75 @@ export const actions: Actions = {
 		return message(
 			rejectForm,
 			m.successfullyRejectedObject({
+				object: safeTranslate(model).toLowerCase(),
+				id: id
+			})
+		);
+	},
+	submit: async ({ request, fetch, params }) => {
+		const formData = await request.formData();
+		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+		const submitForm = await superValidate(formData, zod(schema));
+
+		const urlmodel = submitForm.data.urlmodel;
+		const id = submitForm.data.id;
+		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/submit/`;
+
+		if (!submitForm.valid) {
+			return fail(400, { form: submitForm });
+		}
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST'
+		};
+		const res = await fetch(endpoint, requestInitOptions);
+		if (!res.ok) {
+			const response = await res.json();
+			if (response.non_field_errors) {
+				setError(submitForm, 'non_field_errors', response.non_field_errors);
+			}
+			return fail(400, { form: submitForm });
+		}
+		const model: string = urlParamModelVerboseName(params.model!);
+		// TODO: reference object by name instead of id
+		return message(
+			submitForm,
+			m.successfullyValidatedObject({
+				object: safeTranslate(model).toLowerCase(),
+				id: id
+			})
+		);
+	},
+
+	draft: async ({ request, fetch, params }) => {
+		const formData = await request.formData();
+		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+		const draftForm = await superValidate(formData, zod(schema));
+
+		const urlmodel = draftForm.data.urlmodel;
+		const id = draftForm.data.id;
+		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/draft/`;
+
+		if (!draftForm.valid) {
+			return fail(400, { form: draftForm });
+		}
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST'
+		};
+		const res = await fetch(endpoint, requestInitOptions);
+		if (!res.ok) {
+			const response = await res.json();
+			if (response.non_field_errors) {
+				setError(draftForm, 'non_field_errors', response.non_field_errors);
+			}
+			return fail(400, { form: draftForm });
+		}
+		const model: string = urlParamModelVerboseName(params.model!);
+		// TODO: reference object by name instead of id
+		return message(
+			draftForm,
+			m.successfullyValidatedObject({
 				object: safeTranslate(model).toLowerCase(),
 				id: id
 			})

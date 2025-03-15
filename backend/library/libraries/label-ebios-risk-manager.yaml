@@ -1,0 +1,2654 @@
+urn: urn:intuitem:risk:library:cahier-des-charges-label-ebios-rm-v3.1
+locale: fr
+ref_id: Cahier-des-Charges-Label-EBIOS-RM-v3.1
+name: Cahier des Charges Label EBIOS RM v3.1
+description: "\"Ce document a pour but de rassembler les exigences de l\u2019Agence\
+  \ nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019information (ANSSI) en vue\
+  \ de la labellisation d\u2019un logiciel qui instancie la m\xE9thode EBIOS Risk\
+  \ Manager.\nIl d\xE9taille les attentes de l\u2019ANSSI par rapport au projet et\
+  \ d\xE9crit les besoins fonctionnels et non fonctionnels.\nLa premi\xE8re partie\
+  \ du document pr\xE9sente le contexte et l\u2019objectif de la labellisation.\n\
+  La seconde d\xE9crit les sp\xE9cifications \xE0 respecter pour l\u2019obtention\
+  \ du label EBIOS Risk Manager.\nUne annexe donne des recommandations relatives \xE0\
+  \ l\u2019application et \xE0 son ergonomie.\nLien: https://cyber.gouv.fr/label-ebios-risk-manager\""
+copyright: ANSSI
+version: 1
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cahier-des-charges-label-ebios-rm-v3.1
+    ref_id: Cahier-des-Charges-Label-EBIOS-RM-v3.1
+    name: Cahier des Charges Label EBIOS RM v3.1
+    description: "Ce document a pour but de rassembler les exigences de l\u2019Agence\
+      \ nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019information (ANSSI)\
+      \ en vue de la labellisation d\u2019un logiciel qui instancie la m\xE9thode\
+      \ EBIOS Risk Manager.\nIl d\xE9taille les attentes de l\u2019ANSSI par rapport\
+      \ au projet et d\xE9crit les besoins fonctionnels et non fonctionnels.\nLa premi\xE8\
+      re partie du document pr\xE9sente le contexte et l\u2019objectif de la labellisation.\n\
+      La seconde d\xE9crit les sp\xE9cifications \xE0 respecter pour l\u2019obtention\
+      \ du label EBIOS Risk Manager.\nUne annexe donne des recommandations relatives\
+      \ \xE0 l\u2019application et \xE0 son ergonomie.\nLien: https://cyber.gouv.fr/label-ebios-risk-manager"
+    implementation_groups_definition:
+    - ref_id: Standalone
+      name: Standalone
+      description: "Le logiciel fonctionnant de mani\xE8re autonome sur une station\
+        \ de travail est soumis aux\nexigences relevant du mode \xAB standalone \xBB\
+        ."
+    - ref_id: Client-Serveur
+      name: Client-Serveur
+      description: "Le logiciel fonctionnant au sein d\u2019une infrastructure r\xE9\
+        seau priv\xE9e et dans un\nenvironnement client\u2013serveur est soumis aux\
+        \ exigences relevant du mode \xAB Client-\nServeur \xBB."
+    - ref_id: SaaS
+      name: SaaS
+      description: SaaS
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "Sp\xE9cifications g\xE9n\xE9rales"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3
+      ref_id: '3.1'
+      name: "Sp\xE9cifications logicielles"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.1
+      description: "Le logiciel devra fonctionner de mani\xE8re autonome sur une station\
+        \ de travail (format \xAB standalone \xBB) ou selon un environnement client/serveur.\
+        \ Il devra permettre de d\xE9rouler de bout-en-bout les 5 ateliers de la m\xE9\
+        thode EBIOS Risk Manager:"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node4
+      description: "Atelier 1 \u2013 Cadrage et socle de s\xE9curit\xE9,"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node4
+      description: "Atelier 2 \u2013 Sources de risque,"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node4
+      description: "Atelier 3 \u2013 Sc\xE9narios strat\xE9giques,"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node4
+      description: "Atelier 4 \u2013 Sc\xE9narios op\xE9rationnels,"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node4
+      description: "Atelier 5 \u2013 Traitement du risque."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.1
+      description: "Il doit \xEAtre possible de travailler de fa\xE7on agile, c\u2019\
+        est-\xE0-dire it\xE9rative et incr\xE9mentale et d\u2019exporter des livrables\
+        \ pour chacune des \xE9tapes. Leur contenu est d\xE9taill\xE9, pour chaque\
+        \ atelier, dans le guide EBIOS Risk Manager (\xAB Les donn\xE9es de sortie\
+        \ \xBB)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3
+      ref_id: '3.2'
+      name: "Mention de protection de l\u2019analyse de risque"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.2
+      description: "L\u2019application permet de porter une mention (obligatoire)\
+        \ de protection \xE0 l\u2019analyse de risque. Par exemple, non prot\xE9g\xE9\
+        e, sensible, restreinte ou confidentielle."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3
+      ref_id: '3.3'
+      name: "Guide d\u2019utilisation"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.3
+      description: "L\u2019\xE9diteur de l\u2019application met \xE0 disposition un\
+        \ guide d\u2019utilisation pour l\u2019installation du logiciel, le lancement\
+        \ des fonctions de base, et propose des recommandations d\u2019utilisation\
+        \ (en particulier lorsque des donn\xE9es sensibles ou devant porter une mention\
+        \ de protection seront utilis\xE9es pour produire l\u2019analyse de risque)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3
+      ref_id: '3.4'
+      name: Gestion des versions des analyses des risques
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:3.4
+      description: "L\u2019application devra pouvoir g\xE9rer les versions successives\
+        \ d\u2019une m\xEAme analyse de risque :"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node16
+      description: "en permettant \xE0 un utilisateur qui ouvrirait une analyse de\
+        \ risque de choisir s\u2019il souhaite la mettre \xE0 jour dans le cadre d\u2019\
+        un cycle op\xE9rationnel ou strat\xE9gique (exemple : case \xE0 cocher) "
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node16
+      description: "en incr\xE9mentant la version x.y de l\u2019analyse de risque\
+        \ (par exemple incr\xE9ment du \xAB y \xBB pour une mise \xE0 jour op\xE9\
+        rationnelle et du \xAB x \xBB pour une mise \xE0 jour strat\xE9gique)"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node19
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node16
+      description: "en demandant \xE0 l\u2019utilisateur quelles sont les modifications\
+        \ majeures apport\xE9es lors d\u2019une mise \xE0 jour (exemple : champ texte\
+        \ renseign\xE9 librement) et quels ateliers sont concern\xE9s (exemple : cases\
+        \ \xE0 cocher),"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node20
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node16
+      description: "en proposant une synth\xE8se des mises \xE0 jour effectu\xE9es\
+        \ (\xE0 minima identification des ateliers et activit\xE9s ayant fait l\u2019\
+        objet de modifications)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Sp\xE9cifications fonctionnelles"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:4
+      ref_id: Atelier 1
+      name: "Cadrage et socle de s\xE9curit\xE9"
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.1"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-1
+      ref_id: "Activit\xE9 1.1"
+      name: "D\xE9finir le cadre de l\u2019\xE9tude"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.1"
+      ref_id: EXI_M1_01
+      description: "L\u2019application permet de renseigner les \xE9l\xE9ments du\
+        \ cadre de l\u2019\xE9tude :"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01
+      ref_id: EXI_M1_01.1
+      description: "les objectifs de l\u2019\xE9tude,"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01
+      ref_id: EXI_M1_01.2
+      description: "les participants \xE0 l\u2019\xE9tude (par exemple sous forme\
+        \ de matrice de type RACI),"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01
+      ref_id: EXI_M1_01.3
+      description: "le cadre temporel de l\u2019\xE9tude (dur\xE9e des cycles op\xE9\
+        rationnel et strat\xE9gique),"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01
+      ref_id: EXI_M1_01.4
+      description: "les contraintes et hypoth\xE8ses,"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01.5
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_01
+      ref_id: EXI_M1_01.5
+      description: "les \xE9l\xE9ments de planning projet (par exemple date des ateliers,\
+        \ contraintes du projet)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_02
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.1"
+      ref_id: EXI_M1_02
+      description: "L\u2019utilisateur peut ajouter, modifier, supprimer les \xE9\
+        l\xE9ments du cadre de l\u2019\xE9tude."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_03
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.1"
+      ref_id: EXI_M1_03
+      description: "L\u2019application pr\xE9voit d\u2019\xE9diter ou d\u2019exporter\
+        \ les \xE9l\xE9ments du cadre de l\u2019\xE9tude."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.2"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-1
+      ref_id: "Activit\xE9 1.2"
+      name: "D\xE9finir le p\xE9rim\xE8tre m\xE9tier et technique"
+      annotation: "(Cf. fiche m\xE9thode n\xB01 EBIOS Risk Manager: d\xE9finir le\
+        \ p\xE9rim\xE8tre m\xE9tier et technique et fiche m\xE9thode n\xB02 EBIOS\
+        \ Risk Manager: identifier les biens supports)"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_04
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.2"
+      ref_id: EXI_M1_04
+      description: "L\u2019application permet de recenser les missions de l\u2019\
+        objet \xE9tudi\xE9. Pour chaque mission, il est possible de saisir une description."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_05
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.2"
+      ref_id: EXI_M1_05
+      description: "L\u2019application permet de recenser les valeurs m\xE9tier associ\xE9\
+        es \xE0 l\u2019objet de l\u2019\xE9tude. Pour chaque valeur m\xE9tier, l\u2019\
+        utilisateur peut saisir sa d\xE9nomination, la nature de la valeur m\xE9tier\
+        \ (par exemple : processus ou information), et une description. A cette valeur\
+        \ m\xE9tier, est associ\xE9e une entit\xE9 ou une personne propri\xE9taire\
+        \ (interne ou externe \xE0 l\u2019organisme)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_06
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.2"
+      ref_id: EXI_M1_06
+      description: "L\u2019application recense les biens supports associ\xE9s \xE0\
+        \ chaque valeur m\xE9tier d\xE9finie. Pour chaque bien support, l\u2019utilisateur\
+        \ saisit sa d\xE9nomination et sa description d\xE9taill\xE9e. A ce bien support,\
+        \ est associ\xE9e une entit\xE9 ou une personne propri\xE9taire (interne ou\
+        \ externe \xE0 l\u2019organisme)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_07
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.2"
+      ref_id: EXI_M1_07
+      description: "L\u2019utilisateur peut ajouter, modifier, supprimer des \xE9\
+        l\xE9ments du p\xE9rim\xE8tre m\xE9tier technique."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_08
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.2"
+      ref_id: EXI_M1_08
+      description: "L\u2019application pr\xE9voit d\u2019\xE9diter, d\u2019importer\
+        \ ou d\u2019exporter les \xE9l\xE9ments du p\xE9rim\xE8tre m\xE9tier et technique."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_08-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.2"
+      ref_id: EXI_M1_08-opt
+      description: "(Optionnel) Des options de filtre sont propos\xE9es (ex : ne faire\
+        \ apparaitre que les biens supports associ\xE9s \xE0 une valeur m\xE9tier\
+        \ choisie)."
+      annotation: Un exemple figure en p.22-23 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-1
+      ref_id: "Activit\xE9 1.3"
+      name: "Identifier les \xE9v\xE9nements redout\xE9s et \xE9valuer leur niveau\
+        \ de gravit\xE9"
+      description: "(Cf. fiche m\xE9thode n\xB03 : \xE9valuer la gravit\xE9 des impacts\
+        \ des \xE9v\xE9nements redout\xE9s)"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_09
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      ref_id: EXI_M1_09
+      description: "L\u2019application pr\xE9voit d\u2019ajouter, modifier et supprimer\
+        \ des \xE9v\xE9nements redout\xE9s."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_10
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      ref_id: EXI_M1_10
+      description: "L\u2019application permet d\u2019associer \xE0 chaque valeur m\xE9\
+        tier un ou plusieurs \xE9v\xE9nements redout\xE9s."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_11
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      ref_id: EXI_M1_11
+      description: "L\u2019application pr\xE9voit une \xE9chelle de gravit\xE9 d\xE9\
+        crivant des niveaux et pour chacun d\u2019entre eux une description. Des fonctionnalit\xE9\
+        s permettent la cr\xE9ation, la mise \xE0 jour et la suppression d\u2019\xE9\
+        chelles de gravit\xE9."
+      annotation: Un exemple figure en p.26 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_12
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      ref_id: EXI_M1_12
+      description: "A une valeur m\xE9tier et un \xE9v\xE9nement redout\xE9 peuvent\
+        \ \xEAtre associ\xE9s un ou plusieurs impacts (par exemple : juridique, financier,\
+        \ image)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_13
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      ref_id: EXI_M1_13
+      description: "L\u2019application permet d\u2019associer \xE0 chaque couple valeur\
+        \ m\xE9tier / \xE9v\xE9nement redout\xE9 un niveau de gravit\xE9 de l\u2019\
+        \xE9chelle de gravit\xE9."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_14
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      ref_id: EXI_M1_14
+      description: "L'application permet de tracer les justifications des impacts\
+        \ (colonne suppl\xE9mentaire, champ texte, etc.)"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_15
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      ref_id: EXI_M1_15
+      description: "L'application permet d'ajouter un \xE9v\xE9nement redout\xE9 non\
+        \ li\xE9 \xE0 une valeur m\xE9tier, pour inclure dans l'analyse des risques\
+        \ des risques non-intentionnels par exemple. L\u2019estimation de la vraisemblance\
+        \ de ces risques s\u2019effectuera en mode express."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_16
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.3"
+      ref_id: EXI_M1_16
+      description: "L\u2019application pr\xE9voit d\u2019\xE9diter ou d\u2019exporter\
+        \ les \xE9v\xE8nements redout\xE9s."
+      annotation: Un exemple figure en p.27 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-1
+      ref_id: "Activit\xE9 1.4"
+      name: "D\xE9terminer le socle de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_17
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_17
+      description: "L\u2019application permet \xE0 l\u2019utilisateur de renseigner\
+        \ lui-m\xEAme les r\xE9f\xE9rentiels et les exigences de s\xE9curit\xE9 associ\xE9\
+        es."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_17-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_17-opt
+      description: "(Optionnel) L\u2019utilisateur peut importer des r\xE9f\xE9rentiels\
+        \ de s\xE9curit\xE9, \xE0 partir de fichiers."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_18
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_18
+      description: "Pour chaque r\xE9f\xE9rentiel de s\xE9curit\xE9, l\u2019application\
+        \ propose de s\xE9lectionner des exigences de s\xE9curit\xE9 respect\xE9es\
+        \ (\xE0 l\u2019aide, par exemple, de cases \xE0 cocher \xE0 choix multiples\
+        \ afin de permettre \xE0 l\u2019utilisateur de s\xE9lectionner/d\xE9s\xE9\
+        lectionner l\u2019int\xE9gralit\xE9 du r\xE9f\xE9rentiel ou chacune des exigences\
+        \ du r\xE9f\xE9rentiel ind\xE9pendamment, s\u2019il/elle est appliqu\xE9(e))."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_19
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_19
+      description: "L\u2019application permet \xE0 l\u2019utilisateur de rendre visible\
+        \ ou non le d\xE9tail des exigences de chaque r\xE9f\xE9rentiel de s\xE9curit\xE9\
+        \ par simple clic."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_20
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_20
+      description: "Un indicateur permet \xE0 l\u2019utilisateur de visualiser rapidement\
+        \ l\u2019\xE9tat d\u2019application des r\xE9f\xE9rentiels list\xE9s (exemple\
+        \ : indicateur de couleur : vert pour \xAB appliqu\xE9 sans restriction \xBB\
+        , orange pour \xAB appliqu\xE9 avec restrictions \xBB, rouge pour \xAB non\
+        \ appliqu\xE9 \xBB)"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_21
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_21
+      description: "Pour chaque exigence du r\xE9f\xE9rentiel, l\u2019utilisateur\
+        \ peut saisir des commentaires ou des informations de justification de la\
+        \ d\xE9rogation dans un champ texte."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_22
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_22
+      description: "L\u2019utilisateur peut ajouter, modifier, supprimer les r\xE9\
+        f\xE9rentiels de s\xE9curit\xE9. Il peut modifier leur \xE9tat d\u2019application.\
+        \ Les indicateurs peuvent \xEAtre modifi\xE9s."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_23
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_23
+      description: "L\u2019application pr\xE9voit d\u2019\xE9diter ou d\u2019exporter\
+        \ le socle de s\xE9curit\xE9."
+      annotation: "Un exemple d\u2019\xE9tat figure en p.30 du guide EBIOS Risk Manager\
+        \ v1.5."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m1_23-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -1.4"
+      ref_id: EXI_M1_23-opt
+      description: "(Optionnel) Des options de filtre sont propos\xE9es (exemple :\
+        \ ne faire apparaitre que les exigences non respect\xE9es)."
+      annotation: "Un exemple d\u2019\xE9tat figure en p.30 du guide EBIOS Risk Manager\
+        \ v1.5."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:4
+      ref_id: Atelier 2
+      name: Sources de risque
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.1"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-2
+      ref_id: "Activit\xE9 2.1"
+      name: "Identifier les sources de risque et les objectifs vis\xE9s"
+      description: "(Cf. fiche m\xE9thode n\xB04 : identifier et caract\xE9riser les\
+        \ sources de risque)"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_01
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.1"
+      ref_id: EXI_M2_01
+      description: "L\u2019application propose par d\xE9faut des cat\xE9gories g\xE9\
+        n\xE9riques de sources de risques et d\u2019objectifs vis\xE9s."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_02
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.1"
+      ref_id: EXI_M2_02
+      description: "L\u2019application permet de compl\xE9ter ou modifier ces cat\xE9\
+        gories (exemple : ajouter, supprimer, renommer une cat\xE9gorie de source\
+        \ de risque)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_03
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.1"
+      ref_id: EXI_M2_03
+      description: "L\u2019utilisateur saisit manuellement les objectifs vis\xE9s\
+        \ pour chaque source de risque identifi\xE9e."
+      annotation: Un exemple figure en p.37 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_03-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.1"
+      ref_id: EXI_M2_03-opt
+      description: "(Optionnel) L\u2019utilisateur peut importer et fusionner des\
+        \ bases de connaissances de cat\xE9gories de source de risques et d\u2019\
+        objectifs vis\xE9s, \xE0 partir de fichiers."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.2"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-2
+      ref_id: "Activit\xE9 2.2"
+      name: "Evaluer les couples source de risque/objectif vis\xE9"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_04
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.2"
+      ref_id: EXI_M2_04
+      description: "A chaque couple source de risque/objectif vis\xE9 sont associ\xE9\
+        s des crit\xE8res de caract\xE9risation comme le degr\xE9 de motivation, le\
+        \ niveau des ressources, le niveau d\u2019activit\xE9."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_05
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.2"
+      ref_id: EXI_M2_05
+      description: "L\u2019application \xE9value selon une m\xE9trique le niveau de\
+        \ pertinence du couple source de risques/objectif vis\xE9 ou permet de saisir\
+        \ directement la pertinence de chaque couple."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_06
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.2"
+      ref_id: EXI_M2_06
+      description: "L'application permet de tracer les justifications des cotations\
+        \ des pertinences (colonne suppl\xE9mentaire, champ texte, etc.)"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_07
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.2"
+      ref_id: EXI_M2_07
+      description: "L\u2019application pr\xE9voit d\u2019\xE9diter et d\u2019exporter\
+        \ les couples source de risque/objectif vis\xE9 et leur \xE9valuation."
+      annotation: Un exemple figure en p.39 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_07-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.2"
+      ref_id: EXI_M2_07-opt
+      description: "(Optionnel) Des options de filtre sont propos\xE9es (exemple :\
+        \ ne faire apparaitre que certaines sources de risque)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.3"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-2
+      ref_id: "Activit\xE9 2.3"
+      name: "S\xE9lectionner les couples source de risque/objectif vis\xE9 jug\xE9\
+        s prioritaires"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_08
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.3"
+      ref_id: EXI_M2_08
+      description: "L\u2019application propose de s\xE9lectionner les couples source\
+        \ de risque/objectif vis\xE9 retenus pour la suite de l\u2019analyse."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_09
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.3"
+      ref_id: EXI_M2_09
+      description: "L\u2019application permet de repr\xE9senter les couples source\
+        \ de risque/objectif vis\xE9 sur des cartographies visuelles de type radar."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_09-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.3"
+      ref_id: EXI_M2_09-opt
+      description: "(Optionnel) Des options de filtre sont propos\xE9es (exemple :\
+        \ ne faire apparaitre que des \xE9l\xE9ments associ\xE9s \xE0 certaines cat\xE9\
+        gories)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m2_10
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -2.3"
+      ref_id: EXI_M2_10
+      description: "L'application permet de faire le rapprochement entre les \xE9\
+        v\xE9nements redout\xE9s retenus lors de l'atelier 1 et les couples SR/OV\
+        \ retenus lors de l'atelier 2."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:4
+      ref_id: Atelier 3
+      name: " Sc\xE9narios strat\xE9giques"
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-3
+      ref_id: "Activit\xE9 3.1"
+      name: "Construire la cartographie de dangerosit\xE9 num\xE9rique de l\u2019\xE9\
+        cosyst\xE8me"
+      description: "(Cf. fiche m\xE9thode n\xB05 : construire la cartographie de dangerosit\xE9\
+        \ num\xE9rique de l\u2019\xE9cosyst\xE8me)"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_01
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_01
+      description: "L\u2019application propose par d\xE9faut des cat\xE9gories g\xE9\
+        n\xE9riques de parties prenantes tant internes qu\u2019externes (par exemple,\
+        \ les parties prenantes externes pourront \xEAtre de type clients, fournisseurs,\
+        \ partenaires)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_02
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_02
+      description: "L\u2019utilisateur peut ajouter, modifier, supprimer les cat\xE9\
+        gories des parties prenantes."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_03-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_03-opt
+      description: "(Optionnel) L\u2019application permet d\u2019importer et fusionner\
+        \ des bases de connaissances de cat\xE9gories de parties prenantes"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_04
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_04
+      description: "L\u2019utilisateur recense les parties prenantes de l\u2019\xE9\
+        cosyst\xE8me de l\u2019objet \xE9tudi\xE9. Chaque partie prenante est caract\xE9\
+        ris\xE9e par un nom, une description et est associ\xE9e \xE0 une cat\xE9gorie\
+        \ (cf. EXI_M3_01)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_05
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_05
+      description: "A chaque partie prenante de l\u2019\xE9cosyst\xE8me sont associ\xE9\
+        es deux valeurs, correspondant au niveau de dangerosit\xE9 initial et r\xE9\
+        siduel de celle-ci."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_06
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_06
+      description: "L\u2019application permet de calculer le niveau de dangerosit\xE9\
+        \ initial de chaque partie prenante sur la base de crit\xE8res et de m\xE9\
+        triques d\u2019\xE9valuation"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_07
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_07
+      description: "L\u2019application propose par d\xE9faut une grille d\u2019\xE9\
+        valuation sur la base des quatre crit\xE8res suivants : d\xE9pendance, p\xE9\
+        n\xE9tration, maturit\xE9 SSI, confiance."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_08
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_08
+      description: "L\u2019ajout, la modification, la suppression des m\xE9triques\
+        \ de cotation est rendue possible."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_08-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_08-opt
+      description: "(Optionnel) L\u2019application permet d\u2019importer et fusionner\
+        \ des bases de connaissances contenant des crit\xE8res et m\xE9triques d\u2019\
+        \xE9valuation de la dangerosit\xE9."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_09
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_09
+      description: "Le niveau de dangerosit\xE9 d\u2019une partie prenante est calcul\xE9\
+        \ selon la formule : (D\xE9pendance x P\xE9n\xE9tration) / (Maturit\xE9 SSI\
+        \ x Confiance). La formule de calcul du niveau de dangerosit\xE9 peut \xEA\
+        tre modifi\xE9e afin de pond\xE9rer chacun des crit\xE8res si n\xE9cessaire."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_10
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_10
+      description: "L'application permet de tracer les justifications des cotations\
+        \ des niveaux de dangerosit\xE9 (colonne suppl\xE9mentaire, champ texte, etc.)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_11
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_11
+      description: "La valeur du niveau de dangerosit\xE9 initial de chaque partie\
+        \ prenante peut \xEAtre \xAB forc\xE9e \xBB."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_12
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_12
+      description: "Une fonctionnalit\xE9 rend possible la saisie des valeurs de seuils\
+        \ correspondant \xE0 la zone de danger, \xE0 la zone de contr\xF4le et \xE0\
+        \ la zone de veille."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_13
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_13
+      description: "L\u2019application permet de repr\xE9senter le niveau de dangerosit\xE9\
+        \ des parties prenantes sur une cartographie visuelle de type radar (appel\xE9\
+        e \xAB cartographie de dangerosit\xE9 initiale \xBB)."
+      annotation: Un exemple figure en p.47 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_14
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_14
+      description: "L\u2019application permet de s\xE9lectionner les parties prenantes\
+        \ estim\xE9es comme critiques par l\u2019utilisateur. Les parties prenantes\
+        \ consid\xE9r\xE9es comme critiques peuvent \xEAtre distingu\xE9es des autres,\
+        \ visuellement, sur la cartographie de dangerosit\xE9."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_15
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_15
+      description: "L\u2019utilisateur peut ajouter, modifier, supprimer les parties\
+        \ prenantes, les valeurs des crit\xE8res d\u2019\xE9valuation et les valeurs\
+        \ de seuil des diff\xE9rentes zones. L\u2019application devra permettre de\
+        \ distinguer visuellement une modification des valeurs faite de mani\xE8re\
+        \ intentionnelle par l\u2019utilisateur."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_16
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_16
+      description: "Si l\u2019atelier 4 n\u2019est pas r\xE9alis\xE9 (par exemple\
+        \ une \xE9tude pr\xE9liminaire de risque), proposer la pertinence du couple\
+        \ SR/OV associ\xE9 au sc\xE9nario strat\xE9gique pour obtenir la vraisemblance.\
+        \ L'utilisateur aura la possibilit\xE9 de r\xE9\xE9valuer le niveau."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_17
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_17
+      description: "L\u2019application pr\xE9voit d\u2019\xE9diter et d\u2019exporter\
+        \ la cartographie de dangerosit\xE9 initiale."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_17-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -3.1"
+      ref_id: EXI_M3_17-opt
+      description: "(Optionnel) Des options de filtre sont propos\xE9es."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-3
+      ref_id: Action 3.2
+      name: "Elaborer des sc\xE9narios strat\xE9giques"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.2
+      ref_id: EXI_M3_18
+      description: "L\u2019application permet de construire des sc\xE9narios strat\xE9\
+        giques et de distinguer les chemins d\u2019attaque qui les constituent. Pour\
+        \ chaque sc\xE9nario strat\xE9gique peuvent \xEAtre associ\xE9s un nom et\
+        \ une description dans des champs texte. Il en est de m\xEAme pour les chemins\
+        \ d\u2019attaque des sc\xE9narios."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_19
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.2
+      ref_id: EXI_M3_19
+      description: "Chaque sc\xE9nario strat\xE9gique est associ\xE9 \xE0 un couple\
+        \ source de risque / objectif vis\xE9 s\xE9lectionn\xE9 dans l\u2019atelier\
+        \ 2. Il se pr\xE9sente sous la forme d\u2019un s\xE9quencement d\u2019\xE9\
+        v\xE9nements soit li\xE9s \xE0 une partie prenante de l\u2019\xE9cosyst\xE8\
+        me (\xE9v\xE9nements interm\xE9diaires), soit li\xE9s \xE0 une valeur m\xE9\
+        tier de l\u2019objet de l\u2019\xE9tude (\xE9v\xE9nements redout\xE9s). L\u2019\
+        application facilite la construction des sc\xE9narios en permettant d\u2019\
+        associer chaque \xE9v\xE9nement interm\xE9diaire \xE0 une partie prenante\
+        \ (liste, cf. activit\xE9 3.1) et chaque \xE9v\xE9nement redout\xE9 \xE0 une\
+        \ valeur m\xE9tier (liste, cf. atelier 1)."
+      annotation: Des exemples figurent en p.50-51 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_20-opt
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.2
+      ref_id: EXI_M3_20-opt
+      description: "(Optionnel) L\u2019espace de construction des sc\xE9narios peut\
+        \ \xEAtre rempli gr\xE2ce \xE0 des glisser-d\xE9poser d\u2019\xE9v\xE8nements\
+        \ propos\xE9s sur le c\xF4t\xE9 de l\u2019espace de travail."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_21
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.2
+      ref_id: EXI_M3_21
+      description: "La gravit\xE9 d\u2019un sc\xE9nario strat\xE9gique correspond\
+        \ \xE0 la gravit\xE9 des \xE9v\xE9nements redout\xE9s impliqu\xE9s dans les\
+        \ chemins d\u2019attaque du sc\xE9nario."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_22
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.2
+      ref_id: EXI_M3_22
+      description: "Il est possible de \xAB forcer \xBB le niveau de gravit\xE9 d\u2019\
+        un sc\xE9nario strat\xE9gique."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_23
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.2
+      ref_id: EXI_M3_23
+      description: "L\u2019application pr\xE9voit d\u2019\xE9diter et d\u2019exporter\
+        \ les sc\xE9narios strat\xE9giques avec leurs chemins d\u2019attaque associ\xE9\
+        s."
+      annotation: Un exemple figure en p.52 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_23-opt
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.2
+      ref_id: EXI_M3_23-opt
+      description: "(Optionnel) Des options de filtre peuvent \xEAtre propos\xE9es."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-3
+      ref_id: Action 3.3
+      name: "D\xE9finir des mesures de s\xE9curit\xE9 sur l\u2019\xE9cosyst\xE8me"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_24
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.3
+      ref_id: EXI_M3_24
+      description: "Il est possible d\u2019associer \xE0 chaque partie prenante des\
+        \ mesures de s\xE9curit\xE9 ou un niveau cible \xE0 atteindre, en lien avec\
+        \ les crit\xE8res d\u2019\xE9valuation retenus pour l\u2019\xE9tude (par exemple\
+        \ : abaisser le niveau \xAB p\xE9n\xE9tration \xBB de la partie prenante de\
+        \ 4 \xE0 3)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_25
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.3
+      ref_id: EXI_M3_25
+      description: "A chaque partie prenante de l\u2019\xE9cosyst\xE8me est associ\xE9\
+        \ un niveau de dangerosit\xE9 r\xE9siduel (suite \xE0 l\u2019application des\
+        \ mesures de s\xE9curit\xE9). Cette valeur est calcul\xE9e selon la formule\
+        \ choisie pour \xE9tablir le niveau de dangerosit\xE9 initial."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_26
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.3
+      ref_id: EXI_M3_26
+      description: "L\u2019application permet de repr\xE9senter le niveau de dangerosit\xE9\
+        \ r\xE9siduel des parties prenantes sur une cartographie visuelle de type\
+        \ radar (appel\xE9e \xAB cartographie de dangerosit\xE9 r\xE9siduelle \xBB\
+        ), selon le m\xEAme mod\xE8le que la cartographie de dangerosit\xE9 initiale."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_27
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.3
+      ref_id: EXI_M3_27
+      description: "Les valeurs de seuils correspondant \xE0 la zone de danger, \xE0\
+        \ la zone de contr\xF4le et \xE0 la zone de veille sont identiques sur les\
+        \ cartographies de dangerosit\xE9 initiale et r\xE9siduelle."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_28
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.3
+      ref_id: EXI_M3_28
+      description: "L\u2019application pr\xE9voit d\u2019\xE9diter et d\u2019exporter\
+        \ la cartographie de dangerosit\xE9 r\xE9siduelle, ainsi que le tableau de\
+        \ synth\xE8se des mesures de s\xE9curit\xE9 sur l\u2019\xE9cosyst\xE8me."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m3_28-opt
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:action-3.3
+      ref_id: EXI_M3_28-opt
+      description: "(Optionnel) Des options de filtre peuvent \xEAtre propos\xE9es."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:4
+      ref_id: Atelier 4
+      name: "Sc\xE9narios op\xE9rationnels"
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.1"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-4
+      ref_id: "Activit\xE9 4.1"
+      name: "Elaborer les sc\xE9narios op\xE9rationnels"
+      description: "(Cf. fiche m\xE9thode n\xB07 : construire des graphes d\u2019\
+        attaque)"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_01
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.1"
+      ref_id: EXI_M4_01
+      description: "L\u2019application permet de construire des sc\xE9narios op\xE9\
+        rationnels associ\xE9s aux sc\xE9narios strat\xE9giques. Pour chaque sc\xE9\
+        nario op\xE9rationnel, il est possible d\u2019associer un nom, une description\
+        \ dans des champs texte et un sc\xE9nario strat\xE9gique (via une liste d\xE9\
+        roulante par exemple). Il en est de m\xEAme pour les modes op\xE9ratoires\
+        \ des sc\xE9narios."
+      annotation: Un exemple figure en p.63 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_02-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.1"
+      ref_id: EXI_M4_02-opt
+      description: "La construction des sc\xE9narios op\xE9rationnels devra \xEAtre\
+        \ simple et intuitive. Par exemple, l\u2019espace de construction des sc\xE9\
+        narios pourra \xEAtre rempli gr\xE2ce \xE0 des glisser-d\xE9poser d\u2019\
+        actions \xE9l\xE9mentaires propos\xE9es sur le c\xF4t\xE9 de l\u2019espace\
+        \ de travail."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_03
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.1"
+      ref_id: EXI_M4_03
+      description: "L\u2019application propose par d\xE9faut une liste d\u2019actions\
+        \ \xE9l\xE9mentaires, organis\xE9es selon des cat\xE9gories d\u2019actions\
+        \ d\u2019une s\xE9quence d\u2019attaque type. Il est possible de modifier\
+        \ cette base (exemple : modifier l\u2019intitul\xE9 d\u2019une action \xE9\
+        l\xE9mentaire ou d\u2019une phase de la s\xE9quence d\u2019attaque, ajouter\
+        \ une phase et l\u2019associer \xE0 des actions \xE9l\xE9mentaires existantes,\
+        \ cr\xE9er des actions \xE9l\xE9mentaires et les associer \xE0 une phase,\
+        \ ajouter une cat\xE9gorie d\u2019actions \xE9l\xE9mentaires, etc.)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_04-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.1"
+      ref_id: EXI_M4_04-opt
+      description: "(Optionnel) Il est possible d\u2019importer et fusionner des bases\
+        \ de connaissances structur\xE9es d\u2019actions \xE9l\xE9mentaires associ\xE9\
+        es \xE0 une s\xE9quence d\u2019attaque type."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_05
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.1"
+      ref_id: EXI_M4_05
+      description: "Chaque action \xE9l\xE9mentaire d\u2019un sc\xE9nario op\xE9rationnel\
+        \ est associ\xE9e \xE0 un bien support sur lequel elle s\u2019applique."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_06
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.1"
+      ref_id: EXI_M4_06
+      description: "L'application permet d'ajouter des op\xE9rateurs ET et OU dans\
+        \ un mode op\xE9ratoire (ET : il faut toutes les AE pr\xE9c\xE9dentes pour\
+        \ enchainer l\u2019AE suivante, OU : 1 des AE suffit pour enchainer l\u2019\
+        action suivante)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-4
+      ref_id: "Activit\xE9 4.2"
+      name: "Evaluer la vraisemblance des sc\xE9narios op\xE9rationnels"
+      description: "(Cf. fiche m\xE9thode n\xB0 8 : \xE9valuer la vraisemblance des\
+        \ sc\xE9narios op\xE9rationnels)"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_07
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_07
+      description: "L\u2019application permet de s\xE9lectionner la m\xE9thode d\u2019\
+        \xE9valuation de vraisemblance souhait\xE9e (expresse, standard, avanc\xE9\
+        e) qui s\u2019appliquera \xE0 l\u2019ensemble des sc\xE9narios op\xE9rationnels\
+        \ de l\u2019analyse de risque. Selon le choix de la m\xE9thode d\u2019\xE9\
+        valuation, l\u2019application propose les crit\xE8res et m\xE9triques de cotation\
+        \ associ\xE9s (voir ci-apr\xE8s)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_07-1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_07
+      ref_id: EXI_M4_07-1
+      description: "1) M\xE9thode expresse ;"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_07-2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_07
+      ref_id: EXI_M4_07-2
+      description: "2) M\xE9thode standard ;"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_07-3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_07
+      ref_id: EXI_M4_07-3
+      description: "3) M\xE9thode avanc\xE9e."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_08
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_08
+      description: "L\u2019application permet de changer \xE0 tout moment (en cours\
+        \ d\u2019analyse) la m\xE9thode d\u2019\xE9valuation de la vraisemblance des\
+        \ sc\xE9narios op\xE9rationnels."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_09
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_09
+      description: "M\xE9thode expresse : l\u2019application permet d\u2019associer\
+        \ une vraisemblance globale au sc\xE9nario, et si l\u2019utilisateur le souhaite\
+        \ \xE0 chacun des modes op\xE9ratoires du sc\xE9nario."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_10
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_10
+      description: "M\xE9thode standard : l\u2019application permet d\u2019associer\
+        \ une probabilit\xE9 de succ\xE8s \xE0 chaque action \xE9l\xE9mentaire."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_11
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_11
+      description: "M\xE9thode avanc\xE9e : l\u2019application permet d\u2019associer\
+        \ une probabilit\xE9 de succ\xE8s et une difficult\xE9 technique \xE0 chaque\
+        \ action \xE9l\xE9mentaire."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_12
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_12
+      description: "L\u2019application propose par d\xE9faut des grilles g\xE9n\xE9\
+        riques de cotation de la vraisemblance globale, de la probabilit\xE9 de succ\xE8\
+        s et de la difficult\xE9 technique. Il est possible de modifier ces grilles\
+        \ (exemple : modifier l\u2019intitul\xE9 des classes de vraisemblance, modifier\
+        \ l\u2019intitul\xE9 ou le seuil des niveaux de vraisemblance)."
+      annotation: "Un exemple d\u2019\xE9chelle de vraisemblance globale figure en\
+        \ p.66 du guide EBIOS Risk Manager v1.5. Des m\xE9triques d\xE9taill\xE9es\
+        \ sont propos\xE9es dans la fiche m\xE9thode n\xB08."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_13-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_13-opt
+      description: "(Optionnel) Il est possible d\u2019importer des m\xE9triques de\
+        \ cotation."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_14
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_14
+      description: "M\xE9thodes standard et avanc\xE9e : l\u2019application propose\
+        \ des algorithmes de calcul de la vraisemblance globale d\u2019un sc\xE9nario\
+        \ \xE0 partir de la cotation des actions \xE9l\xE9mentaires, selon le choix\
+        \ de la m\xE9thode d\u2019\xE9valuation standard/avanc\xE9e. Si plusieurs\
+        \ algorithmes de calculs sont propos\xE9s, l\u2019utilisateur peut s\xE9lectionner\
+        \ l\u2019algorithme de son choix dans une liste d\xE9roulante par exemple."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_15
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_15
+      description: "L\u2019application permet de faciliter la cotation des actions\
+        \ \xE9l\xE9mentaires ou des modes op\xE9ratoires en \xE9ditant une base de\
+        \ connaissances telle que celle qui figure \xE0 la fin de la fiche m\xE9thode\
+        \ n\xB08. L\u2019application permet de modifier cette base de connaissance."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_16
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_16
+      description: "La vraisemblance globale d\u2019un sc\xE9nario op\xE9rationnel\
+        \ peut \xEAtre \xAB forc\xE9e \xBB."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_17
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_17
+      description: "M\xE9thodes standard et avanc\xE9e : l\u2019application permet\
+        \ d\u2019identifier et visualiser les actions \xE9l\xE9mentaires les plus\
+        \ critiques (les plus probables et/ou faciles), ainsi que le mode op\xE9ratoire\
+        \ le plus vraisemblable (celui de moindre effort)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_18
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_18
+      description: "L\u2019application permet d\u2019\xE9diter et d\u2019exporter\
+        \ les sc\xE9narios op\xE9rationnels, ainsi qu\u2019un tableau de synth\xE8\
+        se des sc\xE9narios, et si l\u2019utilisateur le souhaite, des modes op\xE9\
+        ratoires."
+      annotation: "Des exemples figurent en p.67 du guide EBIOS Risk Manager v1.5\
+        \ et au chapitre 4 de la fiche m\xE9thode n\xB08."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m4_18-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -4.2"
+      ref_id: EXI_M4_18-opt
+      description: "(Optionnel) Des options de filtre peuvent \xEAtre propos\xE9es\
+        \ (par exemple : ne faire apparaitre que les sc\xE9narios dont la vraisemblance\
+        \ d\xE9passe un seuil donn\xE9)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:4
+      ref_id: Atelier 5
+      name: ' Traitement du risque'
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.1"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-5
+      ref_id: "Activit\xE9 5.1"
+      name: "R\xE9aliser la synth\xE8se des sc\xE9narios de risque"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_01
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.1"
+      ref_id: EXI_M5_01
+      description: "L\u2019application permet de visualiser la cartographie du risque\
+        \ initial des sc\xE9narios de risque selon leur gravit\xE9 et vraisemblance\
+        \ globale."
+      annotation: Un exemple figure en p.72 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_02
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.1"
+      ref_id: EXI_M5_02
+      description: "L\u2019application permet d\u2019\xE9diter et d\u2019exporter\
+        \ la cartographie du risque initial, ainsi que le tableau de synth\xE8se des\
+        \ sc\xE9narios de risque."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_02-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.1"
+      ref_id: EXI_M5_02-opt
+      description: "(Optionnel) Des options de filtre sont propos\xE9es (par exemple\
+        \ n\u2019exporter que les sc\xE9narios relatifs \xE0 une cat\xE9gorie de source\
+        \ de risque et de gravit\xE9 sup\xE9rieure \xE0 un seuil donn\xE9)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_03-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.1"
+      ref_id: EXI_M5_03-opt
+      description: "(Optionnel) L\u2019application permet d\u2019\xE9diter une matrice\
+        \ de tra\xE7abilit\xE9/couverture entre les \xE9v\xE9nements redout\xE9s de\
+        \ l\u2019atelier 1 et les sc\xE9narios de risque trait\xE9s dans les ateliers\
+        \ 3 et 4. L\u2019application met en \xE9vidence les \xE9ventuels \xE9v\xE9\
+        nements redout\xE9s (et valeurs m\xE9tier associ\xE9es) qui n\u2019apparaissent\
+        \ dans aucun sc\xE9nario de risque."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.2"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-5
+      ref_id: "Activit\xE9 5.2"
+      name: "D\xE9finir la strat\xE9gie de traitement du risque et les mesures de\
+        \ s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_04
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.2"
+      ref_id: EXI_M5_04
+      description: "Pour chaque sc\xE9nario de risque, on associe un indicateur de\
+        \ couleur repr\xE9sentant la strat\xE9gie de traitement du risque (exemple\
+        \ : vert pour \xAB acceptable en l\u2019\xE9tat \xBB orange pour \xAB tol\xE9\
+        rable sous contr\xF4le \xBB, rouge pour \xAB inacceptable \xBB)."
+      annotation: Un exemple figure en p.74-75 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_04-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.2"
+      ref_id: EXI_M5_04-opt
+      description: (Optionnel) La coloration est rendue possible directement, par
+        clic, depuis la cartographie du risque initial.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_05
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.2"
+      ref_id: EXI_M5_05
+      description: "L\u2019application permet d\u2019associer aux sc\xE9narios de\
+        \ risque des mesures de s\xE9curit\xE9. Ces mesures s\u2019appliquent \xE0\
+        \ l\u2019objet de l\u2019\xE9tude (valeur m\xE9tier, bien support) ou \xE0\
+        \ des parties prenantes de l\u2019\xE9cosyst\xE8me."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.2"
+      ref_id: EXI_M5_06
+      description: "L\u2019application permet d\u2019associer \xE0 chaque mesure de\
+        \ s\xE9curit\xE9 :"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06-1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06
+      ref_id: EXI_M5_06-1
+      description: "- une cat\xE9gorie (gouvernance, protection, d\xE9fense, r\xE9\
+        silience : cf. fiche m\xE9thode n\xB09 : structurer les mesures de traitement\
+        \ du risque),"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06-2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06
+      ref_id: EXI_M5_06-2
+      description: " - l\u2019\xE9l\xE9ment concern\xE9 (valeur m\xE9tier, bien support,\
+        \ partie prenante d\u2019\xE9cosyst\xE8me),"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06-3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06
+      ref_id: EXI_M5_06-3
+      description: '- un responsable,'
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06-4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06
+      ref_id: EXI_M5_06-4
+      description: "- un co\xFBt,"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06-5
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06
+      ref_id: EXI_M5_06-5
+      description: "- une \xE9ch\xE9ance"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06-6
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06
+      ref_id: EXI_M5_06-6
+      description: "- un pourcentage d\u2019avancement de la mise en \u0153uvre"
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06-7
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_06
+      ref_id: EXI_M5_06-7
+      description: '- des commentaires additionnels'
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node154
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.2"
+      description: "L\u2019ensemble des mesures de s\xE9curit\xE9 est ainsi formalis\xE9\
+        \ dans un plan de traitement du risque (sous la forme d\u2019un tableau par\
+        \ exemple)."
+      annotation: Un exemple figure en p.77 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_07
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.2"
+      ref_id: EXI_M5_07
+      description: "L\u2019application permet l\u2019\xE9dition et l\u2019exportation\
+        \ de tout ou partie du plan de traitement du risque. La liste des mesures\
+        \ peut \xEAtre tri\xE9e ou filtr\xE9e par cat\xE9gorie, responsable, co\xFB\
+        t, charge estim\xE9e, \xE9ch\xE9ance, priorit\xE9, etc."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.3"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:atelier-5
+      ref_id: "Activit\xE9 5.3"
+      name: "Evaluer et documenter les risques r\xE9siduels"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_08
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.3"
+      ref_id: EXI_M5_08
+      description: "A chaque sc\xE9nario de risque sont associ\xE9es une gravit\xE9\
+        \ et une vraisemblance r\xE9siduelles suite \xE0 l\u2019application des mesures\
+        \ de s\xE9curit\xE9. Cette r\xE9\xE9valuation s\u2019effectue soit \xE0 partir\
+        \ de la cartographie du risque initial (en \xAB glissant \xBB manuellement\
+        \ les risques concern\xE9s de leur position initiale gravit\xE9/vraisemblance\
+        \ \xE0 la position r\xE9siduelle), soit depuis le tableau de synth\xE8se des\
+        \ sc\xE9narios de risque (colonnes gravit\xE9 et vraisemblance r\xE9siduelles).\
+        \ La cartographie du risque r\xE9siduelle et le tableau de synth\xE8se des\
+        \ sc\xE9narios de risque sont mis \xE0 jour automatiquement selon les modifications\
+        \ apport\xE9es \xE0 l\u2019un ou \xE0 l\u2019autre."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_09
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.3"
+      ref_id: EXI_M5_09
+      description: "Il est possible de \xAB forcer \xBB les valeurs de gravit\xE9\
+        \ et vraisemblance r\xE9siduelles."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_10
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.3"
+      ref_id: EXI_M5_10
+      description: "L\u2019application permet de visualiser la cartographie du risque\
+        \ r\xE9siduel repr\xE9sentant les sc\xE9narios de risque selon leur gravit\xE9\
+        \ et vraisemblance r\xE9siduelles. Les \xE9chelles de repr\xE9sentation sont\
+        \ identiques \xE0 celles de la cartographie du risque initial."
+      annotation: Un exemple figure en p.80 du guide EBIOS Risk Manager v1.5.
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_11
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.3"
+      ref_id: EXI_M5_11
+      description: "L\u2019application permet d\u2019\xE9diter et d\u2019exporter\
+        \ la cartographie du risque r\xE9siduel, ainsi que le tableau de synth\xE8\
+        se associ\xE9."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_12
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.3"
+      ref_id: EXI_M5_12
+      description: "L\u2019application permet de documenter les risques r\xE9siduels,\
+        \ selon le mod\xE8le propos\xE9 en page 78 du guide EBIOS Risk Manager v1.5.\
+        \ L\u2019application permet d\u2019\xE9diter et d\u2019exporter la liste des\
+        \ risques r\xE9siduels."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_m5_12-opt
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:activit\xE9\
+        -5.3"
+      ref_id: EXI_M5_12-opt
+      description: "(Optionnel) Des options de filtre sont propos\xE9es (ex : n\u2019\
+        exporter que les risques r\xE9siduels relatifs \xE0 une cat\xE9gorie d\u2019\
+        impact et de gravit\xE9 sup\xE9rieure \xE0 un seuil donn\xE9)."
+      implementation_groups:
+      - Standalone
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "Exigences de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5
+      ref_id: '5.1'
+      name: "M\xE9canismes d'identification et d'authentification et de cloisonnement\
+        \ des profils"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s1_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      ref_id: EXI_S1_01
+      description: "L\u2019application devra pr\xE9voir un compte d\u2019administration\
+        \ d\xE9di\xE9 et distinct des comptes utilisateurs. Le compte administrateur\
+        \ permet d\u2019acc\xE9der aux ressources et interfaces d\u2019administration,\
+        \ qui ne seront visible que par l\u2019administrateur."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s1_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      ref_id: EXI_S1_02
+      description: "Le compte administrateur devra permettre la gestion des diff\xE9\
+        rents profils utilisateurs tel qu\u2019ils sont d\xE9crits dans la m\xE9thode\
+        \ EBIOS Risk Manager."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s1_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      ref_id: EXI_S1_03
+      description: "La cr\xE9ation des profils devra \xEAtre nominative, non g\xE9\
+        n\xE9rique et bas\xE9e sur un identifiant unique et individuel"
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s1_04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      ref_id: EXI_S1_04
+      description: "L\u2019authentification des profils administrateurs et utilisateurs\
+        \ devra \xEAtre \xE0 minima bas\xE9e sur l\u2019usage de mot de passe."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s1_05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      ref_id: EXI_S1_05
+      description: "L\u2019attribution des droits en lecture et/ou \xE9criture devra\
+        \ \xEAtre param\xE9trable par profils utilisateurs et par analyses de risques."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s1_06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      ref_id: EXI_S1_06
+      description: "La gestion des droits doit permettre de g\xE9rer le besoin d\u2019\
+        en connaitre au niveau d\u2019un utilisateur ou groupe d\u2019utilisateurs.\
+        \ A minima, la granularit\xE9 des autorisations permettra de restreindre l\u2019\
+        acc\xE8s \xE0 une analyse, un groupe d\u2019analyse ou \xE0 toutes les analyses\
+        \ de risques."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s1_07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      ref_id: EXI_S1_07
+      description: "La validation de l\u2019authentification sur la base d\u2019un\
+        \ couple identifiant/authentifiant devra \xEAtre r\xE9alis\xE9e par la partie\
+        \ serveur de l\u2019application ou par l\u2019interm\xE9diaire d\u2019un annuaire\
+        \ externe \xE0 l\u2019application."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s1_08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.1
+      ref_id: EXI_S1_08
+      description: "L\u2019application doit assurer la confidentialit\xE9 et l\u2019\
+        int\xE9grit\xE9 des informations d\u2019identification et d\u2019authentification\
+        \ des profils administrateurs et utilisateurs."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5
+      ref_id: '5.2'
+      name: "Confidentialit\xE9 des donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s2_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.2
+      ref_id: EXI_S2_01
+      description: "L\u2019application devra garantir la confidentialit\xE9 et l\u2019\
+        int\xE9grit\xE9 des donn\xE9es qui y sont stock\xE9es."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s2_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.2
+      ref_id: EXI_S2_02
+      description: "L\u2019application devra garantir la confidentialit\xE9 et l\u2019\
+        int\xE9grit\xE9 des donn\xE9es lors de leurs transits."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s2_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.2
+      ref_id: EXI_S2_03
+      description: "La mise en \u0153uvre des m\xE9canismes de s\xE9curit\xE9 lors\
+        \ du transit des donn\xE9es devra \xEAtre conformes aux guides de bonnes pratiques\
+        \ de l\u2019ANSSI relatifs aux protocoles TLS, IPSEC ou SSH (Publications\
+        \ r\xE9seaux sur https://cyber.gouv.fr)."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5
+      ref_id: '5.3'
+      name: Journalisation
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.3
+      ref_id: EXI_S3_01
+      description: "L\u2019application devra mettre en \u0153uvre les m\xE9canismes\
+        \ de journalisation et d\u2019imputabilit\xE9 des actions effectu\xE9es par\
+        \ chacun des profils administrateurs et utilisateurs."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.3
+      ref_id: EXI_S3_02
+      description: "Une journalisation des \xE9v\xE8nements d\u2019identification\
+        \ et d\u2019authentification li\xE9s aux profils administrateurs et utilisateurs\
+        \ devra \xEAtre mise en \u0153uvre. Cette journalisation peut \xEAtre locale\
+        \ au serveur applicatif ou d\xE9port\xE9e."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.3
+      ref_id: EXI_S3_03
+      description: "Si l\u2019identification et l\u2019authentification des profils\
+        \ sont g\xE9r\xE9es par un annuaire externe \xE0 l\u2019application, alors\
+        \ la journalisation des profils administrateurs et utilisateurs devra \xEA\
+        tre recommand\xE9e dans les conditions g\xE9n\xE9rales d\u2019emploi et d\u2019\
+        usage de la solution logicielle (cf. \xA7 2.3)."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.3
+      ref_id: EXI_S3_04
+      description: "Si l\u2019identification et l\u2019authentification des profils\
+        \ administrateurs et utilisateurs sont g\xE9r\xE9es par l\u2019application,\
+        \ la journalisation devra porter \xE0 minima sur les \xE9l\xE9ments suivants\
+        \ :"
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04
+      ref_id: EXI_S3_04-1
+      description: '- ouverture et fermeture de session ;'
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04
+      ref_id: EXI_S3_04-2
+      description: "- verrouillage des comptes (si cette protection est mise en \u0153\
+        uvre) ;"
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04
+      ref_id: EXI_S3_04-3
+      description: " - gestion des comptes administrateurs et utilisateurs (cr\xE9\
+        ation, suppression\nou modification) "
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04
+      ref_id: EXI_S3_04-4
+      description: "- acc\xE8s en lecture ou \xE9criture d\u2019une analyse de risques\
+        \ ;"
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04
+      ref_id: EXI_S3_04-5
+      description: '- manipulation des journaux ;'
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_04
+      ref_id: EXI_S3_04-6
+      description: "- des \xE9v\xE8nements applicatif : mont\xE9 de version, arr\xEA\
+        t, relance, etc."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s3_05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.3
+      ref_id: EXI_S3_05
+      description: "L\u2019application devra assurer la protection des donn\xE9es\
+        \ journalis\xE9es, \xE0 minima en g\xE9n\xE9rant un \xE9v\xE8nement li\xE9\
+        \ \xE0 l\u2019effacement des journaux."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5
+      ref_id: '5.4'
+      name: "Revue des politiques internes de d\xE9veloppement"
+      description: "La revue des politiques internes de d\xE9veloppement de l\u2019\
+        \xE9diteur de l\u2019application a pour objectif de promouvoir des pratiques\
+        \ \xE0 l\u2019\xE9tat de l\u2019art en mati\xE8re de d\xE9veloppement s\xE9\
+        curis\xE9 et d\u2019en identifier les \xE9carts afin d\u2019\xE9valuer la\
+        \ surface d\u2019exposition et de tendre \xE0 limiter l\u2019apparition de\
+        \ vuln\xE9rabilit\xE9s dans la solution logicielle."
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s4_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.4
+      ref_id: EXI_S4_01
+      description: "L\u2019\xE9diteur de l\u2019application devra pr\xE9senter les\
+        \ politiques et processus internes de d\xE9veloppement relevant du cloisonnement\
+        \ des environnements de d\xE9veloppement li\xE9s \xE0 l\u2019application ;"
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s4_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.4
+      ref_id: EXI_S4_02
+      description: "L\u2019\xE9diteur de l\u2019application devra pr\xE9senter les\
+        \ politiques et processus internes de d\xE9veloppement relevant de la revue\
+        \ et de l\u2019audit de code li\xE9s \xE0 l\u2019application ;"
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s4_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.4
+      ref_id: EXI_S4_03
+      description: "L\u2019\xE9diteur de l\u2019application devra pr\xE9senter les\
+        \ politiques et processus internes de d\xE9veloppement relevant du contr\xF4\
+        le d\u2019innocuit\xE9 de l\u2019application avant livraison ;"
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s4_04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.4
+      ref_id: EXI_S4_04
+      description: "L\u2019\xE9diteur de l\u2019application devra pr\xE9senter les\
+        \ politiques et processus internes de veille sur les modules et briques applicatifs\
+        \ tiers (versions, support, vuln\xE9rabilit\xE9s) li\xE9s \xE0 l\u2019application."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5
+      ref_id: '5.5'
+      name: "Maintien en conditions de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s5_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.5
+      ref_id: EXI_S5_01
+      description: "Les engagements pris par l\u2019\xE9diteur au titre des exigences\
+        \ EXI_S5_01 \xE0 EXI_S5_06 devront \xEAtre clairement sp\xE9cifi\xE9s dans\
+        \ sa politique de maintien en conditions de s\xE9curit\xE9."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s5_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.5
+      ref_id: EXI_S5_02
+      description: "L\u2019\xE9diteur de l\u2019application devra afficher sa politique\
+        \ en mati\xE8re de versions (mineures et majeures) support\xE9es et maintenues\
+        \ de l\u2019application, en fonction des syst\xE8mes d\u2019exploitation et\
+        \ des plateformes d\u2019int\xE9grations support\xE9s."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s5_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.5
+      ref_id: EXI_S5_03
+      description: "L\u2019\xE9diteur devra pr\xE9ciser si sa politique en mati\xE8\
+        re de version support\xE9es diff\xE8re selon qu\u2019il s\u2019agit de correctifs\
+        \ fonctionnels (MCO) ou de s\xE9curit\xE9 (MCS)."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s5_04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.5
+      ref_id: EXI_S5_04
+      description: "En cas de faille, de vuln\xE9rabilit\xE9 ou d\u2019incident concernant\
+        \ l\u2019application, l\u2019\xE9diteur s\u2019engage, d\xE8s qu\u2019il en\
+        \ a connaissance, \xE0 notifier le CERT-FR (www.cert.ssi.gouv.fr/contact)\
+        \ et \xE0 \xE9mettre un avis de s\xE9curit\xE9 aupr\xE8s des utilisateurs."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s5_05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.5
+      ref_id: EXI_S5_05
+      description: "L\u2019\xE9diteur devra s\u2019engager sur le d\xE9lai de correction\
+        \ maximal des failles et vuln\xE9rabilit\xE9s logicielles concernant les versions\
+        \ support\xE9es et maintenues de l\u2019application."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s5_06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.5
+      ref_id: EXI_S5_06
+      description: "D\xE8s publication d\u2019un correctif de s\xE9curit\xE9, l\u2019\
+        \xE9diteur s\u2019engage \xE0 publier un avis de s\xE9curit\xE9 \xE0 destination\
+        \ des clients finaux de l\u2019application, ainsi qu\u2019au CERT- FR."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5
+      ref_id: '5.6'
+      name: "Conditions g\xE9n\xE9rales d\u2019emploi et d\u2019usage"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s6_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.6
+      ref_id: EXI_S6_01
+      description: "L\u2019\xE9diteur devra faire apparaitre dans les conditions g\xE9\
+        n\xE9rales d\u2019emploi et d\u2019usage de l\u2019application, sous la forme\
+        \ d\u2019un encart d\u2019avertissement ou de \xAB disclaimer \xBB les exigences\
+        \ EXI_S6_02 \xE0 EXI_S6_04."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s6_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.6
+      ref_id: EXI_S6_02
+      description: "L\u2019\xE9valuation de conformit\xE9 r\xE9alis\xE9e par l\u2019\
+        Agence au titre du Label EBIOS Risk Manager se restreint aux aspects fonctionnels\
+        \ de la solution vis-\xE0-vis de la m\xE9thode EBIOS Risk Manager."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s6_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.6
+      ref_id: EXI_S6_03
+      description: "Le Label EBIOS Risk Manager ne se substitue pas aux d\xE9marches\
+        \ de certification ou de qualification, tel que d\xE9crites sur le site de\
+        \ l\u2019Agence (www.ssi.gouv.fr/visa-de-securite)."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s6_04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.6
+      ref_id: EXI_S6_04
+      description: "Le Label EBIOS Risk Manager ne garantit en aucun cas la robustesse\
+        \ de l\u2019application face \xE0 des actions malveillantes."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s6_05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.6
+      ref_id: EXI_S6_05
+      description: "Afin de d\xE9terminer les mesures de s\xE9curit\xE9 n\xE9cessaires\
+        \ \xE0 la protection de l\u2019application et des donn\xE9es qui y sont contenues,\
+        \ l\u2019\xE9diteur recommande \xE0 l\u2019utilisateur d\u2019entreprendre\
+        \ une d\xE9marche d\u2019homologation de s\xE9curit\xE9 tel que d\xE9crite\
+        \ par l\u2019Agence (https://cyber.gouv.fr/lhomologation-de-securite)."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_s6_06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:5.6
+      ref_id: EXI_S6_06
+      description: "Afin d\u2019orienter l\u2019utilisateur dans sa d\xE9marche d\u2019\
+        homologation et de s\xE9curisation de l\u2019application, l\u2019\xE9diteur\
+        \ devra faire apparaitre une matrice affichant l\u2019\xE9tat de conformit\xE9\
+        \ de l\u2019application vis-\xE0-vis des guides et bonnes pratiques (https://cyber.gouv.fr/publications)\
+        \ publi\xE9s par l\u2019Agence (tel que l\u2019exemple ci-apr\xE8s)."
+      implementation_groups:
+      - Client-Serveur
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Exigences SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6
+      ref_id: '6.1'
+      name: "H\xE9bergement qualifi\xE9 SecNumCloud"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_snc1_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.1
+      ref_id: EXI_SNC1_01
+      description: "L'\xE9diteur de la solution fait appel \xE0 un prestataire certifi\xE9\
+        \ SecNumCloud pour h\xE9berger sa solution. Ce prestataire est bien pr\xE9\
+        sent dans la liste des \xAB Produits et Services Qualifi\xE9es par l\u2019\
+        ANSSI \xBB (Services CLOUD Qualifi\xE9s par l'ANSSI)"
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_snc1_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.1
+      ref_id: EXI_SNC1_02
+      description: "L\u2019\xE9diteur a souscrit \xE0 une offre IaaS, CaaS ou PaaS\
+        \ chez cet h\xE9bergeur."
+      annotation: "Note : pour les exigences EXI_SNC1_01 et EXI_SNC1_02, des \xE9\
+        l\xE9ments de preuves peuvent \xEAtre demand\xE9s (contrat, facture, etc.)"
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6
+      ref_id: '6.2'
+      name: "Administration s\xE9curis\xE9e"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_snc2_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.2
+      ref_id: EXI_SNC2_01
+      description: "L'\xE9diteur fournira une matrice de conformit\xE9 au guide ANSSI\
+        \ \xAB Recommandations relatives \xE0 l\u2019administration s\xE9curis\xE9\
+        \ des syst\xE8mes d\u2019information \xBB, dans sa version disponible le jour\
+        \ de demande du label, recommandations 1 \xE0 58. Tous les \xE9carts et non\
+        \ conformit\xE9s seront justifi\xE9s."
+      annotation: 'Le guide : https://cyber.gouv.fr/publications/recommandations-relatives-ladministration-securisee-des-systemes-dinformation
+
+        La matrice : https://cyber.gouv.fr/sites/default/files/2018/04/anssi-guide-admin_securisee_si_v3-0-liste_recommandations.xlsx'
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6
+      ref_id: '6.3'
+      name: Segmentation client
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_snc3_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.3
+      ref_id: EXI_SNC3_01
+      description: "L'\xE9diteur fournira une matrice de conformit\xE9 aux exigences\
+        \ du chapitre 9.7 du r\xE9f\xE9rentiel SecNumCloud (R\xE9f\xE9rentiel SecNumCloud\
+        \ v3.2) \xAB Restriction des acc\xE8s \xE0 l\u2019information \xBB dans sa\
+        \ version disponible le jour de demande du label."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6
+      ref_id: '6.4'
+      name: "Chiffrement des \xE9l\xE9ments h\xE9berg\xE9s"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:exi_snc4_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:6.4
+      ref_id: EXI_SNC4_01
+      description: "L'\xE9diteur mettra en \u0153uvre un chiffrement pour l\u2019\
+        ensemble des \xE9l\xE9ments qui sont h\xE9berg\xE9s chez le fournisseur du\
+        \ service SaaS, et notamment les donn\xE9es des clients. D\u2019une mani\xE8\
+        re plus g\xE9n\xE9rale, la machine virtuelle qui h\xE9berge l\u2019applicatif\
+        \ et les donn\xE9es devra \xEAtre chiffr\xE9e."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a
+      assessable: false
+      depth: 1
+      ref_id: Annexe A
+      name: "Recommandations portant sur l\u2019application"
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a
+      description: "Il est recommand\xE9 de proposer une solution logicielle ergonomique\
+        \ et adapt\xE9e \xE0 la production d\u2019analyses de risque."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-1
+      description: "L\u2019interface de l\u2019application s\u2019adapte automatiquement\
+        \ \xE0 la taille de l\u2019\xE9cran. Cet \xE9cran peut \xEAtre redimensionn\xE9\
+        \ par l\u2019utilisateur en suivant le fonctionnement des interfaces graphiques\
+        \ pr\xE9vues par les environnements MS Windows, Mac OS ou LINUX."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-2
+      description: "Il est possible de travailler \xE0 l\u2019aide de la souris, mais\
+        \ \xE9galement par des raccourcis clavier."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-3
+      description: "L\u2019application permet de r\xE9aliser une sauvegarde manuelle\
+        \ et automatique p\xE9riodique de l\u2019\xE9tude."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-4
+      description: "Le contenu des champs de saisie est contr\xF4l\xE9 par l\u2019\
+        application (par exemple : un champ date permet uniquement la saisie d\u2019\
+        une date selon un format pr\xE9d\xE9fini dans le code de l\u2019application)."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-5
+      description: "L\u2019application permet la mise en forme enrichie des champs\
+        \ de saisie de texte : gras, italique, soulign\xE9, centrer, puces, taille\
+        \ de police de caract\xE8re, couleur du texte et surlignage."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-6
+      description: "Les visuels de restitution et de manipulation d\u2019informations\
+        \ (repr\xE9sentations graphiques des risques, tableaux des \xE9v\xE9nements\
+        \ redout\xE9s, etc.) facilitent l\u2019exploitation de l\u2019analyse (ex.\
+        \ : les titres des colonnes/lignes restent visibles m\xEAme en se d\xE9pla\xE7\
+        ant dans le tableau, les lignes sont alternativement de tonalit\xE9s diff\xE9\
+        rentes, le texte s\u2019adapte au conteneur)."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-7
+      description: "L\u2019utilisateur identifie facilement l\u2019atelier et l\u2019\
+        activit\xE9 en cours dans le processus d\u2019analyse (par exemple en faisant\
+        \ appara\xEEtre en permanence le sch\xE9ma p.6-7 du guide EBIOS Risk Manager\
+        \ v1.5 et en mettant en surbrillance l\u2019atelier en cours)."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-8
+      description: "L\u2019utilisateur peut acc\xE9der \xE0 tout moment aux diff\xE9\
+        rents ateliers et activit\xE9s : l\u2019application permet facilement de naviguer\
+        \ d\u2019un atelier ou d\u2019une activit\xE9 \xE0 une autre, par exemple\
+        \ \xE0 partir du sch\xE9ma du processus g\xE9n\xE9ral de la m\xE9thode et/ou\
+        \ d\u2019une arborescence des activit\xE9s accessible facilement."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-9
+      description: "L\u2019application propose uniquement les m\xE9triques et \xE9\
+        l\xE9ments d\u2019analyse qui sont n\xE9cessaires pour r\xE9aliser l\u2019\
+        atelier (par exemple, dans l\u2019atelier 4 si l\u2019utilisateur choisit\
+        \ une \xE9valuation expresse de la vraisemblance, il n\u2019est pas utile\
+        \ de proposer les grilles de probabilit\xE9 de succ\xE8s et de difficult\xE9\
+        \ technique, ni la grille de croisement)."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-10
+      description: "L\u2019application permet d\u2019annuler les actions pr\xE9c\xE9\
+        dentes."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-11
+      description: "L\u2019application permet l\u2019utilisation de la roulette de\
+        \ la souris dans les listes d\xE9roulantes."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-12
+      description: "Les listes d\xE9roulantes utilis\xE9es sont tri\xE9es par ordre\
+        \ alphab\xE9tique et permettent la saisie pr\xE9dictive."
+      implementation_groups:
+      - SaaS
+    - urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:annexe-a-13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cahier-des-charges-label-ebios-rm-v3.1:node219
+      ref_id: Annexe A-13
+      description: " L\u2019application devra s\u2019installer le plus simplement\
+        \ possible (type installeur automatis\xE9)."
+      implementation_groups:
+      - SaaS

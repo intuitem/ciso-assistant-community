@@ -19,6 +19,7 @@
 	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
+	export let selectedStatus: string[];
 	export let resultCounts: Record<string, number> | undefined;
 	export let assessable: boolean;
 	export let max_score: number;
@@ -93,8 +94,8 @@
 		}
 	);
 
-	function nodeScore(): number {
-		if (!resultCounts) return -1;
+	function nodeScore(): number | null {
+		if (!resultCounts) return null;
 		let mean = resultCounts['total_score'] / resultCounts['scored'];
 		return Math.floor(mean * 10) / 10;
 	}
@@ -116,11 +117,16 @@
 									breadcrumbAction="push"
 									href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}"
 								>
-									{#if title}
-										<span style="font-weight: 600;">{title}</span>
-									{/if}
-									{#if description}
-										<p>{description}</p>
+									{#if title || description}
+										{#if title}
+											<span style="font-weight: 600;">{title}</span>
+										{/if}
+										{#if description}
+											<p>{description}</p>
+										{/if}
+									{:else if node.question && node.question.questions && node.question.questions[0]}
+										<!-- This only displays the first question -->
+										{node.question.questions[0].text}
 									{/if}
 								</Anchor>
 							{:else}
@@ -150,14 +156,14 @@
 				</div>
 				<div>
 					{#if hasAssessableChildren}
-						{#each Object.entries(complianceStatusColorMap) as status}
-							{#if resultCounts[status[0]]}
+						{#each Object.entries(complianceStatusColorMap) as [status, color]}
+							{#if resultCounts[status] && selectedStatus.includes(status)}
 								<span
 									class="badge mr-1"
-									style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
+									style="background-color: {color + '44'}; color: {darkenColor(color, 0.3)}"
 								>
-									{resultCounts[status[0]]}
-									{safeTranslate(status[0])}
+									{resultCounts[status]}
+									{safeTranslate(status)}
 								</span>
 							{/if}
 						{/each}
@@ -272,7 +278,7 @@
 						</div>
 					{/each}
 				</div>
-				{#if nodeScore() >= 0}
+				{#if nodeScore() !== null}
 					<span>
 						<ProgressRadial
 							stroke={100}
