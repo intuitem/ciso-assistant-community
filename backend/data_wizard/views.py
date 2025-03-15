@@ -121,7 +121,6 @@ class LoadFileView(APIView):
         # Collection to track successes and errors
         results = {"successful": 0, "failed": 0, "errors": []}
 
-        # Assets processing
         for record in records:
             # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
             domain = folder_id
@@ -166,8 +165,6 @@ class LoadFileView(APIView):
         return results
 
     def _process_applied_controls(self, request, records, folders_map, folder_id):
-        # Applied Controls processing
-
         results = {"successful": 0, "failed": 0, "errors": []}
 
         for record in records:
@@ -230,7 +227,6 @@ class LoadFileView(APIView):
         # Collection to track successes and errors
         results = {"successful": 0, "failed": 0, "errors": []}
 
-        # Assets processing
         for record in records:
             # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
             domain = folder_id
@@ -299,23 +295,18 @@ class LoadFileView(APIView):
             )
 
             if serializer.is_valid(raise_exception=True):
-                # Save the compliance assessment
                 findings_assessment = serializer.save()
                 logger.info(
                     f"Created follow-up: {assessment_name} with ID {findings_assessment.id}"
                 )
-                # UNDEFINED = -1, "undefined"
-                # LOW = 0, "low"
-                # MEDIUM = 1, "medium"
-                # HIGH = 2, "high"
-                # CRITICAL = 3, "critical"
+
                 SEVERITY_MAP = {
                     "low": 0,
                     "medium": 1,
                     "high": 2,
                     "critical": 3,
                 }
-                # Now process all the requirement assessments from the records
+
                 for record in records:
                     try:
                         if record.get("name") == "":
