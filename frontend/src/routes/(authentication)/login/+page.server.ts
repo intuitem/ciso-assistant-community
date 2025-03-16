@@ -132,11 +132,11 @@ export const actions: Actions = {
 		const preferencesRes = await fetch(`${BASE_API_URL}/user-preferences/`);
 		const preferences = await preferencesRes.json();
 
-		const currentLang = cookies.get('ciso_lang') || DEFAULT_LANGUAGE;
+		const currentLang = cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE;
 		const preferedLang = preferences.lang || DEFAULT_LANGUAGE;
 
 		if (currentLang !== preferedLang) {
-			cookies.set('ciso_lang', preferedLang, {
+			cookies.set('PARAGLIDE_LOCALE', preferedLang, {
 				httpOnly: false,
 				sameSite: 'lax',
 				path: '/',
