@@ -1,8 +1,5 @@
 name: Build and Push Docker Images Dummy
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
 env:
   UBUNTU_VERSION: "ubuntu-24.04"
