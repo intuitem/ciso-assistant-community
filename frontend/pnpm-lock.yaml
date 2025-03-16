@@ -21,11 +21,11 @@ importers:
         specifier: ^8.18.0
         version: 8.18.0(eslint@9.16.0(jiti@1.21.6))(typescript@5.7.2)
       '@unovis/svelte':
-        specifier: 1.4.3-beta.0
-        version: 1.4.3-beta.0(@unovis/ts@1.4.3-beta.0)(svelte@4.2.19)
+        specifier: ^1.5.1
+        version: 1.5.1(@unovis/ts@1.5.1)(svelte@4.2.19)
       '@unovis/ts':
-        specifier: 1.4.3-beta.0
-        version: 1.4.3-beta.0
+        specifier: ^1.5.1
+        version: 1.5.1
       cmdk-sv:
         specifier: ^0.0.18
         version: 0.0.18(svelte@4.2.19)
@@ -1495,14 +1495,14 @@ packages:
   '@unovis/graphlibrary@2.2.0-2':
     resolution: {integrity: sha512-HeEzpd/vDyWiIJt0rnh+2ICXUIuF2N0+Z9OJJiKg0DB+eFUcD+bk+9QPhYHwkFwfxdjDA9fHi1DZ/O/bbV58Nw==}
 
-  '@unovis/svelte@1.4.3-beta.0':
-    resolution: {integrity: sha512-6rpY7aFhqmWgz4VixX0UgCaMrw8wlRzhjPox31qdO9DDTsE6Em4+mpMXCzKj1WpRx1GZ8CDdcCfYRiot0CEdTw==}
+  '@unovis/svelte@1.5.1':
+    resolution: {integrity: sha512-AIKXUbdfg3/Du0sr/o7CTCpjNHFq4WDp7t5GQwNV92VC4YiOEVtBt8k7Z0LcC3JH0rHG4DU5xh8mtrG1uBHPiQ==}
     peerDependencies:
-      '@unovis/ts': 1.4.3-beta.0
-      svelte: ^3.48.0 || ^4.0.0
+      '@unovis/ts': 1.5.1
+      svelte: '^3.48.0 || ^4.0.0 '
 
-  '@unovis/ts@1.4.3-beta.0':
-    resolution: {integrity: sha512-8Uyf6yHkOP1a1NoIONrUp+PxsRmgTkxA4KvqXyylqrwFXFNY5spmZndc8oMv14257iJUr7W0TJlAtEADOwiajw==}
+  '@unovis/ts@1.5.1':
+    resolution: {integrity: sha512-cNCVZUz3RagftEOw+HDvbbGTkmtpDNSv1Mw7C4wBBeRKQGzztI5TVL18IWFbKo/0VD6zP/jv+GKwJXZTGl6w0w==}
 
   '@vincjo/datatables@1.14.10':
     resolution: {integrity: sha512-gtojSC/LKDHbh2ZGZeaAQ+lLltcmcSDDLkecgb9WpG7lHmd4b/1HUTtFWAJt43TnaK8SrciGugh9VRRZN53bpw==}
@@ -5358,12 +5358,12 @@ snapshots:
     dependencies:
       lodash-es: 4.17.21
 
-  '@unovis/svelte@1.4.3-beta.0(@unovis/ts@1.4.3-beta.0)(svelte@4.2.19)':
+  '@unovis/svelte@1.5.1(@unovis/ts@1.5.1)(svelte@4.2.19)':
     dependencies:
-      '@unovis/ts': 1.4.3-beta.0
+      '@unovis/ts': 1.5.1
       svelte: 4.2.19
 
-  '@unovis/ts@1.4.3-beta.0':
+  '@unovis/ts@1.5.1':
     dependencies:
       '@emotion/css': 11.13.5
       '@juggle/resize-observer': 3.4.0
