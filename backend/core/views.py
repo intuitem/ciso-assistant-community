@@ -551,9 +551,6 @@ class AssetViewSet(BaseModelViewSet):
                 }
             )
             nodes_idx[asset.name] = N
-            links.append(
-                {"source": nodes_idx[asset.folder.name], "target": N, "value": "scope"}
-            )
             N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
             for relationship in asset.parent_assets.all():
