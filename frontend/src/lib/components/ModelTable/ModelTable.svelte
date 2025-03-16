@@ -20,7 +20,7 @@
 	import { listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
 	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
+	import { getLocale } from '$paraglide/runtime';
 	import {
 		popup,
 		type CssClasses,
@@ -345,7 +345,7 @@
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
-											{formatDateOrDateTime(value, languageTag())}
+											{formatDateOrDateTime(value, getLocale())}
 										{:else if [true, false].includes(value)}
 											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
 										{:else if key === 'progress'}
