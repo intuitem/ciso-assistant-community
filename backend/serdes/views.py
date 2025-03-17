@@ -42,7 +42,6 @@ class ExportBackupView(APIView):
             dumpdata.Command(),
             exclude=[
                 "contenttypes",
-                "auth.permission",
                 "sessions.session",
                 "iam.ssosettings",
                 "knox.authtoken",
@@ -74,7 +73,6 @@ class LoadBackupView(APIView):
                 verbosity=0,
                 exclude=[
                     "contenttypes",
-                    "auth.permission",
                     "sessions.session",
                     "iam.ssosettings",
                     "knox.authtoken",
