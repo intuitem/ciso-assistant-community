@@ -186,6 +186,35 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the evidence data are displayed in the table
 	});
 
+	await test.step('user can delete an evidence', async () => {
+		await sideBar.click('Compliance', pages.evidencesPage.url);
+		await pages.evidencesPage.hasUrl();
+		await pages.evidencesPage.hasTitle();
+
+		await pages.evidencesPage.createItem({
+			name: vars.evidenceName,
+			description: vars.description,
+			attachment: vars.file,
+			folder: vars.folderName,
+			link: 'https://intuitem.com/'
+		});
+
+		// Wait for the evidence to be created and displayed
+		await pages.evidencesPage.waitForItemInTable(vars.evidenceName);
+
+		// Click on the evidence to view details
+		await pages.evidencesPage.clickOnItem(vars.evidenceName);
+
+		// Click the delete attachment button
+		await pages.evidencesPage.clickDeleteAttachmentButton();
+
+		// Confirm deletion in the modal
+		await pages.evidencesPage.confirmDeleteAttachment();
+
+		// Verify the attachment is deleted
+		await pages.evidencesPage.expectAttachmentDeleted();
+	});
+
 	await test.step('user can import a risk matrix', async () => {
 		await sideBar.click('Catalog', pages.riskMatricesPage.url);
 		await pages.riskMatricesPage.hasUrl();
