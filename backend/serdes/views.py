@@ -93,12 +93,28 @@ class LoadBackupView(APIView):
         request.session.flush()
 
         try:
+            last_model = None
+
+            def fixture_callback(sender, **kwargs):
+                nonlocal last_model
+                if "instance" in kwargs:
+                    instance = kwargs["instance"]
+                    last_model = (
+                        f"{instance._meta.app_label}.{instance._meta.model_name}"
+                    )
+                    logger.debug(f"Loaded: {last_model} with pk={instance.pk}")
+
+            # Connect to the post_save signal
+            from django.db.models.signals import post_save
+
+            post_save.connect(fixture_callback)
+
             management.call_command("flush", interactive=False)
             management.call_command(
                 "loaddata",
                 "-",
                 format="json",
-                verbosity=0,
+                verbosity=2,
                 exclude=[
                     "contenttypes",
                     "auth.permission",
@@ -110,6 +126,10 @@ class LoadBackupView(APIView):
             )
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)
+            logger.error(
+                f"Error while loading backup. Last successful model: {last_model}",
+                exc_info=e,
+            )
             # On failure, restore the original data.
             try:
                 sys.stdin = io.StringIO(current_backup)
@@ -133,6 +153,8 @@ class LoadBackupView(APIView):
                     {"error": "LowerBackupVersion"}, status=status.HTTP_400_BAD_REQUEST
                 )
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        finally:
+            post_save.disconnect(fixture_callback)
         return Response({}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
