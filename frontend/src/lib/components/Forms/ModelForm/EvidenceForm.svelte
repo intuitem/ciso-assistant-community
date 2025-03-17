@@ -29,10 +29,10 @@
 		allowedExtensions={'*'}
 	/>
 {:else}
-	<label class="text-sm font-semibold">
+	<div class="text-sm font-semibold">
 		{m.attachment()}
-	</label>
-	<p class="text-sm text-gray-500">{m.deleteAttachmentInfo()}</p>
+		<span class="block text-gray-500 font-normal">{m.deleteAttachmentInfo()}</span>
+	</div>
 {/if}
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect
