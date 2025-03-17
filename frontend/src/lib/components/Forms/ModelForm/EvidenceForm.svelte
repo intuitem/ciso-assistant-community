@@ -31,7 +31,9 @@
 {:else}
 	<div class="text-sm font-semibold">
 		{m.attachment()}
-		<span class="block text-gray-500 font-normal" data-testid="attachment-name-title">{m.deleteAttachmentInfo()}</span>
+		<span class="block text-gray-500 font-normal" data-testid="attachment-name-title"
+			>{m.deleteAttachmentInfo()}</span
+		>
 	</div>
 {/if}
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
