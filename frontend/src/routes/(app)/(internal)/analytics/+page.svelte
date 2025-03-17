@@ -159,7 +159,7 @@
 						<Card
 							count={metrics.controls.p1}
 							label={m.sumpageP1()}
-							href="/applied-controls/?priority=p1"
+							href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
 							icon="fa-solid fa-shield-halved"
 							section={m.sumpageSectionControls()}
 							emphasis={true}
@@ -168,7 +168,9 @@
 						<Card
 							count={metrics.controls.eta_missed}
 							label={m.sumpageEtaMissed()}
-							href="/applied-controls/?status=on_hold"
+							href="/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte={new Date()
+								.toISOString()
+								.split('T')[0]}"
 							icon="fa-solid fa-shield-halved"
 							section={m.sumpageSectionControls()}
 							emphasis={true}

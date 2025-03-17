@@ -18,5 +18,5 @@ docker compose rm -fs
 
 # note: the rmi trick is not needed anymore since we move to always pull policy
 # Start the containers
-docker compose -f docker-compose-default.yml up -d
+docker compose up -d
 echo "CISO assistant updated successfully"

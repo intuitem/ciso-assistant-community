@@ -6,6 +6,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from auditlog.registry import auditlog
+
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -289,6 +291,16 @@ class StoredLibrary(LibraryMixin):
         is_loaded = LoadedLibrary.objects.filter(  # We consider the library as loaded even if the loaded version is different
             urn=urn, locale=locale
         ).exists()
+        same_version_lib = StoredLibrary.objects.filter(
+            urn=urn, locale=locale, version=version
+        ).first()
+        if same_version_lib:
+            # update hash following cosmetic change (e.g. when we added publication date)
+            logger.info("update hash", urn=urn)
+            same_version_lib.hash_checksum = hash_checksum
+            same_version_lib.save()
+            return None
+
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
             return None  # We do not accept to store outdated libraries
 
@@ -435,7 +447,6 @@ class LibraryUpdater:
             except:
                 return "dependencyNotFound"
             new_dependencies.append(new_dependency)
-
         for key, value in [
             ("name", self.new_library.name),
             ("version", self.new_library.version),
@@ -646,9 +657,6 @@ class LibraryUpdater:
                         key in matrix
                     ):  # If all keys are mandatory this condition is useless
                         matrix_dict["json_definition"][key] = matrix[key]
-                matrix_dict["json_definition"] = json.dumps(
-                    matrix_dict["json_definition"]
-                )
 
                 RiskMatrix.objects.update_or_create(
                     urn=matrix["urn"].lower(),
@@ -1653,6 +1661,12 @@ class Asset(
             sub_children.update(child.get_descendants())
         return sub_children
 
+    @property
+    def children_assets(self):
+        descendants = self.get_descendants()
+        descendant_ids = [d.id for d in descendants]
+        return Asset.objects.filter(id__in=descendant_ids).exclude(id=self.id)
+
     def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
         Gets the security objectives of a given asset.
@@ -1828,6 +1842,11 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
+
+    def delete(self, *args, **kwargs):
+        if self.attachment:
+            self.attachment.delete()
+        super().delete(*args, **kwargs)
 
     @property
     def attachment_hash(self):
@@ -2875,6 +2894,14 @@ class ComplianceAssessment(Assessment):
     )
     show_documentation_score = models.BooleanField(default=False)
 
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name=_("Related assets"),
+        blank=True,
+        help_text=_("Assets related to the compliance assessment"),
+        related_name="compliance_assessments",
+    )
+
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -3618,10 +3645,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
 class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
-        UNDEFINED = "--", _("Undefined")
-        PENTEST = "pentest", _("Pentest")
-        AUDIT = "audit", _("Audit")
-        SELF_IDENTIFIED = "self_identified", _("Self-identified")
+        UNDEFINED = "--", "Undefined"
+        PENTEST = "pentest", "Pentest"
+        AUDIT = "audit", "Audit"
+        SELF_IDENTIFIED = "self_identified", "Self-identified"
 
     owner = models.ManyToManyField(
         User,
@@ -3791,3 +3818,85 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
+
+
+common_exclude = ["created_at", "updated_at"]
+
+auditlog.register(
+    ReferenceControl,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    AppliedControl,
+    m2m_fields={"owner", "evidences"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Threat,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    ComplianceAssessment,
+    m2m_fields={"authors"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RequirementAssessment,
+    m2m_fields={"applied_controls"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RiskAssessment,
+    m2m_fields={"authors"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RiskScenario,
+    m2m_fields={"owner", "applied_controls", "existing_applied_controls"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    FindingsAssessment,
+    m2m_fields={"authors"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Finding,
+    m2m_fields={"applied_controls", "owner"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Framework,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RiskAcceptance,
+    m2m_fields={"risk_scenarios"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Folder,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Perimeter,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Evidence,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Asset,
+    exclude_fields=common_exclude,
+    m2m_fields={"parent_assets"},
+)
+auditlog.register(
+    SecurityException,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Vulnerability,
+    exclude_fields=common_exclude,
+)
+# actions - 0: create, 1: update, 2: delete

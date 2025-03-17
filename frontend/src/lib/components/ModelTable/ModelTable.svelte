@@ -20,7 +20,7 @@
 	import { listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
 	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
+	import { getLocale } from '$paraglide/runtime';
 	import {
 		popup,
 		type CssClasses,
@@ -227,19 +227,21 @@
 			>
 				<SuperForm {_form} validators={zod(z.object({}))} let:form>
 					{#each filteredFields as field}
-						<svelte:component
-							this={filters[field].component}
-							{form}
-							{field}
-							{...filters[field].props}
-							fieldContext="filter"
-							label={safeTranslate(filters[field].props?.label)}
-							on:change={(e) => {
-								const value = e.detail;
-								filterValues[field] = value.map((v) => ({ value: v }));
-								invalidateTable = true;
-							}}
-						/>
+						{#if filters[field]?.component}
+							<svelte:component
+								this={filters[field].component}
+								{form}
+								{field}
+								{...filters[field].props}
+								fieldContext="filter"
+								label={safeTranslate(filters[field].props?.label)}
+								on:change={(e) => {
+									const value = e.detail;
+									filterValues[field] = value.map((v) => ({ value: v }));
+									invalidateTable = true;
+								}}
+							/>
+						{/if}
 					{/each}
 				</SuperForm>
 			</div>
@@ -299,7 +301,7 @@
 												{#each value as val}
 													<li>
 														{#if val.str && val.id}
-															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${val.id}`}
+															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 															<Anchor href={itemHref} class="anchor" stopPropagation
 																>{val.str}</Anchor
 															>
@@ -343,7 +345,7 @@
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
-											{formatDateOrDateTime(value, languageTag())}
+											{formatDateOrDateTime(value, getLocale())}
 										{:else if [true, false].includes(value)}
 											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
 										{:else if key === 'progress'}
