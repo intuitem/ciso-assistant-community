@@ -17,6 +17,10 @@ from ciso_assistant.settings import SCHEMA_VERSION, VERSION
 from core.utils import compare_schema_versions
 from serdes.serializers import LoadBackupSerializer
 
+from auditlog.models import LogEntry
+from django.db.models.signals import post_save
+from core.custom_middleware import add_user_info_to_log_entry
+
 logger = structlog.get_logger(__name__)
 
 GZIP_MAGIC_NUMBER = b"\x1f\x8b"
@@ -64,6 +68,10 @@ class LoadBackupView(APIView):
     serializer_class = LoadBackupSerializer
 
     def load_backup(self, request, decompressed_data, backup_version, current_version):
+        # Temporarily disconnect the problematic signal
+
+        post_save.disconnect(add_user_info_to_log_entry, sender=LogEntry)
+
         # Back up current database state using dumpdata into an in-memory string.
         backup_buffer = io.StringIO()
         try:
@@ -105,7 +113,6 @@ class LoadBackupView(APIView):
                     logger.debug(f"Loaded: {last_model} with pk={instance.pk}")
 
             # Connect to the post_save signal
-            from django.db.models.signals import post_save
 
             post_save.connect(fixture_callback)
 
@@ -155,6 +162,7 @@ class LoadBackupView(APIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         finally:
             post_save.disconnect(fixture_callback)
+            post_save.connect(add_user_info_to_log_entry, sender=LogEntry)
         return Response({}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
