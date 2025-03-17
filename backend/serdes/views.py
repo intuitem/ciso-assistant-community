@@ -13,6 +13,8 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from django.db import connection
+
 from ciso_assistant.settings import SCHEMA_VERSION, VERSION
 from core.utils import compare_schema_versions
 from serdes.serializers import LoadBackupSerializer
@@ -93,6 +95,8 @@ class LoadBackupView(APIView):
         request.session.flush()
 
         try:
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA foreign_keys = OFF;")
             management.call_command("flush", interactive=False)
             management.call_command(
                 "loaddata",
@@ -133,6 +137,10 @@ class LoadBackupView(APIView):
                     {"error": "LowerBackupVersion"}, status=status.HTTP_400_BAD_REQUEST
                 )
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        finally:
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA foreign_keys = ON;")
+
         return Response({}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
