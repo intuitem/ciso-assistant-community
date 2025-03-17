@@ -1169,6 +1169,7 @@
 	"associatedFindings": "Constats associés",
 	"findingsAssessment": "Suivi",
 	"findingsAssessments": "Suivis",
+	"findings_count": "Nombre de constats",
 	"addFinding": "Ajouter un constat",
 	"addFindingsAssessment": "Ajouter un suivi",
 	"followUp": "Suivi",
