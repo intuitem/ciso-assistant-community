@@ -1199,7 +1199,6 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
-    str = serializers.CharField(source="__str__")
     owner = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
 
@@ -1215,7 +1214,6 @@ class FindingWriteSerializer(BaseModelSerializer):
 
 
 class FindingReadSerializer(FindingWriteSerializer):
-    str = serializers.CharField(source="__str__")
     owner = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField()
     vulnerabilities = FieldsRelatedField(many=True)
