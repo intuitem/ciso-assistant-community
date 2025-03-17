@@ -1183,5 +1183,6 @@
 	"compliantRequirementsSemiColon": "Exigences conformes :",
 	"requirementsProgressionSemiColon": "Progression des exigences :",
 	"noRequirementFound": "Aucune revue de cette exigence trouvée",
+	"deleteAttachmentInfo": "Pour modifier cette pièce jointe, supprimez la pièce jointe sur la page de la preuve.",
 	"noAuditForTheFramework": "Il n'y a pas d'audit utilisant ce référentiel"
 }

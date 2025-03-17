@@ -17,6 +17,7 @@
 
 <HiddenInput {form} field="applied_controls" />
 <HiddenInput {form} field="requirement_assessments" />
+{#if !initialData.attachment}
 <FileInput
 	{form}
 	allowPaste={true}
@@ -27,6 +28,13 @@
 	label={m.attachment()}
 	allowedExtensions={'*'}
 />
+{:else}
+<label class="text-sm font-semibold">
+	{m.attachment()}
+</label>
+<p class="text-sm text-gray-500">{m.deleteAttachmentInfo()}</p>
+
+{/if}
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect
 		{form}
