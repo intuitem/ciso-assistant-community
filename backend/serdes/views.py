@@ -21,6 +21,8 @@ from auditlog.models import LogEntry
 from django.db.models.signals import post_save
 from core.custom_middleware import add_user_info_to_log_entry
 
+from auditlog.context import disable_auditlog
+
 logger = structlog.get_logger(__name__)
 
 GZIP_MAGIC_NUMBER = b"\x1f\x8b"
@@ -115,22 +117,22 @@ class LoadBackupView(APIView):
             # Connect to the post_save signal
 
             post_save.connect(fixture_callback)
-
-            management.call_command("flush", interactive=False)
-            management.call_command(
-                "loaddata",
-                "-",
-                format="json",
-                verbosity=2,
-                exclude=[
-                    "contenttypes",
-                    "auth.permission",
-                    "sessions.session",
-                    "iam.ssosettings",
-                    "knox.authtoken",
-                    "auditlog.logentry",
-                ],
-            )
+            with disable_auditlog():
+                management.call_command("flush", interactive=False)
+                management.call_command(
+                    "loaddata",
+                    "-",
+                    format="json",
+                    verbosity=2,
+                    exclude=[
+                        "contenttypes",
+                        "auth.permission",
+                        "sessions.session",
+                        "iam.ssosettings",
+                        "knox.authtoken",
+                        "auditlog.logentry",
+                    ],
+                )
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)
             logger.error(
