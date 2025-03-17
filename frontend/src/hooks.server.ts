@@ -90,10 +90,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event: { cookies } }) => {
 	const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-
+	const currentLang = cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
 		request.headers.set('Content-Type', 'application/json');
-		request.headers.set('Accept-Language', getLocale());
+		request.headers.set('Accept-Language', currentLang);
 
 		const token = cookies.get('token');
 		const csrfToken = cookies.get('csrftoken');
