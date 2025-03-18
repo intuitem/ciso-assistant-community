@@ -95,7 +95,7 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     return res.json() if res.text else {"id": obj_id, **values}
 
 
-def update_object(
+def update_objects(
     message: dict, resource_endpoint: str | None = None, selector_mapping: dict = {}
 ) -> list:
     """
@@ -136,11 +136,11 @@ def update_object(
 
 
 def update_applied_control(message: dict):
-    return update_object(message, "applied-controls")
+    return update_objects(message, "applied-controls")
 
 
 def update_requirement_assessment(message: dict):
-    return update_object(message, "requirement-assessments")
+    return update_objects(message, "requirement-assessments")
 
 
 def upload_attachment(message: dict):
