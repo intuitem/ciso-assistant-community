@@ -1,0 +1,24 @@
+{
+    "type": "record",
+    "name": "update_requirement_assessment_command",
+    "fields": [
+        {
+            "name": "event_type",
+            "type": "string"
+        },
+        {
+            "name": "selector",
+            "type": {
+                "type": "map",
+                "values": "string"
+            }
+        },
+        {
+            "name": "values",
+            "type": {
+                "type": "map",
+                "values": "string"
+            }
+        }
+    ]
+}
