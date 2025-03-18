@@ -165,10 +165,12 @@ export class PageContent extends BasePage {
 	}
 
 	async clickDeleteAttachmentButton() {
+		await this.page.getByTestId('attachment-delete-button').waitFor({ state: 'visible' });
 		await this.page.getByTestId('attachment-delete-button').click();
 	}
 
 	async confirmDeleteAttachment() {
+		await this.deleteModalTitle.waitFor({ state: 'visible' });
 		await this.deleteModalConfirmButton.click();
 	}
 
