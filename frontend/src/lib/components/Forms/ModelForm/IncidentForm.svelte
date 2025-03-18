@@ -24,7 +24,6 @@
 	hidden={initialData.folder}
 />
 <Select
-    required
     {form}
     options={model.selectOptions['status']}
     field="status"

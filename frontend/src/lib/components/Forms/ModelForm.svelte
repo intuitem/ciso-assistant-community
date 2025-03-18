@@ -35,6 +35,7 @@
 	import FindingForm from './ModelForm/FindingForm.svelte';
 	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
 	import IncidentForm from './ModelForm/IncidentForm.svelte';
+	import TimelineForm from './ModelForm/TimelineForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -339,6 +340,8 @@
 		<FindingsAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'incidents'}
 		<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+		{:else if URLModel === 'timelines'}
+		<TimelineForm {form} {model} {cacheLocks} {formDataCache} initialData={model.initialData} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

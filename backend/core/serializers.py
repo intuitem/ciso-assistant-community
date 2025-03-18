@@ -1228,7 +1228,6 @@ class FindingReadSerializer(FindingWriteSerializer):
 
 
 class TimelineWriteSerializer(BaseModelSerializer):
-    entry_type = serializers.ChoiceField(choices=Timeline.ALLOWED_ENTRY_TYPES)
 
     class Meta:
         model = Timeline

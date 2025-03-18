@@ -4808,4 +4808,4 @@ class TimelineViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get entry type choices")
     def entry_type(self, request):
-        return Response(Timeline.ALLOWED_ENTRY_TYPES)
+        return Response(dict(Timeline.EntryType.choices))

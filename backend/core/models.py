@@ -1924,12 +1924,6 @@ class Timeline(AbstractBaseModel, FolderMixin):
         CLOSING = "closing", "Closing"
         DISMISSAL = "dismissal", "Dismissal"
 
-    ALLOWED_ENTRY_TYPES = {
-        EntryType.DETECTION,
-        EntryType.MITIGATION,
-        EntryType.OBSERVATION,
-    }
-
     incident = models.ForeignKey(
         Incident,
         on_delete=models.CASCADE,
@@ -1962,12 +1956,6 @@ class Timeline(AbstractBaseModel, FolderMixin):
         blank=True,
     )
     is_published = models.BooleanField(_("published"), default=True)
-
-    def clean(self):
-        """Enforce allowed entry types at the model level."""
-        super().clean()
-        if self.entry_type not in self.ALLOWED_ENTRY_TYPES:
-            raise ValidationError({"entry_type": "Invalid entry type"})
 
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
