@@ -3,7 +3,7 @@
 	export let data: PageData;
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { languageTag } from '$paraglide/runtime';
+	import { getLocale } from '$paraglide/runtime';
 	import * as m from '$paraglide/messages';
 	import AuditCard from './AuditCard.svelte';
 	import ActivityTracker from './ActivityTracker.svelte';
@@ -53,7 +53,7 @@
 							</td>
 							<td class="px-6 py-4">
 								<span class=" p-1 rounded {eta_span_class[ac.eta_missed]}">
-									{formatDateOrDateTime(ac.eta, languageTag()) ?? '-'}
+									{formatDateOrDateTime(ac.eta, getLocale()) ?? '-'}
 								</span>
 							</td>
 							<td class="px-6 py-4">{ac.folder.str} </td>
@@ -108,7 +108,7 @@
 									>
 								</th>
 								<td class="px-6 py-4"> {safeTranslate(ra.status) ?? '-'} </td>
-								<td class="px-6 py-4"> {formatDateOrDateTime(ra.eta, languageTag()) ?? '-'} </td>
+								<td class="px-6 py-4"> {formatDateOrDateTime(ra.eta, getLocale()) ?? '-'} </td>
 							</tr>
 						{/each}
 					</tbody>
