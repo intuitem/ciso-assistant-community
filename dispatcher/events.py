@@ -222,3 +222,4 @@ def upload_attachment(message: dict):
 
 event_registry.add(update_applied_control)
 event_registry.add(update_requirement_assessment)
+event_registry.add(upload_attachment)
