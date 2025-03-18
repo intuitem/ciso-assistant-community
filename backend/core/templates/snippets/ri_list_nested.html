@@ -102,9 +102,17 @@
         {% empty %} -- {% endfor %}
       </td>
       <td class="px-4 py-5 border-b border-gray-200 text-sm">
-        <p class="max-h-64 max-w-full box overflow-hidden">
-          {{ scenario.existing_controls|linebreaksbr }}
-        </p>
+        <ul class="list-disc space-y-4 ml-4">
+          {% for measure in scenario.existing_applied_controls.all %}
+          <li class="text-gray-900">
+            <p
+              class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-400"
+            >
+              {{ measure }}
+            </p>
+          </li>
+          {% endfor %}
+        </ul>
       </td>
       <td class="px-4 py-5 border-b border-gray-200 text-sm">
         <p
