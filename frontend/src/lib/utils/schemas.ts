@@ -537,6 +537,17 @@ export const FindingsAssessmentSchema = z.object({
 	category: z.string().default('--')
 });
 
+export const IncidentSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	status: z.string(),
+	severity: z.string(),
+	threats: z.string().uuid().optional().array().optional(),
+	owners: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional(),
+})
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -572,7 +583,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'operational-scenarios': operationalScenarioSchema,
 	'security-exceptions': SecurityExceptionSchema,
 	findings: FindingSchema,
-	'findings-assessments': FindingsAssessmentSchema
+	'findings-assessments': FindingsAssessmentSchema,
+	'incidents': IncidentSchema
 };
 
 export const modelSchema = (model: string) => {
