@@ -29,7 +29,7 @@
 		allowedExtensions={'*'}
 	/>
 {:else}
-	<div class="text-sm font-semibold" data-testid="form-input-attachment">
+	<div class="text-sm font-semibold">
 		{m.attachment()}
 		<span class="block text-gray-500 font-normal">{m.deleteAttachmentInfo()}</span>
 	</div>
