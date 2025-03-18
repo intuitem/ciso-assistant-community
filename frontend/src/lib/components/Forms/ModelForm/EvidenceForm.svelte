@@ -17,23 +17,16 @@
 
 <HiddenInput {form} field="applied_controls" />
 <HiddenInput {form} field="requirement_assessments" />
-{#if !initialData.attachment}
-	<FileInput
-		{form}
-		allowPaste={true}
-		helpText={object.attachment
-			? `${m.attachmentWarningText()}: ${object.attachment}`
-			: m.attachmentHelpText()}
-		field="attachment"
-		label={m.attachment()}
-		allowedExtensions={'*'}
-	/>
-{:else}
-	<div class="text-sm font-semibold">
-		{m.attachment()}
-		<span class="block text-gray-500 font-normal">{m.deleteAttachmentInfo()}</span>
-	</div>
-{/if}
+<FileInput
+	{form}
+	allowPaste={true}
+	helpText={object.attachment
+		? `${m.attachmentWarningText()}: ${object.attachment}`
+		: m.attachmentHelpText()}
+	field="attachment"
+	label={m.attachment()}
+	allowedExtensions={'*'}
+/>
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect
 		{form}

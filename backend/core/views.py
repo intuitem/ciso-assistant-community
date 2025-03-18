@@ -3850,7 +3850,8 @@ class UploadAttachmentView(APIView):
             try:
                 evidence = Evidence.objects.get(id=kwargs["pk"])
                 attachment = request.FILES["file"]
-                evidence.attachment = attachment
+                if attachment.name != "undefined":
+                    evidence.attachment = attachment
                 evidence.save()
                 return Response(status=status.HTTP_200_OK)
             except Exception:
