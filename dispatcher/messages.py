@@ -8,14 +8,14 @@ import requests
 from settings import API_URL, TOKEN, VERIFY_CERTIFICATE
 
 
-class EventRegistry:
+class MessageRegistry:
     REGISTRY = {}
 
-    def add(self, event):
-        self.REGISTRY[event.__name__] = event
+    def add(self, message):
+        self.REGISTRY[message.__name__] = message
 
 
-event_registry = EventRegistry()
+message_registry = MessageRegistry()
 
 
 def get_resource_endpoint(message: dict, resource_endpoint: str | None = None) -> str:
@@ -220,6 +220,6 @@ def upload_attachment(message: dict):
             print(update_response.json())
 
 
-event_registry.add(update_applied_control)
-event_registry.add(update_requirement_assessment)
-event_registry.add(upload_attachment)
+message_registry.add(update_applied_control)
+message_registry.add(update_requirement_assessment)
+message_registry.add(upload_attachment)

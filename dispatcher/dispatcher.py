@@ -9,7 +9,7 @@ from kafka import KafkaConsumer
 from kafka.errors import UnsupportedCodecError
 from rich import print as rprint
 
-from events import event_registry
+from messages import message_registry
 from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD
 
 auth_data = dict()
@@ -73,13 +73,13 @@ def consume():
             except Exception as e:
                 rprint(f"Error decoding message: {e}")
             else:
-                if message.get("event_type") not in event_registry.REGISTRY:
+                if message.get("event_type") not in message_registry.REGISTRY:
                     rprint(
                         "Event type not supported. Skipping. Check the event_registry for supported events."
                     )
                     continue
                 rprint(f"Processing event: {message.get('event_type')}")
-                event_registry.REGISTRY[message.get("event_type")](message)
+                message_registry.REGISTRY[message.get("event_type")](message)
 
     except UnsupportedCodecError as e:
         rprint("KO", e)
