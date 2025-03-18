@@ -192,26 +192,17 @@ test('user usual routine actions are working correctly', async ({
 		await pages.evidencesPage.hasTitle();
 
 		await pages.evidencesPage.createItem({
-			name: vars.evidenceName,
+			name: vars.evidenceName2,
 			description: vars.description,
 			attachment: vars.file,
 			folder: vars.folderName,
 			link: 'https://intuitem.com/'
 		});
 
-		// Wait for the evidence to be created and displayed
-		await pages.evidencesPage.waitForItemInTable(vars.evidenceName);
-
-		// Click on the evidence to view details
-		await pages.evidencesPage.clickOnItem(vars.evidenceName);
-
-		// Click the delete attachment button
+		await pages.evidencesPage.waitForItemInTable(vars.evidenceName2);
+		await pages.evidencesPage.clickOnItem(vars.evidenceName2);
 		await pages.evidencesPage.clickDeleteAttachmentButton();
-
-		// Confirm deletion in the modal
 		await pages.evidencesPage.confirmDeleteAttachment();
-
-		// Verify the attachment is deleted
 		await pages.evidencesPage.expectAttachmentDeleted();
 	});
 
