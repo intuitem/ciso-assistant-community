@@ -1855,6 +1855,121 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
+class Incident(NameDescriptionMixin, FolderMixin):
+    class Status(models.TextChoices):
+        NEW = "new", "New"
+        ONGOING = "ongoing", "Ongoing"
+        RESOLVED = "resolved", "Resolved"
+        CLOSED = "closed", "Closed"
+        DISMISSED = "dismissed", "Dismissed"
+
+    class Severity(models.IntegerChoices):
+        SEV1 = 1, "Critical"
+        SEV2 = 2, "Major"
+        SEV3 = 3, "Moderate"
+        SEV4 = 4, "Minor"
+        SEV5 = 5, "Low"
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.NEW,
+    )
+    severity = models.PositiveSmallIntegerField(
+        choices=Severity.choices,
+        default=Severity.SEV3,
+    )
+    threats = models.ManyToManyField(
+        Threat,
+        related_name="incidents",
+        verbose_name="Threats",
+        blank=True,
+    )
+    owners = models.ManyToManyField(
+        User,
+        related_name="incidents",
+        verbose_name="Owners",
+        blank=True,
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        related_name="incidents",
+        verbose_name="Assets",
+        blank=True,
+    )
+    qualifications = models.ManyToManyField(
+        Qualification,
+        related_name="incidents",
+        verbose_name="Qualifications",
+        blank=True,
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    class Meta:
+        verbose_name = "Incident"
+        verbose_name_plural = "Incidents"
+
+
+class Timeline(AbstractBaseModel, FolderMixin):
+    """
+    Timeline objects contain a list of entries that describe the evolution of an incident
+    """
+
+    class EntryType(models.TextChoices):
+        DETECTION = "detection", "Detection"
+        SEVERITY_CHANGE = "severity_change", "Severity change"
+        MITIGATION = "mitigation", "Mitigation"
+        OBSERVATION = "observation", "Observation"
+        RESOLUTION = "resolution", "Resolution"
+        CLOSING = "closing", "Closing"
+        DISMISSAL = "dismissal", "Dismissal"
+
+    ALLOWED_ENTRY_TYPES = {
+        EntryType.DETECTION,
+        EntryType.MITIGATION,
+        EntryType.OBSERVATION,
+    }
+
+    incident = models.ForeignKey(
+        Incident,
+        on_delete=models.CASCADE,
+        related_name="timelines",
+        verbose_name=_("Incident"),
+    )
+    entry = models.CharField(max_length=200, verbose_name="Entry", unique=False)
+    entry_type = models.CharField(
+        max_length=20,
+        choices=EntryType.choices,
+        default=EntryType.OBSERVATION,
+        verbose_name="Entry type",
+    )
+    timestamp = models.DateTimeField(
+        verbose_name="Timestamp", unique=False, default=now
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="timelines",
+        verbose_name="Author",
+        null=True,
+        blank=True,
+    )
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+    evidences = models.ManyToManyField(
+        Evidence,
+        related_name="timelines",
+        verbose_name="Evidence",
+        blank=True,
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    def clean(self):
+        """Enforce allowed entry types at the model level."""
+        super().clean()
+        if self.entry_type not in self.ALLOWED_ENTRY_TYPES:
+            raise ValidationError({"entry_type": "Invalid entry type"})
+
+
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")

@@ -4788,3 +4788,24 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Finding.Status.choices))
+
+
+class IncidentViewSet(BaseModelViewSet):
+    model = Incident
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Incident.Status.choices))
+
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Incident.Severity.choices))
+
+
+class TimelineViewSet(BaseModelViewSet):
+    model = Timeline
+    filterset_fields = ["incident"]
+
+    @action(detail=False, name="Get entry type choices")
+    def entry_type(self, request):
+        return Response(Timeline.ALLOWED_ENTRY_TYPES)

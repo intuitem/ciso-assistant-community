@@ -1225,3 +1225,39 @@ class FindingReadSerializer(FindingWriteSerializer):
     class Meta:
         model = Finding
         fields = "__all__"
+
+
+class TimelineWriteSerializer(BaseModelSerializer):
+    entry_type = serializers.ChoiceField(choices=Timeline.ALLOWED_ENTRY_TYPES)
+
+    class Meta:
+        model = Timeline
+        exclude = ["created_at", "updated_at"]
+
+
+class TimelineReadSerializer(TimelineWriteSerializer):
+    author = FieldsRelatedField()
+    evidences = FieldsRelatedField(many=True)
+
+
+class IncidentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Incident
+        exclude = ["created_at", "updated_at"]
+
+
+class IncidentReadSerializer(IncidentWriteSerializer):
+    threats = FieldsRelatedField(many=True)
+    owners = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
+    qualifications = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+    timeline = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Incident
+        fields = "__all__"
+
+    def get_timeline(self, obj):
+        """Returns a serialized list of timeline entries related to the incident."""
+        return TimelineReadSerializer(obj.timelines.all(), many=True).data

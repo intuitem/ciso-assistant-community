@@ -80,6 +80,8 @@ router.register(
     r"findings-assessments", FindingsAssessmentViewSet, basename="findings-assessments"
 )
 router.register(r"findings", FindingViewSet, basename="findings")
+router.register(r"incidents", IncidentViewSet, basename="incidents")
+router.register(r"timelines", TimelineViewSet, basename="timelines")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
