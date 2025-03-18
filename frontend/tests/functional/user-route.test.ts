@@ -191,6 +191,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.evidencesPage.hasUrl();
 		await pages.evidencesPage.hasTitle();
 
+		// Create the evidence
 		await pages.evidencesPage.createItem({
 			name: vars.evidenceName2,
 			description: vars.description,
@@ -201,6 +202,10 @@ test('user usual routine actions are working correctly', async ({
 
 		await pages.evidencesPage.waitForItemInTable(vars.evidenceName2);
 		await pages.evidencesPage.clickOnItem(vars.evidenceName2);
+		await pages.evidencesPage.page.waitForURL(new RegExp('^.*/evidences/.+'));
+		await pages.evidencesPage.page
+			.getByTestId('attachment-name-title')
+			.waitFor({ state: 'visible' });
 		await pages.evidencesPage.clickDeleteAttachmentButton();
 		await pages.evidencesPage.confirmDeleteAttachment();
 		await pages.evidencesPage.expectAttachmentDeleted();

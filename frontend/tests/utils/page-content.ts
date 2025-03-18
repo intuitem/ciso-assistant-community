@@ -157,11 +157,12 @@ export class PageContent extends BasePage {
 	}
 
 	async waitForItemInTable(name: string) {
-		await this.page.getByText(name).waitFor({ state: 'visible' });
+		await this.page.getByTestId('table').waitFor({ state: 'visible' });
+		await this.page.getByRole('row', { name: name }).waitFor({ state: 'visible', timeout: 10000 });
 	}
 
 	async clickOnItem(name: string) {
-		await this.page.getByText(name).click();
+		await this.page.getByRole('row', { name: name }).click();
 	}
 
 	async clickDeleteAttachmentButton() {
