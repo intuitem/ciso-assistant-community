@@ -527,7 +527,6 @@ export class TestContent {
 				editParams: {
 					name: '',
 					description: '',
-					attachment: vars.file2,
 					link: 'https://intuitem.com/community/'
 				}
 			},
