@@ -10,6 +10,7 @@ from kafka.errors import UnsupportedCodecError
 from rich import print as rprint
 
 from messages import message_registry
+from schemas import deserialize_avro_message
 from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD
 
 from loguru import logger
@@ -69,7 +70,7 @@ def consume():
         for msg in consumer:
             logger.debug("Consumed record.", key=msg.key, value=msg.value)
             try:
-                message = json.loads(msg.value.decode("utf-8"))
+                message = deserialize_avro_message(msg.value)
             except Exception as e:
                 logger.error(f"Error decoding message: {e}")
             else:
@@ -85,11 +86,13 @@ def consume():
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
                     # TODO: Message-bound error handling is to be done here.
                     logger.error("KO", e)
+                    # raise e
 
     except UnsupportedCodecError as e:
         logger.error("KO", e)
     except Exception as e:
         logger.error("KO", e)
+        # raise e
 
 
 cli.add_command(auth)

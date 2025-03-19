@@ -29,7 +29,7 @@ def fetch_schema_from_registry(
     if not schema_json:
         raise Exception("Schema not found in registry response.")
 
-    return avro.schema.Parse(schema_json)
+    return avro.schema.parse(schema_json)
 
 
 def deserialize_avro_message(
