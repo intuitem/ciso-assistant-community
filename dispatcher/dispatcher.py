@@ -97,13 +97,18 @@ def consume():
                     message_registry.REGISTRY[message.get("message_type")](message)
                 except Exception as e:
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
-                    logger.error("KO", e)
-                    error_producer.send(ERRORS_TOPIC, key=msg.key, value=msg.value)
+                    logger.error("Message could not be consumed", exception=e)
+                    error_producer.send(
+                        ERRORS_TOPIC,
+                        value=json.dumps(
+                            {"message": message, "error": str(e)}
+                        ).encode(),
+                    )
 
     except UnsupportedCodecError as e:
-        logger.error("KO", e)
+        logger.exception("KO", e)
     except Exception as e:
-        logger.error("KO", e)
+        logger.exception("KO", e)
         # raise e
     finally:
         error_producer.flush()
