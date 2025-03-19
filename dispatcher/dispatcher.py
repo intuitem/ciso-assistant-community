@@ -12,6 +12,8 @@ from rich import print as rprint
 from messages import message_registry
 from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD
 
+from loguru import logger
+
 auth_data = dict()
 
 
@@ -30,26 +32,24 @@ def auth(email, password):
     if email and password:
         data = {"username": email, "password": password}
     else:
-        print("trying credentials from the config file", file=sys.stderr)
+        logger.info("trying credentials from the config file")
         if EMAIL and PASSWORD:
             data = {"username": EMAIL, "password": PASSWORD}
         else:
-            print("Could not find any usable credentials.", file=sys.stderr)
+            logger.error("Could not find any usable credentials.")
             sys.exit(1)
     headers = {"accept": "application/json", "Content-Type": "application/json"}
 
     res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
-    print(res.status_code)
     if res.status_code == 200:
         with open(".tmp.yaml", "w") as yfile:
             yaml.safe_dump(res.json(), yfile)
-            print("Looks good, you can move to other commands.", file=sys.stderr)
+            logger.info("Looks good, you can move to other commands.")
     else:
-        print(
+        logger.error(
             "Check your credentials again. You can set them on the config file or on the command line.",
-            file=sys.stderr,
         )
-        print(res.json())
+        logger.error(res.json())
 
 
 @click.command()
@@ -65,30 +65,31 @@ def consume():
     )
 
     try:
-        rprint("Starting consumer")
+        logger.info("Starting consumer")
         for msg in consumer:
-            rprint(f"Consumed record. key={msg.key}, value={msg.value}")
+            logger.debug("Consumed record.", key=msg.key, value=msg.value)
             try:
                 message = json.loads(msg.value.decode("utf-8"))
             except Exception as e:
-                rprint(f"Error decoding message: {e}")
+                logger.error(f"Error decoding message: {e}")
             else:
                 if message.get("message_type") not in message_registry.REGISTRY:
-                    rprint(
-                        "Event type not supported. Skipping. Check the event_registry for supported events."
+                    logger.error(
+                        "Event type not supported. Skipping. Check the message registry for supported events."
                     )
                     continue
-                rprint(f"Processing event: {message.get('message_type')}")
+                logger.info(f"Processing event: {message.get('message_type')}")
                 try:
                     message_registry.REGISTRY[message.get("message_type")](message)
                 except Exception as e:
+                    # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
                     # TODO: Message-bound error handling is to be done here.
-                    rprint("KO", e)
+                    logger.error("KO", e)
 
     except UnsupportedCodecError as e:
-        rprint("KO", e)
+        logger.error("KO", e)
     except Exception as e:
-        rprint("KO", e)
+        logger.error("KO", e)
 
 
 cli.add_command(auth)

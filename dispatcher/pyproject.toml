@@ -14,6 +14,7 @@ requests = "^2.32.3"
 rich = "^13.9.4"
 icecream = "^2.1.4"
 pyyaml = "^6.0.2"
+loguru = "^0.7.3"
 
 
 [build-system]
