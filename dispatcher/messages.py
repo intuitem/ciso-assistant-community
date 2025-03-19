@@ -206,7 +206,7 @@ def upload_attachment(message: dict):
         raise Exception(
             f"Failed to update evidence {evidence_id}: {upload_response.status_code}, {upload_response.text}"
         )
-    print(upload_response.json())
+    print(upload_response.status_code)
 
     if applied_controls_selector:
         applied_controls = get_object_ids(applied_controls_selector, "applied-controls")

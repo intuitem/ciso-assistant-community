@@ -79,9 +79,15 @@ def consume():
                     )
                     continue
                 rprint(f"Processing event: {message.get('message_type')}")
-                message_registry.REGISTRY[message.get("message_type")](message)
+                try:
+                    message_registry.REGISTRY[message.get("message_type")](message)
+                except Exception as e:
+                    # TODO: Message-bound error handling is to be done here.
+                    rprint("KO", e)
 
     except UnsupportedCodecError as e:
+        rprint("KO", e)
+    except Exception as e:
         rprint("KO", e)
 
 
