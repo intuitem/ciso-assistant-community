@@ -88,15 +88,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 	return await resolve(event);
 };
 
-export const handleFetch: HandleFetch = async ({ request, fetch, event: { cookies } }) => {
+export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-	const currentLang = cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE;
+	const currentLang = event.cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
 		request.headers.set('Content-Type', 'application/json');
 		request.headers.set('Accept-Language', currentLang);
 
-		const token = cookies.get('token');
-		const csrfToken = cookies.get('csrftoken');
+		const token = event.cookies.get('token');
+		const csrfToken = event.cookies.get('csrftoken');
 
 		if (token) {
 			request.headers.append('Authorization', `Token ${token}`);
@@ -109,10 +109,37 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event: { cookie
 	}
 
 	if (request.url.startsWith(`${BASE_API_URL}/_allauth/app`)) {
-		const allauthSessionToken = cookies.get('allauth_session_token');
+		const allauthSessionToken = event.cookies.get('allauth_session_token');
 		if (allauthSessionToken) {
 			request.headers.append('X-Session-Token', allauthSessionToken);
 		}
+		const response = await fetch(request);
+		const clonedResponse = response.clone();
+
+		// Session is invalid
+		if (clonedResponse.status === 410) logoutUser(event);
+
+		if (clonedResponse.status === 401) {
+			const data = await clonedResponse.json();
+			const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
+			console.log(data);
+
+			if (
+				// User is authenticated, but needs to reauthenticate to perform a sensitive action
+				data.meta.is_authenticated &&
+				data.data.flows.filter((flow: Record<string, any>) =>
+					reauthenticationFlows.includes(flow.id)
+				)
+			) {
+				setFlash({ type: 'error', message: 'Sensitive action. Please log back in.' }, event);
+				// NOTE: This is a temporary solution to force the user to reauthenticate
+				// We have to properly implement allauth's reauthentication flow
+				// https://docs.allauth.org/en/latest/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1reauthenticate/post
+				logoutUser(event);
+			}
+		}
+
+		return response;
 	}
 
 	return fetch(request);
