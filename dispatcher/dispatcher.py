@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 
@@ -7,13 +6,21 @@ import requests
 import yaml
 from kafka import KafkaConsumer
 from kafka.errors import UnsupportedCodecError
-from rich import print as rprint
 
 from messages import message_registry
 from schemas import deserialize_avro_message
 from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD
 
 from loguru import logger
+
+logger.remove(0)
+logger.add(
+    sys.stderr,
+    format="<green>{time:YYYY-MM-DD at HH:mm:ss}</green> | <level>{level}</level> | <level>{message}</level> | <magenta>{extra}</magenta>",
+    colorize=True,
+    backtrace=True,
+    diagnose=True,
+)
 
 auth_data = dict()
 
@@ -68,7 +75,7 @@ def consume():
     try:
         logger.info("Starting consumer")
         for msg in consumer:
-            logger.debug("Consumed record.", key=msg.key, value=msg.value)
+            logger.trace("Consumed record.", key=msg.key, value=msg.value)
             try:
                 message = deserialize_avro_message(msg.value)
             except Exception as e:
@@ -76,7 +83,9 @@ def consume():
             else:
                 if message.get("message_type") not in message_registry.REGISTRY:
                     logger.error(
-                        "Event type not supported. Skipping. Check the message registry for supported events."
+                        "Message type not supported. Skipping. Check the message registry for supported events.",
+                        message_type=message.get("message_type"),
+                        supported_message_types=list(message_registry.REGISTRY.keys()),
                     )
                     continue
                 logger.info(f"Processing event: {message.get('message_type')}")

@@ -1,4 +1,5 @@
 import requests
+from loguru import logger
 
 
 def process_selector(
@@ -54,7 +55,12 @@ def process_selector(
             headers=headers,
             verify=verify_certificate,
         )
-        if response.status_code != 200:
+        if not response.ok:
+            logger.exception(
+                "Search failed",
+                status_code=response.status_code,
+                response=response.text,
+            )
             raise Exception(
                 f"Search API call failed with status {response.status_code}: {response.text}"
             )
@@ -68,10 +74,16 @@ def process_selector(
             results_list = data
             next_url = None
         else:
+            logger.exception("Unexpected API response format", response=data)
             raise Exception("Unexpected API response format")
 
     if target == "single":
         if len(results_list) != 1:
+            logger.exception(
+                "Expected a single object, but got {} objects",
+                len(results_list),
+                results=results_list,
+            )
             raise Exception(
                 f"Expected a single object, but got {len(results_list)} objects."
             )

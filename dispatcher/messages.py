@@ -8,6 +8,8 @@ import requests
 
 from settings import API_URL, TOKEN, VERIFY_CERTIFICATE
 
+from loguru import logger
+
 
 class MessageRegistry:
     REGISTRY = {}
@@ -81,6 +83,9 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     """
     patch_url = f"{API_URL}/{resource_endpoint}/{obj_id}/"
     data = json.dumps(values)
+
+    logger.debug(f"Updating {resource_endpoint} {obj_id}", values=values)
+
     res = requests.patch(
         patch_url,
         data,
@@ -93,10 +98,19 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     )
 
     if res.status_code not in [200, 204]:
+        logger.exception(
+            f"Failed to update {resource_endpoint} {obj_id}: {res.status_code}",
+            response=res.text,
+        )
         raise Exception(
             f"Failed to update {resource_endpoint} {obj_id}: {res.status_code}, {res.text}"
         )
 
+    logger.success(
+        f"Successfully updated object {obj_id}",
+        resource=resource_endpoint,
+        response=res.json() if res.text else {"id": obj_id, **values},
+    )
     # Return JSON response if available, else construct a dict with the provided values.
     return res.json() if res.text else {"id": obj_id, **values}
 
@@ -138,10 +152,17 @@ def update_objects(
     object_ids = get_object_ids(selector, resource_endpoint, selector_mapping)
 
     updated_objects = []
+
+    logger.info("Updating objects", resource=resource_endpoint, ids=object_ids)
+
     # Process each update
     for obj_id in object_ids:
         updated_obj = update_single_object(resource_endpoint, obj_id, values)
         updated_objects.append(updated_obj)
+
+    logger.success(
+        "Successfully updated objects", resource=resource_endpoint, ids=object_ids
+    )
 
     return updated_objects
 
@@ -160,11 +181,13 @@ def upload_attachment(message: dict):
 
     file_name = values.get("file_name")
     if not file_name:
-        raise Exception("No file name provided.")
+        logger.exception("No file_name provided")
+        raise Exception("No file_name provided")
 
     file_content_b64 = values.get("file_content")
     if not file_content_b64:
-        raise Exception("No file content provided.")
+        logger.exception("No file_content provided")
+        raise Exception("No file_content provided")
 
     file_content = base64.b64decode(file_content_b64)
     in_memory_file = io.BytesIO(file_content)
@@ -178,11 +201,17 @@ def upload_attachment(message: dict):
     evidences_endpoint = f"{API_URL}/evidences/"
 
     if selector:
+        logger.info("Using provided selector to find evidence", selector=selector)
         selector["target"] = "single"
         evidence_id = get_object_ids(selector, "evidences")[0]
+        logger.info("Found evidence", evidence_id=evidence_id)
         if not evidence_id:
+            logger.exception(
+                "No evidence found for the provided selector.", selector=selector
+            )
             raise Exception("No evidence found for the provided selector.")
     else:
+        logger.info("Creating new evidence with name: {}", file_name, values=values)
         response = requests.post(
             evidences_endpoint,
             data={"name": values.get("name", file_name)},
@@ -190,12 +219,19 @@ def upload_attachment(message: dict):
             verify=VERIFY_CERTIFICATE,
         )
         if not response.ok:
+            logger.exception(
+                "Failed to create evidence",
+                status_code=response.status_code,
+                response=response.text,
+            )
             raise Exception(
                 f"Failed to create evidence: {response.status_code}, {response.text}"
             )
         data = response.json()
         evidence_id = data["id"]
+        logger.info("Created evidence", evidence_id=evidence_id, evidence=data)
 
+    logger.info("Uploading attachment to evidence", evidence_id=evidence_id)
     upload_response = requests.post(
         f"{evidences_endpoint}{evidence_id}/upload/",
         headers=file_upload_headers,
@@ -203,32 +239,71 @@ def upload_attachment(message: dict):
         verify=VERIFY_CERTIFICATE,
     )
     if upload_response.status_code not in [200, 204]:
+        logger.exception(
+            "Failed to upload attachment to evidence",
+            evidence_id=evidence_id,
+            status_code=upload_response.status_code,
+            response=upload_response.text,
+        )
         raise Exception(
             f"Failed to update evidence {evidence_id}: {upload_response.status_code}, {upload_response.text}"
         )
-    print(upload_response.status_code)
+    logger.success(
+        "Uploaded attachment to evidence", evidence_id=evidence_id, file_name=file_name
+    )
 
     if applied_controls_selector:
+        logger.info(
+            "Updating applied controls with evidence",
+            selector=applied_controls_selector,
+        )
         applied_controls = get_object_ids(applied_controls_selector, "applied-controls")
+        logger.info("Found applied controls", applied_controls=applied_controls)
         if not applied_controls:
+            logger.exception(
+                "No applied controls found for the provided selector.",
+                selector=applied_controls_selector,
+            )
             raise Exception("No applied controls found for the provided selector.")
         for control in applied_controls:
+            logger.debug("Fetching applied control", control=control)
             control_endpoint = f"{API_URL}/applied-controls/{control}/"
             get_response = requests.get(
                 control_endpoint, headers={"Authorization": f"Token {TOKEN}"}
             )
             control_data = get_response.json()
+            logger.debug("Got applied control", control=control, data=control_data)
             evidences = control_data.get("evidences", [])
+            logger.info(
+                "Attaching evidence to applied control",
+                control=control_data,
+                evidence=evidence_id,
+            )
             update_response = requests.patch(
                 control_endpoint,
                 json={"evidences": evidences + [evidence_id]},
                 headers={"Authorization": f"Token {TOKEN}"},
             )
             if not update_response.ok:
+                logger.exception(
+                    "Failed to update applied control",
+                    control=control,
+                    response=update_response.text,
+                )
                 raise Exception(
                     f"Failed to update applied control {control}: {update_response.status_code}, {update_response.text}"
                 )
-            print(update_response.json())
+            logger.success(
+                "Updated applied control",
+                control=control,
+                response=update_response.json(),
+            )
+        logger.success(
+            "Successfully updated applied controls with evidence",
+            applied_controls=applied_controls,
+            evidence=evidence_id,
+            file_name=file_name,
+        )
 
 
 message_registry.add(update_applied_control)
