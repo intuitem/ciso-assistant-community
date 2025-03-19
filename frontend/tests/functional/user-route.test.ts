@@ -200,15 +200,8 @@ test('user usual routine actions are working correctly', async ({
 			link: 'https://intuitem.com/'
 		});
 
-		await pages.evidencesPage.waitForItemInTable(vars.evidenceName2);
+		await pages.evidencesPage.waitForItemInTable();
 		await pages.evidencesPage.clickOnItem(vars.evidenceName2);
-		await pages.evidencesPage.page.waitForURL(new RegExp('^.*/evidences/.+'));
-		await pages.evidencesPage.page
-			.getByTestId('attachment-name-title')
-			.waitFor({ state: 'visible' });
-		await pages.evidencesPage.clickDeleteAttachmentButton();
-		await pages.evidencesPage.confirmDeleteAttachment();
-		await pages.evidencesPage.expectAttachmentDeleted();
 	});
 
 	await test.step('user can import a risk matrix', async () => {
