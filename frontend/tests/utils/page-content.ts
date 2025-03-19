@@ -160,17 +160,14 @@ export class PageContent extends BasePage {
 		await this.page.getByTestId('table');
 	}
 
-	async clickOnItem(name: string) {
-		await this.page.getByTestId(`${this.url}-${name}`).click();
-	}
 
 	async clickDeleteAttachmentButton() {
 		await this.page.getByTestId('attachment-delete-button').waitFor({ state: 'visible' });
 		await this.page.getByTestId('attachment-delete-button').click();
 	}
 
-	async confirmDeleteAttachment() {
-		await this.deleteModalTitle.waitFor({ state: 'visible' });
+	async clickDeleteModalConfirmButton() {
+		await this.deleteModalConfirmButton.waitFor({ state: 'visible' });
 		await this.deleteModalConfirmButton.click();
 	}
 

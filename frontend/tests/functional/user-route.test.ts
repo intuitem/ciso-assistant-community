@@ -201,7 +201,11 @@ test('user usual routine actions are working correctly', async ({
 		});
 
 		await pages.evidencesPage.waitForItemInTable();
-		await pages.evidencesPage.clickOnItem(vars.evidenceName2);
+		await pages.evidencesPage.viewItemDetail(vars.evidenceName2);
+		await pages.evidencesPage.clickDeleteAttachmentButton();
+		await pages.evidencesPage.deleteModalConfirmButton.waitFor({ state: 'visible' });
+		await pages.evidencesPage.deleteModalConfirmButton.click();
+		await pages.evidencesPage.expectAttachmentDeleted();
 	});
 
 	await test.step('user can import a risk matrix', async () => {
