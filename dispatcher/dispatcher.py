@@ -97,7 +97,6 @@ def consume():
                     message_registry.REGISTRY[message.get("message_type")](message)
                 except Exception as e:
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
-                    # TODO: Message-bound error handling is to be done here.
                     logger.error("KO", e)
                     error_producer.send(ERRORS_TOPIC, key=msg.key, value=msg.value)
 
