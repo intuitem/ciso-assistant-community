@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "ciso-assistant-dispatcher"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "Kafka message dispatcher for CISO Assistant"
+authors = ["intuitem <contact@intuitem.com>"]
 readme = "README.md"
 package-mode = false
 
