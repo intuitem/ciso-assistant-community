@@ -1957,6 +1957,15 @@ class Timeline(AbstractBaseModel, FolderMixin):
     )
     is_published = models.BooleanField(_("published"), default=True)
 
+    def __str__(self):
+        return f"{self.entry}"
+
+    def create(self, *args, **kwargs):
+        super().create(*args, **kwargs)
+        self.folder = self.incident.folder
+        self.save()
+        return self
+
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):

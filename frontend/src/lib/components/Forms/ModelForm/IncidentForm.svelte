@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
-    import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -24,24 +24,24 @@
 	hidden={initialData.folder}
 />
 <Select
-    {form}
-    options={model.selectOptions['status']}
-    field="status"
-    label={m.status()}
-    cacheLock={cacheLocks['status']}
-    bind:cachedValue={formDataCache['status']}
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
 />
 <Select
-    {form}
-    options={model.selectOptions['severity']}
-    field="severity"
-    label={m.severity()}
-    cacheLock={cacheLocks['severity']}
-    bind:cachedValue={formDataCache['severity']}
+	{form}
+	options={model.selectOptions['severity']}
+	field="severity"
+	label={m.severity()}
+	cacheLock={cacheLocks['severity']}
+	bind:cachedValue={formDataCache['severity']}
 />
 <AutocompleteSelect
 	{form}
-    multiple
+	multiple
 	optionsEndpoint="threats"
 	field="threats"
 	cacheLock={cacheLocks['threats']}
@@ -49,28 +49,28 @@
 	label={m.threats()}
 />
 <AutocompleteSelect
-    {form}
-    multiple
-    optionsEndpoint="users?is_third_party=false"
-    optionsLabelField="email"
-    field="owners"
-    cacheLock={cacheLocks['owners']}
-    bind:cachedValue={formDataCache['owners']}
-    label={m.owners()}
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="owners"
+	cacheLock={cacheLocks['owners']}
+	bind:cachedValue={formDataCache['owners']}
+	label={m.owners()}
 />
 <AutocompleteSelect
-    multiple
-    {form}
-    optionsEndpoint="assets"
-    optionsLabelField="auto"
-    optionsExtraFields={[['folder', 'str']]}
-    field="assets"
-    label={m.assets()}
+	multiple
+	{form}
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
+	field="assets"
+	label={m.assets()}
 />
 <AutocompleteSelect
-    multiple
-    {form}
-    optionsEndpoint="qualifications"
-    field="qualifications"
-    label={m.qualifications()}
+	multiple
+	{form}
+	optionsEndpoint="qualifications"
+	field="qualifications"
+	label={m.qualifications()}
 />

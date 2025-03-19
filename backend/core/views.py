@@ -4805,7 +4805,13 @@ class IncidentViewSet(BaseModelViewSet):
 class TimelineViewSet(BaseModelViewSet):
     model = Timeline
     filterset_fields = ["incident"]
+    ordering = ["-timestamp"]
 
     @action(detail=False, name="Get entry type choices")
     def entry_type(self, request):
         return Response(dict(Timeline.EntryType.choices))
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        instance.author = self.request.user
+        return super().perform_create(serializer)

@@ -546,17 +546,16 @@ export const IncidentSchema = z.object({
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional()
-})
+});
 
 export const TimelineSchema = z.object({
 	incident: z.string(),
-	folder: z.string(),
 	entry: z.string(),
 	entry_type: z.string(),
-	timestamp: z.union([z.literal('').transform(() => null), z.string().date()]),
+	timestamp: z.union([z.literal('').transform(() => null), z.string().datetime({ local: true })]),
 	observation: z.string().optional().nullable(),
 	evidences: z.string().uuid().optional().array().optional()
-})
+});
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
@@ -594,8 +593,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'security-exceptions': SecurityExceptionSchema,
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
-	'incidents': IncidentSchema,
-	'timelines': TimelineSchema
+	incidents: IncidentSchema,
+	timelines: TimelineSchema
 };
 
 export const modelSchema = (model: string) => {

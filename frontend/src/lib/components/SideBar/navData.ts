@@ -193,7 +193,7 @@ export const navData = {
 				{
 					name: 'incidents',
 					fa_icon: 'fa-solid fa-bug',
-					href: '/incidents',
+					href: '/incidents'
 				}
 			]
 		},

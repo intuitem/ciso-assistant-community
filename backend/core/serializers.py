@@ -1228,15 +1228,21 @@ class FindingReadSerializer(FindingWriteSerializer):
 
 
 class TimelineWriteSerializer(BaseModelSerializer):
-
     class Meta:
         model = Timeline
         exclude = ["created_at", "updated_at"]
 
 
 class TimelineReadSerializer(TimelineWriteSerializer):
+    str = serializers.CharField(source="__str__", read_only=True)
     author = FieldsRelatedField()
     evidences = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+    incident = FieldsRelatedField()
+
+    class Meta:
+        model = Timeline
+        fields = "__all__"
 
 
 class IncidentWriteSerializer(BaseModelSerializer):
@@ -1251,7 +1257,6 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
-    timeline = serializers.SerializerMethodField()
 
     class Meta:
         model = Incident
