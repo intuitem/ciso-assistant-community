@@ -73,13 +73,13 @@ def consume():
             except Exception as e:
                 rprint(f"Error decoding message: {e}")
             else:
-                if message.get("event_type") not in message_registry.REGISTRY:
+                if message.get("message_type") not in message_registry.REGISTRY:
                     rprint(
                         "Event type not supported. Skipping. Check the event_registry for supported events."
                     )
                     continue
-                rprint(f"Processing event: {message.get('event_type')}")
-                message_registry.REGISTRY[message.get("event_type")](message)
+                rprint(f"Processing event: {message.get('message_type')}")
+                message_registry.REGISTRY[message.get("message_type")](message)
 
     except UnsupportedCodecError as e:
         rprint("KO", e)

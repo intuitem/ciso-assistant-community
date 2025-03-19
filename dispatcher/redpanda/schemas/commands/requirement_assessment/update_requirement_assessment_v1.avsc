@@ -3,7 +3,7 @@
     "name": "update_requirement_assessment_command",
     "fields": [
         {
-            "name": "event_type",
+            "name": "message_type",
             "type": "string"
         },
         {
