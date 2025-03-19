@@ -1905,6 +1905,8 @@ class Incident(NameDescriptionMixin, FolderMixin):
     )
     is_published = models.BooleanField(_("published"), default=True)
 
+    fields_to_check = ["name"]
+
     class Meta:
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
@@ -1923,6 +1925,13 @@ class Timeline(AbstractBaseModel, FolderMixin):
         RESOLUTION = "resolution", "Resolution"
         CLOSING = "closing", "Closing"
         DISMISSAL = "dismissal", "Dismissal"
+
+        @classmethod
+        def get_manual_entry_types(cls):
+            return filter(
+                lambda x: x[0] in ["detection", "mitigation", "observation"],
+                cls.choices,
+            )
 
     incident = models.ForeignKey(
         Incident,

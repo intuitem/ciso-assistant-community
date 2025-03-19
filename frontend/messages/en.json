@@ -1201,5 +1201,7 @@
 	"incidents": "Incidents",
 	"addIncident": "Add incident",
 	"timestamp": "Timestamp",
-	"addTimeline": "Add timeline entry"
+	"addTimeline": "Add timeline entry",
+	"major": "Major",
+	"statusFromongoingToresolved": "Status changed from Ongoing to Resolved"
 }

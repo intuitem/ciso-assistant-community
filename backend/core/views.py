@@ -4801,6 +4801,46 @@ class IncidentViewSet(BaseModelViewSet):
     def severity(self, request):
         return Response(dict(Incident.Severity.choices))
 
+    def perform_update(self, serializer):
+        previous_instance = self.get_object()
+        previous_status = previous_instance.status
+        previous_severity = previous_instance.severity
+
+        instance = serializer.save()
+        if (
+            instance.status
+            in [
+                Incident.Status.RESOLVED,
+                Incident.Status.CLOSED,
+                Incident.Status.DISMISSED,
+            ]
+            and previous_status != instance.status
+        ):
+            entry_type = {
+                Incident.Status.RESOLVED: Timeline.EntryType.RESOLUTION,
+                Incident.Status.CLOSED: Timeline.EntryType.CLOSING,
+                Incident.Status.DISMISSED: Timeline.EntryType.DISMISSAL,
+            }.get(instance.status)
+
+            Timeline.objects.create(
+                incident=instance,
+                entry=f"statusFrom{previous_status}To{instance.status}",
+                entry_type=entry_type,
+                author=self.request.user,
+                timestamp=now(),
+            )
+
+        if previous_severity != instance.severity and previous_severity is not None:
+            Timeline.objects.create(
+                incident=instance,
+                entry=f"severityFrom{previous_severity}To{instance.severity}",
+                entry_type=Timeline.EntryType.SEVERITY_CHANGE,
+                author=self.request.user,
+                timestamp=now(),
+            )
+
+        return super().perform_update(serializer)
+
 
 class TimelineViewSet(BaseModelViewSet):
     model = Timeline
@@ -4809,7 +4849,7 @@ class TimelineViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get entry type choices")
     def entry_type(self, request):
-        return Response(dict(Timeline.EntryType.choices))
+        return Response(dict(Timeline.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
         instance = serializer.save()

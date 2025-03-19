@@ -33,7 +33,13 @@
 />
 <Select
 	{form}
-	options={model.selectOptions['severity']}
+	options={[
+		{ label: m.critical(), value: 1 },
+		{ label: m.major(), value: 2 },
+		{ label: m.moderate(), value: 3 },
+		{ label: m.minor(), value: 4 },
+		{ label: m.low(), value: 5 }
+	]}
 	field="severity"
 	label={m.severity()}
 	cacheLock={cacheLocks['severity']}

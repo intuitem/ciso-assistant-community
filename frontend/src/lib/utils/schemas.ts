@@ -541,7 +541,7 @@ export const IncidentSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	status: z.string(),
-	severity: z.string(),
+	severity: z.number(),
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
