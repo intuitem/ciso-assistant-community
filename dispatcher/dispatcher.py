@@ -38,7 +38,7 @@ def auth(email, password):
             sys.exit(1)
     headers = {"accept": "application/json", "Content-Type": "application/json"}
 
-    res = requests.post(url, data, headers, verify=VERIFY_CERTIFICATE)
+    res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
     print(res.status_code)
     if res.status_code == 200:
         with open(".tmp.yaml", "w") as yfile:
