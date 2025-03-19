@@ -3,7 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type RequestEvent, type HandleFetch } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { getLocale, setLocale } from '$paraglide/runtime';
+import { setLocale } from '$paraglide/runtime';
 import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
@@ -131,7 +131,10 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 					reauthenticationFlows.includes(flow.id)
 				)
 			) {
-				setFlash({ type: 'error', message: 'Sensitive action. Please log back in.' }, event);
+				setFlash(
+					{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
+					event
+				);
 				// NOTE: This is a temporary solution to force the user to reauthenticate
 				// We have to properly implement allauth's reauthentication flow
 				// https://docs.allauth.org/en/latest/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1reauthenticate/post
