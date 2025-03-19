@@ -873,5 +873,10 @@
 	"compliantRequirementsSemiColon": "Requisitos conforme:",
 	"requirementsProgressionSemiColon": "Progresión de requisitos:",
 	"noRequirementFound": "No se encontró ningún requisito",
-	"noAuditForTheFramework": "No hay auditoría utilizando este marco"
+	"noAuditForTheFramework": "No hay auditoría utilizando este marco",
+	"finding": "Hallazgo",
+	"findings": "Hallazgos",
+	"associatedFindings": "Hallazgos asociados",
+	"findings_count": "Número de hallazgos",
+	"addFinding": "Añadir hallazgo"
 }
