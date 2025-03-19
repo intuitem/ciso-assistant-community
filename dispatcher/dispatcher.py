@@ -3,12 +3,12 @@ import sys
 
 import click
 import requests
+import json
 import yaml
 from kafka import KafkaConsumer
 from kafka.errors import UnsupportedCodecError
 
 from messages import message_registry
-from schemas import deserialize_avro_message
 from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD
 
 from loguru import logger
@@ -77,7 +77,7 @@ def consume():
         for msg in consumer:
             logger.trace("Consumed record.", key=msg.key, value=msg.value)
             try:
-                message = deserialize_avro_message(msg.value)
+                message = json.loads(msg.value.decode("utf-8"))
             except Exception as e:
                 logger.error(f"Error decoding message: {e}")
             else:
