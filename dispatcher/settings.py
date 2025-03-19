@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 
 import click
@@ -9,6 +10,8 @@ GLOBAL_FOLDER_ID = None
 TOKEN = ""
 EMAIL = ""
 PASSWORD = ""
+
+ERRORS_TOPIC = os.getenv("ERRORS_TOPIC", "errors")
 
 CONSUMER_CONFG_PATH = ".consumer_config.yaml"
 

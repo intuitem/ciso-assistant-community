@@ -5,11 +5,11 @@ import click
 import requests
 import json
 import yaml
-from kafka import KafkaConsumer
+from kafka import KafkaConsumer, KafkaProducer
 from kafka.errors import UnsupportedCodecError
 
 from messages import message_registry
-from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD
+from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD, ERRORS_TOPIC
 
 from loguru import logger
 
@@ -72,6 +72,10 @@ def consume():
         # value_deserializer=lambda v: v,
     )
 
+    error_producer = KafkaProducer(
+        bootstrap_servers=os.getenv("REDPANDA_BROKERS", "localhost:9092"),
+    )
+
     try:
         logger.info("Starting consumer")
         for msg in consumer:
@@ -95,13 +99,16 @@ def consume():
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
                     # TODO: Message-bound error handling is to be done here.
                     logger.error("KO", e)
-                    # raise e
+                    error_producer.send(ERRORS_TOPIC, key=msg.key, value=msg.value)
 
     except UnsupportedCodecError as e:
         logger.error("KO", e)
     except Exception as e:
         logger.error("KO", e)
         # raise e
+    finally:
+        error_producer.flush()
+        error_producer.close()
 
 
 cli.add_command(auth)
