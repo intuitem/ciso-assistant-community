@@ -1,3 +1,4 @@
+import base64
 import io
 import json
 import urllib.parse
@@ -165,7 +166,7 @@ def upload_attachment(message: dict):
     if not file_content_b64:
         raise Exception("No file content provided.")
 
-    file_content = file_content_b64.decode("base64")
+    file_content = base64.b64decode(file_content_b64)
     in_memory_file = io.BytesIO(file_content)
     file_upload_headers = {
         "Authorization": f"Token {TOKEN}",
