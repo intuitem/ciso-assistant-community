@@ -49,11 +49,16 @@ def extract_update_data(message: dict) -> tuple[dict, dict]:
 
 
 def get_object_ids(
-    selector: dict, resource_endpoint: str, selector_mapping: dict = {}
+    selector: dict,
+    resource_endpoint: str,
+    selector_mapping: dict[str, str] | None = None,
 ) -> list:
     """
     Uses the selector to query the API and return a list of object IDs.
     """
+    if selector_mapping is None:
+        selector_mapping = {}
+
     search_endpoint = f"{API_URL}/{resource_endpoint}/"
     result = process_selector(
         selector,
@@ -96,7 +101,9 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
 
 
 def update_objects(
-    message: dict, resource_endpoint: str | None = None, selector_mapping: dict = {}
+    message: dict,
+    resource_endpoint: str | None = None,
+    selector_mapping: dict[str, str] | None = None,
 ) -> list:
     """
     Generic function to update an object.
@@ -117,6 +124,9 @@ def update_objects(
     Raises:
         Exception: If no selector is provided, or if the update fails.
     """
+    if selector_mapping is None:
+        selector_mapping = {}
+
     # Determine resource endpoint
     resource_endpoint = get_resource_endpoint(message, resource_endpoint)
 

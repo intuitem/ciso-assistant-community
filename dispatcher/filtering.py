@@ -5,7 +5,7 @@ def process_selector(
     selector: dict[str, str],
     endpoint: str,
     token: str,
-    selector_mapping: dict[str, str] = {},
+    selector_mapping: dict[str, str] | None = None,
     verify_certificate: bool = True,
 ):
     """
@@ -27,6 +27,9 @@ def process_selector(
         Exception: If the API call fails, the response is not as expected, or if the result count
                    does not match the expected target.
     """
+    if selector_mapping is None:
+        selector_mapping = {}
+
     target = selector.pop("target", "single")
 
     if selector_mapping:
