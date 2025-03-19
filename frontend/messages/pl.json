@@ -869,5 +869,9 @@
 	"useDocumentationScoreHelpText": "Drugi wynik (wynik dokumentacji) będzie dostępny do oceny wymagań.",
 	"publicationDate": "Data publikacji",
 	"filterby": "Filtruj według",
-	"selectEvidence": "Wybierz dowody"
+	"selectEvidence": "Wybierz dowody",
+	"multipleChoice": "Wielokrotny wybór",
+	"uniqueChoice": "Unikalny wybór",
+	"text": "Tekst",
+	"date": "Data"
 }

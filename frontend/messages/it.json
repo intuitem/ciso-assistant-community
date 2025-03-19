@@ -1171,5 +1171,9 @@
 	"addSecurityException": "Aggiungi eccezione",
 	"expirationDate": "Data di scadenza",
 	"filterBy": "Filtra per",
-	"selectEvidence": "Seleziona evidenza"
+	"selectEvidence": "Seleziona evidenza",
+	"multipleChoice": "Scelta multipla",
+	"uniqueChoice": "Scelta unica",
+	"text": "Testo",
+	"date": "Data"
 }
