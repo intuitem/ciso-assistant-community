@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "upload_attachment",
+  "type": "object",
+  "properties": {
+    "message_type": {
+      "type": "string"
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "values": {
+      "type": "object",
+      "properties": {
+        "file_name": {
+          "type": "string"
+        },
+        "file_content": {
+          "type": "string"
+        },
+        "applied_controls": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["file_name", "file_content", "applied_controls"]
+    }
+  },
+  "required": ["message_type", "selector", "values"]
+}
+
