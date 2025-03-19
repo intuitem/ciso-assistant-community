@@ -41,7 +41,9 @@
 
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
-		<header class={cHeader}  data-testid="modal-title">{$modalStore[0].title ?? '(title missing)'}</header>
+		<header class={cHeader} data-testid="modal-title">
+			{$modalStore[0].title ?? '(title missing)'}
+		</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 		{#if bodyComponent}
 			<div class="max-h-96 overflow-y-scroll scroll card">

@@ -160,7 +160,6 @@ export class PageContent extends BasePage {
 		await this.page.getByTestId('table');
 	}
 
-
 	async clickDeleteAttachmentButton() {
 		await this.page.getByTestId('attachment-delete-button').waitFor({ state: 'visible' });
 		await this.page.getByTestId('attachment-delete-button').click();
