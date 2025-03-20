@@ -1179,6 +1179,8 @@
 	"identified": "Identifié",
 	"confirmed": "Confirmé",
 	"dismissed": "Rejeté",
+	"confirmModalTitleWarning": "Faites attention",
+	"bodyModalExportFolder": "Certains objets en dehors de ce domaine vont aussi être exportés. Voici la liste des catégories d'objets concernés: ",
 	"assigned": "Assigné",
 	"selectEvidence": "Sélectionner une preuve",
 	"compliantRequirementsSemiColon": "Exigences conformes :",
