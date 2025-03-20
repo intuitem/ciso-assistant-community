@@ -34,8 +34,8 @@
 				const targetLabel = targetNode ? targetNode.name : 'unknown';
 				const value = params.data.value || '';
 
-				// Return formatted label: "src_label - value - tgt_label"
-				return `${sourceLabel} - ${value} - ${targetLabel}`;
+				// Return formatted label with src and tgt in bold, value in italic
+				return `<b>${sourceLabel}</b> - <i>${value}</i> - <b>${targetLabel}</b>`;
 			}
 			return params.name;
 		};
@@ -54,6 +54,15 @@
 			label: {
 				position: 'right',
 				show: true
+			},
+			enterable: false,
+			triggerOn: 'mousemove',
+			backgroundColor: 'rgba(255, 255, 255, 0.95)',
+			borderColor: '#ccc',
+			borderWidth: 1,
+			extraCssText: 'box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);',
+			textStyle: {
+				color: '#333'
 			}
 		},
 		title: {
