@@ -5,11 +5,6 @@ from core.base_models import NameDescriptionMixin
 from core.models import AppliedControl
 
 
-class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
-    class Meta:
-        abstract = True
-
-
 class Purpose(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="purposes"
