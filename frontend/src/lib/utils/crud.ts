@@ -269,7 +269,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
@@ -387,8 +388,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assets',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
+		reverseForeignKeyFields: [
+			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
+		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -478,7 +483,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' },
-			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' }
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' },
+			{ field: 'assets', urlModel: 'assets' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
@@ -553,7 +559,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
 		reverseForeignKeyFields: [
-			{ field: 'entity', urlModel: 'solutions' },
+			{ field: 'provider_entity', urlModel: 'solutions' },
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'entity', urlModel: 'entity-assessments' }
 		],

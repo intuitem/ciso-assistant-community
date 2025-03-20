@@ -289,7 +289,8 @@ export const ComplianceAssessmentSchema = z.object({
 	baseline: z.string().optional().nullable(),
 	create_applied_controls_from_suggestions: z.boolean().optional().default(false),
 	observation: z.string().optional().nullable(),
-	ebios_rm_studies: z.string().uuid().optional().array().optional()
+	ebios_rm_studies: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional()
 });
 
 export const EvidenceSchema = z.object({

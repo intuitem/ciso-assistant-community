@@ -21,8 +21,8 @@
 		"build-storybook": "storybook build"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "1.11.2",
-		"@inlang/plugin-message-format": "2.2.0",
+		"@inlang/paraglide-js": "2.0.0-beta.30",
+		"@inlang/plugin-message-format": "^2.2.0",
 		"@playwright/test": "^1.49.1",
 		"@skeletonlabs/skeleton": "^2.10.3",
 		"@skeletonlabs/tw-plugin": "^0.4.0",
@@ -78,7 +78,6 @@
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.12",
 		"@fortawesome/fontawesome-free": "^6.7.1",
-		"@inlang/paraglide-sveltekit": "0.11.0",
 		"@typescript-eslint/eslint-plugin": "^8.18.0",
 		"@typescript-eslint/parser": "^8.18.0",
 		"@unovis/svelte": "1.4.3-beta.0",

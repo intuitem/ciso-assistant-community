@@ -127,6 +127,15 @@
 		cacheLock={cacheLocks['show_documentation_score']}
 		bind:cachedValue={formDataCache['show_documentation_score']}
 	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="assets"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="assets"
+		label={m.assets()}
+	/>
 	<TextField
 		{form}
 		field="ref_id"
