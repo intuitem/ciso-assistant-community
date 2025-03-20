@@ -5,8 +5,7 @@ import click
 import requests
 import json
 import yaml
-from kafka import KafkaConsumer, KafkaProducer
-from kafka.errors import UnsupportedCodecError
+from quixstreams import Application
 
 from messages import message_registry
 from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD, ERRORS_TOPIC
@@ -62,57 +61,48 @@ def auth(email, password):
 
 @click.command()
 def consume():
-    consumer = KafkaConsumer(
-        # topic
-        "observation",
-        # consumer configs
-        bootstrap_servers=os.getenv("REDPANDA_BROKERS", "localhost:9092"),
-        group_id="my-group",
-        auto_offset_reset="earliest",
-        # value_deserializer=lambda v: v,
+    app = Application(
+        broker_address=os.getenv("REDPANDA_BROKERS", "localhost:9092"),
+        consumer_group="my-group",
     )
+    messages_topic = app.topic(name="observation", value_serializer="json")
+    errors_topic = app.topic(name=ERRORS_TOPIC, value_serializer="json")
 
-    error_producer = KafkaProducer(
-        bootstrap_servers=os.getenv("REDPANDA_BROKERS", "localhost:9092"),
-    )
+    with app.get_producer() as producer:
 
-    try:
-        logger.info("Starting consumer")
-        for msg in consumer:
-            logger.trace("Consumed record.", key=msg.key, value=msg.value)
+        def on_update_callback(message: dict):
+            message_type = message.get("message_type")
+            if message_type not in message_registry.REGISTRY:
+                logger.error(
+                    "Message type not supported. Skipping. Check the message registry for supported events.",
+                    extra={
+                        "message_type": message_type,
+                        "supported_message_types": list(
+                            message_registry.REGISTRY.keys()
+                        ),
+                    },
+                )
+
+            logger.info(f"Processing event: {message_type}")
             try:
-                message = json.loads(msg.value.decode("utf-8"))
+                # Dispatch to the function registered for this message type.
+                message_registry.REGISTRY[message_type](message)
             except Exception as e:
-                logger.error(f"Error decoding message: {e}")
-            else:
-                if message.get("message_type") not in message_registry.REGISTRY:
-                    logger.error(
-                        "Message type not supported. Skipping. Check the message registry for supported events.",
-                        message_type=message.get("message_type"),
-                        supported_message_types=list(message_registry.REGISTRY.keys()),
-                    )
-                    continue
-                logger.info(f"Processing event: {message.get('message_type')}")
-                try:
-                    message_registry.REGISTRY[message.get("message_type")](message)
-                except Exception as e:
-                    # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
-                    logger.error("Message could not be consumed", exception=e)
-                    error_producer.send(
-                        ERRORS_TOPIC,
-                        value=json.dumps(
-                            {"message": message, "error": str(e)}
-                        ).encode(),
-                    )
+                logger.error("Message could not be consumed", exc_info=True)
+                error_payload = errors_topic.serialize(
+                    value={"message": message, "error": str(e)}
+                )
+                producer.produce(topic=errors_topic.name, value=error_payload.value)
 
-    except UnsupportedCodecError as e:
-        logger.exception("KO", e)
+    # Create a streaming dataframe for the messages topic.
+    sdf = app.dataframe(topic=messages_topic)
+    sdf = sdf.update(on_update_callback)
+
+    logger.info("Starting consumer")
+    try:
+        app.run()  # This call will block and process messages using your on_update_callback.
     except Exception as e:
-        logger.exception("KO", e)
-        # raise e
-    finally:
-        error_producer.flush()
-        error_producer.close()
+        logger.exception("Error in application run", exc_info=True)
 
 
 cli.add_command(auth)
