@@ -269,7 +269,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
 		],
-		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
+		reverseForeignKeyFields: [
+			{ field: 'applied_controls', urlModel: 'evidences' },
+			{ field: 'applied_controls', urlModel: 'requirement-assessments' },
+			{ field: 'applied_controls', urlModel: 'risk-scenarios' },
+			{ field: 'applied_controls', urlModel: 'findings' }
+		],
 		selectFields: [
 			{ field: 'status' },
 			{ field: 'category' },

@@ -867,5 +867,10 @@
 	"documentationScore": "دستاویزی سکور",
 	"useDocumentationScore": "دستاویزی سکور استعمال کریں۔",
 	"useDocumentationScoreHelpText": "ضروریات کو پورا کرنے کے لیے دوسرا سکور (دستاویزی سکور) دستیاب ہوگا۔",
-	"publicationDate": "اشاعت کی تاریخ"
+	"publicationDate": "اشاعت کی تاریخ",
+	"finding": "نتیجہ",
+	"findings": "نتائج",
+	"associatedFindings": "وابستہ نتائج",
+	"findings_count": "نتائج کی تعداد",
+	"addFinding": "نتیجہ شامل کریں۔"
 }
