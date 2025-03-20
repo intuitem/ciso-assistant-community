@@ -156,10 +156,6 @@ export class PageContent extends BasePage {
 			: this.getRow(value).getByTestId('tablerow-import-button');
 	}
 
-	async waitForItemInTable() {
-		await this.page.getByTestId('table');
-	}
-
 	async clickDeleteAttachmentButton() {
 		await this.page.getByTestId('attachment-delete-button').waitFor({ state: 'visible' });
 		await this.page.getByTestId('attachment-delete-button').click();

@@ -200,7 +200,6 @@ test('user usual routine actions are working correctly', async ({
 			link: 'https://intuitem.com/'
 		});
 
-		await pages.evidencesPage.waitForItemInTable();
 		await pages.evidencesPage.viewItemDetail(vars.evidenceName2);
 		await pages.evidencesPage.clickDeleteAttachmentButton();
 		await pages.evidencesPage.deleteModalConfirmButton.waitFor({ state: 'visible' });
