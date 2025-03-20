@@ -620,8 +620,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		foreignKeyFields: [],
-		reverseForeignKeyFields: []
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'owner', urlModel: 'users' }
+		]
 	},
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',

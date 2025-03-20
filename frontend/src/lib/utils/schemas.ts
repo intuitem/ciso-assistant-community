@@ -417,7 +417,7 @@ export const vulnerabilitySchema = z.object({
 
 export const processingSchema = z.object({
 	...NameDescriptionMixin,
-	folder: z.string().default('GL'),
+	folder: z.string(),
 	ref_id: z.string().optional().default(''),
 	filtering_labels: z.string().optional().array().optional()
 });
@@ -570,6 +570,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	solutions: solutionSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
+	processings: processingSchema,
 	'ebios-rm': ebiosRMSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,

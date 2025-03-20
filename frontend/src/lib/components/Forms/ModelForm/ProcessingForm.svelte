@@ -1,6 +1,8 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import Select from '../Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -10,8 +12,6 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
-
-	export let updated_fields: Set<string> = new Set();
 </script>
 
 <TextField
@@ -21,13 +21,7 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-<TextField
-	{form}
-	field="name"
-	label={m.name()}
-	cacheLock={cacheLocks['name']}
-	bind:cachedValue={formDataCache['name']}
-/>
+
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
