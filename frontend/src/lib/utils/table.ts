@@ -491,7 +491,8 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			provider: PROVIDER_FILTER
+			provider: PROVIDER_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-scenarios': {
@@ -569,7 +570,8 @@ export const listViewFields = {
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
 			priority: PRIORITY_FILTER,
-			effort: EFFORT_FILTER
+			effort: EFFORT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	policies: {
@@ -611,7 +613,8 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
 			provider: PROVIDER_FILTER,
-			csf_function: CSF_FUNCTION_FILTER
+			csf_function: CSF_FUNCTION_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	assets: {
