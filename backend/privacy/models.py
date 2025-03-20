@@ -5,7 +5,12 @@ from core.base_models import NameDescriptionMixin
 from core.models import AppliedControl
 
 
-class Purpose(NameDescriptionMixin, FolderMixin):
+class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
+    class Meta:
+        abstract = True
+
+
+class Purpose(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="purposes"
     )
@@ -15,7 +20,7 @@ class Purpose(NameDescriptionMixin, FolderMixin):
         super().save(*args, **kwargs)
 
 
-class PersonalData(NameDescriptionMixin, FolderMixin):
+class PersonalData(NameDescriptionFolderMixin):
     DELETION_POLICY_CHOICES = (
         ("automatic_deletion", "Automatic Deletion"),
         ("anonymization", "Anonymization"),
@@ -45,7 +50,7 @@ class PersonalData(NameDescriptionMixin, FolderMixin):
             self.processing.save(update_fields=["has_sensitive_personal_data"])
 
 
-class DataSubject(NameDescriptionMixin, FolderMixin):
+class DataSubject(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="data_subjects"
     )
@@ -57,7 +62,7 @@ class DataSubject(NameDescriptionMixin, FolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataRecipient(NameDescriptionMixin, FolderMixin):
+class DataRecipient(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="data_recipients"
     )
@@ -68,7 +73,7 @@ class DataRecipient(NameDescriptionMixin, FolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataContractor(NameDescriptionMixin, FolderMixin):
+class DataContractor(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="contractors_involved"
     )
@@ -81,7 +86,7 @@ class DataContractor(NameDescriptionMixin, FolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataTransfer(NameDescriptionMixin, FolderMixin):
+class DataTransfer(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="data_transfers"
     )
@@ -95,7 +100,7 @@ class DataTransfer(NameDescriptionMixin, FolderMixin):
         super().save(*args, **kwargs)
 
 
-class Processing(NameDescriptionMixin, FolderMixin):
+class Processing(NameDescriptionFolderMixin):
     STATUS_CHOICES = (
         ("draft", "Draft"),
         ("in_review", "In Review"),

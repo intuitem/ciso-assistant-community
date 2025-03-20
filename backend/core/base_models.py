@@ -134,3 +134,8 @@ class ETADueDateMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
+    class Meta:
+        abstract = True
