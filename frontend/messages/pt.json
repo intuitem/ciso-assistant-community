@@ -868,5 +868,10 @@
 	"useDocumentationScore": "Utilizar a pontuação da documentação",
 	"useDocumentationScoreHelpText": "Uma segunda pontuação (a pontuação da documentação) estará disponível para avaliar os requisitos.",
 	"publicationDate": "Data de publicação",
-	"selectEvidence": "Selecionar evidência"
+	"selectEvidence": "Selecionar evidência",
+	"finding": "Achado",
+	"findings": "Achados",
+	"associatedFindings": "Achados associados",
+	"findings_count": "Número de achados",
+	"addFinding": "Adicionar achado"
 }

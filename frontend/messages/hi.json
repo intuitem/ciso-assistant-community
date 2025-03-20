@@ -867,5 +867,10 @@
 	"documentationScore": "दस्तावेज़ीकरण स्कोर",
 	"useDocumentationScore": "दस्तावेज़ स्कोर का उपयोग करें",
 	"useDocumentationScoreHelpText": "आवश्यकताओं का आकलन करने के लिए दूसरी रेटिंग (दस्तावेज़ीकरण स्कोर) उपलब्ध होगी।",
-	"publicationDate": "प्रकाशन की तिथि"
+	"publicationDate": "प्रकाशन की तिथि",
+	"finding": "खोज",
+	"findings": "खोजें",
+	"associatedFindings": "संबद्ध खोजें",
+	"findings_count": "खोजों की संख्या",
+	"addFinding": "खोज जोड़ें"
 }

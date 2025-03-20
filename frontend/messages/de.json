@@ -873,5 +873,10 @@
 	"compliantRequirementsSemiColon": "Konforme Anforderungen:",
 	"requirementsProgressionSemiColon": "Fortschritt der Anforderungen:",
 	"noRequirementFound": "Keine Anforderung gefunden",
-	"noAuditForTheFramework": "Es gibt kein Audit, das dieses Framework verwendet"
+	"noAuditForTheFramework": "Es gibt kein Audit, das dieses Framework verwendet",
+	"finding": "Ergebnis",
+	"findings": "Ergebnisse",
+	"associatedFindings": "Zugehörige Ergebnisse",
+	"findings_count": "Anzahl der Ergebnisse",
+	"addFinding": "Ergebnis hinzufügen"
 }
