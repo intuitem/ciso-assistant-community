@@ -1191,6 +1191,8 @@
 	"dismissed": "Dismissed",
 	"assigned": "Assigned",
 	"selectEvidence": "Select evidence",
+	"infrastructure": "Infrastructure",
+	"build": "Build",
 	"compliantRequirementsSemiColon": "Compliant requirements:",
 	"requirementsProgressionSemiColon": "Requirements progression:",
 	"noRequirementFound": "No requirement assessment found",

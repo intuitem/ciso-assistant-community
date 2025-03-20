@@ -1181,6 +1181,8 @@
 	"dismissed": "Rejeté",
 	"assigned": "Assigné",
 	"selectEvidence": "Sélectionner une preuve",
+	"infrastructure": "Infrastructure",
+	"build": "Build",
 	"compliantRequirementsSemiColon": "Exigences conformes :",
 	"requirementsProgressionSemiColon": "Progression des exigences :",
 	"noRequirementFound": "Aucune revue de cette exigence trouvée",
