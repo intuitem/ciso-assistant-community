@@ -1216,5 +1216,6 @@
 	"statusChanged": "Status changed",
 	"cannotDeleteAutoTimeline": "Auto timeline entries cannot be deleted",
 	"timelines": "Timelines",
-	"author": "Author"
+	"author": "Author",
+	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication"
 }
