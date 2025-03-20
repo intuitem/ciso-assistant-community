@@ -4855,7 +4855,7 @@ class TimelineViewSet(BaseModelViewSet):
         instance = serializer.save()
         instance.author = self.request.user
         return super().perform_create(serializer)
-    
+
     def perform_destroy(self, instance):
         if instance.entry_type in [
             Timeline.EntryType.SEVERITY_CHANGE,

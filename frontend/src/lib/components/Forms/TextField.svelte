@@ -24,7 +24,7 @@
 
 	label = label ?? field;
 	const { value, errors, constraints } = formFieldProxy(form, field);
-	
+
 	// Store the display value separately from the actual form value
 	let displayValue: string;
 
@@ -54,11 +54,17 @@
 		if (!utcDateString) return '';
 		const date = new Date(utcDateString);
 		// Format as YYYY-MM-DDThh:mm (format required by datetime-local input)
-		return date.getFullYear() + '-' + 
-			String(date.getMonth() + 1).padStart(2, '0') + '-' +
-			String(date.getDate()).padStart(2, '0') + 'T' +
-			String(date.getHours()).padStart(2, '0') + ':' +
-			String(date.getMinutes()).padStart(2, '0');
+		return (
+			date.getFullYear() +
+			'-' +
+			String(date.getMonth() + 1).padStart(2, '0') +
+			'-' +
+			String(date.getDate()).padStart(2, '0') +
+			'T' +
+			String(date.getHours()).padStart(2, '0') +
+			':' +
+			String(date.getMinutes()).padStart(2, '0')
+		);
 	}
 
 	// Handle value changes for datetime-local inputs
@@ -117,7 +123,7 @@
 			/>
 		{:else}
 			<input
-				{...{type}}
+				{...{ type }}
 				class="{'input ' + _class} {classesTextField($errors)}"
 				data-testid="form-input-{field.replaceAll('_', '-')}"
 				id="form-input-{field.replaceAll('_', '-')}"

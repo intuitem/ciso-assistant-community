@@ -17,7 +17,9 @@ export function unsafeTranslate(key: string, params = {}, options = {}): string 
 	const prefixSuffixMatch = key.match('^([^:]+):([^:]+)$');
 	if (prefixSuffixMatch) {
 		const [, prefix, suffix] = prefixSuffixMatch;
-		const translatedPrefix = Object.hasOwn(m, toCamelCase(prefix)) ? m[toCamelCase(prefix)](params, options) : prefix;
+		const translatedPrefix = Object.hasOwn(m, toCamelCase(prefix))
+			? m[toCamelCase(prefix)](params, options)
+			: prefix;
 		return `${translatedPrefix}:${suffix}`;
 	}
 
@@ -25,8 +27,12 @@ export function unsafeTranslate(key: string, params = {}, options = {}): string 
 	const sourceTargetMatch = key.match('^([^->]+)->([^->]+)$');
 	if (sourceTargetMatch) {
 		const [, source, target] = sourceTargetMatch;
-		const translatedSource = Object.hasOwn(m, toCamelCase(source)) ? m[toCamelCase(source)](params, options) : source;
-		const translatedTarget = Object.hasOwn(m, toCamelCase(target)) ? m[toCamelCase(target)](params, options) : target;
+		const translatedSource = Object.hasOwn(m, toCamelCase(source))
+			? m[toCamelCase(source)](params, options)
+			: source;
+		const translatedTarget = Object.hasOwn(m, toCamelCase(target))
+			? m[toCamelCase(target)](params, options)
+			: target;
 		return `${translatedSource}->${translatedTarget}`;
 	}
 
