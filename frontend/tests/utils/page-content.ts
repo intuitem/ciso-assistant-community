@@ -155,4 +155,18 @@ export class PageContent extends BasePage {
 			? this.getRow(value, language).getByTestId('tablerow-import-button')
 			: this.getRow(value).getByTestId('tablerow-import-button');
 	}
+
+	async clickDeleteAttachmentButton() {
+		await this.page.getByTestId('attachment-delete-button').waitFor({ state: 'visible' });
+		await this.page.getByTestId('attachment-delete-button').click();
+	}
+
+	async clickDeleteModalConfirmButton() {
+		await this.deleteModalConfirmButton.waitFor({ state: 'visible' });
+		await this.deleteModalConfirmButton.click();
+	}
+
+	async expectAttachmentDeleted() {
+		await expect(this.page.getByTestId('attachment-name-title')).not.toBeVisible();
+	}
 }
