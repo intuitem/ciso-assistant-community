@@ -1191,5 +1191,7 @@
 	"closing": "Chiusura",
 	"dismissal": "Dimissione",
 	"statusChanged": "Stato cambiato",
-	"cannotDeleteAutoTimeline": "Le voci della cronologia automatica non possono essere eliminate"
+	"cannotDeleteAutoTimeline": "Le voci della cronologia automatica non possono essere eliminate",
+	"timelines": "Cronologie",
+	"author": "Autore"
 }

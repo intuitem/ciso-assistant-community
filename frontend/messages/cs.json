@@ -879,5 +879,7 @@
 	"closing": "Uzavření",
 	"dismissal": "Zamítnutí",
 	"statusChanged": "Stav změněn",
-	"cannotDeleteAutoTimeline": "Automatické záznamy časové osy nelze smazat"
+	"cannotDeleteAutoTimeline": "Automatické záznamy časové osy nelze smazat",
+	"timelines": "Časové osy",
+	"author": "Autor"
 }

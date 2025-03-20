@@ -888,5 +888,7 @@
 	"closing": "Stängning",
 	"dismissal": "Avvisning",
 	"statusChanged": "Status ändrad",
-	"cannotDeleteAutoTimeline": "Automatiska tidslinje kan inte raderas"
+	"cannotDeleteAutoTimeline": "Automatiska tidslinje kan inte raderas",
+	"timelines": "Tidslinjer",
+	"author": "Författare"
 }

@@ -889,5 +889,7 @@
 	"closing": "Zamykanie",
 	"dismissal": "Odrzucony",
 	"statusChanged": "Zmiana statusu",
-	"cannotDeleteAutoTimeline": "Nie można usunąć automatycznych wpisów osi czasu"
+	"cannotDeleteAutoTimeline": "Nie można usunąć automatycznych wpisów osi czasu",
+	"timelines": "Oś czasu",
+	"author": "Autor"
 }

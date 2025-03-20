@@ -889,5 +889,7 @@
 	"closing": "Sluiting",
 	"dismissal": "Afwijzing",
 	"statusChanged": "Status gewijzigd",
-	"cannotDeleteAutoTimeline": "Automatische tijdlijninvoer kan niet worden verwijderd"
+	"cannotDeleteAutoTimeline": "Automatische tijdlijninvoer kan niet worden verwijderd",
+	"timelines": "Tijdlijnen",
+	"author": "Auteur"
 }

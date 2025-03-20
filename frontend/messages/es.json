@@ -893,5 +893,7 @@
 	"closing": "Cierre",
 	"dismissal": "Descartado",
 	"statusChanged": "Estado cambiado",
-	"cannotDeleteAutoTimeline": "No se pueden eliminar las entradas de cronología automáticas"
+	"cannotDeleteAutoTimeline": "No se pueden eliminar las entradas de cronología automáticas",
+	"timelines": "Cronologías",
+	"author": "Autor"
 }

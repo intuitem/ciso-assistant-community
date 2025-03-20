@@ -1214,5 +1214,7 @@
 	"closing": "Closing",
 	"dismissal": "Dismissal",
 	"statusChanged": "Status changed",
-	"cannotDeleteAutoTimeline": "Auto timeline entries cannot be deleted"
+	"cannotDeleteAutoTimeline": "Auto timeline entries cannot be deleted",
+	"timelines": "Timelines",
+	"author": "Author"
 }

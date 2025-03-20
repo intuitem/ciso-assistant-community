@@ -888,5 +888,7 @@
 	"closing": "Închidere",
 	"dismissal": "Respingere",
 	"statusChanged": "Stare schimbată",
-	"cannotDeleteAutoTimeline": "Intrările cronologiei automate nu pot fi șterse"
+	"cannotDeleteAutoTimeline": "Intrările cronologiei automate nu pot fi șterse",
+	"timelines": "Cronologii",
+	"author": "Autor"
 }

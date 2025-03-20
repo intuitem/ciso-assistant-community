@@ -888,5 +888,7 @@
 	"closing": "Fechamento",
 	"dismissal": "Desconsideração",
 	"statusChanged": "Status alterado",
-	"cannotDeleteAutoTimeline": "As entradas automáticas da linha do tempo não podem ser excluídas"
+	"cannotDeleteAutoTimeline": "As entradas automáticas da linha do tempo não podem ser excluídas",
+	"timelines": "Linha do tempo",
+	"author": "Autor"
 }

@@ -893,5 +893,7 @@
 	"closing": "Schließen",
 	"dismissal": "Ablehnung",
 	"statusChanged": "Status geändert",
-	"cannotDeleteAutoTimeline": "Automatische Zeitleisten-Einträge können nicht gelöscht werden"
+	"cannotDeleteAutoTimeline": "Automatische Zeitleisten-Einträge können nicht gelöscht werden",
+	"timelines": "Zeitleisten",
+	"author": "Autor"
 }
