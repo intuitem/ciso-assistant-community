@@ -558,7 +558,7 @@ class AssetViewSet(BaseModelViewSet):
                     {
                         "source": nodes_idx[relationship.name],
                         "target": nodes_idx[asset.name],
-                        "value": "parent",
+                        "value": "supported by",
                     }
                 )
         meta = {"display_name": "Assets Explorer"}
