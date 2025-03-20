@@ -224,7 +224,10 @@ export async function defaultDeleteFormAction({
 	if (!res.ok) {
 		const response = await res.json();
 		if (response.error) {
-			setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
+			const errorMessages = Array.isArray(response.error) ? response.error : [response.error];
+			errorMessages.forEach((error) => {
+				setFlash({ type: 'error', message: safeTranslate(error) }, event);
+			});
 			return message(deleteForm, { status: res.status });
 		}
 		if (response.non_field_errors) {

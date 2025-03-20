@@ -1213,5 +1213,6 @@
 	"resolution": "Resolution",
 	"closing": "Closing",
 	"dismissal": "Dismissal",
-	"statusChanged": "Status changed"
+	"statusChanged": "Status changed",
+	"cannotDeleteAutoTimeline": "Auto timeline entries cannot be deleted"
 }
