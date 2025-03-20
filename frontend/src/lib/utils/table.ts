@@ -770,6 +770,10 @@ export const listViewFields = {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
 	},
+	processings: {
+		head: ['name', 'description'],
+		body: ['name', 'description']
+	},
 	'ebios-rm': {
 		head: ['name', 'description'],
 		body: ['name', 'description']

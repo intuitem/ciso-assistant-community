@@ -613,6 +613,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Qualification',
 		verboseNamePlural: 'Qualifications'
 	},
+	processings: {
+		endpointUrl: 'privacy/processings',
+		name: 'processing',
+		localName: 'processing',
+		localNamePlural: 'processings',
+		verboseName: 'processing',
+		verboseNamePlural: 'processings',
+		foreignKeyFields: [],
+		reverseForeignKeyFields: []
+	},
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',

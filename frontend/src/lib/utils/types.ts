@@ -67,6 +67,7 @@ export const URL_MODEL = [
 	'attack-paths',
 	'operational-scenarios',
 	'qualifications',
+	'processings',
 	// 'ebios-rm',
 	'security-exceptions',
 	'findings',
