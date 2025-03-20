@@ -18,6 +18,29 @@
 	const chart_id = `${name}_div`;
 	let resizeTimeout: ReturnType<typeof setTimeout>;
 
+	// Add custom formatter for tooltip to show custom edge label format
+	const getCustomEdgeFormatter = () => {
+		return (params) => {
+			if (params.dataType === 'edge') {
+				// Find source and target node names
+				const sourceNode = data.nodes.find(
+					(node) => node.id === params.data.source || node.name === params.data.source
+				);
+				const targetNode = data.nodes.find(
+					(node) => node.id === params.data.target || node.name === params.data.target
+				);
+
+				const sourceLabel = sourceNode ? sourceNode.name : 'unknown';
+				const targetLabel = targetNode ? targetNode.name : 'unknown';
+				const value = params.data.value || '';
+
+				// Return formatted label: "src_label - value - tgt_label"
+				return `${sourceLabel} - ${value} - ${targetLabel}`;
+			}
+			return params.name;
+		};
+	};
+
 	const getChartOptions = () => ({
 		legend: [
 			{
@@ -27,6 +50,7 @@
 			}
 		],
 		tooltip: {
+			formatter: getCustomEdgeFormatter(),
 			label: {
 				position: 'right',
 				show: true
@@ -86,6 +110,9 @@
 				},
 				labelLayout: {
 					hideOverlap: true
+				},
+				edgeLabel: {
+					show: false // Hide permanent edge labels
 				},
 				edges: data.links,
 				lineStyle: {
