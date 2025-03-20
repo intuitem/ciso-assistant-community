@@ -2,6 +2,7 @@ from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
 from core.models import AppliedControl
+from core.models import FilteringLabelMixin
 from core.base_models import NameDescriptionMixin
 
 
@@ -100,7 +101,7 @@ class DataTransfer(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class Processing(NameDescriptionFolderMixin):
+class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("draft", "Draft"),
         ("in_review", "In Review"),
@@ -113,11 +114,10 @@ class Processing(NameDescriptionFolderMixin):
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
     )
-    labels = models.JSONField(default=list, blank=True)
-    legal_basis = models.CharField(max_length=255)
+    legal_basis = models.CharField(max_length=255, blank=True)
     information_channel = models.CharField(max_length=255, blank=True)
     usage_channel = models.CharField(max_length=255, blank=True)
-    dpia_required = models.BooleanField(default=False)
+    dpia_required = models.BooleanField(default=False, blank=True)
     dpia_reference = models.CharField(max_length=255, blank=True)
     has_sensitive_personal_data = models.BooleanField(default=False)
     owner = models.ForeignKey(

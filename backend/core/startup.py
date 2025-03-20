@@ -493,6 +493,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_processing",
+    "change_processing",
+    "view_processing",
+    "delete_processing",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
