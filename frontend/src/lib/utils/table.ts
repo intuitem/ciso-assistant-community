@@ -495,15 +495,11 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-<<<<<<< HEAD
-			provider: PROVIDER_FILTER,
-			filtering_labels: LABELS_FILTER
-=======
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
-			}
->>>>>>> main
+			},
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-scenarios': {
