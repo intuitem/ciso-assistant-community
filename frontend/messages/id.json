@@ -1086,5 +1086,10 @@
 	"documentationScore": "Skor dokumentasi",
 	"useDocumentationScore": "Gunakan skor dokumentasi",
 	"useDocumentationScoreHelpText": "Skor kedua (skor dokumentasi) akan tersedia untuk menilai persyaratan.",
-	"selectEvidence": "Pilih bukti"
+	"selectEvidence": "Pilih bukti",
+	"finding": "Temuan",
+	"findings": "Temuan",
+	"associatedFindings": "Temuan terkait",
+	"findings_count": "Jumlah Temuan",
+	"addFinding": "Tambahkan temuan"
 }

@@ -869,5 +869,10 @@
 	"useDocumentationScoreHelpText": "Een tweede score (documentatiescore) zal beschikbaar zijn om de vereisten te beoordelen.",
 	"publicationDate": "Publicatiedatum",
 	"filterBy": "Filteren op",
-	"selectEvidence": "Selecteer bewijs"
+	"selectEvidence": "Selecteer bewijs",
+	"finding": "Bevinding",
+	"findings": "Bevindingen",
+	"associatedFindings": "Geassocieerde bevindingen",
+	"findings_count": "Aantal bevindingen",
+	"addFinding": "Bevinding toevoegen"
 }

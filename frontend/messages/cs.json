@@ -859,5 +859,10 @@
 	"useDocumentationScore": "Použití skóre dokumentace",
 	"useDocumentationScoreHelpText": "Pro posouzení požadavků bude k dispozici druhé bodové skóre (skóre dokumentace).",
 	"publicationDate": "Datum zveřejnění",
-	"selectEvidence": "Vyberte důkaz"
+	"selectEvidence": "Vyberte důkaz",
+	"finding": "Zjištění",
+	"findings": "Zjištění",
+	"associatedFindings": "Přidružená zjištění",
+	"findings_count": "Počet zjištění",
+	"addFinding": "Přidat zjištění"
 }
