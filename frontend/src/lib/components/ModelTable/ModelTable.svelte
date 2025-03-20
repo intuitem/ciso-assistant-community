@@ -141,7 +141,8 @@
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
-		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0) ||
+		['severity_change', 'resolution', 'closing', 'dismissal'].includes(row.meta.entry_type);
 
 	const filterInitialData = $page.url.searchParams.entries();
 
