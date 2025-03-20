@@ -61,7 +61,14 @@
                             <td class="text-md p-2 text-center">{{ applied_control.expiry_date|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_effort_display|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.cost|default:"--" }}</td>
-                            <td class="text-md p-2 text-center">{% get_requirements_count applied_control compliance_assessment %}</td>
+                            {% get_requirements applied_control compliance_assessment as requirements  %}
+                            <td class="text-md p-2 text-center">
+                                {% for req in requirements %}
+                                    {{ req }}<br>
+                                {% empty %}
+                                    --
+                                {% endfor %}
+                            </td>
                         </tr>
                         {% empty %}
                             <tr>

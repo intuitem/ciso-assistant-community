@@ -162,6 +162,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
     "huey.contrib.djhuey",
+    "auditlog",
 ]
 
 MIDDLEWARE = [
@@ -174,6 +175,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
 
@@ -456,3 +458,5 @@ HUEY = {
     "results": True,  # would be interesting for debug
     "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
 }
+AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
+AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))

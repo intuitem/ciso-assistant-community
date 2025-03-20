@@ -323,6 +323,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    children_assets = FieldsRelatedField(["id"], many=True)
     owner = FieldsRelatedField(many=True)
     security_objectives = serializers.JSONField(
         source="get_security_objectives_display"
@@ -559,15 +560,71 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     state = serializers.SerializerMethodField()
-    requirements_count = serializers.IntegerField(
-        source="requirement_assessments.count"
-    )
     findings_count = serializers.IntegerField(source="findings.count")
 
     def get_state(self, obj):
         if not obj.eta:
             return None
         return time_state(obj.eta.isoformat())
+
+
+class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    reference_control = FieldsRelatedField()
+    priority = serializers.CharField(source="get_priority_display")
+    category = serializers.CharField(
+        source="get_category_display"
+    )  # type : get_type_display
+    csf_function = serializers.CharField(
+        source="get_csf_function_display"
+    )  # type : get_type_display
+    evidences = FieldsRelatedField(many=True)
+    effort = serializers.CharField(source="get_effort_display")
+    cost = serializers.FloatField()
+
+    ranking_score = serializers.IntegerField(source="get_ranking_score")
+    owner = FieldsRelatedField(many=True)
+    requirement_assessments = serializers.SerializerMethodField(
+        method_name="get_requirement_assessments"
+    )
+
+    def get_requirement_assessments(self, obj):
+        pk = self.context.get("pk")
+        if pk is None:
+            return None
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=pk, applied_controls=obj
+        )
+        return [
+            {
+                "str": str(req.requirement.display_short or req.requirement.urn),
+                "id": str(req.id),
+            }
+            for req in requirement_assessments
+        ]
+
+    class Meta:
+        model = AppliedControl
+        fields = [
+            "id",
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "status",
+            "eta",
+            "expiry_date",
+            "priority",
+            "category",
+            "csf_function",
+            "effort",
+            "cost",
+            "ranking_score",
+            "requirement_assessments",
+            "reference_control",
+            "evidences",
+            "owner",
+        ]
 
 
 class AppliedControlDuplicateSerializer(BaseModelSerializer):
@@ -901,6 +958,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         source="get_selected_implementation_groups"
     )
     progress = serializers.ReadOnlyField()
+    assets = FieldsRelatedField(many=True)
 
     class Meta:
         model = ComplianceAssessment
@@ -926,6 +984,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def create(self, validated_data: Any):
+        validated_data.pop("create_applied_controls_from_suggestions", None)
         return super().create(validated_data)
 
     class Meta:
@@ -1140,7 +1199,6 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
-    str = serializers.CharField(source="__str__")
     owner = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
 
@@ -1156,7 +1214,6 @@ class FindingWriteSerializer(BaseModelSerializer):
 
 
 class FindingReadSerializer(FindingWriteSerializer):
-    str = serializers.CharField(source="__str__")
     owner = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField()
     vulnerabilities = FieldsRelatedField(many=True)

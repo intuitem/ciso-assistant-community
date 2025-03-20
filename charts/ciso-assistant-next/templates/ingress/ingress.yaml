@@ -8,7 +8,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   labels:
-    {{- include "ciso-assistant.labels" (dict "context" . "component" .Values.frontend.name) | nindent 4 }}
+    {{- include "ciso-assistant.labels" (dict "context" .) | nindent 4 }}
 spec:
   {{- with .Values.ingress.ingressClassName }}
   ingressClassName: {{ . }}
@@ -23,18 +23,22 @@ spec:
             port:
               number: {{ .Values.frontend.service.port }}
         path: /
-        pathType: Prefix
+        pathType: {{ .Values.ingress.pathType }}
       - backend:
           service:
             name: {{ include "ciso-assistant.fullname" . }}-backend
             port:
               number: {{ .Values.backend.service.port }}
         path: /api/
-        pathType: Prefix
+        pathType: {{ .Values.ingress.pathType }}
   {{- if .Values.global.tls }}
   tls:
     - hosts:
       - {{ .Values.global.domain }}
+      {{- if .Values.ingress.existingSecret }}
+      secretName: {{ .Values.ingress.existingSecret }}
+      {{ else }}
       secretName: {{ include "ciso-assistant.fullname" . }}-tls
+      {{- end }}
   {{- end }}
 {{- end }}

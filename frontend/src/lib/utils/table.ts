@@ -447,7 +447,11 @@ export const listViewFields = {
 		body: ['name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'risk-matrices/provider' }
+			}
 		}
 	},
 	vulnerabilities: {
@@ -491,7 +495,10 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			provider: PROVIDER_FILTER
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
+			}
 		}
 	},
 	'risk-scenarios': {
@@ -569,7 +576,8 @@ export const listViewFields = {
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
 			priority: PRIORITY_FILTER,
-			effort: EFFORT_FILTER
+			effort: EFFORT_FILTER,
+			eta__lte: undefined
 		}
 	},
 	policies: {
@@ -610,7 +618,10 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
-			provider: PROVIDER_FILTER,
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'reference-controls/provider' }
+			},
 			csf_function: CSF_FUNCTION_FILTER
 		}
 	},
@@ -666,12 +677,15 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			provider: PROVIDER_FILTER
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'frameworks/provider' }
+			}
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'reviewProgress'],
-		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress'],
+		head: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'reviewProgress'],
+		body: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'progress'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -725,7 +739,13 @@ export const listViewFields = {
 	},
 	'requirement-mapping-sets': {
 		head: ['sourceFramework', 'targetFramework'],
-		body: ['source_framework', 'target_framework']
+		body: ['source_framework', 'target_framework'],
+		filters: {
+			library__provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'requirement-mapping-sets/provider' }
+			}
+		}
 	},
 	entities: {
 		head: ['name', 'description', 'domain', 'ownedFolders'],
@@ -845,11 +865,11 @@ export const listViewFields = {
 	},
 	'findings-assessments': {
 		head: ['ref_id', 'name', 'description', 'category', 'findings', 'perimeter'],
-		body: ['ref_id', 'str', 'description', 'category', 'findings_count', 'perimeter']
+		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
 		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
-		body: ['ref_id', 'str', 'description', 'findings_assessment', 'status', 'filtering_labels']
+		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels']
 	},
 	extra: {
 		filters: {

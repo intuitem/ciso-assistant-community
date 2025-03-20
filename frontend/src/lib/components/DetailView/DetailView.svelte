@@ -13,7 +13,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import * as m from '$paraglide/messages.js';
-	import { languageTag } from '$paraglide/runtime.js';
+	import { getLocale } from '$paraglide/runtime.js';
 	import type {
 		PopupSettings,
 		ModalComponent,
@@ -186,6 +186,10 @@
 	if (data.urlModel === 'folders') {
 		orderRelatedModels = ['perimeters', 'entities'];
 	}
+
+	function truncateString(str: string, maxLength: number = 50): string {
+		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
+	}
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -270,6 +274,31 @@
 													: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
 														m.undefined())}
 											{stringifiedSeverity}
+										{:else if key === 'children_assets'}
+											{#if Object.keys(value).length > 0}
+												<ul class="inline-flex flex-wrap space-x-4">
+													{#each value as val}
+														<li data-testid={key.replace('_', '-') + '-field-value'}>
+															{#if val.str && val.id}
+																{@const itemHref = `/${
+																	URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+																		(item) => item.field === key
+																	)?.urlModel
+																}/${val.id}`}
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
+																	{truncateString(val.str)}</Anchor
+																>
+															{:else if val.str}
+																{safeTranslate(val.str)}
+															{:else}
+																{value}
+															{/if}
+														</li>
+													{/each}
+												</ul>
+											{:else}
+												--
+											{/if}
 										{:else if Array.isArray(value)}
 											{#if Object.keys(value).length > 0}
 												<ul>
@@ -330,7 +359,7 @@
 												>{value}</Anchor
 											>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date')}
-											{formatDateOrDateTime(value, languageTag())}
+											{formatDateOrDateTime(value, getLocale())}
 										{:else if m[toCamelCase(value.str || value.name)]}
 											{safeTranslate((value.str || value.name) ?? value)}
 										{:else}

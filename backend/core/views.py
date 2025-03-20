@@ -8,6 +8,8 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
+from django.db.models import F, Count, Avg, Q, ExpressionWrapper, FloatField
+from collections import defaultdict
 from django_filters.filterset import filterset_factory
 import pytz
 from uuid import UUID
@@ -24,9 +26,11 @@ import humanize
 
 from wsgiref.util import FileWrapper
 
+import pandas as pd
 import io
 
 import random
+from django.db.models.functions import Lower
 
 from docxtpl import DocxTemplate
 from .generators import gen_audit_context
@@ -54,7 +58,7 @@ from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, UserGroup
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, generics, permissions, status, viewsets
 from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
     action,
@@ -424,6 +428,15 @@ class ThreatViewSet(BaseModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Threat.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
         return Response({"results": threats_count_per_name(request.user)})
@@ -538,9 +551,6 @@ class AssetViewSet(BaseModelViewSet):
                 }
             )
             nodes_idx[asset.name] = N
-            links.append(
-                {"source": nodes_idx[asset.folder.name], "target": N, "value": "scope"}
-            )
             N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
             for relationship in asset.parent_assets.all():
@@ -650,6 +660,15 @@ class ReferenceControlViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "provider"]
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            ReferenceControl.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
@@ -672,6 +691,15 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False)  # Set a name there
     def colors(self, request):
         return Response({"results": get_risk_color_ordered_list(request.user)})
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            RiskMatrix.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
 
     @action(detail=False, name="Get risk level choices")
     def risk(self, request):
@@ -1186,6 +1214,9 @@ class AppliedControlFilterSet(df.FilterSet):
         method="filter_findings_assessments",
         queryset=FindingsAssessment.objects.all(),
     )
+    status = df.MultipleChoiceFilter(
+        choices=AppliedControl.Status.choices, lookup_expr="icontains"
+    )
 
     def filter_findings_assessments(self, queryset, name, value):
         if value:
@@ -1247,29 +1278,24 @@ class AppliedControlFilterSet(df.FilterSet):
 
     class Meta:
         model = AppliedControl
-        fields = [
-            "folder",
-            "category",
-            "csf_function",
-            "priority",
-            "status",
-            "reference_control",
-            "effort",
-            "cost",
-            "risk_scenarios",
-            "risk_scenarios_e",
-            "requirement_assessments",
-            "evidences",
-            "progress_field",
-            "security_exceptions",
-            "owner",
-            "todo",
-            "to_review",
-            "compliance_assessments",
-            "risk_assessments",
-            "findings",
-            "findings_assessments",
-        ]
+        fields = {
+            "folder": ["exact"],
+            "category": ["exact"],
+            "csf_function": ["exact"],
+            "priority": ["exact"],
+            "reference_control": ["exact"],
+            "effort": ["exact"],
+            "cost": ["exact"],
+            "risk_scenarios": ["exact"],
+            "risk_scenarios_e": ["exact"],
+            "requirement_assessments": ["exact"],
+            "evidences": ["exact"],
+            "progress_field": ["exact"],
+            "security_exceptions": ["exact"],
+            "owner": ["exact"],
+            "findings": ["exact"],
+            "eta": ["exact", "lte", "gte", "lt", "gt"],
+        }
 
 
 class AppliedControlViewSet(BaseModelViewSet):
@@ -1310,7 +1336,8 @@ class AppliedControlViewSet(BaseModelViewSet):
     def owner(self, request):
         return Response(
             UserReadSerializer(
-                User.objects.filter(applied_controls__isnull=False), many=True
+                User.objects.filter(applied_controls__isnull=False).distinct(),
+                many=True,
             ).data
         )
 
@@ -1744,6 +1771,34 @@ class AppliedControlViewSet(BaseModelViewSet):
                 links.append({"source": indexes[ac.id], "target": indexes[sc.id]})
 
         return Response({"nodes": nodes, "categories": categories, "links": links})
+
+
+class ComplianceAssessmentActionPlanList(generics.ListAPIView):
+    filterset_fields = ["reference_control"]
+    serializer_class = ComplianceAssessmentActionPlanSerializer
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    ordering_fields = "__all__"
+    ordering = ["eta"]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"pk": self.kwargs["pk"]})
+        return context
+
+    def get_queryset(self):
+        compliance_assessment: ComplianceAssessment = ComplianceAssessment.objects.get(
+            id=self.kwargs["pk"]
+        )
+        requirement_assessments = compliance_assessment.get_requirement_assessments(
+            include_non_assessable=True
+        )
+        return AppliedControl.objects.filter(
+            requirement_assessments__in=requirement_assessments
+        ).distinct()
 
 
 class PolicyViewSet(AppliedControlViewSet):
@@ -2490,9 +2545,7 @@ class FolderViewSet(BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
-        domain_name = f"DEMO {timestamp}"
-
+        domain_name = f"DEMO"
         try:
             dummy_fixture_path = (
                 Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
@@ -2511,13 +2564,13 @@ class FolderViewSet(BaseModelViewSet):
             return Response(result, status=status.HTTP_200_OK)
 
         except json.JSONDecodeError:
-            logger.error("Invalid JSON format in dummy fixture file", exc_info=True)
+            logger.error("Invalid JSON format in dummy fixture file")
             return Response(
                 {"errors": ["Invalid JSON format"]},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         except Exception:
-            logger.error("Error importing dummy domain", exc_info=True)
+            logger.error("Error importing dummy domain")
             return Response(
                 {"error": "failedToImportDummyDomain"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -3219,6 +3272,39 @@ class FolderViewSet(BaseModelViewSet):
                 urns.append(item)
         return uuids, urns
 
+    @action(detail=False, methods=["get"])
+    def get_accessible_objects(self, request):
+        (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Folder
+        )
+        (viewable_perimeters_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Perimeter
+        )
+        (viewable_frameworks_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Framework
+        )
+        res = {
+            "folders": [
+                {"name": str(f), "id": f.id}
+                for f in Folder.objects.filter(id__in=viewable_folders_ids).order_by(
+                    Lower("name")
+                )
+            ],
+            "perimeters": [
+                {"name": str(p), "id": p.id}
+                for p in Perimeter.objects.filter(
+                    id__in=viewable_perimeters_ids
+                ).order_by(Lower("name"))
+            ],
+            "frameworks": [
+                {"name": f.name, "id": f.id}
+                for f in Framework.objects.filter(
+                    id__in=viewable_frameworks_ids
+                ).order_by(Lower("name"))
+            ],
+        }
+        return Response(res)
+
 
 class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -3435,6 +3521,88 @@ class FrameworkViewSet(BaseModelViewSet):
         ).data
         return Response({"results": available_target_frameworks})
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Framework.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
+    @action(detail=True, methods=["get"], name="Framework as an Excel template")
+    def excel_template(self, request, pk):
+        fwk = Framework.objects.get(id=pk)
+        req_nodes = RequirementNode.objects.filter(framework=fwk)
+        entries = []
+        for rn in req_nodes:
+            entry = {
+                "urn": rn.urn,
+                "assessable": rn.assessable,
+                "ref_id": rn.ref_id,
+                "name": rn.name,
+                "description": rn.description,
+                "compliance_result": "",
+                "requirement_progress": "",
+                "score": "",
+                "observations": "",
+            }
+            entries.append(entry)
+
+        # Create DataFrame from entries
+        df = pd.DataFrame(entries)
+
+        # Create BytesIO object
+        buffer = io.BytesIO()
+
+        # Create ExcelWriter with openpyxl engine
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+
+            # Get the worksheet
+            worksheet = writer.sheets["Sheet1"]
+
+            # For text wrapping, we need to define which columns need wrapping
+            # Assuming 'description' and 'observations' columns need text wrapping
+            wrap_columns = ["name", "description", "observations"]
+
+            # Find the indices of the columns that need wrapping
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            # Apply text wrapping to those columns
+            from openpyxl.styles import Alignment
+
+            for col_idx in wrap_indices:
+                for row_idx in range(
+                    2, len(df) + 2
+                ):  # +2 because of header row and 1-indexing
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            # Adjust column widths for better readability
+            for idx, col in enumerate(df.columns):
+                column_width = 40  # default width
+                if col in wrap_columns:
+                    column_width = 60  # wider for wrapped text columns
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        # Get the value of the buffer and return as response
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="{fwk.name}_template.xlsx"'
+        )
+
+        return response
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """
@@ -3460,6 +3628,162 @@ class RequirementViewSet(BaseModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get"], name="Inspect specific requirements")
+    def inspect_requirement(self, request, pk):
+        requirement = RequirementNode.objects.get(id=pk)
+        requirement_assessments = RequirementAssessment.objects.filter(
+            requirement=requirement
+        ).prefetch_related("folder", "compliance_assessment__perimeter")
+        serialized_requirement_assessments = RequirementAssessmentReadSerializer(
+            requirement_assessments, many=True
+        ).data
+
+        # Group by Domain and Perimeter
+        grouped_data = requirement_assessments.values(
+            "folder__name", "compliance_assessment__perimeter__name"
+        ).annotate(
+            compliant_count=Count(
+                "id", filter=Q(result=RequirementAssessment.Result.COMPLIANT)
+            ),
+            total_count=Count("id"),
+            assessed_count=Count(
+                "id", filter=~Q(status=RequirementAssessment.Status.TODO)
+            ),
+            assessment_completion_rate=ExpressionWrapper(
+                Count("id", filter=~Q(status=RequirementAssessment.Status.TODO))
+                * 100.0
+                / Count("id"),
+                output_field=FloatField(),
+            ),
+        )
+
+        # Collect all data by domain for calculations
+        domain_data_collector = defaultdict(
+            lambda: {
+                "compliant_count": 0,
+                "total_count": 0,
+                "assessed_count": 0,
+                "perimeter_data": [],
+            }
+        )
+
+        for item in grouped_data:
+            domain_name = item["folder__name"]
+            domain_data_collector[domain_name]["compliant_count"] += item[
+                "compliant_count"
+            ]
+            domain_data_collector[domain_name]["total_count"] += item["total_count"]
+            domain_data_collector[domain_name]["assessed_count"] += item[
+                "assessed_count"
+            ]
+            domain_data_collector[domain_name]["perimeter_data"].append(item)
+
+        # Organize data by domain and perimeter using the collected data
+        domain_dict = defaultdict(
+            lambda: {
+                "name": "",
+                "compliance_result": {
+                    "compliant_count": 0,
+                    "total_count": 0,
+                    "compliance_percentage": 0,
+                },
+                "assessment_progress": {
+                    "assessed_count": 0,
+                    "total_count": 0,
+                    "assessment_completion_rate": 0,
+                },
+                "perimeters": [],
+            }
+        )
+
+        # Structure the final response
+        for domain_name, collector_data in domain_data_collector.items():
+            domain_dict[domain_name]["name"] = domain_name
+
+            # Calculate domain-level metrics
+            domain_total_count = collector_data["total_count"]
+            domain_compliant_count = collector_data["compliant_count"]
+            domain_assessed_count = collector_data["assessed_count"]
+
+            # Avoid division by zero
+            domain_compliance_percentage = 0
+            if domain_total_count > 0:
+                domain_compliance_percentage = int(
+                    (domain_compliant_count / domain_total_count) * 100
+                )
+
+            domain_assessment_completion_rate = 0
+            if domain_total_count > 0:
+                domain_assessment_completion_rate = int(
+                    (domain_assessed_count / domain_total_count) * 100
+                )
+
+            # Set domain metrics
+            domain_dict[domain_name]["compliance_result"] = {
+                "compliant_count": domain_compliant_count,
+                "total_count": domain_total_count,
+                "compliance_percentage": domain_compliance_percentage,
+            }
+
+            domain_dict[domain_name]["assessment_progress"] = {
+                "assessed_count": domain_assessed_count,
+                "total_count": domain_total_count,
+                "assessment_completion_rate": domain_assessment_completion_rate,
+            }
+
+            # Process perimeter data
+            for item in collector_data["perimeter_data"]:
+                perimeter_name = item["compliance_assessment__perimeter__name"]
+
+                perimeter_entry = {
+                    "name": perimeter_name,
+                    "compliance_assessments": [],
+                }
+
+                # Add compliance assessments to the perimeter entry
+                compliance_assessments = (
+                    requirement_assessments.filter(
+                        folder__name=domain_name,
+                        compliance_assessment__perimeter__name=perimeter_name,
+                    )
+                    .select_related("compliance_assessment")
+                    .values(
+                        "compliance_assessment__id",
+                        "compliance_assessment__name",
+                        "compliance_assessment__version",
+                        "compliance_assessment__show_documentation_score",
+                        "compliance_assessment__max_score",
+                    )
+                    .distinct()
+                )
+
+                for ca in compliance_assessments:
+                    perimeter_entry["compliance_assessments"].append(
+                        {
+                            "id": ca["compliance_assessment__id"],
+                            "name": ca["compliance_assessment__name"],
+                            "version": ca["compliance_assessment__version"],
+                            "show_documentation_score": ca[
+                                "compliance_assessment__show_documentation_score"
+                            ],
+                            "max_score": ca["compliance_assessment__max_score"],
+                        }
+                    )
+
+                domain_dict[domain_name]["perimeters"].append(perimeter_entry)
+
+        # Convert defaultdict to list for the response
+        data_by_domain = [
+            domain_data for domain_data in domain_dict.values() if domain_data["name"]
+        ]
+
+        return Response(
+            {
+                "requirement_assessments": serialized_requirement_assessments,
+                "metrics": data_by_domain,
+            }
+        )
 
 
 class EvidenceViewSet(BaseModelViewSet):
@@ -3513,7 +3837,6 @@ class EvidenceViewSet(BaseModelViewSet):
             evidence = self.get_object()
             if evidence.attachment:
                 evidence.attachment.delete()
-                evidence.save()
                 response = Response(status=status.HTTP_200_OK)
         return response
 
@@ -3550,47 +3873,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "perimeter", "status", "ebios_rm_studies"]
+    filterset_fields = [
+        "framework",
+        "perimeter",
+        "status",
+        "ebios_rm_studies",
+        "assets",
+    ]
     search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
-
-    @action(detail=True, methods=["get"], name="Get action plan data")
-    def action_plan(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=ComplianceAssessment,
-        )
-        if UUID(pk) in viewable_objects:
-            response = []
-            compliance_assessment_object: ComplianceAssessment = self.get_object()
-            requirement_assessments_objects = (
-                compliance_assessment_object.get_requirement_assessments(
-                    include_non_assessable=True
-                )
-            )
-            applied_controls = [
-                AppliedControlReadSerializer(applied_control).data
-                for applied_control in AppliedControl.objects.filter(
-                    requirement_assessments__in=requirement_assessments_objects
-                ).distinct()
-            ]
-
-            for applied_control in applied_controls:
-                applied_control["requirements_count"] = (
-                    RequirementAssessment.objects.filter(
-                        compliance_assessment=compliance_assessment_object
-                    )
-                    .filter(applied_controls=applied_control["id"])
-                    .count()
-                )
-                response.append(applied_control)
-
-        return Response(response)
 
     @action(detail=True, name="Get compliance assessment (audit) CSV")
     def compliance_assessment_csv(self, request, pk):
@@ -4007,9 +4302,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
         requirement_assessments = compliance_assessment.requirement_assessments.all()
+        controls = []
         for requirement_assessment in requirement_assessments:
-            requirement_assessment.create_applied_controls_from_suggestions()
-        return Response(status=status.HTTP_200_OK)
+            controls.append(
+                requirement_assessment.create_applied_controls_from_suggestions()
+            )
+        return Response(
+            AppliedControlReadSerializer(chain.from_iterable(controls), many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
@@ -4143,14 +4444,26 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             folder=requirement_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        requirement_assessment.create_applied_controls_from_suggestions()
-        return Response(status=status.HTTP_200_OK)
+        controls = requirement_assessment.create_applied_controls_from_suggestions()
+        return Response(
+            AppliedControlReadSerializer(controls, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
     model = RequirementMappingSet
 
-    filterset_fields = ["target_framework", "source_framework"]
+    filterset_fields = ["target_framework", "source_framework", "library__provider"]
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            LoadedLibrary.objects.filter(
+                provider__isnull=False, requirement_mapping_sets__isnull=False
+            ).values_list("provider", flat=True)
+        )
+        return Response({p: p for p in providers})
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):

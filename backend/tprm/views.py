@@ -73,6 +73,7 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
+    filterset_fields = ["provider_entity"]
 
     def perform_create(self, serializer):
         serializer.save()
