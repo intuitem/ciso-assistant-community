@@ -21,12 +21,43 @@ def delivery_report(err, msg):
         )
 
 
-def extract_compliance_data(oscf_file_path, framework):
+def process_ref_id(ref_id, truncate_to_three_parts=False):
+    """
+    Process a reference ID according to specified rules.
+
+    Args:
+        ref_id: The original reference ID
+        truncate_to_three_parts: If True, truncate ref_id to three parts (a.b.c) if it has more parts
+
+    Returns:
+        Processed reference ID
+    """
+    if truncate_to_three_parts:
+        parts = ref_id.split(".")
+        if len(parts) > 3:
+            return ".".join(parts[:3])
+
+    return ref_id
+
+
+def extract_compliance_data(oscf_file_path, framework, truncate_pci_refs=False):
+    """
+    Extract compliance data from OSCF file for a specific framework.
+
+    Args:
+        oscf_file_path: Path to the OSCF format JSON file
+        framework: The compliance framework to extract (e.g., 'ISO27001')
+        truncate_pci_refs: If True and framework is PCI-4.0, truncate ref_ids to three parts
+
+    Returns:
+        List of dictionaries containing ref_id and status_code
+    """
     try:
         with open(oscf_file_path, "r") as file:
             data = json.load(file)
 
         results = []
+        should_truncate = truncate_pci_refs and framework == "PCI-4.0"
 
         # Process each node in the array
         for node in data:
@@ -41,7 +72,12 @@ def extract_compliance_data(oscf_file_path, framework):
 
                     # For each reference ID, create an entry with the status code
                     for ref_id in ref_ids:
-                        results.append({"ref_id": ref_id, "status_code": status_code})
+                        # Process the reference ID if needed
+                        processed_ref_id = process_ref_id(ref_id, should_truncate)
+
+                        results.append(
+                            {"ref_id": processed_ref_id, "status_code": status_code}
+                        )
 
         return results
 
@@ -65,14 +101,22 @@ def map_status_to_result(status_code):
         "pass": "compliant",
         "fail": "non_compliant",
         "warning": "partially_compliant",
+        "error": "not_applicable",
         # Add more mappings as needed
     }
 
     # Return the mapped value or a default
-    return status_mapping.get(status_code.lower(), "not_assessed")
+    return status_mapping.get(status_code.lower(), "not_applicable")
 
 
 def send_kafka_messages(compliance_data, assessment_ref_id):
+    """
+    Send Kafka messages for each compliance data entry.
+
+    Args:
+        compliance_data: List of dictionaries with ref_id and status_code
+        assessment_ref_id: The compliance assessment reference ID
+    """
     # Create producer configuration
     conf = {"bootstrap.servers": BOOTSTRAP_SERVERS}
 
@@ -132,6 +176,11 @@ def main():
         action="store_true",
         help="Process file and show messages without sending to Kafka",
     )
+    parser.add_argument(
+        "--truncate-pci-refs",
+        action="store_true",
+        help="For PCI-4.0 only: Truncate reference IDs to three parts (a.b.c)",
+    )
 
     args = parser.parse_args()
 
@@ -140,7 +189,9 @@ def main():
     TOPIC = args.topic
 
     # Extract compliance data from OSCF file
-    compliance_data = extract_compliance_data(args.oscf_file, args.framework)
+    compliance_data = extract_compliance_data(
+        args.oscf_file, args.framework, args.truncate_pci_refs
+    )
 
     if not compliance_data:
         print(f"No compliance data found for framework '{args.framework}'")
@@ -152,6 +203,26 @@ def main():
 
     if args.dry_run:
         print("=== DRY RUN MODE (not sending to Kafka) ===")
+
+        # Count unique reference IDs
+        unique_ref_ids = set(item["ref_id"] for item in compliance_data)
+        print(f"Found {len(unique_ref_ids)} unique reference IDs that will be affected")
+
+        # Count by result type
+        result_counts = {}
+        for item in compliance_data:
+            result = map_status_to_result(item["status_code"])
+            if result in result_counts:
+                result_counts[result] += 1
+            else:
+                result_counts[result] = 1
+
+        # Print result distribution
+        print("\nResult distribution:")
+        for result, count in result_counts.items():
+            print(f"  {result}: {count}")
+
+        print("\nMessages that would be sent:")
         for item in compliance_data:
             message = {
                 "message_type": "update_requirement_assessment",
