@@ -52,7 +52,7 @@ const nameSchema = z
 	.string({
 		required_error: 'Name is required'
 	})
-	.min(1);
+	.min(3);
 
 const descriptionSchema = z.string().optional().nullable();
 
