@@ -17,10 +17,11 @@ export const load: PageServerLoad = async (event) => {
 	if (!outOfScopeRes.ok) {
 		throw new Error('Failed to check out-of-scope objects');
 	}
-	const { has_out_of_scope_objects } = await outOfScopeRes.json();
+	const { has_out_of_scope_objects, out_of_scope_objects } = await outOfScopeRes.json();
 	return {
 		...detailData,
-		has_out_of_scope_objects
+		has_out_of_scope_objects,
+		out_of_scope_objects
 	};
 };
 

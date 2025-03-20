@@ -2403,12 +2403,48 @@ class FolderViewSet(BaseModelViewSet):
 
         objects = get_domain_export_objects(instance)
         out_of_scope_types = []
+        out_of_scope_objects = {}
+
+        excluded_types = ["framework", "riskmatrix", "loadedlibrary"]
+
+        folder_relationships = {
+            "riskscenario": "risk_assessment__perimeter__folder__id__in",
+            "requirementassessment": "compliance_assessment__perimeter__folder__id__in",
+            "fearedevent": "ebios_rm_study__folder__id__in",
+            "roto": "ebios_rm_study__folder__id__in",
+            "operationalscenario": "ebios_rm_study__folder__id__in",
+            "stakeholder": "ebios_rm_study__folder__id__in",
+            "strategicscenario": "ebios_rm_study__folder__id__in",
+            "attackpath": "ebios_rm_study__folder__id__in",
+            "loadedlibrary": "folder__id__in",
+            "riskassessment": "perimeter__folder__id__in",
+            "complianceassessment": "perimeter__folder__id__in",
+            "framework": "folder__id__in",
+        }
 
         for model_name, queryset in objects.items():
-            if queryset.exclude(id__in=valid_folder_ids).exists():
-                out_of_scope_types.append(model_name)
+            if model_name in excluded_types:
+                continue
 
-        return Response({"has_out_of_scope_objects": out_of_scope_types})
+            folder_path = folder_relationships.get(model_name, "folder__id__in")
+            out_of_scope_qs = queryset.exclude(**{folder_path: valid_folder_ids})
+            if out_of_scope_qs.exists():
+                out_of_scope_types.append(model_name)
+                out_of_scope_objects[model_name] = [
+                    {
+                        "id": obj.id,
+                        "name": obj.name,
+                        "description": getattr(obj, "description", None),
+                    }
+                    for obj in out_of_scope_qs
+                ]
+
+        return Response(
+            {
+                "has_out_of_scope_objects": out_of_scope_types,
+                "out_of_scope_objects": out_of_scope_objects,
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):

@@ -8,7 +8,7 @@
 
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import ConfirmExportScopeModal from '$lib/components/Modals/ConfirmExportScopeModal.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -20,23 +20,36 @@
 	}
 
 	function confirmExport(event: Event) {
-		event.preventDefault(); 
+		event.preventDefault();
 
 		if (data.has_out_of_scope_objects?.length) {
-		const modalComponent: ModalComponent = {
-			ref: ConfirmModal
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			title: m.confirmModalTitleWarning(),
-			body: `${m.bodyModalExportFolder()}${data.has_out_of_scope_objects}`,
-			response: (r: boolean) => {
-				if (r)
-					(event.target as HTMLFormElement).submit()
-				},
-		};
-		modalStore.trigger(modal);
+			const modalComponent: ModalComponent = {
+				ref: ConfirmExportScopeModal,
+				props: {
+					outOfScopeObjects: data.out_of_scope_objects || {}
+				}
+			};
+			const modal: ModalSettings = {
+				type: 'component',
+				component: modalComponent,
+				title: m.confirmModalTitleWarning(),
+				body: `
+					<div class="space-y-4">
+						<div class="text-lg">
+							${m.bodyModalExportFolder()}
+							<div class="mt-2 flex flex-wrap gap-2">
+								${data.has_out_of_scope_objects
+									.map((type) => `<span class="badge variant-filled-warning">${type}</span>`)
+									.join('')}
+							</div>
+						</div>
+					</div>
+				`,
+				response: (r: boolean) => {
+					if (r) (event.target as HTMLFormElement).submit();
+				}
+			};
+			modalStore.trigger(modal);
 		} else {
 			(event.target as HTMLFormElement).submit();
 		}
@@ -45,9 +58,15 @@
 
 <DetailView {data}>
 	<div slot="actions" class="flex flex-col space-y-2 justify-end">
-		<form class="flex justify-end" action={`${$page.url.pathname}/export`} method="GET" on:submit={confirmExport}>
+		<form
+			class="flex justify-end"
+			action={`${$page.url.pathname}/export`}
+			method="GET"
+			on:submit={confirmExport}
+		>
 			<button type="submit" class="btn variant-filled-primary h-fit">
-				<i class="fa-solid fa-download mr-2" /> {m.exportButton()}
+				<i class="fa-solid fa-download mr-2" />
+				{m.exportButton()}
 			</button>
 		</form>
 	</div>

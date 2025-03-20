@@ -1185,5 +1185,6 @@
 	"compliantRequirementsSemiColon": "Exigences conformes :",
 	"requirementsProgressionSemiColon": "Progression des exigences :",
 	"noRequirementFound": "Aucune revue de cette exigence trouvée",
-	"noAuditForTheFramework": "Il n'y a pas d'audit utilisant ce référentiel"
+	"noAuditForTheFramework": "Il n'y a pas d'audit utilisant ce référentiel",
+	"detailedListOfOutOfScopeObjects": "Liste détaillée des objets en dehors du domaine"
 }
