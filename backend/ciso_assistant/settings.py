@@ -150,6 +150,7 @@ INSTALLED_APPS = [
     "tprm",
     "core",
     "cal",
+    "privacy",
     "django_filters",
     "library",
     "serdes",

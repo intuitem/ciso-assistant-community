@@ -149,6 +149,7 @@ INSTALLED_APPS = [
     "ebios_rm",
     "core",
     "cal",
+    "privacy",
     "django_filters",
     "library",
     "serdes",
