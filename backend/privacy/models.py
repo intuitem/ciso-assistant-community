@@ -1,8 +1,13 @@
 from django.db import models
-from iam.models import FolderMixin, User
+from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.base_models import NameDescriptionMixin
 from core.models import AppliedControl
+from core.base_models import NameDescriptionMixin
+
+
+class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
+    class Meta:
+        abstract = True
 
 
 class Purpose(NameDescriptionFolderMixin):
