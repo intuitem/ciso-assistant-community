@@ -1255,7 +1255,9 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     threats = FieldsRelatedField(many=True)
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
-    qualifications = FieldsRelatedField(many=True)
+    qualifications = FieldsRelatedField(["name"], many=True)
+    severity = serializers.CharField(source="get_severity_display", read_only=True)
+    status = serializers.CharField(source="get_status_display", read_only=True)
     folder = FieldsRelatedField()
 
     class Meta:

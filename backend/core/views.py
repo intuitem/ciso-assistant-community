@@ -4824,7 +4824,7 @@ class IncidentViewSet(BaseModelViewSet):
 
             Timeline.objects.create(
                 incident=instance,
-                entry=f"statusFrom{previous_status}To{instance.status}",
+                entry="statusChanged",
                 entry_type=entry_type,
                 author=self.request.user,
                 timestamp=now(),
@@ -4833,7 +4833,7 @@ class IncidentViewSet(BaseModelViewSet):
         if previous_severity != instance.severity and previous_severity is not None:
             Timeline.objects.create(
                 incident=instance,
-                entry=f"severityFrom{previous_severity}To{instance.severity}",
+                entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
                 entry_type=Timeline.EntryType.SEVERITY_CHANGE,
                 author=self.request.user,
                 timestamp=now(),

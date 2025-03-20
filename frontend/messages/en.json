@@ -1202,6 +1202,16 @@
 	"addIncident": "Add incident",
 	"timestamp": "Timestamp",
 	"addTimeline": "Add timeline entry",
+	"associatedTimelines": "Associated timeline entries",
 	"major": "Major",
-	"statusFromongoingToresolved": "Status changed from Ongoing to Resolved"
+	"new": "New",
+	"ongoing": "Ongoing",
+	"closed": "Closed",
+	"mitigation": "Mitigation",
+	"detection": "Detection",
+	"severityChange": "Severity change",
+	"resolution": "Resolution",
+	"closing": "Closing",
+	"dismissal": "Dismissal",
+	"statusChanged": "Status changed"
 }

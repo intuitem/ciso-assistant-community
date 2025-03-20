@@ -265,7 +265,7 @@
 											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 												>{value.name}</Anchor
 											>
-										{:else if key === 'severity'}
+										{:else if key === 'severity' && data.urlModel !== 'incidents'}
 											<!-- We must add translations for the following severity levels -->
 											<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
 											{@const stringifiedSeverity =
