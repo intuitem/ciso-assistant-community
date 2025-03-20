@@ -868,5 +868,10 @@
 	"useDocumentationScore": "Använd poängsättning av dokumentation",
 	"useDocumentationScoreHelpText": "En andra poäng (dokumentationspoängen) kommer att finnas tillgänglig för att bedöma kraven.",
 	"publicationDate": "Publiceringsdatum",
-	"selectEvidence": "Välj bevis"
+	"selectEvidence": "Välj bevis",
+	"finding": "Resultat",
+	"findings": "Resultat",
+	"associatedFindings": "Associerade resultat",
+	"findings_count": "Antal resultat",
+	"addFinding": "Lägg till resultat"
 }
