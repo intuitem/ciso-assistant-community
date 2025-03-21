@@ -275,10 +275,18 @@ spec:
       {{- if .Values.backend.persistence.sqlite.enabled }}
       - name: sqlite-data
         persistentVolumeClaim:
-          claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
+          {{- if eq .Values.backend.persistence.existingClaim "" }}
+            claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
+          {{- else }}
+            claimName: {{ .Values.backend.persistence.existingClaim }}
+          {{- end }}
       {{- end }}
       {{- if .Values.backend.persistence.localStorage.enabled }}
       - name: localstorage-data
         persistentVolumeClaim:
-          claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+          {{- if eq .Values.backend.persistence.existingClaim "" }}
+            claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+          {{- else }}
+            claimName: {{ .Values.backend.persistence.existingClaim }}
+          {{- end }}
       {{- end }}
