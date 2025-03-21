@@ -9,14 +9,18 @@ from kafka import KafkaConsumer, KafkaProducer
 from kafka.errors import UnsupportedCodecError
 
 from messages import message_registry
-from settings import API_URL, VERIFY_CERTIFICATE, EMAIL, PASSWORD, ERRORS_TOPIC
+from settings import API_URL, DEBUG, VERIFY_CERTIFICATE, EMAIL, PASSWORD, ERRORS_TOPIC
 
 from loguru import logger
+
+log_message_format = "<green>{time:YYYY-MM-DD at HH:mm:ss}</green> | <level>{level}</level> | <level>{message}</level>"
+if DEBUG:
+    log_message_format += " | <magenta>{extra}</magenta>"
 
 logger.remove(0)
 logger.add(
     sys.stderr,
-    format="<green>{time:YYYY-MM-DD at HH:mm:ss}</green> | <level>{level}</level> | <level>{message}</level> | <magenta>{extra}</magenta>",
+    format=log_message_format,
     colorize=True,
     backtrace=True,
     diagnose=True,

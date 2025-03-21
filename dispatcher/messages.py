@@ -98,7 +98,7 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     )
 
     if res.status_code not in [200, 204]:
-        logger.exception(
+        logger.error(
             f"Failed to update {resource_endpoint} {obj_id}: {res.status_code}",
             response=res.text,
         )
@@ -181,12 +181,12 @@ def upload_attachment(message: dict):
 
     file_name = values.get("file_name")
     if not file_name:
-        logger.exception("No file_name provided")
+        logger.error("No file_name provided")
         raise Exception("No file_name provided")
 
     file_content_b64 = values.get("file_content")
     if not file_content_b64:
-        logger.exception("No file_content provided")
+        logger.error("No file_content provided")
         raise Exception("No file_content provided")
 
     file_content = base64.b64decode(file_content_b64)
@@ -206,7 +206,7 @@ def upload_attachment(message: dict):
         evidence_id = get_object_ids(selector, "evidences")[0]
         logger.info("Found evidence", evidence_id=evidence_id)
         if not evidence_id:
-            logger.exception(
+            logger.error(
                 "No evidence found for the provided selector.", selector=selector
             )
             raise Exception("No evidence found for the provided selector.")
@@ -219,7 +219,7 @@ def upload_attachment(message: dict):
             verify=VERIFY_CERTIFICATE,
         )
         if not response.ok:
-            logger.exception(
+            logger.error(
                 "Failed to create evidence",
                 status_code=response.status_code,
                 response=response.text,
@@ -239,7 +239,7 @@ def upload_attachment(message: dict):
         verify=VERIFY_CERTIFICATE,
     )
     if upload_response.status_code not in [200, 204]:
-        logger.exception(
+        logger.error(
             "Failed to upload attachment to evidence",
             evidence_id=evidence_id,
             status_code=upload_response.status_code,
@@ -260,7 +260,7 @@ def upload_attachment(message: dict):
         applied_controls = get_object_ids(applied_controls_selector, "applied-controls")
         logger.info("Found applied controls", applied_controls=applied_controls)
         if not applied_controls:
-            logger.exception(
+            logger.error(
                 "No applied controls found for the provided selector.",
                 selector=applied_controls_selector,
             )
@@ -285,7 +285,7 @@ def upload_attachment(message: dict):
                 headers={"Authorization": f"Token {TOKEN}"},
             )
             if not update_response.ok:
-                logger.exception(
+                logger.error(
                     "Failed to update applied control",
                     control=control,
                     response=update_response.text,

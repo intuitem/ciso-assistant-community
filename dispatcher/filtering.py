@@ -56,7 +56,7 @@ def process_selector(
             verify=verify_certificate,
         )
         if not response.ok:
-            logger.exception(
+            logger.error(
                 "Search failed",
                 status_code=response.status_code,
                 response=response.text,
@@ -74,15 +74,15 @@ def process_selector(
             results_list = data
             next_url = None
         else:
-            logger.exception("Unexpected API response format", response=data)
+            logger.error("Unexpected API response format", response=data)
             raise Exception("Unexpected API response format")
 
     if len(results_list) == 0:
-        raise Exception("No objects returned for the selector.")
+        raise Exception("No objects match the given selector.")
     if target == "single":
         if len(results_list) > 1:
             error_message = f"Expected a single object, but got {len(results_list)} objects. Please refine the selector or set the selector to target 'multiple' if you expect multiple objects."
-            logger.exception(
+            logger.error(
                 error_message,
                 len(results_list),
                 results=results_list,

@@ -13,6 +13,8 @@ PASSWORD = ""
 
 ERRORS_TOPIC = os.getenv("ERRORS_TOPIC", "errors")
 
+DEBUG = os.getenv("DEBUG", False)
+
 CONSUMER_CONFG_PATH = ".consumer_config.yaml"
 
 config = dict()
