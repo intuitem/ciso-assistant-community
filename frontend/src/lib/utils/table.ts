@@ -490,8 +490,8 @@ export const listViewFields = {
 		}
 	},
 	threats: {
-		head: ['ref_id', 'name', 'description', 'provider', 'domain'],
-		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
+		head: ['ref_id', 'name', 'description', 'provider', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'provider', 'folder', 'filtering_labels'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -556,7 +556,8 @@ export const listViewFields = {
 			'eta',
 			'owner',
 			'domain',
-			'referenceControl'
+			'referenceControl',
+			'labels'
 		],
 		body: [
 			'ref_id',
@@ -568,7 +569,8 @@ export const listViewFields = {
 			'eta',
 			'owner',
 			'folder',
-			'reference_control'
+			'reference_control',
+			'filtering_labels'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -614,8 +616,26 @@ export const listViewFields = {
 		}
 	},
 	'reference-controls': {
-		head: ['ref_id', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
-		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'csfFunction',
+			'provider',
+			'domain',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'csf_function',
+			'provider',
+			'folder',
+			'filtering_labels'
+		],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
