@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('privacy', '0003_remove_processing_labels_processing_filtering_labels'),
+        ("privacy", "0003_remove_processing_labels_processing_filtering_labels"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='datasubject',
-            name='description',
-            field=models.TextField(blank=True, null=True, verbose_name='Description'),
+            model_name="datasubject",
+            name="description",
+            field=models.TextField(blank=True, null=True, verbose_name="Description"),
         ),
     ]
