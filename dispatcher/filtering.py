@@ -77,20 +77,21 @@ def process_selector(
             logger.exception("Unexpected API response format", response=data)
             raise Exception("Unexpected API response format")
 
+    if len(results_list) == 0:
+        raise Exception("No objects returned for the selector.")
     if target == "single":
-        if len(results_list) != 1:
+        if len(results_list) > 1:
+            error_message = f"Expected a single object, but got {len(results_list)} objects. Please refine the selector or set the selector to target 'multiple' if you expect multiple objects."
             logger.exception(
-                "Expected a single object, but got {} objects",
+                error_message,
                 len(results_list),
                 results=results_list,
             )
             raise Exception(
-                f"Expected a single object, but got {len(results_list)} objects."
+                error_message,
             )
         return results_list[0].get("id")
     elif target == "multiple":
-        if len(results_list) == 0:
-            raise Exception("No objects returned for the selector.")
         return [item.get("id") for item in results_list]
     else:
         raise Exception(f"Unknown target specified in selector: {target}")
