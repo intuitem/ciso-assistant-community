@@ -1,5 +1,4 @@
 <script lang="ts">
-	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
 	import FlippableCard from './FlippableCard.svelte';
 	import type { PageData } from './$types';
 	export let data: PageData;
@@ -7,7 +6,7 @@
 
 {@debug data}
 <div class="card bg-white bg-stripes-pink">
-	<div class="p-6 bg-white bg-opacity-95">
+	<div class="p-6 bg-white bg-opacity-85">
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 			{#each data.data as provider}
 				<FlippableCard {provider} />

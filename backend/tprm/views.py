@@ -79,15 +79,26 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 if ea.updated_at
                 else "-",
                 "conclusion": ea.conclusion if ea.conclusion else "ongoing",
+                "compliance_assessment_id": ea.compliance_assessment.id
+                if ea.compliance_assessment
+                else "#",
+                "reviewers": ",".join([re.email for re in ea.reviewers.all()])
+                if len(ea.reviewers.all())
+                else "-",
+                "observation": ea.observation if ea.observation else "-",
             }
 
-            progress = (
+            completion = (
                 ea.compliance_assessment.answers_progress
                 if ea.compliance_assessment
                 else 0
             )
-            entry.update({"progress": progress})
+            entry.update({"completion": completion})
 
+            review_progress = (
+                ea.compliance_assessment.progress if ea.compliance_assessment else 0
+            )
+            entry.update({"review_progress": review_progress})
             assessments_data.append(entry)
 
         return Response(assessments_data)

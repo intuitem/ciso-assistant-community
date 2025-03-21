@@ -4,10 +4,14 @@
 		provider: string;
 		baseline: string;
 		solutions: string;
-		progress: number;
+		completion: number;
+		review_progress: number;
 		conclusion: string;
 		last_update: string;
 		due_date: string;
+		eta_date: string;
+		observation: string;
+		reviewers: string;
 	};
 
 	// State to track if the card is flipped
@@ -41,7 +45,7 @@
 </script>
 
 <!-- Tailwind-based implementation -->
-<div class="perspective-1000 w-full h-full min-h-[350px]">
+<div class="perspective-1000 w-full h-full min-h-[400px]">
 	<div
 		class="relative w-full h-full transition-transform duration-800 {isFlipped
 			? 'rotate-x-180'
@@ -112,12 +116,12 @@
 					<div class="mb-3">
 						<div class="flex justify-between items-center mb-1">
 							<span class="text-sm text-gray-500">Completion</span>
-							<span class="text-sm font-medium">{provider.progress}%</span>
+							<span class="text-sm font-medium">{provider.completion}%</span>
 						</div>
 						<div class="w-full bg-gray-200 rounded-full h-2">
 							<div
-								class="h-2 rounded-full {getProgressColor(provider.progress)}"
-								style="width: {provider.progress}%"
+								class="h-2 rounded-full {getProgressColor(provider.completion)}"
+								style="width: {provider.completion}%"
 							></div>
 						</div>
 					</div>
@@ -173,7 +177,7 @@
 
 				<!-- Additional details could go here -->
 				<div class="mb-4">
-					<span class="block text-sm text-gray-500 mb-2">Detailed Progress</span>
+					<span class="block text-sm text-gray-500 mb-2">Compliance review progress</span>
 					<div class="flex flex-col items-center gap-4 mt-2">
 						<!-- Progress circle - SVG can't be fully replaced with Tailwind -->
 						<div class="text-gray-900">
@@ -187,14 +191,14 @@
 									cy="50"
 									r="45"
 									fill="none"
-									stroke={provider.progress < 50
+									stroke={provider.review_progress < 50
 										? '#ef4444'
-										: provider.progress < 75
+										: provider.review_progress < 75
 											? '#eab308'
 											: '#22c55e'}
 									stroke-width="8"
 									stroke-dasharray="283"
-									stroke-dashoffset={283 - (283 * provider.progress) / 100}
+									stroke-dashoffset={283 - (283 * provider.review_progress) / 100}
 									transform="rotate(-90 50 50)"
 								/>
 
@@ -207,29 +211,19 @@
 									font-weight="bold"
 									fill="currentColor"
 								>
-									{provider.progress}%
+									<a href="/compliance-assessments/{provider.compliance_assessment_id}"
+										>{provider.review_progress}%</a
+									>
 								</text>
 							</svg>
 						</div>
 
-						<!-- Timeline -->
 						<div class="w-full mt-4">
 							<div class="flex mb-4">
 								<div class="w-3 h-3 rounded-full bg-gray-300 mt-1 mr-3"></div>
 								<div class="flex-1">
-									<p class="font-semibold mb-1">{provider.last_update}</p>
-									<p class="text-gray-600">Last updated</p>
-								</div>
-							</div>
-							<div class="flex mb-4">
-								<div
-									class="w-3 h-3 rounded-full {provider.conclusion === 'completed'
-										? 'bg-green-500'
-										: 'bg-gray-300'} mt-1 mr-3"
-								></div>
-								<div class="flex-1">
-									<p class="font-semibold mb-1">{provider.due_date}</p>
-									<p class="text-gray-600">Expected completion</p>
+									<p class="font-semibold mb-1">{provider.reviewers}</p>
+									<p class="text-gray-600">Reviewer(s)</p>
 								</div>
 							</div>
 						</div>
@@ -237,15 +231,9 @@
 				</div>
 
 				<div class="mt-2">
-					<span class="block text-sm text-gray-500 mb-2">Status Summary</span>
-					<p class="text-gray-600 leading-relaxed">
-						{#if provider.conclusion === 'completed'}
-							This provider has completed implementation with a {provider.progress}% success rate.
-						{:else if provider.conclusion === 'delayed' || provider.conclusion === 'blocker'}
-							Implementation is facing challenges. Currently at {provider.progress}% completion.
-						{:else}
-							Implementation is on track at {provider.progress}% completion.
-						{/if}
+					<span class="block text-sm text-gray-500 mb-2">Observation</span>
+					<p class="text-gray-600 leading-relaxed text-xs">
+						{provider.observation}
 					</p>
 				</div>
 			</div>
