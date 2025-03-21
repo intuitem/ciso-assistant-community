@@ -56,7 +56,6 @@ class DataSubject(NameDescriptionFolderMixin):
         "Processing", on_delete=models.CASCADE, related_name="data_subjects"
     )
     category = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
