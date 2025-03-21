@@ -9,5 +9,5 @@ export const load = (async ({ fetch }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
-	return { data, title: m.myAssignments() };
+	return { data, title: m.tprmOverview() };
 }) satisfies PageServerLoad;

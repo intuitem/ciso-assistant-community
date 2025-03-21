@@ -67,6 +67,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
         for ea in EntityAssessment.objects.filter(id__in=viewable_items):
             entry = {
+                "entity_assessment_id": ea.id,
                 "provider": ea.entity.name,
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0

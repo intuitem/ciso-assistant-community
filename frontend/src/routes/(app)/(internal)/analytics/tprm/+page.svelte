@@ -1,6 +1,7 @@
 <script lang="ts">
 	import FlippableCard from './FlippableCard.svelte';
 	import type { PageData } from './$types';
+
 	export let data: PageData;
 </script>
 
@@ -8,8 +9,8 @@
 <div class="card bg-white bg-stripes-pink">
 	<div class="p-6 bg-white bg-opacity-85">
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-			{#each data.data as provider}
-				<FlippableCard {provider} />
+			{#each data.data as entity_assessment}
+				<FlippableCard {entity_assessment} />
 			{/each}
 		</div>
 	</div>

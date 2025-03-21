@@ -1,7 +1,8 @@
 <script lang="ts">
-	// Accept provider data as a prop
-	export let provider: {
+	// Accept entity_assessment.data as a prop
+	export let entity_assessment: {
 		provider: string;
+		entity_assessment_id: string;
 		baseline: string;
 		solutions: string;
 		completion: number;
@@ -22,6 +23,8 @@
 		isFlipped = !isFlipped;
 	}
 
+	import * as m from '$paraglide/messages';
+
 	// Function to determine progress bar color based on completion percentage
 	function getProgressColor(progress: number): string {
 		if (progress < 50) return 'bg-red-500';
@@ -35,8 +38,6 @@
 			blocker: 'bg-red-100 text-red-800',
 			warning: 'bg-yellow-100 text-yellow-800',
 			ongoing: 'bg-blue-100 text-blue-800',
-			delayed: 'bg-yellow-100 text-yellow-800',
-			'on track': 'bg-blue-100 text-blue-800',
 			completed: 'bg-green-100 text-green-800',
 			ok: 'bg-green-100 text-green-800'
 		};
@@ -86,13 +87,15 @@
 			<div class="p-4 h-full flex flex-col">
 				<!-- Card header with provider name and conclusion -->
 				<div class="flex justify-between items-center pb-3 border-b border-gray-200 mb-3">
-					<h3 class="font-bold text-lg text-gray-900">{provider.provider}</h3>
+					<h3 class="font-bold text-lg text-gray-900">{entity_assessment.provider}</h3>
 					<span
 						class="px-2 py-1 rounded-full text-xs font-medium mr-10 {getConclusionColor(
-							provider.conclusion
+							entity_assessment.conclusion
 						)}"
 					>
-						{provider.conclusion}
+						<a href="/entity-assessments/{entity_assessment.entity_assessment_id}"
+							>{entity_assessment.conclusion}</a
+						>
 					</span>
 				</div>
 
@@ -101,14 +104,14 @@
 					<!-- Solution name -->
 					<div class="mb-3">
 						<span class="block text-sm text-gray-500">Solution(s)</span>
-						<div class="font-semibold text-gray-800">{provider.solutions}</div>
+						<div class="font-semibold text-gray-800">{entity_assessment.solutions}</div>
 					</div>
 
 					<!-- Framework/Baseline -->
 					<div class="mb-3">
 						<span class="block text-sm text-gray-500">Baseline</span>
 						<div class="inline-block bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-							{provider.baseline}
+							{entity_assessment.baseline}
 						</div>
 					</div>
 
@@ -116,12 +119,12 @@
 					<div class="mb-3">
 						<div class="flex justify-between items-center mb-1">
 							<span class="text-sm text-gray-500">Completion</span>
-							<span class="text-sm font-medium">{provider.completion}%</span>
+							<span class="text-sm font-medium">{entity_assessment.completion}%</span>
 						</div>
 						<div class="w-full bg-gray-200 rounded-full h-2">
 							<div
-								class="h-2 rounded-full {getProgressColor(provider.completion)}"
-								style="width: {provider.completion}%"
+								class="h-2 rounded-full {getProgressColor(entity_assessment.completion)}"
+								style="width: {entity_assessment.completion}%"
 							></div>
 						</div>
 					</div>
@@ -130,11 +133,11 @@
 					<div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
 						<div>
 							<span class="block text-gray-500">Last update</span>
-							{provider.last_update}
+							{entity_assessment.last_update}
 						</div>
 						<div>
 							<span class="block text-gray-500">Due date</span>
-							{provider.due_date}
+							{entity_assessment.due_date}
 						</div>
 					</div>
 				</div>
@@ -173,7 +176,7 @@
 
 			<!-- Card content (back) -->
 			<div class="p-4 h-full flex flex-col">
-				<h3 class="font-bold text-lg text-gray-900 mb-3 pr-10">{provider.provider}</h3>
+				<h3 class="font-bold text-lg text-gray-900 mb-3 pr-10">{entity_assessment.provider}</h3>
 
 				<!-- Additional details could go here -->
 				<div class="mb-4">
@@ -191,14 +194,14 @@
 									cy="50"
 									r="45"
 									fill="none"
-									stroke={provider.review_progress < 50
+									stroke={entity_assessment.review_progress < 50
 										? '#ef4444'
-										: provider.review_progress < 75
+										: entity_assessment.review_progress < 75
 											? '#eab308'
 											: '#22c55e'}
 									stroke-width="8"
 									stroke-dasharray="283"
-									stroke-dashoffset={283 - (283 * provider.review_progress) / 100}
+									stroke-dashoffset={283 - (283 * entity_assessment.review_progress) / 100}
 									transform="rotate(-90 50 50)"
 								/>
 
@@ -211,8 +214,8 @@
 									font-weight="bold"
 									fill="currentColor"
 								>
-									<a href="/compliance-assessments/{provider.compliance_assessment_id}"
-										>{provider.review_progress}%</a
+									<a href="/compliance-assessments/{entity_assessment.compliance_assessment_id}"
+										>{entity_assessment.review_progress}%</a
 									>
 								</text>
 							</svg>
@@ -222,7 +225,7 @@
 							<div class="flex mb-4">
 								<div class="w-3 h-3 rounded-full bg-gray-300 mt-1 mr-3"></div>
 								<div class="flex-1">
-									<p class="font-semibold mb-1">{provider.reviewers}</p>
+									<p class="font-semibold mb-1">{entity_assessment.reviewers}</p>
 									<p class="text-gray-600">Reviewer(s)</p>
 								</div>
 							</div>
@@ -233,7 +236,7 @@
 				<div class="mt-2">
 					<span class="block text-sm text-gray-500 mb-2">Observation</span>
 					<p class="text-gray-600 leading-relaxed text-xs">
-						{provider.observation}
+						{entity_assessment.observation}
 					</p>
 				</div>
 			</div>
