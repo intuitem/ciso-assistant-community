@@ -282,3 +282,12 @@ spec:
         persistentVolumeClaim:
           claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
       {{- end }}
+      # Add extra environment variables dynamically
+      {{- range .Values.backend.extraEnv }}
+      - name: {{ .name }}
+        {{- if .valueFrom }}
+          valueFrom: {{- toYaml .valueFrom | nindent 14 }}
+        {{- else }}
+          value: {{ .value | quote }}
+        {{- end }}
+      {{- end }}
