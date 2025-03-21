@@ -1912,9 +1912,9 @@ class Incident(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = "Incidents"
 
 
-class Timeline(AbstractBaseModel, FolderMixin):
+class TimelineEntry(AbstractBaseModel, FolderMixin):
     """
-    Timeline objects contain a list of entries that describe the evolution of an incident
+    Timeline entry objects describe the evolution of an incident
     """
 
     class EntryType(models.TextChoices):
@@ -1936,7 +1936,7 @@ class Timeline(AbstractBaseModel, FolderMixin):
     incident = models.ForeignKey(
         Incident,
         on_delete=models.CASCADE,
-        related_name="timelines",
+        related_name="timeline_entries",
         verbose_name=_("Incident"),
     )
     entry = models.CharField(max_length=200, verbose_name="Entry", unique=False)
@@ -1952,7 +1952,7 @@ class Timeline(AbstractBaseModel, FolderMixin):
     author = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
-        related_name="timelines",
+        related_name="timeline_entries",
         verbose_name="Author",
         null=True,
         blank=True,
@@ -1960,7 +1960,7 @@ class Timeline(AbstractBaseModel, FolderMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
     evidences = models.ManyToManyField(
         Evidence,
-        related_name="timelines",
+        related_name="timeline_entries",
         verbose_name="Evidence",
         blank=True,
     )

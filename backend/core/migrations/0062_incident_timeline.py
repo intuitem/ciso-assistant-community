@@ -124,7 +124,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="Timeline",
+            name="TimelineEntry",
             fields=[
                 (
                     "id",
@@ -181,7 +181,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="timelines",
+                        related_name="timeline_entries",
                         to=settings.AUTH_USER_MODEL,
                         verbose_name="Author",
                     ),
@@ -190,7 +190,7 @@ class Migration(migrations.Migration):
                     "evidences",
                     models.ManyToManyField(
                         blank=True,
-                        related_name="timelines",
+                        related_name="timeline_entries",
                         to="core.evidence",
                         verbose_name="Evidence",
                     ),
@@ -208,7 +208,7 @@ class Migration(migrations.Migration):
                     "incident",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="timelines",
+                        related_name="timeline_entries",
                         to="core.incident",
                         verbose_name="Incident",
                     ),

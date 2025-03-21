@@ -875,7 +875,7 @@ export const listViewFields = {
 		head: ['name', 'description', 'status', 'severity', 'threats'],
 		body: ['name', 'description', 'status', 'severity', 'threats']
 	},
-	timelines: {
+	"timeline-entries": {
 		head: ['entry', 'entry_type', 'author', 'timestamp'],
 		body: ['entry', 'entry_type', 'author', 'timestamp']
 	},

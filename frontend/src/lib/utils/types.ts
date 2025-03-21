@@ -72,7 +72,7 @@ export const URL_MODEL = [
 	'findings',
 	'findings-assessments',
 	'incidents',
-	'timelines'
+	'timeline-entries'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

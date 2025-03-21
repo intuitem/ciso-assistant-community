@@ -549,7 +549,7 @@ export const IncidentSchema = z.object({
 	qualifications: z.string().uuid().optional().array().optional()
 });
 
-export const TimelineSchema = z.object({
+export const TimelineEntrySchema = z.object({
 	incident: z.string(),
 	entry: z.string(),
 	entry_type: z.string(),
@@ -599,7 +599,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
 	incidents: IncidentSchema,
-	timelines: TimelineSchema
+	'timeline-entries': TimelineEntrySchema
 };
 
 export const modelSchema = (model: string) => {

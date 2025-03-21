@@ -826,15 +826,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
-		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timelines' }],
+		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
 		selectFields: [{ field: 'status' }, { field: 'severity' }]
 	},
-	timelines: {
-		name: 'timeline',
-		localName: 'timeline',
-		localNamePlural: 'timelines',
-		verboseName: 'Timeline',
-		verboseNamePlural: 'Timelines',
+	"timeline-entries": {
+		name: 'timelineentry',
+		localName: 'timelineEntry',
+		localNamePlural: 'timelineEntries',
+		verboseName: 'Timeline entriy',
+		verboseNamePlural: 'Timeline entries',
 		foreignKeyFields: [
 			{ field: 'incident', urlModel: 'incidents' },
 			{ field: 'author', urlModel: 'users' }

@@ -772,6 +772,7 @@
 	"licenseExpiredMessage": "Lisensi Anda telah kedaluwarsa. Operasi tulis dinonaktifkan. Silakan hubungi administrator Anda untuk memperbarui.",
 	"experimental": "Eksperimental",
 	"timeline": "Linimasa",
+	"timelineEntries": "Linimasa",
 	"graph": "Grafik",
 	"startDate": "Tanggal mulai",
 	"startDateHelpText": "Tanggal mulai (berguna untuk linimasa)",

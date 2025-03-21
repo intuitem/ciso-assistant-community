@@ -1576,7 +1576,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         return Response(data)
 
     @action(detail=False, methods=["get"])
-    def get_timeline_info(self, request):
+    def get_timeline_entries_info(self, request):
         entries = []
         COLORS_PALETTE = [
             "#F72585",
@@ -4829,12 +4829,12 @@ class IncidentViewSet(BaseModelViewSet):
             and previous_status != instance.status
         ):
             entry_type = {
-                Incident.Status.RESOLVED: Timeline.EntryType.RESOLUTION,
-                Incident.Status.CLOSED: Timeline.EntryType.CLOSING,
-                Incident.Status.DISMISSED: Timeline.EntryType.DISMISSAL,
+                Incident.Status.RESOLVED: TimelineEntry.EntryType.RESOLUTION,
+                Incident.Status.CLOSED: TimelineEntry.EntryType.CLOSING,
+                Incident.Status.DISMISSED: TimelineEntry.EntryType.DISMISSAL,
             }.get(instance.status)
 
-            Timeline.objects.create(
+            TimelineEntry.objects.create(
                 incident=instance,
                 entry="statusChanged",
                 entry_type=entry_type,
@@ -4843,10 +4843,10 @@ class IncidentViewSet(BaseModelViewSet):
             )
 
         if previous_severity != instance.severity and previous_severity is not None:
-            Timeline.objects.create(
+            TimelineEntry.objects.create(
                 incident=instance,
                 entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
-                entry_type=Timeline.EntryType.SEVERITY_CHANGE,
+                entry_type=TimelineEntry.EntryType.SEVERITY_CHANGE,
                 author=self.request.user,
                 timestamp=now(),
             )
@@ -4854,14 +4854,14 @@ class IncidentViewSet(BaseModelViewSet):
         return super().perform_update(serializer)
 
 
-class TimelineViewSet(BaseModelViewSet):
-    model = Timeline
+class TimelineEntryViewSet(BaseModelViewSet):
+    model = TimelineEntry
     filterset_fields = ["incident"]
     ordering = ["-timestamp"]
 
     @action(detail=False, name="Get entry type choices")
     def entry_type(self, request):
-        return Response(dict(Timeline.EntryType.get_manual_entry_types()))
+        return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -4870,10 +4870,10 @@ class TimelineViewSet(BaseModelViewSet):
 
     def perform_destroy(self, instance):
         if instance.entry_type in [
-            Timeline.EntryType.SEVERITY_CHANGE,
-            Timeline.EntryType.RESOLUTION,
-            Timeline.EntryType.CLOSING,
-            Timeline.EntryType.DISMISSAL,
+            TimelineEntry.EntryType.SEVERITY_CHANGE,
+            TimelineEntry.EntryType.RESOLUTION,
+            TimelineEntry.EntryType.CLOSING,
+            TimelineEntry.EntryType.DISMISSAL,
         ]:
-            raise ValidationError({"error": "cannotDeleteAutoTimeline"})
+            raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
         return super().perform_destroy(instance)

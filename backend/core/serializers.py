@@ -1227,13 +1227,13 @@ class FindingReadSerializer(FindingWriteSerializer):
         fields = "__all__"
 
 
-class TimelineWriteSerializer(BaseModelSerializer):
+class TimelineEntryWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = Timeline
+        model = TimelineEntry
         exclude = ["created_at", "updated_at"]
 
 
-class TimelineReadSerializer(TimelineWriteSerializer):
+class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
     str = serializers.CharField(source="__str__", read_only=True)
     author = FieldsRelatedField()
     evidences = FieldsRelatedField(many=True)
@@ -1241,7 +1241,7 @@ class TimelineReadSerializer(TimelineWriteSerializer):
     incident = FieldsRelatedField()
 
     class Meta:
-        model = Timeline
+        model = TimelineEntry
         fields = "__all__"
 
 
@@ -1264,6 +1264,6 @@ class IncidentReadSerializer(IncidentWriteSerializer):
         model = Incident
         fields = "__all__"
 
-    def get_timeline(self, obj):
+    def get_timeline_entries(self, obj):
         """Returns a serialized list of timeline entries related to the incident."""
-        return TimelineReadSerializer(obj.timelines.all(), many=True).data
+        return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data

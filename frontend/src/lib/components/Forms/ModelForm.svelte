@@ -340,7 +340,7 @@
 		<FindingsAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'incidents'}
 		<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
-	{:else if URLModel === 'timelines'}
+	{:else if URLModel === 'timeline-entries'}
 		<TimelineForm
 			{form}
 			{model}
