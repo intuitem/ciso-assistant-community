@@ -5,6 +5,10 @@ from pathlib import Path
 import click
 import yaml
 
+CONSUMER_CONFG_PATH = ".consumer_config.yaml"
+
+DEBUG = os.getenv("DEBUG", False)
+
 API_URL = ""
 GLOBAL_FOLDER_ID = None
 TOKEN = ""
@@ -13,9 +17,7 @@ PASSWORD = ""
 
 ERRORS_TOPIC = os.getenv("ERRORS_TOPIC", "errors")
 
-DEBUG = os.getenv("DEBUG", False)
-
-CONSUMER_CONFG_PATH = ".consumer_config.yaml"
+S3_URL = os.getenv("S3_URL", "http://localhost:9000")
 
 config = dict()
 

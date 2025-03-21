@@ -3,10 +3,11 @@ import io
 import json
 import urllib.parse
 from filtering import process_selector
+from s3fs import S3FileSystem
 
 import requests
 
-from settings import API_URL, TOKEN, VERIFY_CERTIFICATE
+from settings import API_URL, S3_URL, TOKEN, VERIFY_CERTIFICATE
 
 from loguru import logger
 
@@ -175,67 +176,108 @@ def update_requirement_assessment(message: dict):
     return update_objects(message, "requirement-assessments")
 
 
-def upload_attachment(message: dict):
-    selector = message.get("selector", {})
-    values = message.get("values", {})
-
-    file_name = values.get("file_name")
+def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
+    """
+    Determines how to load the file.
+    If a base64 encoded content is provided under 'file_content', it decodes it.
+    If S3 details are provided (i.e. 'file_s3_bucket' and 'file_s3_key'), it opens the file from S3.
+    """
+    file_name = values.get("file_name") or values.get("file_s3_key")
     if not file_name:
-        logger.error("No file_name provided")
-        raise Exception("No file_name provided")
+        logger.error("No file_name or file_s3_key provided")
+        raise Exception("No file_name or file_s3_key provided")
 
-    file_content_b64 = values.get("file_content")
-    if not file_content_b64:
-        logger.error("No file_content provided")
-        raise Exception("No file_content provided")
+    if "file_content" in values:
+        file_content_b64 = values.get("file_content")
+        if not file_content_b64:
+            logger.error("No file_content provided")
+            raise Exception("No file_content provided")
+        file_content = base64.b64decode(file_content_b64)
+        in_memory_file = io.BytesIO(file_content)
+        logger.info("Loaded file from base64 encoded content", file_name=file_name)
+        return file_name, in_memory_file
 
-    file_content = base64.b64decode(file_content_b64)
-    in_memory_file = io.BytesIO(file_content)
-    file_upload_headers = {
-        "Authorization": f"Token {TOKEN}",
-        "Content-Disposition": f"attachment; filename={urllib.parse.quote(file_name)}",
-    }
-
-    applied_controls_selector: list[dict] = values.get("applied_controls", [])
-
-    evidences_endpoint = f"{API_URL}/evidences/"
-
-    if selector:
-        logger.info("Using provided selector to find evidence", selector=selector)
-        selector["target"] = "single"
-        evidence_id = get_object_ids(selector, "evidences")[0]
-        logger.info("Found evidence", evidence_id=evidence_id)
-        if not evidence_id:
+    elif "file_s3_bucket" in values and "file_s3_key" in values:
+        s3 = S3FileSystem(anon=True, endpoint_url=S3_URL)
+        bucket = values["file_s3_bucket"]
+        key = values["file_s3_key"]
+        file_path = f"{bucket}/{key}"
+        try:
+            in_memory_file = s3.open(file_path, "rb")
+        except Exception as e:
             logger.error(
-                "No evidence found for the provided selector.", selector=selector
+                "Failed to open file from S3", bucket=bucket, key=key, error=str(e)
             )
-            raise Exception("No evidence found for the provided selector.")
+            raise Exception(f"Failed to open file from S3: {e}")
+        logger.info("Loaded file from S3", file_name=file_name, bucket=bucket, key=key)
+        return file_name, in_memory_file
+
     else:
-        logger.info("Creating new evidence with name: {}", file_name, values=values)
+        logger.error(
+            "No valid file source provided. Expecting 'file_content' or S3 details."
+        )
+        raise Exception(
+            "No valid file source provided. Provide base64 file content or S3 file location."
+        )
+
+
+def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str:
+    """
+    Either finds an existing object using a selector or creates a new object.
+    """
+    objects_endpoint = f"{API_URL}/{resource}/"
+    if selector:
+        logger.info("Using provided selector to find object", selector=selector)
+        selector["target"] = "single"
+        object_ids = get_object_ids(selector, resource)
+        if not object_ids:
+            logger.error(
+                "No object found for the provided selector.", selector=selector
+            )
+            raise Exception("No object found for the provided selector.")
+        object_id = object_ids[0]
+        logger.info("Found object", object_id=object_id)
+    else:
+        logger.info("Creating new object with name: {}", name, values=values)
         response = requests.post(
-            evidences_endpoint,
-            data={"name": values.get("name", file_name)},
+            objects_endpoint,
+            data={"name": values.get("name", name)},
             headers={"Authorization": f"Token {TOKEN}"},
             verify=VERIFY_CERTIFICATE,
         )
         if not response.ok:
             logger.error(
-                "Failed to create evidence",
+                "Failed to create object",
                 status_code=response.status_code,
                 response=response.text,
             )
             raise Exception(
-                f"Failed to create evidence: {response.status_code}, {response.text}"
+                f"Failed to create object: {response.status_code}, {response.text}"
             )
         data = response.json()
-        evidence_id = data["id"]
-        logger.info("Created evidence", evidence_id=evidence_id, evidence=data)
+        object_id = data["id"]
+        logger.info("Created object", object_id=object_id, object=data)
+    return object_id
 
-    logger.info("Uploading attachment to evidence", evidence_id=evidence_id)
+
+def upload_file_to_evidence(
+    evidence_id: str, file_name: str, file_obj: io.IOBase
+) -> None:
+    """
+    Uploads the file to the evidence upload endpoint.
+    """
+    file_upload_headers = {
+        "Authorization": f"Token {TOKEN}",
+        "Content-Disposition": f"attachment; filename={urllib.parse.quote(file_name)}",
+    }
+    evidences_endpoint = f"{API_URL}/evidences/"
+    logger.info(
+        "Uploading attachment to evidence", evidence_id=evidence_id, file_name=file_name
+    )
     upload_response = requests.post(
         f"{evidences_endpoint}{evidence_id}/upload/",
         headers=file_upload_headers,
-        data=in_memory_file,
+        data=file_obj,
         verify=VERIFY_CERTIFICATE,
     )
     if upload_response.status_code not in [200, 204]:
@@ -252,13 +294,20 @@ def upload_attachment(message: dict):
         "Uploaded attachment to evidence", evidence_id=evidence_id, file_name=file_name
     )
 
+
+def update_applied_controls_with_evidence(
+    values: dict, evidence_id: str, file_name: str
+) -> None:
+    """
+    If applied controls are provided in the values, update each with the new evidence.
+    """
+    applied_controls_selector: list[dict] = values.get("applied_controls", [])
     if applied_controls_selector:
         logger.info(
             "Updating applied controls with evidence",
             selector=applied_controls_selector,
         )
         applied_controls = get_object_ids(applied_controls_selector, "applied-controls")
-        logger.info("Found applied controls", applied_controls=applied_controls)
         if not applied_controls:
             logger.error(
                 "No applied controls found for the provided selector.",
@@ -266,13 +315,11 @@ def upload_attachment(message: dict):
             )
             raise Exception("No applied controls found for the provided selector.")
         for control in applied_controls:
-            logger.debug("Fetching applied control", control=control)
             control_endpoint = f"{API_URL}/applied-controls/{control}/"
             get_response = requests.get(
                 control_endpoint, headers={"Authorization": f"Token {TOKEN}"}
             )
             control_data = get_response.json()
-            logger.debug("Got applied control", control=control, data=control_data)
             evidences = control_data.get("evidences", [])
             logger.info(
                 "Attaching evidence to applied control",
@@ -281,7 +328,7 @@ def upload_attachment(message: dict):
             )
             update_response = requests.patch(
                 control_endpoint,
-                json={"evidences": evidences + [evidence_id]},
+                json={"evidences": [e.get("id") for e in evidences] + [evidence_id]},
                 headers={"Authorization": f"Token {TOKEN}"},
             )
             if not update_response.ok:
@@ -304,6 +351,26 @@ def upload_attachment(message: dict):
             evidence=evidence_id,
             file_name=file_name,
         )
+
+
+def upload_attachment(message: dict):
+    """
+    Main function to process attachment upload.
+    Determines file source (base64 or S3), creates or finds the related evidence,
+    uploads the file, and then updates applied controls if provided.
+    """
+    selector = message.get("selector", {})
+    values = message.get("values", {})
+
+    # Load file from provided source (base64 or S3)
+    file_name, file_obj = get_file_from_message(values)
+
+    # Get or create the evidence and upload the file
+    evidence_id = get_or_create("evidences", selector, values, file_name)
+    upload_file_to_evidence(evidence_id, file_name, file_obj)
+
+    # Update applied controls if any
+    update_applied_controls_with_evidence(values, evidence_id, file_name)
 
 
 message_registry.add(update_applied_control)
