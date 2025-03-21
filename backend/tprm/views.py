@@ -81,7 +81,11 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "conclusion": ea.conclusion if ea.conclusion else "ongoing",
             }
 
-            progress = 70
+            progress = (
+                ea.compliance_assessment.answers_progress
+                if ea.compliance_assessment
+                else 0
+            )
             entry.update({"progress": progress})
 
             assessments_data.append(entry)
