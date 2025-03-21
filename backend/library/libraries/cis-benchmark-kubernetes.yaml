@@ -1,0 +1,1213 @@
+urn: urn:intuitem:risk:library:cis-benchmark-kubernetes
+locale: en
+ref_id: cis-benchmark-kubernetes
+name: CIS Kubernetes Benchmark
+description: CIS Kubernetes Benchmark v1.10.0
+copyright: "\xA9 CIS Security"
+version: 1
+publication_date: 2024-09-23
+provider: CIS
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cis-benchmark-kubernetes
+    ref_id: cis-benchmark-kubernetes
+    name: CIS Kubernetes Benchmark
+    description: CIS Kubernetes Benchmark v1.10.0
+    implementation_groups_definition:
+    - ref_id: A
+      name: Automatic
+      description: null
+    - ref_id: M
+      name: Manual
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Control Plane Components
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1
+      ref_id: '1.1'
+      name: Control Plane Node Configuration Files
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.1
+      name: Ensure that the API server pod specification file permissions are set
+        to 600 or more restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.2
+      name: Ensure that the API server pod specification file ownership is set to
+        root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.3
+      name: Ensure that the controller manager pod specification file permissions
+        are set to 600 or more restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.4
+      name: Ensure that the controller manager pod specification file ownership is
+        set to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.5
+      name: Ensure that the scheduler pod specification file permissions are set to
+        600 or more restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.6
+      name: Ensure that the scheduler pod specification file ownership is set to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.7
+      name: Ensure that the etcd pod specification file permissions are set to 600
+        or more restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.8
+      name: Ensure that the etcd pod specification file ownership is set to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.9
+      name: Ensure that the Container Network Interface file permissions are set to
+        600 or more restrictive
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.10
+      name: Ensure that the Container Network Interface file ownership is set to root:root
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.11
+      name: Ensure that the etcd data directory permissions are set to 700 or more
+        restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.12
+      name: Ensure that the etcd data directory ownership is set to etcd:etcd
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.13
+      name: Ensure that the default administrative credential file permissions are
+        set to 600
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.14
+      name: Ensure that the default administrative credential file ownership is set
+        to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.15
+      name: Ensure that the scheduler.conf file permissions are set to 600 or more
+        restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.16
+      name: Ensure that the scheduler.conf file ownership is set to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.17
+      name: Ensure that the controller-manager.conf file permissions are set to 600
+        or more restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.18
+      name: Ensure that the controller-manager.conf file ownership is set to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.19
+      name: Ensure that the Kubernetes PKI directory and file ownership is set to
+        root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.20
+      name: Ensure that the Kubernetes PKI certificate file permissions are set to
+        600 or more restrictive
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1.21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.1
+      ref_id: 1.1.21
+      name: Ensure that the Kubernetes PKI key file permissions are set to 600
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1
+      ref_id: '1.2'
+      name: API Server
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.1
+      name: Ensure that the --anonymous-auth argument is set to false
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.2
+      name: Ensure that the --token-auth-file parameter is not set
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.3
+      name: Ensure that the DenyServiceExternalIPs is set
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.4
+      name: Ensure that the --kubelet-client-certificate and --kubelet-client-key
+        arguments are set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.5
+      name: Ensure that the --kubelet-certificate-authority argument is set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.6
+      name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.7
+      name: Ensure that the --authorization-mode argument includes Node
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.8
+      name: Ensure that the --authorization-mode argument includes RBAC
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.9
+      name: Ensure that the admission control plugin EventRateLimit is set
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.10
+      name: Ensure that the admission control plugin AlwaysAdmit is not set
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.11
+      name: Ensure that the admission control plugin AlwaysPullImages is set
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.12
+      name: Ensure that the admission control plugin ServiceAccount is set
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.13
+      name: Ensure that the admission control plugin NamespaceLifecycle is set
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.14
+      name: Ensure that the admission control plugin NodeRestriction is set
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.15
+      name: Ensure that the --profiling argument is set to false
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.16
+      name: Ensure that the --audit-log-path argument is set
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.17
+      name: Ensure that the --audit-log-maxage argument is set to 30 or as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.18
+      name: Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.19
+      name: Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.20
+      name: Ensure that the --request-timeout argument is set as appropriate
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.21
+      name: Ensure that the --service-account-lookup argument is set to true
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.22
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.22
+      name: Ensure that the --service-account-key-file argument is set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.23
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.23
+      name: Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as
+        appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.24
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.24
+      name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are
+        set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.25
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.25
+      name: Ensure that the --client-ca-file argument is set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.26
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.26
+      name: Ensure that the --etcd-cafile argument is set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.27
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.27
+      name: Ensure that the --encryption-provider-config argument is set as appropriate
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.28
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.28
+      name: Ensure that encryption providers are appropriately configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2.29
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.2
+      ref_id: 1.2.29
+      name: Ensure that the API Server only makes use of Strong Cryptographic Ciphers
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1
+      ref_id: '1.3'
+      name: Controller Manager
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3
+      ref_id: 1.3.1
+      name: Ensure that the --terminated-pod-gc-threshold argument is set as appropriate
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3
+      ref_id: 1.3.2
+      name: Ensure that the --profiling argument is set to false
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3
+      ref_id: 1.3.3
+      name: Ensure that the --use-service-account-credentials argument is set to true
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3
+      ref_id: 1.3.4
+      name: Ensure that the --service-account-private-key-file argument is set as
+        appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3
+      ref_id: 1.3.5
+      name: Ensure that the --root-ca-file argument is set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3
+      ref_id: 1.3.6
+      name: Ensure that the RotateKubeletServerCertificate argument is set to true
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.3
+      ref_id: 1.3.7
+      name: Ensure that the --bind-address argument is set to 127.0.0.1
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1
+      ref_id: '1.4'
+      name: Scheduler
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.4
+      ref_id: 1.4.1
+      name: Ensure that the --profiling argument is set to false
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:1.4
+      ref_id: 1.4.2
+      name: Ensure that the --bind-address argument is set to 127.0.0.1
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: etcd
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2
+      ref_id: '2.1'
+      name: Ensure that the --cert-file and --key-file arguments are set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2
+      ref_id: '2.2'
+      name: Ensure that the --client-cert-auth argument is set to true
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2
+      ref_id: '2.3'
+      name: Ensure that the --auto-tls argument is not set to true
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2
+      ref_id: '2.4'
+      name: Ensure that the --peer-cert-file and --peer-key-file arguments are set
+        as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2
+      ref_id: '2.5'
+      name: Ensure that the --peer-client-cert-auth argument is set to true
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2
+      ref_id: '2.6'
+      name: Ensure that the --peer-auto-tls argument is not set to true
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:2
+      ref_id: '2.7'
+      name: Ensure that a unique Certificate Authority is used for etcd
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Control Plane Configuration
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3
+      ref_id: '3.1'
+      name: Authentication and Authorization
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.1
+      ref_id: 3.1.1
+      name: Client certificate authentication should not be used for users
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.1
+      ref_id: 3.1.2
+      name: Service account token authentication should not be used for users
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.1
+      ref_id: 3.1.3
+      name: Bootstrap token authentication should not be used for users
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3
+      ref_id: '3.2'
+      name: Logging
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.2
+      ref_id: 3.2.1
+      name: Ensure that a minimal audit policy is created
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:3.2
+      ref_id: 3.2.2
+      name: Ensure that the audit policy covers key security concerns
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Worker Nodes
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4
+      ref_id: '4.1'
+      name: Worker Node Configuration Files
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.1
+      name: Ensure that the kubelet service file permissions are set to 600 or more
+        restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.2
+      name: Ensure that the kubelet service file ownership is set to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.3
+      name: If proxy kubeconfig file exists ensure permissions are set to 600 or more
+        restrictive
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.4
+      name: If proxy kubeconfig file exists ensure ownership is set to root:root
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.5
+      name: Ensure that the --kubeconfig kubelet.conf file permissions are set to
+        600 or more restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.6
+      name: Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.7
+      name: Ensure that the certificate authorities file permissions are set to 600
+        or more restrictive
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.8
+      name: Ensure that the client certificate authorities file ownership is set to
+        root:root
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.9
+      name: If the kubelet config.yaml configuration file is being used validate permissions
+        set to 600 or more restrictive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.1
+      ref_id: 4.1.10
+      name: If the kubelet config.yaml configuration file is being used validate file
+        ownership is set to root:root
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4
+      ref_id: '4.2'
+      name: Kubelet
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.1
+      name: Ensure that the --anonymous-auth argument is set to false
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.2
+      name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.3
+      name: Ensure that the --client-ca-file argument is set as appropriate
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.4
+      name: Verify that the --read-only-port argument is set to 0
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.5
+      name: Ensure that the --streaming-connection-idle-timeout argument is not set
+        to 0
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.6
+      name: Ensure that the --make-iptables-util-chains argument is set to true
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.7
+      name: Ensure that the --hostname-override argument is not set
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.8
+      name: Ensure that the eventRecordQPS argument is set to a level which ensures
+        appropriate event capture
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.9
+      name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are
+        set as appropriate
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.10
+      name: Ensure that the --rotate-certificates argument is not set to false
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.11
+      name: Verify that the RotateKubeletServerCertificate argument is set to true
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.12
+      name: Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.2
+      ref_id: 4.2.13
+      name: Ensure that a limit is set on pod PIDs
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4
+      ref_id: '4.3'
+      name: kube-proxy
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:4.3
+      ref_id: 4.3.1
+      name: Ensure that the kube-proxy metrics service is bound to localhost
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Policies
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5
+      ref_id: '5.1'
+      name: RBAC and Service Accounts
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.1
+      name: Ensure that the cluster-admin role is only used where required
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.2
+      name: Minimize access to secrets
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.3
+      name: Minimize wildcard use in Roles and ClusterRoles
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.4
+      name: Minimize access to create pods
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.5
+      name: Ensure that default service accounts are not actively used
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.6
+      name: Ensure that Service Account Tokens are only mounted where necessary
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.7
+      name: Avoid use of system:masters group
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.8
+      name: Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes
+        cluster
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.9
+      name: Minimize access to create persistent volumes
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.10
+      name: Minimize access to the proxy sub-resource of nodes
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.11
+      name: Minimize access to the approval sub-resource of certificatesigningrequests
+        objects
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.12
+      name: Minimize access to webhook configuration objects
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.1
+      ref_id: 5.1.13
+      name: Minimize access to the service account token creation
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5
+      ref_id: '5.2'
+      name: Pod Security Standards
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.1
+      name: Ensure that the cluster has at least one active policy control mechanism
+        in place
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.2
+      name: Minimize the admission of privileged containers
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.3
+      name: Minimize the admission of containers wishing to share the host process
+        ID namespace
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.4
+      name: Minimize the admission of containers wishing to share the host IPC namespace
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.5
+      name: Minimize the admission of containers wishing to share the host network
+        namespace
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.6
+      name: Minimize the admission of containers with allowPrivilegeEscalation
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.7
+      name: Minimize the admission of root containers
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.8
+      name: Minimize the admission of containers with the NET_RAW capability
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.9
+      name: Minimize the admission of containers with added capabilities
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.10
+      name: Minimize the admission of containers with capabilities assigned
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.11
+      name: Minimize the admission of Windows HostProcess Containers
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.12
+      name: Minimize the admission of HostPath volumes
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.2
+      ref_id: 5.2.13
+      name: Minimize the admission of containers which use HostPorts
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5
+      ref_id: '5.3'
+      name: Network Policies and CNI
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.3
+      ref_id: 5.3.1
+      name: Ensure that the CNI in use supports Network Policies
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.3
+      ref_id: 5.3.2
+      name: Ensure that all Namespaces have Network Policies defined
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5
+      ref_id: '5.4'
+      name: Secrets Management
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.4
+      ref_id: 5.4.1
+      name: Prefer using secrets as files over secrets as environment variables
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.4
+      ref_id: 5.4.2
+      name: Consider external secret storage
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5
+      ref_id: '5.5'
+      name: Extensible Admission Control
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.5
+      ref_id: 5.5.1
+      name: Configure Image Provenance using ImagePolicyWebhook admission controller
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5
+      ref_id: '5.7'
+      name: General Policies
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7
+      ref_id: 5.7.1
+      name: Create administrative boundaries between resources using namespaces
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7
+      ref_id: 5.7.2
+      name: Ensure that the seccomp profile is set to docker/default in your pod definitions
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7
+      ref_id: 5.7.3
+      name: Apply Security Context to Your Pods and Containers
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-kubernetes:5.7
+      ref_id: 5.7.4
+      name: The default namespace should not be used
+      implementation_groups:
+      - M
