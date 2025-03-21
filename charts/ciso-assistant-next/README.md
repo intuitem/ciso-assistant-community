@@ -62,6 +62,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.persistence.localStorage.enabled | bool | `true` | Enable Local Storage persistence |
 | backend.persistence.localStorage.size | string | `"5Gi"` | Local Storage persistant volume size |
 | backend.persistence.localStorage.storageClass | string | `""` | Local Storage persistant volume storageClass |
+| backend.persistence.localStorage.existingClaim | string | `""` | Use existing pvc |
 | backend.persistence.sqlite.accessMode | string | `"ReadWriteOnce"` | SQLite persistant volume accessMode |
 | backend.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence (for backend and/or Huey) # Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite` |
 | backend.persistence.sqlite.size | string | `"5Gi"` | SQLite persistant volume size |

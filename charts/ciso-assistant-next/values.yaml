@@ -112,7 +112,6 @@ backend:
 
   ## Backend persistence configuration (used for sqlite DBs and local storage)
   persistence:
-    existingClaim: ""
     sqlite:
       # -- Enable SQLite persistence (for backend and/or Huey)
       ## Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite`
@@ -132,6 +131,8 @@ backend:
       storageClass: ""
       # -- Local Storage persistant volume accessMode
       accessMode: ReadWriteOnce
+      # -- Name of an existing PersistentVolumeClaim
+      existingClaim: ""
 
   ## Backend image
   image:
