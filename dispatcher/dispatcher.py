@@ -9,7 +9,15 @@ from kafka import KafkaConsumer, KafkaProducer
 from kafka.errors import UnsupportedCodecError
 
 from messages import message_registry
-from settings import API_URL, DEBUG, VERIFY_CERTIFICATE, EMAIL, PASSWORD, ERRORS_TOPIC
+from settings import (
+    API_URL,
+    DEBUG,
+    VERIFY_CERTIFICATE,
+    USER_EMAIL,
+    USER_PASSWORD,
+    ERRORS_TOPIC,
+    init_config,
+)
 
 from loguru import logger
 
@@ -47,8 +55,8 @@ def auth(email, password):
         data = {"username": email, "password": password}
     else:
         logger.info("trying credentials from the config file")
-        if EMAIL and PASSWORD:
-            data = {"username": EMAIL, "password": PASSWORD}
+        if USER_EMAIL and USER_PASSWORD:
+            data = {"username": USER_EMAIL, "password": USER_PASSWORD}
         else:
             logger.error("Could not find any usable credentials.")
             sys.exit(1)
@@ -123,6 +131,7 @@ def consume():
 
 cli.add_command(auth)
 cli.add_command(consume)
+cli.add_command(init_config)
 
 
 if __name__ == "__main__":
