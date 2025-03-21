@@ -11,6 +11,8 @@ from settings import API_URL, S3_URL, TOKEN, VERIFY_CERTIFICATE
 
 from loguru import logger
 
+from utils.api import get_api_headers
+
 
 class MessageRegistry:
     REGISTRY = {}
@@ -214,10 +216,10 @@ def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
 
     else:
         logger.error(
-            "No valid file source provided. Expecting 'file_content' or S3 details."
+            "No valid file source provided. Provide base64 file content or S3 bucket and key."
         )
         raise Exception(
-            "No valid file source provided. Provide base64 file content or S3 file location."
+            "No valid file source provided. Provide base64 file content or S3 bucket and key."
         )
 
 
@@ -266,29 +268,28 @@ def upload_file_to_evidence(
     """
     Uploads the file to the evidence upload endpoint.
     """
-    file_upload_headers = {
-        "Authorization": f"Token {TOKEN}",
-        "Content-Disposition": f"attachment; filename={urllib.parse.quote(file_name)}",
+    extra_headers = {
+        "Content-Disposition": f"attachment; filename={urllib.parse.quote(file_name)}"
     }
-    evidences_endpoint = f"{API_URL}/evidences/"
+    endpoint = f"{API_URL}/evidences/"
     logger.info(
         "Uploading attachment to evidence", evidence_id=evidence_id, file_name=file_name
     )
-    upload_response = requests.post(
-        f"{evidences_endpoint}{evidence_id}/upload/",
-        headers=file_upload_headers,
+    response = requests.post(
+        endpoint,
+        headers=get_api_headers(extra_headers=extra_headers),
         data=file_obj,
         verify=VERIFY_CERTIFICATE,
     )
-    if upload_response.status_code not in [200, 204]:
+    if not response.ok:
         logger.error(
             "Failed to upload attachment to evidence",
             evidence_id=evidence_id,
-            status_code=upload_response.status_code,
-            response=upload_response.text,
+            status_code=response.status_code,
+            response=response.text,
         )
         raise Exception(
-            f"Failed to update evidence {evidence_id}: {upload_response.status_code}, {upload_response.text}"
+            f"Failed to update evidence {evidence_id}: {response.status_code}, {response.text}"
         )
     logger.success(
         "Uploaded attachment to evidence", evidence_id=evidence_id, file_name=file_name
