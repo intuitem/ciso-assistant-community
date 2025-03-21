@@ -71,7 +71,14 @@ export const URL_MODEL = [
 	// 'ebios-rm',
 	'security-exceptions',
 	'findings',
-	'findings-assessments'
+	'findings-assessments',
+	'processings',
+	'purposes',
+	'personal-data',
+	'data-subjects',
+	'data-recipients',
+	'data-contractors',
+	'data-transfers'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
