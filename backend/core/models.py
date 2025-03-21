@@ -1970,8 +1970,8 @@ class Timeline(AbstractBaseModel, FolderMixin):
         return f"{self.entry}"
 
     def save(self, *args, **kwargs):
-        if not self.folder and self.incident:  
-            self.folder = self.incident.folder  
+        if not self.folder and self.incident:
+            self.folder = self.incident.folder
         super().save(*args, **kwargs)
 
 
