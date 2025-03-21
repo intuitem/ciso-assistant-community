@@ -479,6 +479,7 @@ class AssetFilter(df.FilterSet):
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
+            "filtering_labels",
         ]
 
 
@@ -4795,7 +4796,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = ["owner", "folder", "status", "findings_assessment"]
+    filterset_fields = [
+        "owner",
+        "folder",
+        "status",
+        "findings_assessment",
+        "filtering_labels",
+    ]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
