@@ -13,7 +13,9 @@ from settings import API_URL, DEBUG, VERIFY_CERTIFICATE, EMAIL, PASSWORD, ERRORS
 
 from loguru import logger
 
-log_message_format = "<green>{time:YYYY-MM-DD at HH:mm:ss}</green> | <level>{level}</level> | <level>{message}</level>"
+log_message_format = (
+    "<green>{time}</green> | <level>{level}</level> | <level>{message}</level>"
+)
 if DEBUG:
     log_message_format += " | <magenta>{extra}</magenta>"
 
