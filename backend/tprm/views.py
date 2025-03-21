@@ -71,7 +71,9 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0
                 else "-",
-                "baseline": ea.compliance_assessment.framework.name,
+                "baseline": ea.compliance_assessment.framework.name
+                if ea.compliance_assessment
+                else "-",
                 "due_date": ea.due_date.strftime("%Y-%m-%d") if ea.due_date else "-",
                 "last_update": ea.updated_at.strftime("%Y-%m-%d")
                 if ea.updated_at
