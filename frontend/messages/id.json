@@ -1091,5 +1091,6 @@
 	"findings": "Temuan",
 	"associatedFindings": "Temuan terkait",
 	"findings_count": "Jumlah Temuan",
-	"addFinding": "Tambahkan temuan"
+	"addFinding": "Tambahkan temuan",
+	"timestampCannotBeInTheFuture": "Timestamp tidak boleh di masa depan"
 }

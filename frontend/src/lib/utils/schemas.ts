@@ -1,5 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
+import * as m from '$paraglide/messages'
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -552,7 +553,13 @@ export const TimelineSchema = z.object({
 	incident: z.string(),
 	entry: z.string(),
 	entry_type: z.string(),
-	timestamp: z.union([z.literal('').transform(() => null), z.string().datetime({ local: true })]),
+	timestamp: z.union([
+		z.literal('').transform(() => null), 
+		z.string().datetime({ local: true })
+	  ]).refine(
+		val => !val || new Date(val) <= new Date(),
+		{ message: m.timestampCannotBeInTheFuture() }
+	  ),
 	observation: z.string().optional().nullable(),
 	evidences: z.string().uuid().optional().array().optional()
 });

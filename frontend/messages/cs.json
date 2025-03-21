@@ -886,5 +886,6 @@
 	"findings": "Zjištění",
 	"associatedFindings": "Přidružená zjištění",
 	"findings_count": "Počet zjištění",
-	"addFinding": "Přidat zjištění"
+	"addFinding": "Přidat zjištění",
+	"timestampCannotBeInTheFuture": "Časové razítko nemůže být v budoucnosti"
 }

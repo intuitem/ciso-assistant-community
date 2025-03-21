@@ -896,5 +896,6 @@
 	"findings": "Bevindingen",
 	"associatedFindings": "Geassocieerde bevindingen",
 	"findings_count": "Aantal bevindingen",
-	"addFinding": "Bevinding toevoegen"
+	"addFinding": "Bevinding toevoegen",
+	"timestampCannotBeInTheFuture": "Tijdstempel kan niet in de toekomst liggen"
 }

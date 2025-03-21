@@ -895,5 +895,6 @@
 	"findings": "Achados",
 	"associatedFindings": "Achados associados",
 	"findings_count": "Número de achados",
-	"addFinding": "Adicionar achado"
+	"addFinding": "Adicionar achado",
+	"timestampCannotBeInTheFuture": "O carimbo de data/hora não pode estar no futuro"
 }

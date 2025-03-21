@@ -1969,11 +1969,10 @@ class Timeline(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.entry}"
 
-    def create(self, *args, **kwargs):
-        super().create(*args, **kwargs)
-        self.folder = self.incident.folder
-        self.save()
-        return self
+    def save(self, *args, **kwargs):
+        if not self.folder and self.incident:  
+            self.folder = self.incident.folder  
+        super().save(*args, **kwargs)
 
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):

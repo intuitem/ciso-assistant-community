@@ -895,5 +895,6 @@
 	"findings": "Constatări",
 	"associatedFindings": "Constatările asociate",
 	"findings_count": "Numărul de constatări",
-	"addFinding": "Adăugați o constatare"
+	"addFinding": "Adăugați o constatare",
+	"timestampCannotBeInTheFuture": "Marcă de timp nu poate fi în viitor"
 }

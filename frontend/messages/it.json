@@ -1197,5 +1197,6 @@
 	"findings": "Risultati",
 	"associatedFindings": "Risultati associati",
 	"findings_count": "Numero di risultati",
-	"addFinding": "Aggiungi risultato"
+	"addFinding": "Aggiungi risultato",
+	"timestampCannotBeInTheFuture": "Il timestamp non può essere nel futuro"
 }

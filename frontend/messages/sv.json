@@ -895,5 +895,6 @@
 	"findings": "Resultat",
 	"associatedFindings": "Associerade resultat",
 	"findings_count": "Antal resultat",
-	"addFinding": "Lägg till resultat"
+	"addFinding": "Lägg till resultat",
+	"timestampCannotBeInTheFuture": "Tidsstämpeln kan inte vara i framtiden"
 }

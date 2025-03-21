@@ -1219,5 +1219,6 @@
 	"cannotDeleteAutoTimeline": "Auto timeline entries cannot be deleted",
 	"timelines": "Timelines",
 	"author": "Author",
-	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication"
+	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication",
+	"timestampCannotBeInTheFuture": "Timestamp cannot be in the future"
 }
