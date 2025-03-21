@@ -895,5 +895,10 @@
 	"statusChanged": "Status geändert",
 	"cannotDeleteAutoTimeline": "Automatische Zeitleisten-Einträge können nicht gelöscht werden",
 	"timelines": "Zeitleisten",
-	"author": "Autor"
+	"author": "Autor",
+	"finding": "Ergebnis",
+	"findings": "Ergebnisse",
+	"associatedFindings": "Zugehörige Ergebnisse",
+	"findings_count": "Anzahl der Ergebnisse",
+	"addFinding": "Ergebnis hinzufügen"
 }

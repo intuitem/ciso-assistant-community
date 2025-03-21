@@ -890,5 +890,10 @@
 	"statusChanged": "Status alterado",
 	"cannotDeleteAutoTimeline": "As entradas automáticas da linha do tempo não podem ser excluídas",
 	"timelines": "Linha do tempo",
-	"author": "Autor"
+	"author": "Autor",
+	"finding": "Achado",
+	"findings": "Achados",
+	"associatedFindings": "Achados associados",
+	"findings_count": "Número de achados",
+	"addFinding": "Adicionar achado"
 }

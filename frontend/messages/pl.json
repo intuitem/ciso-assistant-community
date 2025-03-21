@@ -891,5 +891,10 @@
 	"statusChanged": "Zmiana statusu",
 	"cannotDeleteAutoTimeline": "Nie można usunąć automatycznych wpisów osi czasu",
 	"timelines": "Oś czasu",
-	"author": "Autor"
+	"author": "Autor",
+	"finding": "Znalezienie",
+	"findings": "Znalezienia",
+	"associatedFindings": "Powiązane znalezienia",
+	"findings_count": "Liczba znalezień",
+	"addFinding": "Dodaj znalezienie"
 }

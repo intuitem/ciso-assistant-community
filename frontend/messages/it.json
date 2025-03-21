@@ -1193,5 +1193,10 @@
 	"statusChanged": "Stato cambiato",
 	"cannotDeleteAutoTimeline": "Le voci della cronologia automatica non possono essere eliminate",
 	"timelines": "Cronologie",
-	"author": "Autore"
+	"author": "Autore",
+	"finding": "Risultato",
+	"findings": "Risultati",
+	"associatedFindings": "Risultati associati",
+	"findings_count": "Numero di risultati",
+	"addFinding": "Aggiungi risultato"
 }

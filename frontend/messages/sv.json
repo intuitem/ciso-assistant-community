@@ -890,5 +890,10 @@
 	"statusChanged": "Status ändrad",
 	"cannotDeleteAutoTimeline": "Automatiska tidslinje kan inte raderas",
 	"timelines": "Tidslinjer",
-	"author": "Författare"
+	"author": "Författare",
+	"finding": "Resultat",
+	"findings": "Resultat",
+	"associatedFindings": "Associerade resultat",
+	"findings_count": "Antal resultat",
+	"addFinding": "Lägg till resultat"
 }

@@ -895,5 +895,10 @@
 	"statusChanged": "Estado cambiado",
 	"cannotDeleteAutoTimeline": "No se pueden eliminar las entradas de cronología automáticas",
 	"timelines": "Cronologías",
-	"author": "Autor"
+	"author": "Autor",
+	"finding": "Hallazgo",
+	"findings": "Hallazgos",
+	"associatedFindings": "Hallazgos asociados",
+	"findings_count": "Número de hallazgos",
+	"addFinding": "Añadir hallazgo"
 }

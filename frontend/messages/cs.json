@@ -881,5 +881,10 @@
 	"statusChanged": "Stav změněn",
 	"cannotDeleteAutoTimeline": "Automatické záznamy časové osy nelze smazat",
 	"timelines": "Časové osy",
-	"author": "Autor"
+	"author": "Autor",
+	"finding": "Zjištění",
+	"findings": "Zjištění",
+	"associatedFindings": "Přidružená zjištění",
+	"findings_count": "Počet zjištění",
+	"addFinding": "Přidat zjištění"
 }
