@@ -16,12 +16,14 @@
 <div class="card bg-white bg-stripes-pink">
 	<div class="grid grid-cols-3 lg:grid-cols-5 p-6 gap-6 bg-white bg-opacity-95">
 		{#each data as provider}
-			<div class="border-purple-300 border-2 bg-white h-44 shadow-lg rounded-lg z-30 p-2">
-				<div class="">{provider.name}</div>
-				<div class="mb-2">{provider.solution}</div>
+			<div class="border-purple-300 border-2 bg-white shadow-lg rounded-lg z-30 p-2">
+				<div class="font-black">{provider.name}</div>
+				<div class="font-semibold mb-2">{provider.solution}</div>
 				<div class="mb-2"><span class="code">Baseline: {provider.framwork}</span></div>
 				<div>Completion: {provider.progress}</div>
-				<div>Last update: yyyy-mm-dd</div>
+				<div class="text-sm">Last update: yyyy-mm-dd</div>
+				<div class="text-sm">Due date: yyyy-mm-dd</div>
+				<div class="text-xl text-right">Conclusion: A/B/C</div>
 			</div>
 		{/each}
 	</div>
