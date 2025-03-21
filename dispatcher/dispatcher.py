@@ -103,7 +103,7 @@ def consume():
                     message_registry.REGISTRY[message.get("message_type")](message)
                 except Exception as e:
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
-                    logger.error("Message could not be consumed", exception=e)
+                    logger.exception("Message could not be consumed")
                     error_producer.send(
                         ERRORS_TOPIC,
                         value=json.dumps(
