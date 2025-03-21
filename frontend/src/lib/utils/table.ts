@@ -770,6 +770,34 @@ export const listViewFields = {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
 	},
+	processings: {
+		head: ['name', 'description'],
+		body: ['name', 'description']
+	},
+	purposes: {
+		head: ['name', 'description'],
+		body: ['name', 'description']
+	},
+	'personal-data': {
+		head: ['name', 'description', 'category', 'isSensitive', 'deletionPolicy', 'retentionPolicy'],
+		body: ['name', 'description', 'category', 'is_sensitive', 'deletion_policy', 'retention_policy']
+	},
+	'data-subjects': {
+		head: ['name', 'description', 'category'],
+		body: ['name', 'description', 'category']
+	},
+	'data-recipients': {
+		head: ['name', 'description', 'category'],
+		body: ['name', 'description', 'category']
+	},
+	'data-contractors': {
+		head: ['name', 'description', 'realtionshipType', 'country', 'documentationLink'],
+		body: ['name', 'description', 'relationship_type', 'country', 'documentation_link']
+	},
+	'data-transfers': {
+		head: ['name', 'description', 'country', 'legalBasis', 'documentationLink'],
+		body: ['name', 'description', 'country', 'legal_basis', 'documentation_link']
+	},
 	'ebios-rm': {
 		head: ['name', 'description'],
 		body: ['name', 'description']

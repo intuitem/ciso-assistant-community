@@ -618,6 +618,79 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Qualification',
 		verboseNamePlural: 'Qualifications'
 	},
+	processings: {
+		endpointUrl: 'privacy/processings',
+		name: 'processing',
+		localName: 'processing',
+		localNamePlural: 'processings',
+		verboseName: 'processing',
+		verboseNamePlural: 'processings',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'owner', urlModel: 'users' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'processing', urlModel: 'purposes' },
+			{ field: 'processing', urlModel: 'personal-data' },
+			{ field: 'processing', urlModel: 'data-subjects' },
+			{ field: 'processing', urlModel: 'data-recipients' },
+			{ field: 'processing', urlModel: 'data-contractors' },
+			{ field: 'processing', urlModel: 'data-transfers' }
+		]
+	},
+	purposes: {
+		endpointUrl: 'privacy/purposes',
+		name: 'purpose',
+		localName: 'purpose',
+		localNamePlural: 'purposes',
+		verboseName: 'purpose',
+		verboseNamePlural: 'purposes'
+	},
+	'personal-data': {
+		endpointUrl: 'privacy/personal-data',
+		name: 'personaldata',
+		localName: 'personalData',
+		localNamePlural: 'personalData',
+		verboseName: 'personal data',
+		verboseNamePlural: 'personal data',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }]
+	},
+	'data-subjects': {
+		endpointUrl: 'privacy/data-subjects',
+		name: 'datasubject',
+		localName: 'dataSubject',
+		localNamePlural: 'dataSubjects',
+		verboseName: 'data subject',
+		verboseNamePlural: 'data subjects',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }]
+	},
+	'data-recipients': {
+		endpointUrl: 'privacy/data-recipients',
+		name: 'datarecipient',
+		localName: 'dataRecipient',
+		localNamePlural: 'dataRecipients',
+		verboseName: 'data recipient',
+		verboseNamePlural: 'data recipients',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }]
+	},
+	'data-contractors': {
+		endpointUrl: 'privacy/data-contractors',
+		name: 'datacontractor',
+		localName: 'dataContractor',
+		localNamePlural: 'dataContractors',
+		verboseName: 'data contractor',
+		verboseNamePlural: 'data contractors',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }]
+	},
+	'data-transfers': {
+		endpointUrl: 'privacy/data-transfers',
+		name: 'datatransfer',
+		localName: 'dataTransfer',
+		localNamePlural: 'dataTransfers',
+		verboseName: 'data transfer',
+		verboseNamePlural: 'data transfers',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }]
+	},
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',
