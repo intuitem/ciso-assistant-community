@@ -40,12 +40,25 @@
 	}
 </script>
 
-<div class="card-container">
-	<div class="card {isFlipped ? 'flipped' : ''}">
+<!-- Tailwind-based implementation -->
+<div class="perspective-1000 w-full h-full min-h-[350px]">
+	<div
+		class="relative w-full h-full transition-transform duration-800 {isFlipped
+			? 'rotate-x-180'
+			: ''}"
+		style="transform-style: preserve-3d;"
+	>
 		<!-- Front face of the card -->
-		<div class="card-face front">
+		<div
+			class="absolute w-full h-full rounded-lg shadow-md bg-white overflow-hidden"
+			style="backface-visibility: hidden;"
+		>
 			<!-- Flip button for front face -->
-			<button class="corner-button" on:click={handleFlip} aria-label="Flip card">
+			<button
+				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
+				on:click={handleFlip}
+				aria-label="Flip card"
+			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 24 24"
@@ -56,6 +69,7 @@
 					width="18"
 					height="18"
 					stroke-width="2"
+					class="text-gray-500"
 				>
 					<path d="M3 8l4 -4l4 4"></path>
 					<path d="M7 4l0 9"></path>
@@ -65,52 +79,58 @@
 			</button>
 
 			<!-- Card content (front) -->
-			<div class="card-content">
+			<div class="p-4 h-full flex flex-col">
 				<!-- Card header with provider name and conclusion -->
-				<div class="card-header">
-					<h3 class="provider-name">{provider.provider}</h3>
-					<span class="conclusion-badge {getConclusionColor(provider.conclusion)}">
+				<div class="flex justify-between items-center pb-3 border-b border-gray-200 mb-3">
+					<h3 class="font-bold text-lg text-gray-900">{provider.provider}</h3>
+					<span
+						class="px-2 py-1 rounded-full text-xs font-medium mr-10 {getConclusionColor(
+							provider.conclusion
+						)}"
+					>
 						{provider.conclusion}
 					</span>
 				</div>
 
 				<!-- Card body -->
-				<div class="card-body">
+				<div class="flex flex-col gap-3">
 					<!-- Solution name -->
-					<div class="info-section">
-						<span class="info-label">Solution(s)</span>
-						<div class="info-value">{provider.solutions}</div>
+					<div class="mb-3">
+						<span class="block text-sm text-gray-500">Solution(s)</span>
+						<div class="font-semibold text-gray-800">{provider.solutions}</div>
 					</div>
 
 					<!-- Framework/Baseline -->
-					<div class="info-section">
-						<span class="info-label">Baseline</span>
-						<div class="baseline-tag">{provider.baseline}</div>
+					<div class="mb-3">
+						<span class="block text-sm text-gray-500">Baseline</span>
+						<div class="inline-block bg-gray-100 px-2 py-1 rounded text-sm font-mono">
+							{provider.baseline}
+						</div>
 					</div>
 
 					<!-- Progress bar -->
-					<div class="info-section">
-						<div class="progress-header">
-							<span class="info-label">Completion</span>
-							<span class="progress-value">{provider.progress}%</span>
+					<div class="mb-3">
+						<div class="flex justify-between items-center mb-1">
+							<span class="text-sm text-gray-500">Completion</span>
+							<span class="text-sm font-medium">{provider.progress}%</span>
 						</div>
-						<div class="progress-bar-bg">
+						<div class="w-full bg-gray-200 rounded-full h-2">
 							<div
-								class="progress-bar-fill {getProgressColor(provider.progress)}"
+								class="h-2 rounded-full {getProgressColor(provider.progress)}"
 								style="width: {provider.progress}%"
 							></div>
 						</div>
 					</div>
 
 					<!-- Dates -->
-					<div class="dates-grid">
-						<div class="date-section">
-							<span class="info-label">Last update</span>
-							<span>{provider.last_update}</span>
+					<div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+						<div>
+							<span class="block text-gray-500">Last update</span>
+							{provider.last_update}
 						</div>
-						<div class="date-section">
-							<span class="info-label">Due date</span>
-							<span>{provider.due_date}</span>
+						<div>
+							<span class="block text-gray-500">Due date</span>
+							{provider.due_date}
 						</div>
 					</div>
 				</div>
@@ -118,9 +138,16 @@
 		</div>
 
 		<!-- Back face of the card -->
-		<div class="card-face back">
+		<div
+			class="absolute w-full h-full rounded-lg shadow-md bg-white overflow-hidden"
+			style="backface-visibility: hidden; transform: rotateX(180deg);"
+		>
 			<!-- Flip button for back face -->
-			<button class="corner-button" on:click={handleFlip} aria-label="Flip card back">
+			<button
+				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
+				on:click={handleFlip}
+				aria-label="Flip card back"
+			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 24 24"
@@ -131,6 +158,7 @@
 					width="18"
 					height="18"
 					stroke-width="2"
+					class="text-gray-500"
 				>
 					<path d="M3 8l4 -4l4 4"></path>
 					<path d="M7 4l0 9"></path>
@@ -140,14 +168,15 @@
 			</button>
 
 			<!-- Card content (back) -->
-			<div class="card-content">
-				<h3 class="provider-name">{provider.provider}</h3>
+			<div class="p-4 h-full flex flex-col">
+				<h3 class="font-bold text-lg text-gray-900 mb-3 pr-10">{provider.provider}</h3>
 
 				<!-- Additional details could go here -->
-				<div class="info-section">
-					<span class="info-label">Detailed Progress</span>
-					<div class="progress-details">
-						<div class="progress-circle">
+				<div class="mb-4">
+					<span class="block text-sm text-gray-500 mb-2">Detailed Progress</span>
+					<div class="flex flex-col items-center gap-4 mt-2">
+						<!-- Progress circle - SVG can't be fully replaced with Tailwind -->
+						<div class="text-gray-900">
 							<svg viewBox="0 0 100 100" width="80" height="80">
 								<!-- Background circle -->
 								<circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8" />
@@ -182,30 +211,34 @@
 								</text>
 							</svg>
 						</div>
-						<div class="timeline">
-							<div class="timeline-item">
-								<div class="timeline-marker"></div>
-								<div class="timeline-content">
-									<p class="timeline-date">{provider.last_update}</p>
-									<p>Last updated</p>
+
+						<!-- Timeline -->
+						<div class="w-full mt-4">
+							<div class="flex mb-4">
+								<div class="w-3 h-3 rounded-full bg-gray-300 mt-1 mr-3"></div>
+								<div class="flex-1">
+									<p class="font-semibold mb-1">{provider.last_update}</p>
+									<p class="text-gray-600">Last updated</p>
 								</div>
 							</div>
-							<div class="timeline-item">
+							<div class="flex mb-4">
 								<div
-									class="timeline-marker {provider.conclusion === 'completed' ? 'completed' : ''}"
+									class="w-3 h-3 rounded-full {provider.conclusion === 'completed'
+										? 'bg-green-500'
+										: 'bg-gray-300'} mt-1 mr-3"
 								></div>
-								<div class="timeline-content">
-									<p class="timeline-date">{provider.due_date}</p>
-									<p>Expected completion</p>
+								<div class="flex-1">
+									<p class="font-semibold mb-1">{provider.due_date}</p>
+									<p class="text-gray-600">Expected completion</p>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="info-section">
-					<span class="info-label">Status Summary</span>
-					<p class="status-text">
+				<div class="mt-2">
+					<span class="block text-sm text-gray-500 mb-2">Status Summary</span>
+					<p class="text-gray-600 leading-relaxed">
 						{#if provider.conclusion === 'completed'}
 							This provider has completed implementation with a {provider.progress}% success rate.
 						{:else if provider.conclusion === 'delayed' || provider.conclusion === 'blocker'}
@@ -221,220 +254,16 @@
 </div>
 
 <style>
-	.card-container {
+	/* Some styles can't be implemented with Tailwind alone */
+	.perspective-1000 {
 		perspective: 1000px;
-		width: 100%;
-		height: 100%;
-		min-height: 360px;
 	}
 
-	.card {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		transform-style: preserve-3d;
-		transition: transform 0.8s;
-	}
-
-	.card.flipped {
+	.rotate-x-180 {
 		transform: rotateX(180deg);
 	}
 
-	.card-face {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		backface-visibility: hidden;
-		border-radius: 0.5rem;
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
-		background-color: white;
-		overflow: hidden;
-	}
-
-	.front {
-		background-color: white;
-	}
-
-	.back {
-		background-color: white;
-		transform: rotateX(180deg);
-	}
-
-	.card-content {
-		padding: 1rem;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-
-	/* Corner button for flipping */
-	.corner-button {
-		position: absolute;
-		width: 32px;
-		height: 32px;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		z-index: 10;
-		top: 8px;
-		right: 8px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s ease;
-		opacity: 0.4;
-		border-radius: 4px;
-	}
-
-	.corner-button:hover {
-		background: rgba(0, 0, 0, 0.08);
-		opacity: 1;
-	}
-
-	.corner-button svg {
-		color: #6b7280;
-	}
-
-	/* Front face styling */
-	.card-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding-bottom: 0.75rem;
-		border-bottom: 1px solid #e5e7eb;
-		margin-bottom: 0.75rem;
-	}
-
-	.provider-name {
-		font-weight: 700;
-		font-size: 1.125rem;
-		color: #111827;
-	}
-
-	.conclusion-badge {
-		padding: 0.25rem 0.5rem;
-		border-radius: 9999px;
-		font-size: 0.75rem;
-		font-weight: 500;
-	}
-
-	.card-body {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.info-section {
-		margin-bottom: 0.75rem;
-	}
-
-	.info-label {
-		display: block;
-		font-size: 0.875rem;
-		color: #6b7280;
-	}
-
-	.info-value {
-		font-weight: 600;
-		color: #1f2937;
-	}
-
-	.baseline-tag {
-		display: inline-block;
-		background-color: #f3f4f6;
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.25rem;
-		font-size: 0.875rem;
-		font-family: monospace;
-	}
-
-	.progress-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 0.25rem;
-	}
-
-	.progress-value {
-		font-size: 0.875rem;
-		font-weight: 500;
-	}
-
-	.progress-bar-bg {
-		width: 100%;
-		background-color: #e5e7eb;
-		border-radius: 9999px;
-		height: 0.5rem;
-	}
-
-	.progress-bar-fill {
-		height: 0.5rem;
-		border-radius: 9999px;
-	}
-
-	.dates-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.5rem;
-		font-size: 0.875rem;
-		color: #4b5563;
-	}
-
-	.date-section {
-		display: flex;
-		flex-direction: column;
-	}
-
-	/* Back face styling */
-	.progress-details {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 1rem;
-		margin-top: 0.5rem;
-	}
-
-	.progress-circle {
-		color: #111827;
-	}
-
-	.timeline {
-		width: 100%;
-		margin-top: 1rem;
-	}
-
-	.timeline-item {
-		display: flex;
-		margin-bottom: 1rem;
-	}
-
-	.timeline-marker {
-		width: 0.75rem;
-		height: 0.75rem;
-		border-radius: 50%;
-		background-color: #d1d5db;
-		margin-right: 0.75rem;
-		margin-top: 0.25rem;
-	}
-
-	.timeline-marker.completed {
-		background-color: #22c55e;
-	}
-
-	.timeline-content {
-		flex: 1;
-	}
-
-	.timeline-date {
-		font-weight: 600;
-		margin-bottom: 0.25rem;
-	}
-
-	.status-text {
-		margin-top: 0.5rem;
-		line-height: 1.5;
-		color: #4b5563;
+	.duration-800 {
+		transition-duration: 800ms;
 	}
 </style>
