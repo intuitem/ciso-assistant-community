@@ -142,6 +142,7 @@ erDiagram
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
     VULNERABILITY                }o--o{ APPLIED_CONTROL       : is_fixed_by
+    VULNERABILITY                }o--o{ ASSET                 : impacts
     USER                         }o--o{ RISK_SCENARIO         : owns
     USER                         }o--o{ APPLIED_CONTROL       : owns
     USER                         }o--o{ ASSET                 : owns
