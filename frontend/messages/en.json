@@ -1197,5 +1197,6 @@
 	"requirementsProgressionSemiColon": "Requirements progression:",
 	"noRequirementFound": "No requirement assessment found",
 	"noAuditForTheFramework": "There is no audit using this framework",
-	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication"
+	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication",
+	"tprmOverview": "Overview"
 }
