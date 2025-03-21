@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-poetry run python dispatcher.py init-config -y
-poetry run python dispatcher.py auth
-poetry run python dispatcher.py consume
+uv run dispatcher.py init-config -y
+uv run dispatcher.py auth
+uv run dispatcher.py consume

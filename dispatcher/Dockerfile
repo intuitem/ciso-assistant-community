@@ -10,24 +10,24 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /code
 
 RUN apt-get update && apt-get install -y \
-  libyaml-cpp-dev \
-  libffi-dev \
-  libglib2.0-0 \
-  pango-1.0 \
-  libcairo2 \
-  locales \
-  tzdata \
-  zlib1g-dev \
-  && apt-get clean \
-  && pip install --no-cache-dir --upgrade pip poetry==2.0.1
+  libyaml-cpp-dev
+# libffi-dev \
+# libglib2.0-0 \
+# pango-1.0 \
+# libcairo2 \
+# zlib1g-dev
 
-COPY pyproject.toml poetry.lock ./
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+ADD https://astral.sh/uv/0.6.9/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+ENV PATH="/root/.local/bin/:$PATH"
 
-RUN poetry install --no-root \
-  && rm -rf $POETRY_CACHE_DIR
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
+RUN uv sync --frozen
+
 EXPOSE 8000
-ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
+ENTRYPOINT ["uv", "run", "bash", "startup.sh"]
