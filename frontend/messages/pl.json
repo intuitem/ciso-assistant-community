@@ -885,7 +885,7 @@
 	"closed": "Zamknięty",
 	"mitigation": "Złagodzenie",
 	"detection": "Wykrycie",
-	"severityChange": "Zmiana poważności",
+	"severityChanged": "Zmiana poważności",
 	"resolution": "Rozwiązanie",
 	"closing": "Zamykanie",
 	"dismissal": "Odrzucony",

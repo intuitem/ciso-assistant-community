@@ -884,7 +884,7 @@
 	"closed": "Fechado",
 	"mitigation": "Mitigação",
 	"detection": "Detecção",
-	"severityChange": "Mudança de gravidade",
+	"severityChanged": "Mudança de gravidade",
 	"resolution": "Resolução",
 	"closing": "Fechamento",
 	"dismissal": "Desconsideração",

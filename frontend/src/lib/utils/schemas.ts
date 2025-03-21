@@ -541,6 +541,7 @@ export const FindingsAssessmentSchema = z.object({
 export const IncidentSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
+	ref_id: z.string().optional(),
 	status: z.string(),
 	severity: z.number(),
 	threats: z.string().uuid().optional().array().optional(),
@@ -557,7 +558,8 @@ export const TimelineEntrySchema = z.object({
 		.union([z.literal('').transform(() => null), z.string().datetime({ local: true })])
 		.refine((val) => !val || new Date(val) <= new Date(), {
 			message: m.timestampCannotBeInTheFuture()
-		}),
+		})
+		.optional(),
 	observation: z.string().optional().nullable(),
 	evidences: z.string().uuid().optional().array().optional()
 });

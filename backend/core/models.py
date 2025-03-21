@@ -1870,6 +1870,10 @@ class Incident(NameDescriptionMixin, FolderMixin):
         SEV4 = 4, "Minor"
         SEV5 = 5, "Low"
 
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -1919,12 +1923,10 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
     class EntryType(models.TextChoices):
         DETECTION = "detection", "Detection"
-        SEVERITY_CHANGE = "severity_change", "Severity change"
         MITIGATION = "mitigation", "Mitigation"
         OBSERVATION = "observation", "Observation"
-        RESOLUTION = "resolution", "Resolution"
-        CLOSING = "closing", "Closing"
-        DISMISSAL = "dismissal", "Dismissal"
+        SEVERITY_CHANGED = "severity_changed", "Severity changed"
+        STATUS_CHANGED = "status_changed", "Status changed"
 
         @classmethod
         def get_manual_entry_types(cls):
@@ -4021,6 +4023,14 @@ auditlog.register(
 )
 auditlog.register(
     Vulnerability,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Incident,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TimelineEntry,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

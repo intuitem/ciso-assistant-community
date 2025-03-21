@@ -1186,7 +1186,7 @@
 	"closed": "Chiuso",
 	"mitigation": "Mitigazione",
 	"detection": "Rilevamento",
-	"severityChange": "Cambio di gravità",
+	"severityChanged": "Cambio di gravità",
 	"resolution": "Risoluzione",
 	"closing": "Chiusura",
 	"dismissal": "Dimissione",

@@ -1212,7 +1212,7 @@
 	"closed": "Closed",
 	"mitigation": "Mitigation",
 	"detection": "Detection",
-	"severityChange": "Severity change",
+	"severityChanged": "Severity changed",
 	"resolution": "Resolution",
 	"closing": "Closing",
 	"dismissal": "Dismissal",

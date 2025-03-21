@@ -71,6 +71,8 @@ erDiagram
     ROOT_FOLDER_OR_DOMAIN ||--o{ VULNERABILITY               : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ COMPLIANCE_ASSESSMENT       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ INCIDENT                    : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ TIMELINE_ENTRY              : contains
 
     DOMAIN {
         string ref_id
@@ -145,6 +147,7 @@ erDiagram
     USER                         }o--o{ RISK_SCENARIO         : owns
     USER                         }o--o{ APPLIED_CONTROL       : owns
     USER                         }o--o{ ASSET                 : owns
+    USER                         }o--o{ INCIDENT              : owns
     ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
@@ -162,6 +165,11 @@ erDiagram
     FINDING                      }o--o{ REFERENCE_CONTROL     : is_mitigated_by
     FINDING                      }o--o{ APPLIED_CONTROL       : is_mitigated_by
     USER                         }o--o{ FINDING               : owns
+    INCIDENT                     ||--o{ TIMELINE_ENTRY        : contains
+    INCIDENT                     }o--o{ ASSET                 : impacts
+    INCIDENT                     }o--o{ THREATS               : relates
+    INCIDENT                     }o--|| QUALIFICATION         : impacts
+
 
     FRAMEWORK {
         string  urn
@@ -423,6 +431,22 @@ erDiagram
         int    severity
         string status
     }
+
+    INCIDENT {
+        string ref_id
+        string name
+        string description
+        int    severity
+        string status
+    }
+
+    TIMELINE_ENTRY {
+        string   entry
+        stirng   entry_type
+        string   observation
+        datetime timestamp
+    }
+
 
 ```
 
@@ -864,6 +888,28 @@ Security exceptions are located in the governance menu.
 
 The performance of the UX shall be optimized, by avoiding to preload all possible targets for the security exception.
 
+## Incidents
+
+Significant security incidents can be traced in CISO Assistant. An incident object has the following fields:
+- ref_id/name/description
+- qualifications
+- severity (like security exceptions)
+- status: new/in progress/solved/closed/rejected
+
+Incidents can be linked to threats, assets, owners.
+
+Incidents contain a table of timeline_entry objects.
+
+Timeline_entry objects have the following fields:
+- entry (a string to describe the entry)
+- entry_type within detection/mitigation/observation/status_changed/severity_changed
+- observation
+- timestamp (we can report an event that has occured in the past)
+
+status_changed and severity_changed entries are automatically generated.
+
+The type of an entry cannot be updated.
+
 ## Libraries
 
 Libraries can contain:
@@ -1289,18 +1335,6 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - The change in applied control is not retained.
 - implementation_group_selector is not retained.
 - ebios-RM parameters are not retained.
-
-## Near-term evolutions
-
-We need to add in the near term the follwoing objects:
-
-- EBIOS-RM study
-- Audit campaign
-- Third-party campaign
-- Pentest follow-up
-- Incident follow-up
-
-Each of these objects will have its specific datamodel. Factoring will be done ad-hoc.
 
 ## EBIOS-RM evolution
 

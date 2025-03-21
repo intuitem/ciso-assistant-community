@@ -884,7 +884,7 @@
 	"closed": "Închis",
 	"mitigation": "Mitigare",
 	"detection": "Detecție",
-	"severityChange": "Schimbare de severitate",
+	"severityChanged": "Schimbare de severitate",
 	"resolution": "Rezolvare",
 	"closing": "Închidere",
 	"dismissal": "Respingere",

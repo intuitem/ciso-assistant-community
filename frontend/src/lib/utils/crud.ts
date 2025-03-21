@@ -829,11 +829,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
 		selectFields: [{ field: 'status' }, { field: 'severity' }]
 	},
-	"timeline-entries": {
+	'timeline-entries': {
 		name: 'timelineentry',
 		localName: 'timelineEntry',
 		localNamePlural: 'timelineEntries',
-		verboseName: 'Timeline entriy',
+		verboseName: 'Timeline entry',
 		verboseNamePlural: 'Timeline entries',
 		foreignKeyFields: [
 			{ field: 'incident', urlModel: 'incidents' },

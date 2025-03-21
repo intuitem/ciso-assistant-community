@@ -872,12 +872,12 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels']
 	},
 	incidents: {
-		head: ['name', 'description', 'status', 'severity', 'threats'],
-		body: ['name', 'description', 'status', 'severity', 'threats']
+		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
+		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
 	},
-	"timeline-entries": {
-		head: ['entry', 'entry_type', 'author', 'timestamp'],
-		body: ['entry', 'entry_type', 'author', 'timestamp']
+	'timeline-entries': {
+		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
+		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	extra: {
 		filters: {

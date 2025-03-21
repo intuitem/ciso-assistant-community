@@ -3,6 +3,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	export let form: SuperValidated<any>;
@@ -13,6 +14,14 @@
 	export let schema: any = {};
 	export let initialData: Record<string, any> = {};
 </script>
+
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
 
 <AutocompleteSelect
 	{form}

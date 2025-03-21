@@ -1202,7 +1202,7 @@
 	"closed": "Fermé",
 	"mitigation": "Atténuation",
 	"detection": "Détection",
-	"severityChange": "Changement de gravité",
+	"severityChanged": "Changement de gravité",
 	"resolution": "Résolution",
 	"closing": "Fermeture",
 	"dismissal": "Rejet",

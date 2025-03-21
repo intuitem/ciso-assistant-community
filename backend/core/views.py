@@ -4819,25 +4819,12 @@ class IncidentViewSet(BaseModelViewSet):
         previous_severity = previous_instance.severity
 
         instance = serializer.save()
-        if (
-            instance.status
-            in [
-                Incident.Status.RESOLVED,
-                Incident.Status.CLOSED,
-                Incident.Status.DISMISSED,
-            ]
-            and previous_status != instance.status
-        ):
-            entry_type = {
-                Incident.Status.RESOLVED: TimelineEntry.EntryType.RESOLUTION,
-                Incident.Status.CLOSED: TimelineEntry.EntryType.CLOSING,
-                Incident.Status.DISMISSED: TimelineEntry.EntryType.DISMISSAL,
-            }.get(instance.status)
 
+        if previous_status != instance.status and previous_status is not None:
             TimelineEntry.objects.create(
                 incident=instance,
-                entry="statusChanged",
-                entry_type=entry_type,
+                entry=f"{previous_instance.get_status_display()}->{instance.get_status_display()}",
+                entry_type=TimelineEntry.EntryType.STATUS_CHANGED,
                 author=self.request.user,
                 timestamp=now(),
             )
@@ -4846,7 +4833,7 @@ class IncidentViewSet(BaseModelViewSet):
             TimelineEntry.objects.create(
                 incident=instance,
                 entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
-                entry_type=TimelineEntry.EntryType.SEVERITY_CHANGE,
+                entry_type=TimelineEntry.EntryType.SEVERITY_CHANGED,
                 author=self.request.user,
                 timestamp=now(),
             )
@@ -4870,10 +4857,8 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
     def perform_destroy(self, instance):
         if instance.entry_type in [
-            TimelineEntry.EntryType.SEVERITY_CHANGE,
-            TimelineEntry.EntryType.RESOLUTION,
-            TimelineEntry.EntryType.CLOSING,
-            TimelineEntry.EntryType.DISMISSAL,
+            TimelineEntry.EntryType.SEVERITY_CHANGED,
+            TimelineEntry.EntryType.STATUS_CHANGED,
         ]:
             raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
         return super().perform_destroy(instance)

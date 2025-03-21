@@ -885,7 +885,7 @@
 	"closed": "Gesloten",
 	"mitigation": "Mitigatie",
 	"detection": "Detectie",
-	"severityChange": "Ernstigheidswijziging",
+	"severityChanged": "Ernstigheidswijziging",
 	"resolution": "Oplossing",
 	"closing": "Sluiting",
 	"dismissal": "Afwijzing",

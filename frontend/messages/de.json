@@ -889,7 +889,7 @@
 	"closed": "Geschlossen",
 	"mitigation": "Milderung",
 	"detection": "Erkennung",
-	"severityChange": "Schwereänderung",
+	"severityChanged": "Schwereänderung",
 	"resolution": "Auflösung",
 	"closing": "Schließen",
 	"dismissal": "Ablehnung",

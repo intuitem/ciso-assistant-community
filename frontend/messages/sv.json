@@ -884,7 +884,7 @@
 	"closed": "Stängd",
 	"mitigation": "Mildrande",
 	"detection": "Upptäckt",
-	"severityChange": "Ändring av allvarlighet",
+	"severityChanged": "Ändring av allvarlighet",
 	"resolution": "Lösning",
 	"closing": "Stängning",
 	"dismissal": "Avvisning",
