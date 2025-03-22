@@ -59,7 +59,7 @@ export const LOCALE_MAP = {
 		name: 'indonesian',
 		flag: '🇮🇩'
 	},
-	dk: {
+	da: {
 		name: 'danish',
 		flag: '🇩🇰'
 	}
