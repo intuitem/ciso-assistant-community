@@ -1869,6 +1869,7 @@ class Incident(NameDescriptionMixin, FolderMixin):
         SEV3 = 3, "Moderate"
         SEV4 = 4, "Minor"
         SEV5 = 5, "Low"
+        UNDEFINED = 6, "unknown"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")

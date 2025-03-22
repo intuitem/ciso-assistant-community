@@ -43,6 +43,7 @@
 <Select
 	{form}
 	options={[
+		{ label: m.unknown(), value: 6 },
 		{ label: m.critical(), value: 1 },
 		{ label: m.major(), value: 2 },
 		{ label: m.moderate(), value: 3 },

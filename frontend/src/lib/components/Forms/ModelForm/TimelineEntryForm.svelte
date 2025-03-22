@@ -25,14 +25,6 @@
 		label={m.incident()}
 		hidden={initialData.incident}
 	/>
-	<TextField
-		{form}
-		field="entry"
-		label={m.entry()}
-		cacheLock={cacheLocks['entry']}
-		bind:cachedValue={formDataCache['entry']}
-		data-focusindex="0"
-	/>
 	<Select
 		{form}
 		options={model.selectOptions['entry_type']}
@@ -40,6 +32,14 @@
 		label={m.entryType()}
 		cacheLock={cacheLocks['entry_type']}
 		bind:cachedValue={formDataCache['entry_type']}
+	/>
+	<TextField
+		{form}
+		field="entry"
+		label={m.entry()}
+		cacheLock={cacheLocks['entry']}
+		bind:cachedValue={formDataCache['entry']}
+		data-focusindex="0"
 	/>
 {/if}
 <TextField

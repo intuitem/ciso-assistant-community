@@ -125,6 +125,11 @@ export const navData = {
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
 					permissions: ['view_riskassessment', 'view_assessment']
+				},
+				{
+					name: 'incidents',
+					fa_icon: 'fa-solid fa-bug',
+					href: '/incidents'
 				}
 			]
 		},
@@ -189,11 +194,6 @@ export const navData = {
 					// What is the best icon between "fa-triangle-exclamation" and "fa-skull-crossbones" for a vulnerability ?
 					fa_icon: 'fa-solid fa-triangle-exclamation',
 					href: '/vulnerabilities'
-				},
-				{
-					name: 'incidents',
-					fa_icon: 'fa-solid fa-bug',
-					href: '/incidents'
 				}
 			]
 		},
