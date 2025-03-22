@@ -2,7 +2,9 @@ urn: urn:intuitem:risk:library:de-tekniske-minimumskrav
 locale: da
 ref_id: de-tekniske-minimumskrav
 name: DE TEKNISKE MINIMUMSKRAV FOR STATSLIGE MYNDIGHEDER
-description: DE TEKNISKE MINIMUMSKRAV FOR STATSLIGE MYNDIGHEDER
+description: 'DE TEKNISKE MINIMUMSKRAV FOR STATSLIGE MYNDIGHEDER
+
+  https://www.sikkerdigital.dk/myndighed/tekniske-tiltag/tekniske-minimumskrav/tekniske-minimumskrav-2024'
 copyright: "\xA9 sikker digital DK"
 version: 1
 publication_date: 2024-10-01
@@ -13,9 +15,11 @@ objects:
     urn: urn:intuitem:risk:framework:de-tekniske-minimumskrav
     ref_id: de-tekniske-minimumskrav
     name: DE TEKNISKE MINIMUMSKRAV FOR STATSLIGE MYNDIGHEDER
-    description: DE TEKNISKE MINIMUMSKRAV FOR STATSLIGE MYNDIGHEDER
+    description: 'DE TEKNISKE MINIMUMSKRAV FOR STATSLIGE MYNDIGHEDER
+
+      https://www.sikkerdigital.dk/myndighed/tekniske-tiltag/tekniske-minimumskrav/tekniske-minimumskrav-2024'
     requirement_nodes:
-    - urn: None:1
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node2
       assessable: false
       depth: 1
       name: Klienter/PC'er
@@ -24,7 +28,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:1
       assessable: true
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node2
       ref_id: '1'
       name: "Der skal implementeres firewall p\xE5 klienterne."
       description: "Form\xE5let med kravet er at sikre myndighedens klienter mod utilsigtet\
@@ -38,7 +42,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:2
       assessable: true
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node2
       ref_id: '2'
       name: "Klienter skal benytte Always On VPN fra eksterne netv\xE6rk."
       description: "Form\xE5let med kravet er at modvirke man-in-the-middle angreb\
@@ -54,7 +58,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:3
       assessable: true
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node2
       ref_id: '3'
       name: Fysiske klienters harddiske skal krypteres.
       description: "Form\xE5let med kravet er at undg\xE5 kompromittering af data\
@@ -67,7 +71,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:4
       assessable: true
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node2
       ref_id: '4'
       name: "Der skal implementeres endpoint-beskyttelse p\xE5 klienter."
       description: "Form\xE5let med kravet er at opdage og forhindre, at vira og malware\
@@ -77,7 +81,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:5
       assessable: true
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node2
       ref_id: '5'
       name: "Klienters OS og applikationer p\xE5 klienten skal holdes sikkerhedsopdateret."
       description: "Form\xE5let med kravet er at lukke kendte s\xE5rbarheder p\xE5\
@@ -91,7 +95,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:6
       assessable: true
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node2
       ref_id: '6'
       name: "Almindelige brugerkonti m\xE5 ikke tildeles administrative rettigheder\
         \ til klienter."
@@ -118,7 +122,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:7
       assessable: true
       depth: 2
-      parent_urn: None:1
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node2
       ref_id: '7'
       name: Klienter skal anvende det nyeste operativsystem.
       description: "Form\xE5let med kravet er at sikre, at myndighedens klienter f\xE5\
@@ -127,7 +131,7 @@ objects:
         \ det nyeste operativsystem p\xE5 de omfattede klienter. "
       annotation: "Kravet er opfyldt, hvis det anvendte operativsystem (OS) er en\
         \ major release eller major update udgivet for mindre end 24 m\xE5neder siden. "
-    - urn: None:2
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node10
       assessable: false
       depth: 1
       name: Mail
@@ -135,7 +139,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:8
       assessable: true
       depth: 2
-      parent_urn: None:2
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node10
       ref_id: '8'
       name: "Der m\xE5 kun anvendes godkendte mail-relays med autentifikation. "
       description: "Form\xE5let med kravet er at reducere risikoen for misbrug af\
@@ -148,7 +152,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:9
       assessable: true
       depth: 2
-      parent_urn: None:2
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node10
       ref_id: '9'
       name: Kommunikation med mail-protokoller skal krypteres og anvende minimum TLS
         1.2.
@@ -165,7 +169,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:10
       assessable: true
       depth: 2
-      parent_urn: None:2
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node10
       ref_id: '10'
       name: Afsenders DMARC-politik skal overholdes ved modtagelse.
       description: "Form\xE5let med kravet er at reducere antallet af forfalskede\
@@ -174,7 +178,7 @@ objects:
       annotation: "Kravet er opfyldt, hvis det sikres, at indg\xE5ende mailgateways\
         \ respekterer afsenderdom\xE6nets DMARC-politik, s\xE5fremt en s\xE5dan politik\
         \ er publiceret af dom\xE6neejeren. "
-    - urn: None:3
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node14
       assessable: false
       depth: 1
       name: Autentifikation
@@ -183,7 +187,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:11
       assessable: true
       depth: 2
-      parent_urn: None:3
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node14
       ref_id: '11'
       name: Autentifikation til myndighedens systemer over internettet skal anvende
         flerfaktor-autentificering.
@@ -198,7 +202,7 @@ objects:
         \ identitet bekr\xE6ftes og\n4) s\xE5fremt der anvendes engangskoder skal\
         \ disse koder genereres lokalt (p\xE5 enheden) og m\xE5 ikke transmitteres\
         \ til brugeren, fx via SMS eller mail. "
-    - urn: None:4
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node16
       assessable: false
       depth: 1
       name: Password
@@ -207,7 +211,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:12
       assessable: true
       depth: 2
-      parent_urn: None:4
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node16
       ref_id: '12'
       name: "Myndigheden skal sikre, at der ikke anvendes tidligere l\xE6kkede passwords."
       description: "Form\xE5let med kravet er at sikre, at uvedkommende ikke nemt\
@@ -217,7 +221,7 @@ objects:
         \ der anvendes l\xE6kkede passwords, tvinges til at skifte password ved n\xE6\
         ste log-on og\n3) kontoejere for it-systemer og servicekonti, der anvender\
         \ l\xE6kkede passwords, orienteres med henblik p\xE5 skift af password. "
-    - urn: None:5
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node18
       assessable: false
       depth: 1
       name: Mobile enheder
@@ -226,7 +230,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:13
       assessable: true
       depth: 2
-      parent_urn: None:5
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node18
       ref_id: '13'
       name: "Anvend numerisk adgangskode p\xE5 minimum 6 cifre eller biometrisk identifikation."
       description: "Form\xE5let med kravet er at beskytte den mobile enhed mod misbrug,\
@@ -237,7 +241,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:14
       assessable: true
       depth: 2
-      parent_urn: None:5
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node18
       ref_id: '14'
       name: "MDM (Mobile Device Management) skal implementeres p\xE5 alle mobile enheder."
       description: "Form\xE5let med kravet er at beskytte myndighedens data p\xE5\
@@ -251,7 +255,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:15
       assessable: true
       depth: 2
-      parent_urn: None:5
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node18
       ref_id: '15'
       name: "Operativsystem og apps p\xE5 mobile enheder skal holdes sikkerhedsopdateret"
       description: "Form\xE5let med kravet er at sikre, at kendte sikkerhedshuller\
@@ -262,7 +266,7 @@ objects:
         \ for operativsystem og 'managed apps' er installeret senest 30 dage efter\
         \ udgivelse og\n3) den mobile enhed er sat op til automatisk opdatering af\
         \ alle installerede apps. "
-    - urn: None:6
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node22
       assessable: false
       depth: 1
       name: Logning
@@ -271,7 +275,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:16
       assessable: true
       depth: 2
-      parent_urn: None:6
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node22
       ref_id: '16'
       name: "Logning skal foretages p\xE5 internetvendte tjenester og centrale interne\
         \ it-systemer"
@@ -285,7 +289,7 @@ objects:
         \ omr\xE5det tilsiger andet. \n\nBilag 1 udg\xF8r en udt\xF8mmende liste over\
         \ de internetvendte tjenester og centrale interne it-systemer, der er omfattet\
         \ af kravet, herunder hvilke data der skal logges."
-    - urn: None:7
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node24
       assessable: false
       depth: 1
       name: "Dom\xE6nesikkerhed"
@@ -294,7 +298,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:17
       assessable: true
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node24
       ref_id: '17'
       name: "Internetvendte tjenester tilh\xF8rende myndigheden skal registreres under\
         \ .dk-dom\xE6ner."
@@ -311,7 +315,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:18
       assessable: true
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node24
       ref_id: '18'
       name: "DNSSEC skal tilknyttes alle dom\xE6nenavne tilh\xF8rende myndigheden."
       description: "Form\xE5let med kravet er at sikre, at dom\xE6neforesp\xF8rgsler\
@@ -323,7 +327,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:19
       assessable: true
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node24
       ref_id: '19'
       name: "Det skal sikres, at indg\xE5ende mailgateways ligger i DNSSEC-signerede\
         \ dom\xE6ner."
@@ -336,7 +340,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:20
       assessable: true
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node24
       ref_id: '20'
       name: "Der skal anvendes DANE for alle indg\xE5ende mailgateways."
       description: "Form\xE5let med kravet er at tydeligg\xF8re over for afsenderen,\
@@ -347,7 +351,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:21
       assessable: true
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node24
       ref_id: '21'
       name: "Der skal foretages validering af DNSSEC-signerede svar p\xE5 navneopslag."
       description: "Form\xE5let med kravet er at forhindre, at myndighedens ansatte\
@@ -358,7 +362,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:22
       assessable: true
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node24
       ref_id: '22'
       name: "Myndigheden skal anvende en Sikker DNS-tjeneste eller implementere anden\
         \ l\xF8sning til beskyttelse mod adgang til kendte skadelige dom\xE6ner."
@@ -374,7 +378,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:23
       assessable: true
       depth: 2
-      parent_urn: None:7
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node24
       ref_id: '23'
       name: "DMARC REJECT policy implementeres p\xE5 alle  dom\xE6ner tilh\xF8rende\
         \ myndigheden."
@@ -388,7 +392,7 @@ objects:
         \ Policy Framework) er implementeret for alle myndighedens hoved- og subdom\xE6\
         ner og\n3) DKIM (DomainKeys Identified Mail) er implementeret p\xE5 alle hoveddom\xE6\
         ner og p\xE5 de subdom\xE6ner, der indg\xE5r i mailflow."
-    - urn: None:8
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node32
       assessable: false
       depth: 1
       name: "Netv\xE6rk"
@@ -397,7 +401,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:24
       assessable: true
       depth: 2
-      parent_urn: None:8
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node32
       ref_id: '24'
       name: "Myndighedens WiFi-netv\xE6rk skal v\xE6re krypteret med minimum WPA2"
       description: "Form\xE5let med kravet er at forhindre misbrug og aflytning af\
@@ -407,7 +411,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:25
       assessable: true
       depth: 2
-      parent_urn: None:8
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node32
       ref_id: '25'
       name: "G\xE6stenetv\xE6rk skal holdes adskilt fra myndighedens interne netv\xE6\
         rk"
@@ -420,7 +424,7 @@ objects:
         \ og behandles som trafik fra internettet og \n3) udg\xE5ende trafik fra g\xE6\
         stenetv\xE6rket skal anvende en anden IP-adresse end trafik fra myndighedens\
         \ interne netv\xE6rk. "
-    - urn: None:9
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node35
       assessable: false
       depth: 1
       name: Internetvendte tjenester
@@ -429,7 +433,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:26
       assessable: true
       depth: 2
-      parent_urn: None:9
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node35
       ref_id: '26'
       name: "Software p\xE5 myndighedens internetvendte tjenester skal holdes sikkerhedsopdateret."
       description: "Form\xE5let med kravet er, at kendte s\xE5rbarheder, der kan udnyttes\
@@ -445,7 +449,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:27
       assessable: true
       depth: 2
-      parent_urn: None:9
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node35
       ref_id: '27'
       name: Adgang til myndighedens internetvendte tjenester skal ske over en krypteret
         forbindelse.
@@ -460,7 +464,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:28
       assessable: true
       depth: 2
-      parent_urn: None:9
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node35
       ref_id: '28'
       name: "Internettilg\xE6ngelige IP-adresser, som myndigheden har brugsret over,\
         \ skal scannes for tjenester."
@@ -469,7 +473,7 @@ objects:
       annotation: "Kravet er opfyldt, hvis\n1) der mindst \xE9n gang i kvartalet foretages\
         \ en scanning af myndighedsbenyttede internettilg\xE6ngelige IP-adresser for\
         \ internetvendte tjenester og \n2) IP-rangen scannes for alle porte (0-65.535)."
-    - urn: None:10
+    - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node39
       assessable: false
       depth: 1
       name: Interne it-systemer
@@ -477,7 +481,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:29
       assessable: true
       depth: 2
-      parent_urn: None:10
+      parent_urn: urn:intuitem:risk:req_node:de-tekniske-minimumskrav:node39
       ref_id: '29'
       name: "Software p\xE5 specifikke interne infrastruktur-enheder og -tjenester\
         \ skal holdes sikkerhedsopdateret."
