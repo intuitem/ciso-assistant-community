@@ -3101,6 +3101,71 @@ class ComplianceAssessment(Assessment):
 
         return requirement_assessments_list
 
+    def get_threats_metrics(self):
+        problematic_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=self,
+            result__in=[
+                RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                RequirementAssessment.Result.NON_COMPLIANT,
+            ],
+        ).select_related("requirement")
+
+        threat_metrics = {}
+        # isn't it better to check if the fwk has threats linked first to avoid this check?
+        # or at least dynamic loading of the widget that will pull this?
+        #
+        # Process each problematic requirement assessment
+        for assessment in problematic_assessments:
+            threats = assessment.requirement.threats.all()
+
+            for threat in threats:
+                if threat.id not in threat_metrics:
+                    threat_metrics[threat.id] = {
+                        "id": threat.id,
+                        "name": threat.name,
+                        "display_long": threat.display_long,
+                        "urn": threat.urn,
+                        "non_compliant_count": 0,
+                        "partially_compliant_count": 0,
+                        "total_issues": 0,
+                        "requirement_assessments": [],
+                    }
+
+                if assessment.result == RequirementAssessment.Result.NON_COMPLIANT:
+                    threat_metrics[threat.id]["non_compliant_count"] += 1
+                elif (
+                    assessment.result
+                    == RequirementAssessment.Result.PARTIALLY_COMPLIANT
+                ):
+                    threat_metrics[threat.id]["partially_compliant_count"] += 1
+
+                threat_metrics[threat.id]["total_issues"] += 1
+
+                # Add the requirement assessment to the list (to track which requirements are affected - could be cool for the viz)
+                if assessment.id not in [
+                    ra.get("id")
+                    for ra in threat_metrics[threat.id]["requirement_assessments"]
+                ]:
+                    threat_metrics[threat.id]["requirement_assessments"].append(
+                        {
+                            "id": assessment.id,
+                            "requirement_id": assessment.requirement.id,
+                            "requirement_name": assessment.requirement.display_short,
+                            "result": assessment.result,
+                        }
+                    )
+
+        return {
+            "threats": list(threat_metrics.values()),
+            "total_unique_threats": len(threat_metrics),
+            "total_non_compliant": sum(
+                t["non_compliant_count"] for t in threat_metrics.values()
+            ),
+            "total_partially_compliant": sum(
+                t["partially_compliant_count"] for t in threat_metrics.values()
+            ),
+        }
+
     def get_requirements_status_count(self):
         requirements_status_count = []
         for st in RequirementAssessment.Status:

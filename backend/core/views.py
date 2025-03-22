@@ -4192,8 +4192,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ]
         return Response({"results": res})
 
-    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
@@ -4341,6 +4339,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 {"error": "No metrics found for this assessment"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+    @action(detail=True, methods=["get"])
+    def threats_metrics(self, request, pk=None):
+        compliance_assessment = self.get_object()
+
+        # is this needed or overlapping with the IAM checks inherited?
+        self.check_object_permissions(request, compliance_assessment)
+
+        threat_metrics = compliance_assessment.get_threats_metrics()
+        return Response(threat_metrics, status=status.HTTP_200_OK)
 
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
