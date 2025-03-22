@@ -214,7 +214,6 @@ export const navData = {
 				}
 			]
 		},
-
 		{
 			name: 'thirdPartyCategory',
 			items: [
@@ -237,6 +236,21 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
+				}
+			]
+		},
+		{
+			name: 'privacy',
+			items: [
+				{
+					name: 'overview',
+					fa_icon: 'fa-solid fa-gauge',
+					href: '/analytics/gdpr/'
+				},
+				{
+					name: 'processingsRegister',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/processings'
 				}
 			]
 		},
