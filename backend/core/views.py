@@ -479,6 +479,7 @@ class AssetFilter(df.FilterSet):
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
+            "filtering_labels",
         ]
 
 
@@ -3850,7 +3851,13 @@ class UploadAttachmentView(APIView):
             try:
                 evidence = Evidence.objects.get(id=kwargs["pk"])
                 attachment = request.FILES["file"]
-                evidence.attachment = attachment
+                if not evidence.attachment and attachment.name != "undefined":
+                    evidence.attachment = attachment
+                elif (
+                    evidence.attachment and attachment.name != "undefined"
+                ) and evidence.attachment != attachment:
+                    evidence.attachment.delete()
+                    evidence.attachment = attachment
                 evidence.save()
                 return Response(status=status.HTTP_200_OK)
             except Exception:
@@ -4795,7 +4802,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = ["owner", "folder", "status", "findings_assessment"]
+    filterset_fields = [
+        "owner",
+        "folder",
+        "status",
+        "findings_assessment",
+        "filtering_labels",
+    ]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):

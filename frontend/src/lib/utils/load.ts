@@ -51,13 +51,10 @@ export const loadDetail = async ({ event, model, id }) => {
 					tableFields.head.splice(index, 1);
 					tableFields.body.splice(index, 1);
 				}
-				const headData: Record<string, string> = listViewFields[e.urlModel].body.reduce(
-					(obj, key, index) => {
-						obj[key] = listViewFields[e.urlModel].head[index];
-						return obj;
-					},
-					{}
-				);
+				const headData: Record<string, string> = tableFields.body.reduce((obj, key, index) => {
+					obj[key] = index < tableFields.head.length ? tableFields.head[index] : key;
+					return obj;
+				}, {});
 				const table: TableSource = {
 					head: headData,
 					body: [],
