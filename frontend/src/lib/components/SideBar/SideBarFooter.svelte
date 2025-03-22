@@ -48,7 +48,7 @@
 		cs: 'Český',
 		sv: 'Svenska',
 		id: 'Bahasa Indonesia',
-		dk: 'Dansk'
+		da: 'Dansk'
 	};
 
 	let value = getLocale();
