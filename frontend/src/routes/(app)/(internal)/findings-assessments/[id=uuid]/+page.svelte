@@ -5,6 +5,8 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import * as m from '$paraglide/messages';
 	export let data: PageData;
+	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
+	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 </script>
 
 {@debug data}
@@ -24,21 +26,36 @@
 				<div class="rounded-lg bg-primary-100 p-3 text-center">
 					<p class="text-xs font-medium text-primary-800">Total</p>
 					<p class="text-xl font-bold text-primary-900">
-						{data.findings_metrics.total_count || 'N/A'}
+						{data.findings_metrics.raw_metrics.total_count || 'N/A'}
 					</p>
 				</div>
 				<div class="rounded-lg bg-primary-100 p-3 text-center">
 					<p class="text-xs font-medium text-primary-800">Unresolved High or Critical</p>
 					<p class="text-xl font-bold text-primary-900">
-						{data.findings_metrics.unresolved_important_count || 'N/A'}
+						{data.findings_metrics.raw_metrics.unresolved_important_count || 'N/A'}
 					</p>
 				</div>
 			</div>
 		</div>
 
 		<div class="card p-4 bg-gray-50 shadow-sm flex-grow">
-			{data.findings_metrics.severity_distribution}
-			{data.findings_metrics.status_distribution}
+			<div class="h-1/2">
+				<HalfDonutChart
+					name="current_h"
+					title="Severity"
+					classesContainer="flex-1 card p-4 bg-white"
+					values={data.findings_metrics.severity_chart_data}
+					colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
+				/>
+			</div>
+			<div class="h-1/2">
+				<DonutChart
+					classesContainer="flex-1 card p-4 bg-white"
+					name="titi"
+					title="Progress"
+					values={data.findings_metrics.status_chart_data.values}
+				/>
+			</div>
 		</div>
 	</div>
 </DetailView>
