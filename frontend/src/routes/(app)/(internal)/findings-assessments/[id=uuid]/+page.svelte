@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -10,11 +9,36 @@
 
 {@debug data}
 <DetailView {data}>
-	<div slot="actions" class="flex flex-col space-y-2 ml-4">
+	<div slot="actions" class="flex flex-col space-y-2">
 		<Anchor
 			href={`${$page.url.pathname}/action-plan`}
 			class="btn variant-filled-primary h-fit"
 			breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
 		>
+	</div>
+
+	<div slot="widgets" class="h-full flex flex-col space-y-4">
+		<div class="card p-4 bg-gray-50 shadow-sm">
+			<h3 class="text-lg font-semibold mb-2">Summary</h3>
+			<div class="grid grid-cols-2 gap-2">
+				<div class="rounded-lg bg-primary-100 p-3 text-center">
+					<p class="text-xs font-medium text-primary-800">Total</p>
+					<p class="text-xl font-bold text-primary-900">
+						{data.findings_metrics.total_count || 'N/A'}
+					</p>
+				</div>
+				<div class="rounded-lg bg-primary-100 p-3 text-center">
+					<p class="text-xs font-medium text-primary-800">Unresolved High or Critical</p>
+					<p class="text-xl font-bold text-primary-900">
+						{data.findings_metrics.unresolved_important_count || 'N/A'}
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="card p-4 bg-gray-50 shadow-sm flex-grow">
+			{data.findings_metrics.severity_distribution}
+			{data.findings_metrics.status_distribution}
+		</div>
 	</div>
 </DetailView>
