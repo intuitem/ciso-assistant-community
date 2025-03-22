@@ -865,11 +865,12 @@ export const listViewFields = {
 	},
 	'findings-assessments': {
 		head: ['ref_id', 'name', 'description', 'category', 'findings', 'perimeter'],
-		body: ['ref_id', 'str', 'description', 'category', 'findings_count', 'perimeter']
+		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
 		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
-		body: ['ref_id', 'str', 'description', 'findings_assessment', 'status', 'filtering_labels']
+		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels'],
+		filters: { filtering_labels: LABELS_FILTER }
 	},
 	extra: {
 		filters: {

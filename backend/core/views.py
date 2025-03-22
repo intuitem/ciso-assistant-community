@@ -479,6 +479,7 @@ class AssetFilter(df.FilterSet):
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
+            "filtering_labels",
         ]
 
 
@@ -558,7 +559,7 @@ class AssetViewSet(BaseModelViewSet):
                     {
                         "source": nodes_idx[relationship.name],
                         "target": nodes_idx[asset.name],
-                        "value": "parent",
+                        "value": "supported by",
                     }
                 )
         meta = {"display_name": "Assets Explorer"}
@@ -2341,7 +2342,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.progress()
+                sum += audit.progress
             avg_progress = int(sum / audits.count())
 
         controls = (
@@ -3850,7 +3851,13 @@ class UploadAttachmentView(APIView):
             try:
                 evidence = Evidence.objects.get(id=kwargs["pk"])
                 attachment = request.FILES["file"]
-                evidence.attachment = attachment
+                if not evidence.attachment and attachment.name != "undefined":
+                    evidence.attachment = attachment
+                elif (
+                    evidence.attachment and attachment.name != "undefined"
+                ) and evidence.attachment != attachment:
+                    evidence.attachment.delete()
+                    evidence.attachment = attachment
                 evidence.save()
                 return Response(status=status.HTTP_200_OK)
             except Exception:
@@ -4283,8 +4290,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
-    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
@@ -4564,6 +4569,13 @@ def get_build(request):
     """
     BUILD = settings.BUILD
     VERSION = settings.VERSION
+    default_db_engine = settings.DATABASES["default"]["ENGINE"]
+    if "postgresql" in default_db_engine:
+        database_type = "P-FS"
+    elif "sqlite" in default_db_engine:
+        database_type = "S-FS"
+    else:
+        database_type = "Unknown"
 
     disk_info = get_disk_usage()
 
@@ -4578,7 +4590,14 @@ def get_build(request):
             "Disk space": "Unable to retrieve disk usage",
         }
 
-    return Response({"version": VERSION, "build": BUILD, **disk_response})
+    return Response(
+        {
+            "version": VERSION,
+            "build": BUILD,
+            **disk_response,
+            "infrastructure": database_type,
+        }
+    )
 
 
 # NOTE: Important functions/classes from old views.py, to be reviewed
@@ -4783,7 +4802,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = ["owner", "folder", "status", "findings_assessment"]
+    filterset_fields = [
+        "owner",
+        "folder",
+        "status",
+        "findings_assessment",
+        "filtering_labels",
+    ]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):

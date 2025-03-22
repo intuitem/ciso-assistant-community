@@ -868,5 +868,10 @@
 	"documentationScore": "درجة التوثيق",
 	"useDocumentationScore": "استخدام درجة التوثيق",
 	"useDocumentationScoreHelpText": "ستتوفر درجة ثانية (درجة التوثيق) لتقييم المتطلبات.",
-	"publicationDate": "تاريخ النشر"
+	"publicationDate": "تاريخ النشر",
+	"finding": "ملاحظة",
+	"findings": "ملاحظات",
+	"associatedFindings": "الملاحظات المرتبطة",
+	"findings_count": "عدد الملاحظات",
+	"addFinding": "إضافة ملاحظة"
 }
