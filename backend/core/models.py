@@ -3044,7 +3044,7 @@ class ComplianceAssessment(Assessment):
                 "total": total,
                 "per_status": per_status,
                 "per_result": per_result,
-                "progress_perc": self.progress(),
+                "progress_perc": self.progress,
                 "score": self.get_global_score(),
             },
         }
@@ -3576,6 +3576,7 @@ class ComplianceAssessment(Assessment):
 
         return requirement_assessments
 
+    @property
     def progress(self) -> int:
         requirement_assessments = list(
             self.get_requirement_assessments(include_non_assessable=False)
@@ -3589,6 +3590,28 @@ class ComplianceAssessment(Assessment):
             ]
         )
         return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
+
+    @property
+    def answers_progress(self) -> int:
+        requirement_assessments = self.get_requirement_assessments(
+            include_non_assessable=False
+        )
+        total_questions_count = 0
+        answered_questions_count = 0
+        for ra in requirement_assessments:
+            # if it has question set it should count
+            if ra.requirement.question:
+                answers = ra.answer.get("questions")
+                if answers:
+                    total_questions_count += len(answers)
+                    answered_questions_count += sum(
+                        1 for ans in answers if ans.get("answer") != ""
+                    )
+
+        if total_questions_count > 0:
+            return int((answered_questions_count / total_questions_count) * 100)
+        else:
+            return 0
 
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):

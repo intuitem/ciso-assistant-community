@@ -14,6 +14,8 @@
 	"urdu": "Urdu",
 	"czech": "Czech",
 	"swedish": "Swedish",
+	"indonesian": "Indonesian",
+	"danish": "Danish",
 	"addThreat": "Add threat",
 	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
@@ -1220,5 +1222,7 @@
 	"cannotDeleteAutoTimeline": "Auto timeline entries cannot be deleted",
 	"author": "Author",
 	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication",
-	"timestampCannotBeInTheFuture": "Timestamp cannot be in the future"
+	"timestampCannotBeInTheFuture": "Timestamp cannot be in the future",
+	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication",
+	"tprmOverview": "Overview"
 }

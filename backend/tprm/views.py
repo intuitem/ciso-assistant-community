@@ -1,9 +1,14 @@
 from rest_framework.response import Response
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from tprm.models import Entity, Representative, Solution, EntityAssessment
 from rest_framework.decorators import action
 import structlog
+
+from rest_framework.request import Request
+from rest_framework.response import Response
+
+from django.utils.formats import date_format
 
 logger = structlog.get_logger(__name__)
 
@@ -49,6 +54,55 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get conclusion choices")
     def conclusion(self, request):
         return Response(dict(EntityAssessment.Conclusion.choices))
+
+    @action(detail=False, name="Get TPRM metrics")
+    def metrics(self, request):
+        assessments_data = []
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=EntityAssessment,
+        )
+
+        for ea in EntityAssessment.objects.filter(id__in=viewable_items):
+            entry = {
+                "entity_assessment_id": ea.id,
+                "provider": ea.entity.name,
+                "solutions": ",".join([sol.name for sol in ea.solutions.all()])
+                if len(ea.solutions.all()) > 0
+                else "-",
+                "baseline": ea.compliance_assessment.framework.name
+                if ea.compliance_assessment
+                else "-",
+                "due_date": ea.due_date.strftime("%Y-%m-%d") if ea.due_date else "-",
+                "last_update": ea.updated_at.strftime("%Y-%m-%d")
+                if ea.updated_at
+                else "-",
+                "conclusion": ea.conclusion if ea.conclusion else "ongoing",
+                "compliance_assessment_id": ea.compliance_assessment.id
+                if ea.compliance_assessment
+                else "#",
+                "reviewers": ",".join([re.email for re in ea.reviewers.all()])
+                if len(ea.reviewers.all())
+                else "-",
+                "observation": ea.observation if ea.observation else "-",
+            }
+
+            completion = (
+                ea.compliance_assessment.answers_progress
+                if ea.compliance_assessment
+                else 0
+            )
+            entry.update({"completion": completion})
+
+            review_progress = (
+                ea.compliance_assessment.progress if ea.compliance_assessment else 0
+            )
+            entry.update({"review_progress": review_progress})
+            assessments_data.append(entry)
+
+        return Response(assessments_data)
 
 
 class RepresentativeViewSet(BaseModelViewSet):

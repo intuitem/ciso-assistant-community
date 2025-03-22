@@ -224,6 +224,17 @@ export const navData = {
 			name: 'thirdPartyCategory',
 			items: [
 				{
+					name: 'tprmOverview',
+					fa_icon: 'fa-solid fa-gauge',
+					href: '/analytics/tprm',
+					permissions: [
+						'view_complianceassessment',
+						'view_entity',
+						'view_solution',
+						'view_entityassessment'
+					]
+				},
+				{
 					name: 'entities',
 					fa_icon: 'fa-solid fa-building',
 					href: '/entities'
