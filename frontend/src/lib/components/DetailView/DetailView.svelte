@@ -28,7 +28,7 @@
 	import { listViewFields } from '$lib/utils/table';
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
+	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
 
 	const popupHover: PopupSettings = {
 		event: 'hover',
@@ -265,7 +265,7 @@
 											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 												>{value.name}</Anchor
 											>
-										{:else if key === 'severity'}
+										{:else if key === 'severity' && data.urlModel !== 'incidents'}
 											<!-- We must add translations for the following severity levels -->
 											<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
 											{@const stringifiedSeverity =
@@ -358,7 +358,7 @@
 											<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 												>{value}</Anchor
 											>
-										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date')}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date' || key === 'timestamp')}
 											{formatDateOrDateTime(value, getLocale())}
 										{:else if m[toCamelCase(value.str || value.name)]}
 											{safeTranslate((value.str || value.name) ?? value)}

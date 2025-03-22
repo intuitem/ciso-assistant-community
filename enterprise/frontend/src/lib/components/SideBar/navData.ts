@@ -219,6 +219,11 @@ export const navData = {
 					// What is the best icon between "fa-triangle-exclamation" and "fa-skull-crossbones" for a vulnerability ?
 					fa_icon: 'fa-solid fa-triangle-exclamation',
 					href: '/vulnerabilities'
+				},
+				{
+					name: 'incidents',
+					fa_icon: 'fa-solid fa-bug',
+					href: '/incidents',
 				}
 			]
 		},
