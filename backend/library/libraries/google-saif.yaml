@@ -5,7 +5,7 @@ name: Google SAIF Framework
 description: Google's Secure AI Framework
 copyright: "\xA9 Google"
 version: 1
-publication_date: 2025-03-16
+publication_date: 2025-03-22
 provider: Google
 packager: intuitem
 objects:
@@ -214,6 +214,9 @@ objects:
         data does not enter your models?
       implementation_groups:
       - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:utd
+      - urn:intuitem:risk:threat:google-saif:isd
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-10
     - urn: urn:intuitem:risk:req_node:google-saif:2.2
@@ -224,6 +227,8 @@ objects:
         changes in your training, tuning, or evaluation data?
       implementation_groups:
       - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-11
       - urn:intuitem:risk:reference_control:google-saif:gsc-20
@@ -238,6 +243,8 @@ objects:
         your AI models?
       implementation_groups:
       - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:sdd
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-09
       - urn:intuitem:risk:reference_control:google-saif:gsc-12
@@ -252,6 +259,9 @@ objects:
       implementation_groups:
       - CR
       - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:edh
+      - urn:intuitem:risk:threat:google-saif:sdd
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-12
     - urn: urn:intuitem:risk:req_node:google-saif:2.5
@@ -263,6 +273,10 @@ objects:
       implementation_groups:
       - CR
       - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      - urn:intuitem:risk:threat:google-saif:mst
+      - urn:intuitem:risk:threat:google-saif:mxf
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-20
     - urn: urn:intuitem:risk:req_node:google-saif:2.6
@@ -275,6 +289,10 @@ objects:
       implementation_groups:
       - CR
       - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      - urn:intuitem:risk:threat:google-saif:mst
+      - urn:intuitem:risk:threat:google-saif:mxf
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-21
     - urn: urn:intuitem:risk:req_node:google-saif:2.7
@@ -286,6 +304,9 @@ objects:
         model development and during deployment?
       implementation_groups:
       - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      - urn:intuitem:risk:threat:google-saif:mst
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-22
     - urn: urn:intuitem:risk:req_node:google-saif:2.8
@@ -297,6 +318,11 @@ objects:
         against security vulnerabilities?
       implementation_groups:
       - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      - urn:intuitem:risk:threat:google-saif:mst
+      - urn:intuitem:risk:threat:google-saif:mxf
+      - urn:intuitem:risk:threat:google-saif:mdt
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-23
     - urn: urn:intuitem:risk:req_node:google-saif:2.9
@@ -308,6 +334,9 @@ objects:
       implementation_groups:
       - CR
       - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dms
+      - urn:intuitem:risk:threat:google-saif:mre
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-03
     - urn: urn:intuitem:risk:req_node:google-saif:2.10
@@ -319,6 +348,8 @@ objects:
       implementation_groups:
       - CR
       - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:iic
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-23
     - urn: urn:intuitem:risk:req_node:google-saif:2.11
@@ -330,6 +361,12 @@ objects:
       implementation_groups:
       - CR
       - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:pij
+      - urn:intuitem:risk:threat:google-saif:mev
+      - urn:intuitem:risk:threat:google-saif:sdd
+      - urn:intuitem:risk:threat:google-saif:isd
+      - urn:intuitem:risk:threat:google-saif:imo
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-19
       - urn:intuitem:risk:reference_control:google-saif:gsc-17
@@ -342,6 +379,9 @@ objects:
       implementation_groups:
       - CR
       - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:pij
+      - urn:intuitem:risk:threat:google-saif:ra
       reference_controls:
       - urn:intuitem:risk:reference_control:google-saif:gsc-18
       - urn:intuitem:risk:reference_control:google-saif:gsc-03
