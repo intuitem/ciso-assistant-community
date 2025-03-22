@@ -8,6 +8,7 @@
 	export let data: PageData;
 </script>
 
+{@debug data}
 <DetailView {data}>
 	<div slot="actions" class="flex flex-col space-y-2 ml-4">
 		<Anchor

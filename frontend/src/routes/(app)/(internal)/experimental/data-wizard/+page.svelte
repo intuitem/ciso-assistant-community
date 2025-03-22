@@ -55,7 +55,6 @@
 	const authorizedExtensions = ['.xls', '.xlsx'];
 </script>
 
-{@debug form}
 <div class="grid grid-cols-4 gap-4">
 	<div class=" col-span-2 bg-white shadow py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
