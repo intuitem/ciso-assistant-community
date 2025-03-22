@@ -442,7 +442,7 @@ erDiagram
 
     TIMELINE_ENTRY {
         string   entry
-        stirng   entry_type
+        string   entry_type
         string   observation
         datetime timestamp
     }
@@ -908,7 +908,7 @@ Timeline_entry objects have the following fields:
 
 status_changed and severity_changed entries are automatically generated.
 
-The type of an entry cannot be updated.
+Entry type cannot be updated.
 
 ## Libraries
 
