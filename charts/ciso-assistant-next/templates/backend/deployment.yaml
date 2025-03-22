@@ -280,5 +280,9 @@ spec:
       {{- if .Values.backend.persistence.localStorage.enabled }}
       - name: localstorage-data
         persistentVolumeClaim:
-          claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+          {{- if eq .Values.backend.persistence.existingClaim "" }}
+            claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+          {{- else }}
+            claimName: {{ .Values.backend.persistence.existingClaim }}
+          {{- end }}
       {{- end }}

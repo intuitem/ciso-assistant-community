@@ -131,6 +131,8 @@ backend:
       storageClass: ""
       # -- Local Storage persistant volume accessMode
       accessMode: ReadWriteOnce
+      # -- Name of an existing PersistentVolumeClaim
+      existingClaim: ""
 
   ## Backend image
   image:
