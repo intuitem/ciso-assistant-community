@@ -4799,6 +4799,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     def category(self, request):
         return Response(dict(FindingsAssessment.Category.choices))
 
+    @action(detail=True, name="Get Follow up metrics")
+    def metrics(self, request, pk=None):
+        assessment = self.get_object()
+        metrics = assessment.get_findings_metrics()
+        return Response(metrics)
+
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
