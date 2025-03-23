@@ -125,8 +125,13 @@ spec:
         - name: tmp-data
           mountPath: /tmp
         {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
+        {{- if not .Values.backend.persistence.existingClaim }}
         - name: sqlite-data
           mountPath: /ciso/db
+        {{- else }}
+        - name: localstorage-data
+          mountPath: /ciso/db
+        {{- end }}
         {{- end }}
         {{- if .Values.backend.persistence.localStorage.enabled }}
         - name: localstorage-data
@@ -249,8 +254,13 @@ spec:
         - name: tmp-data
           mountPath: /tmp
         {{- if .Values.backend.persistence.sqlite.enabled }}
+        {{- if not .Values.backend.persistence.existingClaim }}
         - name: sqlite-data
           mountPath: /ciso/db
+        {{- else }}
+        - name: localstorage-data
+          mountPath: /ciso/db
+        {{- end }}
         {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
@@ -272,7 +282,7 @@ spec:
       - name: tmp-data
         emptyDir:
           sizeLimit: 256Mi
-      {{- if .Values.backend.persistence.sqlite.enabled }}
+      {{- if and .Values.backend.persistence.sqlite.enabled (not .Values.backend.persistence.existingClaim) }}
       - name: sqlite-data
         persistentVolumeClaim:
           claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
@@ -280,7 +290,7 @@ spec:
       {{- if .Values.backend.persistence.localStorage.enabled }}
       - name: localstorage-data
         persistentVolumeClaim:
-          {{- if eq .Values.backend.persistence.existingClaim "" }}
+          {{- if not .Values.backend.persistence.existingClaim }}
             claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
           {{- else }}
             claimName: {{ .Values.backend.persistence.existingClaim }}
