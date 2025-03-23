@@ -31,7 +31,7 @@
 			},
 			series: [
 				{
-					name: 'risk level',
+					name: 'Level',
 					type: 'pie',
 					radius: ['40%', '70%'],
 					center: ['50%', '70%'],

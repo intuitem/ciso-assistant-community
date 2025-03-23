@@ -50,7 +50,7 @@
 			<div class="h-1/2">
 				<DonutChart
 					classesContainer="flex-1 card p-4 bg-white"
-					name="titi"
+					name="f_treatment_progress"
 					title="Progress"
 					values={data.findings_metrics.status_chart_data.values}
 				/>

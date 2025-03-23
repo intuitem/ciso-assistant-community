@@ -3705,7 +3705,7 @@ class FindingsAssessment(Assessment):
             }
 
         status_counts = {}
-        for status_code, status_label in Finding.Status.choices:
+        for status_code, _ in Finding.Status.choices:
             status_counts[status_code] = findings.filter(status=status_code).count()
 
         # Severity distribution using the defined severity levels - we need a better way for this
