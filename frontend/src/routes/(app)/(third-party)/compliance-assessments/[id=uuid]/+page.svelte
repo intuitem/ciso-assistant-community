@@ -72,6 +72,8 @@
 		if (dialogElement) dialogElement.close();
 	}
 
+	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return; // otherwise it will interfere with input fields
@@ -575,24 +577,6 @@
 		</div>
 
 		<div class="threats-content">
-			{#if data.threats.threats_by_category}
-				<div class="mb-4">
-					<h4 class="font-semibold mb-2">Threats by Category</h4>
-					<div class="grid grid-cols-2 gap-4">
-						{#each Object.entries(data.threats.threats_by_category) as [category, threats]}
-							<div class="card p-3 bg-yellow-100">
-								<h5 class="font-medium">{category}</h5>
-								<ul class="list-disc pl-5 mt-2">
-									{#each threats as threat}
-										<li>{threat}</li>
-									{/each}
-								</ul>
-							</div>
-						{/each}
-					</div>
-				</div>
-			{/if}
-
 			<div class="card p-4 bg-gray-100 mt-4">
 				<h4 class="font-semibold mb-2">Summary</h4>
 				<p>
@@ -611,6 +595,13 @@
 					</p>
 				{/if}
 			</div>
+			<TreeChart
+				tree={data.threats.tree}
+				name="toto"
+				title="tata"
+				height="h-[400px]"
+				width="w-[800px]"
+			/>
 
 			<div class="mt-4">
 				<h4 class="font-semibold mb-2">Raw Data</h4>

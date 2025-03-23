@@ -4348,6 +4348,22 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         self.check_object_permissions(request, compliance_assessment)
 
         threat_metrics = compliance_assessment.get_threats_metrics()
+        if threat_metrics.get("total_unique_threats") == 0:
+            return Response(threat_metrics, status=status.HTTP_200_OK)
+        children = []
+        for th in threat_metrics["threats"]:
+            children.append(
+                {
+                    "name": th["name"],
+                    "children": [
+                        ra["requirement_name"] for ra in th["requirement_assessments"]
+                    ],
+                    "value": len(th["requirement_assessments"]),
+                }
+            )
+        tree = {"name": "threats", "children": children}
+        threat_metrics.update({"tree": tree})
+
         return Response(threat_metrics, status=status.HTTP_200_OK)
 
 
