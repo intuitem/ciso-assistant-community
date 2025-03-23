@@ -270,7 +270,8 @@ export const navData = {
 				{
 					name: 'overview',
 					fa_icon: 'fa-solid fa-gauge',
-					href: '/analytics/gdpr/'
+					href: '/analytics/gdpr/',
+					permissions: ['view_processing', 'view_purpose']
 				},
 				{
 					name: 'processingsRegister',
