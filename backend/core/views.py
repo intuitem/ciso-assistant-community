@@ -4361,7 +4361,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "value": len(th["requirement_assessments"]),
                 }
             )
-        tree = {"name": "threats", "children": children}
+        tree = {"name": "Threats", "children": children}
         threat_metrics.update({"tree": tree})
 
         return Response(threat_metrics, status=status.HTTP_200_OK)

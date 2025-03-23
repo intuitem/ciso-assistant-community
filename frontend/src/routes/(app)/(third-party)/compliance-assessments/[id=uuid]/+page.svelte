@@ -577,28 +577,9 @@
 		</div>
 
 		<div class="threats-content">
-			<div class="card p-4 bg-gray-100 mt-4">
-				<h4 class="font-semibold mb-2">Summary</h4>
-				<p>
-					Total unique threats: <span class="font-bold">{data.threats.total_unique_threats}</span>
-				</p>
-				{#if data.threats.highest_risk_level}
-					<p>
-						Highest risk level: <span class="font-bold">{data.threats.highest_risk_level}</span>
-					</p>
-				{/if}
-				{#if data.threats.average_risk_score}
-					<p>
-						Average risk score: <span class="font-bold"
-							>{data.threats.average_risk_score.toFixed(2)}</span
-						>
-					</p>
-				{/if}
-			</div>
 			<TreeChart
 				tree={data.threats.tree}
-				name="toto"
-				title="tata"
+				name="threats_tree"
 				height="h-[400px]"
 				width="w-[800px]"
 			/>
