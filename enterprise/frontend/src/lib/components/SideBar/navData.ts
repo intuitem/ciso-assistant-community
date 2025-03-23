@@ -265,6 +265,21 @@ export const navData = {
 			]
 		},
 		{
+			name: 'privacy',
+			items: [
+				{
+					name: 'overview',
+					fa_icon: 'fa-solid fa-gauge',
+					href: '/analytics/gdpr/'
+				},
+				{
+					name: 'processingsRegister',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/processings'
+				}
+			]
+		},
+		{
 			name: 'extra',
 			items: [
 				{

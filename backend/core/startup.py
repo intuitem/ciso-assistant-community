@@ -497,6 +497,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
+    "add_purpose",
+    "change_purpose",
+    "view_purpose",
+    "delete_purpose",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

@@ -27,6 +27,7 @@
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
+	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -312,6 +313,8 @@
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
 	{:else if URLModel === 'processings'}
 		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'purposes'}
+		<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'ebios-rm'}
 		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'feared-events'}
