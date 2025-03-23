@@ -9,7 +9,6 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 </script>
 
-{@debug data}
 <DetailView {data}>
 	<div slot="actions" class="flex flex-col space-y-2">
 		<Anchor

@@ -79,7 +79,6 @@
 	}
 </script>
 
-{@debug data}
 <TabGroup class="">
 	<Tab bind:group={tabSet} on:click={() => handleTabChange(0)} name="summary" value={0}
 		>{m.summary()}</Tab
