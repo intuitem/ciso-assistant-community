@@ -4829,12 +4829,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             status_mapping = {
                 "identified": {"localName": "identified", "color": "#F5C481"},
                 "confirmed": {"localName": "confirmed", "color": "#E6686D"},
-                "assigned": {"localName": "open", "color": "#fac858"},
-                "in_progress": {"localName": "open", "color": "#fac858"},
-                "mitigated": {"localName": "mitigate", "color": "#59BBB2"},
-                "resolved": {"localName": "mitigate", "color": "#59BBB2"},
-                "dismissed": {"localName": "accept", "color": "#5470c6"},
-                "deprecated": {"localName": "avoid", "color": "#91cc75"},
+                "assigned": {"localName": "assigned", "color": "#fab998"},
+                "in_progress": {"localName": "inProgress", "color": "#fac858"},
+                "mitigated": {"localName": "mitigated", "color": "#59BBB2"},
+                "resolved": {"localName": "resolved", "color": "#59BBB2"},
+                "dismissed": {"localName": "dismissed", "color": "#5470c6"},
+                "deprecated": {"localName": "deprecated", "color": "#91cc75"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},
             }
 
