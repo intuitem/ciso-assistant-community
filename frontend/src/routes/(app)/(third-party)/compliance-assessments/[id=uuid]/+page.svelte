@@ -54,6 +54,24 @@
 		`change_${requirementAssessmentModel.name}`
 	);
 
+	const has_threats = data.threats.total_unique_threats > 0;
+
+	let threatDialogOpen = false;
+	let dialogElement;
+
+	function openThreatsDialog() {
+		threatDialogOpen = true;
+		// Need to use the next tick to ensure the dialog is in the DOM
+		setTimeout(() => {
+			if (dialogElement) dialogElement.showModal();
+		}, 0);
+	}
+
+	function closeThreatsDialog() {
+		threatDialogOpen = false;
+		if (dialogElement) dialogElement.close();
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return; // otherwise it will interfere with input fields
@@ -450,6 +468,18 @@
 					{m.suggestControls()}
 				</button>
 			{/if}
+			{#if has_threats}
+				<button
+					class="border rounded-lg btn h-fit bg-gradient-to-r from-yellow-500 to-yellow-300 px-3 py-2"
+					on:click={openThreatsDialog}
+				>
+					<div class="flex items-center space-x-2">
+						<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
+						<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
+						<span>Threats identified</span>
+					</div>
+				</button>
+			{/if}
 		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
@@ -531,3 +561,65 @@
 		{/key}
 	</div>
 </div>
+{#if threatDialogOpen}
+	<dialog
+		bind:this={dialogElement}
+		class="card p-4 bg-white shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
+		on:close={() => (threatDialogOpen = false)}
+	>
+		<div class="flex justify-between items-center mb-4">
+			<h3 class="h3 font-bold">Identified Threats</h3>
+			<button class="btn btn-sm variant-filled-error" on:click={closeThreatsDialog}>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+
+		<div class="threats-content">
+			{#if data.threats.threats_by_category}
+				<div class="mb-4">
+					<h4 class="font-semibold mb-2">Threats by Category</h4>
+					<div class="grid grid-cols-2 gap-4">
+						{#each Object.entries(data.threats.threats_by_category) as [category, threats]}
+							<div class="card p-3 bg-yellow-100">
+								<h5 class="font-medium">{category}</h5>
+								<ul class="list-disc pl-5 mt-2">
+									{#each threats as threat}
+										<li>{threat}</li>
+									{/each}
+								</ul>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<div class="card p-4 bg-gray-100 mt-4">
+				<h4 class="font-semibold mb-2">Summary</h4>
+				<p>
+					Total unique threats: <span class="font-bold">{data.threats.total_unique_threats}</span>
+				</p>
+				{#if data.threats.highest_risk_level}
+					<p>
+						Highest risk level: <span class="font-bold">{data.threats.highest_risk_level}</span>
+					</p>
+				{/if}
+				{#if data.threats.average_risk_score}
+					<p>
+						Average risk score: <span class="font-bold"
+							>{data.threats.average_risk_score.toFixed(2)}</span
+						>
+					</p>
+				{/if}
+			</div>
+
+			<div class="mt-4">
+				<h4 class="font-semibold mb-2">Raw Data</h4>
+				<pre class="bg-gray-100 p-3 rounded overflow-auto max-h-64 text-xs">{JSON.stringify(
+						data.threats,
+						null,
+						2
+					)}</pre>
+			</div>
+		</div>
+	</dialog>
+{/if}

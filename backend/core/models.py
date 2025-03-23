@@ -3102,6 +3102,19 @@ class ComplianceAssessment(Assessment):
         return requirement_assessments_list
 
     def get_threats_metrics(self):
+        # trying this to avoid looping on fwk with no threats mappings
+        has_threats = RequirementNode.objects.filter(
+            framework=self.framework, threats__isnull=False
+        ).exists()
+
+        if not has_threats:
+            return {
+                "threats": [],
+                "total_unique_threats": 0,
+                "total_non_compliant": 0,
+                "total_partially_compliant": 0,
+            }
+
         problematic_assessments = RequirementAssessment.objects.filter(
             compliance_assessment=self,
             result__in=[
