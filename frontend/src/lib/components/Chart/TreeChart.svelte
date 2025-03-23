@@ -27,6 +27,7 @@
 			series: [
 				{
 					type: 'tree',
+					roam: true,
 
 					data: [tree],
 					symbol: 'square',

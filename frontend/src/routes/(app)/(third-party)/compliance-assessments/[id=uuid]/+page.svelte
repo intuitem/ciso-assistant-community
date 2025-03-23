@@ -478,7 +478,7 @@
 					<div class="flex items-center space-x-2">
 						<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
 						<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
-						<span>Threats identified</span>
+						<span>{m.potentialThreats()}</span>
 					</div>
 				</button>
 			{/if}
@@ -570,28 +570,14 @@
 		on:close={() => (threatDialogOpen = false)}
 	>
 		<div class="flex justify-between items-center mb-4">
-			<h3 class="h3 font-bold">Identified Threats</h3>
+			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
 			<button class="btn btn-sm variant-filled-error" on:click={closeThreatsDialog}>
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>
 
 		<div class="threats-content">
-			<TreeChart
-				tree={data.threats.tree}
-				name="threats_tree"
-				height="h-[400px]"
-				width="w-[800px]"
-			/>
-
-			<div class="mt-4">
-				<h4 class="font-semibold mb-2">Raw Data</h4>
-				<pre class="bg-gray-100 p-3 rounded overflow-auto max-h-64 text-xs">{JSON.stringify(
-						data.threats,
-						null,
-						2
-					)}</pre>
-			</div>
+			<TreeChart tree={data.threats.tree} name="threats_tree" height="h-[600px]" />
 		</div>
 	</dialog>
 {/if}

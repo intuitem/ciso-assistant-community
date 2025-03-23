@@ -1188,5 +1188,6 @@
 	"noRequirementFound": "Aucune revue de cette exigence trouvée",
 	"noAuditForTheFramework": "Il n'y a pas d'audit utilisant ce référentiel",
 	"reauthenticateForSensitiveAction": "Veuillez vous réauthentifier pour effectuer cette action sensible",
-	"tprmOverview": "Vue d'ensemble"
+	"tprmOverview": "Vue d'ensemble",
+	"potentialThreats": "menaces potentielles"
 }
