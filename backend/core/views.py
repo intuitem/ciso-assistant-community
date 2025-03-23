@@ -1577,7 +1577,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         return Response(data)
 
     @action(detail=False, methods=["get"])
-    def get_timeline_entries_info(self, request):
+    def get_timeline_info(self, request):
         entries = []
         COLORS_PALETTE = [
             "#F72585",
