@@ -802,8 +802,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'processing']
 	},
 	'personal-data': {
-		head: ['name', 'description', 'category', 'isSensitive', 'deletionPolicy', 'retention'],
-		body: ['name', 'description', 'category', 'is_sensitive', 'deletion_policy', 'retention']
+		head: ['name', 'description', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
+		body: ['name', 'description', 'category', 'is_sensitive', 'retention', 'deletion_policy']
 	},
 	'data-subjects': {
 		head: ['name', 'description', 'category'],

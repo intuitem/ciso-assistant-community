@@ -3,11 +3,10 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
+	import Checkbox from '../Checkbox.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
-
-	import Checkbox from '../Checkbox.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;

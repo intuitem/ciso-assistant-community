@@ -121,6 +121,7 @@ class ProcessingWriteSerializer(BaseModelSerializer):
 
 class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     class Meta:
         model = Processing

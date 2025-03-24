@@ -422,9 +422,25 @@ export const processingSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional().default(''),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	status: z.string().optional(),
+	legal_basis: z.string().optional(),
+	dpia_required: z.boolean().optional(),
+	has_sensitive_personal_data: z.boolean().optional()
 });
 
+// <!-- author = models.ForeignKey( -->
+// <!--     User, on_delete=models.SET_NULL, null=True, related_name="authored_processings" -->
+// <!-- ) -->
+// <!-- information_channel = models.CharField(max_length=255, blank=True) -->
+// <!-- usage_channel = models.CharField(max_length=255, blank=True) -->
+// <!-- dpia_reference = models.CharField(max_length=255, blank=True) -->
+// <!-- owner = models.ForeignKey( -->
+// <!--     Entity, on_delete=models.SET_NULL, null=True, related_name="owned_processings" -->
+// <!-- ) -->
+// <!-- associated_controls = models.ManyToManyField( -->
+// <!--     AppliedControl, blank=True, related_name="processings" -->
+// <!-- ) -->
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),

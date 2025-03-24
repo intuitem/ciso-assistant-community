@@ -11,9 +11,84 @@ class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
         abstract = True
 
 
+class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
+    STATUS_CHOICES = (
+        ("draft", "Draft"),
+        ("in_review", "In Review"),
+        ("approved", "Approved"),
+        ("deprecated", "Deprecated"),
+    )
+    LEGAL_BASIS_CHOICES = (
+        # Article 6(1) Legal Bases
+        ("consent", "Consent"),
+        ("contract", "Performance of a Contract"),
+        ("legal_obligation", "Compliance with a Legal Obligation"),
+        ("vital_interests", "Protection of Vital Interests"),
+        ("public_interest", "Performance of a Task in the Public Interest"),
+        ("legitimate_interests", "Legitimate Interests"),
+        # Special Category Processing - Article 9(2)
+        ("explicit_consent", "Explicit Consent for Special Categories"),
+        ("employment_social_security", "Employment and Social Security Law"),
+        (
+            "vital_interests_incapacity",
+            "Vital Interests (Subject Physically/Legally Incapable)",
+        ),
+        ("nonprofit_organization", "Processing by Nonprofit Organization"),
+        ("public_data", "Data Manifestly Made Public by the Data Subject"),
+        ("legal_claims", "Establishment, Exercise or Defense of Legal Claims"),
+        ("substantial_public_interest", "Substantial Public Interest"),
+        ("preventive_medicine", "Preventive or Occupational Medicine"),
+        ("public_health", "Public Health"),
+        ("archiving_research", "Archiving, Research or Statistical Purposes"),
+        # Additional GDPR Bases
+        ("child_consent", "Child's Consent with Parental Authorization"),
+        ("data_transfer_adequacy", "Transfer Based on Adequacy Decision"),
+        ("data_transfer_safeguards", "Transfer Subject to Appropriate Safeguards"),
+        ("data_transfer_binding_rules", "Transfer Subject to Binding Corporate Rules"),
+        (
+            "data_transfer_derogation",
+            "Transfer Based on Derogation for Specific Situations",
+        ),
+        # Common Combined Bases
+        ("consent_and_contract", "Consent and Contract"),
+        ("contract_and_legitimate_interests", "Contract and Legitimate Interests"),
+        # Other
+        ("not_applicable", "Not Applicable"),
+        ("other", "Other Legal Basis (Specify in Description)"),
+    )
+
+    ref_id = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+    author = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
+    )
+    legal_basis = models.CharField(
+        max_length=255, choices=LEGAL_BASIS_CHOICES, blank=True
+    )
+    information_channel = models.CharField(max_length=255, blank=True)
+    usage_channel = models.CharField(max_length=255, blank=True)
+    dpia_required = models.BooleanField(default=False, blank=True)
+    dpia_reference = models.CharField(max_length=255, blank=True)
+    has_sensitive_personal_data = models.BooleanField(default=False)
+    owner = models.ForeignKey(
+        Entity, on_delete=models.SET_NULL, null=True, related_name="owned_processings"
+    )
+    associated_controls = models.ManyToManyField(
+        AppliedControl, blank=True, related_name="processings"
+    )
+
+    def update_sensitive_data_flag(self):
+        """Update the has_sensitive_personal_data flag based on associated personal data"""
+        has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
+
+        if has_sensitive != self.has_sensitive_personal_data:
+            self.has_sensitive_personal_data = has_sensitive
+            self.save(update_fields=["has_sensitive_personal_data"])
+
+
 class Purpose(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
-        "Processing", on_delete=models.CASCADE, related_name="purposes"
+        Processing, on_delete=models.CASCADE, related_name="purposes"
     )
 
     def save(self, *args, **kwargs):
@@ -100,7 +175,7 @@ class PersonalData(NameDescriptionFolderMixin):
     )
 
     processing = models.ForeignKey(
-        "Processing", on_delete=models.CASCADE, related_name="personal_data"
+        Processing, on_delete=models.CASCADE, related_name="personal_data"
     )
     category = models.CharField(max_length=255, choices=PERSONAL_DATA_CHOICES)
     retention = models.CharField(max_length=255, blank=True)
@@ -121,7 +196,7 @@ class PersonalData(NameDescriptionFolderMixin):
 
 class DataSubject(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
-        "Processing", on_delete=models.CASCADE, related_name="data_subjects"
+        Processing, on_delete=models.CASCADE, related_name="data_subjects"
     )
     category = models.CharField(max_length=255)
 
@@ -132,7 +207,7 @@ class DataSubject(NameDescriptionFolderMixin):
 
 class DataRecipient(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
-        "Processing", on_delete=models.CASCADE, related_name="data_recipients"
+        Processing, on_delete=models.CASCADE, related_name="data_recipients"
     )
     category = models.CharField(max_length=255)
 
@@ -143,7 +218,7 @@ class DataRecipient(NameDescriptionFolderMixin):
 
 class DataContractor(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
-        "Processing", on_delete=models.CASCADE, related_name="contractors_involved"
+        Processing, on_delete=models.CASCADE, related_name="contractors_involved"
     )
     relationship_type = models.CharField(max_length=255)
     country = models.CharField(max_length=100)
@@ -156,7 +231,7 @@ class DataContractor(NameDescriptionFolderMixin):
 
 class DataTransfer(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
-        "Processing", on_delete=models.CASCADE, related_name="data_transfers"
+        Processing, on_delete=models.CASCADE, related_name="data_transfers"
     )
     country = models.CharField(max_length=100)
     legal_basis = models.CharField(max_length=255)
@@ -166,38 +241,3 @@ class DataTransfer(NameDescriptionFolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
-
-
-class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
-    STATUS_CHOICES = (
-        ("draft", "Draft"),
-        ("in_review", "In Review"),
-        ("approved", "Approved"),
-        ("deprecated", "Deprecated"),
-    )
-
-    ref_id = models.CharField(max_length=100, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
-    author = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
-    )
-    legal_basis = models.CharField(max_length=255, blank=True)
-    information_channel = models.CharField(max_length=255, blank=True)
-    usage_channel = models.CharField(max_length=255, blank=True)
-    dpia_required = models.BooleanField(default=False, blank=True)
-    dpia_reference = models.CharField(max_length=255, blank=True)
-    has_sensitive_personal_data = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        Entity, on_delete=models.SET_NULL, null=True, related_name="owned_processings"
-    )
-    associated_controls = models.ManyToManyField(
-        AppliedControl, blank=True, related_name="processings"
-    )
-
-    def update_sensitive_data_flag(self):
-        """Update the has_sensitive_personal_data flag based on associated personal data"""
-        has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
-
-        if has_sensitive != self.has_sensitive_personal_data:
-            self.has_sensitive_personal_data = has_sensitive
-            self.save(update_fields=["has_sensitive_personal_data"])

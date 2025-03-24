@@ -87,3 +87,11 @@ class ProcessingViewSet(BaseModelViewSet):
     """
 
     model = Processing
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Processing.STATUS_CHOICES))
+
+    @action(detail=False, name="Get legal basis choices")
+    def legal_basis(self, request):
+        return Response(dict(Processing.LEGAL_BASIS_CHOICES))
