@@ -1,14 +1,7 @@
 <script lang="ts">
-	import { Orientation, Scale, TopoJSONMap } from '@unovis/ts';
+	import { Orientation, Scale, TopoJSONMap, MapProjection } from '@unovis/ts';
 	import { WorldMapTopoJSON } from '@unovis/ts/maps';
-	import {
-		VisSingleContainer,
-		VisTopoJSONMap,
-		VisTooltip,
-		VisAxis,
-		VisXYContainer,
-		VisStackedBar
-	} from '@unovis/svelte';
+	import { VisSingleContainer, VisTopoJSONMap, VisTooltip } from '@unovis/svelte';
 	export let data;
 
 	const palette = ['#E6B236', '#006E8D'];
@@ -17,15 +10,20 @@
 	// scale functions
 
 	const tooltipTriggers = {
-		[TopoJSONMap.selectors.feature]: (d) => `${d.properties.name}: ${d.data ? d.data : 'no data'}`
+		[TopoJSONMap.selectors.feature]: (d) =>
+			`${d.properties.name}: ${d.data.count ? d.data.count : 'no data'}`
 	};
 </script>
 
 <div class="topojson-map">
 	<!-- year slider -->
 	<!-- topojson map -->
-	<VisSingleContainer data={mapData} height={550} duration={0}>
-		<VisTopoJSONMap topojson={WorldMapTopoJSON} disableZoom />
+	<VisSingleContainer data={mapData} height={600} duration={0}>
+		<VisTopoJSONMap
+			topojson={WorldMapTopoJSON}
+			mapFitToPoints
+			projection={MapProjection.EqualEarth()}
+		/>
 		<VisTooltip triggers={tooltipTriggers} />
 	</VisSingleContainer>
 </div>
