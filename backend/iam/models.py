@@ -804,15 +804,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         permissions = defaultdict(set)
         for ra in cls.get_role_assignments(principal):
+            ra_permissions = set(
+                ra.role.permissions.all().values_list("codename", flat=True)
+            )
             for folder in ra.perimeter_folders.all():
-                permissions[str(folder.id)] |= set(
-                    ra.role.permissions.all().values_list("codename", flat=True)
-                )
+                permissions[str(folder.id)] |= ra_permissions
                 if recursive and ra.is_recursive:
                     for f in folder.get_sub_folders():
-                        permissions[str(f.id)] |= set(
-                            ra.role.permissions.all().values_list("codename", flat=True)
-                        )
+                        permissions[str(f.id)] |= ra_permissions
         return permissions
 
 
