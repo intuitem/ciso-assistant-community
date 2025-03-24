@@ -29,6 +29,10 @@
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
+	import DataSubjectForm from './ModelForm/DataSubjectForm.svelte';
+	import DataRecipientForm from './ModelForm/DataRecipientForm.svelte';
+	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
+	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -318,6 +322,14 @@
 		<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'personal-data'}
 		<PersonalDataForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-subjects'}
+		<DataSubjectForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-recipients'}
+		<DataRecipientForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-contractors'}
+		<DataContractorForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-transfers'}
+		<DataTransferForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'ebios-rm'}
 		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'feared-events'}
