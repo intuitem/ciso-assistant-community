@@ -23,6 +23,14 @@
 />
 <AutocompleteSelect
 	{form}
+	field="category"
+	options={model.selectOptions['category']}
+	cacheLock={cacheLocks['category']}
+	bind:cachedValue={formDataCache['category']}
+	label={m.category()}
+/>
+<AutocompleteSelect
+	{form}
 	field="processing"
 	optionsEndpoint="processings"
 	cacheLock={cacheLocks['processing']}

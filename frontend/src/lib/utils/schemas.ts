@@ -443,6 +443,7 @@ export const dataSubjectSchema = z.object({
 export const dataRecipientSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
+	category: z.string(),
 	processing: z.string()
 });
 export const dataContractorSchema = z.object({

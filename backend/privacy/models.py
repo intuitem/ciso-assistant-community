@@ -225,10 +225,49 @@ class DataSubject(NameDescriptionFolderMixin):
 
 
 class DataRecipient(NameDescriptionFolderMixin):
+    CATEGORY_CHOICES = (
+        # Internal Recipients
+        ("internal_team", "Internal Team/Department"),
+        ("employee", "Employee"),
+        ("subsidiary", "Subsidiary Company"),
+        ("parent_company", "Parent Company"),
+        ("affiliated_entity", "Affiliated Entity"),
+        # External Service Providers
+        ("service_provider", "Service Provider"),
+        ("data_processor", "Data Processor"),
+        ("cloud_provider", "Cloud Service Provider"),
+        ("it_provider", "IT Service Provider"),
+        ("marketing_agency", "Marketing Agency"),
+        ("payment_processor", "Payment Processor"),
+        ("analytics_provider", "Analytics Provider"),
+        # Business Partners
+        ("business_partner", "Business Partner"),
+        ("distributor", "Distributor"),
+        ("reseller", "Reseller"),
+        ("supplier", "Supplier"),
+        ("contractor", "Contractor"),
+        # Professional Services
+        ("legal_advisor", "Legal Advisor"),
+        ("accountant", "Accountant"),
+        ("consultant", "Consultant"),
+        ("auditor", "Auditor"),
+        # Authorities
+        ("regulatory_authority", "Regulatory Authority"),
+        ("tax_authority", "Tax Authority"),
+        ("law_enforcement", "Law Enforcement"),
+        ("government_entity", "Government Entity"),
+        ("court", "Court"),
+        # Others
+        ("joint_controller", "Joint Controller"),
+        ("individual_recipient", "Individual Recipient"),
+        ("public", "Public Disclosure"),
+        ("other", "Other Recipient Category"),
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="data_recipients"
     )
-    category = models.CharField(max_length=255)
+    category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder

@@ -685,7 +685,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataRecipients',
 		verboseName: 'data recipient',
 		verboseNamePlural: 'data recipients',
-		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }]
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
+		selectFields: [{ field: 'category' }]
 	},
 	'data-contractors': {
 		endpointUrl: 'privacy/data-contractors',
