@@ -293,7 +293,14 @@ export const navData = {
 				{
 					name: 'processingsRegister',
 					fa_icon: 'fa-solid fa-clipboard-list',
-					href: '/processings'
+					href: '/processings',
+					permissions: ['view_processing']
+				},
+				{
+					name: 'purposes',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/purposes',
+					permissions: ['view_purpose']
 				}
 			]
 		},

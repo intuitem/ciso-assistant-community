@@ -794,12 +794,12 @@ export const listViewFields = {
 		body: ['email', 'entity', 'role']
 	},
 	processings: {
-		head: ['name', 'description'],
-		body: ['name', 'description']
+		head: ['name', 'description', 'folder'],
+		body: ['name', 'description', 'folder']
 	},
 	purposes: {
-		head: ['name', 'description'],
-		body: ['name', 'description']
+		head: ['name', 'description', 'processing'],
+		body: ['name', 'description', 'processing']
 	},
 	'personal-data': {
 		head: ['name', 'description', 'category', 'isSensitive', 'deletionPolicy', 'retentionPolicy'],
