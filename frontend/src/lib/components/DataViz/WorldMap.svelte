@@ -19,15 +19,12 @@
 	<!-- year slider -->
 	<!-- topojson map -->
 	<VisSingleContainer data={mapData} height={600} duration={0}>
-		<VisTopoJSONMap
-			topojson={WorldMapTopoJSON}
-			mapFitToPoints
-			projection={MapProjection.EqualEarth()}
-		/>
+		<VisTopoJSONMap topojson={WorldMapTopoJSON} />
 		<VisTooltip triggers={tooltipTriggers} />
 	</VisSingleContainer>
 </div>
 
+<!-- projection={MapProjection.EqualEarth()} -->
 <style>
 	.topojson-map,
 	.year-slider {
