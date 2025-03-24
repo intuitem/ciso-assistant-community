@@ -19,7 +19,7 @@
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
-
+		const filteredValues = values.filter((item) => item.value > 0);
 		// specify chart configuration item and data
 		let option = {
 			tooltip: {
@@ -100,7 +100,7 @@
 					labelLine: {
 						show: false
 					},
-					data: values,
+					data: filteredValues,
 					color: colors
 				}
 			]
