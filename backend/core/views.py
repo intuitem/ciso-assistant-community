@@ -2393,7 +2393,12 @@ class FolderViewSet(BaseModelViewSet):
         instance = self.get_object()
 
         if instance.content_type == "GL":
-            return Response({"has_out_of_scope_objects": []})
+            return Response(
+                {
+                    "has_out_of_scope_objects": [],
+                    "out_of_scope_objects": {},
+                }
+            )
 
         valid_folder_ids = set(
             Folder.objects.filter(
@@ -2405,35 +2410,25 @@ class FolderViewSet(BaseModelViewSet):
         out_of_scope_types = []
         out_of_scope_objects = {}
 
-        excluded_types = ["framework", "riskmatrix", "loadedlibrary"]
-
-        folder_relationships = {
-            "riskscenario": "risk_assessment__perimeter__folder__id__in",
-            "requirementassessment": "compliance_assessment__perimeter__folder__id__in",
-            "fearedevent": "ebios_rm_study__folder__id__in",
-            "roto": "ebios_rm_study__folder__id__in",
-            "operationalscenario": "ebios_rm_study__folder__id__in",
-            "stakeholder": "ebios_rm_study__folder__id__in",
-            "strategicscenario": "ebios_rm_study__folder__id__in",
-            "attackpath": "ebios_rm_study__folder__id__in",
-            "loadedlibrary": "folder__id__in",
-            "riskassessment": "perimeter__folder__id__in",
-            "complianceassessment": "perimeter__folder__id__in",
-            "framework": "folder__id__in",
-        }
-
         for model_name, queryset in objects.items():
-            if model_name in excluded_types:
+            model = queryset.model
+            folder_filter = None
+
+            if "folder" in [f.name for f in model._meta.get_fields()]:
+                folder_filter = Q(folder__id__in=valid_folder_ids)
+            if "perimeter" in [f.name for f in model._meta.get_fields()]:
+                folder_filter = Q(perimeter__id__in=valid_folder_ids)
+
+            if folder_filter is None:
                 continue
 
-            folder_path = folder_relationships.get(model_name, "folder__id__in")
-            out_of_scope_qs = queryset.exclude(**{folder_path: valid_folder_ids})
+            out_of_scope_qs = queryset.exclude(folder_filter).distinct()
             if out_of_scope_qs.exists():
                 out_of_scope_types.append(model_name)
                 out_of_scope_objects[model_name] = [
                     {
                         "id": obj.id,
-                        "name": obj.name,
+                        "name": getattr(obj, "name", None),
                         "description": getattr(obj, "description", None),
                     }
                     for obj in out_of_scope_qs
@@ -2450,7 +2445,6 @@ class FolderViewSet(BaseModelViewSet):
     def export(self, request, pk):
         include_attachments = True
         instance = self.get_object()
-
         logger.info(
             "Starting domain export",
             domain_id=instance.id,
