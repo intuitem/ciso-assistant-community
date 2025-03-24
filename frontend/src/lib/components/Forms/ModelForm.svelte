@@ -28,6 +28,7 @@
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
+	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -314,7 +315,9 @@
 	{:else if URLModel === 'processings'}
 		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'purposes'}
-		<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'personal-data'}
+		<PersonalDataForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'ebios-rm'}
 		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'feared-events'}

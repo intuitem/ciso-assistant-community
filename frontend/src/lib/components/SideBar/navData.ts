@@ -266,6 +266,12 @@ export const navData = {
 					permissions: ['view_processing']
 				},
 				{
+					name: 'personalData',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/personal-data',
+					permissions: ['view_personaldata']
+				},
+				{
 					name: 'purposes',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/purposes',

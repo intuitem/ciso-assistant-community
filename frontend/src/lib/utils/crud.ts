@@ -638,9 +638,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'processing', urlModel: 'purposes' },
-			{ field: 'processing', urlModel: 'personal-data' },
+			{ field: 'processing', urlModel: 'personal-data', endpointUrl: 'privacy/personal-data' },
 			{ field: 'processing', urlModel: 'data-subjects' },
+			{ field: 'processing', urlModel: 'purposes' },
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' }
@@ -652,7 +652,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'purpose',
 		localNamePlural: 'purposes',
 		verboseName: 'purpose',
-		verboseNamePlural: 'purposes'
+		verboseNamePlural: 'purposes',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }]
 	},
 	'personal-data': {
 		endpointUrl: 'privacy/personal-data',
@@ -661,7 +662,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'personalData',
 		verboseName: 'personal data',
 		verboseNamePlural: 'personal data',
-		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }]
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }
+		],
+		selectFields: [{ field: 'category' }]
 	},
 	'data-subjects': {
 		endpointUrl: 'privacy/data-subjects',

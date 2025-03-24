@@ -3,6 +3,12 @@ import { loadDetail } from '$lib/utils/load';
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 
+import { fail, type Actions } from '@sveltejs/kit';
+import {
+	nestedDeleteFormAction,
+	nestedWriteFormAction,
+	handleErrorResponse
+} from '$lib/utils/actions';
 export const load: PageServerLoad = async (event) => {
 	// Keep your existing loadDetail logic
 	const detailData = await loadDetail({
@@ -21,4 +27,10 @@ export const load: PageServerLoad = async (event) => {
 		...detailData,
 		processing_metrics: {}
 	};
+};
+export const actions: Actions = {
+	delete: async (event) => {
+		console.log('delete');
+		return nestedDeleteFormAction({ event });
+	}
 };

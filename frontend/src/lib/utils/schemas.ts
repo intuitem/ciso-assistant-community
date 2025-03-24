@@ -431,6 +431,13 @@ export const purposeSchema = z.object({
 	processing: z.string()
 });
 
+export const personalDataSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	category: z.string(),
+	processing: z.string()
+});
+
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
@@ -581,6 +588,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'filtering-labels': FilteringLabelSchema,
 	processings: processingSchema,
 	purposes: purposeSchema,
+	'personal-data': personalDataSchema,
 	'ebios-rm': ebiosRMSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
