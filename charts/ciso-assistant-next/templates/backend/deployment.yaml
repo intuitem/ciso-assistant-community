@@ -125,13 +125,8 @@ spec:
         - name: tmp-data
           mountPath: /tmp
         {{- if and (eq .Values.backend.config.databaseType "sqlite") .Values.backend.persistence.sqlite.enabled }}
-        {{- if not .Values.backend.persistence.existingClaim }}
         - name: sqlite-data
           mountPath: /ciso/db
-        {{- else }}
-        - name: localstorage-data
-          mountPath: /ciso/db
-        {{- end }}
         {{- end }}
         {{- if .Values.backend.persistence.localStorage.enabled }}
         - name: localstorage-data
@@ -254,13 +249,8 @@ spec:
         - name: tmp-data
           mountPath: /tmp
         {{- if .Values.backend.persistence.sqlite.enabled }}
-        {{- if not .Values.backend.persistence.existingClaim }}
         - name: sqlite-data
           mountPath: /ciso/db
-        {{- else }}
-        - name: localstorage-data
-          mountPath: /ciso/db
-        {{- end }}
         {{- end }}
         {{- if .Values.backend.huey.resources }}
         resources:
@@ -282,17 +272,21 @@ spec:
       - name: tmp-data
         emptyDir:
           sizeLimit: 256Mi
-      {{- if and .Values.backend.persistence.sqlite.enabled (not .Values.backend.persistence.existingClaim) }}
+      {{- if and .Values.backend.persistence.sqlite.enabled }}
       - name: sqlite-data
         persistentVolumeClaim:
+          {{- if not .Values.backend.persistence.sqlite.existingClaim }}
           claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
+          {{- else }}
+          claimName: {{ .Values.backend.persistence.sqlite.existingClaim }}
+          {{- end }}
       {{- end }}
       {{- if .Values.backend.persistence.localStorage.enabled }}
       - name: localstorage-data
         persistentVolumeClaim:
-          {{- if not .Values.backend.persistence.existingClaim }}
-            claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+          {{- if not .Values.backend.persistence.localStorage.existingClaim }}
+          claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
           {{- else }}
-            claimName: {{ .Values.backend.persistence.existingClaim }}
+          claimName: {{ .Values.backend.persistence.localStorage.existingClaim }}
           {{- end }}
       {{- end }}
