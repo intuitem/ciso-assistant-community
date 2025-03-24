@@ -229,6 +229,15 @@
 	});
 
 	function handleSelectChange() {
+		if (allowUserOptions && selectedValues.length > 0) {
+			for (const val of selectedValues) {
+				if (!options.some((opt) => opt.value === val)) {
+					const newOption: Option = { label: val, value: val };
+					options = [...options, newOption];
+				}
+			}
+		}
+
 		dispatch('change', $value);
 		dispatch('cache', selected);
 	}
