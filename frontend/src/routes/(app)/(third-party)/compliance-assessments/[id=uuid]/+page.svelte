@@ -40,6 +40,7 @@
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	$: tree = data.tree;
 
@@ -47,12 +48,19 @@
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: model.name,
+		domain: data.compliance_assessment.folder.id
+	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
-	const canEditRequirementAssessment: boolean = Object.hasOwn(
-		user.permissions,
-		`change_${requirementAssessmentModel.name}`
-	);
+	const canEditRequirementAssessment: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: requirementAssessmentModel.name,
+		domain: data.compliance_assessment.folder.id
+	});
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
