@@ -120,6 +120,8 @@ class ProcessingWriteSerializer(BaseModelSerializer):
 
 
 class ProcessingReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
     class Meta:
         model = Processing
         fields = "__all__"

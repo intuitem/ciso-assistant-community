@@ -435,6 +435,9 @@ export const personalDataSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
+	retention: z.string(),
+	deletion_policy: z.string(),
+	is_sensitive: z.boolean().optional(),
 	processing: z.string()
 });
 

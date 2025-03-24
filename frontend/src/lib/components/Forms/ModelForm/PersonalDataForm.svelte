@@ -7,6 +7,8 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 
+	import Checkbox from '../Checkbox.svelte';
+
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
@@ -31,6 +33,22 @@
 	bind:cachedValue={formDataCache['category']}
 	label={m.category()}
 />
+
+<TextField
+	{form}
+	field="retention"
+	label={m.retention()}
+	cacheLock={cacheLocks['retention']}
+	bind:cachedValue={formDataCache['retention']}
+/>
+<AutocompleteSelect
+	{form}
+	field="deletion_policy"
+	options={model.selectOptions['deletion_policy']}
+	cacheLock={cacheLocks['deletion_policy']}
+	bind:cachedValue={formDataCache['deletion_policy']}
+	label={m.deletionPolicy()}
+/>
 <AutocompleteSelect
 	{form}
 	field="processing"
@@ -40,3 +58,16 @@
 	label={m.processing()}
 	hidden={initialData.processing}
 />
+
+<Checkbox
+	{form}
+	field="is_sensitive"
+	label={m.isSensitive()}
+	cacheLock={cacheLocks['is_sensitive']}
+	bind:cachedValue={formDataCache['is_sensitive']}
+/>
+<!-- retention = models.CharField(max_length=255, blank=True) -->
+<!-- deletion_policy = models.CharField( -->
+<!--     max_length=50, choices=DELETION_POLICY_CHOICES, blank=True -->
+<!-- ) -->
+<!-- is_sensitive = models.BooleanField(default=False) -->

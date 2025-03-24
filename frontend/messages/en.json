@@ -943,6 +943,8 @@
 	"dataContractors": "Data Contractors",
 	"deletionPolicy": "Deletion Policy",
 	"retentionPolicy": "Retention Policy",
+	"retention": "Retention",
+	"isSensitive": "Is sensitive",
 	"legalBasis": "Legal Basis",
 	"documentationLink": "Documentation Link",
 	"ebiosWs1": "Workshop 1: Framing and Security Foundation",
