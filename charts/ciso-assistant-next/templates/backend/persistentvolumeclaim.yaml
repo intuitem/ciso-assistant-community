@@ -1,4 +1,4 @@
-{{- if .Values.backend.persistence.sqlite.enabled }}
+{{- if and .Values.backend.persistence.sqlite.enabled (not .Values.backend.persistence.sqlite.existingClaim) }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -17,7 +17,7 @@ spec:
   {{- end }}
 {{- end }}
 ---
-{{- if .Values.backend.persistence.localStorage.enabled }}
+{{- if and .Values.backend.persistence.localStorage.enabled (not .Values.backend.persistence.localStorage.existingClaim) }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
