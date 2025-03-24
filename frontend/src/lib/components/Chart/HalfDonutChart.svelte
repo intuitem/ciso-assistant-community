@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import { safeTranslate } from '$lib/utils/i18n';
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
 	export let title = '';
 	export let name: string;
 
+	import { level } from '$paraglide/messages';
 	interface riskChartData {
 		name: string;
 		value: number;
@@ -16,6 +18,11 @@
 	export let values: riskChartData[]; // Set the types for these variables later on
 	export let colors: string[] = [];
 
+	for (const index in values) {
+		if (values[index].name) {
+			values[index].name = safeTranslate(values[index].name);
+		}
+	}
 	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -31,7 +38,7 @@
 			},
 			series: [
 				{
-					name: 'risk level',
+					name: level(),
 					type: 'pie',
 					radius: ['40%', '70%'],
 					center: ['50%', '70%'],
