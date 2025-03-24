@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import * as m from '$paraglide/messages';
+	import { IconDiamond } from '@tabler/icons-svelte';
 	export let data: PageData;
 </script>
 
@@ -16,5 +17,14 @@
 		>
 	</div>
 
-	<div slot="widgets" class="h-full flex flex-col space-y-4"></div>
+	<div slot="widgets" class="h-full flex flex-col space-y-4 bg-slate-100">
+		<!-- <div class="grid grid-cols-2 p-4 gap-4"> -->
+		<!-- 	<div class="bg-white rounded-xl min-h-40"> -->
+		<!-- 		<IconDiamond size={48} stroke={1} /> 12 personal data -->
+		<!-- 	</div> -->
+		<!-- 	<div class="bg-white rounded-xl"> -->
+		<!-- 		<IconDiamond size={48} stroke={1} /> 8 marked as sensitive -->
+		<!-- 	</div> -->
+		<!-- </div> -->
+	</div>
 </DetailView>

@@ -460,7 +460,7 @@ export const dataTransferSchema = z.object({
 	country: z.string(),
 	documentation_link: z.string().optional(),
 	legal_basis: z.string(),
-	guarantees: z.string().optional().nullable(),
+	guarantees: z.string().optional(),
 	processing: z.string()
 });
 
