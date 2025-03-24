@@ -172,6 +172,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="compliance-assessments"
+	optionsExtraFields={[['folder', 'str']]}
 	field="compliance_assessment"
 	cacheLock={cacheLocks['compliance_assessment']}
 	bind:cachedValue={formDataCache['compliance_assessment']}
