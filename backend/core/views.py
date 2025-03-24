@@ -419,7 +419,7 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder", "provider", "risk_scenarios"]
+    filterset_fields = ["folder", "provider", "risk_scenarios", "filtering_labels"]
     search_fields = ["name", "provider", "description"]
 
     def list(self, request, *args, **kwargs):
@@ -658,6 +658,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "csf_function",
         "provider",
         "findings",
+        "filtering_labels",
     ]
     search_fields = ["name", "description", "provider"]
 
@@ -1287,6 +1288,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "reference_control": ["exact"],
             "effort": ["exact"],
             "cost": ["exact"],
+            "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
             "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],

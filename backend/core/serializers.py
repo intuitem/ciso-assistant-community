@@ -366,6 +366,7 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 class ReferenceControlReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = ReferenceControl
@@ -421,6 +422,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
 class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = Threat
@@ -555,6 +557,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     cost = serializers.FloatField()
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
