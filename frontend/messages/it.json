@@ -1171,5 +1171,10 @@
 	"addSecurityException": "Aggiungi eccezione",
 	"expirationDate": "Data di scadenza",
 	"filterBy": "Filtra per",
-	"selectEvidence": "Seleziona evidenza"
+	"selectEvidence": "Seleziona evidenza",
+	"finding": "Risultato",
+	"findings": "Risultati",
+	"associatedFindings": "Risultati associati",
+	"findings_count": "Numero di risultati",
+	"addFinding": "Aggiungi risultato"
 }

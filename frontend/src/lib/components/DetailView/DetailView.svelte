@@ -243,139 +243,157 @@
 			{/if}
 		</div>
 	{/if}
-	<div class="card shadow-lg bg-white flex flex-row p-4 justify-between">
-		<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-sm w-3/4">
-			<dl class="-my-3 divide-y divide-gray-100 text-sm">
-				{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
-					<div class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
-						<dt class="font-medium text-gray-900" data-testid="{key.replace('_', '-')}-field-title">
-							{safeTranslate(key)}
-						</dt>
-						<dd class="text-gray-700 sm:col-span-2">
-							<ul class="">
-								<li
-									class="list-none"
-									data-testid={!(value instanceof Array)
-										? key.replace('_', '-') + '-field-value'
-										: null}
-								>
-									{#if value !== null && value !== undefined && value !== ''}
-										{#if key === 'library'}
-											{@const itemHref = `/loaded-libraries/${value.id}`}
-											<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-												>{value.name}</Anchor
-											>
-										{:else if key === 'severity'}
-											<!-- We must add translations for the following severity levels -->
-											<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
-											{@const stringifiedSeverity =
-												value < 0
-													? '--'
-													: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
-														m.undefined())}
-											{stringifiedSeverity}
-										{:else if key === 'children_assets'}
-											{#if Object.keys(value).length > 0}
-												<ul class="inline-flex flex-wrap space-x-4">
-													{#each value as val}
-														<li data-testid={key.replace('_', '-') + '-field-value'}>
-															{#if val.str && val.id}
-																{@const itemHref = `/${
-																	URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																		(item) => item.field === key
-																	)?.urlModel
-																}/${val.id}`}
-																<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
-																	{truncateString(val.str)}</Anchor
-																>
-															{:else if val.str}
-																{safeTranslate(val.str)}
-															{:else}
-																{value}
-															{/if}
-														</li>
-													{/each}
-												</ul>
-											{:else}
-												--
-											{/if}
-										{:else if Array.isArray(value)}
-											{#if Object.keys(value).length > 0}
-												<ul>
-													{#each value as val}
-														<li data-testid={key.replace('_', '-') + '-field-value'}>
-															{#if val.str && val.id}
-																{@const itemHref = `/${
-																	URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																		(item) => item.field === key
-																	)?.urlModel
-																}/${val.id}`}
-																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																	>{val.str}</Anchor
-																>
-															{:else if val.str}
-																{safeTranslate(val.str)}
-															{:else}
-																{value}
-															{/if}
-														</li>
-													{/each}
-												</ul>
-											{:else}
-												--
-											{/if}
-										{:else if value.id && !value.hexcolor}
-											{@const itemHref = `/${
-												URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-													(item) => item.field === key
-												)?.urlModel
-											}/${value.id}`}
-											{#if key === 'ro_to_couple'}
+
+	<!-- Main content area - modified to use flex layout -->
+	<div class="card shadow-lg bg-white p-4">
+		<div class="flex flex-row flex-wrap gap-4">
+			<!-- Left side - Details (now takes half width) -->
+			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-sm flex-1 min-w-[300px]">
+				<dl class="-my-3 divide-y divide-gray-100 text-sm">
+					{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
+						<div class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
+							<dt
+								class="font-medium text-gray-900"
+								data-testid="{key.replace('_', '-')}-field-title"
+							>
+								{safeTranslate(key)}
+							</dt>
+							<dd class="text-gray-700 sm:col-span-2">
+								<ul class="">
+									<li
+										class="list-none"
+										data-testid={!(value instanceof Array)
+											? key.replace('_', '-') + '-field-value'
+											: null}
+									>
+										{#if value !== null && value !== undefined && value !== ''}
+											{#if key === 'library'}
+												{@const itemHref = `/loaded-libraries/${value.id}`}
 												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-													>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
-														'-'
-													)[1]}</Anchor
+													>{value.name}</Anchor
 												>
+											{:else if key === 'severity'}
+												<!-- We must add translations for the following severity levels -->
+												<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
+												{@const stringifiedSeverity =
+													value < 0
+														? '--'
+														: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
+															m.undefined())}
+												{stringifiedSeverity}
+											{:else if key === 'children_assets'}
+												{#if Object.keys(value).length > 0}
+													<ul class="inline-flex flex-wrap space-x-4">
+														{#each value as val}
+															<li data-testid={key.replace('_', '-') + '-field-value'}>
+																{#if val.str && val.id}
+																	{@const itemHref = `/${
+																		URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+																			(item) => item.field === key
+																		)?.urlModel
+																	}/${val.id}`}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
+																		{truncateString(val.str)}</Anchor
+																	>
+																{:else if val.str}
+																	{safeTranslate(val.str)}
+																{:else}
+																	{value}
+																{/if}
+															</li>
+														{/each}
+													</ul>
+												{:else}
+													--
+												{/if}
+											{:else if Array.isArray(value)}
+												{#if Object.keys(value).length > 0}
+													<ul>
+														{#each value as val}
+															<li data-testid={key.replace('_', '-') + '-field-value'}>
+																{#if val.str && val.id}
+																	{@const itemHref = `/${
+																		URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+																			(item) => item.field === key
+																		)?.urlModel
+																	}/${val.id}`}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{val.str}</Anchor
+																	>
+																{:else if val.str}
+																	{safeTranslate(val.str)}
+																{:else}
+																	{value}
+																{/if}
+															</li>
+														{/each}
+													</ul>
+												{:else}
+													--
+												{/if}
+											{:else if value.id && !value.hexcolor}
+												{@const itemHref = `/${
+													URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+														(item) => item.field === key
+													)?.urlModel
+												}/${value.id}`}
+												{#if key === 'ro_to_couple'}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+															'-'
+														)[1]}</Anchor
+													>
+												{:else}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{value.str}</Anchor
+													>
+												{/if}
+												<!-- Shortcut before DetailView refactoring -->
+											{:else if value === 'P1'}
+												<li class="fa-solid fa-flag text-red-500"></li>
+												{m.p1()}
+											{:else if value === 'P2'}
+												<li class="fa-solid fa-flag text-orange-500"></li>
+												{m.p2()}
+											{:else if value === 'P3'}
+												<li class="fa-solid fa-flag text-blue-500"></li>
+												{m.p3()}
+											{:else if value === 'P4'}
+												<li class="fa-solid fa-flag text-gray-500"></li>
+												{m.p4()}
+											{:else if isURL(value) && !value.startsWith('urn')}
+												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
+													>{value}</Anchor
+												>
+											{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date')}
+												{formatDateOrDateTime(value, getLocale())}
+											{:else if m[toCamelCase(value.str || value.name)]}
+												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
-												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-													>{value.str}</Anchor
-												>
+												{(value.str || value.name) ?? value}
 											{/if}
-											<!-- Shortcut before DetailView refactoring -->
-										{:else if value === 'P1'}
-											<li class="fa-solid fa-flag text-red-500"></li>
-											{m.p1()}
-										{:else if value === 'P2'}
-											<li class="fa-solid fa-flag text-orange-500"></li>
-											{m.p2()}
-										{:else if value === 'P3'}
-											<li class="fa-solid fa-flag text-blue-500"></li>
-											{m.p3()}
-										{:else if value === 'P4'}
-											<li class="fa-solid fa-flag text-gray-500"></li>
-											{m.p4()}
-										{:else if isURL(value) && !value.startsWith('urn')}
-											<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
-												>{value}</Anchor
-											>
-										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date')}
-											{formatDateOrDateTime(value, getLocale())}
-										{:else if m[toCamelCase(value.str || value.name)]}
-											{safeTranslate((value.str || value.name) ?? value)}
 										{:else}
-											{(value.str || value.name) ?? value}
+											--
 										{/if}
-									{:else}
-										--
-									{/if}
-								</li>
-							</ul>
-						</dd>
-					</div>
-				{/each}
-			</dl>
+									</li>
+								</ul>
+							</dd>
+						</div>
+					{/each}
+				</dl>
+			</div>
+
+			<!-- Right side - New widgets and metrics area -->
+			<div class="flex-1 min-w-[300px] flex flex-col">
+				<!-- New slot for widgets and metrics -->
+				<div class="h-full">
+					<slot name="widgets"></slot>
+				</div>
+			</div>
 		</div>
-		<div class="flex flex-col space-y-2 ml-4">
+
+		<!-- Bottom row for action buttons -->
+		<div class="flex flex-row justify-end mt-4 gap-2">
 			{#if mailing}
 				<button
 					class="btn variant-filled-primary h-fit"
@@ -399,66 +417,58 @@
 			{/if}
 
 			{#if data.data.state === 'Submitted' && canEditObject}
-				<div class="flex flex-col space-y-2 ml-4">
-					<button
-						on:click={(_) => {
-							modalConfirm(data.data.id, data.data.name, '?/draft');
-						}}
-						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/draft')}
-						class="btn variant-filled-primary"
-						disabled={!data.data.approver}
-					>
-						<i class="fas fa-arrow-alt-circle-left mr-2" /> {m.draft()}</button
-					>
-				</div>
+				<button
+					on:click={(_) => {
+						modalConfirm(data.data.id, data.data.name, '?/draft');
+					}}
+					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/draft')}
+					class="btn variant-filled-primary"
+					disabled={!data.data.approver}
+				>
+					<i class="fas fa-arrow-alt-circle-left mr-2" /> {m.draft()}</button
+				>
 			{/if}
 
 			{#if displayEditButton()}
 				{#if data.data.state === 'Created'}
-					<div class="flex flex-col space-y-2 ml-4">
-						<button
-							on:click={(_) => {
-								modalConfirm(data.data.id, data.data.name, '?/submit');
-							}}
-							on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
-							class="btn variant-filled-primary [&>*]:pointer-events-none"
-							disabled={!data.data.approver}
-							use:popup={popupHover}
-						>
-							<i class="fas fa-paper-plane mr-2" />
-							{m.submit()}
-						</button>
-						{#if !data.data.approver}
-							<div class="card variant-ghost-surface p-4 z-20" data-popup="popupHover">
-								<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
-								<div class="arrow variant-filled-surface" />
-							</div>
-						{/if}
-					</div>
-				{/if}
-				<div class="flex flex-col space-y-2 ml-4">
-					<Anchor
-						breadcrumbAction="push"
-						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
-						label={m.edit()}
-						class="btn variant-filled-primary h-fit"
-						><i
-							class="fa-solid fa-pen-to-square mr-2"
-							data-testid="edit-button"
-						/>{m.edit()}</Anchor
+					<button
+						on:click={(_) => {
+							modalConfirm(data.data.id, data.data.name, '?/submit');
+						}}
+						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
+						class="btn variant-filled-primary [&>*]:pointer-events-none"
+						disabled={!data.data.approver}
+						use:popup={popupHover}
 					>
-					{#if data.urlModel === 'applied-controls'}
-						<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
-						<button
-							class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
-							on:click={(_) => modalAppliedControlDuplicateForm()}
-							data-testid="duplicate-button"
-						>
-							<i class="fa-solid fa-copy mr-2"></i>
-							{m.duplicate()}</button
-						>
+						<i class="fas fa-paper-plane mr-2" />
+						{m.submit()}
+					</button>
+					{#if !data.data.approver}
+						<div class="card variant-ghost-surface p-4 z-20" data-popup="popupHover">
+							<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
+							<div class="arrow variant-filled-surface" />
+						</div>
 					{/if}
-				</div>
+				{/if}
+
+				<Anchor
+					breadcrumbAction="push"
+					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+					label={m.edit()}
+					class="btn variant-filled-primary h-fit"
+					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</Anchor
+				>
+
+				{#if data.urlModel === 'applied-controls'}
+					<button
+						class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
+						on:click={(_) => modalAppliedControlDuplicateForm()}
+						data-testid="duplicate-button"
+					>
+						<i class="fa-solid fa-copy mr-2"></i>
+						{m.duplicate()}</button
+					>
+				{/if}
 			{/if}
 			<slot name="actions" />
 		</div>

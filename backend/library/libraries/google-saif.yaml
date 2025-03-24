@@ -1,0 +1,388 @@
+urn: urn:intuitem:risk:library:google-saif
+locale: en
+ref_id: Google SAIF
+name: Google SAIF Framework
+description: Google's Secure AI Framework
+copyright: "\xA9 Google"
+version: 1
+publication_date: 2025-03-22
+provider: Google
+packager: intuitem
+objects:
+  reference_controls:
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-01
+    ref_id: GSC-01
+    name: Model plugin permissions
+    category: technical
+    description: Use least-privilege principle to minimize the number of tools that
+      a model plugin is permitted to interact with and the actions it is allowed to
+      take
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-02
+    ref_id: GSC-02
+    name: Application access management
+    category: technical
+    description: Maintain application availability in the face of resource-wasting
+      attacks
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-03
+    ref_id: GSC-03
+    name: Model plugin user control
+    category: technical
+    description: Ensure that users approve all actions by model plugins that is taken
+      on their behalf or that can modify users' data
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-04
+    ref_id: GSC-04
+    name: User consent and controls
+    category: process
+    description: Inform users of relevant AI risks with disclosures, and provide consent
+      and control experiences for use of their data in AI applications
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-05
+    ref_id: GSC-05
+    name: Red teaming
+    category: technical
+    description: Drive security and privacy improvements through self-driven adversarial
+      attacks on AI infrastructure and products
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-06
+    ref_id: GSC-06
+    name: Vulnerability management
+    category: process
+    description: "Proactively and continually test and monitor production infrastructure\
+      \ and products for security and privacy regressions\_"
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-07
+    ref_id: GSC-07
+    name: Threat detection
+    category: process
+    description: Detect and alert on internal or external attacks on AI assets, infrastructure,
+      and products
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-08
+    ref_id: GSC-08
+    name: Incident response management
+    category: process
+    description: Manage response to AI security and privacy incidents
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-09
+    ref_id: GSC-09
+    name: Privacy enhancing technologies
+    category: process
+    description: Use privacy enhancing technologies to minimize, deidentify, or restrict
+      use of PII data in training or evaluating models
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-10
+    ref_id: GSC-10
+    name: Training data management
+    category: process
+    description: Ensure that all data used to train and eval models is authorized
+      for the intended purposes
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-11
+    ref_id: GSC-11
+    name: Training data sanitization
+    category: technical
+    description: Detect and remove or remediate poisoned data in training and eval
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-12
+    ref_id: GSC-12
+    name: User data management
+    category: process
+    description: Store, process, and use all user data (e.g. prompts and logs) from
+      AI applications in compliance with user consent
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-13
+    ref_id: GSC-13
+    name: User policies and education
+    category: process
+    description: Publish easy to understand AI security and privacy policies and education
+      for users
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-14
+    ref_id: GSC-14
+    name: Internal policies and education
+    category: process
+    description: Publish comprehensive AI security and privacy policies and education
+      for your employees
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-15
+    ref_id: GSC-15
+    name: Product governance
+    category: process
+    description: "Validate that all AI models and products meet the established security\
+      \ and privacy requirements\_"
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-16
+    ref_id: GSC-16
+    name: Risk governance
+    category: process
+    description: Inventory, measure, and monitor residual risk to AI in your organization
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-17
+    ref_id: GSC-17
+    name: Adversarial training and testing
+    category: technical
+    description: Use techniques to make AI models robust to adversarial inputs (i.e.
+      prompts)
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-18
+    ref_id: GSC-18
+    name: Input validation and sanitization
+    category: technical
+    description: Block or nullify adversarial queries to AI models
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-19
+    ref_id: GSC-19
+    name: Output validation and sanitization
+    category: technical
+    description: Block, nullify, or sanitize insecure output from AI models before
+      passing it to applications, extensions or users
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-20
+    ref_id: GSC-20
+    name: Model and data inventory management
+    category: process
+    description: Ensure that all data, code, models, and transformation tools used
+      in AI applications are inventoried and tracked.
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-21
+    ref_id: GSC-21
+    name: Model and data access control
+    category: technical
+    description: Minimize internal access to models, weights, datasets, etc. in storage
+      and in production use
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-22
+    ref_id: GSC-22
+    name: Model and data integrity management
+    category: technical
+    description: Ensure that all data, models, and code used to produce AI models
+      are verifiably integrity-protected during development and deployment.
+  - urn: urn:intuitem:risk:reference_control:google-saif:gsc-23
+    ref_id: GSC-23
+    name: Secure-by-default ML tooling
+    category: process
+    description: Use secure-by-default frameworks, libraries, software systems, and
+      hardware components for AI development or deployment to protect confidentiality
+      and integrity of AI assets and outputs.
+  threats:
+  - urn: urn:intuitem:risk:threat:google-saif:dms
+    ref_id: DMS
+    name: Denial of ML Service
+  - urn: urn:intuitem:risk:threat:google-saif:iic
+    ref_id: IIC
+    name: Insecure Integrated System
+  - urn: urn:intuitem:risk:threat:google-saif:mre
+    ref_id: MRE
+    name: Model Reverse Engineering
+  - urn: urn:intuitem:risk:threat:google-saif:ra
+    ref_id: RA
+    name: Rogue Actions
+  - urn: urn:intuitem:risk:threat:google-saif:sdd
+    ref_id: SDD
+    name: Sensitive Data Disclosure
+  - urn: urn:intuitem:risk:threat:google-saif:isd
+    ref_id: ISD
+    name: Inferred Sensitive Information
+  - urn: urn:intuitem:risk:threat:google-saif:pij
+    ref_id: PIJ
+    name: Prompt Injection
+  - urn: urn:intuitem:risk:threat:google-saif:mev
+    ref_id: MEV
+    name: Model Evasion
+  - urn: urn:intuitem:risk:threat:google-saif:imo
+    ref_id: IMO
+    name: Insecure Model Output
+  - urn: urn:intuitem:risk:threat:google-saif:dp
+    ref_id: DP
+    name: Data and Model Poisoning
+  - urn: urn:intuitem:risk:threat:google-saif:utd
+    ref_id: UTD
+    name: Unauthorized Training Data
+  - urn: urn:intuitem:risk:threat:google-saif:edh
+    ref_id: EDH
+    name: Excessive Data Handling
+  - urn: urn:intuitem:risk:threat:google-saif:mst
+    ref_id: MST
+    name: Model Source Tampering
+  - urn: urn:intuitem:risk:threat:google-saif:mxf
+    ref_id: MXF
+    name: Model Exfiltration
+  - urn: urn:intuitem:risk:threat:google-saif:mdt
+    ref_id: MDT
+    name: Model Deployment Tampering
+  framework:
+    urn: urn:intuitem:risk:framework:google-saif
+    ref_id: Google SAIF
+    name: Google SAIF Framework
+    description: Google's Secure AI Framework
+    implementation_groups_definition:
+    - ref_id: CR
+      name: Creator
+      description: null
+    - ref_id: CO
+      name: Consumer
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:google-saif:2.1
+      assessable: true
+      depth: 1
+      ref_id: '2.1'
+      description: Do you have robust management of all training, tuning, or evaluation
+        data used with your models to ensure that sensitive, unauthorized, or malicious
+        data does not enter your models?
+      implementation_groups:
+      - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:utd
+      - urn:intuitem:risk:threat:google-saif:isd
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-10
+    - urn: urn:intuitem:risk:req_node:google-saif:2.2
+      assessable: true
+      depth: 1
+      ref_id: '2.2'
+      description: Are you able to detect, remove, and remediate malicious or accidental
+        changes in your training, tuning, or evaluation data?
+      implementation_groups:
+      - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-11
+      - urn:intuitem:risk:reference_control:google-saif:gsc-20
+      - urn:intuitem:risk:reference_control:google-saif:gsc-21
+      - urn:intuitem:risk:reference_control:google-saif:gsc-22
+      - urn:intuitem:risk:reference_control:google-saif:gsc-23
+    - urn: urn:intuitem:risk:req_node:google-saif:2.3
+      assessable: true
+      depth: 1
+      ref_id: '2.3'
+      description: Is any sensitive user data used in training, tuning, or evaluating
+        your AI models?
+      implementation_groups:
+      - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:sdd
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-09
+      - urn:intuitem:risk:reference_control:google-saif:gsc-12
+      - urn:intuitem:risk:reference_control:google-saif:gsc-19
+    - urn: urn:intuitem:risk:req_node:google-saif:2.4
+      assessable: true
+      depth: 1
+      ref_id: '2.4'
+      description: Do you have robust management of all user data that results from
+        your Generative AI applications to ensure that user data is stored, processed,
+        and used in accordance with user consents and user policies?
+      implementation_groups:
+      - CR
+      - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:edh
+      - urn:intuitem:risk:threat:google-saif:sdd
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-12
+    - urn: urn:intuitem:risk:req_node:google-saif:2.5
+      assessable: true
+      depth: 1
+      ref_id: '2.5'
+      description: Do you have a complete inventory of all models, datasets (for training,
+        tuning, or evaluation), and related ML artifacts (such as code)?
+      implementation_groups:
+      - CR
+      - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      - urn:intuitem:risk:threat:google-saif:mst
+      - urn:intuitem:risk:threat:google-saif:mxf
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-20
+    - urn: urn:intuitem:risk:req_node:google-saif:2.6
+      assessable: true
+      depth: 1
+      ref_id: '2.6'
+      description: Do you have robust access controls on all models, datasets, and
+        related ML artifacts to minimize, detect, and prevent unauthorized reading
+        or copying?
+      implementation_groups:
+      - CR
+      - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      - urn:intuitem:risk:threat:google-saif:mst
+      - urn:intuitem:risk:threat:google-saif:mxf
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-21
+    - urn: urn:intuitem:risk:req_node:google-saif:2.7
+      assessable: true
+      depth: 1
+      ref_id: '2.7'
+      description: Are you able to ensure that all data, models, and code used to
+        train, tune, or evaluate models cannot be tampered without detection during
+        model development and during deployment?
+      implementation_groups:
+      - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      - urn:intuitem:risk:threat:google-saif:mst
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-22
+    - urn: urn:intuitem:risk:req_node:google-saif:2.8
+      assessable: true
+      depth: 1
+      ref_id: '2.8'
+      description: Are the frameworks, libraries, software systems, and hardware components
+        used in the development and deployment of your models analyzed for and protected
+        against security vulnerabilities?
+      implementation_groups:
+      - CR
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dp
+      - urn:intuitem:risk:threat:google-saif:mst
+      - urn:intuitem:risk:threat:google-saif:mxf
+      - urn:intuitem:risk:threat:google-saif:mdt
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-23
+    - urn: urn:intuitem:risk:req_node:google-saif:2.9
+      assessable: true
+      depth: 1
+      ref_id: '2.9'
+      description: Do you protect your Generative AI applications and models against
+        large-scale malicious queries from user accounts, devices, or via APIs?
+      implementation_groups:
+      - CR
+      - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:dms
+      - urn:intuitem:risk:threat:google-saif:mre
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-03
+    - urn: urn:intuitem:risk:req_node:google-saif:2.10
+      assessable: true
+      depth: 1
+      ref_id: '2.10'
+      description: Are you using secure-by-default designs and coding frameworks in
+        applications integrated with Generative AI applications?
+      implementation_groups:
+      - CR
+      - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:iic
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-23
+    - urn: urn:intuitem:risk:req_node:google-saif:2.11
+      assessable: true
+      depth: 1
+      ref_id: '2.11'
+      description: Do you perform adversarial testing and training on models and Generative
+        AI applications to improve resistance to adversarial inputs?
+      implementation_groups:
+      - CR
+      - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:pij
+      - urn:intuitem:risk:threat:google-saif:mev
+      - urn:intuitem:risk:threat:google-saif:sdd
+      - urn:intuitem:risk:threat:google-saif:isd
+      - urn:intuitem:risk:threat:google-saif:imo
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-19
+      - urn:intuitem:risk:reference_control:google-saif:gsc-17
+    - urn: urn:intuitem:risk:req_node:google-saif:2.12
+      assessable: true
+      depth: 1
+      ref_id: '2.12'
+      description: Do you build or deploy Generative AI powered agents or tools that
+        can take actions on behalf of internal or external users?
+      implementation_groups:
+      - CR
+      - CO
+      threats:
+      - urn:intuitem:risk:threat:google-saif:pij
+      - urn:intuitem:risk:threat:google-saif:ra
+      reference_controls:
+      - urn:intuitem:risk:reference_control:google-saif:gsc-18
+      - urn:intuitem:risk:reference_control:google-saif:gsc-03
+      - urn:intuitem:risk:reference_control:google-saif:gsc-01
