@@ -31,12 +31,12 @@ spec:
               number: {{ .Values.backend.service.port }}
         path: /api/
         pathType: {{ .Values.ingress.pathType }}
-  {{- if .Values.global.tls }}
+  {{- if .Values.ingress.tls.enabled }}
   tls:
     - hosts:
       - {{ .Values.global.domain }}
-      {{- if .Values.ingress.existingSecret }}
-      secretName: {{ .Values.ingress.existingSecret }}
+      {{- if .Values.ingress.tls.existingSecret }}
+      secretName: {{ .Values.ingress.tls.existingSecret }}
       {{ else }}
       secretName: {{ include "ciso-assistant.fullname" . }}-tls
       {{- end }}

@@ -1,34 +1,33 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-
 	export let name: string;
 	export let s_label = '';
-
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
 	export let title = '';
 	export let orientation = 'vertical';
-
 	export let values: any[]; // Set the types for these variables later on
 	export let colors: string[] = [];
-
 	for (const index in values) {
 		if (values[index].localName) {
 			values[index].name = safeTranslate(values[index].localName);
 		}
 	}
-
 	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
-
+		const filteredValues = values.filter((item) => item.value > 0);
 		// specify chart configuration item and data
 		let option = {
 			tooltip: {
-				trigger: 'item'
+				trigger: 'item',
+				formatter: function (params) {
+					// Return formatted tooltip content with just the name and value
+					return `${params.data.name}: ${params.data.value}`;
+				}
 			},
 			title: {
 				text: title,
@@ -69,23 +68,46 @@
 					emphasis: {
 						label: {
 							show: true,
-							fontSize: '24',
-							fontWeight: 'bold'
+							fontSize: 20,
+							fontWeight: 'bold',
+							formatter: function (params) {
+								// Calculate the total value
+								const total =
+									params.data.value +
+									values
+										.filter((item) => item.name !== params.data.name)
+										.reduce((sum, item) => sum + item.value, 0);
+
+								// Calculate percentage
+								const percent = ((params.data.value / total) * 100).toFixed(1);
+
+								// Return formatted center label with just the name and percentage
+								return `{name|${params.data.name}}\n{value|${percent}%}`;
+							},
+							rich: {
+								name: {
+									fontSize: 16,
+									fontWeight: 'bold',
+									lineHeight: 30
+								},
+								value: {
+									fontSize: 14,
+									lineHeight: 20
+								}
+							}
 						}
 					},
 					labelLine: {
 						show: false
 					},
-					data: values,
+					data: filteredValues,
 					color: colors
 				}
 			]
 		};
 		// console.debug(option);
-
 		// use configuration item and data specified to show chart
 		chart.setOption(option);
-
 		window.addEventListener('resize', function () {
 			chart.resize();
 		});
