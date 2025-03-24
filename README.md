@@ -183,6 +183,10 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
 69. OWASP's checklist for LLM governance and security 🌐
 70. Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (ANSSI) 🇫🇷
+71. CIS benchmark for Kubernetes v1.10 🌐
+72. De tekniske minimumskrav for statslige myndigheder 🇩🇰
+73. Google SAIF framework 🤖
+
 
 ### Community contributions
 

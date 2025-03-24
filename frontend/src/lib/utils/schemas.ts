@@ -114,7 +114,8 @@ export const ThreatSchema = z.object({
 	folder: z.string(),
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
-	annotation: z.string().optional().nullable()
+	annotation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
 });
 
 export const RiskScenarioSchema = z.object({
@@ -158,6 +159,7 @@ export const AppliedControlSchema = z.object({
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	progress_field: z.number().optional().default(0),
+	filtering_labels: z.string().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional()
 });
 
@@ -184,7 +186,8 @@ export const ReferenceControlSchema = z.object({
 	csf_function: z.string().optional().nullable(),
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	annotation: z.string().optional().nullable()
+	annotation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
 });
 
 export const AssetSchema = z.object({
