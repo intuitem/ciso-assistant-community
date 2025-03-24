@@ -195,10 +195,29 @@ class PersonalData(NameDescriptionFolderMixin):
 
 
 class DataSubject(NameDescriptionFolderMixin):
-    processing = models.ForeignKey(
-        Processing, on_delete=models.CASCADE, related_name="data_subjects"
+    CATEGORY_CHOICES = (
+        # Core Categories
+        ("customer", "Customer/Client"),
+        ("prospect", "Prospective Customer/Client"),
+        ("employee", "Employee"),
+        ("job_applicant", "Job Applicant"),
+        ("contractor", "Contractor/Vendor"),
+        ("business_partner", "Business Partner"),
+        # Website/Service Users
+        ("user", "Website/App User"),
+        ("visitor", "Visitor"),
+        # Special Categories
+        ("minor", "Child/Minor"),
+        ("vulnerable", "Vulnerable Person"),
+        # Others
+        ("public", "General Public"),
+        ("other", "Other Data Subject Category"),
     )
-    category = models.CharField(max_length=255)
+
+    processing = models.ForeignKey(
+        "Processing", on_delete=models.CASCADE, related_name="data_subjects"
+    )
+    category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder

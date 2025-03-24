@@ -437,6 +437,7 @@ export const purposeSchema = z.object({
 export const dataSubjectSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
+	category: z.string(),
 	processing: z.string()
 });
 export const dataRecipientSchema = z.object({

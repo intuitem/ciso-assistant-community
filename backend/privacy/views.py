@@ -53,6 +53,10 @@ class DataSubjectViewSet(BaseModelViewSet):
     model = DataSubject
     filterset_fields = ["processing"]
 
+    @action(detail=False, name="Get category choices")
+    def category(self, request):
+        return Response(dict(DataSubject.CATEGORY_CHOICES))
+
 
 class DataRecipientViewSet(BaseModelViewSet):
     """
