@@ -259,7 +259,7 @@
 							<dd class="text-gray-700 sm:col-span-2">
 								<ul class="">
 									<li
-										class="list-none"
+										class="list-none whitespace-pre-line"
 										data-testid={!(value instanceof Array)
 											? key.replace('_', '-') + '-field-value'
 											: null}
@@ -365,8 +365,6 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date')}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description'}
-												<p class="whitespace-pre-line">{value}</p>
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
