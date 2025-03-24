@@ -274,9 +274,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'evidences' },
-			{ field: 'applied_controls', urlModel: 'requirement-assessments' },
-			{ field: 'applied_controls', urlModel: 'risk-scenarios' },
-			{ field: 'applied_controls', urlModel: 'findings' }
+			{
+				field: 'applied_controls',
+				urlModel: 'requirement-assessments',
+				disableAddDeleteButtons: true
+			},
+			{ field: 'applied_controls', urlModel: 'risk-scenarios', disableAddDeleteButtons: true },
+			{ field: 'applied_controls', urlModel: 'findings', disableAddDeleteButtons: true }
 		],
 		selectFields: [
 			{ field: 'status' },

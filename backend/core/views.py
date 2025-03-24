@@ -4890,6 +4890,7 @@ class FindingViewSet(BaseModelViewSet):
         "status",
         "findings_assessment",
         "filtering_labels",
+        "applied_controls",
     ]
 
     @action(detail=False, name="Get status choices")
