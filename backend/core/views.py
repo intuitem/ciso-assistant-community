@@ -2343,7 +2343,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.progress()
+                sum += audit.progress
             avg_progress = int(sum / audits.count())
 
         controls = (
@@ -4803,6 +4803,86 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(FindingsAssessment.Category.choices))
+
+    @action(detail=True, name="Get Follow up metrics")
+    def metrics(self, request, pk=None):
+        assessment = self.get_object()
+        raw_metrics = assessment.get_findings_metrics()
+
+        def format_severity_data(metrics):
+            severity_colors = {
+                "low": "#59BBB2",
+                "medium": "#F5C481",
+                "high": "#E6686D",
+                "critical": "#C71E1D",
+                "undefined": "#CCCCCC",
+            }
+
+            severity_chart_data = []
+            for severity, count in metrics["severity_distribution"].items():
+                severity_chart_data.append(
+                    {
+                        "name": severity.capitalize(),
+                        "value": count,
+                        "color": severity_colors.get(severity, "#CCCCCC"),
+                    }
+                )
+
+            return severity_chart_data
+
+        def format_status_data(metrics):
+            status_mapping = {
+                "identified": {"localName": "identified", "color": "#F5C481"},
+                "confirmed": {"localName": "confirmed", "color": "#E6686D"},
+                "assigned": {"localName": "assigned", "color": "#fab998"},
+                "in_progress": {"localName": "inProgress", "color": "#fac858"},
+                "mitigated": {"localName": "mitigated", "color": "#59BBB2"},
+                "resolved": {"localName": "resolved", "color": "#59BBB2"},
+                "dismissed": {"localName": "dismissed", "color": "#5470c6"},
+                "deprecated": {"localName": "deprecated", "color": "#91cc75"},
+                "--": {"localName": "undefined", "color": "#CCCCCC"},
+            }
+
+            grouped_status_counts = {}
+
+            for status, count in metrics["status_distribution"].items():
+                mapping_info = status_mapping.get(
+                    status, {"localName": "other", "color": "#CCCCCC"}
+                )
+                local_name = mapping_info["localName"]
+                color = mapping_info["color"]
+
+                if local_name in grouped_status_counts:
+                    grouped_status_counts[local_name]["value"] += count
+                else:
+                    grouped_status_counts[local_name] = {
+                        "value": count,
+                        "localName": local_name,
+                        "itemStyle": {"color": color},
+                    }
+
+            status_values = list(grouped_status_counts.values())
+
+            expected_statuses = ["open", "mitigate", "accept", "avoid", "transfer"]
+            for status in expected_statuses:
+                if not any(item["localName"] == status for item in status_values):
+                    status_values.append(
+                        {
+                            "value": 0,
+                            "localName": status,
+                            "itemStyle": {"color": "#CCCCCC"},
+                        }
+                    )
+
+            return {"values": status_values}
+
+        formatted_metrics = {
+            "raw_metrics": raw_metrics,
+            "severity_chart_data": format_severity_data(raw_metrics),
+            "status_chart_data": format_status_data(raw_metrics),
+        }
+
+        return Response(formatted_metrics)
 
 
 class FindingViewSet(BaseModelViewSet):
