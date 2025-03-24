@@ -363,7 +363,7 @@
 											</div>
 										{:else}
 											<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-											{#if value.length > 300}
+											{#if value?.length > 300}
 												{safeTranslate(value ?? '-').slice(0, 300)}...
 											{:else}
 												{safeTranslate(value ?? '-')}
