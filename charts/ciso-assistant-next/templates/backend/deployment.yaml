@@ -272,21 +272,21 @@ spec:
       - name: tmp-data
         emptyDir:
           sizeLimit: 256Mi
-      {{- if and .Values.backend.persistence.sqlite.enabled }}
+      {{- if .Values.backend.persistence.sqlite.enabled }}
       - name: sqlite-data
         persistentVolumeClaim:
-          {{- if not .Values.backend.persistence.sqlite.existingClaim }}
-          claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
-          {{- else }}
+          {{- if .Values.backend.persistence.sqlite.existingClaim }}
           claimName: {{ .Values.backend.persistence.sqlite.existingClaim }}
+          {{- else }}
+          claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
           {{- end }}
       {{- end }}
       {{- if .Values.backend.persistence.localStorage.enabled }}
       - name: localstorage-data
         persistentVolumeClaim:
-          {{- if not .Values.backend.persistence.localStorage.existingClaim }}
-          claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
-          {{- else }}
+          {{- if .Values.backend.persistence.localStorage.existingClaim }}
           claimName: {{ .Values.backend.persistence.localStorage.existingClaim }}
+          {{- else }}
+          claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
           {{- end }}
       {{- end }}
