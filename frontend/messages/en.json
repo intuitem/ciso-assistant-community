@@ -1196,5 +1196,8 @@
 	"requirementsProgressionSemiColon": "Requirements progression:",
 	"noRequirementFound": "No requirement assessment found",
 	"noAuditForTheFramework": "There is no audit using this framework",
-	"detailedListOfOutOfScopeObjects": "Detailed list of out-of-scope objects"
+	"detailedListOfOutOfScopeObjects": "Detailed list of out-of-scope objects",
+	"loadedlibrary": "Loaded libraries",
+	"riskmatrix": "Risk matrix",
+	"referencecontrol": "Reference control"
 }

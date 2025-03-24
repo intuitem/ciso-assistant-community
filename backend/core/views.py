@@ -2416,7 +2416,7 @@ class FolderViewSet(BaseModelViewSet):
 
             if "folder" in [f.name for f in model._meta.get_fields()]:
                 folder_filter = Q(folder__id__in=valid_folder_ids)
-            
+
             if folder_filter is None:
                 continue
 

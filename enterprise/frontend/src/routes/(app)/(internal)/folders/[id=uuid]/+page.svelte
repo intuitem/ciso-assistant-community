@@ -5,6 +5,7 @@
 	import { page } from '$app/stores';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
+	import { safeTranslate} from '$lib/utils/i18n';
 
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -39,7 +40,7 @@
 							${m.bodyModalExportFolder()}
 							<div class="mt-2 flex flex-wrap gap-2">
 								${data.has_out_of_scope_objects
-									.map((type) => `<span class="badge variant-filled-warning">${type}</span>`)
+									.map((type) => `<span class="badge variant-filled-warning">${safeTranslate(type)}</span>`)
 									.join('')}
 							</div>
 						</div>

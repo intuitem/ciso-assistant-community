@@ -11,7 +11,7 @@
 
 	import * as m from '$paraglide/messages';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-
+	import { safeTranslate } from '$lib/utils/i18n';
 	const modalStore: ModalStore = getModalStore();
 
 	export let _form = {};
@@ -55,7 +55,7 @@
 					{#each Object.entries(outOfScopeObjects) as [type, objects]}
 						<AccordionItem>
 							<div slot="summary" class="flex items-center gap-2">
-								<span class="font-medium">{type}</span>
+								<span class="font-medium">{safeTranslate(type)}</span>
 								<span class="badge variant-filled-warning">{objects.length}</span>
 							</div>
 							<div slot="content">
