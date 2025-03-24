@@ -705,7 +705,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataTransfers',
 		verboseName: 'data transfer',
 		verboseNamePlural: 'data transfers',
-		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }]
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
+		selectFields: [{ field: 'legal_basis' }, { field: 'country' }]
 	},
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',

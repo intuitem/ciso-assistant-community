@@ -13,6 +13,7 @@ from .models import (
     DataContractor,
     DataTransfer,
     Processing,
+    LEGAL_BASIS_CHOICES,
 )
 
 
@@ -103,6 +104,10 @@ class DataTransferViewSet(BaseModelViewSet):
     def country(self, request):
         return Response(dict(COUNTRY_CHOICES))
 
+    @action(detail=False, name="Get legal basis choices")
+    def legal_basis(self, request):
+        return Response(dict(LEGAL_BASIS_CHOICES))
+
 
 class ProcessingViewSet(BaseModelViewSet):
     """
@@ -117,4 +122,4 @@ class ProcessingViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get legal basis choices")
     def legal_basis(self, request):
-        return Response(dict(Processing.LEGAL_BASIS_CHOICES))
+        return Response(dict(LEGAL_BASIS_CHOICES))

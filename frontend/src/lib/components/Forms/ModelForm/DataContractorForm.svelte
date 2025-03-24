@@ -40,7 +40,7 @@
 <TextField
 	{form}
 	field="documentation_link"
-	label={m.refId()}
+	label={m.documentationLink()}
 	cacheLock={cacheLocks['documentation_link']}
 	bind:cachedValue={formDataCache['documentation_link']}
 />

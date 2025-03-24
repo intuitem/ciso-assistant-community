@@ -12,50 +12,52 @@ class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
         abstract = True
 
 
+LEGAL_BASIS_CHOICES = (
+    # Article 6(1) Legal Bases
+    ("consent", "Consent"),
+    ("contract", "Performance of a Contract"),
+    ("legal_obligation", "Compliance with a Legal Obligation"),
+    ("vital_interests", "Protection of Vital Interests"),
+    ("public_interest", "Performance of a Task in the Public Interest"),
+    ("legitimate_interests", "Legitimate Interests"),
+    # Special Category Processing - Article 9(2)
+    ("explicit_consent", "Explicit Consent for Special Categories"),
+    ("employment_social_security", "Employment and Social Security Law"),
+    (
+        "vital_interests_incapacity",
+        "Vital Interests (Subject Physically/Legally Incapable)",
+    ),
+    ("nonprofit_organization", "Processing by Nonprofit Organization"),
+    ("public_data", "Data Manifestly Made Public by the Data Subject"),
+    ("legal_claims", "Establishment, Exercise or Defense of Legal Claims"),
+    ("substantial_public_interest", "Substantial Public Interest"),
+    ("preventive_medicine", "Preventive or Occupational Medicine"),
+    ("public_health", "Public Health"),
+    ("archiving_research", "Archiving, Research or Statistical Purposes"),
+    # Additional GDPR Bases
+    ("child_consent", "Child's Consent with Parental Authorization"),
+    ("data_transfer_adequacy", "Transfer Based on Adequacy Decision"),
+    ("data_transfer_safeguards", "Transfer Subject to Appropriate Safeguards"),
+    ("data_transfer_binding_rules", "Transfer Subject to Binding Corporate Rules"),
+    (
+        "data_transfer_derogation",
+        "Transfer Based on Derogation for Specific Situations",
+    ),
+    # Common Combined Bases
+    ("consent_and_contract", "Consent and Contract"),
+    ("contract_and_legitimate_interests", "Contract and Legitimate Interests"),
+    # Other
+    ("not_applicable", "Not Applicable"),
+    ("other", "Other Legal Basis (Specify in Description)"),
+)
+
+
 class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("draft", "Draft"),
         ("in_review", "In Review"),
         ("approved", "Approved"),
         ("deprecated", "Deprecated"),
-    )
-    LEGAL_BASIS_CHOICES = (
-        # Article 6(1) Legal Bases
-        ("consent", "Consent"),
-        ("contract", "Performance of a Contract"),
-        ("legal_obligation", "Compliance with a Legal Obligation"),
-        ("vital_interests", "Protection of Vital Interests"),
-        ("public_interest", "Performance of a Task in the Public Interest"),
-        ("legitimate_interests", "Legitimate Interests"),
-        # Special Category Processing - Article 9(2)
-        ("explicit_consent", "Explicit Consent for Special Categories"),
-        ("employment_social_security", "Employment and Social Security Law"),
-        (
-            "vital_interests_incapacity",
-            "Vital Interests (Subject Physically/Legally Incapable)",
-        ),
-        ("nonprofit_organization", "Processing by Nonprofit Organization"),
-        ("public_data", "Data Manifestly Made Public by the Data Subject"),
-        ("legal_claims", "Establishment, Exercise or Defense of Legal Claims"),
-        ("substantial_public_interest", "Substantial Public Interest"),
-        ("preventive_medicine", "Preventive or Occupational Medicine"),
-        ("public_health", "Public Health"),
-        ("archiving_research", "Archiving, Research or Statistical Purposes"),
-        # Additional GDPR Bases
-        ("child_consent", "Child's Consent with Parental Authorization"),
-        ("data_transfer_adequacy", "Transfer Based on Adequacy Decision"),
-        ("data_transfer_safeguards", "Transfer Subject to Appropriate Safeguards"),
-        ("data_transfer_binding_rules", "Transfer Subject to Binding Corporate Rules"),
-        (
-            "data_transfer_derogation",
-            "Transfer Based on Derogation for Specific Situations",
-        ),
-        # Common Combined Bases
-        ("consent_and_contract", "Consent and Contract"),
-        ("contract_and_legitimate_interests", "Contract and Legitimate Interests"),
-        # Other
-        ("not_applicable", "Not Applicable"),
-        ("other", "Other Legal Basis (Specify in Description)"),
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
@@ -302,7 +304,9 @@ class DataTransfer(NameDescriptionFolderMixin):
         Processing, on_delete=models.CASCADE, related_name="data_transfers"
     )
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
-    legal_basis = models.CharField(max_length=255)
+    legal_basis = models.CharField(
+        max_length=255, choices=LEGAL_BASIS_CHOICES, blank=True
+    )
     guarantees = models.TextField(blank=True)
     documentation_link = models.URLField(blank=True)
 

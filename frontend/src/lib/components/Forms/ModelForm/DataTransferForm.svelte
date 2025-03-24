@@ -23,6 +23,36 @@
 />
 <AutocompleteSelect
 	{form}
+	field="country"
+	options={model.selectOptions['country']}
+	cacheLock={cacheLocks['country']}
+	bind:cachedValue={formDataCache['country']}
+	label={m.country()}
+/>
+<AutocompleteSelect
+	{form}
+	field="legal_basis"
+	options={model.selectOptions['legal_basis']}
+	cacheLock={cacheLocks['legal_basis']}
+	bind:cachedValue={formDataCache['legal_basis']}
+	label={m.legalBasis()}
+/>
+<TextArea
+	{form}
+	field="guarantees"
+	label={m.guarantees()}
+	cacheLock={cacheLocks['guarantees']}
+	bind:cachedValue={formDataCache['guarantees']}
+/>
+<TextField
+	{form}
+	field="documentation_link"
+	label={m.documentationLink()}
+	cacheLock={cacheLocks['documentation_link']}
+	bind:cachedValue={formDataCache['documentation_link']}
+/>
+<AutocompleteSelect
+	{form}
 	field="processing"
 	optionsEndpoint="processings"
 	cacheLock={cacheLocks['processing']}

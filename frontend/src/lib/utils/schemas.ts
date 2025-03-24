@@ -458,6 +458,9 @@ export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
+	documentation_link: z.string().optional(),
+	legal_basis: z.string(),
+	guarantees: z.string().optional().nullable(),
 	processing: z.string()
 });
 
