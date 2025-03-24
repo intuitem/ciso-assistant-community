@@ -4946,9 +4946,8 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
-        instance = serializer.save()
-        instance.author = self.request.user
-        return super().perform_create(serializer)
+        serializer.save(author=self.request.user)
+        return
 
     def perform_destroy(self, instance):
         if instance.entry_type in [

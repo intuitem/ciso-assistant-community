@@ -1979,6 +1979,8 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         return f"{self.entry}"
 
     def save(self, *args, **kwargs):
+        if self.timestamp > now():
+            raise ValidationError("Timestamp cannot be in the future.")
         if not self.folder and self.incident:
             self.folder = self.incident.folder
         super().save(*args, **kwargs)
