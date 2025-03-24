@@ -425,6 +425,12 @@ export const processingSchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 
+export const purposeSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	processing: z.string()
+});
+
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
@@ -574,6 +580,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
 	processings: processingSchema,
+	purposes: purposeSchema,
 	'ebios-rm': ebiosRMSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,

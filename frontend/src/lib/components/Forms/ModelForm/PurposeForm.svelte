@@ -21,20 +21,10 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	hidden={initialData.folder}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="processings"
 	field="processing"
+	optionsEndpoint="processings"
 	cacheLock={cacheLocks['processing']}
 	bind:cachedValue={formDataCache['processing']}
 	label={m.processing()}
