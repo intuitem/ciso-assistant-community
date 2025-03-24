@@ -25,6 +25,7 @@ class PurposeViewSet(BaseModelViewSet):
     """
 
     model = Purpose
+    filterset_fields = ["processing"]
 
 
 class PersonalDataViewSet(BaseModelViewSet):
@@ -33,6 +34,11 @@ class PersonalDataViewSet(BaseModelViewSet):
     """
 
     model = PersonalData
+    filterset_fields = ["processing"]
+
+    @action(detail=False, name="Get category choices")
+    def category(self, request):
+        return Response(dict(PersonalData.PERSONAL_DATA_CHOICES))
 
     @action(detail=False, name="Get deletion policy choices")
     def deletion_policy(self, request):
@@ -45,6 +51,7 @@ class DataSubjectViewSet(BaseModelViewSet):
     """
 
     model = DataSubject
+    filterset_fields = ["processing"]
 
 
 class DataRecipientViewSet(BaseModelViewSet):
@@ -53,6 +60,7 @@ class DataRecipientViewSet(BaseModelViewSet):
     """
 
     model = DataRecipient
+    filterset_fields = ["processing"]
 
 
 class DataContractorViewSet(BaseModelViewSet):
@@ -61,6 +69,7 @@ class DataContractorViewSet(BaseModelViewSet):
     """
 
     model = DataContractor
+    filterset_fields = ["processing"]
 
 
 class DataTransferViewSet(BaseModelViewSet):
@@ -69,6 +78,7 @@ class DataTransferViewSet(BaseModelViewSet):
     """
 
     model = DataTransfer
+    filterset_fields = ["processing"]
 
 
 class ProcessingViewSet(BaseModelViewSet):

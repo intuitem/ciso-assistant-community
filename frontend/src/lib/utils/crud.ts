@@ -638,7 +638,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'processing', urlModel: 'personal-data', endpointUrl: 'privacy/personal-data' },
+			{ field: 'processing', urlModel: 'personal-data' },
 			{ field: 'processing', urlModel: 'data-subjects' },
 			{ field: 'processing', urlModel: 'purposes' },
 			{ field: 'processing', urlModel: 'data-recipients' },

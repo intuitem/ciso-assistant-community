@@ -30,11 +30,79 @@ class PersonalData(NameDescriptionFolderMixin):
         ("legal_regulatory_hold", "Legal/Regulatory Hold"),
         ("partial_deletion", "Partial Deletion"),
     )
+    PERSONAL_DATA_CHOICES = (
+        # Basic Identity Information
+        ("basic_identity", "Basic Identity Information"),
+        ("name", "Name"),
+        ("identification_numbers", "Identification Numbers"),
+        ("online_identifiers", "Online Identifiers"),
+        ("location_data", "Location Data"),
+        # Contact Information
+        ("contact_details", "Contact Details"),
+        ("address", "Address"),
+        ("email", "Email Address"),
+        ("phone_number", "Phone Number"),
+        # Financial Information
+        ("financial_data", "Financial Data"),
+        ("bank_account", "Bank Account Information"),
+        ("payment_card", "Payment Card Information"),
+        ("transaction_history", "Transaction History"),
+        ("salary_information", "Salary Information"),
+        # Special Categories of Personal Data (Sensitive)
+        ("health_data", "Health Data"),
+        ("genetic_data", "Genetic Data"),
+        ("biometric_data", "Biometric Data"),
+        ("racial_ethnic_origin", "Racial or Ethnic Origin"),
+        ("political_opinions", "Political Opinions"),
+        ("religious_beliefs", "Religious or Philosophical Beliefs"),
+        ("trade_union_membership", "Trade Union Membership"),
+        ("sexual_orientation", "Sexual Orientation"),
+        ("sex_life_data", "Sex Life Data"),
+        # Digital Behavior and Activities
+        ("browsing_history", "Browsing History"),
+        ("search_history", "Search History"),
+        ("cookies", "Cookies Data"),
+        ("device_information", "Device Information"),
+        ("ip_address", "IP Address"),
+        ("user_behavior", "User Behavior"),
+        # Professional Data
+        ("employment_details", "Employment Details"),
+        ("education_history", "Education History"),
+        ("professional_qualifications", "Professional Qualifications"),
+        ("work_performance", "Work Performance Data"),
+        # Social Relationships
+        ("family_details", "Family Details"),
+        ("social_network", "Social Network"),
+        ("lifestyle_information", "Lifestyle Information"),
+        # Communication Data
+        ("correspondence", "Correspondence Content"),
+        ("messaging_content", "Messaging Content"),
+        ("communication_metadata", "Communication Metadata"),
+        # Government/Official Data
+        ("government_identifiers", "Government Identifiers"),
+        ("tax_information", "Tax Information"),
+        ("social_security", "Social Security Information"),
+        ("drivers_license", "Driver's License Information"),
+        ("passport_information", "Passport Information"),
+        # Legal Data
+        ("legal_records", "Legal Records"),
+        ("criminal_records", "Criminal Records"),
+        ("judicial_data", "Judicial Data"),
+        # Preferences and Opinions
+        ("preferences", "Preferences"),
+        ("opinions", "Opinions"),
+        ("feedback", "Feedback"),
+        # Other Types
+        ("images_photos", "Images and Photos"),
+        ("voice_recordings", "Voice Recordings"),
+        ("video_recordings", "Video Recordings"),
+        ("other", "Other Personal Data"),
+    )
 
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="personal_data"
     )
-    category = models.CharField(max_length=255)
+    category = models.CharField(max_length=255, choices=PERSONAL_DATA_CHOICES)
     retention = models.CharField(max_length=255, blank=True)
     deletion_policy = models.CharField(
         max_length=50, choices=DELETION_POLICY_CHOICES, blank=True

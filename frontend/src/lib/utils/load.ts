@@ -97,7 +97,7 @@ export const loadDetail = async ({ event, model, id }) => {
 				if (info.selectFields) {
 					await Promise.all(
 						info.selectFields.map(async (selectField) => {
-							const url = `${BASE_API_URL}/${e.endpointUrl || e.urlModel}/${selectField.field}/`;
+							const url = `${BASE_API_URL}/${info.endpointUrl || info.urlModel}/${selectField.field}/`;
 							const response = await event.fetch(url);
 							if (response.ok) {
 								selectOptions[selectField.field] = await response.json().then((data) =>
