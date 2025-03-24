@@ -1,3 +1,4 @@
+from core.constants import COUNTRY_CHOICES
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
@@ -79,6 +80,15 @@ class DataContractorViewSet(BaseModelViewSet):
     model = DataContractor
     filterset_fields = ["processing"]
 
+    @action(detail=False, name="Get category choices")
+    def relationship_type(self, request):
+        return Response(dict(DataContractor.RELATIONSHIP_TYPE_CHOICES))
+
+    # this should be cached
+    @action(detail=False, name="Get countries list")
+    def country(self, request):
+        return Response(dict(COUNTRY_CHOICES))
+
 
 class DataTransferViewSet(BaseModelViewSet):
     """
@@ -87,6 +97,11 @@ class DataTransferViewSet(BaseModelViewSet):
 
     model = DataTransfer
     filterset_fields = ["processing"]
+
+    # this should be cached
+    @action(detail=False, name="Get countries list")
+    def country(self, request):
+        return Response(dict(COUNTRY_CHOICES))
 
 
 class ProcessingViewSet(BaseModelViewSet):

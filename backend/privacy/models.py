@@ -4,6 +4,7 @@ from tprm.models import Entity
 from core.models import AppliedControl
 from core.models import FilteringLabelMixin
 from core.base_models import NameDescriptionMixin
+from core.constants import COUNTRY_CHOICES
 
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
@@ -275,11 +276,20 @@ class DataRecipient(NameDescriptionFolderMixin):
 
 
 class DataContractor(NameDescriptionFolderMixin):
+    RELATIONSHIP_TYPE_CHOICES = (
+        ("data_processor", "Data Processor"),
+        ("sub_processor", "Sub-processor"),
+        ("joint_controller", "Joint Controller"),
+        ("independent_controller", "Independent Controller"),
+        ("other", "Other Relationship Type"),
+    )
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="contractors_involved"
     )
-    relationship_type = models.CharField(max_length=255)
-    country = models.CharField(max_length=100)
+    relationship_type = models.CharField(
+        max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
+    )
+    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True)
 
     def save(self, *args, **kwargs):
@@ -291,7 +301,7 @@ class DataTransfer(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="data_transfers"
     )
-    country = models.CharField(max_length=100)
+    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
     legal_basis = models.CharField(max_length=255)
     guarantees = models.TextField(blank=True)
     documentation_link = models.URLField(blank=True)

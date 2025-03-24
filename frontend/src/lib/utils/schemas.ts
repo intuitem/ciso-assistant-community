@@ -449,11 +449,15 @@ export const dataRecipientSchema = z.object({
 export const dataContractorSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
+	relationship_type: z.string(),
+	country: z.string(),
+	documentation_link: z.string().optional(),
 	processing: z.string()
 });
 export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
+	country: z.string(),
 	processing: z.string()
 });
 

@@ -23,6 +23,29 @@
 />
 <AutocompleteSelect
 	{form}
+	field="relationship_type"
+	options={model.selectOptions['relationship_type']}
+	cacheLock={cacheLocks['relationship_type']}
+	bind:cachedValue={formDataCache['relationship_type']}
+	label={m.relationshipType()}
+/>
+<AutocompleteSelect
+	{form}
+	field="country"
+	options={model.selectOptions['country']}
+	cacheLock={cacheLocks['country']}
+	bind:cachedValue={formDataCache['country']}
+	label={m.country()}
+/>
+<TextField
+	{form}
+	field="documentation_link"
+	label={m.refId()}
+	cacheLock={cacheLocks['documentation_link']}
+	bind:cachedValue={formDataCache['documentation_link']}
+/>
+<AutocompleteSelect
+	{form}
 	field="processing"
 	optionsEndpoint="processings"
 	cacheLock={cacheLocks['processing']}
