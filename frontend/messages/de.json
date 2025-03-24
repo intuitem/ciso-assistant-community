@@ -869,5 +869,14 @@
 	"useDocumentationScoreHelpText": "Eine zweite Punktzahl (Dokumentationspunktzahl) wird verfügbar sein, um die Anforderungen zu bewerten.",
 	"publicationDate": "Veröffentlichungsdatum",
 	"filterBy": "Filtern nach",
-	"selectEvidence": "Wählen Sie eine Beweismittel"
+	"selectEvidence": "Wählen Sie eine Beweismittel",
+	"compliantRequirementsSemiColon": "Konforme Anforderungen:",
+	"requirementsProgressionSemiColon": "Fortschritt der Anforderungen:",
+	"noRequirementFound": "Keine Anforderung gefunden",
+	"noAuditForTheFramework": "Es gibt kein Audit, das dieses Framework verwendet",
+	"finding": "Ergebnis",
+	"findings": "Ergebnisse",
+	"associatedFindings": "Zugehörige Ergebnisse",
+	"findings_count": "Anzahl der Ergebnisse",
+	"addFinding": "Ergebnis hinzufügen"
 }

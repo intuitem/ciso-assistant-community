@@ -267,6 +267,13 @@ def get_build(request):
     BUILD = settings.BUILD
     LICENSE_SEATS = settings.LICENSE_SEATS
     LICENSE_EXPIRATION = settings.LICENSE_EXPIRATION
+    default_db_engine = settings.DATABASES["default"]["ENGINE"]
+    if "postgresql" in default_db_engine:
+        database_type = "P-FS"
+    elif "sqlite" in default_db_engine:
+        database_type = "S-FS"
+    else:
+        database_type = "Unknown"
     try:
         try:
             expiration_iso = datetime.fromisoformat(LICENSE_EXPIRATION)
@@ -293,6 +300,7 @@ def get_build(request):
         {
             "version": VERSION,
             "build": BUILD,
+            "infrastructure": database_type,
             "license_seats": LICENSE_SEATS,
             "available_seats": LICENSE_SEATS - len(User.get_editors()),
             "license_expiration": license_expiration,

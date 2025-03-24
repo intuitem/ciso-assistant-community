@@ -42,6 +42,8 @@ from django.utils import translation
 
 logger = structlog.get_logger(__name__)
 
+from auditlog.registry import auditlog
+
 
 def _get_root_folder():
     """helper function outside of class to facilitate serialization
@@ -812,3 +814,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                             ra.role.permissions.all().values_list("codename", flat=True)
                         )
         return permissions
+
+auditlog.register(
+    User,
+    m2m_fields={"user_groups"},
+    exclude_fields=["created_at", "updated_at", "password"],
+)

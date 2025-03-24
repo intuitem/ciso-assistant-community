@@ -47,7 +47,7 @@ The vision of the tool is based on these fundamental objects:
 
 ![](core_objects.png)
 
-There are other concepts and models to provide other features. The full details are available in the [data model](documentation/architecture/data-model.md).
+There are other concepts and models used to provide other features. The full details are available in the [data model](documentation/architecture/data-model.md).
 
 The decoupling concept is a pillar of the app and allows you to save a considerable amount of time:
 
@@ -183,6 +183,10 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
 69. OWASP's checklist for LLM governance and security 🌐
 70. Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (ANSSI) 🇫🇷
+71. CIS benchmark for Kubernetes v1.10 🌐
+72. De tekniske minimumskrav for statslige myndigheder 🇩🇰
+73. Google SAIF framework 🤖
+
 
 ### Community contributions
 
@@ -284,7 +288,7 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 - Python 3.11+
 - pip 20.3+
 - poetry 2.0+
-- node 18+
+- node 21+
 - npm 10.2+
 - pnpm 9.0+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)

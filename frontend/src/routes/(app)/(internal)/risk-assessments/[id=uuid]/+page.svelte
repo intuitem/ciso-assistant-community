@@ -17,8 +17,9 @@
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import { getLocale } from '$paraglide/runtime';
+	import { listViewFields } from '$lib/utils/table';
 
 	export let data;
 	const showRisks = true;
@@ -137,11 +138,11 @@
 						</li>
 						<li>
 							<span class="font-semibold">{m.createdAt()}:</span>
-							{new Date(risk_assessment.created_at).toLocaleString(languageTag())}
+							{new Date(risk_assessment.created_at).toLocaleString(getLocale())}
 						</li>
 						<li>
 							<span class="font-semibold">{m.updatedAt()}:</span>
-							{new Date(risk_assessment.updated_at).toLocaleString(languageTag())}
+							{new Date(risk_assessment.updated_at).toLocaleString(getLocale())}
 						</li>
 					</ul>
 				</div>

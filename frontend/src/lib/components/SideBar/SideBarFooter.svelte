@@ -3,7 +3,7 @@
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { availableLanguageTags, languageTag, setLanguageTag } from '$paraglide/runtime';
+	import { locales, getLocale, setLocale } from '$paraglide/runtime';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import * as m from '$paraglide/messages';
 	import { setCookie } from '$lib/utils/cookies';
@@ -26,7 +26,8 @@
 		urdu: m.urdu(),
 		czech: m.czech(),
 		swedish: m.swedish(),
-		indonesian: m.indonesian()
+		indonesian: m.indonesian(),
+		danish: m.danish()
 	};
 
 	const modalStore = getModalStore();
@@ -46,14 +47,15 @@
 		ur: 'اردو',
 		cs: 'Český',
 		sv: 'Svenska',
-		id: 'Bahasa Indonesia'
+		id: 'Bahasa Indonesia',
+		da: 'Dansk'
 	};
 
-	let value = languageTag();
+	let value = getLocale();
 	async function handleLocaleChange(event: Event) {
 		event.preventDefault();
 		value = event?.target?.value;
-		setLanguageTag(value);
+		setLocale(value);
 		fetch('/fe-api/user-preferences', {
 			method: 'PATCH',
 			body: JSON.stringify({
@@ -61,7 +63,7 @@
 			})
 		});
 		// sessionStorage.setItem('lang', value);
-		setCookie('ciso_lang', value);
+		setCookie('PARAGLIDE_LOCALE', value);
 		window.location.reload();
 	}
 
@@ -143,8 +145,8 @@
 				class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0"
 				data-testid="language-select"
 			>
-				{#each availableLanguageTags as lang}
-					<option value={lang} selected={lang === languageTag()}>
+				{#each locales as lang}
+					<option value={lang} selected={lang === getLocale()}>
 						{defaultLangLabels[lang]} ({language[LOCALE_MAP[lang].name]})
 					</option>
 				{/each}

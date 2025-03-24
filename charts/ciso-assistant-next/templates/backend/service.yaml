@@ -8,7 +8,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   labels:
-    {{- include "ciso-assistant.labels" (dict "context" . "name" .Values.backend.name "component" .Values.backend.name) | nindent 4 }}
+    {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 4 }}
 spec:
   ports:
   - name: {{ .Values.backend.service.portName }}
@@ -16,4 +16,4 @@ spec:
     port: {{ .Values.backend.service.port }}
     targetPort: http
   selector:
-    {{- include "ciso-assistant.selectorLabels" (dict "context" . "component" .Values.backend.name) | nindent 4 }}
+    {{- include "ciso-assistant.selectorLabels" (dict "context" . "component" "backend") | nindent 4 }}

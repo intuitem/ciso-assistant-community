@@ -490,15 +490,16 @@ export const listViewFields = {
 		}
 	},
 	threats: {
-		head: ['ref_id', 'name', 'description', 'provider', 'domain'],
-		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
+		head: ['ref_id', 'name', 'description', 'provider', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'provider', 'folder', 'filtering_labels'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
-			}
+			},
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-scenarios': {
@@ -555,7 +556,8 @@ export const listViewFields = {
 			'eta',
 			'owner',
 			'domain',
-			'referenceControl'
+			'referenceControl',
+			'labels'
 		],
 		body: [
 			'ref_id',
@@ -567,7 +569,8 @@ export const listViewFields = {
 			'eta',
 			'owner',
 			'folder',
-			'reference_control'
+			'reference_control',
+			'filtering_labels'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -576,7 +579,9 @@ export const listViewFields = {
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
 			priority: PRIORITY_FILTER,
-			effort: EFFORT_FILTER
+			effort: EFFORT_FILTER,
+			filtering_labels: LABELS_FILTER,
+			eta__lte: undefined
 		}
 	},
 	policies: {
@@ -611,8 +616,26 @@ export const listViewFields = {
 		}
 	},
 	'reference-controls': {
-		head: ['ref_id', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
-		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'csfFunction',
+			'provider',
+			'domain',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'csf_function',
+			'provider',
+			'folder',
+			'filtering_labels'
+		],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -621,7 +644,8 @@ export const listViewFields = {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'reference-controls/provider' }
 			},
-			csf_function: CSF_FUNCTION_FILTER
+			csf_function: CSF_FUNCTION_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	assets: {
@@ -864,11 +888,12 @@ export const listViewFields = {
 	},
 	'findings-assessments': {
 		head: ['ref_id', 'name', 'description', 'category', 'findings', 'perimeter'],
-		body: ['ref_id', 'str', 'description', 'category', 'findings_count', 'perimeter']
+		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
 		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
-		body: ['ref_id', 'str', 'description', 'findings_assessment', 'status', 'filtering_labels']
+		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels'],
+		filters: { filtering_labels: LABELS_FILTER }
 	},
 	extra: {
 		filters: {
