@@ -434,6 +434,26 @@ export const purposeSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	processing: z.string()
 });
+export const dataSubjectSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	processing: z.string()
+});
+export const dataRecipientSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	processing: z.string()
+});
+export const dataContractorSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	processing: z.string()
+});
+export const dataTransferSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	processing: z.string()
+});
 
 export const personalDataSchema = z.object({
 	...NameDescriptionMixin,
@@ -596,6 +616,10 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	processings: processingSchema,
 	purposes: purposeSchema,
 	'personal-data': personalDataSchema,
+	'data-subjects': dataSubjectSchema,
+	'data-recipients': dataRecipientSchema,
+	'data-contractors': dataContractorSchema,
+	'data-transfers': dataTransferSchema,
 	'ebios-rm': ebiosRMSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
