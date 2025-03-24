@@ -815,6 +815,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                         )
         return permissions
 
+
 auditlog.register(
     User,
     m2m_fields={"user_groups"},
