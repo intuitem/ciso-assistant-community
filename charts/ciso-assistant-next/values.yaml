@@ -122,6 +122,8 @@ backend:
       storageClass: ""
       # -- SQLite persistant volume accessMode
       accessMode: ReadWriteOnce
+      # -- Name of an existing PersistentVolumeClaim for sqlite
+      existingClaim: ""
     localStorage:
       # -- Enable Local Storage persistence
       enabled: true
@@ -131,6 +133,8 @@ backend:
       storageClass: ""
       # -- Local Storage persistant volume accessMode
       accessMode: ReadWriteOnce
+      # -- Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC
+      existingClaim: ""
 
   ## Backend image
   image:
