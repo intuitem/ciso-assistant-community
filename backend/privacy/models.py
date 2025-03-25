@@ -88,6 +88,9 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
             self.has_sensitive_personal_data = has_sensitive
             self.save(update_fields=["has_sensitive_personal_data"])
 
+    def metrics(self):
+        return {}
+
 
 class Purpose(NameDescriptionFolderMixin):
     processing = models.ForeignKey(

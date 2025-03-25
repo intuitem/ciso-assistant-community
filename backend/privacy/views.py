@@ -4,6 +4,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import filters
+from django.db.models import Count
+from itertools import chain
+from collections import defaultdict
 
 from .models import (
     Purpose,
@@ -109,11 +112,24 @@ class DataTransferViewSet(BaseModelViewSet):
         return Response(dict(LEGAL_BASIS_CHOICES))
 
 
-class ProcessingViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows processing activities to be viewed or edited.
-    """
+def agg_countries():
+    transfer_countries = DataTransfer.objects.values("country").annotate(
+        count=Count("id")
+    )
+    contractor_countries = DataContractor.objects.values("country").annotate(
+        count=Count("id")
+    )
+    country_counts = defaultdict(int)
+    for item in chain(transfer_countries, contractor_countries):
+        country_counts[item["country"]] += item["count"]
+    countries = [
+        {"id": country, "count": count} for country, count in country_counts.items()
+    ]
 
+    return countries
+
+
+class ProcessingViewSet(BaseModelViewSet):
     model = Processing
 
     @action(detail=False, name="Get status choices")
@@ -123,3 +139,18 @@ class ProcessingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get legal basis choices")
     def legal_basis(self, request):
         return Response(dict(LEGAL_BASIS_CHOICES))
+
+    @action(detail=False, name="processing metrics")
+    def metrics(self, request, pk=None):
+        return Response({})
+
+    @action(detail=False, name="aggregated metrics")
+    def agg_metrics(self, request):
+        countries = agg_countries()
+        incidents = 123
+        personal_data_cat_cnt = 123
+        processings_count = Processing.objects.all().count()
+        recipients_count = 123
+        return Response(
+            {"countries": countries, "processings_count": processings_count}
+        )
