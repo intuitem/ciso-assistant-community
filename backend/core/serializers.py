@@ -1266,6 +1266,7 @@ class QuickStartSerializer(serializers.Serializer):
             framework=framework,
             name=validated_data["audit_name"],
         )
+        audit.create_requirement_assessments()
 
         created_objects = {
             "folder": FolderReadSerializer(folder).data,
