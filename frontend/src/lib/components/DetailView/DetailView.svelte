@@ -40,6 +40,7 @@
 	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
+	export let displayModelTable = true
 
 	exclude = [...exclude, ...defaultExcludes];
 
@@ -475,7 +476,7 @@
 	</div>
 </div>
 
-{#if Object.keys(data.relatedModels).length > 0}
+{#if Object.keys(data.relatedModels).length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
 		<TabGroup justify="justify-center">
 			{#each Object.entries(data.relatedModels).sort((a, b) => {
