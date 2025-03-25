@@ -202,7 +202,7 @@ def reverse_migrations(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0060_fix_matrix_json_definition"),
+        ("core", "0062_appliedcontrol_filtering_labels_and_more"),
     ]
 
     operations = [
