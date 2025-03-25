@@ -3514,13 +3514,12 @@ class ComplianceAssessment(Assessment):
         answered_questions_count = 0
         for ra in requirement_assessments:
             # if it has question set it should count
-            if ra.requirement.question:
-                answers = ra.answer.get("questions")
+            if ra.requirement.questions:
+                total_questions_count += len(ra.requirement.questions)
+                answers = ra.answers
                 if answers:
-                    total_questions_count += len(answers)
-                    answered_questions_count += sum(
-                        1 for ans in answers if ans.get("answer") != ""
-                    )
+                    for answer in answers.values():
+                        answered_questions_count += 1 if answer else 0
 
         if total_questions_count > 0:
             return int((answered_questions_count / total_questions_count) * 100)
