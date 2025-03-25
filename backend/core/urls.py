@@ -125,6 +125,7 @@ urlpatterns = [
         "compliance-assessments/<uuid:pk>/action-plan/",
         ComplianceAssessmentActionPlanList.as_view(),
     ),
+    path("quick-start/", QuickStartView.as_view(), name="quick-start"),
 ]
 
 # Additional modules take precedence over the default modules

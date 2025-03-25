@@ -1231,8 +1231,69 @@ class FindingReadSerializer(FindingWriteSerializer):
 
 
 class QuickStartSerializer(serializers.Serializer):
+    folder = serializers.UUIDField()
     audit_name = serializers.CharField()
-    framework = serializers.UUIDField()
-    create_assessment = serializers.BooleanField()
-    risk_assessment_name = serializers.CharField()
-    risk_matrix = serializers.UUIDField()
+    framework = serializers.CharField()
+    create_risk_assessment = serializers.BooleanField()
+    risk_assessment_name = serializers.CharField(required=False)
+    risk_matrix = serializers.CharField(required=False)
+
+    def save(self, **kwargs):
+        return self.create(self.validated_data)
+
+    def create(self, validated_data):
+        folder = Folder.objects.get(pk=validated_data["folder"])
+        perimeter = Perimeter.objects.create(
+            name=validated_data["audit_name"], folder=folder
+        )
+        framework_lib_urn = validated_data["framework"]
+        if not LoadedLibrary.objects.filter(urn=framework_lib_urn).exists():
+            framework_stored_lib = StoredLibrary.objects.get(urn=framework_lib_urn)
+            try:
+                framework_stored_lib.load()
+            except Exception as e:
+                logger.error(e)
+                raise serializers.ValidationError(
+                    {"error": "Could not load the selected framework library"}
+                )
+        framework_lib = LoadedLibrary.objects.get(urn=framework_lib_urn)
+        framework = Framework.objects.get(library=framework_lib)
+        audit = ComplianceAssessment.objects.create(
+            folder=folder,
+            perimeter=perimeter,
+            framework=framework,
+            name=validated_data["audit_name"],
+        )
+
+        created_objects = {
+            "perimeter": PerimeterReadSerializer(perimeter).data,
+            "complianceassessment": ComplianceAssessmentReadSerializer(audit).data,
+        }
+
+        if not validated_data["create_risk_assessment"]:
+            return created_objects
+
+        matrix_lib_urn = validated_data["risk_matrix"]
+        if not LoadedLibrary.objects.filter(urn=matrix_lib_urn).exists():
+            matrix_stored_lib = StoredLibrary.objects.get(urn=matrix_lib_urn)
+            try:
+                matrix_stored_lib.load()
+            except Exception as e:
+                logger.error(e)
+                raise serializers.ValidationError(
+                    {"error": "Could not load the selected risk matrix library"}
+                )
+        matrix_lib = LoadedLibrary.objects.get(urn=matrix_lib_urn)
+        matrix = RiskMatrix.objects.get(library=matrix_lib)
+        risk_assessment = RiskAssessment.objects.create(
+            folder=folder,
+            perimeter=perimeter,
+            risk_matrix=matrix,
+            name=validated_data["risk_assessment_name"],
+        )
+
+        created_objects["riskassessment"] = RiskAssessmentReadSerializer(
+            risk_assessment
+        ).data
+
+        return created_objects
