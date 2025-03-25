@@ -794,8 +794,8 @@ export const listViewFields = {
 		body: ['email', 'entity', 'role']
 	},
 	processings: {
-		head: ['name', 'description', 'folder'],
-		body: ['name', 'description', 'folder']
+		head: ['name', 'description', 'status', 'legalBasis', 'folder'],
+		body: ['name', 'description', 'status', 'legal_basis', 'folder']
 	},
 	purposes: {
 		head: ['name', 'description', 'processing'],
