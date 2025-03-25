@@ -26,6 +26,14 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
 	z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)])
 );
 
+export const quickStartSchema = z.object({
+	audit_name: z.string().nonempty().default('funny-purple-octopus'),
+	framework: z.string().uuid(),
+	create_risk_assessment: z.boolean().default(true),
+	risk_matrix: z.string().uuid().optional(),
+	risk_assessment_name: z.string().nonempty().default('funny-purple-octopus')
+});
+
 export const loginSchema = z
 	.object({
 		username: z
