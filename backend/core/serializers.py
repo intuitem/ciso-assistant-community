@@ -1228,3 +1228,11 @@ class FindingReadSerializer(FindingWriteSerializer):
     class Meta:
         model = Finding
         fields = "__all__"
+
+
+class QuickStartSerializer(serializers.Serializer):
+    audit_name = serializers.CharField()
+    framework = serializers.UUIDField()
+    create_assessment = serializers.BooleanField()
+    risk_assessment_name = serializers.CharField()
+    risk_matrix = serializers.UUIDField()
