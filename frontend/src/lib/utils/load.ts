@@ -51,8 +51,12 @@ export const loadDetail = async ({ event, model, id }) => {
 					tableFields.head.splice(index, 1);
 					tableFields.body.splice(index, 1);
 				}
+				const headData: Record<string, string> = tableFields.body.reduce((obj, key, index) => {
+					obj[key] = index < tableFields.head.length ? tableFields.head[index] : key;
+					return obj;
+				}, {});
 				const table: TableSource = {
-					head: tableFields.head,
+					head: headData,
 					body: [],
 					meta: []
 				};

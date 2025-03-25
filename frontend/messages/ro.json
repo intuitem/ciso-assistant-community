@@ -872,5 +872,10 @@
 	"multipleChoice": "Alegere multiplă",
 	"uniqueChoice": "Alegere unică",
 	"text": "Text",
-	"date": "Data"
+	"date": "Data",
+	"finding": "Constatare",
+	"findings": "Constatări",
+	"associatedFindings": "Constatările asociate",
+	"findings_count": "Numărul de constatări",
+	"addFinding": "Adăugați o constatare"
 }

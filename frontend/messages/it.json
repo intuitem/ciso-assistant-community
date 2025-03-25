@@ -1175,5 +1175,10 @@
 	"multipleChoice": "Scelta multipla",
 	"uniqueChoice": "Scelta unica",
 	"text": "Testo",
-	"date": "Data"
+	"date": "Data",
+	"finding": "Risultato",
+	"findings": "Risultati",
+	"associatedFindings": "Risultati associati",
+	"findings_count": "Numero di risultati",
+	"addFinding": "Aggiungi risultato"
 }

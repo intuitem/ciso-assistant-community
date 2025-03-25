@@ -12,7 +12,7 @@ global:
   # -- Default domain used by all components
   ## Used for ingresses, certificates, environnement vars, etc.
   domain: octopus.foo.bar
-  # -- Globally enable TLS (Ingress, URLs, etc.)
+  # -- Globally enable TLS (URLs, etc.)
   tls: false
 
   # -- Extra allowed hosts (comma separated, without spaces)
@@ -122,6 +122,8 @@ backend:
       storageClass: ""
       # -- SQLite persistant volume accessMode
       accessMode: ReadWriteOnce
+      # -- Name of an existing PersistentVolumeClaim for sqlite
+      existingClaim: ""
     localStorage:
       # -- Enable Local Storage persistence
       enabled: true
@@ -131,6 +133,8 @@ backend:
       storageClass: ""
       # -- Local Storage persistant volume accessMode
       accessMode: ReadWriteOnce
+      # -- Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC
+      existingClaim: ""
 
   ## Backend image
   image:
@@ -187,7 +191,6 @@ backend:
     port: 80
     # -- Backend service port name
     portName: http
-
 
 ## CISO Assistant frontend
 frontend:
@@ -259,7 +262,7 @@ frontend:
     portName: http
 
 # CISO Assistant ingress configuration
-# Note: host and tls values are inherited from global.domain and global.tls
+# Note: host value is inherited from global.domain
 ingress:
   # -- Enable an ingress resource for the CISO Assistant
   enabled: true
@@ -275,19 +278,22 @@ ingress:
   path: /
   # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
   pathType: Prefix
-  # -- Use existing TLS secret
-  existingSecret: ""
-  # -- Custom TLS certificate as secret
-  ## Note: 'key' and 'certificate' are expected in PEM format
-  certificateSecret: {}
-    # key: |-
-    #   -----BEGIN RSA PRIVATE KEY-----
-    #   ...
-    #   -----END RSA PRIVATE KEY-----
-    # certificate: |-
-    #   -----BEGIN CERTIFICATE-----
-    #   ...
-    #   -----END CERTIFICATE-----
+  tls:
+    # -- Enable TLS for the ingress
+    enabled: false
+    # -- Use existing TLS secret
+    existingSecret: ""
+    # -- Custom TLS certificate as secret
+    ## Note: 'key' and 'certificate' are expected in PEM format
+    certificateSecret: {}
+      # key: |-
+      #   -----BEGIN RSA PRIVATE KEY-----
+      #   ...
+      #   -----END RSA PRIVATE KEY-----
+      # certificate: |-
+      #   -----BEGIN CERTIFICATE-----
+      #   ...
+      #   -----END CERTIFICATE-----
 
 ## Bundeled PostgreSQL database configuration (Bitnami chart)
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql

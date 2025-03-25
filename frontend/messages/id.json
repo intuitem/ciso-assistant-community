@@ -1090,5 +1090,10 @@
 	"multipleChoice": "Pilihan ganda",
 	"uniqueChoice": "Pilihan unik",
 	"text": "Teks",
-	"date": "Tanggal"
+	"date": "Tanggal",
+	"finding": "Temuan",
+	"findings": "Temuan",
+	"associatedFindings": "Temuan terkait",
+	"findings_count": "Jumlah Temuan",
+	"addFinding": "Tambahkan temuan"
 }

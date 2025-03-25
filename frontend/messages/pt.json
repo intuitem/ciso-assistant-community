@@ -872,5 +872,10 @@
 	"multipleChoice": "Múltipla escolha",
 	"uniqueChoice": "Escolha única",
 	"text": "Texto",
-	"date": "Data"
+	"date": "Data",
+	"finding": "Achado",
+	"findings": "Achados",
+	"associatedFindings": "Achados associados",
+	"findings_count": "Número de achados",
+	"addFinding": "Adicionar achado"
 }

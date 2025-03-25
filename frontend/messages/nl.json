@@ -873,5 +873,10 @@
 	"multipleChoice": "Meerkeuze",
 	"uniqueChoice": "Unieke keuze",
 	"text": "Tekst",
-	"date": "Datum"
+	"date": "Datum",
+	"finding": "Bevinding",
+	"findings": "Bevindingen",
+	"associatedFindings": "Geassocieerde bevindingen",
+	"findings_count": "Aantal bevindingen",
+	"addFinding": "Bevinding toevoegen"
 }

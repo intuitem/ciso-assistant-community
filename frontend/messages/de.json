@@ -877,5 +877,10 @@
 	"multipleChoice": "Mehrfachauswahl",
 	"uniqueChoice": "Einzigartige Wahl",
 	"text": "Text",
-	"date": "Datum"
+	"date": "Datum",
+	"finding": "Ergebnis",
+	"findings": "Ergebnisse",
+	"associatedFindings": "Zugehörige Ergebnisse",
+	"findings_count": "Anzahl der Ergebnisse",
+	"addFinding": "Ergebnis hinzufügen"
 }

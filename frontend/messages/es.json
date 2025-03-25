@@ -877,5 +877,10 @@
 	"multipleChoice": "Opción múltiple",
 	"uniqueChoice": "Opción única",
 	"text": "Texto",
-	"date": "Fecha"
+	"date": "Fecha",
+	"finding": "Hallazgo",
+	"findings": "Hallazgos",
+	"associatedFindings": "Hallazgos asociados",
+	"findings_count": "Número de hallazgos",
+	"addFinding": "Añadir hallazgo"
 }
