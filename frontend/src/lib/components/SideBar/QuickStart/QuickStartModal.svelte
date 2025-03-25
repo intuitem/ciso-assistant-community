@@ -17,6 +17,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { quickStartSchema } from '$lib/utils/schemas';
+	import { getLocale } from '$paraglide/runtime';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -35,8 +36,10 @@
 
 	const form = defaults(
 		{
-			framework: 'urn:intuitem:risk:library:secnumcloud-3.2',
-			risk_matrix: 'urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm'
+			framework: 'urn:intuitem:risk:library:iso27001-2022',
+			risk_matrix: 'urn:intuitem:risk:library:critical_risk_matrix_5x5',
+			audit_name: `Quick start audit ${new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}`,
+			risk_assessment_name: `Quick start risk assessment ${new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}`
 		},
 		zod(quickStartSchema)
 	);
