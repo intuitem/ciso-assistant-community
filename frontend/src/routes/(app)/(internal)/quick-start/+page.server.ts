@@ -2,7 +2,7 @@ import { defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { quickStartSchema } from '$lib/utils/schemas';
 import { type Actions } from '@sveltejs/kit';
-import { fail, setError, superValidate } from 'sveltekit-superforms';
+import { fail, message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 
@@ -34,6 +34,10 @@ export const actions: Actions = {
 			}
 		}
 
-		return { form };
+		const response = await res.json();
+
+		return message(form, {
+			redirect: `/compliance-assessments/${response.complianceassessment.id}`
+		});
 	}
 };
