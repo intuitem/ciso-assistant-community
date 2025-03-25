@@ -1242,12 +1242,10 @@ class QuickStartSerializer(serializers.Serializer):
         return self.create(self.validated_data)
 
     def create(self, validated_data):
-        folder = Folder.objects.create(
-            content_type=Folder.ContentType.DOMAIN, name=validated_data["audit_name"]
+        folder = Folder.objects.get_or_create(
+            content_type=Folder.ContentType.DOMAIN, name="Starter"
         )
-        perimeter = Perimeter.objects.create(
-            name=validated_data["audit_name"], folder=folder
-        )
+        perimeter = Perimeter.objects.get_or_create(name="Starter", folder=folder)
         framework_lib_urn = validated_data["framework"]
         if not LoadedLibrary.objects.filter(urn=framework_lib_urn).exists():
             framework_stored_lib = StoredLibrary.objects.get(urn=framework_lib_urn)
