@@ -30,6 +30,9 @@ export const load = (async ({ fetch, params }) => {
 		(res) => res.json()
 	);
 
+	const threats = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/threats_metrics/`).then(
+		(res) => res.json()
+	);
 	const initialData = { baseline: compliance_assessment.id };
 	const auditCreateForm = await superValidate(initialData, zod(ComplianceAssessmentSchema), {
 		errors: false
@@ -69,6 +72,7 @@ export const load = (async ({ fetch, params }) => {
 		tree,
 		compliance_assessment_donut_values,
 		global_score,
+		threats,
 		form,
 		title: compliance_assessment.name
 	};
