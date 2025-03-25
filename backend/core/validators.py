@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.core.validators import BaseValidator
 from django.utils.text import get_valid_filename, slugify
+from django.utils.translation import gettext_lazy as _
 import jsonschema
 
 
@@ -63,3 +64,23 @@ def validate_file_name(value):
         return value
     else:
         raise ValidationError("An error occured with file extension")
+
+
+def validate_perimeter_name(value):
+    """
+    Check that the folder perimeter name does not contain the character "/"
+    """
+    if "/" in value:
+        raise ValidationError(
+            {"name": _("The name cannot contain '/' for a Perimeter.")}
+        )
+    return value
+
+
+def validate_folder_name(value):
+    """
+    Check that the folder folder name does not contain the character "/"
+    """
+    if "/" in value:
+        raise ValidationError({"name": _("The name cannot contain '/' for a Folder.")})
+    return value

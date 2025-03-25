@@ -23,6 +23,8 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
+from core.validators import validate_perimeter_name
+
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from library.helpers import (
@@ -1408,6 +1410,10 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
     class Meta:
         verbose_name = _("Perimeter")
         verbose_name_plural = _("Perimeters")
+
+    def clean(self):
+        super().clean()
+        validate_perimeter_name(self.name)
 
     def overall_compliance(self):
         compliance_assessments_list = [

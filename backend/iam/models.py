@@ -36,6 +36,7 @@ from ciso_assistant.settings import (
     EMAIL_USE_TLS,
     EMAIL_USE_TLS_RESCUE,
 )
+from core.validators import validate_folder_name
 
 import structlog
 from django.utils import translation
@@ -59,6 +60,10 @@ class Folder(NameDescriptionMixin):
     Folders are organized in a tree structure, with a single root folder
     Folders are the base perimeter for role assignments
     """
+
+    def clean(self):
+        super().clean()
+        validate_folder_name(self.name)
 
     @staticmethod
     def get_root_folder() -> Self:
