@@ -793,6 +793,27 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 return True
         return False
 
+    @classmethod
+    def get_permissions_per_folder(
+        cls, principal: AbstractBaseUser | AnonymousUser | UserGroup, recursive=False
+    ):
+        """
+        Get all permissions attached to a user directly or indirectly, grouped by folder.
+        If recursive is set to True, permissions from recursive role assignments are transmitted
+        to the children of its perimeter folders.
+        """
+        permissions = defaultdict(set)
+        for ra in cls.get_role_assignments(principal):
+            ra_permissions = set(
+                ra.role.permissions.all().values_list("codename", flat=True)
+            )
+            for folder in ra.perimeter_folders.all():
+                permissions[str(folder.id)] |= ra_permissions
+                if recursive and ra.is_recursive:
+                    for f in folder.get_sub_folders():
+                        permissions[str(f.id)] |= ra_permissions
+        return permissions
+
 
 auditlog.register(
     User,

@@ -158,8 +158,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
 		selectFields: [{ field: 'lc_status' }],
 		reverseForeignKeyFields: [
-			{ field: 'perimeter', urlModel: 'risk-assessments' },
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
+			{ field: 'perimeter', urlModel: 'risk-assessments' },
 			{ field: 'perimeter', urlModel: 'entity-assessments' }
 		],
 		filters: [{ field: 'lc_status' }, { field: 'folder' }]
@@ -209,7 +209,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Threat',
 		verboseNamePlural: 'Threats',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
 	},
 	'risk-scenarios': {
@@ -259,7 +260,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' },
 			{ field: 'progress_field' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
@@ -267,13 +269,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'evidences' },
-			{ field: 'applied_controls', urlModel: 'requirement-assessments' },
-			{ field: 'applied_controls', urlModel: 'risk-scenarios' },
-			{ field: 'applied_controls', urlModel: 'findings' }
+			{
+				field: 'applied_controls',
+				urlModel: 'requirement-assessments',
+				disableAddDeleteButtons: true
+			},
+			{ field: 'applied_controls', urlModel: 'risk-scenarios', disableAddDeleteButtons: true },
+			{ field: 'applied_controls', urlModel: 'findings', disableAddDeleteButtons: true }
 		],
 		selectFields: [
 			{ field: 'status' },
@@ -378,7 +385,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'category' }, { field: 'csf_function' }],
 		filters: [{ field: 'folder' }]
@@ -560,9 +568,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
 		reverseForeignKeyFields: [
-			{ field: 'provider_entity', urlModel: 'solutions' },
+			{ field: 'entity', urlModel: 'entity-assessments' },
 			{ field: 'entity', urlModel: 'representatives' },
-			{ field: 'entity', urlModel: 'entity-assessments' }
+			{ field: 'provider_entity', urlModel: 'solutions' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
