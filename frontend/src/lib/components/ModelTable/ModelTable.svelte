@@ -37,6 +37,7 @@
 	import RowsPerPage from './RowsPerPage.svelte';
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	// Props
 	export let source: TableSource = { head: [], body: [] };
@@ -199,7 +200,20 @@
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	$: model = URL_MODEL_MAP[URLModel];
-	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
+	$: canCreateObject = model
+		? $page.params.id
+			? canPerformAction({
+					user,
+					action: 'add',
+					model: model.name,
+					domain:
+						$page.data?.data?.folder?.id ||
+						$page.data?.data?.folder ||
+						$page.params.id ||
+						user.root_folder_id
+				})
+			: Object.hasOwn(user.permissions, `add_${model.name}`)
+		: false;
 	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
@@ -362,7 +376,12 @@
 												</span>
 											</div>
 										{:else}
-											{safeTranslate(value ?? '-')}
+											<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+											{#if value?.length > 300}
+												{safeTranslate(value ?? '-').slice(0, 300)}...
+											{:else}
+												{safeTranslate(value ?? '-')}
+											{/if}
 										{/if}
 									</span>
 								{/if}
