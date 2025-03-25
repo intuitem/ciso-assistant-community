@@ -782,7 +782,12 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
-class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
+class Threat(
+    ReferentialObjectMixin,
+    I18nObjectMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -790,6 +795,7 @@ class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
         blank=True,
         related_name="threats",
     )
+
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
@@ -814,7 +820,7 @@ class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
         return self.name
 
 
-class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
+class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
     CATEGORY = [
         ("policy", _("Policy")),
         ("process", _("Process")),
@@ -1855,7 +1861,9 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
-class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class AppliedControl(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1906,6 +1914,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         verbose_name=_("Evidences"),
         related_name="applied_controls",
     )
+
     category = models.CharField(
         max_length=20,
         choices=CATEGORY,
@@ -3768,6 +3777,59 @@ class FindingsAssessment(Assessment):
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
+
+    def get_findings_metrics(self):
+        findings = self.findings.all()
+        total_count = findings.count()
+
+        # Skip calculations if there are no findings
+        if total_count == 0:
+            return {
+                "total_count": 0,
+                "status_distribution": {},
+                "severity_distribution": {},
+                "unresolved_important_count": 0,
+            }
+
+        status_counts = {}
+        for status_code, _ in Finding.Status.choices:
+            status_counts[status_code] = findings.filter(status=status_code).count()
+
+        # Severity distribution using the defined severity levels - we need a better way for this
+        severity_values = {
+            -1: "undefined",
+            0: "low",
+            1: "medium",
+            2: "high",
+            3: "critical",
+        }
+
+        severity_distribution = {}
+        for value, label in severity_values.items():
+            severity_distribution[label] = findings.filter(severity=value).count()
+
+        # Count of unresolved important findings (severity is HIGH or CRITICAL)
+        # Excludes findings that are mitigated, resolved, or dismissed
+        unresolved_important = (
+            findings.filter(
+                severity__gte=2  # HIGH or CRITICAL (>=2)
+            )
+            .exclude(
+                status__in=[
+                    Finding.Status.MITIGATED,
+                    Finding.Status.RESOLVED,
+                    Finding.Status.DISMISSED,
+                ]
+            )
+            .count()
+        )
+
+        return {
+            "total_count": total_count,
+            "status_distribution": status_counts,
+            "severity_distribution": severity_distribution,
+            "unresolved_important_count": unresolved_important,
+        }
 
 
 class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
