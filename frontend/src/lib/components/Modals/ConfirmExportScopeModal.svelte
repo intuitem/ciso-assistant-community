@@ -46,9 +46,15 @@
 	<div class="modal-example-form {cBase}">
 		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
 		<article class="max-h-[60vh] overflow-y-auto">
-			<div class="prose prose-sm dark:prose-invert max-w-none">
-				{@html $modalStore[0].body ?? '(body missing)'}
-			</div>
+			{#if bodyComponent}
+				<div class="prose prose-sm dark:prose-invert max-w-none">
+					<svelte:component this={bodyComponent} {...bodyProps} />
+				</div>
+			{:else}
+				<div class="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line">
+					{$modalStore[0].body ?? '(body missing)'}
+				</div>
+			{/if}
 			<div class="card p-4 bg-surface-100-800-token mt-4">
 				<h3 class="font-semibold text-lg mb-4">{m.detailedListOfOutOfScopeObjects()}</h3>
 				<Accordion>
@@ -75,11 +81,6 @@
 				</Accordion>
 			</div>
 		</article>
-		{#if bodyComponent}
-			<div class="max-h-96 overflow-y-scroll scroll card">
-				<svelte:component this={bodyComponent} {...bodyProps} />
-			</div>
-		{/if}
 		<!-- Enable for debugging: -->
 		<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
 			<!-- prettier-ignore -->

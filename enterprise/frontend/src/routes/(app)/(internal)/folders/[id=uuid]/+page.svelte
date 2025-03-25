@@ -6,6 +6,8 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
 	import { safeTranslate} from '$lib/utils/i18n';
+	import ConfirmExportBody from '$lib/components/Modals/ConfirmExportBody.svelte';
+
 
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -27,25 +29,17 @@
 			const modalComponent: ModalComponent = {
 				ref: ConfirmExportScopeModal,
 				props: {
-					outOfScopeObjects: data.out_of_scope_objects || {}
+					outOfScopeObjects: data.out_of_scope_objects || {},
+					bodyComponent: ConfirmExportBody,
+					bodyProps: {
+						types: data.has_out_of_scope_objects
+					}
 				}
 			};
 			const modal: ModalSettings = {
 				type: 'component',
 				component: modalComponent,
 				title: m.confirmModalTitleWarning(),
-				body: `
-					<div class="space-y-4">
-						<div class="text-lg">
-							${m.bodyModalExportFolder()}
-							<div class="mt-2 flex flex-wrap gap-2">
-								${data.has_out_of_scope_objects
-									.map((type) => `<span class="badge variant-filled-warning">${safeTranslate(type)}</span>`)
-									.join('')}
-							</div>
-						</div>
-					</div>
-				`,
 				response: (r: boolean) => {
 					if (r) (event.target as HTMLFormElement).submit();
 				}
