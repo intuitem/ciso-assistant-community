@@ -30,10 +30,11 @@
 			},
 			tooltip: {
 				trigger: 'item',
-				formatter: '{b}/requirements: {c}'
+				formatter: '{b}/data: {c}'
 			},
 			series: {
 				type: 'treemap',
+				// type: 'sunburst',
 				// emphasis: {
 				//     focus: 'ancestor'
 				// },

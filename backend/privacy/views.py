@@ -19,6 +19,36 @@ from .models import (
     LEGAL_BASIS_CHOICES,
 )
 
+EU_COUNTRIES_SET = {
+    "AT",
+    "BE",
+    "BG",
+    "HR",
+    "CY",
+    "CZ",
+    "DK",
+    "EE",
+    "FI",
+    "FR",
+    "DE",
+    "GR",
+    "HU",
+    "IE",
+    "IT",
+    "LV",
+    "LT",
+    "LU",
+    "MT",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "SK",
+    "SI",
+    "ES",
+    "SE",
+}
+
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "privacy.serializers"
@@ -122,8 +152,15 @@ def agg_countries():
     country_counts = defaultdict(int)
     for item in chain(transfer_countries, contractor_countries):
         country_counts[item["country"]] += item["count"]
+
+    # if country code is in EU (GDPR scope) set the dict color to #A7CC74 otherwise to #F4B83D
     countries = [
-        {"id": country, "count": count} for country, count in country_counts.items()
+        {
+            "id": country,
+            "count": count,
+            "color": "#A7CC74" if country in EU_COUNTRIES_SET else "#F4B83D",
+        }
+        for country, count in country_counts.items()
     ]
 
     return countries
@@ -146,11 +183,19 @@ class ProcessingViewSet(BaseModelViewSet):
 
     @action(detail=False, name="aggregated metrics")
     def agg_metrics(self, request):
-        countries = agg_countries()
+        # <Card icon="fa-solid fa-circle-exclamation" text="Incidents" count={data.data.privacy_incidents} />
+
         incidents = 123
-        personal_data_cat_cnt = 123
+        pd_categories = PersonalData.get_categories_count()
+        total_categories = len(pd_categories)
         processings_count = Processing.objects.all().count()
-        recipients_count = 123
+        recipients_count = DataRecipient.objects.all().count()
         return Response(
-            {"countries": countries, "processings_count": processings_count}
+            {
+                "countries": agg_countries(),
+                "processings_count": processings_count,
+                "recipients_count": recipients_count,
+                "pd_categories": pd_categories,
+                "pd_cat_count": total_categories,
+            }
         )

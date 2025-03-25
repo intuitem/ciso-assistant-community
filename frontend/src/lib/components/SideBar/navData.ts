@@ -267,13 +267,13 @@ export const navData = {
 				},
 				{
 					name: 'personalData',
-					fa_icon: 'fa-solid fa-clipboard-list',
+					fa_icon: 'fa-solid fa-users-viewfinder',
 					href: '/personal-data',
 					permissions: ['view_personaldata']
 				},
 				{
 					name: 'purposes',
-					fa_icon: 'fa-solid fa-clipboard-list',
+					fa_icon: 'fa-solid fa-diamond',
 					href: '/purposes',
 					permissions: ['view_purpose']
 				}

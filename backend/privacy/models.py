@@ -5,6 +5,7 @@ from core.models import AppliedControl
 from core.models import FilteringLabelMixin
 from core.base_models import NameDescriptionMixin
 from core.constants import COUNTRY_CHOICES
+from django.db.models import Count
 
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
@@ -198,6 +199,27 @@ class PersonalData(NameDescriptionFolderMixin):
         if self.is_sensitive and not self.processing.has_sensitive_personal_data:
             self.processing.has_sensitive_personal_data = True
             self.processing.save(update_fields=["has_sensitive_personal_data"])
+
+    @classmethod
+    def get_categories_count(cls):
+        categories = (
+            cls.objects.values("category")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+
+        # Convert to list of dictionaries with readable category names
+        result = []
+        for item in categories:
+            category_code = item["category"]
+            category_name = dict(cls.PERSONAL_DATA_CHOICES).get(
+                category_code, category_code
+            )
+            result.append(
+                {"id": category_code, "name": category_name, "value": item["count"]}
+            )
+
+        return result
 
 
 class DataSubject(NameDescriptionFolderMixin):
