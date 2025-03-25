@@ -27,10 +27,11 @@ const jsonSchema: z.ZodType<Json> = z.lazy(() =>
 );
 
 export const quickStartSchema = z.object({
+	folder: z.string().uuid().optional(),
 	audit_name: z.string().nonempty().default('funny-purple-octopus'),
-	framework: z.string().uuid(),
+	framework: z.string().url(),
 	create_risk_assessment: z.boolean().default(true),
-	risk_matrix: z.string().uuid().optional(),
+	risk_matrix: z.string().url().optional(),
 	risk_assessment_name: z.string().nonempty().default('funny-purple-octopus')
 });
 

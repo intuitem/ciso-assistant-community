@@ -12,7 +12,6 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import { z, type AnyZodObject } from 'zod';
 
 	import * as m from '$paraglide/messages';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -22,7 +21,7 @@
 	const modalStore: ModalStore = getModalStore();
 
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
-	export let formAction = '?/create';
+	export let formAction = '/quick-start?/create';
 	export let additionalInitialData = {};
 	export let suggestions: { [key: string]: any } = {};
 
@@ -94,6 +93,12 @@
 		>
 			<AutocompleteSelect
 				{form}
+				optionsEndpoint="folders?content_type=DO"
+				field="folder"
+				label={m.domain()}
+			/>
+			<AutocompleteSelect
+				{form}
 				field="framework"
 				label={m.framework()}
 				optionsEndpoint="stored-libraries"
@@ -117,6 +122,22 @@
 				optionsValueField="urn"
 				disabled={!data.create_risk_assessment}
 			/>
+			<div class="flex flex-row justify-between space-x-4">
+				<button
+					class="btn bg-gray-400 text-white font-semibold w-full"
+					data-testid="cancel-button"
+					type="button"
+					on:click={(event) => {
+						parent.onClose(event);
+					}}>{m.cancel()}</button
+				>
+
+				<button
+					class="btn variant-filled-primary font-semibold w-full"
+					data-testid="save-button"
+					type="submit">{m.save()}</button
+				>
+			</div>
 		</SuperForm>
 	</div>
 {/if}
