@@ -18,10 +18,11 @@
 		"format": "prettier --write .",
 		"postinstall": "paraglide-js compile --project ./project.inlang",
 		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build"
+		"build-storybook": "storybook build",
+		"machine-translate": "inlang machine translate --project project.inlang"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "2.0.0-beta.30",
+		"@inlang/paraglide-js": "2.0.5",
 		"@inlang/plugin-message-format": "^2.2.0",
 		"@playwright/test": "^1.49.1",
 		"@skeletonlabs/skeleton": "^2.10.3",
@@ -72,7 +73,8 @@
 		"vite": "^5.4.14",
 		"vite-plugin-tailwind-purgecss": "^0.3.5",
 		"vitest": "^1.6.1",
-		"zod": "^3.24.1"
+		"zod": "^3.24.1",
+		"@inlang/cli": "^3.0.0"
 	},
 	"type": "module",
 	"dependencies": {
