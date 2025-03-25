@@ -62,6 +62,26 @@
 		domain: data.compliance_assessment.folder.id
 	});
 
+	const has_threats = data.threats.total_unique_threats > 0;
+
+	let threatDialogOpen = false;
+	let dialogElement;
+
+	function openThreatsDialog() {
+		threatDialogOpen = true;
+		// Need to use the next tick to ensure the dialog is in the DOM
+		setTimeout(() => {
+			if (dialogElement) dialogElement.showModal();
+		}, 0);
+	}
+
+	function closeThreatsDialog() {
+		threatDialogOpen = false;
+		if (dialogElement) dialogElement.close();
+	}
+
+	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return; // otherwise it will interfere with input fields
@@ -458,6 +478,18 @@
 					{m.suggestControls()}
 				</button>
 			{/if}
+			{#if has_threats}
+				<button
+					class="border rounded-lg btn h-fit bg-gradient-to-r from-yellow-500 to-yellow-300 px-3 py-2"
+					on:click={openThreatsDialog}
+				>
+					<div class="flex items-center space-x-2">
+						<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
+						<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
+						<span>{m.potentialThreats()}</span>
+					</div>
+				</button>
+			{/if}
 		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
@@ -539,3 +571,21 @@
 		{/key}
 	</div>
 </div>
+{#if threatDialogOpen}
+	<dialog
+		bind:this={dialogElement}
+		class="card p-4 bg-white shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
+		on:close={() => (threatDialogOpen = false)}
+	>
+		<div class="flex justify-between items-center mb-4">
+			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
+			<button class="btn btn-sm variant-filled-error" on:click={closeThreatsDialog}>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+
+		<div class="threats-content">
+			<TreeChart tree={data.threats.tree} name="threats_tree" height="h-[600px]" />
+		</div>
+	</dialog>
+{/if}
