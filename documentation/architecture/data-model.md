@@ -1565,25 +1565,109 @@ A finding ("constat" has the following fields:
 A finding can have related reference controls, applied controls, vulnerabilities.
 
 
-## Asset compliance (draft)
+## Tasks
 
 ```mermaid
 erDiagram
 
-    COMPLIANCE_INDICATOR          }o--o{ ASSET                : applies_to
-    OBSERVATION                   }o--|| ASSET                : applies_to
-    OBSERVATION                   }o--|| COMPLIANCE_INDICATOR : corresponds_to
- 
-    COMPLIANCE_INDICATOR {
-        string ref_id
-        string name
-        string description
-        json   tracker_metadata
-    }
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_INSTANCE : contains
+TASK_INSTANCE |o--o{ TASK_INSTANCE         : generates
+user          }o--o{ TASK_INSTANCE         : owns
+TASK_INSTANCE }o--o| TASK_INSTANCE         : is_subtask_of
+TASK_INSTANCE }o--o{ ASSET                 : relates_to
+TASK_INSTANCE }o--o{ APPLIED_CONTROL       : relates_to
+TASK_INSTANCE }o--o{ COMPLIANCE_ASSESSMENT : relates_to
+TASK_INSTANCE }o--o{ RISK_ASSESSMENT       : relates_to
 
-    OBSERVATION {
-        datetime when
-        json     tracked_data
-        boolean  compliance_status
-    }
+TASK_INSTANCE {
+    string ref_id
+    string name
+    string description
+    int    iteration
+    date   due_date
+
+    date   eta
+    date   completion_date
+    enum   status "pending, in progress, completed, cancelled"
+    string observation
+
+    bool   is_template
+    json   schedule_definition
+    bool   enabled
+}
 ```
+
+is_template indicates this task is the start of a recurring series. If true, the schedule_definition contains the following fields:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Schedule Definition",
+  "type": "object",
+  "properties": {
+    "frequency": {
+      "type": "string",
+      "enum": ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+    },
+    "days_of_week": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 6
+      },
+      "description": "Optional. Days of the week (0=Sunday, 6=Saturday)"
+    },
+    "days_of_month": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -31,
+        "maximum": 31,
+        "not": { "enum": [0] }
+      },
+      "description": "Optional. Days of the month (negative values count from the month's end, e.g., -1 for last day)"
+    },
+    "months_of_year": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 12
+      },
+      "description": "Optional. Months of the year (1=January, 12=December)"
+    },
+    "endDate": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Optional. Date when recurrence ends."
+    },
+    "occurrences": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "description": "Optional. Number of occurrences before recurrence stops."
+    },
+    "overdue_behavior": {
+      "type": "string",
+      "enum": ["DELAY_NEXT", "SKIP_AND_CONTINUE"],
+      "default": "SKIP_AND_CONTINUE",
+      "description": "Optional. Behavior when tasks become overdue."
+    },
+    "exceptions": {
+      "type": ["object", "null"],
+      "description": "Optional. JSON object for future exceptions handling."
+    }
+  },
+  "required": ["frequency"],
+  "additionalProperties": false
+}
+```
+
+When enabled is set to False, the schedule is suspended.
+
+The iteration field is read_only. Its value is 0 for a one-off or template task, and increases by one for each element of a series.
+
+The following concepts will not be included in the MVP:
+- subtasks
+- exceptions
+- overdue_behavior (will be SKIP_AND_CONTINUE)
