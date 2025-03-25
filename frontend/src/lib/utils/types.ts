@@ -15,6 +15,8 @@ export interface User {
 	is_third_party: boolean;
 	is_admin: boolean;
 	accessible_domains: string[];
+	domain_permissions: Record<string, string[]>;
+	root_folder_id: string;
 }
 
 export interface GlobalSettings {
