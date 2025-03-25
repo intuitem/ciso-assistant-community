@@ -3111,7 +3111,7 @@ class ComplianceAssessment(Assessment):
         return requirement_assessments_list
 
     def get_threats_metrics(self):
-        # trying this to avoid looping on fwk with no threats mappings
+        # Check if the framework has any threats mappings
         has_threats = RequirementNode.objects.filter(
             framework=self.framework, threats__isnull=False
         ).exists()
@@ -3124,18 +3124,20 @@ class ComplianceAssessment(Assessment):
                 "total_partially_compliant": 0,
             }
 
-        problematic_assessments = RequirementAssessment.objects.filter(
-            compliance_assessment=self,
-            result__in=[
+        problematic_assessments = [
+            assessment
+            for assessment in self.get_requirement_assessments(
+                include_non_assessable=False
+            )
+            if assessment.result
+            in [
                 RequirementAssessment.Result.PARTIALLY_COMPLIANT,
                 RequirementAssessment.Result.NON_COMPLIANT,
-            ],
-        ).select_related("requirement")
+            ]
+        ]
 
         threat_metrics = {}
-        # isn't it better to check if the fwk has threats linked first to avoid this check?
-        # or at least dynamic loading of the widget that will pull this?
-        #
+
         # Process each problematic requirement assessment
         for assessment in problematic_assessments:
             threats = assessment.requirement.threats.all()
@@ -3163,7 +3165,6 @@ class ComplianceAssessment(Assessment):
 
                 threat_metrics[threat.id]["total_issues"] += 1
 
-                # Add the requirement assessment to the list (to track which requirements are affected - could be cool for the viz)
                 if assessment.id not in [
                     ra.get("id")
                     for ra in threat_metrics[threat.id]["requirement_assessments"]
