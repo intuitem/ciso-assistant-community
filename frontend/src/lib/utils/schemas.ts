@@ -562,7 +562,7 @@ export const TimelineEntrySchema = z.object({
 		.refine((val) => !val || new Date(val) <= new Date(), {
 			message: m.timestampCannotBeInTheFuture()
 		})
-		.optional(),
+		.default(() => new Date().toISOString()),
 	observation: z.string().optional().nullable(),
 	evidences: z.string().uuid().optional().array().optional()
 });
