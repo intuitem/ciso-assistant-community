@@ -1231,7 +1231,7 @@ class FindingReadSerializer(FindingWriteSerializer):
 
 
 class QuickStartSerializer(serializers.Serializer):
-    folder = serializers.UUIDField()
+    folder = serializers.UUIDField(required=False)
     audit_name = serializers.CharField()
     framework = serializers.CharField()
     create_risk_assessment = serializers.BooleanField()
@@ -1242,7 +1242,9 @@ class QuickStartSerializer(serializers.Serializer):
         return self.create(self.validated_data)
 
     def create(self, validated_data):
-        folder = Folder.objects.get(pk=validated_data["folder"])
+        folder = Folder.objects.create(
+            content_type=Folder.ContentType.DOMAIN, name=validated_data["audit_name"]
+        )
         perimeter = Perimeter.objects.create(
             name=validated_data["audit_name"], folder=folder
         )
@@ -1266,6 +1268,7 @@ class QuickStartSerializer(serializers.Serializer):
         )
 
         created_objects = {
+            "folder": FolderReadSerializer(folder).data,
             "perimeter": PerimeterReadSerializer(perimeter).data,
             "complianceassessment": ComplianceAssessmentReadSerializer(audit).data,
         }

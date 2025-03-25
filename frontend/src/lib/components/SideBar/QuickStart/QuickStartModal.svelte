@@ -93,12 +93,6 @@
 		>
 			<AutocompleteSelect
 				{form}
-				optionsEndpoint="folders?content_type=DO"
-				field="folder"
-				label={m.domain()}
-			/>
-			<AutocompleteSelect
-				{form}
 				field="framework"
 				label={m.framework()}
 				optionsEndpoint="stored-libraries"
