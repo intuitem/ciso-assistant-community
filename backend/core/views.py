@@ -4939,6 +4939,7 @@ class IncidentViewSet(BaseModelViewSet):
 class TimelineEntryViewSet(BaseModelViewSet):
     model = TimelineEntry
     filterset_fields = ["incident"]
+    search_fields = ["entry", "entry_type"]
     ordering = ["-timestamp"]
 
     @action(detail=False, name="Get entry type choices")

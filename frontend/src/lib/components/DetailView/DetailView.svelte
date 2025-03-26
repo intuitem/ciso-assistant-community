@@ -40,7 +40,7 @@
 	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
-	export let displayModelTable = true
+	export let displayModelTable = true;
 
 	exclude = [...exclude, ...defaultExcludes];
 

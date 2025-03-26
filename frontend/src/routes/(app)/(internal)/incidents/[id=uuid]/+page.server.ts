@@ -1,10 +1,7 @@
 import { getModelInfo } from '$lib/utils/crud';
 
 import { type Actions } from '@sveltejs/kit';
-import {
-	nestedDeleteFormAction,
-	defaultWriteFormAction,
-} from '$lib/utils/actions';
+import { nestedDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
