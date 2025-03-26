@@ -393,7 +393,8 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
-	criticality: z.number().optional()
+	criticality: z.number().optional(),
+	assets: z.string().uuid().optional().array().optional()
 });
 
 export const representativeSchema = z.object({
