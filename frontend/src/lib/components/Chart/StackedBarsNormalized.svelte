@@ -8,6 +8,10 @@
 	export let uuids;
 	import * as m from '$paraglide/messages';
 
+	function truncateString(maxLength: number) {
+		return (name) => name.length > maxLength ? name.substring(0, maxLength) + "..." : name
+	}
+
 	const chart_id = `stacked_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -87,7 +91,7 @@
 			},
 			yAxis: {
 				type: 'category',
-				data: names,
+				data: names.map(truncateString(24)),
 				axisTick: {
 					show: false
 				},
