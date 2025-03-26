@@ -90,6 +90,7 @@
 <div class="flex flex-col space-y-2">
 	<DetailView {data} displayModelTable={false}>
 		<div slot="widgets">
+            <h1 class="text-2xl font-bold">{m.addTimelineEntry()}</h1>
 			<SuperForm
 				class="flex flex-col space-y-3"
 				action={formAction}
