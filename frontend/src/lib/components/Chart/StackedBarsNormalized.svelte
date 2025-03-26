@@ -9,7 +9,7 @@
 	import * as m from '$paraglide/messages';
 
 	function truncateString(maxLength: number) {
-		return (name) => name.length > maxLength ? name.substring(0, maxLength) + "..." : name
+		return (name) => (name.length > maxLength ? name.substring(0, maxLength) + '...' : name);
 	}
 
 	const chart_id = `stacked_div`;
@@ -91,6 +91,7 @@
 			},
 			yAxis: {
 				type: 'category',
+				name: 'ABCDEF',
 				data: names.map(truncateString(24)),
 				axisTick: {
 					show: false
