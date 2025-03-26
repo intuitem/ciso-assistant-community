@@ -158,10 +158,14 @@
 								identifierField={'id'}
 								preventDelete={preventDelete(row)}
 							></TableRowActions>
+                            {#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
+                                <span class="text-xs italic text-gray-500 dark:text-gray-400">
+                                    ({m.edited()})
+                                </span>
+                            {/if}
 						</div>
-
 						<span class="text-primary-700 text-sm"></span>
-						<span class="font-semibold text-sm">{meta.entry}</span>
+						<span class="font-semibold text-sm">{safeTranslate(meta.entry)}</span>
 						<p class="text-xs italic text-gray-500 dark:text-gray-400">
 							{meta.observation ?? m.noObservation()}
 						</p>

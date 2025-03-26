@@ -1224,8 +1224,8 @@
 	"author": "Author",
 	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication",
 	"timestampCannotBeInTheFuture": "Timestamp cannot be in the future",
-	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication",
 	"tprmOverview": "Overview",
 	"followUpUnresolvedHigh": "Unresolved High or Critical",
-	"level": "Level"
+	"level": "Level",
+	"edited": "edited"
 }
