@@ -260,6 +260,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
+        self._validate_related_objects_access(request)
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
@@ -268,7 +269,54 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
+        self._validate_related_objects_access(request, instance=self.get_object())
         return super().update(request, *args, **kwargs)
+
+    def _validate_related_objects_access(self, request: Request, instance=None):
+        folder_id = request.data.get("folder")
+        if not folder_id:
+            raise ValidationError(
+                {"folder": "Folder ID is required in the request data"}
+            )
+
+        current_folder = get_object_or_404(Folder, id=folder_id)
+
+        model_class = self.get_queryset().model
+        fields = (instance or model_class())._meta.get_fields()
+
+        for field in fields:
+            if not hasattr(field, "related_model") or field.related_model is None:
+                continue
+
+            field_value = request.data.get(field.name)
+            if not field_value or field_value == -1:
+                continue
+
+            accessible_ids = set(
+                RoleAssignment.get_accessible_object_ids(
+                    current_folder, request.user, field.related_model
+                )[0]
+            )
+
+            if field.many_to_many:
+                related_ids = (
+                    field_value if isinstance(field_value, list) else [field_value]
+                )
+                if not all(uuid.UUID(str(id)) in accessible_ids for id in related_ids):
+                    raise ValidationError(
+                        {
+                            field.name: "Some objects are not accessible in the current folder"
+                        }
+                    )
+
+            elif field.one_to_one or field.many_to_one:
+                related_id = uuid.UUID(str(field_value))
+                if related_id not in accessible_ids:
+                    raise ValidationError(
+                        {
+                            field.name: "The object is not accessible in the current folder"
+                        }
+                    )
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
