@@ -1,13 +1,12 @@
 <script lang="ts">
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { modelSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages.js';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import TimelineEntryForm from '$lib/components/Forms/ModelForm/TimelineEntryForm.svelte';
 	import { createModalCache } from '$lib/utils/stores';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { loadTableData } from '$lib/components/ModelTable/handler';
@@ -22,25 +21,40 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime.js';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import {
+		type TableSource,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
 	export let data: PageData;
+	export let form: ActionData;
+
 	let invalidateAll = true;
 	let formAction = '?/create';
-	let context = 'create';
-	const form = data.relatedModels['timeline-entries'].createForm;
+	const timelineForm = data.relatedModels['timeline-entries'].createForm;
 	const model = data.relatedModels['timeline-entries'];
 	let schema = modelSchema('timeline-entries');
 
-	const _form = superForm(form, {
+	const _form = superForm(timelineForm, {
 		dataType: 'json',
 		enctype: 'application/x-www-form-urlencoded',
 		invalidateAll,
 		applyAction: $$props.applyAction ?? true,
-		resetForm: $$props.resetForm ?? false,
+		resetForm: true,
 		validators: zod(schema),
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto'
 	});
+
+	const formStore = _form.form;
 
 	const source = data.relatedModels['timeline-entries'].table;
 	const pagination = true;
@@ -85,18 +99,51 @@
 
 	const preventDelete = (row: TableSource) =>
 		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
+
+	const modalStore: ModalStore = getModalStore();
+
+	function modalEvidenceCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.evidenceCreateForm,
+				formAction: '?/createEvidence',
+				model: data.evidenceModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + data.evidenceModel.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	let refreshKey = false;
+	function forceRefresh() {
+		refreshKey = !refreshKey;
+	}
+
+	$: if (form && form.newEvidence) {
+		forceRefresh();
+		$formStore.evidences
+			? $formStore.evidences.push(form.newEvidence)
+			: ($formStore.evidences = [form.newEvidence]);
+	}
 </script>
 
 <div class="flex flex-col space-y-2">
 	<DetailView {data} displayModelTable={false}>
 		<div slot="widgets">
-            <h1 class="text-2xl font-bold">{m.addTimelineEntry()}</h1>
+			<h1 class="text-2xl font-bold">{m.addTimelineEntry()}</h1>
 			<SuperForm
 				class="flex flex-col space-y-3"
 				action={formAction}
 				dataType={'json'}
 				enctype={'application/x-www-form-urlencoded'}
-				data={form}
+				data={timelineForm}
 				{_form}
 				{invalidateAll}
 				let:form
@@ -106,9 +153,42 @@
 				onUpdated={() => createModalCache.deleteCache(model.urlModel)}
 				{...$$restProps}
 			>
-				<TimelineEntryForm {form} {model} {initialData} {context} />
+				<AutocompleteSelect
+					{form}
+					optionsEndpoint="incidents"
+					field="incident"
+					label={m.incident()}
+					hidden={initialData.incident}
+				/>
+				<Select
+					{form}
+					options={model.selectOptions['entry_type']}
+					field="entry_type"
+					label={m.entryType()}
+				/>
+				<TextField type="datetime-local" step="1" {form} field="timestamp" label={m.timestamp()} />
+				<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
+				<TextArea {form} field="observation" label={m.observation()} />
+				{#key refreshKey}
+					<div class="flex items-end justify-center">
+						<div class="w-full mr-2">
+							<AutocompleteSelect
+								{form}
+								multiple
+								optionsEndpoint="evidences"
+								field="evidences"
+								label={m.evidences()}
+							/>
+						</div>
+						<button
+							class="btn bg-gray-300 h-11 w-10"
+							on:click={(_) => modalEvidenceCreateForm()}
+							type="button"><i class="fa-solid fa-plus text-sm" /></button
+						>
+					</div>
+				{/key}
 				<div class="flex flex-row justify-between space-x-4">
-                    <button
+					<button
 						class="btn variant-filled-tertiary font-semibold w-full"
 						data-testid="reset-button"
 						type="button"
@@ -158,11 +238,11 @@
 								identifierField={'id'}
 								preventDelete={preventDelete(row)}
 							></TableRowActions>
-                            {#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
-                                <span class="text-xs italic text-gray-500 dark:text-gray-400">
-                                    ({m.edited()})
-                                </span>
-                            {/if}
+							{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
+								<span class="text-xs italic text-gray-500 dark:text-gray-400">
+									({m.edited()})
+								</span>
+							{/if}
 						</div>
 						<span class="text-primary-700 text-sm"></span>
 						<span class="font-semibold text-sm">{safeTranslate(meta.entry)}</span>
