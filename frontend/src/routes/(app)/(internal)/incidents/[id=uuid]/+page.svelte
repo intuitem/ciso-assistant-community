@@ -214,14 +214,14 @@
 			{#each $rows as row, rowIndex}
 				{@const meta = row?.meta ?? row}
 				{@const actionsURLModel = 'timeline-entries'}
-				<li class="mb-5 ms-4">
+				<li class="mb-10 ms-4">
 					<div
 						class="absolute w-3 h-3 bg-primary-500 rounded-full mt-1.5 -start-1.5 border border-white dark:border-primary-900 dark:bg-primary-700"
 					></div>
 					<div class="flex flex-col">
-						<div class="flex flex-row items-center space-x-2">
+						<div class="flex flex-row items-center space-x-3">
 							<time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500"
-								>{safeTranslate(meta.entry_type)} - {formatDateOrDateTime(
+								> {formatDateOrDateTime(
 									meta.timestamp,
 									getLocale()
 								)} - {meta.author.str}</time
@@ -244,7 +244,7 @@
 								</span>
 							{/if}
 						</div>
-						<span class="text-primary-700 text-sm"></span>
+						<span class="text-primary-700 text-sm">{safeTranslate(meta.entry_type)}</span>
 						<span class="font-semibold text-sm">{safeTranslate(meta.entry)}</span>
 						<p class="text-xs italic text-gray-500 dark:text-gray-400">
 							{meta.observation ?? m.noObservation()}
