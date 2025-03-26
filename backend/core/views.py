@@ -275,10 +275,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def _validate_related_objects_access(self, request: Request, instance=None):
         folder_id = request.data.get("folder")
         if not folder_id:
+            if self.model == Folder:
+                return
+            elif self.model == User:
+                return
             raise ValidationError(
                 {"folder": "Folder ID is required in the request data"}
             )
-
         current_folder = get_object_or_404(Folder, id=folder_id)
 
         model_class = self.get_queryset().model
