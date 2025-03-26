@@ -22,7 +22,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: 'm.quickStart()'
+			title: m.quickStart()
 		};
 		modalStore.trigger(modal);
 	}

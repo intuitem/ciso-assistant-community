@@ -91,7 +91,6 @@
 			let:initialData
 			validators={zod(quickStartSchema)}
 			action={formAction}
-			debug
 			{...$$restProps}
 		>
 			<AutocompleteSelect
@@ -102,12 +101,12 @@
 				optionsDetailedUrlParameters={[['object_type', 'framework']]}
 				optionsValueField="urn"
 			/>
-			<TextField {form} field="audit_name" label="m.auditName()" />
-			<Checkbox {form} field="create_risk_assessment" label="m.createRiskAssessment()" />
+			<TextField {form} field="audit_name" label={m.auditName()} />
+			<Checkbox {form} field="create_risk_assessment" label={m.createRiskAssessment()} />
 			<TextField
 				{form}
 				field="risk_assessment_name"
-				label="m.riskAssessmentName()"
+				label={m.riskAssessmentName()}
 				disabled={!data.create_risk_assessment}
 			/>
 			<AutocompleteSelect

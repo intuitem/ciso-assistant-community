@@ -1191,5 +1191,9 @@
 	"tprmOverview": "Vue d'ensemble",
 	"potentialThreats": "menaces potentielles",
 	"followUpUnresolvedHigh": "Hauts ou critiques non résolus",
-	"level": "Niveau"
+	"level": "Niveau",
+	"quickStart": "🚀 Démarrage Rapide",
+	"auditName": "Nom de l'audit",
+	"createRiskAssessment": "Initier une analyse de risque également",
+	"riskAssessmentName": "Nom de l'analyse de risque"
 }
