@@ -782,7 +782,12 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
-class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
+class Threat(
+    ReferentialObjectMixin,
+    I18nObjectMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -790,6 +795,7 @@ class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
         blank=True,
         related_name="threats",
     )
+
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
@@ -814,7 +820,7 @@ class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
         return self.name
 
 
-class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
+class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
     CATEGORY = [
         ("policy", _("Policy")),
         ("process", _("Process")),
@@ -1855,7 +1861,9 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
-class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class AppliedControl(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1906,6 +1914,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         verbose_name=_("Evidences"),
         related_name="applied_controls",
     )
+
     category = models.CharField(
         max_length=20,
         choices=CATEGORY,
@@ -3100,6 +3109,85 @@ class ComplianceAssessment(Assessment):
         ]
 
         return requirement_assessments_list
+
+    def get_threats_metrics(self):
+        # Check if the framework has any threats mappings
+        has_threats = RequirementNode.objects.filter(
+            framework=self.framework, threats__isnull=False
+        ).exists()
+
+        if not has_threats:
+            return {
+                "threats": [],
+                "total_unique_threats": 0,
+                "total_non_compliant": 0,
+                "total_partially_compliant": 0,
+            }
+
+        problematic_assessments = [
+            assessment
+            for assessment in self.get_requirement_assessments(
+                include_non_assessable=False
+            )
+            if assessment.result
+            in [
+                RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                RequirementAssessment.Result.NON_COMPLIANT,
+            ]
+        ]
+
+        threat_metrics = {}
+
+        # Process each problematic requirement assessment
+        for assessment in problematic_assessments:
+            threats = assessment.requirement.threats.all()
+
+            for threat in threats:
+                if threat.id not in threat_metrics:
+                    threat_metrics[threat.id] = {
+                        "id": threat.id,
+                        "name": threat.name,
+                        "display_long": threat.display_long,
+                        "urn": threat.urn,
+                        "non_compliant_count": 0,
+                        "partially_compliant_count": 0,
+                        "total_issues": 0,
+                        "requirement_assessments": [],
+                    }
+
+                if assessment.result == RequirementAssessment.Result.NON_COMPLIANT:
+                    threat_metrics[threat.id]["non_compliant_count"] += 1
+                elif (
+                    assessment.result
+                    == RequirementAssessment.Result.PARTIALLY_COMPLIANT
+                ):
+                    threat_metrics[threat.id]["partially_compliant_count"] += 1
+
+                threat_metrics[threat.id]["total_issues"] += 1
+
+                if assessment.id not in [
+                    ra.get("id")
+                    for ra in threat_metrics[threat.id]["requirement_assessments"]
+                ]:
+                    threat_metrics[threat.id]["requirement_assessments"].append(
+                        {
+                            "id": assessment.id,
+                            "requirement_id": assessment.requirement.id,
+                            "requirement_name": assessment.requirement.display_short,
+                            "result": assessment.result,
+                        }
+                    )
+
+        return {
+            "threats": list(threat_metrics.values()),
+            "total_unique_threats": len(threat_metrics),
+            "total_non_compliant": sum(
+                t["non_compliant_count"] for t in threat_metrics.values()
+            ),
+            "total_partially_compliant": sum(
+                t["partially_compliant_count"] for t in threat_metrics.values()
+            ),
+        }
 
     def get_requirements_status_count(self):
         requirements_status_count = []
