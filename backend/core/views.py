@@ -4210,8 +4210,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ]
         return Response({"results": res})
 
-    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
@@ -4359,6 +4357,32 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 {"error": "No metrics found for this assessment"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+    @action(detail=True, methods=["get"])
+    def threats_metrics(self, request, pk=None):
+        compliance_assessment = self.get_object()
+
+        # is this needed or overlapping with the IAM checks inherited?
+        self.check_object_permissions(request, compliance_assessment)
+
+        threat_metrics = compliance_assessment.get_threats_metrics()
+        if threat_metrics.get("total_unique_threats") == 0:
+            return Response(threat_metrics, status=status.HTTP_200_OK)
+        children = []
+        for th in threat_metrics["threats"]:
+            children.append(
+                {
+                    "name": th["name"],
+                    "children": [
+                        ra["requirement_name"] for ra in th["requirement_assessments"]
+                    ],
+                    "value": len(th["requirement_assessments"]),
+                }
+            )
+        tree = {"name": "Threats", "children": children}
+        threat_metrics.update({"tree": tree})
+
+        return Response(threat_metrics, status=status.HTTP_200_OK)
 
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
