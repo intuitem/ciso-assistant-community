@@ -107,6 +107,12 @@
 			>
 				<TimelineEntryForm {form} {model} {initialData} {context} />
 				<div class="flex flex-row justify-between space-x-4">
+                    <button
+						class="btn variant-filled-tertiary font-semibold w-full"
+						data-testid="reset-button"
+						type="button"
+						on:click={() => _form.reset()}>{m.cancel()}</button
+					>
 					<button
 						class="btn variant-filled-primary font-semibold w-full"
 						data-testid="save-button"
