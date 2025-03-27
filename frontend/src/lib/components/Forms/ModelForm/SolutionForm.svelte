@@ -37,3 +37,14 @@
 	min_score={1}
 	max_score={4}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
+	field="assets"
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
+/>

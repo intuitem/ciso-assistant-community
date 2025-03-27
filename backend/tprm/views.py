@@ -127,7 +127,7 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-    filterset_fields = ["provider_entity"]
+    filterset_fields = ["provider_entity", "assets"]
 
     def perform_create(self, serializer):
         serializer.save()
