@@ -227,7 +227,7 @@
 		requirementAssessmentForm.form.update(
 			(current: Record<string, any>) => ({
 				...current,
-				seucrity_exceptions: [...current.security_exceptions, form?.newSecurityException]
+				security_exceptions: [...current.security_exceptions, form?.newSecurityException]
 			}),
 			{ taint: false }
 		);
