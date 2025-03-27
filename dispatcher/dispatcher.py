@@ -80,14 +80,14 @@ def consume():
         # topic
         "observation",
         # consumer configs
-        bootstrap_servers=os.getenv("REDPANDA_BROKERS", "localhost:9092"),
+        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:9092"),
         group_id="my-group",
         auto_offset_reset="earliest",
         # value_deserializer=lambda v: v,
     )
 
     error_producer = KafkaProducer(
-        bootstrap_servers=os.getenv("REDPANDA_BROKERS", "localhost:9092"),
+        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:9092"),
     )
 
     try:
