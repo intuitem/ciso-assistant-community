@@ -85,6 +85,7 @@ from core.models import (
     ComplianceAssessment,
     RequirementMappingSet,
     RiskAssessment,
+    RiskScenario,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -318,7 +319,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         model_class = self.get_queryset().model
         fields = (instance or model_class())._meta.get_fields()
 
+        skip_fields = {"approver", "authors", "provider", "owner"}
+
         for field in fields:
+            if field.name in skip_fields:
+                continue
+
             if not hasattr(field, "related_model") or field.related_model is None:
                 continue
 
@@ -336,6 +342,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 related_ids = (
                     field_value if isinstance(field_value, list) else [field_value]
                 )
+                print(related_ids)
                 if not all(uuid.UUID(str(id)) in accessible_ids for id in related_ids):
                     raise PermissionDenied(
                         {
@@ -345,6 +352,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
             elif field.one_to_one or field.many_to_one:
                 related_id = uuid.UUID(str(field_value))
+                print(related_id)
                 if related_id not in accessible_ids:
                     raise PermissionDenied(
                         {
