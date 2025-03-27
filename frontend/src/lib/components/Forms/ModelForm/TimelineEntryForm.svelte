@@ -6,6 +6,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -13,6 +14,8 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
+
+	const { value, errors, constraints } = formFieldProxy(form, 'entry_type');
 </script>
 
 {#if context != 'edit'}
@@ -34,6 +37,17 @@
 		bind:cachedValue={formDataCache['entry_type']}
 	/>
 	<TextField
+		type="datetime-local"
+		step="1"
+		{form}
+		field="timestamp"
+		label={m.timestamp()}
+		cacheLock={cacheLocks['timestamp']}
+		bind:cachedValue={formDataCache['timestamp']}
+	/>
+{/if}
+{#if !['severity_changed', 'status_changed'].includes($value)}
+	<TextField
 		{form}
 		field="entry"
 		label={m.entry()}
@@ -42,15 +56,6 @@
 		data-focusindex="0"
 	/>
 {/if}
-<TextField
-	type="datetime-local"
-	step="1"
-	{form}
-	field="timestamp"
-	label={m.timestamp()}
-	cacheLock={cacheLocks['timestamp']}
-	bind:cachedValue={formDataCache['timestamp']}
-/>
 <TextArea
 	{form}
 	field="observation"

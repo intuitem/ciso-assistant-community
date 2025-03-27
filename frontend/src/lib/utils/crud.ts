@@ -843,7 +843,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'incident', urlModel: 'incidents' },
 			{ field: 'author', urlModel: 'users' }
 		],
-		selectFields: [{ field: 'entry_type' }]
+		selectFields: [{ field: 'entry_type' }],
+		reverseForeignKeyFields: [{ field: 'timeline_entries', urlModel: 'evidences' }]
 	}
 };
 
