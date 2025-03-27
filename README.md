@@ -475,7 +475,7 @@ These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
+To run API tests on the backend, simply type "poetry run pytest" in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 

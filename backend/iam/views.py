@@ -86,6 +86,10 @@ class CurrentUserView(views.APIView):
             "is_third_party": request.user.is_third_party,
             "is_admin": request.user.is_admin(),
             "accessible_domains": [str(f) for f in accessible_domains],
+            "domain_permissions": RoleAssignment.get_permissions_per_folder(
+                principal=request.user, recursive=True
+            ),
+            "root_folder_id": Folder.get_root_folder().id,
         }
         return Response(res_data, status=HTTP_200_OK)
 
