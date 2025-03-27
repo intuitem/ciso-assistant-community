@@ -247,14 +247,6 @@
 							</div>
 						</div>
 					</div>
-					<TextArea
-						form={_form}
-						field="existing_controls"
-						label="context"
-						helpText={m.existingContextHelper()}
-						regionContainer="w-1/2"
-						rows={3}
-					/>
 				</div>
 				<div class="flex w-1/2">
 					<div class="flex flex-row space-x-4 my-auto">
