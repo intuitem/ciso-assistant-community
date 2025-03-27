@@ -133,8 +133,6 @@ jobs:
         run: pnpm exec playwright install
       - name: Build the Docker app
         run: |
-          rm -rf db
-          mkdir db
           docker compose -f docker-compose-build.yml up -d
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
@@ -143,7 +141,10 @@ jobs:
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
-          sleep 120 # give the migrations time to finish (included in the up on the previous step)
+          until docker compose -f docker-compose-build.yml exec -T backend curl -f http://localhost:8000/api/build >/dev/null 2>&1; do
+            echo "Backend is not ready - waiting 10s..."
+            sleep 10
+          done
           docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
@@ -270,7 +271,8 @@ jobs:
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright install
       - name: Build the Docker app
-        run: docker compose -f enterprise/docker-compose-build.yml up -d
+        run: |
+          docker compose -f enterprise/docker-compose-build.yml up -d
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -278,7 +280,10 @@ jobs:
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
-          sleep 120 # give the migrations time to finish (included in the up on the previous step)
+          until docker compose -f enterprise/docker-compose-build.yml exec -T backend curl -f http://localhost:8000/api/build >/dev/null 2>&1; do
+            echo "Backend is not ready - waiting 10s..."
+            sleep 10
+          done
           docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }} && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}

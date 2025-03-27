@@ -21,6 +21,7 @@ COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
 ENV BODY_SIZE_LIMIT=20000000
-
+RUN groupadd --gid 1001 app && useradd --uid 1001 --gid 1001 app
+USER app
 
 CMD [ "node", "server" ]
