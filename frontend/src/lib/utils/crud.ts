@@ -398,7 +398,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
 		reverseForeignKeyFields: [
-			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
+			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
+			{ field: 'assets', urlModel: 'solutions', disableAddDeleteButtons: true }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -605,7 +606,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Solutions',
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
-			{ field: 'recipient_entity', urlModel: 'entities' }
+			{ field: 'recipient_entity', urlModel: 'entities' },
+			{ field: 'assets', urlModel: 'assets' }
 		]
 	},
 	representatives: {
