@@ -1,11 +1,7 @@
 FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
-  PYTHONDONTWRITEBYTECODE=1 \
-  POETRY_NO_INTERACTION=1 \
-  POETRY_VIRTUALENVS_IN_PROJECT=1 \
-  POETRY_VIRTUALENVS_CREATE=1 \
-  POETRY_CACHE_DIR=/tmp/poetry_cache
+  PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /code
 
@@ -17,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 # libcairo2 \
 # zlib1g-dev
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+RUN apt-get install -y --no-install-recommends curl ca-certificates
 ADD https://astral.sh/uv/0.6.9/install.sh /uv-installer.sh
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 ENV PATH="/root/.local/bin/:$PATH"
