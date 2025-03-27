@@ -274,14 +274,45 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def _validate_related_objects_access(self, request: Request, instance=None):
         folder_id = request.data.get("folder")
+        if (
+            not folder_id
+            and "perimeter" in request.data
+            and request.data["perimeter"] not in (-1, None)
+        ):
+            try:
+                perimeter_id = uuid.UUID(str(request.data["perimeter"]))
+                perimeter = get_object_or_404(Perimeter, id=perimeter_id)
+                folder_id = perimeter.folder.id
+            except (ValueError, AttributeError, KeyError, TypeError):
+                raise ValidationError(
+                    {"folder": "Invalid perimeter or missing folder in perimeter"}
+                )
+
+        if (
+            not folder_id
+            and "risk_assessment" in request.data
+            and request.data["risk_assessment"] not in (-1, None)
+        ):
+            try:
+                risk_assessment_id = uuid.UUID(str(request.data["risk_assessment"]))
+                risk_assessment = get_object_or_404(
+                    RiskAssessment, id=risk_assessment_id
+                )
+                folder_id = risk_assessment.folder.id
+            except (ValueError, AttributeError, KeyError, TypeError):
+                raise ValidationError(
+                    {
+                        "risk_assessment": "Invalid risk assessment or missing folder in risk assessment"
+                    }
+                )
+
         if not folder_id:
-            if self.model == Folder:
-                return
-            elif self.model == User:
+            if self.model == Folder or self.model == User:
                 return
             raise ValidationError(
                 {"folder": "Folder ID is required in the request data"}
             )
+
         current_folder = get_object_or_404(Folder, id=folder_id)
 
         model_class = self.get_queryset().model
@@ -306,7 +337,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     field_value if isinstance(field_value, list) else [field_value]
                 )
                 if not all(uuid.UUID(str(id)) in accessible_ids for id in related_ids):
-                    raise ValidationError(
+                    raise PermissionDenied(
                         {
                             field.name: "Some objects are not accessible in the current folder"
                         }
@@ -315,7 +346,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             elif field.one_to_one or field.many_to_one:
                 related_id = uuid.UUID(str(field_value))
                 if related_id not in accessible_ids:
-                    raise ValidationError(
+                    raise PermissionDenied(
                         {
                             field.name: "The object is not accessible in the current folder"
                         }
