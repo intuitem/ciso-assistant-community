@@ -98,6 +98,17 @@
 			bind:cachedValue={formDataCache['evidences']}
 			label={m.evidences()}
 		/>
+
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="assets"
+			optionsExtraFields={[['folder', 'str']]}
+			field="assets"
+			cacheLock={cacheLocks['assets']}
+			bind:cachedValue={formDataCache['assets']}
+			label={m.assets()}
+		/>
 		<AutocompleteSelect
 			{form}
 			multiple
