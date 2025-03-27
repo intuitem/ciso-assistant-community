@@ -54,14 +54,17 @@
 	];
 
 	const requirementHashmap = Object.fromEntries(
-		data.requirements.map((requirement) => [requirement.id, requirement])
+		data.requirements.map((requirement) => [
+			requirement.id,
+			{ obj: requirement, hideSuggestion: true }
+		])
 	);
 
 	$: createdEvidence = form?.createdEvidence;
 
 	function title(requirementAssessment) {
-		const requirement =
-			requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
+		let requirement = requirementHashmap[requirementAssessment.requirement];
+		requirement = requirement ? requirement.obj : requirementAssessment;
 		return requirement.display_short ? requirement.display_short : (requirement.name ?? '');
 	}
 
@@ -200,27 +203,10 @@
 		modalStore.trigger(modal);
 	}
 
-	// TODO: utiliser requirementHashmap ? cf : function title(requirementAssessment) {
-	//
-	// let requirementAssessmentsList: string[] = $hideSuggestions;
-	// let hideSuggestionMap = new Map();
-	// let hideSuggestion = requirementAssessmentsList.includes(data.requirementAssessment.id)
-	// 	? true
-	// 	: false;
-	//
-	// function toggleSuggestions(requirementAssessment) {
-	// 	if (!requirementAssessmentsList.includes(requirementAssessment.id)) {
-	// 		requirementAssessmentsList.push(requirementAssessment.id);
-	// 	} else {
-	// 		requirementAssessmentsList = requirementAssessmentsList.filter(
-	// 			(item) => item !== requirementAssessment.id
-	// 		);
-	// 	}
-	// 	hideSuggestion = !hideSuggestion;
-	// 	hideSuggestions.set(requirementAssessmentsList);
-	// }
-	//
-	// console.log(data);
+	function toggleSuggestion(requirementAssessmentId) {
+		requirementHashmap[requirementAssessmentId].hideSuggestion =
+			!requirementHashmap[requirementAssessmentId].hideSuggestion;
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -262,7 +248,6 @@
 			</div>
 		{/if}
 		{#each data.requirement_assessments as requirementAssessment, i}
-			<!-- {console.log(i)} -->
 			<div class="w-2"></div>
 
 			<span class="relative flex justify-center py-4">
@@ -292,93 +277,93 @@
 								<div>
 									<i class="fa-solid fa-circle-info mr-2" />{m.additionalInformation()}
 								</div>
-								<!-- <button on:click={toggleSuggestions}> -->
-								<!-- 	{#if !hideSuggestion} -->
-								<!-- 		<i class="fa-solid fa-eye" /> -->
-								<!-- 	{:else} -->
-								<!-- 		<i class="fa-solid fa-eye-slash" /> -->
-								<!-- 	{/if} -->
-								<!-- </button> -->
+								<button on:click={() => toggleSuggestion(data.requirements[i].id)}>
+									{#if !requirementHashmap[data.requirements[i].id].hideSuggestion}
+										<i class="fa-solid fa-eye" />
+									{:else}
+										<i class="fa-solid fa-eye-slash" />
+									{/if}
+								</button>
 							</h2>
-							<!-- {#if !hideSuggestion} -->
-							{#if data.requirements[i].annotation}
-								<div class="my-2">
-									<p class="font-medium">
-										<i class="fa-solid fa-pencil" />
-										{m.annotation()}
-									</p>
-									<p class="whitespace-pre-line py-1">
-										{data.requirements[i].annotation}
-									</p>
-								</div>
+							{#if !requirementHashmap[requirementAssessment].hideSuggestion}
+								{#if data.requirements[i].annotation}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-pencil" />
+											{m.annotation()}
+										</p>
+										<p class="whitespace-pre-line py-1">
+											{data.requirements[i].annotation}
+										</p>
+									</div>
+								{/if}
+								<!-- {#if typical_evidence} -->
+								<!-- 	<div class="my-2"> -->
+								<!-- 		<p class="font-medium"> -->
+								<!-- 			<i class="fa-solid fa-pencil" /> -->
+								<!-- 			{m.typicalEvidence()} -->
+								<!-- 		</p> -->
+								<!-- 		<p class="whitespace-pre-line py-1"> -->
+								<!-- 			{typical_evidence} -->
+								<!-- 		</p> -->
+								<!-- 	</div> -->
+								<!-- {/if} -->
+								<!-- {#if requirementAssessment.mapping_inference.result} -->
+								<!-- 	<div class="my-2"> -->
+								<!-- 		<p class="font-medium"> -->
+								<!-- 			<i class="fa-solid fa-link" /> -->
+								<!-- 			{m.mappingInference()} -->
+								<!-- 		</p> -->
+								<!-- 		<span class="text-xs text-gray-500" -->
+								<!-- 			><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span -->
+								<!-- 		> -->
+								<!-- 		<ul class="list-disc ml-4"> -->
+								<!-- 			<li> -->
+								<!-- 				<p> -->
+								<!-- 					<a -->
+								<!-- 						class="anchor" -->
+								<!-- 						href="/requirement-assessments/{mappingInference -->
+								<!-- 							.sourceRequirementAssessment.id}" -->
+								<!-- 					> -->
+								<!-- 						{mappingInference.sourceRequirementAssessment.str} -->
+								<!-- 					</a> -->
+								<!-- 				</p> -->
+								<!-- 				<p class="whitespace-pre-line py-1"> -->
+								<!-- 					<span class="italic">{m.coverageColon()}</span> -->
+								<!-- 					<span class="badge h-fit"> -->
+								<!-- 						{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)} -->
+								<!-- 					</span> -->
+								<!-- 				</p> -->
+								<!-- 				{#if mappingInference.sourceRequirementAssessment.is_scored} -->
+								<!-- 					<p class="whitespace-pre-line py-1"> -->
+								<!-- 						<span class="italic">{m.scoreSemiColon()}</span> -->
+								<!-- 						<span class="badge h-fit"> -->
+								<!-- 							{safeTranslate(mappingInference.sourceRequirementAssessment.score)} -->
+								<!-- 						</span> -->
+								<!-- 					</p> -->
+								<!-- 				{/if} -->
+								<!-- 				<p class="whitespace-pre-line py-1"> -->
+								<!-- 					<span class="italic">{m.suggestionColon()}</span> -->
+								<!-- 					<span -->
+								<!-- 						class="badge {classesText} h-fit" -->
+								<!-- 						style="background-color: {complianceResultColorMap[ -->
+								<!-- 							requirementAssessment.mapping_inference.result -->
+								<!-- 						]};" -->
+								<!-- 					> -->
+								<!-- 						{safeTranslate(requirementAssessment.mapping_inference.result)} -->
+								<!-- 					</span> -->
+								<!-- 				</p> -->
+								<!-- 				{#if mappingInference.data.requirements[i]} -->
+								<!-- 					<p class="whitespace-pre-line py-1"> -->
+								<!-- 						<span class="italic">{m.annotationColon()}</span> -->
+								<!-- 						{mappingInference.data.requirements[i]} -->
+								<!-- 					</p> -->
+								<!-- 				{/if} -->
+								<!-- 			</li> -->
+								<!-- 		</ul> -->
+								<!-- 	</div> -->
+								<!-- {/if} -->
 							{/if}
-							<!-- {#if typical_evidence} -->
-							<!-- 	<div class="my-2"> -->
-							<!-- 		<p class="font-medium"> -->
-							<!-- 			<i class="fa-solid fa-pencil" /> -->
-							<!-- 			{m.typicalEvidence()} -->
-							<!-- 		</p> -->
-							<!-- 		<p class="whitespace-pre-line py-1"> -->
-							<!-- 			{typical_evidence} -->
-							<!-- 		</p> -->
-							<!-- 	</div> -->
-							<!-- {/if} -->
-							<!-- {#if requirementAssessment.mapping_inference.result} -->
-							<!-- 	<div class="my-2"> -->
-							<!-- 		<p class="font-medium"> -->
-							<!-- 			<i class="fa-solid fa-link" /> -->
-							<!-- 			{m.mappingInference()} -->
-							<!-- 		</p> -->
-							<!-- 		<span class="text-xs text-gray-500" -->
-							<!-- 			><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span -->
-							<!-- 		> -->
-							<!-- 		<ul class="list-disc ml-4"> -->
-							<!-- 			<li> -->
-							<!-- 				<p> -->
-							<!-- 					<a -->
-							<!-- 						class="anchor" -->
-							<!-- 						href="/requirement-assessments/{mappingInference -->
-							<!-- 							.sourceRequirementAssessment.id}" -->
-							<!-- 					> -->
-							<!-- 						{mappingInference.sourceRequirementAssessment.str} -->
-							<!-- 					</a> -->
-							<!-- 				</p> -->
-							<!-- 				<p class="whitespace-pre-line py-1"> -->
-							<!-- 					<span class="italic">{m.coverageColon()}</span> -->
-							<!-- 					<span class="badge h-fit"> -->
-							<!-- 						{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)} -->
-							<!-- 					</span> -->
-							<!-- 				</p> -->
-							<!-- 				{#if mappingInference.sourceRequirementAssessment.is_scored} -->
-							<!-- 					<p class="whitespace-pre-line py-1"> -->
-							<!-- 						<span class="italic">{m.scoreSemiColon()}</span> -->
-							<!-- 						<span class="badge h-fit"> -->
-							<!-- 							{safeTranslate(mappingInference.sourceRequirementAssessment.score)} -->
-							<!-- 						</span> -->
-							<!-- 					</p> -->
-							<!-- 				{/if} -->
-							<!-- 				<p class="whitespace-pre-line py-1"> -->
-							<!-- 					<span class="italic">{m.suggestionColon()}</span> -->
-							<!-- 					<span -->
-							<!-- 						class="badge {classesText} h-fit" -->
-							<!-- 						style="background-color: {complianceResultColorMap[ -->
-							<!-- 							requirementAssessment.mapping_inference.result -->
-							<!-- 						]};" -->
-							<!-- 					> -->
-							<!-- 						{safeTranslate(requirementAssessment.mapping_inference.result)} -->
-							<!-- 					</span> -->
-							<!-- 				</p> -->
-							<!-- 				{#if mappingInference.data.requirements[i]} -->
-							<!-- 					<p class="whitespace-pre-line py-1"> -->
-							<!-- 						<span class="italic">{m.annotationColon()}</span> -->
-							<!-- 						{mappingInference.data.requirements[i]} -->
-							<!-- 					</p> -->
-							<!-- 				{/if} -->
-							<!-- 			</li> -->
-							<!-- 		</ul> -->
-							<!-- 	</div> -->
-							<!-- {/if} -->
-							<!-- {/if} -->
 						</div>
 					{/if}
 
