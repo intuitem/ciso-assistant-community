@@ -558,6 +558,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     effort = serializers.CharField(source="get_effort_display")
     cost = serializers.FloatField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
+    assets = FieldsRelatedField(many=True)
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)

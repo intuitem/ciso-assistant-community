@@ -1915,6 +1915,13 @@ class AppliedControl(
         related_name="applied_controls",
     )
 
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name=_("Assets"),
+        related_name="applied_controls",
+    )
+
     category = models.CharField(
         max_length=20,
         choices=CATEGORY,
