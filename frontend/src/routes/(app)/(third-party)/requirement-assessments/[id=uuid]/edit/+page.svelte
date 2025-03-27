@@ -394,7 +394,6 @@
 			let:form
 			let:data
 			action="?/updateRequirementAssessment"
-			debug
 			{...$$restProps}
 		>
 			<div class="card shadow-lg bg-white">

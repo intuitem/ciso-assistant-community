@@ -114,7 +114,6 @@
 		{_form}
 		validators={zod(schema)}
 		action="?/updateRiskScenario&next={next}"
-		debug
 	>
 		<div class="flex flex-row space-x-2">
 			<div class="card p-2 bg-white shadow-lg w-1/2">
