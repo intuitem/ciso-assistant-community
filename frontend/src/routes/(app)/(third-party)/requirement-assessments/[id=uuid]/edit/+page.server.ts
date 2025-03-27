@@ -255,7 +255,7 @@ export const actions: Actions = {
 			},
 			event
 		);
-		return { form, newControl: measure.id };
+		return { form, newControls: [measure.id] };
 	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
