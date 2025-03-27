@@ -479,6 +479,7 @@ class AssetFilter(df.FilterSet):
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
+            "applied_controls",
             "filtering_labels",
         ]
 
@@ -1293,6 +1294,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
+            "assets": ["exact"],
             "progress_field": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
