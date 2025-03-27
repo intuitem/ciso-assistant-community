@@ -282,7 +282,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'applied_controls', urlModel: 'risk-scenarios', disableAddDeleteButtons: true },
 			{ field: 'applied_controls', urlModel: 'findings', disableAddDeleteButtons: true },
-			{ field: 'applied_controls', urlModel: 'assets' }
+			{ field: 'applied_controls', urlModel: 'assets', disableAddDeleteButtons: true }
 		],
 		selectFields: [
 			{ field: 'status' },
