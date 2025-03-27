@@ -3797,7 +3797,13 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
+    filterset_fields = [
+        "folder",
+        "applied_controls",
+        "requirement_assessments",
+        "name",
+        "filtering_labels",
+    ]
     search_fields = ["name"]
 
     @action(methods=["get"], detail=True)

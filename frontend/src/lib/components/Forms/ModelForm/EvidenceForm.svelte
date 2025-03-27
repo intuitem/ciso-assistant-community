@@ -48,3 +48,15 @@
 	cacheLock={cacheLocks['link']}
 	bind:cachedValue={formDataCache['link']}
 />
+
+<AutocompleteSelect
+	multiple
+	{form}
+	createFromSelection={true}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	allowUserOptions="append"
+/>

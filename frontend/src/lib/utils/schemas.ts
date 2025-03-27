@@ -300,7 +300,8 @@ export const EvidenceSchema = z.object({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().optional().nullable()
+	link: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
 });
 
 export const GeneralSettingsSchema = z.object({

@@ -898,6 +898,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = Evidence
