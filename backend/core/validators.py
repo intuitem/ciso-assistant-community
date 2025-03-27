@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.core.validators import BaseValidator
 from django.utils.text import get_valid_filename, slugify
-from django.utils.translation import gettext_lazy as _
 import jsonschema
 
 
