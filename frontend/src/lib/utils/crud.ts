@@ -270,7 +270,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
+			{ field: 'assets', urlModel: 'assets' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'evidences' },
@@ -280,7 +281,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableAddDeleteButtons: true
 			},
 			{ field: 'applied_controls', urlModel: 'risk-scenarios', disableAddDeleteButtons: true },
-			{ field: 'applied_controls', urlModel: 'findings', disableAddDeleteButtons: true }
+			{ field: 'applied_controls', urlModel: 'findings', disableAddDeleteButtons: true },
+			{ field: 'applied_controls', urlModel: 'assets', disableAddDeleteButtons: true }
 		],
 		selectFields: [
 			{ field: 'status' },
