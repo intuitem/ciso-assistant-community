@@ -157,7 +157,7 @@
 		applyAction: true,
 		resetForm: false,
 		validators: zod(schema),
-		taintedMessage: m.taintedFormMessage(),
+		taintedMessage: false,
 		validationMethod: 'auto'
 	});
 
@@ -196,49 +196,42 @@
 	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = false;
 
-	$: console.log('form', form);
-
 	$: formStore = requirementAssessmentForm.form;
-
-	$: if (form?.newControl) {
-		console.log('form.newControl', form.newControl);
-		refreshKey = !refreshKey;
-		requirementAssessmentForm.form.update((current: Record<string, any>) =>
-			form?.newControl
-				? {
-						...current,
-						applied_controls: [...current.applied_controls, form?.newControl]
-					}
-				: current
-		);
-		console.log('formStore', $formStore);
-	}
 
 	$: if (form?.newControls) {
 		refreshKey = !refreshKey;
-		requirementAssessmentForm.form.update((current: Record<string, any>) => ({
-			...current,
-			applied_controls: [...current.applied_controls, ...form?.newControls]
-		}));
-		console.log('formStore', $formStore);
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				applied_controls: [...current.applied_controls, ...form?.newControls]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
 	}
 
 	$: if (form?.newEvidence) {
 		refreshKey = !refreshKey;
-		requirementAssessmentForm.form.update((current: Record<string, any>) => ({
-			...current,
-			evidences: [...current.evidences, form?.newEvidence]
-		}));
-		console.log('formStore', $formStore);
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				evidences: [...current.evidences, form?.newEvidence]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
 	}
 
 	$: if (form?.newSecurityException) {
 		refreshKey = !refreshKey;
-		requirementAssessmentForm.form.update((current: Record<string, any>) => ({
-			...current,
-			seucrity_exceptions: [...current.security_exceptions, form?.newSecurityException]
-		}));
-		console.log('formStore', $formStore);
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				seucrity_exceptions: [...current.security_exceptions, form?.newSecurityException]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
 	}
 </script>
 
