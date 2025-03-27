@@ -319,7 +319,15 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         model_class = self.get_queryset().model
         fields = (instance or model_class())._meta.get_fields()
 
-        skip_fields = {"approver", "authors", "provider", "owner"}
+        skip_fields = {
+            "approver",
+            "authors",
+            "provider",
+            "owner",
+            "folder",
+            "risk_assessment",
+            "perimeter",
+        }
 
         for field in fields:
             if field.name in skip_fields:
