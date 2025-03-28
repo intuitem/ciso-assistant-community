@@ -303,7 +303,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Asset
-        fields = "__all__"
+        exclude = ["business_value"]
 
     def validate_parent_assets(self, parent_assets):
         """
@@ -346,7 +346,6 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "type",
             "name",
             "description",
-            "business_value",
             "reference_link",
             "security_objectives",
             "disaster_recovery_objectives",
