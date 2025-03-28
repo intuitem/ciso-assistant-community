@@ -11,6 +11,9 @@ if [ -d ./db ]; then
   echo "For a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over"
   exit 1
 fi
+
+cp ./docker-compose-custom.yml ../docker-compose.yml
+
 echo "Starting CISO Assistant services..."
 docker compose -f ./docker-compose-custom.yml pull
 echo "Initializing the database. This can take up to 3 minutes, please wait.."
