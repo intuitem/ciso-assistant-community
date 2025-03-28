@@ -899,6 +899,14 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels'],
 		filters: { filtering_labels: LABELS_FILTER }
 	},
+	incidents: {
+		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
+		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
+	},
+	'timeline-entries': {
+		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
+		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
+	},
 	extra: {
 		filters: {
 			risk: undefined,

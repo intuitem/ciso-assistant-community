@@ -772,6 +772,7 @@
 	"licenseExpiredMessage": "Lisensi Anda telah kedaluwarsa. Operasi tulis dinonaktifkan. Silakan hubungi administrator Anda untuk memperbarui.",
 	"experimental": "Eksperimental",
 	"timeline": "Linimasa",
+	"timelineEntries": "Linimasa",
 	"graph": "Grafik",
 	"startDate": "Tanggal mulai",
 	"startDateHelpText": "Tanggal mulai (berguna untuk linimasa)",
@@ -1088,5 +1089,6 @@
 	"findings": "Temuan",
 	"associatedFindings": "Temuan terkait",
 	"findings_count": "Jumlah Temuan",
-	"addFinding": "Tambahkan temuan"
+	"addFinding": "Tambahkan temuan",
+	"timestampCannotBeInTheFuture": "Timestamp tidak boleh di masa depan"
 }

@@ -41,6 +41,8 @@
 	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
 	import FindingForm from './ModelForm/FindingForm.svelte';
 	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
+	import IncidentForm from './ModelForm/IncidentForm.svelte';
+	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -358,6 +360,17 @@
 		<FindingForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'findings-assessments'}
 		<FindingsAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'incidents'}
+		<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'timeline-entries'}
+		<TimelineEntryForm
+			{form}
+			{model}
+			{cacheLocks}
+			{formDataCache}
+			initialData={model.initialData}
+			{context}
+		/>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

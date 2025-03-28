@@ -80,7 +80,9 @@ export const URL_MODEL = [
 	'data-subjects',
 	'data-recipients',
 	'data-contractors',
-	'data-transfers'
+	'data-transfers',
+	'incidents',
+	'timeline-entries'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
