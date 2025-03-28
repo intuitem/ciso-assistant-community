@@ -50,6 +50,8 @@ READER_PERMISSIONS_LIST = [
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
+    "view_incident",
+    "view_timelineentry",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -89,6 +91,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
+    "view_incident",
+    "view_timelineentry",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -208,6 +212,14 @@ ANALYST_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_incident",
+    "view_incident",
+    "change_incident",
+    "delete_incident",
+    "add_timelineentry",
+    "view_timelineentry",
+    "change_timelineentry",
+    "delete_timelineentry",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -335,6 +347,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_incident",
+    "view_incident",
+    "change_incident",
+    "delete_incident",
+    "add_timelineentry",
+    "view_timelineentry",
+    "change_timelineentry",
+    "delete_timelineentry",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -493,6 +513,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_incident",
+    "view_incident",
+    "change_incident",
+    "delete_incident",
+    "add_timelineentry",
+    "view_timelineentry",
+    "change_timelineentry",
+    "delete_timelineentry",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
