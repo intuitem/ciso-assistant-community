@@ -21,6 +21,7 @@
 	export let additionalInitialData = {};
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
+	export let taintedMessage: string | boolean = false;
 
 	// Base Classes
 	const cBase = 'card p-4 w-fit max-w-4xl shadow-xl space-y-4';
@@ -60,6 +61,7 @@
 			{closeModal}
 			{context}
 			{duplicate}
+			{taintedMessage}
 			caching={true}
 			action={formAction}
 			{debug}

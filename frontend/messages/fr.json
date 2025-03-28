@@ -899,9 +899,7 @@
 	"days": "Jours",
 	"milliseconds": "Millisecondes",
 	"existingMeasures": "Mesures existantes",
-	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
 	"forgotPassword": "Mot de passe oublié",
-	"ssoSettingsUpdated": "Paramètres SSO mis à jour",
 	"score": "Score",
 	"scoreSemiColon": "Score :",
 	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source.",
@@ -1038,7 +1036,6 @@
 	"notSelected": "Non retenu",
 	"resetPasswordHere": "Vous pouvez réinitialiser votre mot de passe ici.",
 	"resetPassword": "Réinitialiser le mot de passe",
-	"ebiosRm": "Ebios RM",
 	"workshopOne": "Atelier 1",
 	"refIdSemiColon": "ID :",
 	"addFearedEvent": "Ajouter un événement redouté",
@@ -1230,6 +1227,7 @@
 	"noAuditForTheFramework": "Il n'y a pas d'audit utilisant ce référentiel",
 	"reauthenticateForSensitiveAction": "Veuillez vous réauthentifier pour effectuer cette action sensible",
 	"tprmOverview": "Vue d'ensemble",
+	"potentialThreats": "menaces potentielles",
 	"followUpUnresolvedHigh": "Hauts ou critiques non résolus",
 	"level": "Niveau"
 }

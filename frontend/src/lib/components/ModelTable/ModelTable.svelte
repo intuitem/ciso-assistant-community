@@ -19,7 +19,7 @@
 	import { isDark } from '$lib/utils/helpers';
 	import { listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import {
 		popup,
@@ -73,6 +73,8 @@
 	export let fields: string[] = [];
 
 	export let hideFilters = false;
+
+	export let folderId: string = '';
 
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
@@ -207,6 +209,7 @@
 					action: 'add',
 					model: model.name,
 					domain:
+						folderId ||
 						$page.data?.data?.folder?.id ||
 						$page.data?.data?.folder ||
 						$page.params.id ||
