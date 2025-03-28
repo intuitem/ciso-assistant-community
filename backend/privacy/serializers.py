@@ -1,8 +1,5 @@
-from dataclasses import fields
 from core.serializers import BaseModelSerializer, ReferentialSerializer
 from core.serializer_fields import FieldsRelatedField
-from iam import models
-from rest_framework import serializers
 from .models import (
     ProcessingNature,
     Purpose,
@@ -13,9 +10,6 @@ from .models import (
     DataTransfer,
     Processing,
 )
-from iam.models import User
-from tprm.models import Entity
-from core.models import AppliedControl
 
 
 # Purpose Serializers
