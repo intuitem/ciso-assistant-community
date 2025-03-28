@@ -10,7 +10,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let data: SuperValidated<AnyZodObject>;
 	export let dataType: 'form' | 'json';

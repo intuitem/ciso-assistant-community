@@ -4,7 +4,7 @@
 	import type { PageData } from './$types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';

@@ -4,7 +4,7 @@ import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';

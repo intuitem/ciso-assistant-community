@@ -6,7 +6,7 @@
 	export let data;
 	export let names;
 	export let uuids;
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	const chart_id = `stacked_div`;
 	onMount(async () => {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	export let handler: DataHandler;
 	const rowCount = handler.getRowCount();
 </script>

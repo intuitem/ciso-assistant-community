@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { afterNavigate } from '$app/navigation';
 	export let handler: DataHandler;
 
