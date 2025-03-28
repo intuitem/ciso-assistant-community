@@ -1861,6 +1861,131 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
+class Incident(NameDescriptionMixin, FolderMixin):
+    class Status(models.TextChoices):
+        NEW = "new", "New"
+        ONGOING = "ongoing", "Ongoing"
+        RESOLVED = "resolved", "Resolved"
+        CLOSED = "closed", "Closed"
+        DISMISSED = "dismissed", "Dismissed"
+
+    class Severity(models.IntegerChoices):
+        SEV1 = 1, "Critical"
+        SEV2 = 2, "Major"
+        SEV3 = 3, "Moderate"
+        SEV4 = 4, "Minor"
+        SEV5 = 5, "Low"
+        UNDEFINED = 6, "unknown"
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.NEW,
+    )
+    severity = models.PositiveSmallIntegerField(
+        choices=Severity.choices,
+        default=Severity.SEV3,
+    )
+    threats = models.ManyToManyField(
+        Threat,
+        related_name="incidents",
+        verbose_name="Threats",
+        blank=True,
+    )
+    owners = models.ManyToManyField(
+        User,
+        related_name="incidents",
+        verbose_name="Owners",
+        blank=True,
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        related_name="incidents",
+        verbose_name="Assets",
+        blank=True,
+    )
+    qualifications = models.ManyToManyField(
+        Qualification,
+        related_name="incidents",
+        verbose_name="Qualifications",
+        blank=True,
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = "Incident"
+        verbose_name_plural = "Incidents"
+
+
+class TimelineEntry(AbstractBaseModel, FolderMixin):
+    """
+    Timeline entry objects describe the evolution of an incident
+    """
+
+    class EntryType(models.TextChoices):
+        DETECTION = "detection", "Detection"
+        MITIGATION = "mitigation", "Mitigation"
+        OBSERVATION = "observation", "Observation"
+        SEVERITY_CHANGED = "severity_changed", "Severity changed"
+        STATUS_CHANGED = "status_changed", "Status changed"
+
+        @classmethod
+        def get_manual_entry_types(cls):
+            return filter(
+                lambda x: x[0] in ["detection", "mitigation", "observation"],
+                cls.choices,
+            )
+
+    incident = models.ForeignKey(
+        Incident,
+        on_delete=models.CASCADE,
+        related_name="timeline_entries",
+        verbose_name=_("Incident"),
+    )
+    entry = models.CharField(max_length=200, verbose_name="Entry", unique=False)
+    entry_type = models.CharField(
+        max_length=20,
+        choices=EntryType.choices,
+        default=EntryType.OBSERVATION,
+        verbose_name="Entry type",
+    )
+    timestamp = models.DateTimeField(
+        verbose_name="Timestamp", unique=False, default=now
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="timeline_entries",
+        verbose_name="Author",
+        null=True,
+        blank=True,
+    )
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+    evidences = models.ManyToManyField(
+        Evidence,
+        related_name="timeline_entries",
+        verbose_name="Evidence",
+        blank=True,
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    def __str__(self):
+        return f"{self.entry}"
+
+    def save(self, *args, **kwargs):
+        if self.timestamp > now():
+            raise ValidationError("Timestamp cannot be in the future.")
+        if not self.folder and self.incident:
+            self.folder = self.incident.folder
+        super().save(*args, **kwargs)
+
+
 class AppliedControl(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
@@ -1912,6 +2037,13 @@ class AppliedControl(
         Evidence,
         blank=True,
         verbose_name=_("Evidences"),
+        related_name="applied_controls",
+    )
+
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name=_("Assets"),
         related_name="applied_controls",
     )
 
@@ -3579,6 +3711,16 @@ class ComplianceAssessment(Assessment):
         else:
             return 0
 
+    @property
+    def has_questions(self) -> bool:
+        requirement_assessments = self.get_requirement_assessments(
+            include_non_assessable=False
+        )
+        for ra in requirement_assessments:
+            if ra.requirement.question:
+                return True
+        return False
+
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
@@ -4065,6 +4207,14 @@ auditlog.register(
 )
 auditlog.register(
     Vulnerability,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Incident,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TimelineEntry,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

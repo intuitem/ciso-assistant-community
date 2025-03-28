@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getLocale } from '$paraglide/runtime';

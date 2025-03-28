@@ -5,7 +5,7 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';

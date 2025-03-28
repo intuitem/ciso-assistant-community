@@ -479,6 +479,7 @@ class AssetFilter(df.FilterSet):
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
+            "applied_controls",
             "filtering_labels",
         ]
 
@@ -490,7 +491,7 @@ class AssetViewSet(BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
-    search_fields = ["name", "description", "business_value"]
+    search_fields = ["name", "description", "ref_id"]
 
     def _perform_write(self, serializer):
         type = serializer.validated_data.get("type")
@@ -1293,6 +1294,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
+            "assets": ["exact"],
             "progress_field": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
@@ -4936,3 +4938,64 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Finding.Status.choices))
+
+
+class IncidentViewSet(BaseModelViewSet):
+    model = Incident
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Incident.Status.choices))
+
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Incident.Severity.choices))
+
+    def perform_update(self, serializer):
+        previous_instance = self.get_object()
+        previous_status = previous_instance.status
+        previous_severity = previous_instance.severity
+
+        instance = serializer.save()
+
+        if previous_status != instance.status and previous_status is not None:
+            TimelineEntry.objects.create(
+                incident=instance,
+                entry=f"{previous_instance.get_status_display()}->{instance.get_status_display()}",
+                entry_type=TimelineEntry.EntryType.STATUS_CHANGED,
+                author=self.request.user,
+                timestamp=now(),
+            )
+
+        if previous_severity != instance.severity and previous_severity is not None:
+            TimelineEntry.objects.create(
+                incident=instance,
+                entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
+                entry_type=TimelineEntry.EntryType.SEVERITY_CHANGED,
+                author=self.request.user,
+                timestamp=now(),
+            )
+
+        return super().perform_update(serializer)
+
+
+class TimelineEntryViewSet(BaseModelViewSet):
+    model = TimelineEntry
+    filterset_fields = ["incident"]
+    ordering = ["-timestamp"]
+
+    @action(detail=False, name="Get entry type choices")
+    def entry_type(self, request):
+        return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+        return
+
+    def perform_destroy(self, instance):
+        if instance.entry_type in [
+            TimelineEntry.EntryType.SEVERITY_CHANGED,
+            TimelineEntry.EntryType.STATUS_CHANGED,
+        ]:
+            raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
+        return super().perform_destroy(instance)

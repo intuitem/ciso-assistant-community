@@ -5,7 +5,7 @@ import { fail, superValidate } from 'sveltekit-superforms';
 import type { Actions, PageServerLoad } from './$types';
 import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { safeTranslate } from '$lib/utils/i18n';
 

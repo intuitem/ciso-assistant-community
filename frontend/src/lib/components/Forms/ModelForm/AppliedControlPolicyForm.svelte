@@ -8,7 +8,7 @@
 	import Score from '$lib/components/Forms/Score.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -97,6 +97,17 @@
 			cacheLock={cacheLocks['evidences']}
 			bind:cachedValue={formDataCache['evidences']}
 			label={m.evidences()}
+		/>
+
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="assets"
+			optionsExtraFields={[['folder', 'str']]}
+			field="assets"
+			cacheLock={cacheLocks['assets']}
+			bind:cachedValue={formDataCache['assets']}
+			label={m.assets()}
 		/>
 		<AutocompleteSelect
 			{form}

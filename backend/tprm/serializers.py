@@ -250,6 +250,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 class SolutionReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     recipient_entity = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
 
     class Meta:
         model = Solution
