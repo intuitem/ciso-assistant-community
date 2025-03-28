@@ -4,7 +4,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import AuditCard from './AuditCard.svelte';
 	import ActivityTracker from './ActivityTracker.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';

@@ -7,7 +7,7 @@ import {
 } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';

@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';

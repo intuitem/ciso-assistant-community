@@ -5,7 +5,7 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 
 	const modalStore: ModalStore = getModalStore();

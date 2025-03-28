@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	export let data: PageData;
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 </script>
 
 <div class="bg-white shadow flex overflow-x-auto">

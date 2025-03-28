@@ -3,7 +3,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
 	import { page } from '$app/stores';

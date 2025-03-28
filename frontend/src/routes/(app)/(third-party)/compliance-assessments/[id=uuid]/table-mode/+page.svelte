@@ -11,7 +11,7 @@
 	} from '$lib/utils/constants';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import {
 		Accordion,
 		AccordionItem,

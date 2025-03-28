@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 import type { Perimeter } from '$lib/utils/types';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 const REQUIREMENT_ASSESSMENT_STATUS = [
 	'compliant',

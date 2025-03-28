@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { SSOSettingsSchema, GeneralSettingsSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 
 	let tabSet = 0;

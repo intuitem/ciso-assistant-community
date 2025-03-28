@@ -4,7 +4,7 @@
 	import Notifications from './Notifications.svelte';
 	import { showNotification } from '$lib/utils/stores';
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let info: object[];
 

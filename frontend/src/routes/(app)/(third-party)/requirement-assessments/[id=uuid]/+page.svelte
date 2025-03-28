@@ -11,7 +11,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from '../[id=uuid]/$types';
 

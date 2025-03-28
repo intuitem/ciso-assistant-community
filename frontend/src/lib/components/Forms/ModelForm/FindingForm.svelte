@@ -4,7 +4,7 @@
 	import Select from '../Select.svelte';
 	import { defaults, type SuperForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud';

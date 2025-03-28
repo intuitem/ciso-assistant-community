@@ -12,7 +12,7 @@
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
 	import type {
 		PopupSettings,

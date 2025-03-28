@@ -5,7 +5,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad, Actions } from '../$types';
 import { defaultWriteFormAction } from '$lib/utils/actions';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'ro-to';
