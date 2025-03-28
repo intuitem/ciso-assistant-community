@@ -36,6 +36,8 @@
 <Select
 	{form}
 	{disableDoubleDash}
+	field="status"
+	label={m.status()}
 	options={model.selectOptions['status']}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}

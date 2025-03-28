@@ -155,7 +155,6 @@
 				let:data
 				let:initialData
 				validators={zod(schema)}
-				debug
 				{...$$restProps}
 			>
 				<AutocompleteSelect
