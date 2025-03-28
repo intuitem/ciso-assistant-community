@@ -37,11 +37,11 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	let invalidateAll = true;
-	let formAction = '?/create';
+	const invalidateAll = true;
+	const formAction = '?/create';
 	const timelineForm = data.relatedModels['timeline-entries'].createForm;
 	const model = data.relatedModels['timeline-entries'];
-	let schema = modelSchema('timeline-entries');
+	const schema = modelSchema('timeline-entries');
 
 	const _form = superForm(timelineForm, {
 		dataType: 'json',
@@ -51,7 +51,13 @@
 		resetForm: true,
 		validators: zod(schema),
 		taintedMessage: false,
-		validationMethod: 'auto'
+		validationMethod: 'auto',
+		onUpdated: () => {
+			createModalCache.deleteCache(model.urlModel);
+			_form.form.update((current) => ({ ...current, evidences: undefined }));
+			refreshKey = !refreshKey;
+			console.debug($formStore);
+		}
 	});
 
 	const formStore = _form.form;
@@ -88,13 +94,12 @@
 			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field)
 		})
 	);
+
 	let invalidateTable = false;
-	$: {
-		if (browser || invalidateTable) {
-			handler.invalidate();
-			_goto($page.url);
-			invalidateTable = false;
-		}
+	$: if (browser || invalidateTable) {
+		handler.invalidate();
+		_goto($page.url);
+		invalidateTable = false;
 	}
 
 	const preventDelete = (row: TableSource) =>
@@ -150,7 +155,7 @@
 				let:data
 				let:initialData
 				validators={zod(schema)}
-				onUpdated={() => createModalCache.deleteCache(model.urlModel)}
+				debug
 				{...$$restProps}
 			>
 				<AutocompleteSelect
@@ -173,13 +178,16 @@
 				{#key refreshKey}
 					<div class="flex items-end justify-center">
 						<div class="w-full mr-2">
-							<AutocompleteSelect
-								{form}
-								multiple
-								optionsEndpoint="evidences"
-								field="evidences"
-								label={m.evidences()}
-							/>
+							{#key refreshKey}
+								<AutocompleteSelect
+									{form}
+									multiple
+									optionsEndpoint="evidences"
+									field="evidences"
+									resetForm
+									label={m.evidences()}
+								/>
+							{/key}
 						</div>
 						<button
 							class="btn bg-gray-300 h-11 w-10"
