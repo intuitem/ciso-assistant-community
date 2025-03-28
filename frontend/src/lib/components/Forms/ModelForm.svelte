@@ -34,6 +34,8 @@
 	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
 	import FindingForm from './ModelForm/FindingForm.svelte';
 	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
+	import IncidentForm from './ModelForm/IncidentForm.svelte';
+	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -43,7 +45,7 @@
 	import type { AnyZodObject } from 'zod';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
@@ -55,6 +57,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
+	export let taintedMessage: string | boolean = m.taintedFormMessage();
 	export let model: ModelInfo;
 	export let context = 'default';
 	export let caching: boolean = false;
@@ -138,7 +141,7 @@
 		applyAction: $$props.applyAction ?? true,
 		resetForm: $$props.resetForm ?? false,
 		validators: zod(schema),
-		taintedMessage: m.taintedFormMessage(),
+		taintedMessage,
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
 			if (form.message?.redirect) {
@@ -336,6 +339,17 @@
 		<FindingForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'findings-assessments'}
 		<FindingsAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'incidents'}
+		<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'timeline-entries'}
+		<TimelineEntryForm
+			{form}
+			{model}
+			{cacheLocks}
+			{formDataCache}
+			initialData={model.initialData}
+			{context}
+		/>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

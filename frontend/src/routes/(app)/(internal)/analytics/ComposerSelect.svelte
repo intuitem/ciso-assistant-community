@@ -4,7 +4,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import { composerSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';

@@ -546,32 +546,8 @@ export const listViewFields = {
 		}
 	},
 	'applied-controls': {
-		head: [
-			'ref_id',
-			'name',
-			'priority',
-			'status',
-			'category',
-			'csfFunction',
-			'eta',
-			'owner',
-			'domain',
-			'referenceControl',
-			'labels'
-		],
-		body: [
-			'ref_id',
-			'name',
-			'priority',
-			'status',
-			'category',
-			'csf_function',
-			'eta',
-			'owner',
-			'folder',
-			'reference_control',
-			'filtering_labels'
-		],
+		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'folder', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -894,6 +870,14 @@ export const listViewFields = {
 		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
 		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels'],
 		filters: { filtering_labels: LABELS_FILTER }
+	},
+	incidents: {
+		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
+		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
+	},
+	'timeline-entries': {
+		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
+		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	extra: {
 		filters: {

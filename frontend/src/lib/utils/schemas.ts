@@ -1,5 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
+import * as m from '$paraglide/messages';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -119,7 +120,6 @@ export const ThreatSchema = z.object({
 
 export const RiskScenarioSchema = z.object({
 	...NameDescriptionMixin,
-	existing_controls: z.string().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	existing_applied_controls: z.string().uuid().optional().array().optional(),
 	current_proba: z.number().optional(),
@@ -147,6 +147,7 @@ export const AppliedControlSchema = z.object({
 	priority: z.number().optional().nullable(),
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
+	assets: z.string().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -393,7 +394,8 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
-	criticality: z.number().optional()
+	criticality: z.number().optional(),
+	assets: z.string().uuid().optional().array().optional()
 });
 
 export const representativeSchema = z.object({
@@ -540,6 +542,32 @@ export const FindingsAssessmentSchema = z.object({
 	category: z.string().default('--')
 });
 
+export const IncidentSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	status: z.string(),
+	severity: z.number(),
+	threats: z.string().uuid().optional().array().optional(),
+	owners: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional()
+});
+
+export const TimelineEntrySchema = z.object({
+	incident: z.string(),
+	entry: z.string(),
+	entry_type: z.string(),
+	timestamp: z
+		.union([z.literal('').transform(() => null), z.string().datetime({ local: true })])
+		.refine((val) => !val || new Date(val) <= new Date(), {
+			message: m.timestampCannotBeInTheFuture()
+		})
+		.optional(),
+	observation: z.string().optional().nullable(),
+	evidences: z.string().uuid().optional().array().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -575,7 +603,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'operational-scenarios': operationalScenarioSchema,
 	'security-exceptions': SecurityExceptionSchema,
 	findings: FindingSchema,
-	'findings-assessments': FindingsAssessmentSchema
+	'findings-assessments': FindingsAssessmentSchema,
+	incidents: IncidentSchema,
+	'timeline-entries': TimelineEntrySchema
 };
 
 export const modelSchema = (model: string) => {
