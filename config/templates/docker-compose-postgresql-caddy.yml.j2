@@ -113,7 +113,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
     ports:
-      - {{ port }}:{{ port }}
+      - {{ port }}:{{ port }}{% if can_do_tls and port != 443 %}
+      - 443:443{% endif %}
     volumes:
       - ./caddy_data:/data{% if not can_do_tls and use_custom_cert %}
       - {{ cert_config.cert_path }}:/etc/caddy/cert.pem:ro
