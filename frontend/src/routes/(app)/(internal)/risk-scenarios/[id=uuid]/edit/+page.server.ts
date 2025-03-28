@@ -9,7 +9,7 @@ import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { zod } from 'sveltekit-superforms/adapters';
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { safeTranslate } from '$lib/utils/i18n';

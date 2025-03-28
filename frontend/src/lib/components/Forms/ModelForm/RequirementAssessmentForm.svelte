@@ -4,7 +4,7 @@
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 
 	export let form: SuperValidated<any>;

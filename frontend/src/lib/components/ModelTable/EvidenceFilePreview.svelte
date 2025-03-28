@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let cell: any;
 	export let meta: any;

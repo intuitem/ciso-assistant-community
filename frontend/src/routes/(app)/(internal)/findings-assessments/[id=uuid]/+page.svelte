@@ -3,7 +3,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	export let data: PageData;
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';

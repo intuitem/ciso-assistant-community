@@ -8,7 +8,7 @@
 
 	import { getCookie, setCookie } from '$lib/utils/cookies';
 	import { driverInstance } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';

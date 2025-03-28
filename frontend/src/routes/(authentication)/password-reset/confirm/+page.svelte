@@ -5,7 +5,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 
 	export let data: PageData;
 </script>

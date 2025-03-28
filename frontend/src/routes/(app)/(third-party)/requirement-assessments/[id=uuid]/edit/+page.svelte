@@ -37,7 +37,7 @@
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';

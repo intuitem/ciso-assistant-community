@@ -19,7 +19,7 @@
 	import { isDark } from '$lib/utils/helpers';
 	import { listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import {
 		popup,

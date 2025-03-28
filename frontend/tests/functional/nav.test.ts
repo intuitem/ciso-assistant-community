@@ -1,7 +1,7 @@
 import { safeTranslate } from '$lib/utils/i18n';
 import { locales, setLocale } from '../../src/paraglide/runtime.js';
 import { expect, setHttpResponsesListener, test } from '../utils/test-utils.js';
-import * as m from '$paraglide/messages.js';
+import { m } from '$paraglide/messages';
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
 	test.slow();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import Typewriter from 'svelte-typewriter';
 </script>
 
