@@ -491,7 +491,7 @@ class AssetViewSet(BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
-    search_fields = ["name", "description", "business_value"]
+    search_fields = ["name", "description", "ref_id"]
 
     def _perform_write(self, serializer):
         type = serializer.validated_data.get("type")

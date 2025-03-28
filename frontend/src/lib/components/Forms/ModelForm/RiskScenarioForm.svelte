@@ -61,6 +61,17 @@
 <AutocompleteSelect
 	{form}
 	multiple
+	optionsEndpoint="assets"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	field="assets"
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
 	optionsEndpoint="threats"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"

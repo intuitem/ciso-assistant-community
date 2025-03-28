@@ -3711,6 +3711,16 @@ class ComplianceAssessment(Assessment):
         else:
             return 0
 
+    @property
+    def has_questions(self) -> bool:
+        requirement_assessments = self.get_requirement_assessments(
+            include_non_assessable=False
+        )
+        for ra in requirement_assessments:
+            if ra.requirement.question:
+                return True
+        return False
+
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
