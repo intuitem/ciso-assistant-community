@@ -308,7 +308,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 )
 
         if not folder_id:
-            if self.model == Folder or self.model == User:
+            if (
+                self.model == Folder
+                or self.model == User
+                or self.model == ReferenceControl
+            ):
                 return
             raise ValidationError(
                 {"folder": "Folder ID is required in the request data"}

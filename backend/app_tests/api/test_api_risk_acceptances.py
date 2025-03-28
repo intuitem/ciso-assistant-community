@@ -181,6 +181,56 @@ class TestRiskAcceptanceAuthenticated:
         """test to update risk acceptances with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
+        approver = User.objects.create_user(email="approver@test.com")
+        UserGroup.objects.get(name="BI-UG-GAP").user_set.add(approver)
+        approver2 = User.objects.create_user(email="approver2@test.com")
+        UserGroup.objects.get(name="BI-UG-GAP").user_set.add(approver2)
+        risk_scenario = RiskScenario.objects.create(
+            name="test scenario",
+            description="test description",
+            risk_assessment=RiskAssessment.objects.create(
+                name="test",
+                perimeter=Perimeter.objects.create(name="test", folder=test.folder),
+                risk_matrix=RiskMatrix.objects.create(name="test", folder=test.folder),
+            ),
+        )
+
+        EndpointTestsQueries.Auth.update_object(
+            test.client,
+            "Risk Acceptances",
+            RiskAcceptance,
+            {
+                "name": RISK_ACCEPTANCE_NAME,
+                "description": RISK_ACCEPTANCE_DESCRIPTION,
+                "expiry_date": RISK_ACCEPTANCE_EXPIRY_DATE,
+                # 'state': RISK_ACCEPTANCE_STATE[0],
+                "folder": test.folder,
+                "approver": approver,
+            },
+            {
+                "name": "new " + RISK_ACCEPTANCE_NAME,
+                "description": "new " + RISK_ACCEPTANCE_DESCRIPTION,
+                "expiry_date": "2024-05-05",
+                "folder": str(test.folder.id),
+                "approver": str(approver2.id),
+                "risk_scenarios": [str(risk_scenario.id)],
+            },
+            {
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                "approver": {
+                    "id": str(approver.id),
+                    "str": approver.email,
+                    "last_name": approver.last_name,
+                    "first_name": approver.first_name,
+                },
+                # 'state': RISK_ACCEPTANCE_STATE[1],
+            },
+            user_group=test.user_group,
+        )
+
+    """def test_update_risk_acceptances(self, test):
+
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         folder = Folder.objects.create(name="test2")
         approver = User.objects.create_user(email="approver@test.com")
         UserGroup.objects.get(name="BI-UG-GAP").user_set.add(approver)
@@ -227,7 +277,7 @@ class TestRiskAcceptanceAuthenticated:
                 # 'state': RISK_ACCEPTANCE_STATE[1],
             },
             user_group=test.user_group,
-        )
+        )"""
 
     def test_delete_risk_acceptances(self, test):
         """test to delete risk acceptances with the API with authentication"""

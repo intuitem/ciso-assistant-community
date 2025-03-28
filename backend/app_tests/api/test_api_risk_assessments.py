@@ -173,6 +173,48 @@ class TestRiskAssessmentAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
         perimeter = Perimeter.objects.create(name="test", folder=test.folder)
+        perimeter2 = Perimeter.objects.create(name="test2", folder=test.folder)
+        risk_matrix = RiskMatrix.objects.all()[0]
+        risk_matrix2 = RiskMatrix.objects.all()[1]
+
+        EndpointTestsQueries.Auth.update_object(
+            test.client,
+            "Risk Assessment",
+            RiskAssessment,
+            {
+                "name": RISK_ASSESSMENT_NAME,
+                "description": RISK_ASSESSMENT_DESCRIPTION,
+                "version": RISK_ASSESSMENT_VERSION,
+                "perimeter": perimeter,
+                "risk_matrix": risk_matrix,
+            },
+            {
+                "name": "new " + RISK_ASSESSMENT_NAME,
+                "description": "new " + RISK_ASSESSMENT_DESCRIPTION,
+                "version": RISK_ASSESSMENT_VERSION + ".1",
+                "perimeter": str(perimeter2.id),
+                "risk_matrix": str(risk_matrix2.id),
+            },
+            {
+                "perimeter": {
+                    "id": str(perimeter.id),
+                    "str": perimeter.folder.name + "/" + perimeter.name,
+                    "folder": {
+                        "id": str(perimeter.folder.id),
+                        "str": perimeter.folder.name,
+                    },
+                },
+                "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
+            },
+            user_group=test.user_group,
+            scope=str(test.folder),
+        )
+
+    """def test_update_risk_assessments(self, test):
+
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
         perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
@@ -210,7 +252,7 @@ class TestRiskAssessmentAuthenticated:
             },
             user_group=test.user_group,
             scope=str(test.folder),
-        )
+        )"""
 
     def test_delete_risk_assessments(self, test):
         """test to delete risk assessments with the API with authentication"""

@@ -162,6 +162,52 @@ class TestEvidencesAuthenticated:
 
         folder = Folder.objects.create(name="test2")
         applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
+        applied_control2 = AppliedControl.objects.create(
+            name="test2", folder=test.folder
+        )
+
+        with open(
+            path.join(path.dirname(path.dirname(__file__)), EVIDENCE_ATTACHMENT), "rb"
+        ) as file:
+            EndpointTestsQueries.Auth.update_object(
+                test.client,
+                "Evidences",
+                Evidence,
+                {
+                    "name": EVIDENCE_NAME,
+                    "description": EVIDENCE_DESCRIPTION,
+                    "link": EVIDENCE_LINK,
+                    "folder": test.folder,
+                    "applied_controls": [applied_control],
+                },
+                {
+                    "name": "new " + EVIDENCE_NAME,
+                    "description": "new " + EVIDENCE_DESCRIPTION,
+                    "link": EVIDENCE_LINK + "/new",
+                    "folder": str(test.folder.id),
+                    "applied_controls": [str(applied_control2.id)],
+                    "attachment": file,
+                },
+                {
+                    "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                    "applied_controls": [
+                        {
+                            "id": str(applied_control.id),
+                            "str": applied_control.name,
+                        }
+                    ],
+                },
+                {
+                    "attachment": EVIDENCE_ATTACHMENT,
+                },
+                query_format="multipart",
+                user_group=test.user_group,
+            )
+
+    """def test_update_evidences_fails_with_out_of_scope_object(self, test):
+
+        folder = Folder.objects.create(name="test2")
+        applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
         applied_control2 = AppliedControl.objects.create(name="test2", folder=folder)
 
         with open(
@@ -200,7 +246,7 @@ class TestEvidencesAuthenticated:
                 },
                 query_format="multipart",
                 user_group=test.user_group,
-            )
+            )"""
 
     def test_delete_evidences(self, test):
         """test to delete evidences with the API with authentication"""

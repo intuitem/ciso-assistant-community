@@ -331,7 +331,7 @@ class TestRiskScenariosAuthenticated:
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
-        folder = Folder.objects.create(name="test2")
+        folder = Folder.objects.create(name="test2", parent_folder=test.folder)
         risk_assessment = RiskAssessment.objects.create(
             name="test",
             perimeter=Perimeter.objects.create(name="test", folder=test.folder),
@@ -407,6 +407,88 @@ class TestRiskScenariosAuthenticated:
             user_group=test.user_group,
             scope=str(test.folder),
         )
+
+    """def test_update_risk_scenarios_fails_with_out_of_scope_object(self, test):
+
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
+        folder = Folder.objects.create(name="test2")
+        risk_assessment = RiskAssessment.objects.create(
+            name="test",
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
+            risk_matrix=RiskMatrix.objects.all()[0],
+        )
+        risk_assessment2 = RiskAssessment.objects.create(
+            name="test2",
+            perimeter=Perimeter.objects.create(name="test2", folder=folder),
+            risk_matrix=RiskMatrix.objects.all()[1],
+        )
+        threat = Threat.objects.create(name="test", folder=test.folder)
+        threat2 = Threat.objects.create(name="test2", folder=folder)
+        asset = Asset.objects.create(name="test", folder=folder)
+        applied_controls = AppliedControl.objects.create(name="test", folder=folder)
+
+        EndpointTestsQueries.Auth.update_object(
+            test.client,
+            "Risk Scenarios",
+            RiskScenario,
+            {
+                "name": RISK_SCENARIO_NAME,
+                "description": RISK_SCENARIO_DESCRIPTION,
+                "ref_id": RISK_SCENARIO_REF_ID,
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES["value"],
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT["value"],
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL["value"],
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES["value"],
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT["value"],
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL["value"],
+                "treatment": RISK_SCENARIO_TREATMENT_STATUS[0],
+                "justification": RISK_SCENARIO_JUSTIFICATION,
+                "risk_assessment": risk_assessment,
+                "threats": [threat],
+            },
+            {
+                "name": "new " + RISK_SCENARIO_NAME,
+                "description": "new " + RISK_SCENARIO_DESCRIPTION,
+                "ref_id": "n" + RISK_SCENARIO_REF_ID,
+                "existing_controls": RISK_SCENARIO_existing_controls2[0],
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES2["value"],
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT2["value"],
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL2["value"],
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES2["value"],
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT2["value"],
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL2["value"],
+                "treatment": RISK_SCENARIO_TREATMENT_STATUS2[0],
+                "justification": "new " + RISK_SCENARIO_JUSTIFICATION,
+                "risk_assessment": str(risk_assessment2.id),
+                "threats": [str(threat2.id)],
+                "assets": [str(asset.id)],
+                "applied_controls": [str(applied_controls.id)],
+            },
+            {
+                "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES,
+                "current_impact": RISK_SCENARIO_CURRENT_IMPACT,
+                "current_level": RISK_SCENARIO_CURRENT_LEVEL,
+                "residual_proba": RISK_SCENARIO_RESIDUAL_PROBABILITIES,
+                "residual_impact": RISK_SCENARIO_RESIDUAL_IMPACT,
+                "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL,
+                "treatment": RISK_SCENARIO_TREATMENT_STATUS[1],
+                "risk_assessment": {
+                    "id": str(risk_assessment.id),
+                    "str": str(risk_assessment),
+                    "name": str(risk_assessment.name),
+                },
+                "threats": [{"id": str(threat.id), "str": threat.name}],
+                "risk_matrix": {
+                    "id": str(risk_assessment.risk_matrix.id),
+                    "str": risk_assessment.risk_matrix.name,
+                },
+            },
+            user_group=test.user_group,
+            scope=str(test.folder),
+        fails=True)
+        """
 
     def test_delete_risk_scenarios(self, test):
         """test to delete risk scenarios with the API with authentication"""

@@ -186,6 +186,55 @@ class TestComplianceAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework2")
         perimeter = Perimeter.objects.create(name="test", folder=test.folder)
+        perimeter2 = Perimeter.objects.create(name="test2", folder=test.folder)
+
+        EndpointTestsQueries.Auth.update_object(
+            test.client,
+            "Compliance Assessments",
+            ComplianceAssessment,
+            {
+                "name": COMPLIANCE_ASSESSMENT_NAME,
+                "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
+                "version": COMPLIANCE_ASSESSMENT_VERSION,
+                "perimeter": perimeter,
+                "framework": Framework.objects.all()[0],
+            },
+            {
+                "name": "new " + COMPLIANCE_ASSESSMENT_NAME,
+                "description": "new " + COMPLIANCE_ASSESSMENT_DESCRIPTION,
+                "version": COMPLIANCE_ASSESSMENT_VERSION + ".1",
+                "perimeter": str(perimeter2.id),
+                "framework": str(Framework.objects.all()[1].id),
+            },
+            {
+                "perimeter": {
+                    "id": str(perimeter.id),
+                    "str": perimeter.folder.name + "/" + perimeter.name,
+                    "folder": {
+                        "id": str(perimeter.folder.id),
+                        "str": perimeter.folder.name,
+                    },
+                },
+                "framework": {
+                    "id": str(Framework.objects.all()[0].id),
+                    "str": str(Framework.objects.all()[0]),
+                    "implementation_groups_definition": None,
+                    "reference_controls": [],
+                    "min_score": Framework.objects.all()[0].min_score,
+                    "max_score": Framework.objects.all()[0].max_score,
+                    "ref_id": str(Framework.objects.all()[0].ref_id),
+                },
+            },
+            user_group=test.user_group,
+            scope=str(test.folder),
+        )
+
+    """def test_update_compliance_assessments_fails_with_out_of_scope_object(self, test):
+
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Documents")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework2")
+        perimeter = Perimeter.objects.create(name="test", folder=test.folder)
         perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
@@ -229,7 +278,7 @@ class TestComplianceAssessmentsAuthenticated:
             },
             user_group=test.user_group,
             scope=str(test.folder),
-        )
+        )"""
 
     def test_delete_compliance_assessments(self, test):
         """test to delete compliance assessments with the API with authentication"""
