@@ -13,7 +13,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {

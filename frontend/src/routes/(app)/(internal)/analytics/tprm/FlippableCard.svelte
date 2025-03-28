@@ -24,7 +24,7 @@
 		isFlipped = !isFlipped;
 	}
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	// Function to determine progress bar color based on completion percentage
 	function getProgressColor(progress: number): string {

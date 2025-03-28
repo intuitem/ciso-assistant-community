@@ -32,7 +32,7 @@
 
 	hide = hide || !(selectOptions && Object.entries(selectOptions).length > 1);
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { beforeUpdate, onMount } from 'svelte';
 
 	export let multiSelectOptions = {

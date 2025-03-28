@@ -9,7 +9,7 @@
 	import { pageTitle, clientSideToast } from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 

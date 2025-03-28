@@ -8,7 +8,7 @@
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { defaults } from 'sveltekit-superforms';
 	import { z } from 'zod';
 	import { zod } from 'sveltekit-superforms/adapters';

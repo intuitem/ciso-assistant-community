@@ -2,7 +2,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import HalfGauge from './HalfGauge.svelte';
 
 	export let audit;

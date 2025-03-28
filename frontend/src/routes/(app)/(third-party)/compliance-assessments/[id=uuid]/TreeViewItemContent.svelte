@@ -7,7 +7,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { displayOnlyAssessableNodes } from './store';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 

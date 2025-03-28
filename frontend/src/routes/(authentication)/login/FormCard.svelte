@@ -14,7 +14,7 @@
 		type ModalStore
 	} from '@skeletonlabs/skeleton';
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let data: any;
 	export let form: any;

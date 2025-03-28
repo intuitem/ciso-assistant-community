@@ -6,7 +6,7 @@
 	export let data;
 	export let names;
 	export let uuids;
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	function truncateString(maxLength: number) {
 		return (name) => (name.length > maxLength ? name.substring(0, maxLength) + '...' : name);

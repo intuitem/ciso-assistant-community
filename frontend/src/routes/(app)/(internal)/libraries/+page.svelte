@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LibraryUploadSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	import { page } from '$app/stores';
 	import FileInput from '$lib/components/Forms/FileInput.svelte';

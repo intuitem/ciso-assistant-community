@@ -4,7 +4,7 @@
 	import { UserEditSchema } from '$lib/utils/schemas';
 	import type { PageData } from './$types';
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let data: PageData;
 </script>

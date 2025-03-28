@@ -2,7 +2,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
 import { safeTranslate } from '$lib/utils/i18n';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 import { fail, type Actions } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';

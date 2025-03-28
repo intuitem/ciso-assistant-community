@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 
 	export let data;

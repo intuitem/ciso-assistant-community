@@ -11,7 +11,7 @@
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';
 

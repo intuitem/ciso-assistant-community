@@ -5,7 +5,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { locales, getLocale, setLocale } from '$paraglide/runtime';
 	import { LOCALE_MAP } from '$lib/utils/locales';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { setCookie } from '$lib/utils/cookies';
 
 	import { createEventDispatcher, onMount } from 'svelte';

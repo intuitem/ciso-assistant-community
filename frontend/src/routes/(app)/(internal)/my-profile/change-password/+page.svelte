@@ -3,7 +3,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ChangePasswordSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;

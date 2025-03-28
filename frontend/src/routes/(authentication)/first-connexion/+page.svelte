@@ -5,7 +5,7 @@
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
 	import Typewriter from 'svelte-typewriter';
 
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import Logo from '$lib/components/Logo/Logo.svelte';
 
