@@ -200,7 +200,11 @@
 						class="btn variant-filled-tertiary font-semibold w-full"
 						data-testid="reset-button"
 						type="button"
-						on:click={() => _form.reset()}>{m.cancel()}</button
+						on:click={() => {
+							_form.reset();
+							_form.form.update((current) => ({ ...current, evidences: undefined }));
+							refreshKey = !refreshKey;
+						}}>{m.cancel()}</button
 					>
 					<button
 						class="btn variant-filled-primary font-semibold w-full"
