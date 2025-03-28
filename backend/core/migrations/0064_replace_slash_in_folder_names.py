@@ -11,7 +11,7 @@ def replace_slash_in_perimeter_names(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0063_appliedcontrol_assets"),
+        ("core", "0064_incident_timelineentry"),
     ]
 
     operations = [
