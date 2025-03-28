@@ -125,6 +125,11 @@ export const navData = {
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
 					permissions: ['view_riskassessment', 'view_assessment']
+				},
+				{
+					name: 'incidents',
+					fa_icon: 'fa-solid fa-bug',
+					href: '/incidents'
 				}
 			]
 		},

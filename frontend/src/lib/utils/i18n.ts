@@ -30,6 +30,15 @@ export function unsafeTranslate(key: string, params = {}, options = {}): string 
 		if (typeof key === 'boolean') {
 			return key ? '✅' : '❌';
 		}
+		if (typeof key === 'string' && key.includes('->')) {
+			const parts = key.split('->');
+			if (parts.length === 2) {
+				const [from, to] = parts;
+				const translatedFrom = m[toCamelCase(from)] ? m[toCamelCase(from)](params, options) : from;
+				const translatedTo = m[toCamelCase(to)] ? m[toCamelCase(to)](params, options) : to;
+				return translatedFrom + '->' + translatedTo;
+			}
+		}
 	} catch (e) {
 		console.error(`Error translating key "${key}"`, e);
 	}

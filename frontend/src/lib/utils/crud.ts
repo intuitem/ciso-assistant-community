@@ -826,6 +826,32 @@ export const URL_MODEL_MAP: ModelMap = {
 		// 	{ field: 'findings', urlModel: 'applied-controls' }
 		// ],
 		selectFields: [{ field: 'status' }]
+	},
+	incidents: {
+		name: 'incident',
+		localName: 'incident',
+		localNamePlural: 'incidents',
+		verboseName: 'Incident',
+		verboseNamePlural: 'Incidents',
+		foreignKeyFields: [
+			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
+		selectFields: [{ field: 'status' }, { field: 'severity' }]
+	},
+	'timeline-entries': {
+		name: 'timelineentry',
+		localName: 'timelineEntry',
+		localNamePlural: 'timelineEntries',
+		verboseName: 'Timeline entry',
+		verboseNamePlural: 'Timeline entries',
+		foreignKeyFields: [
+			{ field: 'incident', urlModel: 'incidents' },
+			{ field: 'author', urlModel: 'users' }
+		],
+		selectFields: [{ field: 'entry_type' }]
 	}
 };
 

@@ -1,5 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
+import * as m from '$paraglide/messages';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -541,6 +542,32 @@ export const FindingsAssessmentSchema = z.object({
 	category: z.string().default('--')
 });
 
+export const IncidentSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	status: z.string(),
+	severity: z.number(),
+	threats: z.string().uuid().optional().array().optional(),
+	owners: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional()
+});
+
+export const TimelineEntrySchema = z.object({
+	incident: z.string(),
+	entry: z.string(),
+	entry_type: z.string(),
+	timestamp: z
+		.union([z.literal('').transform(() => null), z.string().datetime({ local: true })])
+		.refine((val) => !val || new Date(val) <= new Date(), {
+			message: m.timestampCannotBeInTheFuture()
+		})
+		.optional(),
+	observation: z.string().optional().nullable(),
+	evidences: z.string().uuid().optional().array().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -576,7 +603,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'operational-scenarios': operationalScenarioSchema,
 	'security-exceptions': SecurityExceptionSchema,
 	findings: FindingSchema,
-	'findings-assessments': FindingsAssessmentSchema
+	'findings-assessments': FindingsAssessmentSchema,
+	incidents: IncidentSchema,
+	'timeline-entries': TimelineEntrySchema
 };
 
 export const modelSchema = (model: string) => {
