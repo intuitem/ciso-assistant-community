@@ -16,7 +16,6 @@
 	export let initialData: Record<string, any> = {};
 
 	const { value, errors, constraints } = formFieldProxy(form, 'entry_type');
-
 </script>
 
 {#if context != 'edit'}
