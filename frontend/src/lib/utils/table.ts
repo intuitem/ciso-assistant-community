@@ -790,7 +790,7 @@ export const listViewFields = {
 		body: ['name', 'description', 'category']
 	},
 	'data-contractors': {
-		head: ['name', 'description', 'entity', 'realtionshipType', 'country', 'documentationLink'],
+		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
 		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
 	},
 	'data-transfers': {
