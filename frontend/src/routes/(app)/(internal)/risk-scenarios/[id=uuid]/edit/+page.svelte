@@ -22,7 +22,7 @@
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 

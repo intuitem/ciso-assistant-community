@@ -30,7 +30,7 @@
 	import type { Node } from './types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let data: PageData;
 	export let form: ActionData;
