@@ -453,7 +453,8 @@ export const dataContractorSchema = z.object({
 	relationship_type: z.string(),
 	country: z.string(),
 	documentation_link: z.string().optional(),
-	processing: z.string()
+	processing: z.string(),
+	entity: z.string().optional()
 });
 export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
@@ -462,7 +463,8 @@ export const dataTransferSchema = z.object({
 	documentation_link: z.string().optional(),
 	legal_basis: z.string(),
 	guarantees: z.string().optional(),
-	processing: z.string()
+	processing: z.string(),
+	entity: z.string().optional()
 });
 
 export const personalDataSchema = z.object({

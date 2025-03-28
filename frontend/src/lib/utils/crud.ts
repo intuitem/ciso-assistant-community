@@ -699,7 +699,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataContractors',
 		verboseName: 'data contractor',
 		verboseNamePlural: 'data contractors',
-		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings' },
+			{ field: 'entity', urlModel: 'entities' }
+		],
 		selectFields: [{ field: 'relationship_type' }, { field: 'country' }]
 	},
 	'data-transfers': {
@@ -709,7 +712,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataTransfers',
 		verboseName: 'data transfer',
 		verboseNamePlural: 'data transfers',
-		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings' },
+			{ field: 'entity', urlModel: 'entities' }
+		],
 		selectFields: [{ field: 'legal_basis' }, { field: 'country' }]
 	},
 	'ebios-rm': {

@@ -790,12 +790,12 @@ export const listViewFields = {
 		body: ['name', 'description', 'category']
 	},
 	'data-contractors': {
-		head: ['name', 'description', 'realtionshipType', 'country', 'documentationLink'],
-		body: ['name', 'description', 'relationship_type', 'country', 'documentation_link']
+		head: ['name', 'description', 'entity', 'realtionshipType', 'country', 'documentationLink'],
+		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
 	},
 	'data-transfers': {
-		head: ['name', 'description', 'country', 'legalBasis', 'documentationLink'],
-		body: ['name', 'description', 'country', 'legal_basis', 'documentation_link']
+		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
+		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
 	},
 	'ebios-rm': {
 		head: ['name', 'description'],

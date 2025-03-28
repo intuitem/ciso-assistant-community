@@ -313,6 +313,12 @@ class DataContractor(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="contractors_involved"
     )
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     relationship_type = models.CharField(
         max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
     )
@@ -327,6 +333,12 @@ class DataContractor(NameDescriptionFolderMixin):
 class DataTransfer(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="data_transfers"
+    )
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
     legal_basis = models.CharField(

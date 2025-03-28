@@ -90,6 +90,7 @@ class DataContractorWriteSerializer(BaseModelSerializer):
 class DataContractorReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
+    entity = FieldsRelatedField()
 
     class Meta:
         model = DataContractor
@@ -106,6 +107,7 @@ class DataTransferWriteSerializer(BaseModelSerializer):
 class DataTransferReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
+    entity = FieldsRelatedField()
 
     class Meta:
         model = DataTransfer

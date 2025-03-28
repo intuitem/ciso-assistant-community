@@ -69,7 +69,7 @@
 {#if tree.length === 0}
 	<div class="flex flex-col justify-center items-center h-full">
 		<span class="text-center text-gray-600"
-			>Not enough compliance data yet. Refresh when more content is available.</span
+			>Not enough data yet. Refresh when more content is available.</span
 		>
 	</div>
 {:else}

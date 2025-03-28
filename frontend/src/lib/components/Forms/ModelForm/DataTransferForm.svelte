@@ -53,6 +53,14 @@
 />
 <AutocompleteSelect
 	{form}
+	field="entity"
+	optionsEndpoint="entities"
+	cacheLock={cacheLocks['entity']}
+	bind:cachedValue={formDataCache['entity']}
+	label={m.entity()}
+/>
+<AutocompleteSelect
+	{form}
 	field="processing"
 	optionsEndpoint="processings"
 	cacheLock={cacheLocks['processing']}
