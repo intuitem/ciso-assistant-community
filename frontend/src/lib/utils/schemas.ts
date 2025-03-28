@@ -148,6 +148,7 @@ export const AppliedControlSchema = z.object({
 	priority: z.number().optional().nullable(),
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
+	assets: z.string().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -394,7 +395,8 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
-	criticality: z.number().optional()
+	criticality: z.number().optional(),
+	assets: z.string().uuid().optional().array().optional()
 });
 
 export const representativeSchema = z.object({

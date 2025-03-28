@@ -27,11 +27,15 @@
 			series: [
 				{
 					type: 'tree',
+					roam: true,
 
 					data: [tree],
-					symbol: 'emptyCircle',
-					symbolSize: 10,
-
+					symbol: 'square',
+					itemStyle: {
+						color: '#ebb610'
+					},
+					symbolSize: 12,
+					initialTreeDepth: 1,
 					label: {
 						position: 'left',
 						verticalAlign: 'middle',
@@ -43,7 +47,7 @@
 						label: {
 							position: 'right',
 							verticalAlign: 'middle',
-							align: 'left'
+							align: 'right'
 						}
 					},
 

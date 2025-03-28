@@ -158,8 +158,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
 		selectFields: [{ field: 'lc_status' }],
 		reverseForeignKeyFields: [
-			{ field: 'perimeter', urlModel: 'risk-assessments' },
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
+			{ field: 'perimeter', urlModel: 'risk-assessments' },
 			{ field: 'perimeter', urlModel: 'entity-assessments' }
 		],
 		filters: [{ field: 'lc_status' }, { field: 'folder' }]
@@ -270,13 +270,19 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
+			{ field: 'assets', urlModel: 'assets' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'evidences' },
-			{ field: 'applied_controls', urlModel: 'requirement-assessments' },
-			{ field: 'applied_controls', urlModel: 'risk-scenarios' },
-			{ field: 'applied_controls', urlModel: 'findings' }
+			{
+				field: 'applied_controls',
+				urlModel: 'requirement-assessments',
+				disableAddDeleteButtons: true
+			},
+			{ field: 'applied_controls', urlModel: 'risk-scenarios', disableAddDeleteButtons: true },
+			{ field: 'applied_controls', urlModel: 'findings', disableAddDeleteButtons: true },
+			{ field: 'applied_controls', urlModel: 'assets', disableAddDeleteButtons: true }
 		],
 		selectFields: [
 			{ field: 'status' },
@@ -394,7 +400,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
 		reverseForeignKeyFields: [
-			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true }
+			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
+			{ field: 'assets', urlModel: 'solutions', disableAddDeleteButtons: true }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -564,9 +571,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
 		reverseForeignKeyFields: [
-			{ field: 'provider_entity', urlModel: 'solutions' },
+			{ field: 'entity', urlModel: 'entity-assessments' },
 			{ field: 'entity', urlModel: 'representatives' },
-			{ field: 'entity', urlModel: 'entity-assessments' }
+			{ field: 'provider_entity', urlModel: 'solutions' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -601,7 +608,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Solutions',
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
-			{ field: 'recipient_entity', urlModel: 'entities' }
+			{ field: 'recipient_entity', urlModel: 'entities' },
+			{ field: 'assets', urlModel: 'assets' }
 		]
 	},
 	representatives: {

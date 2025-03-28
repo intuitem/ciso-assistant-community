@@ -6,7 +6,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP, type ModelMapEntry } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
@@ -26,6 +26,7 @@
 
 	import { goto } from '$app/navigation';
 	import { listViewFields } from '$lib/utils/table';
+	import { canPerformAction } from '$lib/utils/access-control';
 	const modalStore: ModalStore = getModalStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
@@ -44,7 +45,10 @@
 
 	exclude = [...exclude, ...defaultExcludes];
 
-	$: data.relatedModels = Object.fromEntries(Object.entries(data.relatedModels).sort());
+	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
+		if (!model.reverseForeignKeyFields) return -1;
+		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
+	};
 
 	if (data.model?.detailViewFields) {
 		data.data = Object.fromEntries(
@@ -166,7 +170,15 @@
 	}
 
 	const user = $page.data.user;
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${data.model.name}`);
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: data.model.name,
+		domain:
+			data.model.name === 'folder'
+				? data.data.id
+				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
+	});
 
 	$: displayEditButton = function () {
 		return (
@@ -177,16 +189,11 @@
 		);
 	};
 
-	export let orderRelatedModels = [''];
-	if (data.urlModel === 'perimeters') {
-		orderRelatedModels = ['compliance-assessments', 'risk-assessments', 'entity-assessments'];
-	}
-	if (data.urlModel === 'entities') {
-		orderRelatedModels = ['entity-assessments', 'representatives', 'solutions'];
-	}
-	if (data.urlModel === 'folders') {
-		orderRelatedModels = ['perimeters', 'entities'];
-	}
+	$: relatedModels = Object.entries(data.relatedModels).sort(
+		(a: [string, any], b: [string, any]) => {
+			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
+		}
+	);
 
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
@@ -262,7 +269,7 @@
 							<dd class="text-gray-700 sm:col-span-2">
 								<ul class="">
 									<li
-										class="list-none"
+										class="list-none whitespace-pre-line"
 										data-testid={!(value instanceof Array)
 											? key.replace('_', '-') + '-field-value'
 											: null}
@@ -476,12 +483,10 @@
 	</div>
 </div>
 
-{#if Object.keys(data.relatedModels).length > 0 && displayModelTable}
+{#if relatedModels.length > 0}
 	<div class="card shadow-lg mt-8 bg-white">
 		<TabGroup justify="justify-center">
-			{#each Object.entries(data.relatedModels).sort((a, b) => {
-				return orderRelatedModels.indexOf(a[0]) - orderRelatedModels.indexOf(b[0]);
-			}) as [urlmodel, model], index}
+			{#each relatedModels as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
 					{safeTranslate(model.info.localNamePlural)}
 					{#if model.table.body.length > 0}
@@ -490,9 +495,7 @@
 				</Tab>
 			{/each}
 			<svelte:fragment slot="panel">
-				{#each Object.entries(data.relatedModels).sort((a, b) => {
-					return orderRelatedModels.indexOf(a[0]) - orderRelatedModels.indexOf(b[0]);
-				}) as [urlmodel, model], index}
+				{#each relatedModels as [urlmodel, model], index}
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">

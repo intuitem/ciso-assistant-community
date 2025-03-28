@@ -1213,6 +1213,7 @@
 	"reauthenticateForSensitiveAction": "Veuillez vous réauthentifier pour effectuer cette action sensible",
 	"timestampCannotBeInTheFuture": "L'horodatage ne peut pas être dans le futur",
 	"tprmOverview": "Vue d'ensemble",
+	"potentialThreats": "menaces potentielles",
 	"followUpUnresolvedHigh": "Hauts ou critiques non résolus",
 	"level": "Niveau"
 }

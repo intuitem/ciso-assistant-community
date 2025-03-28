@@ -475,7 +475,7 @@ These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
+To run API tests on the backend, simply type "poetry run pytest" in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 
@@ -526,6 +526,7 @@ Set DJANGO_DEBUG=False for security reason.
 - CS: Czech
 - SV: Swedish
 - ID: Indonesian
+- DA: Danish
 
 ## Contributors 🤝
 
@@ -538,6 +539,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
 - [eCharts](https://echarts.apache.org) - Charting library
+- [unovis](https://unovis.dev) - Complementary charting library
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Gitbook](https://www.gitbook.com) - Documentation platform
@@ -545,6 +547,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
 - [Docker](https://www.docker.com/) - Container Engine
 - [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
 
 ## Security
 
