@@ -119,7 +119,6 @@ export const ThreatSchema = z.object({
 
 export const RiskScenarioSchema = z.object({
 	...NameDescriptionMixin,
-	existing_controls: z.string().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	existing_applied_controls: z.string().uuid().optional().array().optional(),
 	current_proba: z.number().optional(),
