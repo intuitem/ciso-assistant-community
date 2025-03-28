@@ -74,6 +74,8 @@
 
 	export let hideFilters = false;
 
+	export let folderId: string = '';
+
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
 		rowIndex: number
@@ -208,6 +210,7 @@
 					action: 'add',
 					model: model.name,
 					domain:
+						folderId ||
 						$page.data?.data?.folder?.id ||
 						$page.data?.data?.folder ||
 						$page.params.id ||

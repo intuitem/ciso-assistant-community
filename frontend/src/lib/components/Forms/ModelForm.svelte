@@ -57,6 +57,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
+	export let taintedMessage: string | boolean = m.taintedFormMessage();
 	export let model: ModelInfo;
 	export let context = 'default';
 	export let caching: boolean = false;
@@ -140,7 +141,7 @@
 		applyAction: $$props.applyAction ?? true,
 		resetForm: $$props.resetForm ?? false,
 		validators: zod(schema),
-		taintedMessage: m.taintedFormMessage(),
+		taintedMessage,
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
 			if (form.message?.redirect) {

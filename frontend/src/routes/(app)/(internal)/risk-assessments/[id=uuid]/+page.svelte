@@ -252,6 +252,7 @@
 				URLModel="risk-scenarios"
 				search={false}
 				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				folderId={data.risk_assessment.folder.id}
 				fields={[
 					'ref_id',
 					'name',

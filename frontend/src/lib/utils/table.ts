@@ -546,32 +546,8 @@ export const listViewFields = {
 		}
 	},
 	'applied-controls': {
-		head: [
-			'ref_id',
-			'name',
-			'priority',
-			'status',
-			'category',
-			'csfFunction',
-			'eta',
-			'owner',
-			'domain',
-			'referenceControl',
-			'labels'
-		],
-		body: [
-			'ref_id',
-			'name',
-			'priority',
-			'status',
-			'category',
-			'csf_function',
-			'eta',
-			'owner',
-			'folder',
-			'reference_control',
-			'filtering_labels'
-		],
+		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'folder', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,

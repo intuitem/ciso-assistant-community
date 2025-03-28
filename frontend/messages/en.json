@@ -1226,6 +1226,7 @@
 	"timestampCannotBeInTheFuture": "Timestamp cannot be in the future",
 	"reauthenticateForSensitiveAction": "The action you are trying to perform is sensitive and requires re-authentication",
 	"tprmOverview": "Overview",
+	"potentialThreats": "potential threats",
 	"followUpUnresolvedHigh": "Unresolved High or Critical",
 	"level": "Level"
 }

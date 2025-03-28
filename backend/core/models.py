@@ -2040,6 +2040,13 @@ class AppliedControl(
         related_name="applied_controls",
     )
 
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name=_("Assets"),
+        related_name="applied_controls",
+    )
+
     category = models.CharField(
         max_length=20,
         choices=CATEGORY,
@@ -3235,6 +3242,85 @@ class ComplianceAssessment(Assessment):
 
         return requirement_assessments_list
 
+    def get_threats_metrics(self):
+        # Check if the framework has any threats mappings
+        has_threats = RequirementNode.objects.filter(
+            framework=self.framework, threats__isnull=False
+        ).exists()
+
+        if not has_threats:
+            return {
+                "threats": [],
+                "total_unique_threats": 0,
+                "total_non_compliant": 0,
+                "total_partially_compliant": 0,
+            }
+
+        problematic_assessments = [
+            assessment
+            for assessment in self.get_requirement_assessments(
+                include_non_assessable=False
+            )
+            if assessment.result
+            in [
+                RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                RequirementAssessment.Result.NON_COMPLIANT,
+            ]
+        ]
+
+        threat_metrics = {}
+
+        # Process each problematic requirement assessment
+        for assessment in problematic_assessments:
+            threats = assessment.requirement.threats.all()
+
+            for threat in threats:
+                if threat.id not in threat_metrics:
+                    threat_metrics[threat.id] = {
+                        "id": threat.id,
+                        "name": threat.name,
+                        "display_long": threat.display_long,
+                        "urn": threat.urn,
+                        "non_compliant_count": 0,
+                        "partially_compliant_count": 0,
+                        "total_issues": 0,
+                        "requirement_assessments": [],
+                    }
+
+                if assessment.result == RequirementAssessment.Result.NON_COMPLIANT:
+                    threat_metrics[threat.id]["non_compliant_count"] += 1
+                elif (
+                    assessment.result
+                    == RequirementAssessment.Result.PARTIALLY_COMPLIANT
+                ):
+                    threat_metrics[threat.id]["partially_compliant_count"] += 1
+
+                threat_metrics[threat.id]["total_issues"] += 1
+
+                if assessment.id not in [
+                    ra.get("id")
+                    for ra in threat_metrics[threat.id]["requirement_assessments"]
+                ]:
+                    threat_metrics[threat.id]["requirement_assessments"].append(
+                        {
+                            "id": assessment.id,
+                            "requirement_id": assessment.requirement.id,
+                            "requirement_name": assessment.requirement.display_short,
+                            "result": assessment.result,
+                        }
+                    )
+
+        return {
+            "threats": list(threat_metrics.values()),
+            "total_unique_threats": len(threat_metrics),
+            "total_non_compliant": sum(
+                t["non_compliant_count"] for t in threat_metrics.values()
+            ),
+            "total_partially_compliant": sum(
+                t["partially_compliant_count"] for t in threat_metrics.values()
+            ),
+        }
+
     def get_requirements_status_count(self):
         requirements_status_count = []
         for st in RequirementAssessment.Status:
@@ -3624,6 +3710,16 @@ class ComplianceAssessment(Assessment):
             return int((answered_questions_count / total_questions_count) * 100)
         else:
             return 0
+
+    @property
+    def has_questions(self) -> bool:
+        requirement_assessments = self.get_requirement_assessments(
+            include_non_assessable=False
+        )
+        for ra in requirement_assessments:
+            if ra.requirement.question:
+                return True
+        return False
 
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):

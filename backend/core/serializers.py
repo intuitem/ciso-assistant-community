@@ -303,7 +303,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Asset
-        fields = "__all__"
+        exclude = ["business_value"]
 
     def validate_parent_assets(self, parent_assets):
         """
@@ -346,7 +346,6 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "type",
             "name",
             "description",
-            "business_value",
             "reference_link",
             "security_objectives",
             "disaster_recovery_objectives",
@@ -558,6 +557,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     effort = serializers.CharField(source="get_effort_display")
     cost = serializers.FloatField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
+    assets = FieldsRelatedField(many=True)
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
