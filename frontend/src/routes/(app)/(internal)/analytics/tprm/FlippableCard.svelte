@@ -13,6 +13,7 @@
 		eta_date: string;
 		observation: string;
 		reviewers: string;
+		has_questions: boolean;
 	};
 
 	// State to track if the card is flipped
@@ -45,8 +46,7 @@
 	}
 </script>
 
-<!-- Tailwind-based implementation -->
-<div class="perspective-1000 w-full h-full min-h-[400px]">
+<div class="perspective-1000 w-full h-full min-h-[420px]">
 	<div
 		class="relative w-full h-full transition-transform duration-800 {isFlipped
 			? 'rotate-x-180'
@@ -55,7 +55,7 @@
 	>
 		<!-- Front face of the card -->
 		<div
-			class="absolute w-full h-full rounded-lg shadow-md bg-white overflow-hidden"
+			class="absolute w-full h-full rounded-lg shadow-lg bg-white overflow-hidden"
 			style="backface-visibility: hidden;"
 		>
 			<!-- Flip button for front face -->
@@ -110,22 +110,56 @@
 					<!-- Framework/Baseline -->
 					<div class="mb-3">
 						<span class="block text-sm text-gray-500">Baseline</span>
-						<div class="inline-block bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-							{entity_assessment.baseline}
+						<div
+							class="inline-block bg-gray-100 px-2 py-1 rounded text-sm font-mono overflow-hidden"
+						>
+							<div class="line-clamp-2 min-h-[2.4em] flex items-center">
+								{entity_assessment.baseline}
+							</div>
 						</div>
 					</div>
+					<span class="block text-sm text-gray-500 mb-2">Compliance review progress</span>
+					<!-- Progress circle - SVG can't be fully replaced with Tailwind -->
+					<div
+						class="flex flex-col items-center"
+						title="Any Compliance status except 'not assessed' counts"
+					>
+						<div class="text-gray-900">
+							<svg viewBox="0 0 100 100" width="80" height="80">
+								<!-- Background circle -->
+								<circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8" />
 
-					<!-- Progress bar -->
-					<div class="mb-3">
-						<div class="flex justify-between items-center mb-1">
-							<span class="text-sm text-gray-500">Completion</span>
-							<span class="text-sm font-medium">{entity_assessment.completion}%</span>
-						</div>
-						<div class="w-full bg-gray-200 rounded-full h-2">
-							<div
-								class="h-2 rounded-full {getProgressColor(entity_assessment.completion)}"
-								style="width: {entity_assessment.completion}%"
-							></div>
+								<!-- Progress circle -->
+								<circle
+									cx="50"
+									cy="50"
+									r="45"
+									fill="none"
+									stroke={entity_assessment.review_progress < 50
+										? '#ef4444'
+										: entity_assessment.review_progress < 75
+											? '#eab308'
+											: '#22c55e'}
+									stroke-width="8"
+									stroke-dasharray="283"
+									stroke-dashoffset={283 - (283 * entity_assessment.review_progress) / 100}
+									transform="rotate(-90 50 50)"
+								/>
+
+								<!-- Percentage text -->
+								<text
+									x="50"
+									y="55"
+									text-anchor="middle"
+									font-size="20"
+									font-weight="bold"
+									fill="currentColor"
+								>
+									<a href="/compliance-assessments/{entity_assessment.compliance_assessment_id}"
+										>{entity_assessment.review_progress}%</a
+									>
+								</text>
+							</svg>
 						</div>
 					</div>
 
@@ -180,47 +214,22 @@
 
 				<!-- Additional details could go here -->
 				<div class="mb-4">
-					<span class="block text-sm text-gray-500 mb-2">Compliance review progress</span>
-					<div class="flex flex-col items-center gap-4 mt-2">
-						<!-- Progress circle - SVG can't be fully replaced with Tailwind -->
-						<div class="text-gray-900">
-							<svg viewBox="0 0 100 100" width="80" height="80">
-								<!-- Background circle -->
-								<circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8" />
-
-								<!-- Progress circle -->
-								<circle
-									cx="50"
-									cy="50"
-									r="45"
-									fill="none"
-									stroke={entity_assessment.review_progress < 50
-										? '#ef4444'
-										: entity_assessment.review_progress < 75
-											? '#eab308'
-											: '#22c55e'}
-									stroke-width="8"
-									stroke-dasharray="283"
-									stroke-dashoffset={283 - (283 * entity_assessment.review_progress) / 100}
-									transform="rotate(-90 50 50)"
-								/>
-
-								<!-- Percentage text -->
-								<text
-									x="50"
-									y="55"
-									text-anchor="middle"
-									font-size="20"
-									font-weight="bold"
-									fill="currentColor"
-								>
-									<a href="/compliance-assessments/{entity_assessment.compliance_assessment_id}"
-										>{entity_assessment.review_progress}%</a
-									>
-								</text>
-							</svg>
-						</div>
-
+					<div class="">
+						{#if entity_assessment.has_questions}
+							<!-- Progress bar -->
+							<div class="mt-3 mb-6" title="Any answer of associated questions unless not set">
+								<div class="flex justify-between items-center mb-1">
+									<span class="text-sm text-gray-500">Questions completion</span>
+									<span class="text-sm font-medium">{entity_assessment.completion}%</span>
+								</div>
+								<div class="w-full bg-gray-200 rounded-full h-2">
+									<div
+										class="h-2 rounded-full {getProgressColor(entity_assessment.completion)}"
+										style="width: {entity_assessment.completion}%"
+									></div>
+								</div>
+							</div>
+						{/if}
 						<div class="w-full mt-4">
 							<div class="flex mb-4">
 								<div class="w-3 h-3 rounded-full bg-gray-300 mt-1 mr-3"></div>
