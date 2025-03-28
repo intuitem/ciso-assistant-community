@@ -2,8 +2,8 @@ from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
 from core.models import AppliedControl
-from core.models import FilteringLabelMixin
-from core.base_models import NameDescriptionMixin
+from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
+from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
 from django.db.models import Count
 
@@ -53,6 +53,42 @@ LEGAL_BASIS_CHOICES = (
 )
 
 
+class ProcessingNature(ReferentialObjectMixin, I18nObjectMixin):
+    DEFAULT_PROCESSING_NATURE = [
+        "collection",
+        "recording",
+        "organization",
+        "structuring",
+        "storage",
+        "adaptationOrAlteration",
+        "retrieval",
+        "consultation",
+        "use",
+        "disclosureByTransmission",
+        "disseminationOrOtherwiseMakingAvailable",
+        "alignmentOrCombination",
+        "restriction",
+        "erasureOrDestruction",
+    ]
+
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def create_default_values(cls):
+        for value in cls.DEFAULT_PROCESSING_NATURE:
+            ProcessingNature.objects.update_or_create(
+                name=value,
+            )
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Processing Nature"
+        verbose_name_plural = "Processing Natures"
+
+
 class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("draft", "Draft"),
@@ -62,6 +98,7 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
+    nature = models.ManyToManyField(ProcessingNature, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="authored_processings"

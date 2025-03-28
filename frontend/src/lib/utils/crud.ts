@@ -637,7 +637,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		selectFields: [{ field: 'status' }, { field: 'legal_basis' }],
+		selectFields: [{ field: 'status' }, { field: 'legal_basis' }, { field: 'nature' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'owner', urlModel: 'users' }
@@ -650,6 +650,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' }
 		]
+	},
+	'processing-natures': {
+		endpointUrl: 'privacy/processing-natures',
+		name: 'processingnature',
+		localName: 'processingNature',
+		localNamePlural: 'processingNatures',
+		verboseName: 'processing nature',
+		verboseNamePlural: 'processing natures'
 	},
 	purposes: {
 		endpointUrl: 'privacy/purposes',

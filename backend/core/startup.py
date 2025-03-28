@@ -518,6 +518,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
+    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -576,6 +577,7 @@ def startup(sender: AppConfig, **kwargs):
     from core.models import Qualification
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
+    from privacy.models import ProcessingNature
 
     print("startup handler: initialize database")
 
@@ -698,6 +700,12 @@ def startup(sender: AppConfig, **kwargs):
         Qualification.create_default_qualifications()
     except Exception as e:
         logger.error("Error creating default qualifications", exc_info=e)
+
+    # Create default Processing natures
+    try:
+        ProcessingNature.create_default_values()
+    except Exception as e:
+        logger.error("Error creating default ProcessingNature", exc_info=e)
 
     call_command("storelibraries")
 

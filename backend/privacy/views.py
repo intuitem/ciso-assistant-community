@@ -9,6 +9,7 @@ from itertools import chain
 from collections import defaultdict
 
 from .models import (
+    ProcessingNature,
     Purpose,
     PersonalData,
     DataSubject,
@@ -199,3 +200,8 @@ class ProcessingViewSet(BaseModelViewSet):
                 "pd_cat_count": total_categories,
             }
         )
+
+
+class ProcessingNatureViewSet(BaseModelViewSet):
+    model = ProcessingNature
+    search_fields = ["name"]

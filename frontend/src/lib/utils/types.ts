@@ -70,6 +70,7 @@ export const URL_MODEL = [
 	'operational-scenarios',
 	'qualifications',
 	'processings',
+	'processing-natures',
 	// 'ebios-rm',
 	'security-exceptions',
 	'findings',

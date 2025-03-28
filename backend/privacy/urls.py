@@ -1,4 +1,5 @@
 from django.urls import path, include
+from privacy.models import ProcessingNature
 from rest_framework.routers import DefaultRouter
 
 from .views import (
@@ -9,6 +10,7 @@ from .views import (
     DataContractorViewSet,
     DataTransferViewSet,
     ProcessingViewSet,
+    ProcessingNatureViewSet,
 )
 
 router = DefaultRouter()
@@ -19,6 +21,9 @@ router.register(r"data-recipients", DataRecipientViewSet, basename="data-recipie
 router.register(r"data-contractors", DataContractorViewSet, basename="data-contractors")
 router.register(r"data-transfers", DataTransferViewSet, basename="data-transfers")
 router.register(r"processings", ProcessingViewSet, basename="processings")
+router.register(
+    r"processing-natures", ProcessingNatureViewSet, basename="processing-natures"
+)
 
 urlpatterns = [
     path("", include(router.urls)),

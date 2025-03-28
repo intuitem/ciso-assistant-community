@@ -428,7 +428,8 @@ export const processingSchema = z.object({
 	status: z.string().optional(),
 	legal_basis: z.string().optional(),
 	dpia_required: z.boolean().optional(),
-	has_sensitive_personal_data: z.boolean().optional()
+	has_sensitive_personal_data: z.boolean().optional(),
+	nature: z.string().optional().array().optional()
 });
 
 export const purposeSchema = z.object({

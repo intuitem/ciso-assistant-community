@@ -1,8 +1,10 @@
 from dataclasses import fields
-from core.serializers import BaseModelSerializer
+from core.serializers import BaseModelSerializer, ReferentialSerializer
 from core.serializer_fields import FieldsRelatedField
+from iam import models
 from rest_framework import serializers
 from .models import (
+    ProcessingNature,
     Purpose,
     PersonalData,
     DataSubject,
@@ -124,7 +126,18 @@ class ProcessingWriteSerializer(BaseModelSerializer):
 class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    nature = FieldsRelatedField(["name"], many=True)
 
     class Meta:
         model = Processing
         fields = "__all__"
+
+
+class ProcessingNatureReadSerializer(ReferentialSerializer):
+    class Meta:
+        model = ProcessingNature
+        exclude = ["translations"]
+
+
+class ProcessingNatureWriteSerializer(ProcessingNatureReadSerializer):
+    pass

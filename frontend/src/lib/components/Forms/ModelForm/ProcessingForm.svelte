@@ -32,6 +32,13 @@
 	label={m.status()}
 />
 <AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="processing-natures"
+	field="nature"
+	label="m.processingNature()"
+/>
+<AutocompleteSelect
 	{form}
 	field="legal_basis"
 	options={model.selectOptions['legal_basis']}
