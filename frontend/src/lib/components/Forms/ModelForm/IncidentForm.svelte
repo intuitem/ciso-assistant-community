@@ -37,8 +37,6 @@
 	{form}
 	{disableDoubleDash}
 	options={model.selectOptions['status']}
-	field="status"
-	label={m.status()}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 />

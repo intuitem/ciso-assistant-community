@@ -1,4 +1,4 @@
-import * as m from '$paraglide/messages.js';
+import { m } from '$paraglide/messages';
 import { toCamelCase } from '$lib/utils/locales';
 
 /**

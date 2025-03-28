@@ -2,7 +2,7 @@
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
 	import Selector from './selector.svelte';
 	import { average, forms } from './utils';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let data;
 	export let risk_matrices = data.risk_matrices;

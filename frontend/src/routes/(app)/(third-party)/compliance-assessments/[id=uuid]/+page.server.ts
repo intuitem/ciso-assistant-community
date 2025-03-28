@@ -8,7 +8,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { setFlash } from 'sveltekit-flash-message/server';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';

@@ -45,7 +45,7 @@
 	import type { AnyZodObject } from 'zod';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
