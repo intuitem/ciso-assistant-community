@@ -346,7 +346,6 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "type",
             "name",
             "description",
-            "business_value",
             "reference_link",
             "security_objectives",
             "disaster_recovery_objectives",
