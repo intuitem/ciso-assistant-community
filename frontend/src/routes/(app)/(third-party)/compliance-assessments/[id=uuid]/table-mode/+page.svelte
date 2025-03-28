@@ -57,8 +57,8 @@
 		data.requirements.map((requirement) => [requirement.id, requirement])
 	);
 
-	const requirementAssessmentHashmap = Object.fromEntries(
-		data.requirement_assessments.map((requirementAssessment) => [requirementAssessment.id, false])
+	const hideSuggestionHashmap = Object.fromEntries(
+		data.requirement_assessments.map((requirementAssessment) => [requirementAssessment.id, true]) // true = yes hide by default
 	);
 
 	$: createdEvidence = form?.createdEvidence;
@@ -205,8 +205,8 @@
 	}
 
 	function toggleSuggestion(requirementAssessmentId) {
-		requirementAssessmentHashmap[requirementAssessmentId] =
-			!requirementAssessmentHashmap[requirementAssessmentId];
+		hideSuggestionHashmap[requirementAssessmentId] =
+			!hideSuggestionHashmap[requirementAssessmentId];
 	}
 
 	function getClassesText(mappingInferenceResult) {
@@ -276,21 +276,21 @@
 				{#if requirementAssessment.assessable}
 					{#if data.requirements[i].annotation || requirementAssessment.mapping_inference.result}
 						<div
-							class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto"
+							class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto w-full"
 						>
 							<h2 class="font-semibold text-lg flex flex-row justify-between">
 								<div>
 									<i class="fa-solid fa-circle-info mr-2" />{m.additionalInformation()}
 								</div>
 								<button on:click={() => toggleSuggestion(requirementAssessment.id)}>
-									{#if !requirementAssessmentHashmap[requirementAssessment.id]}
+									{#if !hideSuggestionHashmap[requirementAssessment.id]}
 										<i class="fa-solid fa-eye" />
 									{:else}
 										<i class="fa-solid fa-eye-slash" />
 									{/if}
 								</button>
 							</h2>
-							{#if !requirementAssessmentHashmap[requirementAssessment.id]}
+							{#if !hideSuggestionHashmap[requirementAssessment.id]}
 								{#if data.requirements[i].annotation}
 									<div class="my-2">
 										<p class="font-medium">
@@ -299,17 +299,6 @@
 										</p>
 										<p class="whitespace-pre-line py-1">
 											{data.requirements[i].annotation}
-										</p>
-									</div>
-								{/if}
-								{#if data.requirements[i].typical_evidence}
-									<div class="my-2">
-										<p class="font-medium">
-											<i class="fa-solid fa-pencil" />
-											{m.typicalEvidence()}
-										</p>
-										<p class="whitespace-pre-line py-1">
-											{data.requirements[i].typical_evidence}
 										</p>
 									</div>
 								{/if}
@@ -328,9 +317,9 @@
 													<a
 														class="anchor"
 														href="/requirement-assessments/{requirementAssessment.mapping_inference
-															.sourceRequirementAssessment.id}"
+															.source_requirement_assessment.id}"
 													>
-														{requirementAssessment.mapping_inference.sourceRequirementAssessment
+														{requirementAssessment.mapping_inference.source_requirement_assessment
 															.str}
 													</a>
 												</p>
@@ -338,18 +327,18 @@
 													<span class="italic">{m.coverageColon()}</span>
 													<span class="badge h-fit">
 														{safeTranslate(
-															requirementAssessment.mapping_inference.sourceRequirementAssessment
+															requirementAssessment.mapping_inference.source_requirement_assessment
 																.coverage
 														)}
 													</span>
 												</p>
-												{#if requirementAssessment.mapping_inference.sourceRequirementAssessment.is_scored}
+												{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
 													<p class="whitespace-pre-line py-1">
 														<span class="italic">{m.scoreSemiColon()}</span>
 														<span class="badge h-fit">
 															{safeTranslate(
-																requirementAssessment.mapping_inference.sourceRequirementAssessment
-																	.score
+																requirementAssessment.mapping_inference
+																	.source_requirement_assessment.score
 															)}
 														</span>
 													</p>
@@ -367,10 +356,10 @@
 														{safeTranslate(requirementAssessment.mapping_inference.result)}
 													</span>
 												</p>
-												{#if requirementAssessment.mapping_inference.data.requirements[i]}
+												{#if requirementAssessment.mapping_inference.annotation}
 													<p class="whitespace-pre-line py-1">
 														<span class="italic">{m.annotationColon()}</span>
-														{requirementAssessment.mapping_inference.data.requirements[i]}
+														{requirementAssessment.mapping_inference.annotation}
 													</p>
 												{/if}
 											</li>
