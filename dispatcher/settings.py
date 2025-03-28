@@ -7,7 +7,7 @@ import yaml
 
 from loguru import logger
 
-CONSUMER_CONFG_PATH = ".consumer_config.yaml"
+DISPATCHER_CONFIG_PATH = ".dispatcher_config.yaml"
 
 DEBUG = os.getenv("DEBUG", False)
 
@@ -31,9 +31,7 @@ VERIFY_CERTIFICATE = (
 )
 
 
-@click.command()
-@click.option("-y", required=False, is_flag=True)
-def init_config(y: bool):
+def _init_config(y: bool):
     """Create/Reset the config file."""
     template_data = {
         "rest": {
@@ -43,30 +41,36 @@ def init_config(y: bool):
         "credentials": {"email": USER_EMAIL, "password": USER_PASSWORD},
     }
     if y or click.confirm(
-        f"This will create {CONSUMER_CONFG_PATH} for you to fill and will RESET any exisiting one. Do you wish to continue?"
+        f"This will create {DISPATCHER_CONFIG_PATH} for you to fill and will RESET any exisiting one. Do you wish to continue?"
     ):
-        with open(CONSUMER_CONFG_PATH, "w") as yfile:
+        with open(DISPATCHER_CONFIG_PATH, "w") as yfile:
             yaml.safe_dump(
                 template_data, yfile, default_flow_style=False, sort_keys=False
             )
             logger.info(
-                f"Config file is available at {CONSUMER_CONFG_PATH}. Please update it with your credentials."
+                f"Config file is available at {DISPATCHER_CONFIG_PATH}. Please update it with your credentials."
             )
 
 
+@click.command()
+@click.option("-y", required=False, is_flag=True)
+def init_config(y: bool):
+    return _init_config(y)
+
+
 try:
-    with open(CONSUMER_CONFG_PATH, "r") as yfile:
+    with open(DISPATCHER_CONFIG_PATH, "r") as yfile:
         config = yaml.safe_load(yfile)
 except FileNotFoundError:
     logger.warning(
         "Config file not found. Running the init command to create it but you need to fill it.",
         file=sys.stderr,
     )
-    init_config()
+    _init_config(y=True)
 
 try:
     API_URL = config["rest"]["url"]
-except KeyError:
+except (KeyError, TypeError):
     logger.error(
         "Missing API URL. Check that the config.yaml file is properly set or trigger init command to create a new one.",
         file=sys.stderr,
@@ -76,7 +80,7 @@ except KeyError:
 try:
     USER_EMAIL = config["credentials"]["email"]
     USER_PASSWORD = config["credentials"]["password"]
-except KeyError:
+except (KeyError, TypeError):
     logger.error(
         "Missing credentials in the config file. You need to pass them to the CLI in this case.",
         file=sys.stderr,
