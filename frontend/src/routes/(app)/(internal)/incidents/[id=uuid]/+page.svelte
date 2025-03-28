@@ -50,7 +50,7 @@
 		applyAction: $$props.applyAction ?? true,
 		resetForm: true,
 		validators: zod(schema),
-		taintedMessage: m.taintedFormMessage(),
+		taintedMessage: false,
 		validationMethod: 'auto'
 	});
 
