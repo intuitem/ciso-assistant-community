@@ -2393,10 +2393,61 @@ class FolderViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
+    def check_out_of_scope_objects(self, request, pk=None):
+        """Action to check if there are out-of-scope objects for the folder."""
+        instance = self.get_object()
+
+        if instance.content_type == "GL":
+            return Response(
+                {
+                    "has_out_of_scope_objects": [],
+                    "out_of_scope_objects": {},
+                }
+            )
+
+        valid_folder_ids = set(
+            Folder.objects.filter(
+                Q(id=instance.id) | Q(id__in=[f.id for f in instance.get_sub_folders()])
+            ).values_list("id", flat=True)
+        )
+
+        objects = get_domain_export_objects(instance)
+        out_of_scope_types = []
+        out_of_scope_objects = {}
+
+        for model_name, queryset in objects.items():
+            model = queryset.model
+            folder_filter = None
+
+            if "folder" in [f.name for f in model._meta.get_fields()]:
+                folder_filter = Q(folder__id__in=valid_folder_ids)
+
+            if folder_filter is None:
+                continue
+
+            out_of_scope_qs = queryset.exclude(folder_filter).distinct()
+            if out_of_scope_qs.exists():
+                out_of_scope_types.append(model_name)
+                out_of_scope_objects[model_name] = [
+                    {
+                        "id": obj.id,
+                        "name": getattr(obj, "name", None),
+                        "description": getattr(obj, "description", None),
+                    }
+                    for obj in out_of_scope_qs
+                ]
+
+        return Response(
+            {
+                "has_out_of_scope_objects": out_of_scope_types,
+                "out_of_scope_objects": out_of_scope_objects,
+            }
+        )
+
+    @action(detail=True, methods=["get"])
     def export(self, request, pk):
         include_attachments = True
         instance = self.get_object()
-
         logger.info(
             "Starting domain export",
             domain_id=instance.id,
