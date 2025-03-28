@@ -77,14 +77,14 @@ def update_translations_in_object(obj: Union[dict, list], locale=None):
 
 def update_translations(data_dict: Union[dict, list], locale=None) -> Union[dict, list]:
     """
-    Update the translations of 'name' and 'description' fields in a dictionary of objects.
+    Update the translations of 'name' and 'description' fields in a dictionary or list of objects.
 
     Args:
-        data_dict (str): The JSON string of the dict of objects to update.
+        data_dict (Union[dict, list]): The JSON string dict or list of objects to update.
         locale (str): The locale to get the translation for.
 
     Returns:
-        str: The updated dictionary.
+        Union[dict, list]: The translated objects.
     """
     if isinstance(data_dict, dict):
         for key, objects_list in data_dict.items():
