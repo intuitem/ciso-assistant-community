@@ -36,7 +36,7 @@
 	{form}
 	optionsEndpoint="processing-natures"
 	field="nature"
-	label="m.processingNature()"
+	label="{m.processingNature()}"
 />
 <AutocompleteSelect
 	{form}
