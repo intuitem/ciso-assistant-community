@@ -1557,7 +1557,7 @@ This new type of assessments is intended to gather and manage findinds. The sect
 A findings assessment has the following specific fields:
 - category: --/pentest/audit/internal
 
-A finding ("constat" has the following fields:
+A finding ("constat") has the following fields:
 - ref_id/name/description
 - severity, like for vulnerabilities
 - a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
@@ -1649,8 +1649,8 @@ is_template indicates this task is the start of a recurring series. If true, the
     },
     "overdue_behavior": {
       "type": "string",
-      "enum": ["DELAY_NEXT", "SKIP_AND_CONTINUE"],
-      "default": "SKIP_AND_CONTINUE",
+      "enum": ["DELAY_NEXT", "NO_IMPACT"],
+      "default": "NO_IMPACT",
       "description": "Optional. Behavior when tasks become overdue."
     },
     "exceptions": {
@@ -1670,4 +1670,4 @@ The iteration field is read_only. Its value is 0 for a one-off or template task,
 The following concepts will not be included in the MVP:
 - subtasks
 - exceptions
-- overdue_behavior (will be SKIP_AND_CONTINUE)
+- overdue_behavior (will be NO_IMPACT)
