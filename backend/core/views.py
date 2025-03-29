@@ -3869,6 +3869,24 @@ class UploadAttachmentView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+class QuickStartView(APIView):
+    serializer_class = QuickStartSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+        try:
+            objects = serializer.save()
+        except Exception as e:
+            logger.error(f"Error in QuickStartView: {e}")
+            raise
+        else:
+            return Response(objects, status=status.HTTP_201_CREATED)
+
+
 class QualificationViewSet(BaseModelViewSet):
     """
     API endpoint that allows qualifications to be viewed or edited.
