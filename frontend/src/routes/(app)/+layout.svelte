@@ -36,6 +36,27 @@
 			});
 		}
 	}
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { PageData, ActionData } from './$types';
+	import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
+
+	export let data: PageData;
+	export let form: ActionData;
+	const modalStore: ModalStore = getModalStore();
+	function modalQuickStart(): void {
+		let modalComponent: ModalComponent = {
+			ref: QuickStartModal,
+			props: {}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.quickStart()
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <!-- App Shell -->
@@ -54,6 +75,15 @@
 			>
 				{safeTranslate($pageTitle)}
 			</span>
+			<button
+				on:click={modalQuickStart}
+				class="absolute top-6 right-8 p-2 rounded-full bg-violet-600 text-white text-xs shadow-lg
+                 ring-2 ring-violet-400 ring-offset-2 transition-all duration-300
+                 hover:bg-violet-700 hover:ring-violet-300 hover:ring-offset-violet-100
+                 hover:shadow-violet-500/50 focus:outline-none focus:ring-violet-500"
+			>
+				{m.quickStart()}
+			</button>
 			<hr class="w-screen my-1" />
 			<Breadcrumbs />
 		</AppBar>

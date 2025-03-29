@@ -89,32 +89,8 @@
 	onMount(() => {
 		enableMoreBtn = true;
 	});
-	import type { ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import QuickStartModal from './QuickStart/QuickStartModal.svelte';
-
-	function modalQuickStart(): void {
-		let modalComponent: ModalComponent = {
-			ref: QuickStartModal,
-			props: {}
-		};
-		let modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: '🪄 ' + m.quickStart()
-		};
-		modalStore.trigger(modal);
-	}
 </script>
 
-<div class=" mx-auto mb-2">
-	<button
-		type="button"
-		on:click={modalQuickStart}
-		class="text-purple-700 hover:text-white border border-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-xs px-5 py-2.5 text-center me-2 mb-2 dark:border-purple-400 dark:text-purple-400 dark:hover:text-white dark:hover:bg-purple-500 dark:focus:ring-purple-900"
-		><i class="fa-solid fa-wand-sparkles"></i> {m.quickStart()}</button
-	>
-</div>
 <div class="border-t pt-2.5">
 	<div class="flex flex-row items-center justify-between">
 		<div class="flex flex-col w-3/4">
