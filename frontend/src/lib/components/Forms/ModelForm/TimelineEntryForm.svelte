@@ -6,6 +6,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -13,6 +14,8 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
+
+	const { value, errors, constraints } = formFieldProxy(form, 'entry_type');
 </script>
 
 {#if context != 'edit'}
@@ -33,6 +36,8 @@
 		cacheLock={cacheLocks['entry_type']}
 		bind:cachedValue={formDataCache['entry_type']}
 	/>
+{/if}
+{#if !['severity_changed', 'status_changed'].includes($value)}
 	<TextField
 		{form}
 		field="entry"

@@ -13,6 +13,7 @@
 	export let formDataCache: Record<string, any> = {};
 	export let schema: any = {};
 	export let initialData: Record<string, any> = {};
+	const disableDoubleDash = true;
 </script>
 
 <TextField
@@ -34,14 +35,16 @@
 />
 <Select
 	{form}
-	options={model.selectOptions['status']}
+	{disableDoubleDash}
 	field="status"
 	label={m.status()}
+	options={model.selectOptions['status']}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 />
 <Select
 	{form}
+	{disableDoubleDash}
 	options={[
 		{ label: m.unknown(), value: 6 },
 		{ label: m.critical(), value: 1 },
