@@ -1,5 +1,4 @@
 import { getModelInfo } from '$lib/utils/crud';
-
 import { type Actions } from '@sveltejs/kit';
 import {
 	nestedDeleteFormAction,
@@ -9,20 +8,40 @@ import {
 import { modelSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
 
 export const load: PageServerLoad = async (event) => {
 	const modelInfo = getModelInfo('incidents');
-
 	const data = await loadDetail({
 		event,
 		model: modelInfo,
 		id: event.params.id
 	});
 
+	// Set up timeline entries form with current timestamp
+	const timelineSchema = modelSchema('timeline-entries');
+	const currentDate = new Date();
+	const formattedDateTime = currentDate.toISOString().slice(0, 19); // Format: YYYY-MM-DDThh:mm:ss
+
+	// Create form with pre-filled incident ID and current timestamp
+	const timelineForm = await superValidate(
+		{
+			incident: data.data.id,
+			timestamp: formattedDateTime
+		},
+		zod(timelineSchema),
+		{ errors: false }
+	);
+
+	// Add the timeline form to related models if it doesn't exist
+	if (!data.relatedModels['timeline-entries']) {
+		data.relatedModels['timeline-entries'] = {};
+	}
+	data.relatedModels['timeline-entries'].createForm = timelineForm;
+
+	// Evidence form setup
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
 	const evidenceCreateForm = await superValidate(
@@ -55,8 +74,8 @@ export const load: PageServerLoad = async (event) => {
 			})
 		);
 	}
-	evidenceModel.selectOptions = evidenceSelectOptions;
 
+	evidenceModel.selectOptions = evidenceSelectOptions;
 	data['evidenceModel'] = evidenceModel;
 	data['evidenceCreateForm'] = evidenceCreateForm;
 
