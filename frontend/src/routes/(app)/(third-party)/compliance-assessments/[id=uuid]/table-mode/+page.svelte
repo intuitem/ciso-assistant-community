@@ -27,10 +27,10 @@
 	import type { Actions, PageData } from './$types';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { displayScoreColor } from '$lib/utils/helpers';
+	import { complianceResultColorMap } from '$lib/utils/constants';
 
 	export let data: PageData;
 	export let form: Actions;
-
 	/** Is the page used for shallow routing? */
 	export let shallow = false;
 
@@ -55,6 +55,10 @@
 
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement) => [requirement.id, requirement])
+	);
+
+	const hideSuggestionHashmap = Object.fromEntries(
+		data.requirement_assessments.map((requirementAssessment) => [requirementAssessment.id, true]) // true = yes hide by default
 	);
 
 	$: createdEvidence = form?.createdEvidence;
@@ -199,6 +203,15 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	function toggleSuggestion(requirementAssessmentId) {
+		hideSuggestionHashmap[requirementAssessmentId] =
+			!hideSuggestionHashmap[requirementAssessmentId];
+	}
+
+	function getClassesText(mappingInferenceResult) {
+		return complianceResultColorMap[mappingInferenceResult] === '#000000' ? 'text-white' : '';
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -239,7 +252,7 @@
 				</div>
 			</div>
 		{/if}
-		{#each data.requirement_assessments as requirementAssessment}
+		{#each data.requirement_assessments as requirementAssessment, i}
 			<div class="w-2"></div>
 
 			<span class="relative flex justify-center py-4">
@@ -261,6 +274,102 @@
 					</div>
 				{/if}
 				{#if requirementAssessment.assessable}
+					{#if data.requirements[i].annotation || requirementAssessment.mapping_inference.result}
+						<div
+							class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto w-full"
+						>
+							<h2 class="font-semibold text-lg flex flex-row justify-between">
+								<div>
+									<i class="fa-solid fa-circle-info mr-2" />{m.additionalInformation()}
+								</div>
+								<button on:click={() => toggleSuggestion(requirementAssessment.id)}>
+									{#if !hideSuggestionHashmap[requirementAssessment.id]}
+										<i class="fa-solid fa-eye" />
+									{:else}
+										<i class="fa-solid fa-eye-slash" />
+									{/if}
+								</button>
+							</h2>
+							{#if !hideSuggestionHashmap[requirementAssessment.id]}
+								{#if data.requirements[i].annotation}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-pencil" />
+											{m.annotation()}
+										</p>
+										<p class="whitespace-pre-line py-1">
+											{data.requirements[i].annotation}
+										</p>
+									</div>
+								{/if}
+								{#if requirementAssessment.mapping_inference.result}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-link" />
+											{m.mappingInference()}
+										</p>
+										<span class="text-xs text-gray-500"
+											><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
+										>
+										<ul class="list-disc ml-4">
+											<li>
+												<p>
+													<a
+														class="anchor"
+														href="/requirement-assessments/{requirementAssessment.mapping_inference
+															.source_requirement_assessment.id}"
+													>
+														{requirementAssessment.mapping_inference.source_requirement_assessment
+															.str}
+													</a>
+												</p>
+												<p class="whitespace-pre-line py-1">
+													<span class="italic">{m.coverageColon()}</span>
+													<span class="badge h-fit">
+														{safeTranslate(
+															requirementAssessment.mapping_inference.source_requirement_assessment
+																.coverage
+														)}
+													</span>
+												</p>
+												{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
+													<p class="whitespace-pre-line py-1">
+														<span class="italic">{m.scoreSemiColon()}</span>
+														<span class="badge h-fit">
+															{safeTranslate(
+																requirementAssessment.mapping_inference
+																	.source_requirement_assessment.score
+															)}
+														</span>
+													</p>
+												{/if}
+												<p class="whitespace-pre-line py-1">
+													<span class="italic">{m.suggestionColon()}</span>
+													<span
+														class="badge {getClassesText(
+															requirementAssessment.mapping_inference.result
+														)} h-fit"
+														style="background-color: {complianceResultColorMap[
+															requirementAssessment.mapping_inference.result
+														]};"
+													>
+														{safeTranslate(requirementAssessment.mapping_inference.result)}
+													</span>
+												</p>
+												{#if requirementAssessment.mapping_inference.annotation}
+													<p class="whitespace-pre-line py-1">
+														<span class="italic">{m.annotationColon()}</span>
+														{requirementAssessment.mapping_inference.annotation}
+													</p>
+												{/if}
+											</li>
+										</ul>
+									</div>
+								{/if}
+							{/if}
+						</div>
+					{/if}
+
 					<form
 						class="flex flex-col space-y-2 items-center justify-evenly w-full"
 						id="tableModeForm-{requirementAssessment.id}"
