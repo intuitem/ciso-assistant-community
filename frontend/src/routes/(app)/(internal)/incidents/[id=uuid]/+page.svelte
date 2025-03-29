@@ -141,8 +141,12 @@
 
 <div class="flex flex-col space-y-2">
 	<DetailView {data} displayModelTable={false}>
-		<div slot="widgets">
-			<h1 class="text-2xl font-bold">{m.addTimelineEntry()}</h1>
+		<div
+			slot="widgets"
+			class="shadow-xl border-l border-t p-4 rounded bg-gradient-to-tl from-slate-50 to-white"
+		>
+			<!-- new record form -->
+			<h1 class="text-xl font-bold font-serif mb-2">{m.addTimelineEntry()}</h1>
 			<SuperForm
 				class="flex flex-col space-y-3"
 				action={formAction}
@@ -218,7 +222,7 @@
 
 	<div class="card shadow-lg bg-white p-4 space-y-2">
 		<div class="flex flex-row justify-between items-center">
-			<h1 class="text-xl font-bold">{m.timeline()}</h1>
+			<h1 class="text-xl font-bold font-serif">{m.timeline()}</h1>
 			<Search {handler} />
 			<RowsPerPage {handler} />
 		</div>
@@ -253,9 +257,15 @@
 								</span>
 							{/if}
 						</div>
-						<span class="text-primary-700 text-sm">{safeTranslate(meta.entry_type)}</span>
-						<span class="font-semibold text-sm">{safeTranslate(meta.entry)}</span>
-						<p class="text-xs italic text-gray-500 dark:text-gray-400">
+						<div class="mb-1">
+							<span class="text-xs font-mono bg-violet-700 text-white p-1 rounded"
+								>{safeTranslate(meta.entry_type)}</span
+							>
+						</div>
+						<a href={`/${actionsURLModel}/${meta.id}`} class="font-semibold capitalize"
+							>{safeTranslate(meta.entry)}</a
+						>
+						<p class="text-xs italic text-gray-500 dark:text-gray-400 whitespace-pre-line">
 							{meta.observation ?? m.noObservation()}
 						</p>
 					</div>
