@@ -1266,23 +1266,27 @@ class QuickStartSerializer(serializers.Serializer):
             "content_type": Folder.ContentType.DOMAIN,
             "name": "Starter",
         }
-        folder_serializer = FolderWriteSerializer(
-            data=folder_data, context=self.context
-        )
-        if not folder_serializer.is_valid(raise_exception=True):
-            return None
-        folder = folder_serializer.save()
+        folder = Folder.objects.filter(**folder_data).first()
+        if not folder:
+            folder_serializer = FolderWriteSerializer(
+                data=folder_data, context=self.context
+            )
+            if not folder_serializer.is_valid(raise_exception=True):
+                return None
+            folder = folder_serializer.save()
 
         perimeter_data = {
             "folder": folder.id,
             "name": "Starter",
         }
-        perimeter_serializer = PerimeterWriteSerializer(
-            data=perimeter_data, context=self.context
-        )
-        if not perimeter_serializer.is_valid(raise_exception=True):
-            return None
-        perimeter = perimeter_serializer.save()
+        perimeter = Perimeter.objects.filter(**perimeter_data).first()
+        if not perimeter:
+            perimeter_serializer = PerimeterWriteSerializer(
+                data=perimeter_data, context=self.context
+            )
+            if not perimeter_serializer.is_valid(raise_exception=True):
+                return None
+            perimeter = perimeter_serializer.save()
 
         framework_lib_urn = validated_data["framework"]
         if not LoadedLibrary.objects.filter(urn=framework_lib_urn).exists():
