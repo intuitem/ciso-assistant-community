@@ -1364,13 +1364,12 @@ class TimelineEntryWriteSerializer(BaseModelSerializer):
 class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
     str = serializers.CharField(source="__str__", read_only=True)
     author = FieldsRelatedField()
-    evidences = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
     incident = FieldsRelatedField()
 
     class Meta:
         model = TimelineEntry
-        fields = "__all__"
+        exclude = ["evidences"]
 
 
 class IncidentWriteSerializer(BaseModelSerializer):

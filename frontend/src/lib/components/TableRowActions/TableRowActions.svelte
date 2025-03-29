@@ -24,6 +24,8 @@
 	export let URLModel: urlModel | string | undefined;
 	export let identifierField = 'id';
 	export let preventDelete = false;
+	export let baseClass =
+		'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end';
 
 	export let hasBody = false;
 
@@ -132,9 +134,7 @@
 	$: displayDelete = canDeleteObject && deleteForm !== undefined;
 </script>
 
-<span
-	class="space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end"
->
+<span class={baseClass}>
 	<slot name="head" />
 	<slot name="body" />
 	{#if !hasBody}
