@@ -95,14 +95,6 @@ class StoredLibraryViewSet(BaseModelViewSet):
         data = StoredLibrarySerializer(lib).data
         return Response(data)
 
-    def content(self, request, pk):
-        try:
-            key = "urn" if pk.startswith("urn:") else "id"
-            lib = StoredLibrary.objects.get(**{key: pk})
-        except:
-            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
-        return Response(lib.content)
-
     @action(detail=True, methods=["get"])
     def content(self, request, pk):
         try:
