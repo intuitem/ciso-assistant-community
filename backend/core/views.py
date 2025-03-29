@@ -3873,7 +3873,9 @@ class QuickStartView(APIView):
     serializer_class = QuickStartSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
         if not serializer.is_valid():
             raise ValidationError(serializer.errors)
         try:

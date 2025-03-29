@@ -1262,10 +1262,28 @@ class QuickStartSerializer(serializers.Serializer):
         return self.create(self.validated_data)
 
     def create(self, validated_data):
-        folder, _ = Folder.objects.get_or_create(
-            content_type=Folder.ContentType.DOMAIN, name="Starter"
+        folder_data = {
+            "content_type": Folder.ContentType.DOMAIN,
+            "name": "Starter",
+        }
+        folder_serializer = FolderWriteSerializer(
+            data=folder_data, context=self.context
         )
-        perimeter, _ = Perimeter.objects.get_or_create(name="Starter", folder=folder)
+        if not folder_serializer.is_valid(raise_exception=True):
+            return None
+        folder = folder_serializer.save()
+
+        perimeter_data = {
+            "folder": folder.id,
+            "name": "Starter",
+        }
+        perimeter_serializer = PerimeterWriteSerializer(
+            data=perimeter_data, context=self.context
+        )
+        if not perimeter_serializer.is_valid(raise_exception=True):
+            return None
+        perimeter = perimeter_serializer.save()
+
         framework_lib_urn = validated_data["framework"]
         if not LoadedLibrary.objects.filter(urn=framework_lib_urn).exists():
             framework_stored_lib = StoredLibrary.objects.get(urn=framework_lib_urn)
@@ -1278,12 +1296,18 @@ class QuickStartSerializer(serializers.Serializer):
                 )
         framework_lib = LoadedLibrary.objects.get(urn=framework_lib_urn)
         framework = Framework.objects.get(library=framework_lib)
-        audit = ComplianceAssessment.objects.create(
-            folder=folder,
-            perimeter=perimeter,
-            framework=framework,
-            name=validated_data["audit_name"],
+        compliance_assessment_data = {
+            "folder": folder.id,
+            "perimeter": perimeter.id,
+            "framework": framework.id,
+            "name": validated_data["audit_name"],
+        }
+        compliance_asssessment_serializer = ComplianceAssessmentWriteSerializer(
+            data=compliance_assessment_data, context=self.context
         )
+        if not compliance_asssessment_serializer.is_valid(raise_exception=True):
+            return None
+        audit = compliance_asssessment_serializer.save()
         audit.create_requirement_assessments()
 
         created_objects = {
@@ -1307,13 +1331,19 @@ class QuickStartSerializer(serializers.Serializer):
                 )
         matrix_lib = LoadedLibrary.objects.get(urn=matrix_lib_urn)
         matrix = RiskMatrix.objects.get(library=matrix_lib)
-        risk_assessment = RiskAssessment.objects.create(
-            folder=folder,
-            perimeter=perimeter,
-            risk_matrix=matrix,
-            name=validated_data["risk_assessment_name"],
-        )
 
+        risk_assessment_data = {
+            "folder": folder.id,
+            "perimeter": perimeter.id,
+            "risk_matrix": matrix.id,
+            "name": validated_data["risk_assessment_name"],
+        }
+        risk_asssessment_serializer = RiskAssessmentWriteSerializer(
+            data=risk_assessment_data, context=self.context
+        )
+        if not risk_asssessment_serializer.is_valid(raise_exception=True):
+            return created_objects
+        risk_assessment = risk_asssessment_serializer.save()
         created_objects["riskassessment"] = RiskAssessmentReadSerializer(
             risk_assessment
         ).data
