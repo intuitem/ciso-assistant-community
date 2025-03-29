@@ -1,5 +1,5 @@
 <script lang="ts">
-	// Most of your app wide CSS should be put in this file
+	// Most of the app wide CSS should be put in this file
 	import '../app.postcss';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 	import { browser } from '$app/environment';
@@ -85,7 +85,6 @@
 </script>
 
 <svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
-
 <ParaglideJsProvider>
 	<Modal components={modalRegistry} />
 	<Toast />
