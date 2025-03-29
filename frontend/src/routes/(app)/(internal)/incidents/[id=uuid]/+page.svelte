@@ -56,7 +56,7 @@
 			createModalCache.deleteCache(model.urlModel);
 			_form.form.update((current) => ({ ...current, evidences: undefined }));
 			refreshKey = !refreshKey;
-			console.debug($formStore);
+			window.location.reload(); // this is ugly but at least the UI is consistent for now
 		}
 	});
 
@@ -208,6 +208,7 @@
 							_form.reset();
 							_form.form.update((current) => ({ ...current, evidences: undefined }));
 							refreshKey = !refreshKey;
+							window.location.reload();
 						}}>{m.cancel()}</button
 					>
 					<button
