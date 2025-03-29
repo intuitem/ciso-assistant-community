@@ -4130,6 +4130,37 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.save()
 
 
+# tasks management
+class TaskInstance(NameDescriptionMixin, FolderMixin):
+    TASK_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+    iteration = models.IntegerField(default=0)
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+    completion_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Completion date")
+    )
+
+    status = models.CharField(
+        max_length=50, default="pending", choices=TASK_STATUS_CHOICES
+    )
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+    is_template = models.BooleanField(default=False)
+    enabled = models.BooleanField(default=True)
+    schedule_definition = models.JSONField(blank=True, null=True)
+
+    generator = models.ForeignKey(
+        "TaskInstance", on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(
