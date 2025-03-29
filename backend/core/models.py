@@ -1799,7 +1799,9 @@ class Asset(
         return super().save(*args, **kwargs)
 
 
-class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Evidence(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
     # TODO: Manage file upload to S3/MiniO
     attachment = models.FileField(
         #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
