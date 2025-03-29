@@ -23,7 +23,7 @@ export const load: PageServerLoad = async (event) => {
 	// Set up timeline entries form with current timestamp
 	const timelineSchema = modelSchema('timeline-entries');
 	const currentDate = new Date();
-	const formattedDateTime = currentDate.toISOString().slice(0, 19); // Format: YYYY-MM-DDThh:mm:ss
+	const formattedDateTime = currentDate.toISOString(); //.slice(0, 19); // Note to self: avoid slice as it loses TZ
 
 	// Create form with pre-filled incident ID and current timestamp
 	const timelineForm = await superValidate(
