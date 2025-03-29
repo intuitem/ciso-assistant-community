@@ -148,6 +148,7 @@ INSTALLED_APPS = [
     "global_settings",
     "ebios_rm",
     "tprm",
+    "privacy",
     "core",
     "cal",
     "django_filters",
