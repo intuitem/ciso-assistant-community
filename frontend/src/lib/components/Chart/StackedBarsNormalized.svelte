@@ -91,8 +91,8 @@
 			},
 			yAxis: {
 				type: 'category',
-				name: 'ABCDEF',
-				data: names.map(truncateString(24)),
+				name: '',
+				data: names.map(truncateString(20)),
 				axisTick: {
 					show: false
 				},
