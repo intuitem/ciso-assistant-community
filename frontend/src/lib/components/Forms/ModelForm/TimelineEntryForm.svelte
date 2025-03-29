@@ -36,15 +36,6 @@
 		cacheLock={cacheLocks['entry_type']}
 		bind:cachedValue={formDataCache['entry_type']}
 	/>
-	<TextField
-		type="datetime-local"
-		step="1"
-		{form}
-		field="timestamp"
-		label={m.timestamp()}
-		cacheLock={cacheLocks['timestamp']}
-		bind:cachedValue={formDataCache['timestamp']}
-	/>
 {/if}
 {#if !['severity_changed', 'status_changed'].includes($value)}
 	<TextField
@@ -56,6 +47,15 @@
 		data-focusindex="0"
 	/>
 {/if}
+<TextField
+	type="datetime-local"
+	step="1"
+	{form}
+	field="timestamp"
+	label={m.timestamp()}
+	cacheLock={cacheLocks['timestamp']}
+	bind:cachedValue={formDataCache['timestamp']}
+/>
 <TextArea
 	{form}
 	field="observation"
