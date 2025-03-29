@@ -219,7 +219,6 @@ export const navData = {
 				}
 			]
 		},
-
 		{
 			name: 'thirdPartyCategory',
 			items: [
@@ -253,6 +252,35 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
+				}
+			]
+		},
+		{
+			name: 'privacy',
+			items: [
+				{
+					name: 'overview',
+					fa_icon: 'fa-solid fa-gauge',
+					href: '/analytics/gdpr',
+					permissions: ['view_processing', 'view_purpose']
+				},
+				{
+					name: 'processingsRegister',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/processings',
+					permissions: ['view_processing']
+				},
+				{
+					name: 'personalData',
+					fa_icon: 'fa-solid fa-users-viewfinder',
+					href: '/personal-data',
+					permissions: ['view_personaldata']
+				},
+				{
+					name: 'purposes',
+					fa_icon: 'fa-solid fa-diamond',
+					href: '/purposes',
+					permissions: ['view_purpose']
 				}
 			]
 		},

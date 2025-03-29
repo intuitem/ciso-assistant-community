@@ -209,6 +209,16 @@ class RiskAcceptanceReadSerializer(BaseModelSerializer):
 
 
 class PerimeterWriteSerializer(BaseModelSerializer):
+    def validate_name(self, value):
+        """
+        Check that the folder perimeter name does not contain the character "/"
+        """
+        if "/" in value:
+            raise serializers.ValidationError(
+                "The name cannot contain '/' for a Perimeter."
+            )
+        return value
+
     class Meta:
         model = Perimeter
         exclude = ["created_at"]
@@ -809,6 +819,16 @@ class FolderWriteSerializer(BaseModelSerializer):
             "builtin",
             "content_type",
         ]
+
+    def validate_name(self, value):
+        """
+        Check that the folder name does not contain the character "/"
+        """
+        if "/" in value:
+            raise serializers.ValidationError(
+                "The name cannot contain '/' for a Folder."
+            )
+        return value
 
 
 class FolderReadSerializer(BaseModelSerializer):
