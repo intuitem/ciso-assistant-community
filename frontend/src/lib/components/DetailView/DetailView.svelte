@@ -41,6 +41,7 @@
 	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
+	export let displayModelTable = true;
 
 	exclude = [...exclude, ...defaultExcludes];
 
@@ -482,7 +483,7 @@
 	</div>
 </div>
 
-{#if relatedModels.length > 0}
+{#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
 		<TabGroup justify="justify-center">
 			{#each relatedModels as [urlmodel, model], index}

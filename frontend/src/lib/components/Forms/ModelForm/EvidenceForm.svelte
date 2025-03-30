@@ -35,7 +35,9 @@
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
-		hidden={initialData.applied_controls || initialData.requirement_assessments}
+		hidden={initialData.applied_controls ||
+			initialData.requirement_assessments ||
+			initialData.folder}
 	/>
 {:else}
 	<HiddenInput {form} field="folder" />
