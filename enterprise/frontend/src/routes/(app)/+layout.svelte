@@ -82,7 +82,7 @@
 				{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
 			</aside>
 		{/if}
-		<AppBar background="bg-white" padding="py-2 px-4">
+		<AppBar background="bg-white" padding="py-2 px-4" class="relative">
 			<span
 				class="text-2xl font-bold pb-1 bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
 				id="page-title"
