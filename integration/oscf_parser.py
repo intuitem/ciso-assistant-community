@@ -111,7 +111,7 @@ def map_status_to_result(status_code):
 
 def send_kafka_messages(compliance_data, assessment_ref_id):
     """
-    Send Kafka messages for each compliance data entry.
+    Send Kafka messages for each unique compliance data entry.
 
     Args:
         compliance_data: List of dictionaries with ref_id and status_code
@@ -123,18 +123,31 @@ def send_kafka_messages(compliance_data, assessment_ref_id):
     # Create Producer instance
     producer = Producer(conf)
 
-    print(f"Connected to Kafka at {BOOTSTRAP_SERVERS}")
-    print(f"Sending {len(compliance_data)} messages to topic {TOPIC}")
-
+    # De-duplicate messages based on combination of ref_id and result
+    unique_messages = {}
     for item in compliance_data:
+        result = map_status_to_result(item["status_code"])
+
+        # Create a unique key based on both ref_id and result
+        key = f"{item['ref_id']}:{result}"
+
+        # Store the unique combination
+        unique_messages[key] = {"ref_id": item["ref_id"], "result": result}
+
+    print(f"Connected to Kafka at {BOOTSTRAP_SERVERS}")
+    print(
+        f"Sending {len(unique_messages)} unique messages to topic {TOPIC} (reduced from {len(compliance_data)} total entries)"
+    )
+
+    for key, data in unique_messages.items():
         # Create message
         message = {
             "message_type": "update_requirement_assessment",
             "selector": {
                 "compliance_assessment__ref_id": assessment_ref_id,
-                "requirement__ref_id": item["ref_id"],
+                "requirement__ref_id": data["ref_id"],
             },
-            "values": {"result": map_status_to_result(item["status_code"])},
+            "values": {"result": data["result"]},
         }
 
         # Produce the message
@@ -204,18 +217,28 @@ def main():
     if args.dry_run:
         print("=== DRY RUN MODE (not sending to Kafka) ===")
 
-        # Count unique reference IDs
-        unique_ref_ids = set(item["ref_id"] for item in compliance_data)
-        print(f"Found {len(unique_ref_ids)} unique reference IDs that will be affected")
+        # De-duplicate messages based on combination of ref_id and result
+        unique_messages = {}
+        for item in compliance_data:
+            result = map_status_to_result(item["status_code"])
+
+            # Create a unique key based on both ref_id and result
+            key = f"{item['ref_id']}:{result}"
+
+            # Store the unique combination
+            unique_messages[key] = {"ref_id": item["ref_id"], "result": result}
+
+        # Print stats
+        print(f"Found {len(compliance_data)} total compliance items")
+        print(
+            f"After de-duplication: {len(unique_messages)} unique messages will be sent"
+        )
 
         # Count by result type
         result_counts = {}
-        for item in compliance_data:
-            result = map_status_to_result(item["status_code"])
-            if result in result_counts:
-                result_counts[result] += 1
-            else:
-                result_counts[result] = 1
+        for data in unique_messages.values():
+            result = data["result"]
+            result_counts[result] = result_counts.get(result, 0) + 1
 
         # Print result distribution
         print("\nResult distribution:")
@@ -223,14 +246,14 @@ def main():
             print(f"  {result}: {count}")
 
         print("\nMessages that would be sent:")
-        for item in compliance_data:
+        for data in unique_messages.values():
             message = {
                 "message_type": "update_requirement_assessment",
                 "selector": {
                     "compliance_assessment__ref_id": args.assessment_ref,
-                    "requirement__ref_id": item["ref_id"],
+                    "requirement__ref_id": data["ref_id"],
                 },
-                "values": {"result": map_status_to_result(item["status_code"])},
+                "values": {"result": data["result"]},
             }
             print(f"Would send to topic '{TOPIC}':")
             print(json.dumps(message, indent=2))
