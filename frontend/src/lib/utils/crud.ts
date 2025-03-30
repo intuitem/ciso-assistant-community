@@ -948,6 +948,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'author', urlModel: 'users' }
 		],
 		selectFields: [{ field: 'entry_type' }]
+	},
+	'task-instances': {
+		name: 'taskinstance',
+		localName: 'taskInstance',
+		localNamePlural: 'taskInstances',
+		verboseName: 'Task instance',
+		verboseNamePlural: 'Task instances',
+		foreignKeyFields: [{ field: 'owner', urlModel: 'users' }],
+		selectFields: [{ field: 'status' }]
 	}
 };
 

@@ -552,6 +552,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # tasks,
+    "add_taskinstance",
+    "view_taskinstance",
+    "change_taskinstance",
+    "delete_taskinstance",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

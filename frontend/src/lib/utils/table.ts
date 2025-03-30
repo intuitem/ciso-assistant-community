@@ -907,6 +907,10 @@ export const listViewFields = {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
+	'task-instances': {
+		head: ['name', 'description', 'status', 'owner'],
+		body: ['name', 'description', 'status', 'owner']
+	},
 	extra: {
 		filters: {
 			risk: undefined,
