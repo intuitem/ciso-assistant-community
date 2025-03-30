@@ -4138,6 +4138,14 @@ class TaskInstance(NameDescriptionMixin, FolderMixin):
         ("completed", "Completed"),
         ("cancelled", "Cancelled"),
     ]
+    SCHEDULE_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://ciso-assistant.com/schemas/task-instance/schedule.schema.json",
+        "title": "Schedule",
+        "description": "Schedule definition of a task",
+        "type": "object",
+        "properties": {},
+    }
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -4147,6 +4155,14 @@ class TaskInstance(NameDescriptionMixin, FolderMixin):
         null=True, blank=True, verbose_name=_("Completion date")
     )
 
+    owner = models.ForeignKey(
+        User,
+        verbose_name=_("Owner"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
     status = models.CharField(
         max_length=50, default="pending", choices=TASK_STATUS_CHOICES
     )
@@ -4154,11 +4170,23 @@ class TaskInstance(NameDescriptionMixin, FolderMixin):
 
     is_template = models.BooleanField(default=False)
     enabled = models.BooleanField(default=True)
-    schedule_definition = models.JSONField(blank=True, null=True)
+    schedule = models.JSONField(
+        verbose_name=_("Schedule definition"),
+        blank=True,
+        null=True,
+        validators=[JSONSchemaInstanceValidator(SCHEDULE_JSONSCHEMA)],
+    )
 
     generator = models.ForeignKey(
-        "TaskInstance", on_delete=models.SET_NULL, null=True, blank=True
+        "TaskInstance",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
+
+    class Meta:
+        verbose_name = _("Task instance")
+        verbose_name_plural = _("Task instances")
 
 
 common_exclude = ["created_at", "updated_at"]
