@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-
+	import { m } from '$paraglide/messages';
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
@@ -68,9 +68,7 @@
 
 {#if tree.length === 0}
 	<div class="flex flex-col justify-center items-center h-full">
-		<span class="text-center text-gray-600"
-			>Not enough data yet. Refresh when more content is available.</span
-		>
+		<span class="text-center text-gray-600">{m.noDataAvailable()}</span>
 	</div>
 {:else}
 	<div id={chart_id} class="{width} {height} {classesContainer}" />
