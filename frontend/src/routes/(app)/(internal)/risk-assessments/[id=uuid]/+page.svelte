@@ -16,7 +16,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { getLocale } from '$paraglide/runtime';
 	import { listViewFields } from '$lib/utils/table';

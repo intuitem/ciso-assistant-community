@@ -1,6 +1,6 @@
 import { LoginPage } from '../utils/login-page.js';
 import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 const vars = TestContent.generateTestVars();
 
 test('user usual routine actions are working correctly', async ({

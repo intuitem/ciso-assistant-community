@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';

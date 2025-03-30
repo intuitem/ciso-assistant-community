@@ -769,6 +769,34 @@ export const listViewFields = {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
 	},
+	processings: {
+		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
+		body: ['name', 'description', 'status', 'legal_basis', 'nature', 'folder']
+	},
+	purposes: {
+		head: ['name', 'description', 'processing'],
+		body: ['name', 'description', 'processing']
+	},
+	'personal-data': {
+		head: ['name', 'description', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
+		body: ['name', 'description', 'category', 'is_sensitive', 'retention', 'deletion_policy']
+	},
+	'data-subjects': {
+		head: ['name', 'description', 'category'],
+		body: ['name', 'description', 'category']
+	},
+	'data-recipients': {
+		head: ['name', 'description', 'category'],
+		body: ['name', 'description', 'category']
+	},
+	'data-contractors': {
+		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
+		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
+	},
+	'data-transfers': {
+		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
+		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
+	},
 	'ebios-rm': {
 		head: ['name', 'description'],
 		body: ['name', 'description']
@@ -870,6 +898,14 @@ export const listViewFields = {
 		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
 		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels'],
 		filters: { filtering_labels: LABELS_FILTER }
+	},
+	incidents: {
+		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
+		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
+	},
+	'timeline-entries': {
+		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
+		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	extra: {
 		filters: {

@@ -3798,7 +3798,13 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
+    filterset_fields = [
+        "folder",
+        "applied_controls",
+        "requirement_assessments",
+        "name",
+        "timeline_entries",
+    ]
     search_fields = ["name"]
 
     @action(methods=["get"], detail=True)
@@ -3868,6 +3874,24 @@ class UploadAttachmentView(APIView):
             except Exception:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class QuickStartView(APIView):
+    serializer_class = QuickStartSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+        try:
+            objects = serializer.save()
+        except Exception as e:
+            logger.error(f"Error in QuickStartView: {e}")
+            raise
+        else:
+            return Response(objects, status=status.HTTP_201_CREATED)
 
 
 class QualificationViewSet(BaseModelViewSet):
@@ -4927,3 +4951,65 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Finding.Status.choices))
+
+
+class IncidentViewSet(BaseModelViewSet):
+    model = Incident
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Incident.Status.choices))
+
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Incident.Severity.choices))
+
+    def perform_update(self, serializer):
+        previous_instance = self.get_object()
+        previous_status = previous_instance.status
+        previous_severity = previous_instance.severity
+
+        instance = serializer.save()
+
+        if previous_status != instance.status and previous_status is not None:
+            TimelineEntry.objects.create(
+                incident=instance,
+                entry=f"{previous_instance.get_status_display()}->{instance.get_status_display()}",
+                entry_type=TimelineEntry.EntryType.STATUS_CHANGED,
+                author=self.request.user,
+                timestamp=now(),
+            )
+
+        if previous_severity != instance.severity and previous_severity is not None:
+            TimelineEntry.objects.create(
+                incident=instance,
+                entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
+                entry_type=TimelineEntry.EntryType.SEVERITY_CHANGED,
+                author=self.request.user,
+                timestamp=now(),
+            )
+
+        return super().perform_update(serializer)
+
+
+class TimelineEntryViewSet(BaseModelViewSet):
+    model = TimelineEntry
+    filterset_fields = ["incident"]
+    search_fields = ["entry", "entry_type"]
+    ordering = ["-timestamp"]
+
+    @action(detail=False, name="Get entry type choices")
+    def entry_type(self, request):
+        return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+        return
+
+    def perform_destroy(self, instance):
+        if instance.entry_type in [
+            TimelineEntry.EntryType.SEVERITY_CHANGED,
+            TimelineEntry.EntryType.STATUS_CHANGED,
+        ]:
+            raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
+        return super().perform_destroy(instance)

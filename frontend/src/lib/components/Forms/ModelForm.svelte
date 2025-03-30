@@ -26,6 +26,13 @@
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
+	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
+	import PurposeForm from './ModelForm/PurposeForm.svelte';
+	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
+	import DataSubjectForm from './ModelForm/DataSubjectForm.svelte';
+	import DataRecipientForm from './ModelForm/DataRecipientForm.svelte';
+	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
+	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -34,6 +41,8 @@
 	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
 	import FindingForm from './ModelForm/FindingForm.svelte';
 	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
+	import IncidentForm from './ModelForm/IncidentForm.svelte';
+	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -43,7 +52,7 @@
 	import type { AnyZodObject } from 'zod';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
@@ -310,6 +319,20 @@
 		<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
+	{:else if URLModel === 'processings'}
+		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'purposes'}
+		<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'personal-data'}
+		<PersonalDataForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-subjects'}
+		<DataSubjectForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-recipients'}
+		<DataRecipientForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-contractors'}
+		<DataContractorForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-transfers'}
+		<DataTransferForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'ebios-rm'}
 		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'feared-events'}
@@ -337,6 +360,17 @@
 		<FindingForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'findings-assessments'}
 		<FindingsAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'incidents'}
+		<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'timeline-entries'}
+		<TimelineEntryForm
+			{form}
+			{model}
+			{cacheLocks}
+			{formDataCache}
+			initialData={model.initialData}
+			{context}
+		/>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
