@@ -950,6 +950,9 @@
 	"dpiaReference": "Référence à l'AIPD",
 	"hasSensitivePersonalData": "Contient des données personnelles sensibles",
 	"associatedControls": "Mesures associés",
+	"processingNature": "Nature",
+	"personalDataCategoriesIdentified": "Catégories des données personnelles identifiées",
+	"documentedProcessings": "Traitements documentés",
 	"ebiosWs1": "Atelier 1 : Cadrage et Socle de sécurité",
 	"ebiosWs2": "Atelier 2 : Sources de risque",
 	"ebiosWs3": "Atelier 3 : Scénarios stratégiques",
@@ -1134,6 +1137,7 @@
 	"human": "Humain",
 	"material": "Matériel",
 	"environmental": "Environnemental",
+	"loadDemoData": "Charger des données démo",
 	"guidedTour": "Visite guidée",
 	"tourWelcomeTitle": "Bienvenue !",
 	"tourWelcomeDescription": "Faisons un tour des principales fonctionnalités pour vous aider à démarrer.",
@@ -1257,5 +1261,6 @@
 	"quickStart": "Démarrage Rapide",
 	"auditName": "Nom de l'audit",
 	"createRiskAssessment": "Initier une analyse de risque également",
-	"riskAssessmentName": "Nom de l'analyse de risque"
+	"riskAssessmentName": "Nom de l'analyse de risque",
+	"noDataAvailable": "Pas de données pour cette visualisation. Rafraîchir la page quand celles-ci sont disponibles."
 }
