@@ -1570,16 +1570,16 @@ A finding can have related reference controls, applied controls, vulnerabilities
 ```mermaid
 erDiagram
 
-ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_INSTANCE : contains
-TASK_INSTANCE |o--o{ TASK_INSTANCE         : generates
-user          }o--o{ TASK_INSTANCE         : owns
-TASK_INSTANCE }o--o| TASK_INSTANCE         : is_subtask_of
-TASK_INSTANCE }o--o{ ASSET                 : relates_to
-TASK_INSTANCE }o--o{ APPLIED_CONTROL       : relates_to
-TASK_INSTANCE }o--o{ COMPLIANCE_ASSESSMENT : relates_to
-TASK_INSTANCE }o--o{ RISK_ASSESSMENT       : relates_to
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE     : contains
+TASK_NODE     |o--o{ TASK_NODE             : generates
+user          }o--o{ TASK_NODE             : owns
+TASK_NODE     }o--o| TASK_NODE             : is_subtask_of
+TASK_NODE     }o--o{ ASSET                 : relates_to
+TASK_NODE     }o--o{ APPLIED_CONTROL       : relates_to
+TASK_NODE     }o--o{ COMPLIANCE_ASSESSMENT : relates_to
+TASK_NODE     }o--o{ RISK_ASSESSMENT       : relates_to
 
-TASK_INSTANCE {
+TASK_NODE {
     string ref_id
     string name
     string description
