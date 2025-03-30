@@ -961,6 +961,8 @@
 	"hasSensitivePersonalData": "Has sensitive personal data",
 	"associatedControls": "Associated controls",
 	"processingNature": "Nature",
+	"personalDataCategoriesIdentified": "Personal data categories identified",
+	"documentedProcessings": "Documented processings",
 	"collection": "Collection",
 	"recording": "Recording",
 	"organization": "Organization",
@@ -1284,5 +1286,6 @@
 	"quickStart": "Quick Start",
 	"auditName": "Audit Name",
 	"createRiskAssessment": "Initiate a risk assessment as well",
-	"riskAssessmentName": "Risk Assessment Name"
+	"riskAssessmentName": "Risk Assessment Name",
+	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available."
 }

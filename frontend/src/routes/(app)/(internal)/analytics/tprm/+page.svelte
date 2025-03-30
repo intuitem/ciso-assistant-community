@@ -1,6 +1,7 @@
 <script lang="ts">
 	import FlippableCard from './FlippableCard.svelte';
 	import type { PageData } from './$types';
+	import { m } from '$paraglide/messages';
 
 	export let data: PageData;
 </script>
@@ -16,7 +17,7 @@
 		</div>
 	</div>
 {:else}
-	<div class="p-4">No data available for now.</div>
+	<div class="p-4">{m.noDataAvailable()}</div>
 {/if}
 
 <style>
