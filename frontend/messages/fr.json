@@ -1262,5 +1262,9 @@
 	"auditName": "Nom de l'audit",
 	"createRiskAssessment": "Initier une analyse de risque également",
 	"riskAssessmentName": "Nom de l'analyse de risque",
-	"noDataAvailable": "Pas de données pour cette visualisation. Rafraîchir la page quand celles-ci sont disponibles."
+	"noDataAvailable": "Pas de données pour cette visualisation. Rafraîchir la page quand celles-ci sont disponibles.",
+	"tasks": "Tâches",
+	"taskNodes": "Tâches",
+	"addTask": "Ajouter une tâche",
+	"addTaskNode": "Ajouter une tâche"
 }

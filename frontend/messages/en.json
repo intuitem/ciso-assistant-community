@@ -1287,5 +1287,9 @@
 	"auditName": "Audit Name",
 	"createRiskAssessment": "Initiate a risk assessment as well",
 	"riskAssessmentName": "Risk Assessment Name",
-	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available."
+	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available.",
+	"tasks": "Tasks",
+	"tasksNodes": "Tasks",
+	"addTask": "Add task",
+	"addTaskNode": "Add task"
 }
