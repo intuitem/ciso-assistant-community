@@ -626,7 +626,9 @@ export const TimelineEntrySchema = z.object({
 	incident: z.string(),
 	entry: z.string(),
 	entry_type: z.string().default('observation'),
-	timestamp: z.string().datetime({ local: true })
+	timestamp: z
+		.string()
+		.datetime({ local: true })
 		.refine((val) => !val || new Date(val) <= new Date(), {
 			message: m.timestampCannotBeInTheFuture()
 		}),

@@ -138,7 +138,9 @@
 		_form.form.update(
 			(current: Record<string, any>) => ({
 				...current,
-				evidences: current.evidences ? [...current.evidences, form?.newEvidence] : [form?.newEvidence]
+				evidences: current.evidences
+					? [...current.evidences, form?.newEvidence]
+					: [form?.newEvidence]
 			}),
 			{ taint: false }
 		);
@@ -183,7 +185,13 @@
 					label={m.entryType()}
 				/>
 				{#key refreshKey}
-					<TextField type="datetime-local" step="1" {form} field="timestamp" label={m.timestamp()} />
+					<TextField
+						type="datetime-local"
+						step="1"
+						{form}
+						field="timestamp"
+						label={m.timestamp()}
+					/>
 				{/key}
 				<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
 				<TextArea {form} field="observation" label={m.observation()} />
@@ -195,7 +203,7 @@
 								multiple
 								optionsEndpoint="evidences"
 								field="evidences"
-								resetForm={resetForm}
+								{resetForm}
 								label={m.evidences()}
 							/>
 						</div>
@@ -215,7 +223,7 @@
 							_form.reset();
 							_form.form.update((current) => ({ ...current, evidences: undefined }));
 							refreshKey = !refreshKey;
-							resetForm = true
+							resetForm = true;
 						}}>{m.cancel()}</button
 					>
 					<button
@@ -223,7 +231,7 @@
 						data-testid="save-button"
 						type="submit"
 						on:click={() => {
-							resetForm = true
+							resetForm = true;
 						}}>{m.save()}</button
 					>
 				</div>
