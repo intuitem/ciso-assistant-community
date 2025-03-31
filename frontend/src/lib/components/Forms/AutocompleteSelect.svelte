@@ -6,6 +6,8 @@
 	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
+	import * as m from '$paraglide/messages.js'
+	import { toCamelCase } from '$lib/utils/locales';
 
 	interface Option {
 		label: string;
@@ -337,7 +339,7 @@
 				<span class="text-indigo-600">{option.label}</span>
 				<span class="text-sm text-gray-500"> (suggested)</span>
 			{:else if translateOptions && option.label}
-				{safeTranslate(option.label)}
+				{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
 			{:else}
 				{option.label || option}
 			{/if}

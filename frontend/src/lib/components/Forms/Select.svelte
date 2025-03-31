@@ -3,6 +3,8 @@
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
+	import * as m from '$paraglide/messages.js'
+	import { toCamelCase } from '$lib/utils/locales';
 
 	let _class = '';
 
@@ -79,7 +81,7 @@
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{safeTranslate(option.label)}
+					{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
 				</option>
 			{/each}
 		</select>
