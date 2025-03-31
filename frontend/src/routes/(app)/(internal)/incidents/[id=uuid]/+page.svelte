@@ -56,11 +56,10 @@
 			createModalCache.deleteCache(model.urlModel);
 			_form.form.update((current) => ({ ...current, evidences: undefined }));
 			refreshKey = !refreshKey;
-			window.location.reload(); // this is ugly but at least the UI is consistent for now
 		}
 	});
 
-	const formStore = _form.form;
+	$: formStore = _form.form;
 
 	const source = data.relatedModels['timeline-entries'].table;
 	const pagination = true;
@@ -131,11 +130,19 @@
 		refreshKey = !refreshKey;
 	}
 
-	$: if (form && form.newEvidence) {
-		forceRefresh();
-		$formStore.evidences
-			? $formStore.evidences.push(form.newEvidence)
-			: ($formStore.evidences = [form.newEvidence]);
+	let resetForm = true;
+
+	$: if (form?.newEvidence) {
+		refreshKey = !refreshKey;
+		resetForm = false;
+		_form.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				evidences: current.evidences ? [...current.evidences, form?.newEvidence] : [form?.newEvidence]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
 	}
 </script>
 
@@ -181,16 +188,14 @@
 				{#key refreshKey}
 					<div class="flex items-end justify-center">
 						<div class="w-full mr-2">
-							{#key refreshKey}
-								<AutocompleteSelect
-									{form}
-									multiple
-									optionsEndpoint="evidences"
-									field="evidences"
-									resetForm
-									label={m.evidences()}
-								/>
-							{/key}
+							<AutocompleteSelect
+								{form}
+								multiple
+								optionsEndpoint="evidences"
+								field="evidences"
+								resetForm={resetForm}
+								label={m.evidences()}
+							/>
 						</div>
 						<button
 							class="btn bg-gray-300 h-11 w-10"
@@ -208,13 +213,16 @@
 							_form.reset();
 							_form.form.update((current) => ({ ...current, evidences: undefined }));
 							refreshKey = !refreshKey;
-							window.location.reload();
+							resetForm = true
 						}}>{m.cancel()}</button
 					>
 					<button
 						class="btn variant-filled-primary font-semibold w-full"
 						data-testid="save-button"
-						type="submit">{m.save()}</button
+						type="submit"
+						on:click={() => {
+							resetForm = true
+						}}>{m.save()}</button
 					>
 				</div>
 			</SuperForm>
