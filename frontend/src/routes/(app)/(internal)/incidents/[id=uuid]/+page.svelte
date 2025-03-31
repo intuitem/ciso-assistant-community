@@ -59,8 +59,6 @@
 		}
 	});
 
-	$: formStore = _form.form;
-
 	const source = data.relatedModels['timeline-entries'].table;
 	const pagination = true;
 	const numberRowsPerPage = 10;
@@ -144,7 +142,6 @@
 			}),
 			{ taint: false }
 		);
-		console.debug('formStore', $formStore);
 	}
 </script>
 
