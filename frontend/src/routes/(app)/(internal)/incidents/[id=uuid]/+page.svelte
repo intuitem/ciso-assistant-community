@@ -54,7 +54,11 @@
 		validationMethod: 'auto',
 		onUpdated: () => {
 			createModalCache.deleteCache(model.urlModel);
-			_form.form.update((current) => ({ ...current, evidences: undefined }));
+			_form.form.update((current) => ({
+				...current,
+				evidences: undefined,
+				timestamp: new Date().toISOString()
+			}));
 			refreshKey = !refreshKey;
 		}
 	});
@@ -130,6 +134,8 @@
 
 	let resetForm = true;
 
+	$: formStore = _form.form;
+
 	$: if (form?.newEvidence) {
 		refreshKey = !refreshKey;
 		resetForm = false;
@@ -142,6 +148,7 @@
 			}),
 			{ taint: false }
 		);
+		console.debug('formStore', $formStore);
 	}
 </script>
 
@@ -218,7 +225,11 @@
 						type="button"
 						on:click={() => {
 							_form.reset();
-							_form.form.update((current) => ({ ...current, evidences: undefined }));
+							_form.form.update((current) => ({
+								...current,
+								evidences: undefined,
+								timestamp: new Date().toISOString()
+							}));
 							refreshKey = !refreshKey;
 							resetForm = true;
 						}}>{m.cancel()}</button
