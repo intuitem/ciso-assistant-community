@@ -182,7 +182,9 @@
 					field="entry_type"
 					label={m.entryType()}
 				/>
-				<TextField type="datetime-local" step="1" {form} field="timestamp" label={m.timestamp()} />
+				{#key refreshKey}
+					<TextField type="datetime-local" step="1" {form} field="timestamp" label={m.timestamp()} />
+				{/key}
 				<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
 				<TextArea {form} field="observation" label={m.observation()} />
 				{#key refreshKey}
