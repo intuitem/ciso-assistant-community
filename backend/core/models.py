@@ -4144,8 +4144,64 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
         "title": "Schedule",
         "description": "Schedule definition of a task",
         "type": "object",
-        "properties": {},
+        "properties": {
+            "frequency": {
+            "type": "string",
+            "enum": ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+            },
+            "days_of_week": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 6
+            },
+            "description": "Optional. Days of the week (0=Sunday, 6=Saturday)"
+            },
+            "days_of_month": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": -31,
+                "maximum": 31,
+                "not": { "enum": [0] }
+            },
+            "description": "Optional. Days of the month (negative values count from the month's end, e.g., -1 for last day)"
+            },
+            "months_of_year": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12
+            },
+            "description": "Optional. Months of the year (1=January, 12=December)"
+            },
+            "endDate": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Optional. Date when recurrence ends."
+            },
+            "occurrences": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "description": "Optional. Number of occurrences before recurrence stops."
+            },
+            "overdue_behavior": {
+            "type": "string",
+            "enum": ["DELAY_NEXT", "NO_IMPACT"],
+            "default": "NO_IMPACT",
+            "description": "Optional. Behavior when tasks become overdue."
+            },
+            "exceptions": {
+            "type": ["object", "null"],
+            "description": "Optional. JSON object for future exceptions handling."
+            }
+        },
+        "required": ["frequency"],
+        "additionalProperties": False
     }
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
