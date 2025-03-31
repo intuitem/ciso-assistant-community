@@ -84,7 +84,7 @@ export const URL_MODEL = [
 	'data-transfers',
 	'incidents',
 	'timeline-entries',
-	'task-instances'
+	'task-nodes'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

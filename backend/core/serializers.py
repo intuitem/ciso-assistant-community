@@ -1396,15 +1396,15 @@ class IncidentReadSerializer(IncidentWriteSerializer):
         return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data
 
 
-class TaskInstanceReadSerializer(BaseModelSerializer):
+class TaskNodeReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
 
     class Meta:
-        model = TaskInstance
+        model = TaskNode
         fields = "__all__"
 
 
-class TaskInstanceWriteSerializer(BaseModelSerializer):
+class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = TaskInstance
+        model = TaskNode
         fields = "__all__"

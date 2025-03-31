@@ -4131,7 +4131,7 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
 
 
 # tasks management
-class TaskInstance(NameDescriptionMixin, FolderMixin):
+class TaskNode(NameDescriptionMixin, FolderMixin):
     TASK_STATUS_CHOICES = [
         ("pending", "Pending"),
         ("in_progress", "In progress"),
@@ -4140,7 +4140,7 @@ class TaskInstance(NameDescriptionMixin, FolderMixin):
     ]
     SCHEDULE_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "https://ciso-assistant.com/schemas/task-instance/schedule.schema.json",
+        "$id": "https://ciso-assistant.com/schemas/task-node/schedule.schema.json",
         "title": "Schedule",
         "description": "Schedule definition of a task",
         "type": "object",
@@ -4178,15 +4178,15 @@ class TaskInstance(NameDescriptionMixin, FolderMixin):
     )
 
     generator = models.ForeignKey(
-        "TaskInstance",
+        "TaskNode",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
 
     class Meta:
-        verbose_name = _("Task instance")
-        verbose_name_plural = _("Task instances")
+        verbose_name = _("Task node")
+        verbose_name_plural = _("Task nodes")
 
 
 common_exclude = ["created_at", "updated_at"]

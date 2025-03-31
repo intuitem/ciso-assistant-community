@@ -5010,9 +5010,9 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
-class TaskInstanceViewSet(BaseModelViewSet):
-    model = TaskInstance
+class TaskNodeViewSet(BaseModelViewSet):
+    model = TaskNode
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
-        return Response(dict(TaskInstance.TASK_STATUS_CHOICES))
+        return Response(dict(TaskNode.TASK_STATUS_CHOICES))

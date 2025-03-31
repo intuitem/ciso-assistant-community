@@ -43,7 +43,7 @@
 	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
 	import IncidentForm from './ModelForm/IncidentForm.svelte';
 	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
-	import TaskInstanceForm from './ModelForm/TaskInstanceForm.svelte';
+	import TaskNodeForm from './ModelForm/TaskNodeForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -372,8 +372,8 @@
 			initialData={model.initialData}
 			{context}
 		/>
-	{:else if URLModel === 'task-instances'}
-		<TaskInstanceForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'task-nodes'}
+		<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

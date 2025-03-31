@@ -636,7 +636,7 @@ export const TimelineEntrySchema = z.object({
 	evidences: z.string().uuid().optional().array().optional()
 });
 
-export const TaskInstanceSchema = z.object({
+export const TaskNodeSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	status: z.string().optional(),
@@ -688,7 +688,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'findings-assessments': FindingsAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
-	'task-instances': TaskInstanceSchema
+	'task-nodes': TaskNodeSchema
 };
 
 export const modelSchema = (model: string) => {

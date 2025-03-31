@@ -950,12 +950,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'entry_type' }],
 		reverseForeignKeyFields: [{ field: 'timeline_entries', urlModel: 'evidences' }]
 	},
-	'task-instances': {
-		name: 'taskinstance',
-		localName: 'taskInstance',
-		localNamePlural: 'taskInstances',
-		verboseName: 'Task instance',
-		verboseNamePlural: 'Task instances',
+	'task-nodes': {
+		name: 'tasknode',
+		localName: 'taskNode',
+		localNamePlural: 'taskNodes',
+		verboseName: 'Task node',
+		verboseNamePlural: 'Task nodes',
 		foreignKeyFields: [{ field: 'owner', urlModel: 'users' }],
 		selectFields: [{ field: 'status' }]
 	}
