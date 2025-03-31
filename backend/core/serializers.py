@@ -1398,6 +1398,10 @@ class IncidentReadSerializer(IncidentWriteSerializer):
 
 class TaskNodeReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    compliance_assessments = FieldsRelatedField(many=True)
+    risk_assessments = FieldsRelatedField(many=True)
 
     class Meta:
         model = TaskNode

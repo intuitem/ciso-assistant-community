@@ -4146,60 +4146,52 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
         "type": "object",
         "properties": {
             "frequency": {
-            "type": "string",
-            "enum": ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+                "type": "string",
+                "enum": ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
             },
             "days_of_week": {
-            "type": "array",
-            "items": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 6
-            },
-            "description": "Optional. Days of the week (0=Sunday, 6=Saturday)"
+                "type": "array",
+                "items": {"type": "integer", "minimum": 0, "maximum": 6},
+                "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
             },
             "days_of_month": {
-            "type": "array",
-            "items": {
-                "type": "integer",
-                "minimum": -31,
-                "maximum": 31,
-                "not": { "enum": [0] }
-            },
-            "description": "Optional. Days of the month (negative values count from the month's end, e.g., -1 for last day)"
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": -31,
+                    "maximum": 31,
+                    "not": {"enum": [0]},
+                },
+                "description": "Optional. Days of the month (negative values count from the month's end, e.g., -1 for last day)",
             },
             "months_of_year": {
-            "type": "array",
-            "items": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 12
-            },
-            "description": "Optional. Months of the year (1=January, 12=December)"
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 12},
+                "description": "Optional. Months of the year (1=January, 12=December)",
             },
             "endDate": {
-            "type": ["string", "null"],
-            "format": "date",
-            "description": "Optional. Date when recurrence ends."
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Optional. Date when recurrence ends.",
             },
             "occurrences": {
-            "type": ["integer", "null"],
-            "minimum": 1,
-            "description": "Optional. Number of occurrences before recurrence stops."
+                "type": ["integer", "null"],
+                "minimum": 1,
+                "description": "Optional. Number of occurrences before recurrence stops.",
             },
             "overdue_behavior": {
-            "type": "string",
-            "enum": ["DELAY_NEXT", "NO_IMPACT"],
-            "default": "NO_IMPACT",
-            "description": "Optional. Behavior when tasks become overdue."
+                "type": "string",
+                "enum": ["DELAY_NEXT", "NO_IMPACT"],
+                "default": "NO_IMPACT",
+                "description": "Optional. Behavior when tasks become overdue.",
             },
             "exceptions": {
-            "type": ["object", "null"],
-            "description": "Optional. JSON object for future exceptions handling."
-            }
+                "type": ["object", "null"],
+                "description": "Optional. JSON object for future exceptions handling.",
+            },
         },
         "required": ["frequency"],
-        "additionalProperties": False
+        "additionalProperties": False,
     }
 
     ref_id = models.CharField(
@@ -4238,6 +4230,35 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+    )
+    
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name="Related assets",
+        blank=True,
+        help_text="Assets related to the task",
+        related_name="tasks",
+    )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name="Applied controls",
+        blank=True,
+        help_text="Applied controls related to the task",
+        related_name="tasks",
+    )
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        verbose_name="Compliance assessments",
+        blank=True,
+        help_text="Compliance assessments related to the task",
+        related_name="tasks",
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        verbose_name="Risk assessments",
+        blank=True,
+        help_text="Risk assessments related to the task",
+        related_name="tasks",
     )
 
     class Meta:

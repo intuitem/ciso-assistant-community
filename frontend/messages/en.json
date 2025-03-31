@@ -1291,5 +1291,9 @@
 	"tasks": "Tasks",
 	"tasksNodes": "Tasks",
 	"addTask": "Add task",
-	"addTaskNode": "Add task"
+	"addTaskNode": "Add task",
+	"completionDate": "Completion Date",
+	"completionDateHelpText": "The date when the task was completed",
+	"isRecurrent": "Recurrent",
+	"isRecurrentHelpText": "Check if the task is recurrent"
 }
