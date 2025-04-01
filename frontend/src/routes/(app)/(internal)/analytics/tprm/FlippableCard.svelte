@@ -215,7 +215,7 @@
 				<!-- Additional details could go here -->
 				<div class="mb-4">
 					<div class="">
-						{#if entity_assessment.has_questions}
+						{#if entity_assessment?.has_questions}
 							<!-- Progress bar -->
 							<div class="mt-3 mb-6" title="Any answer of associated questions unless not set">
 								<div class="flex justify-between items-center mb-1">
