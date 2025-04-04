@@ -82,7 +82,8 @@
 						modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment');
 					}}
 					on:keydown={(_) => modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment')}
-					class="btn variant-filled-tertiary h-full"><i class="fa-solid fa-trash" /></button
+					class="btn variant-filled-tertiary h-full"
+					data-testid="attachment-delete-button"><i class="fa-solid fa-trash" /></button
 				>
 			</div>
 		</div>

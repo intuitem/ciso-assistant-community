@@ -2,6 +2,7 @@ export default {
 	assessmentName: 'Test assessment',
 	assetName: 'Test asset',
 	evidenceName: 'Test evidence',
+	evidenceName2: 'Test evidence 2',
 	folderName: 'Test domain',
 	perimeterName: 'Test perimeter',
 	riskAcceptanceName: 'Test risk acceptance',
