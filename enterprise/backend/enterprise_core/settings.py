@@ -199,13 +199,13 @@ EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False") == "True"
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
-EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE")
+EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False") == "True"
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 
