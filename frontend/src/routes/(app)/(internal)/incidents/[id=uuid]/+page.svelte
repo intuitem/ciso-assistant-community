@@ -54,13 +54,14 @@
 		validationMethod: 'auto',
 		onUpdated: () => {
 			createModalCache.deleteCache(model.urlModel);
-			_form.form.update((current) => ({ ...current, evidences: undefined }));
+			_form.form.update((current) => ({
+				...current,
+				evidences: undefined,
+				timestamp: new Date().toISOString()
+			}));
 			refreshKey = !refreshKey;
-			window.location.reload(); // this is ugly but at least the UI is consistent for now
 		}
 	});
-
-	const formStore = _form.form;
 
 	const source = data.relatedModels['timeline-entries'].table;
 	const pagination = true;
@@ -131,11 +132,23 @@
 		refreshKey = !refreshKey;
 	}
 
-	$: if (form && form.newEvidence) {
-		forceRefresh();
-		$formStore.evidences
-			? $formStore.evidences.push(form.newEvidence)
-			: ($formStore.evidences = [form.newEvidence]);
+	let resetForm = true;
+
+	$: formStore = _form.form;
+
+	$: if (form?.newEvidence) {
+		refreshKey = !refreshKey;
+		resetForm = false;
+		_form.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				evidences: current.evidences
+					? [...current.evidences, form?.newEvidence]
+					: [form?.newEvidence]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
 	}
 </script>
 
@@ -175,22 +188,28 @@
 					field="entry_type"
 					label={m.entryType()}
 				/>
-				<TextField type="datetime-local" step="1" {form} field="timestamp" label={m.timestamp()} />
+				{#key refreshKey}
+					<TextField
+						type="datetime-local"
+						step="1"
+						{form}
+						field="timestamp"
+						label={m.timestamp()}
+					/>
+				{/key}
 				<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
 				<TextArea {form} field="observation" label={m.observation()} />
 				{#key refreshKey}
 					<div class="flex items-end justify-center">
 						<div class="w-full mr-2">
-							{#key refreshKey}
-								<AutocompleteSelect
-									{form}
-									multiple
-									optionsEndpoint="evidences"
-									field="evidences"
-									resetForm
-									label={m.evidences()}
-								/>
-							{/key}
+							<AutocompleteSelect
+								{form}
+								multiple
+								optionsEndpoint="evidences"
+								field="evidences"
+								{resetForm}
+								label={m.evidences()}
+							/>
 						</div>
 						<button
 							class="btn bg-gray-300 h-11 w-10"
@@ -206,15 +225,22 @@
 						type="button"
 						on:click={() => {
 							_form.reset();
-							_form.form.update((current) => ({ ...current, evidences: undefined }));
+							_form.form.update((current) => ({
+								...current,
+								evidences: undefined,
+								timestamp: new Date().toISOString()
+							}));
 							refreshKey = !refreshKey;
-							window.location.reload();
+							resetForm = true;
 						}}>{m.cancel()}</button
 					>
 					<button
 						class="btn variant-filled-primary font-semibold w-full"
 						data-testid="save-button"
-						type="submit">{m.save()}</button
+						type="submit"
+						on:click={() => {
+							resetForm = true;
+						}}>{m.save()}</button
 					>
 				</div>
 			</SuperForm>
