@@ -6,7 +6,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
-	import * as m from '$paraglide/messages.js'
+	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
 
 	interface Option {
