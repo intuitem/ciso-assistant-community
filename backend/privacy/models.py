@@ -15,60 +15,63 @@ class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
 
 LEGAL_BASIS_CHOICES = (
     # Article 6(1) Legal Bases
-    ("consent", "Consent"),
-    ("contract", "Performance of a Contract"),
-    ("legal_obligation", "Compliance with a Legal Obligation"),
-    ("vital_interests", "Protection of Vital Interests"),
-    ("public_interest", "Performance of a Task in the Public Interest"),
-    ("legitimate_interests", "Legitimate Interests"),
+    ("privacy_consent", "Consent"),
+    ("privacy_contract", "Performance of a Contract"),
+    ("privacy_legal_obligation", "Compliance with a Legal Obligation"),
+    ("privacy_vital_interests", "Protection of Vital Interests"),
+    ("privacy_public_interest", "Performance of a Task in the Public Interest"),
+    ("privacy_legitimate_interests", "Legitimate Interests"),
     # Special Category Processing - Article 9(2)
-    ("explicit_consent", "Explicit Consent for Special Categories"),
-    ("employment_social_security", "Employment and Social Security Law"),
+    ("privacy_explicit_consent", "Explicit Consent for Special Categories"),
+    ("privacy_employment_social_security", "Employment and Social Security Law"),
     (
-        "vital_interests_incapacity",
+        "privacy_vital_interests_incapacity",
         "Vital Interests (Subject Physically/Legally Incapable)",
     ),
-    ("nonprofit_organization", "Processing by Nonprofit Organization"),
-    ("public_data", "Data Manifestly Made Public by the Data Subject"),
-    ("legal_claims", "Establishment, Exercise or Defense of Legal Claims"),
-    ("substantial_public_interest", "Substantial Public Interest"),
-    ("preventive_medicine", "Preventive or Occupational Medicine"),
-    ("public_health", "Public Health"),
-    ("archiving_research", "Archiving, Research or Statistical Purposes"),
+    ("privacy_nonprofit_organization", "Processing by Nonprofit Organization"),
+    ("privacy_public_data", "Data Manifestly Made Public by the Data Subject"),
+    ("privacy_legal_claims", "Establishment, Exercise or Defense of Legal Claims"),
+    ("privacy_substantial_public_interest", "Substantial Public Interest"),
+    ("privacy_preventive_medicine", "Preventive or Occupational Medicine"),
+    ("privacy_public_health", "Public Health"),
+    ("privacy_archiving_research", "Archiving, Research or Statistical Purposes"),
     # Additional GDPR Bases
-    ("child_consent", "Child's Consent with Parental Authorization"),
-    ("data_transfer_adequacy", "Transfer Based on Adequacy Decision"),
-    ("data_transfer_safeguards", "Transfer Subject to Appropriate Safeguards"),
-    ("data_transfer_binding_rules", "Transfer Subject to Binding Corporate Rules"),
+    ("privacy_child_consent", "Child's Consent with Parental Authorization"),
+    ("privacy_data_transfer_adequacy", "Transfer Based on Adequacy Decision"),
+    ("privacy_data_transfer_safeguards", "Transfer Subject to Appropriate Safeguards"),
     (
-        "data_transfer_derogation",
+        "privacy_data_transfer_binding_rules",
+        "Transfer Subject to Binding Corporate Rules",
+    ),
+    (
+        "privacy_data_transfer_derogation",
         "Transfer Based on Derogation for Specific Situations",
     ),
     # Common Combined Bases
-    ("consent_and_contract", "Consent and Contract"),
-    ("contract_and_legitimate_interests", "Contract and Legitimate Interests"),
+    ("privacy_consent_and_contract", "Consent and Contract"),
+    ("privacy_contract_and_legitimate_interests", "Contract and Legitimate Interests"),
     # Other
-    ("not_applicable", "Not Applicable"),
-    ("other", "Other Legal Basis (Specify in Description)"),
+    ("privacy_not_applicable", "Not Applicable"),
+    ("privacy_other", "Other Legal Basis (Specify in Description)"),
 )
 
 
 class ProcessingNature(ReferentialObjectMixin, I18nObjectMixin):
     DEFAULT_PROCESSING_NATURE = [
-        "collection",
-        "recording",
-        "organization",
-        "structuring",
-        "storage",
-        "adaptationOrAlteration",
-        "retrieval",
-        "consultation",
-        "use",
-        "disclosureByTransmission",
-        "disseminationOrOtherwiseMakingAvailable",
-        "alignmentOrCombination",
-        "restriction",
-        "erasureOrDestruction",
+        "privacy_collection",
+        "privacy_recording",
+        "privacy_organization",
+        "privacy_structuring",
+        "privacy_storage",
+        "privacy_adaptationOrAlteration",
+        "privacy_retrieval",
+        "privacy_consultation",
+        "privacy_use",
+        "privacy_disclosureByTransmission",
+        "privacy_disseminationOrOtherwiseMakingAvailable",
+        "privacy_alignmentOrCombination",
+        "privacy_restriction",
+        "privacy_erasureOrDestruction",
     ]
 
     name = models.CharField(max_length=100, unique=True)
@@ -91,15 +94,17 @@ class ProcessingNature(ReferentialObjectMixin, I18nObjectMixin):
 
 class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
-        ("draft", "Draft"),
-        ("in_review", "In Review"),
-        ("approved", "Approved"),
-        ("deprecated", "Deprecated"),
+        ("privacy_draft", "Draft"),
+        ("privacy_in_review", "In Review"),
+        ("privacy_approved", "Approved"),
+        ("privacy_deprecated", "Deprecated"),
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
     nature = models.ManyToManyField(ProcessingNature, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="privacy_draft"
+    )
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
     )
@@ -142,80 +147,80 @@ class Purpose(NameDescriptionFolderMixin):
 
 class PersonalData(NameDescriptionFolderMixin):
     DELETION_POLICY_CHOICES = (
-        ("automatic_deletion", "Automatic Deletion"),
-        ("anonymization", "Anonymization"),
-        ("manual_review_deletion", "Manual Review Deletion"),
-        ("user_requested_deletion", "User Requested Deletion"),
-        ("legal_regulatory_hold", "Legal/Regulatory Hold"),
-        ("partial_deletion", "Partial Deletion"),
+        ("privacy_automatic_deletion", "Automatic Deletion"),
+        ("privacy_anonymization", "Anonymization"),
+        ("privacy_manual_review_deletion", "Manual Review Deletion"),
+        ("privacy_user_requested_deletion", "User Requested Deletion"),
+        ("privacy_legal_regulatory_hold", "Legal/Regulatory Hold"),
+        ("privacy_partial_deletion", "Partial Deletion"),
     )
     PERSONAL_DATA_CHOICES = (
         # Basic Identity Information
-        ("basic_identity", "Basic Identity Information"),
-        ("name", "Name"),
-        ("identification_numbers", "Identification Numbers"),
-        ("online_identifiers", "Online Identifiers"),
-        ("location_data", "Location Data"),
+        ("privacy_basic_identity", "Basic Identity Information"),
+        ("privacy_name", "Name"),
+        ("privacy_identification_numbers", "Identification Numbers"),
+        ("privacy_online_identifiers", "Online Identifiers"),
+        ("privacy_location_data", "Location Data"),
         # Contact Information
-        ("contact_details", "Contact Details"),
-        ("address", "Address"),
-        ("email", "Email Address"),
-        ("phone_number", "Phone Number"),
+        ("privacy_contact_details", "Contact Details"),
+        ("privacy_address", "Address"),
+        ("privacy_email", "Email Address"),
+        ("privacy_phone_number", "Phone Number"),
         # Financial Information
-        ("financial_data", "Financial Data"),
-        ("bank_account", "Bank Account Information"),
-        ("payment_card", "Payment Card Information"),
-        ("transaction_history", "Transaction History"),
-        ("salary_information", "Salary Information"),
+        ("privacy_financial_data", "Financial Data"),
+        ("privacy_bank_account", "Bank Account Information"),
+        ("privacy_payment_card", "Payment Card Information"),
+        ("privacy_transaction_history", "Transaction History"),
+        ("privacy_salary_information", "Salary Information"),
         # Special Categories of Personal Data (Sensitive)
-        ("health_data", "Health Data"),
-        ("genetic_data", "Genetic Data"),
-        ("biometric_data", "Biometric Data"),
-        ("racial_ethnic_origin", "Racial or Ethnic Origin"),
-        ("political_opinions", "Political Opinions"),
-        ("religious_beliefs", "Religious or Philosophical Beliefs"),
-        ("trade_union_membership", "Trade Union Membership"),
-        ("sexual_orientation", "Sexual Orientation"),
-        ("sex_life_data", "Sex Life Data"),
+        ("privacy_health_data", "Health Data"),
+        ("privacy_genetic_data", "Genetic Data"),
+        ("privacy_biometric_data", "Biometric Data"),
+        ("privacy_racial_ethnic_origin", "Racial or Ethnic Origin"),
+        ("privacy_political_opinions", "Political Opinions"),
+        ("privacy_religious_beliefs", "Religious or Philosophical Beliefs"),
+        ("privacy_trade_union_membership", "Trade Union Membership"),
+        ("privacy_sexual_orientation", "Sexual Orientation"),
+        ("privacy_sex_life_data", "Sex Life Data"),
         # Digital Behavior and Activities
-        ("browsing_history", "Browsing History"),
-        ("search_history", "Search History"),
-        ("cookies", "Cookies Data"),
-        ("device_information", "Device Information"),
-        ("ip_address", "IP Address"),
-        ("user_behavior", "User Behavior"),
+        ("privacy_browsing_history", "Browsing History"),
+        ("privacy_search_history", "Search History"),
+        ("privacy_cookies", "Cookies Data"),
+        ("privacy_device_information", "Device Information"),
+        ("privacy_ip_address", "IP Address"),
+        ("privacy_user_behavior", "User Behavior"),
         # Professional Data
-        ("employment_details", "Employment Details"),
-        ("education_history", "Education History"),
-        ("professional_qualifications", "Professional Qualifications"),
-        ("work_performance", "Work Performance Data"),
+        ("privacy_employment_details", "Employment Details"),
+        ("privacy_education_history", "Education History"),
+        ("privacy_professional_qualifications", "Professional Qualifications"),
+        ("privacy_work_performance", "Work Performance Data"),
         # Social Relationships
-        ("family_details", "Family Details"),
-        ("social_network", "Social Network"),
-        ("lifestyle_information", "Lifestyle Information"),
+        ("privacy_family_details", "Family Details"),
+        ("privacy_social_network", "Social Network"),
+        ("privacy_lifestyle_information", "Lifestyle Information"),
         # Communication Data
-        ("correspondence", "Correspondence Content"),
-        ("messaging_content", "Messaging Content"),
-        ("communication_metadata", "Communication Metadata"),
+        ("privacy_correspondence", "Correspondence Content"),
+        ("privacy_messaging_content", "Messaging Content"),
+        ("privacy_communication_metadata", "Communication Metadata"),
         # Government/Official Data
-        ("government_identifiers", "Government Identifiers"),
-        ("tax_information", "Tax Information"),
-        ("social_security", "Social Security Information"),
-        ("drivers_license", "Driver's License Information"),
-        ("passport_information", "Passport Information"),
+        ("privacy_government_identifiers", "Government Identifiers"),
+        ("privacy_tax_information", "Tax Information"),
+        ("privacy_social_security", "Social Security Information"),
+        ("privacy_drivers_license", "Driver's License Information"),
+        ("privacy_passport_information", "Passport Information"),
         # Legal Data
-        ("legal_records", "Legal Records"),
-        ("criminal_records", "Criminal Records"),
-        ("judicial_data", "Judicial Data"),
+        ("privacy_legal_records", "Legal Records"),
+        ("privacy_criminal_records", "Criminal Records"),
+        ("privacy_judicial_data", "Judicial Data"),
         # Preferences and Opinions
-        ("preferences", "Preferences"),
-        ("opinions", "Opinions"),
-        ("feedback", "Feedback"),
+        ("privacy_preferences", "Preferences"),
+        ("privacy_opinions", "Opinions"),
+        ("privacy_feedback", "Feedback"),
         # Other Types
-        ("images_photos", "Images and Photos"),
-        ("voice_recordings", "Voice Recordings"),
-        ("video_recordings", "Video Recordings"),
-        ("other", "Other Personal Data"),
+        ("privacy_images_photos", "Images and Photos"),
+        ("privacy_voice_recordings", "Voice Recordings"),
+        ("privacy_video_recordings", "Video Recordings"),
+        ("privacy_other", "Other Personal Data"),
     )
 
     processing = models.ForeignKey(
@@ -262,21 +267,21 @@ class PersonalData(NameDescriptionFolderMixin):
 class DataSubject(NameDescriptionFolderMixin):
     CATEGORY_CHOICES = (
         # Core Categories
-        ("customer", "Customer/Client"),
-        ("prospect", "Prospective Customer/Client"),
-        ("employee", "Employee"),
-        ("job_applicant", "Job Applicant"),
-        ("contractor", "Contractor/Vendor"),
-        ("business_partner", "Business Partner"),
+        ("privacy_customer", "Customer/Client"),
+        ("privacy_prospect", "Prospective Customer/Client"),
+        ("privacy_employee", "Employee"),
+        ("privacy_job_applicant", "Job Applicant"),
+        ("privacy_contractor", "Contractor/Vendor"),
+        ("privacy_business_partner", "Business Partner"),
         # Website/Service Users
-        ("user", "Website/App User"),
-        ("visitor", "Visitor"),
+        ("privacy_user", "Website/App User"),
+        ("privacy_visitor", "Visitor"),
         # Special Categories
-        ("minor", "Child/Minor"),
-        ("vulnerable", "Vulnerable Person"),
+        ("privacy_minor", "Child/Minor"),
+        ("privacy_vulnerable", "Vulnerable Person"),
         # Others
-        ("public", "General Public"),
-        ("other", "Other Data Subject Category"),
+        ("privacy_public", "General Public"),
+        ("privacy_other", "Other Data Subject Category"),
     )
 
     processing = models.ForeignKey(
@@ -292,41 +297,41 @@ class DataSubject(NameDescriptionFolderMixin):
 class DataRecipient(NameDescriptionFolderMixin):
     CATEGORY_CHOICES = (
         # Internal Recipients
-        ("internal_team", "Internal Team/Department"),
-        ("employee", "Employee"),
-        ("subsidiary", "Subsidiary Company"),
-        ("parent_company", "Parent Company"),
-        ("affiliated_entity", "Affiliated Entity"),
+        ("privacy_internal_team", "Internal Team/Department"),
+        ("privacy_employee", "Employee"),
+        ("privacy_subsidiary", "Subsidiary Company"),
+        ("privacy_parent_company", "Parent Company"),
+        ("privacy_affiliated_entity", "Affiliated Entity"),
         # External Service Providers
-        ("service_provider", "Service Provider"),
-        ("data_processor", "Data Processor"),
-        ("cloud_provider", "Cloud Service Provider"),
-        ("it_provider", "IT Service Provider"),
-        ("marketing_agency", "Marketing Agency"),
-        ("payment_processor", "Payment Processor"),
-        ("analytics_provider", "Analytics Provider"),
+        ("privacy_service_provider", "Service Provider"),
+        ("privacy_data_processor", "Data Processor"),
+        ("privacy_cloud_provider", "Cloud Service Provider"),
+        ("privacy_it_provider", "IT Service Provider"),
+        ("privacy_marketing_agency", "Marketing Agency"),
+        ("privacy_payment_processor", "Payment Processor"),
+        ("privacy_analytics_provider", "Analytics Provider"),
         # Business Partners
-        ("business_partner", "Business Partner"),
-        ("distributor", "Distributor"),
-        ("reseller", "Reseller"),
-        ("supplier", "Supplier"),
-        ("contractor", "Contractor"),
+        ("privacy_business_partner", "Business Partner"),
+        ("privacy_distributor", "Distributor"),
+        ("privacy_reseller", "Reseller"),
+        ("privacy_supplier", "Supplier"),
+        ("privacy_contractor", "Contractor"),
         # Professional Services
-        ("legal_advisor", "Legal Advisor"),
-        ("accountant", "Accountant"),
-        ("consultant", "Consultant"),
-        ("auditor", "Auditor"),
+        ("privacy_legal_advisor", "Legal Advisor"),
+        ("privacy_accountant", "Accountant"),
+        ("privacy_consultant", "Consultant"),
+        ("privacy_auditor", "Auditor"),
         # Authorities
-        ("regulatory_authority", "Regulatory Authority"),
-        ("tax_authority", "Tax Authority"),
-        ("law_enforcement", "Law Enforcement"),
-        ("government_entity", "Government Entity"),
-        ("court", "Court"),
+        ("privacy_regulatory_authority", "Regulatory Authority"),
+        ("privacy_tax_authority", "Tax Authority"),
+        ("privacy_law_enforcement", "Law Enforcement"),
+        ("privacy_government_entity", "Government Entity"),
+        ("privacy_court", "Court"),
         # Others
-        ("joint_controller", "Joint Controller"),
-        ("individual_recipient", "Individual Recipient"),
-        ("public", "Public Disclosure"),
-        ("other", "Other Recipient Category"),
+        ("privacy_joint_controller", "Joint Controller"),
+        ("privacy_individual_recipient", "Individual Recipient"),
+        ("privacy_public", "Public Disclosure"),
+        ("privacy_other", "Other Recipient Category"),
     )
 
     processing = models.ForeignKey(
@@ -341,11 +346,11 @@ class DataRecipient(NameDescriptionFolderMixin):
 
 class DataContractor(NameDescriptionFolderMixin):
     RELATIONSHIP_TYPE_CHOICES = (
-        ("data_processor", "Data Processor"),
-        ("sub_processor", "Sub-processor"),
-        ("joint_controller", "Joint Controller"),
-        ("independent_controller", "Independent Controller"),
-        ("other", "Other Relationship Type"),
+        ("privacy_data_processor", "Data Processor"),
+        ("privacy_sub_processor", "Sub-processor"),
+        ("privacy_joint_controller", "Joint Controller"),
+        ("privacy_independent_controller", "Independent Controller"),
+        ("privacy_other", "Other Relationship Type"),
     )
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="contractors_involved"
