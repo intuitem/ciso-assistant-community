@@ -6,6 +6,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import * as m from '$paraglide/messages.js';
 
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
 	export let duplicate: boolean = false;
@@ -59,37 +60,39 @@
 	bind:cachedValue={formDataCache['severity']}
 />
 <AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="threats"
-	field="threats"
-	cacheLock={cacheLocks['threats']}
-	bind:cachedValue={formDataCache['threats']}
-	label={m.threats()}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
-	field="owners"
-	cacheLock={cacheLocks['owners']}
-	bind:cachedValue={formDataCache['owners']}
-	label={m.owners()}
-/>
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="assets"
-	optionsLabelField="auto"
-	optionsExtraFields={[['folder', 'str']]}
-	field="assets"
-	label={m.assets()}
-/>
-<AutocompleteSelect
 	multiple
 	{form}
 	optionsEndpoint="qualifications"
 	field="qualifications"
 	label={m.qualifications()}
 />
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="assets"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="assets"
+		label={m.assets()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="threats"
+		field="threats"
+		cacheLock={cacheLocks['threats']}
+		bind:cachedValue={formDataCache['threats']}
+		label={m.threats()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="users?is_third_party=false"
+		optionsLabelField="email"
+		field="owners"
+		cacheLock={cacheLocks['owners']}
+		bind:cachedValue={formDataCache['owners']}
+		label={m.owners()}
+	/>
+</Dropdown>
