@@ -4,12 +4,10 @@
 	import Score from '$lib/components/Forms/Score.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import {
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import {
@@ -53,15 +51,18 @@
 		{ id: 'done', label: m.done() }
 	];
 
-	const requirementHashmap = Object.fromEntries(
-		data.requirements.map((requirement) => [requirement.id, requirement])
-	);
+	$: requirementHashmap = data.requirements
+		? Object.fromEntries(data.requirements.map((requirement) => [requirement.id, requirement]))
+		: {};
 
 	const hideSuggestionHashmap = Object.fromEntries(
 		data.requirement_assessments.map((requirementAssessment) => [requirementAssessment.id, true]) // true = yes hide by default
 	);
 
-	$: createdEvidence = form?.createdEvidence;
+	let createdEvidence; // Make sure to declare the variable first
+	$: if (form?.createdEvidence !== undefined) {
+		createdEvidence = form.createdEvidence;
+	}
 
 	function title(requirementAssessment) {
 		const requirement =
