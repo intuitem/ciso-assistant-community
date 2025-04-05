@@ -91,9 +91,6 @@
 	<Tab bind:group={tabSet} on:click={() => handleTabChange(3)} name="compliance" value={3}
 		>{m.compliance()}</Tab
 	>
-	<Tab bind:group={tabSet} on:click={() => handleTabChange(4)} name="composer" value={4}
-		>{m.composer()}</Tab
-	>
 	<svelte:fragment slot="panel">
 		<div class="px-4 pb-4 space-y-8">
 			{#if tabSet === 0}
@@ -512,26 +509,6 @@
 					><a href="/recap" class="hover:text-purple-500">{m.sectionMoved()}</a></span
 				>
 				<div class="flex flex-col space-y-2"></div>
-			{:else if tabSet === 4}
-				<div id="title" class="text-lg font-black">{m.composer()}</div>
-				<select id="composer_select" hidden>
-					{#each risk_assessments as risk_assessment}
-						<option value={risk_assessment.id}>{risk_assessment.name}</option>
-					{/each}
-				</select>
-				<div>
-					{m.composerDescription()}:
-					<ul class="list-disc px-4 py-2 mx-4 my-2">
-						<li>
-							{m.composerDescription1()}
-						</li>
-						<li>
-							{m.composerDescription2()}
-						</li>
-					</ul>
-				</div>
-
-				<ComposerSelect composerForm={data.composerForm} />
 			{/if}
 		</div>
 	</svelte:fragment>

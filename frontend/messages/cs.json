@@ -426,7 +426,7 @@
 	"etaHelpText": "Předpokládaný čas doručení",
 	"dueDateHelpText": "Datum, do kterého musí být hodnocení dokončeno",
 	"expiryDateHelpText": "Datum, kdy objekt přestane být platný",
-	"linkHelpText": "Externí URL pro následnou akci (např. lístek Jira)",
+	"linkHelpText": "Externí URL pro sledování nebo reference (např. sharepoint, jira, atd.)",
 	"effortHelpText": "Úsilí potřebné k implementaci aplikované kontroly",
 	"costHelpText": "Cena potřebná k implementaci aplikované kontroly",
 	"riskAcceptanceJusitficationHelpText": "Odůvodnění pro přijetí rizika. Toto pole může upravit pouze schvalovatel.",

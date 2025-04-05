@@ -429,7 +429,7 @@
 	"etaHelpText": "Beräknad ankomsttid",
 	"dueDateHelpText": "Datum då bedömningen måste slutföras",
 	"expiryDateHelpText": "Datum då objektet inte längre är giltigt",
-	"linkHelpText": "Extern URL för åtgärdsuppföljning (t.ex. Jira-ärende)",
+	"linkHelpText": "Extern URL för spårning eller referens (t.ex. sharepoint, jira, etc.)",
 	"effortHelpText": "Ansträngningen som krävs för att implementera den tillämpade kontrollen",
 	"costHelpText": "Kostnaden för att implementera den tillämpade kontrollen",
 	"riskAcceptanceJusitficationHelpText": "Motivering för riskacceptans. Endast godkännaren kan redigera detta fält.",

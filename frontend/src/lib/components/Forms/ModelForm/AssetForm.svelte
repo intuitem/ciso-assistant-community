@@ -119,16 +119,6 @@
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
 />
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="security-exceptions"
-	optionsExtraFields={[['folder', 'str']]}
-	field="security_exceptions"
-	cacheLock={cacheLocks['security_exceptions']}
-	bind:cachedValue={formDataCache['security_exceptions']}
-	label={m.securityExceptions()}
-/>
 <TextField
 	{form}
 	field="reference_link"
