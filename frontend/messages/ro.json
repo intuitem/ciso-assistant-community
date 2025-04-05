@@ -428,7 +428,7 @@
 	"etaHelpText": "Ora estimată de sosire",
 	"dueDateHelpText": "Data la care trebuie finalizată evaluarea",
 	"expiryDateHelpText": "Data la care obiectul nu mai este valabil",
-	"linkHelpText": "URL extern pentru urmărirea acțiunilor (de exemplu, tichet Jira)",
+	"linkHelpText": "URL extern pentru urmărire sau referință (ex. sharepoint, jira, etc.)",
 	"effortHelpText": "Efortul necesar pentru a implementa controlul aplicat",
 	"costHelpText": "Costul necesar pentru a implementa controlul aplicat",
 	"riskAcceptanceJusitficationHelpText": "Justificarea pentru acceptarea riscului. Doar aprobatorul poate edita acest câmp.",

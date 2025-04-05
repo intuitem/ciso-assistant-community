@@ -428,7 +428,7 @@
 	"etaHelpText": "Geschatte aankomsttijd",
 	"dueDateHelpText": "Datum waarop de beoordeling voltooid moet zijn",
 	"expiryDateHelpText": "Datum waarop het object niet langer geldig is",
-	"linkHelpText": "Externe URL voor actie-opvolging (bijv. Jira-ticket)",
+	"linkHelpText": "Externe URL voor opvolging of referentie (bijv. sharepoint, jira, etc.)",
 	"effortHelpText": "De inspanning die nodig is om de toegepaste controle uit te voeren",
 	"costHelpText": "De kosten die nodig zijn om de toegepaste controle te implementeren",
 	"riskAcceptanceJusitficationHelpText": "Rechtvaardiging voor de risicoacceptatie. Alleen de goedkeurder kan dit veld bewerken.",
