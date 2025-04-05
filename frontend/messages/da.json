@@ -336,7 +336,7 @@
 	"etaHelpText": "Forventet ankomsttidspunkt",
 	"dueDateHelpText": "Dato hvor vurderingen skal være afsluttet",
 	"expiryDateHelpText": "Dato hvor objektet ikke længere er gyldigt",
-	"linkHelpText": "Ekstern URL til opfølgning på handling (fx. Jira-ticket)",
+	"linkHelpText": "Ekstern URL til sporing eller reference (f.eks. sharepoint, jira, osv.)",
 	"effortHelpText": "Indsatsen der kræves for at implementere kontrollen",
 	"costHelpText": "Omkostningen ved at implementere kontrollen",
 	"riskAcceptanceJusitficationHelpText": "Begrundelse for risikogodkendelsen. Kun godkenderen kan redigere dette felt",

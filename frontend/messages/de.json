@@ -428,7 +428,7 @@
 	"etaHelpText": "Geschätzte Ankunftszeit",
 	"dueDateHelpText": "Datum, bis zu dem die Bewertung abgeschlossen sein muss",
 	"expiryDateHelpText": "Datum, ab dem das Objekt nicht mehr gültig ist",
-	"linkHelpText": "Externe URL zur Aktionsverfolgung (z. B. Jira-Ticket)",
+	"linkHelpText": "Externe URL für Tracking oder Referenz (z.B. Sharepoint, Jira, usw.)",
 	"effortHelpText": "Der Aufwand, der für die Implementierung der angewendeten Kontrolle erforderlich ist",
 	"costHelpText": "Die für die Implementierung der angewandten Kontrolle erforderlichen Kosten",
 	"riskAcceptanceJusitficationHelpText": "Begründung für die Risikoakzeptanz. Nur der Genehmiger kann dieses Feld bearbeiten.",
