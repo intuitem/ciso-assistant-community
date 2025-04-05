@@ -627,11 +627,11 @@ export const TimelineEntrySchema = z.object({
 	entry: z.string(),
 	entry_type: z.string().default('observation'),
 	timestamp: z
-		.union([z.literal('').transform(() => null), z.string().datetime({ local: true })])
+		.string()
+		.datetime({ local: true })
 		.refine((val) => !val || new Date(val) <= new Date(), {
 			message: m.timestampCannotBeInTheFuture()
-		})
-		.default(() => new Date().toISOString()),
+		}),
 	observation: z.string().optional().nullable(),
 	evidences: z.string().uuid().optional().array().optional()
 });
