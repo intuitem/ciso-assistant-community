@@ -5008,3 +5008,11 @@ class TimelineEntryViewSet(BaseModelViewSet):
         ]:
             raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
         return super().perform_destroy(instance)
+
+
+class TaskNodeViewSet(BaseModelViewSet):
+    model = TaskNode
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(TaskNode.TASK_STATUS_CHOICES))

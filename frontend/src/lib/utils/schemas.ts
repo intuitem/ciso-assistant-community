@@ -636,6 +636,23 @@ export const TimelineEntrySchema = z.object({
 	evidences: z.string().uuid().optional().array().optional()
 });
 
+export const TaskNodeSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	status: z.string().default('pending'),
+	owner: z.string().optional(),
+	ref_id: z.string().optional(),
+	due_date: z.string().optional(),
+	completion_date: z.string().optional(),
+	observation: z.string().optional(),
+	is_template: z.boolean().optional(),
+	enabled: z.boolean().default(true).optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
+	compliance_assessments: z.string().uuid().optional().array().optional(),
+	risk_assessments: z.string().uuid().optional().array().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -680,7 +697,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
 	incidents: IncidentSchema,
-	'timeline-entries': TimelineEntrySchema
+	'timeline-entries': TimelineEntrySchema,
+	'task-nodes': TaskNodeSchema
 };
 
 export const modelSchema = (model: string) => {

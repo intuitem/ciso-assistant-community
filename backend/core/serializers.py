@@ -1394,3 +1394,21 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     def get_timeline_entries(self, obj):
         """Returns a serialized list of timeline entries related to the incident."""
         return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data
+
+
+class TaskNodeReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    compliance_assessments = FieldsRelatedField(many=True)
+    risk_assessments = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = TaskNode
+        fields = "__all__"
+
+
+class TaskNodeWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = TaskNode
+        fields = "__all__"

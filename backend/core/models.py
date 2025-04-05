@@ -4130,6 +4130,142 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.save()
 
 
+# tasks management
+class TaskNode(NameDescriptionMixin, FolderMixin):
+    TASK_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+    SCHEDULE_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://ciso-assistant.com/schemas/task-node/schedule.schema.json",
+        "title": "Schedule",
+        "description": "Schedule definition of a task",
+        "type": "object",
+        "properties": {
+            "frequency": {
+                "type": "string",
+                "enum": ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+            },
+            "days_of_week": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 0, "maximum": 6},
+                "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
+            },
+            "days_of_month": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": -31,
+                    "maximum": 31,
+                    "not": {"enum": [0]},
+                },
+                "description": "Optional. Days of the month (negative values count from the month's end, e.g., -1 for last day)",
+            },
+            "months_of_year": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 12},
+                "description": "Optional. Months of the year (1=January, 12=December)",
+            },
+            "endDate": {
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Optional. Date when recurrence ends.",
+            },
+            "occurrences": {
+                "type": ["integer", "null"],
+                "minimum": 1,
+                "description": "Optional. Number of occurrences before recurrence stops.",
+            },
+            "overdue_behavior": {
+                "type": "string",
+                "enum": ["DELAY_NEXT", "NO_IMPACT"],
+                "default": "NO_IMPACT",
+                "description": "Optional. Behavior when tasks become overdue.",
+            },
+            "exceptions": {
+                "type": ["object", "null"],
+                "description": "Optional. JSON object for future exceptions handling.",
+            },
+        },
+        "required": ["frequency"],
+        "additionalProperties": False,
+    }
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+    iteration = models.IntegerField(default=0)
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+    completion_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Completion date")
+    )
+
+    owner = models.ForeignKey(
+        User,
+        verbose_name=_("Owner"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    status = models.CharField(
+        max_length=50, default="pending", choices=TASK_STATUS_CHOICES
+    )
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+    is_template = models.BooleanField(default=False)
+    enabled = models.BooleanField(default=True)
+    schedule = models.JSONField(
+        verbose_name=_("Schedule definition"),
+        blank=True,
+        null=True,
+        validators=[JSONSchemaInstanceValidator(SCHEDULE_JSONSCHEMA)],
+    )
+
+    generator = models.ForeignKey(
+        "TaskNode",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name="Related assets",
+        blank=True,
+        help_text="Assets related to the task",
+        related_name="tasks",
+    )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name="Applied controls",
+        blank=True,
+        help_text="Applied controls related to the task",
+        related_name="tasks",
+    )
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        verbose_name="Compliance assessments",
+        blank=True,
+        help_text="Compliance assessments related to the task",
+        related_name="tasks",
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        verbose_name="Risk assessments",
+        blank=True,
+        help_text="Risk assessments related to the task",
+        related_name="tasks",
+    )
+
+    class Meta:
+        verbose_name = _("Task node")
+        verbose_name_plural = _("Task nodes")
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(
