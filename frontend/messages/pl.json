@@ -428,7 +428,7 @@
 	"etaHelpText": "Szacowany czas przybycia",
 	"dueDateHelpText": "Termin ukończenia oceny",
 	"expiryDateHelpText": "Data, do której obiekt jest ważny",
-	"linkHelpText": "Zewnętrzny URL do śledzenia działań (np. Jira ticket)",
+	"linkHelpText": "Zewnętrzny URL do śledzenia lub odniesienia (np. sharepoint, jira, itp.)",
 	"effortHelpText": "Wysiłek wymagany do wdrożenia zastosowanej kontroli",
 	"costHelpText": "Koszt wymagany do wdrożenia zastosowanej kontroli",
 	"riskAcceptanceJusitficationHelpText": "Uzasadnienie akceptacji ryzyka. Tylko akceptujący może edytować to pole.",
