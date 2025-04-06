@@ -119,8 +119,16 @@
 		}
 	}
 
+	// Memoized color function
+	const colorCache = new Map();
 	function addColor(result: string, map: Record<string, string>) {
-		return map[result];
+		const cacheKey = `${result}-${JSON.stringify(map)}`;
+		if (colorCache.has(cacheKey)) {
+			return colorCache.get(cacheKey);
+		}
+		const color = map[result];
+		colorCache.set(cacheKey, color);
+		return color;
 	}
 
 	let questionnaireMode = questionnaireOnly
