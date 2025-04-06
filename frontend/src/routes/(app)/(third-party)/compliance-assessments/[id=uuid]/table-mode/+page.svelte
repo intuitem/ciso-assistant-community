@@ -163,14 +163,15 @@
 	let addedEvidence = 0;
 
 	$: if (createdEvidence && shallow) {
-		data.requirements
-			.find((requirementAssessment) => requirementAssessment.id === createdEvidence.requirements[0])
-			.evidences.push({
+		const requirement = data.requirements.find((ra) => ra.id === createdEvidence.requirements[0]);
+		if (requirement) {
+			requirement.evidences.push({
 				str: createdEvidence.name,
 				id: createdEvidence.id
 			});
-		createdEvidence = undefined;
-		addedEvidence = +1;
+			createdEvidence = undefined;
+			addedEvidence += 1;
+		}
 	}
 
 	const requirementAssessmentScores = Object.fromEntries(
@@ -201,7 +202,7 @@
 	}
 
 	function modalUpdateForm(requirementAssessment): void {
-		let modalComponent: ModalComponent = {
+		const modalComponent: ModalComponent = {
 			ref: UpdateModal,
 			props: {
 				form: requirementAssessment.updateForm,
