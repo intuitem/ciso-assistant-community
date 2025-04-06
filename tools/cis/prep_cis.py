@@ -31,7 +31,10 @@ for tab in dataframe:
     title = tab.title
     if title == "License for Use":
         library_copyright = tab["B11"].value + "\n" + tab["B13"].value
-    elif title.startswith("Controls V"): """The script ignored the controls sheet because the title wasn't an exact match in the latest version of the CIS Controls .xlsx file. The title currently reads Controls V8.1.2 instead of Controls V8. Initial workaround as pointed out by my colleague Jak, was to rename the sheet to Controls V8. The fix I applied was to use the startswith function to prompt the script to parse the sheet as long as the title start with Controls V. This should accommodate all version changes going forward."""
+    # The script previously ignored the controls sheet because the title wasn't an exact match 
+    # in the latest version of the CIS Controls .xlsx file (e.g., "Controls V8.1.2" instead of "Controls V8").
+    # Using startswith() allows the script to work with all version changes going forward.
+    elif title.startswith("Controls V"):
         for row in tab:
             (control, safeguard, asset_type, sf, title, description, ig1, ig2, ig3) = (
                 r.value for r in row
