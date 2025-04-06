@@ -688,10 +688,11 @@ export const listViewFields = {
 		breadcrumb_link_disabled: true
 	},
 	evidences: {
-		head: ['name', 'file', 'size', 'description', 'folder'],
-		body: ['name', 'attachment', 'size', 'description', 'folder'],
+		head: ['name', 'file', 'size', 'description', 'folder', 'labels'],
+		body: ['name', 'attachment', 'size', 'description', 'folder', 'filtering_labels'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	requirements: {
