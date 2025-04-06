@@ -349,11 +349,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Vulnerabilities',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
 	},
 	'filtering-labels': {
@@ -401,7 +402,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Assets',
 		reverseForeignKeyFields: [
 			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
-			{ field: 'assets', urlModel: 'solutions', disableAddDeleteButtons: true }
+			{ field: 'assets', urlModel: 'vulnerabilities', disableAddDeleteButtons: false },
+			{ field: 'assets', urlModel: 'solutions', disableAddDeleteButtons: false }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -921,7 +923,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		// 	{ field: 'findings', urlModel: 'reference-controls' },
 		// 	{ field: 'findings', urlModel: 'applied-controls' }
 		// ],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},
 	incidents: {
 		name: 'incident',
@@ -935,7 +937,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
-		selectFields: [{ field: 'status' }, { field: 'severity' }]
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},
 	'timeline-entries': {
 		name: 'timelineentry',

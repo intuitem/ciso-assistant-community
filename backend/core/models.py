@@ -241,6 +241,14 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         )
 
 
+class Severity(models.IntegerChoices):
+    UNDEFINED = -1, "undefined"
+    LOW = 0, "low"
+    MEDIUM = 1, "medium"
+    HIGH = 2, "high"
+    CRITICAL = 3, "critical"
+
+
 class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
@@ -1431,13 +1439,6 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
 
 
 class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
-    class Severity(models.IntegerChoices):
-        UNDEFINED = -1, "undefined"
-        LOW = 0, "low"
-        MEDIUM = 1, "medium"
-        HIGH = 2, "high"
-        CRITICAL = 3, "critical"
-
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
@@ -2261,15 +2262,19 @@ class Vulnerability(
         default=Status.UNDEFINED,
         verbose_name=_("Status"),
     )
-    severity = models.IntegerField(
-        default=-1,
-        verbose_name=_("Severity"),
-        help_text=_("The severity of the vulnerability"),
+    severity = models.SmallIntegerField(
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
     applied_controls = models.ManyToManyField(
         AppliedControl,
         blank=True,
         verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name=_("Assets"),
         related_name="vulnerabilities",
     )
     security_exceptions = models.ManyToManyField(
@@ -4018,10 +4023,8 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
-    severity = models.IntegerField(
-        default=-1,
-        verbose_name=_("Severity"),
-        help_text=_("The severity of the finding"),
+    severity = models.SmallIntegerField(
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
     status = models.CharField(
         verbose_name="Status",
