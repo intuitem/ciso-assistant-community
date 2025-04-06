@@ -349,11 +349,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Vulnerabilities',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
 	},
 	'filtering-labels': {
@@ -401,7 +402,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Assets',
 		reverseForeignKeyFields: [
 			{ field: 'assets', urlModel: 'compliance-assessments', disableAddDeleteButtons: true },
-			{ field: 'assets', urlModel: 'solutions', disableAddDeleteButtons: true }
+			{ field: 'assets', urlModel: 'vulnerabilities', disableAddDeleteButtons: false },
+			{ field: 'assets', urlModel: 'solutions', disableAddDeleteButtons: false }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -479,8 +481,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'evidences', urlModel: 'applied-controls' },
-			{ field: 'evidences', urlModel: 'requirement-assessments' }
+			{ field: 'evidences', urlModel: 'applied-controls', disableAddDeleteButtons: true },
+			{ field: 'evidences', urlModel: 'requirement-assessments', disableAddDeleteButtons: true }
 		]
 	},
 	'compliance-assessments': {
@@ -630,6 +632,102 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'qualifications',
 		verboseName: 'Qualification',
 		verboseNamePlural: 'Qualifications'
+	},
+	processings: {
+		endpointUrl: 'privacy/processings',
+		name: 'processing',
+		localName: 'processing',
+		localNamePlural: 'processings',
+		verboseName: 'processing',
+		verboseNamePlural: 'processings',
+		selectFields: [{ field: 'status' }, { field: 'legal_basis' }, { field: 'nature' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'owner', urlModel: 'users' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'processing', urlModel: 'personal-data' },
+			{ field: 'processing', urlModel: 'data-subjects' },
+			{ field: 'processing', urlModel: 'purposes' },
+			{ field: 'processing', urlModel: 'data-recipients' },
+			{ field: 'processing', urlModel: 'data-contractors' },
+			{ field: 'processing', urlModel: 'data-transfers' }
+		]
+	},
+	'processing-natures': {
+		endpointUrl: 'privacy/processing-natures',
+		name: 'processingnature',
+		localName: 'processingNature',
+		localNamePlural: 'processingNatures',
+		verboseName: 'processing nature',
+		verboseNamePlural: 'processing natures'
+	},
+	purposes: {
+		endpointUrl: 'privacy/purposes',
+		name: 'purpose',
+		localName: 'purpose',
+		localNamePlural: 'purposes',
+		verboseName: 'purpose',
+		verboseNamePlural: 'purposes',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }]
+	},
+	'personal-data': {
+		endpointUrl: 'privacy/personal-data',
+		name: 'personaldata',
+		localName: 'personalData',
+		localNamePlural: 'personalData',
+		verboseName: 'personal data',
+		verboseNamePlural: 'personal data',
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }
+		],
+		selectFields: [{ field: 'category' }, { field: 'deletion_policy' }]
+	},
+	'data-subjects': {
+		endpointUrl: 'privacy/data-subjects',
+		name: 'datasubject',
+		localName: 'dataSubject',
+		localNamePlural: 'dataSubjects',
+		verboseName: 'data subject',
+		verboseNamePlural: 'data subjects',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
+		selectFields: [{ field: 'category' }]
+	},
+	'data-recipients': {
+		endpointUrl: 'privacy/data-recipients',
+		name: 'datarecipient',
+		localName: 'dataRecipient',
+		localNamePlural: 'dataRecipients',
+		verboseName: 'data recipient',
+		verboseNamePlural: 'data recipients',
+		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
+		selectFields: [{ field: 'category' }]
+	},
+	'data-contractors': {
+		endpointUrl: 'privacy/data-contractors',
+		name: 'datacontractor',
+		localName: 'dataContractor',
+		localNamePlural: 'dataContractors',
+		verboseName: 'data contractor',
+		verboseNamePlural: 'data contractors',
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings' },
+			{ field: 'entity', urlModel: 'entities' }
+		],
+		selectFields: [{ field: 'relationship_type' }, { field: 'country' }]
+	},
+	'data-transfers': {
+		endpointUrl: 'privacy/data-transfers',
+		name: 'datatransfer',
+		localName: 'dataTransfer',
+		localNamePlural: 'dataTransfers',
+		verboseName: 'data transfer',
+		verboseNamePlural: 'data transfers',
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings' },
+			{ field: 'entity', urlModel: 'entities' }
+		],
+		selectFields: [{ field: 'legal_basis' }, { field: 'country' }]
 	},
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
@@ -826,7 +924,34 @@ export const URL_MODEL_MAP: ModelMap = {
 		// 	{ field: 'findings', urlModel: 'reference-controls' },
 		// 	{ field: 'findings', urlModel: 'applied-controls' }
 		// ],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
+	},
+	incidents: {
+		name: 'incident',
+		localName: 'incident',
+		localNamePlural: 'incidents',
+		verboseName: 'Incident',
+		verboseNamePlural: 'Incidents',
+		foreignKeyFields: [
+			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+		],
+		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
+	},
+	'timeline-entries': {
+		name: 'timelineentry',
+		localName: 'timelineEntry',
+		localNamePlural: 'timelineEntries',
+		verboseName: 'Timeline entry',
+		verboseNamePlural: 'Timeline entries',
+		foreignKeyFields: [
+			{ field: 'incident', urlModel: 'incidents' },
+			{ field: 'author', urlModel: 'users' }
+		],
+		selectFields: [{ field: 'entry_type' }],
+		reverseForeignKeyFields: [{ field: 'timeline_entries', urlModel: 'evidences' }]
 	}
 };
 

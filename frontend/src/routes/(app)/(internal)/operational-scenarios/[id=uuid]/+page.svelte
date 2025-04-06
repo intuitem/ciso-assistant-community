@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 	import { pageTitle } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';

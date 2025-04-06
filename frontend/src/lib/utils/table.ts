@@ -455,20 +455,10 @@ export const listViewFields = {
 		}
 	},
 	vulnerabilities: {
-		head: [
-			'ref_id',
-			'name',
-			'description',
-			'status',
-			'severity',
-			'applied_controls',
-			'folder',
-			'labels'
-		],
+		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
 		body: [
 			'ref_id',
 			'name',
-			'description',
 			'status',
 			'severity',
 			'applied_controls',
@@ -546,32 +536,8 @@ export const listViewFields = {
 		}
 	},
 	'applied-controls': {
-		head: [
-			'ref_id',
-			'name',
-			'priority',
-			'status',
-			'category',
-			'csfFunction',
-			'eta',
-			'owner',
-			'domain',
-			'referenceControl',
-			'labels'
-		],
-		body: [
-			'ref_id',
-			'name',
-			'priority',
-			'status',
-			'category',
-			'csf_function',
-			'eta',
-			'owner',
-			'folder',
-			'reference_control',
-			'filtering_labels'
-		],
+		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'folder', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
@@ -794,6 +760,34 @@ export const listViewFields = {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
 	},
+	processings: {
+		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
+		body: ['name', 'description', 'status', 'legal_basis', 'nature', 'folder']
+	},
+	purposes: {
+		head: ['name', 'description', 'processing'],
+		body: ['name', 'description', 'processing']
+	},
+	'personal-data': {
+		head: ['name', 'description', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
+		body: ['name', 'description', 'category', 'is_sensitive', 'retention', 'deletion_policy']
+	},
+	'data-subjects': {
+		head: ['name', 'description', 'category'],
+		body: ['name', 'description', 'category']
+	},
+	'data-recipients': {
+		head: ['name', 'description', 'category'],
+		body: ['name', 'description', 'category']
+	},
+	'data-contractors': {
+		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
+		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
+	},
+	'data-transfers': {
+		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
+		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
+	},
 	'ebios-rm': {
 		head: ['name', 'description'],
 		body: ['name', 'description']
@@ -892,9 +886,25 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
-		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels'],
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'severity', 'status', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'findings_assessment',
+			'severity',
+			'status',
+			'filtering_labels'
+		],
 		filters: { filtering_labels: LABELS_FILTER }
+	},
+	incidents: {
+		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
+		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
+	},
+	'timeline-entries': {
+		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
+		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	extra: {
 		filters: {

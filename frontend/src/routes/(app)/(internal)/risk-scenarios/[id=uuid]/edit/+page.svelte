@@ -22,7 +22,7 @@
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 
@@ -247,14 +247,6 @@
 							</div>
 						</div>
 					</div>
-					<TextArea
-						form={_form}
-						field="existing_controls"
-						label="context"
-						helpText={m.existingContextHelper()}
-						regionContainer="w-1/2"
-						rows={3}
-					/>
 				</div>
 				<div class="flex w-1/2">
 					<div class="flex flex-row space-x-4 my-auto">

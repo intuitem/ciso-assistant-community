@@ -87,6 +87,9 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",
+                "has_questions": ea.compliance_assessment.has_questions
+                if ea.compliance_assessment
+                else False,
             }
 
             completion = (

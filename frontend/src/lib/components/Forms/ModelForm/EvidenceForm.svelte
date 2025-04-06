@@ -5,7 +5,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -35,7 +35,9 @@
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
-		hidden={initialData.applied_controls || initialData.requirement_assessments}
+		hidden={initialData.applied_controls ||
+			initialData.requirement_assessments ||
+			initialData.folder}
 	/>
 {:else}
 	<HiddenInput {form} field="folder" />
