@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -55,7 +55,6 @@
 	const authorizedExtensions = ['.xls', '.xlsx'];
 </script>
 
-{@debug form}
 <div class="grid grid-cols-4 gap-4">
 	<div class=" col-span-2 bg-white shadow py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>

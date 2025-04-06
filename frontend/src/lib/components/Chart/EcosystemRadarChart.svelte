@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 
 	// export let name: string;

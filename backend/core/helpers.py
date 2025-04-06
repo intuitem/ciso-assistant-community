@@ -857,11 +857,11 @@ def build_audits_stats(user):
     )
     data = list()
     names = list()
-    uuids = dict()
+    uuids = list()
     for audit in ComplianceAssessment.objects.filter(id__in=object_ids):
         data.append([rs[0] for rs in audit.get_requirements_result_count()])
         names.append(audit.name)
-        uuids[audit.name] = audit.id
+        uuids.append(audit.id)
     return {"data": data, "names": names, "uuids": uuids}
 
 
@@ -898,7 +898,7 @@ def get_metrics(user: User):
     viewable_controls = viewable_items(AppliedControl)
     controls_count = viewable_controls.count()
     progress_avg = math.ceil(
-        mean([x.progress() for x in viewable_items(ComplianceAssessment)] or [0])
+        mean([x.progress for x in viewable_items(ComplianceAssessment)] or [0])
     )
     missed_eta_count = (
         viewable_controls.filter(

@@ -107,6 +107,8 @@ from tprm.models import Entity
 from .models import *
 from .serializers import *
 
+from .models import Severity
+
 from serdes.utils import (
     get_domain_export_objects,
     import_export_serializer_class,
@@ -419,7 +421,7 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder", "provider", "risk_scenarios"]
+    filterset_fields = ["folder", "provider", "risk_scenarios", "filtering_labels"]
     search_fields = ["name", "provider", "description"]
 
     def list(self, request, *args, **kwargs):
@@ -479,6 +481,8 @@ class AssetFilter(df.FilterSet):
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
+            "applied_controls",
+            "filtering_labels",
         ]
 
 
@@ -489,7 +493,7 @@ class AssetViewSet(BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
-    search_fields = ["name", "description", "business_value"]
+    search_fields = ["name", "description", "ref_id"]
 
     def _perform_write(self, serializer):
         type = serializer.validated_data.get("type")
@@ -558,7 +562,7 @@ class AssetViewSet(BaseModelViewSet):
                     {
                         "source": nodes_idx[relationship.name],
                         "target": nodes_idx[asset.name],
-                        "value": "parent",
+                        "value": "supported by",
                     }
                 )
         meta = {"display_name": "Assets Explorer"}
@@ -657,6 +661,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "csf_function",
         "provider",
         "findings",
+        "filtering_labels",
     ]
     search_fields = ["name", "description", "provider"]
 
@@ -813,6 +818,11 @@ class VulnerabilityViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Severity.choices))
 
 
 class FilteringLabelViewSet(BaseModelViewSet):
@@ -1286,10 +1296,12 @@ class AppliedControlFilterSet(df.FilterSet):
             "reference_control": ["exact"],
             "effort": ["exact"],
             "cost": ["exact"],
+            "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
             "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
+            "assets": ["exact"],
             "progress_field": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
@@ -2341,7 +2353,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.progress()
+                sum += audit.progress
             avg_progress = int(sum / audits.count())
 
         controls = (
@@ -3792,7 +3804,13 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
+    filterset_fields = [
+        "folder",
+        "applied_controls",
+        "requirement_assessments",
+        "name",
+        "timeline_entries",
+    ]
     search_fields = ["name"]
 
     @action(methods=["get"], detail=True)
@@ -3850,12 +3868,36 @@ class UploadAttachmentView(APIView):
             try:
                 evidence = Evidence.objects.get(id=kwargs["pk"])
                 attachment = request.FILES["file"]
-                evidence.attachment = attachment
+                if not evidence.attachment and attachment.name != "undefined":
+                    evidence.attachment = attachment
+                elif (
+                    evidence.attachment and attachment.name != "undefined"
+                ) and evidence.attachment != attachment:
+                    evidence.attachment.delete()
+                    evidence.attachment = attachment
                 evidence.save()
                 return Response(status=status.HTTP_200_OK)
             except Exception:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class QuickStartView(APIView):
+    serializer_class = QuickStartSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+        try:
+            objects = serializer.save()
+        except Exception as e:
+            logger.error(f"Error in QuickStartView: {e}")
+            raise
+        else:
+            return Response(objects, status=status.HTTP_201_CREATED)
 
 
 class QualificationViewSet(BaseModelViewSet):
@@ -4185,8 +4227,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ]
         return Response({"results": res})
 
-    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
@@ -4283,8 +4323,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
-    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
@@ -4336,6 +4374,32 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 {"error": "No metrics found for this assessment"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+    @action(detail=True, methods=["get"])
+    def threats_metrics(self, request, pk=None):
+        compliance_assessment = self.get_object()
+
+        # is this needed or overlapping with the IAM checks inherited?
+        self.check_object_permissions(request, compliance_assessment)
+
+        threat_metrics = compliance_assessment.get_threats_metrics()
+        if threat_metrics.get("total_unique_threats") == 0:
+            return Response(threat_metrics, status=status.HTTP_200_OK)
+        children = []
+        for th in threat_metrics["threats"]:
+            children.append(
+                {
+                    "name": th["name"],
+                    "children": [
+                        ra["requirement_name"] for ra in th["requirement_assessments"]
+                    ],
+                    "value": len(th["requirement_assessments"]),
+                }
+            )
+        tree = {"name": "Threats", "children": children}
+        threat_metrics.update({"tree": tree})
+
+        return Response(threat_metrics, status=status.HTTP_200_OK)
 
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
@@ -4564,6 +4628,13 @@ def get_build(request):
     """
     BUILD = settings.BUILD
     VERSION = settings.VERSION
+    default_db_engine = settings.DATABASES["default"]["ENGINE"]
+    if "postgresql" in default_db_engine:
+        database_type = "P-FS"
+    elif "sqlite" in default_db_engine:
+        database_type = "S-FS"
+    else:
+        database_type = "Unknown"
 
     disk_info = get_disk_usage()
 
@@ -4578,7 +4649,14 @@ def get_build(request):
             "Disk space": "Unable to retrieve disk usage",
         }
 
-    return Response({"version": VERSION, "build": BUILD, **disk_response})
+    return Response(
+        {
+            "version": VERSION,
+            "build": BUILD,
+            **disk_response,
+            "infrastructure": database_type,
+        }
+    )
 
 
 # NOTE: Important functions/classes from old views.py, to be reviewed
@@ -4754,7 +4832,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
-        return Response(dict(SecurityException.Severity.choices))
+        return Response(dict(Severity.choices))
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -4780,11 +4858,165 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     def category(self, request):
         return Response(dict(FindingsAssessment.Category.choices))
 
+    @action(detail=True, name="Get Follow up metrics")
+    def metrics(self, request, pk=None):
+        assessment = self.get_object()
+        raw_metrics = assessment.get_findings_metrics()
+
+        def format_severity_data(metrics):
+            severity_colors = {
+                "low": "#59BBB2",
+                "medium": "#F5C481",
+                "high": "#E6686D",
+                "critical": "#C71E1D",
+                "undefined": "#CCCCCC",
+            }
+
+            severity_chart_data = []
+            for severity, count in metrics["severity_distribution"].items():
+                severity_chart_data.append(
+                    {
+                        "name": severity.capitalize(),
+                        "value": count,
+                        "color": severity_colors.get(severity, "#CCCCCC"),
+                    }
+                )
+
+            return severity_chart_data
+
+        def format_status_data(metrics):
+            status_mapping = {
+                "identified": {"localName": "identified", "color": "#F5C481"},
+                "confirmed": {"localName": "confirmed", "color": "#E6686D"},
+                "assigned": {"localName": "assigned", "color": "#fab998"},
+                "in_progress": {"localName": "inProgress", "color": "#fac858"},
+                "mitigated": {"localName": "mitigated", "color": "#59BBB2"},
+                "resolved": {"localName": "resolved", "color": "#59BBB2"},
+                "dismissed": {"localName": "dismissed", "color": "#5470c6"},
+                "deprecated": {"localName": "deprecated", "color": "#91cc75"},
+                "--": {"localName": "undefined", "color": "#CCCCCC"},
+            }
+
+            grouped_status_counts = {}
+
+            for status, count in metrics["status_distribution"].items():
+                mapping_info = status_mapping.get(
+                    status, {"localName": "other", "color": "#CCCCCC"}
+                )
+                local_name = mapping_info["localName"]
+                color = mapping_info["color"]
+
+                if local_name in grouped_status_counts:
+                    grouped_status_counts[local_name]["value"] += count
+                else:
+                    grouped_status_counts[local_name] = {
+                        "value": count,
+                        "localName": local_name,
+                        "itemStyle": {"color": color},
+                    }
+
+            status_values = list(grouped_status_counts.values())
+
+            expected_statuses = ["open", "mitigate", "accept", "avoid", "transfer"]
+            for status in expected_statuses:
+                if not any(item["localName"] == status for item in status_values):
+                    status_values.append(
+                        {
+                            "value": 0,
+                            "localName": status,
+                            "itemStyle": {"color": "#CCCCCC"},
+                        }
+                    )
+
+            return {"values": status_values}
+
+        formatted_metrics = {
+            "raw_metrics": raw_metrics,
+            "severity_chart_data": format_severity_data(raw_metrics),
+            "status_chart_data": format_status_data(raw_metrics),
+        }
+
+        return Response(formatted_metrics)
+
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = ["owner", "folder", "status", "findings_assessment"]
+    filterset_fields = [
+        "owner",
+        "folder",
+        "status",
+        "findings_assessment",
+        "filtering_labels",
+        "applied_controls",
+    ]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Finding.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Severity.choices))
+
+
+class IncidentViewSet(BaseModelViewSet):
+    model = Incident
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Incident.Status.choices))
+
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Incident.Severity.choices))
+
+    def perform_update(self, serializer):
+        previous_instance = self.get_object()
+        previous_status = previous_instance.status
+        previous_severity = previous_instance.severity
+
+        instance = serializer.save()
+
+        if previous_status != instance.status and previous_status is not None:
+            TimelineEntry.objects.create(
+                incident=instance,
+                entry=f"{previous_instance.get_status_display()}->{instance.get_status_display()}",
+                entry_type=TimelineEntry.EntryType.STATUS_CHANGED,
+                author=self.request.user,
+                timestamp=now(),
+            )
+
+        if previous_severity != instance.severity and previous_severity is not None:
+            TimelineEntry.objects.create(
+                incident=instance,
+                entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
+                entry_type=TimelineEntry.EntryType.SEVERITY_CHANGED,
+                author=self.request.user,
+                timestamp=now(),
+            )
+
+        return super().perform_update(serializer)
+
+
+class TimelineEntryViewSet(BaseModelViewSet):
+    model = TimelineEntry
+    filterset_fields = ["incident"]
+    search_fields = ["entry", "entry_type"]
+    ordering = ["-timestamp"]
+
+    @action(detail=False, name="Get entry type choices")
+    def entry_type(self, request):
+        return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+        return
+
+    def perform_destroy(self, instance):
+        if instance.entry_type in [
+            TimelineEntry.EntryType.SEVERITY_CHANGED,
+            TimelineEntry.EntryType.STATUS_CHANGED,
+        ]:
+            raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
+        return super().perform_destroy(instance)

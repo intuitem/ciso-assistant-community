@@ -183,6 +183,13 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
 69. OWASP's checklist for LLM governance and security 🌐
 70. Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (ANSSI) 🇫🇷
+71. CIS benchmark for Kubernetes v1.10 🌐
+72. De tekniske minimumskrav for statslige myndigheder 🇩🇰
+73. Google SAIF framework 🤖
+74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
+75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
+76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
+
 
 ### Community contributions
 
@@ -243,7 +250,7 @@ To run CISO Assistant locally in a straightforward way, you can use Docker compo
 
 0. Update docker
 
-Make sure you have a recent version of docker (>= 25.0).
+Make sure you have a recent version of docker (>= 27.0).
 
 1. Clone the repository
 
@@ -281,10 +288,10 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 
 ### Requirements
 
-- Python 3.11+
+- Python 3.12+
 - pip 20.3+
 - poetry 2.0+
-- node 18+
+- node 22+
 - npm 10.2+
 - pnpm 9.0+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
@@ -471,7 +478,7 @@ These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
+To run API tests on the backend, simply type "poetry run pytest" in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 
@@ -522,6 +529,7 @@ Set DJANGO_DEBUG=False for security reason.
 - CS: Czech
 - SV: Swedish
 - ID: Indonesian
+- DA: Danish
 
 ## Contributors 🤝
 
@@ -534,6 +542,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
 - [eCharts](https://echarts.apache.org) - Charting library
+- [unovis](https://unovis.dev) - Complementary charting library
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Gitbook](https://www.gitbook.com) - Documentation platform
@@ -541,6 +550,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
 - [Docker](https://www.docker.com/) - Container Engine
 - [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
 
 ## Security
 

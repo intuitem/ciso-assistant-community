@@ -17,6 +17,12 @@ from ciso_assistant.settings import SCHEMA_VERSION, VERSION
 from core.utils import compare_schema_versions
 from serdes.serializers import LoadBackupSerializer
 
+from auditlog.models import LogEntry
+from django.db.models.signals import post_save
+from core.custom_middleware import add_user_info_to_log_entry
+
+from auditlog.context import disable_auditlog
+
 logger = structlog.get_logger(__name__)
 
 GZIP_MAGIC_NUMBER = b"\x1f\x8b"
@@ -64,6 +70,10 @@ class LoadBackupView(APIView):
     serializer_class = LoadBackupSerializer
 
     def load_backup(self, request, decompressed_data, backup_version, current_version):
+        # Temporarily disconnect the problematic signal
+
+        post_save.disconnect(add_user_info_to_log_entry, sender=LogEntry)
+
         # Back up current database state using dumpdata into an in-memory string.
         backup_buffer = io.StringIO()
         try:
@@ -74,11 +84,9 @@ class LoadBackupView(APIView):
                 verbosity=0,
                 exclude=[
                     "contenttypes",
-                    "auth.permission",
                     "sessions.session",
                     "iam.ssosettings",
                     "knox.authtoken",
-                    "auditlog.logentry",
                 ],
             )
         except Exception as e:
@@ -95,23 +103,42 @@ class LoadBackupView(APIView):
         request.session.flush()
 
         try:
-            management.call_command("flush", interactive=False)
-            management.call_command(
-                "loaddata",
-                "-",
-                format="json",
-                verbosity=0,
-                exclude=[
-                    "contenttypes",
-                    "auth.permission",
-                    "sessions.session",
-                    "iam.ssosettings",
-                    "knox.authtoken",
-                    "auditlog.logentry",
-                ],
-            )
+            last_model = None
+
+            def fixture_callback(sender, **kwargs):
+                nonlocal last_model
+                if "instance" in kwargs:
+                    instance = kwargs["instance"]
+                    last_model = (
+                        f"{instance._meta.app_label}.{instance._meta.model_name}"
+                    )
+                    logger.debug(f"Loaded: {last_model} with pk={instance.pk}")
+
+            # Connect to the post_save signal
+
+            post_save.connect(fixture_callback)
+            with disable_auditlog():
+                management.call_command("flush", interactive=False)
+                management.call_command(
+                    "loaddata",
+                    "-",
+                    format="json",
+                    verbosity=2,
+                    exclude=[
+                        "contenttypes",
+                        "auth.permission",
+                        "sessions.session",
+                        "iam.ssosettings",
+                        "knox.authtoken",
+                        "auditlog.logentry",
+                    ],
+                )
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)
+            logger.error(
+                f"Error while loading backup. Last successful model: {last_model}",
+                exc_info=e,
+            )
             # On failure, restore the original data.
             try:
                 sys.stdin = io.StringIO(current_backup)
@@ -135,6 +162,9 @@ class LoadBackupView(APIView):
                     {"error": "LowerBackupVersion"}, status=status.HTTP_400_BAD_REQUEST
                 )
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        finally:
+            post_save.disconnect(fixture_callback)
+            post_save.connect(add_user_info_to_log_entry, sender=LogEntry)
         return Response({}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):

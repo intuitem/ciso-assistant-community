@@ -8,7 +8,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { recoveryCodes } from '../utils/stores';
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	import { enhance } from '$app/forms';
 	import { copy } from '@svelte-put/copy';

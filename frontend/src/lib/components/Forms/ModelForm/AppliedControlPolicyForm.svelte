@@ -8,7 +8,7 @@
 	import Score from '$lib/components/Forms/Score.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -61,6 +61,16 @@
 		cacheLock={cacheLocks['eta']}
 		bind:cachedValue={formDataCache['eta']}
 	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
+		field="evidences"
+		cacheLock={cacheLocks['evidences']}
+		bind:cachedValue={formDataCache['evidences']}
+		label={m.evidences()}
+	/>
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 		<TextField
 			{form}
@@ -77,15 +87,16 @@
 			cacheLock={cacheLocks['priority']}
 			bind:cachedValue={formDataCache['priority']}
 		/>
+
 		<AutocompleteSelect
 			{form}
 			multiple
-			optionsEndpoint="evidences"
+			optionsEndpoint="assets"
 			optionsExtraFields={[['folder', 'str']]}
-			field="evidences"
-			cacheLock={cacheLocks['evidences']}
-			bind:cachedValue={formDataCache['evidences']}
-			label={m.evidences()}
+			field="assets"
+			cacheLock={cacheLocks['assets']}
+			bind:cachedValue={formDataCache['assets']}
+			label={m.assets()}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -157,6 +168,17 @@
 			helpText={m.linkHelpText()}
 			cacheLock={cacheLocks['link']}
 			bind:cachedValue={formDataCache['link']}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			createFromSelection={true}
+			optionsEndpoint="filtering-labels"
+			optionsLabelField="label"
+			field="filtering_labels"
+			helpText={m.labelsHelpText()}
+			label={m.labels()}
+			allowUserOptions="append"
 		/>
 	</Dropdown>
 {/if}
