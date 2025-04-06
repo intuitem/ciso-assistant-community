@@ -4,12 +4,10 @@
 	import Score from '$lib/components/Forms/Score.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import {
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import {
@@ -57,16 +55,25 @@
 		data.requirements.map((requirement) => [requirement.id, requirement])
 	);
 
-	const hideSuggestionHashmap = Object.fromEntries(
-		data.requirement_assessments.map((requirementAssessment) => [requirementAssessment.id, true]) // true = yes hide by default
-	);
+	// Initialize hide suggestion state
+	let hideSuggestionHashmap: Record<string, boolean> = {};
+	data.requirement_assessments.forEach((ra) => {
+		hideSuggestionHashmap[ra.id] = true;
+	});
 
 	$: createdEvidence = form?.createdEvidence;
 
-	function title(requirementAssessment) {
+	// Memoized title function
+	const titleMap = new Map();
+	function getTitle(requirementAssessment) {
+		if (titleMap.has(requirementAssessment.id)) {
+			return titleMap.get(requirementAssessment.id);
+		}
 		const requirement =
 			requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
-		return requirement.display_short ? requirement.display_short : (requirement.name ?? '');
+		const result = requirement.display_short ? requirement.display_short : (requirement.name ?? '');
+		titleMap.set(requirementAssessment.id, result);
+		return result;
 	}
 
 	// Function to update requirement assessments, the data argument contain fields as keys and the associated values as values.
@@ -112,8 +119,16 @@
 		}
 	}
 
+	// Memoized color function
+	const colorCache = new Map();
 	function addColor(result: string, map: Record<string, string>) {
-		return map[result];
+		const cacheKey = `${result}-${JSON.stringify(map)}`;
+		if (colorCache.has(cacheKey)) {
+			return colorCache.get(cacheKey);
+		}
+		const color = map[result];
+		colorCache.set(cacheKey, color);
+		return color;
 	}
 
 	let questionnaireMode = questionnaireOnly
@@ -148,14 +163,15 @@
 	let addedEvidence = 0;
 
 	$: if (createdEvidence && shallow) {
-		data.requirements
-			.find((requirementAssessment) => requirementAssessment.id === createdEvidence.requirements[0])
-			.evidences.push({
+		const requirement = data.requirements.find((ra) => ra.id === createdEvidence.requirements[0]);
+		if (requirement) {
+			requirement.evidences.push({
 				str: createdEvidence.name,
 				id: createdEvidence.id
 			});
-		createdEvidence = undefined;
-		addedEvidence = +1;
+			createdEvidence = undefined;
+			addedEvidence += 1;
+		}
 	}
 
 	const requirementAssessmentScores = Object.fromEntries(
@@ -186,7 +202,7 @@
 	}
 
 	function modalUpdateForm(requirementAssessment): void {
-		let modalComponent: ModalComponent = {
+		const modalComponent: ModalComponent = {
 			ref: UpdateModal,
 			props: {
 				form: requirementAssessment.updateForm,
@@ -196,10 +212,10 @@
 				context: 'selectEvidences'
 			}
 		};
-		let modal: ModalSettings = {
+		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: title(requirementAssessment)
+			title: getTitle(requirementAssessment)
 		};
 		modalStore.trigger(modal);
 	}
@@ -211,6 +227,31 @@
 
 	function getClassesText(mappingInferenceResult) {
 		return complianceResultColorMap[mappingInferenceResult] === '#000000' ? 'text-white' : '';
+	}
+	// Create separate superForm instances for each requirement assessment
+	let scoreForms = {};
+	let docScoreForms = {};
+	let isScoredForms = {};
+	$: {
+		// Initialize the form instances
+		data.requirement_assessments.forEach((requirementAssessment, index) => {
+			const id = requirementAssessment.id;
+			if (!scoreForms[id]) {
+				scoreForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-score-${id}-${index}`
+				});
+			}
+			if (!docScoreForms[id]) {
+				docScoreForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-documentation-score-${id}-${index}`
+				});
+			}
+			if (!isScoredForms[id]) {
+				isScoredForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-is-scored-${id}-${index}`
+				});
+			}
+		});
 	}
 </script>
 
@@ -261,7 +302,7 @@
 				></div>
 
 				<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl z-auto">
-					{title(requirementAssessment)}
+					{getTitle(requirementAssessment)}
 				</span>
 			</span>
 			<div class="h-2"></div>
@@ -491,9 +532,7 @@
 						<div class="flex flex-col w-full place-items-center">
 							{#if !shallow}
 								<Score
-									form={superForm(requirementAssessment.scoreForm, {
-										id: `requirement-score-${requirementAssessment.id}`
-									})}
+									form={scoreForms[requirementAssessment.id]}
 									min_score={data.compliance_assessment.min_score}
 									max_score={data.compliance_assessment.max_score}
 									scores_definition={data.compliance_assessment.scores_definition}
@@ -509,9 +548,7 @@
 								>
 									<div slot="left">
 										<Checkbox
-											form={superForm(requirementAssessment.scoreForm, {
-												id: `requirement-is-scored-${requirementAssessment.id}`
-											})}
+											form={isScoredForms[requirementAssessment.id]}
 											field="is_scored"
 											label={''}
 											helpText={m.scoringHelpText()}
@@ -527,9 +564,7 @@
 								</Score>
 								{#if data.compliance_assessment.show_documentation_score}
 									<Score
-										form={superForm(requirementAssessment.scoreForm, {
-											id: `requirement-documentation-score-${requirementAssessment.id}`
-										})}
+										form={docScoreForms[requirementAssessment.id]}
 										min_score={data.compliance_assessment.min_score}
 										max_score={data.compliance_assessment.max_score}
 										field="documentation_score"
