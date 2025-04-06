@@ -55,16 +55,25 @@
 		data.requirements.map((requirement) => [requirement.id, requirement])
 	);
 
-	const hideSuggestionHashmap = Object.fromEntries(
-		data.requirement_assessments.map((requirementAssessment) => [requirementAssessment.id, true]) // true = yes hide by default
-	);
+	// Initialize hide suggestion state
+	let hideSuggestionHashmap: Record<string, boolean> = {};
+	data.requirement_assessments.forEach((ra) => {
+		hideSuggestionHashmap[ra.id] = true;
+	});
 
 	$: createdEvidence = form?.createdEvidence;
 
-	function title(requirementAssessment) {
+	// Memoized title function
+	const titleMap = new Map();
+	function getTitle(requirementAssessment) {
+		if (titleMap.has(requirementAssessment.id)) {
+			return titleMap.get(requirementAssessment.id);
+		}
 		const requirement =
 			requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
-		return requirement.display_short ? requirement.display_short : (requirement.name ?? '');
+		const result = requirement.display_short ? requirement.display_short : (requirement.name ?? '');
+		titleMap.set(requirementAssessment.id, result);
+		return result;
 	}
 
 	// Function to update requirement assessments, the data argument contain fields as keys and the associated values as values.
@@ -194,10 +203,10 @@
 				context: 'selectEvidences'
 			}
 		};
-		let modal: ModalSettings = {
+		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: title(requirementAssessment)
+			title: getTitle(requirementAssessment)
 		};
 		modalStore.trigger(modal);
 	}
@@ -259,7 +268,7 @@
 				></div>
 
 				<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl z-auto">
-					{title(requirementAssessment)}
+					{getTitle(requirementAssessment)}
 				</span>
 			</span>
 			<div class="h-2"></div>
