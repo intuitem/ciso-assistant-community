@@ -455,20 +455,10 @@ export const listViewFields = {
 		}
 	},
 	vulnerabilities: {
-		head: [
-			'ref_id',
-			'name',
-			'description',
-			'status',
-			'severity',
-			'applied_controls',
-			'folder',
-			'labels'
-		],
+		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
 		body: [
 			'ref_id',
 			'name',
-			'description',
 			'status',
 			'severity',
 			'applied_controls',

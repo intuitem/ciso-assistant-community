@@ -4023,10 +4023,8 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
-    severity = models.IntegerField(
-        default=-1,
-        verbose_name=_("Severity"),
-        help_text=_("The severity of the finding"),
+    severity = models.SmallIntegerField(
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
     status = models.CharField(
         verbose_name="Status",
