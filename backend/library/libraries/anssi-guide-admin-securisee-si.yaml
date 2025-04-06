@@ -1,0 +1,748 @@
+urn: urn:intuitem:risk:library:anssi-guide-admin-securisee-si
+locale: fr
+ref_id: anssi-guide-admin-securisee-si
+name: "Recommandations relatives \xE0 l'administration s\xE9curis\xE9e des syst\xE8\
+  mes d'information"
+description: "L\u2019administration d\u2019un SI se traduit par un ensemble de mesures\
+  \ techniques et non techniques visant entre autres \xE0 maintenir le SI en condition\
+  \ op\xE9rationnelle et de s\xE9curit\xE9 et \xE0 g\xE9rer des changements mineurs\
+  \ ou des \xE9volutions majeures - https://cyber.gouv.fr/publications/recommandations-relatives-ladministration-securisee-des-si"
+copyright: ANSSI Etalab
+version: 1
+publication_date: 2021-05-11
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:anssi-guide-admin-securisee-si
+    ref_id: anssi-guide-admin-securisee-si
+    name: "Recommandations relatives \xE0 l'administration s\xE9curis\xE9e des syst\xE8\
+      mes d'information"
+    description: "L\u2019administration d\u2019un SI se traduit par un ensemble de\
+      \ mesures techniques et non techniques visant entre autres \xE0 maintenir le\
+      \ SI en condition op\xE9rationnelle et de s\xE9curit\xE9 et \xE0 g\xE9rer des\
+      \ changements mineurs ou des \xE9volutions majeures - https://cyber.gouv.fr/publications/recommandations-relatives-ladministration-securisee-des-si"
+    implementation_groups_definition:
+    - ref_id: nr
+      name: R
+      description: "Cette recommandation permet de mettre en \u0153uvre un niveau\
+        \ de s\xE9curit\xE9 \xE0 l\u2019\xE9tat de l\u2019art."
+    - ref_id: nrm
+      name: R-
+      description: "Cette recommandation permet de mettre en \u0153uvre une premi\xE8\
+        re alternative, d\u2019un niveau de s\xE9curit\xE9 moindre que la recommandation\
+        \ R."
+    - ref_id: nrmm
+      name: R--
+      description: "Renforcer le niveau de s\xE9curit\xE9 par des adaptations pouvant\
+        \ \xEAtre dimensionnantes. La robustesse ou les niveaux de s\xE9curit\xE9\
+        \ de produits ou de services cl\xE9s sont attest\xE9s par un tiers (certification/qualification). "
+    - ref_id: nrp
+      name: R+
+      description: "Ma\xEEtriser pleinement les recommandations des \xE9tapes 1 et\
+        \ 2. Compl\xE9ter par des recommandations adapt\xE9es au niveau de menace\
+        \ gr\xE2ce \xE0 une analyse de risques."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Les administrateurs, acteurs cl\xE9s de la s\xE9curit\xE9 du syst\xE8\
+        me d'information"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:2
+      ref_id: R1
+      name: Informer les administrateurs de leurs droits et devoirs
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:2
+      ref_id: R2
+      name: "Former les administrateurs \xE0 l'\xE9tat de l'art en mati\xE8re de SSI"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:2
+      ref_id: R3
+      name: "Disposer d'une documentation des SI \xE0 jour"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "G\xE9n\xE9ralit\xE9s sur le syst\xE8me d'information d'administration"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:3
+      ref_id: R4
+      name: "Mener une analyse de risque sur le SI d'administration et son \xE9cosyst\xE8\
+        me"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:3
+      ref_id: R5
+      name: "D\xE9finir les zones de confiance du SI administr\xE9 et d\xE9duire les\
+        \ zones d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:3
+      ref_id: R6
+      name: "Privil\xE9gier l'utilisation de produits qualifi\xE9s par l'ANSSI"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:3
+      ref_id: R7
+      name: "D\xE9dier des socles physiques en cas de virtualisation des infrastructures\
+        \ d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Poste d'administration
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R8
+      name: "G\xE9rer et configurer le poste d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R9
+      name: "Utiliser un poste d'administration d\xE9di\xE9"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r9-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R9-
+      name: Utiliser un poste d'administration multi-niveaux
+      implementation_groups:
+      - nrm
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r9--
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R9--
+      name: "Utiliser un poste d\u2019administration avec acc\xE8s distant au SI bureautique"
+      implementation_groups:
+      - nrmm
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R10
+      name: "Bloquer tout acc\xE8s \xE0 Internet depuis ou vers le poste d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R11
+      name: "Durcir le syst\xE8me d'exploitation du poste d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R12
+      name: Restreindre les droits d'administration sur le poste d'administration
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R13
+      name: "Limiter les logiciels install\xE9s sur le poste d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:4
+      ref_id: R14
+      name: "Chiffrer l'ensemble des p\xE9riph\xE9riques de stockage utilis\xE9s pour\
+        \ l'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "R\xE9seau d'administration"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R15
+      name: "Connecter les ressources d'administration sur un r\xE9seau physique d\xE9\
+        di\xE9"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r15-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R15-
+      name: "Connecter les ressources d'administration sur un r\xE9seau VPN IPsec\
+        \ d\xE9di\xE9"
+      implementation_groups:
+      - nrm
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R16
+      name: "Appliquer un filtrage interne et p\xE9rim\xE9trique au SI d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R17
+      name: "Appliquer un filtrage local sur les ressources administr\xE9es"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R18
+      name: "D\xE9dier une interface r\xE9seau physique d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r18-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R18-
+      name: "D\xE9dier une interface r\xE9seau virtuelle d'administration"
+      implementation_groups:
+      - nrm
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R19
+      name: "Appliquer un filtrage entre ressources d'administration et ressources\
+        \ administr\xE9es"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R20
+      name: "Bloquer toute connexion entre ressources administr\xE9es \xE0 travers\
+        \ le r\xE9seau d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:5
+      ref_id: R21
+      name: "Prot\xE9ger les flux d'administration transitant sur un r\xE9seau tiers"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Outils d'administration
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:6
+      ref_id: R22
+      name: "D\xE9ployer les outils d'administration sur des serveurs d\xE9di\xE9\
+        s par zone d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:6
+      ref_id: R23
+      name: Appliquer un filtrage entre les postes d'administration et les serveurs
+        outils d'administration
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:6
+      ref_id: R24
+      name: "Utiliser des protocoles s\xE9curis\xE9s pour les flux d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r24-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:6
+      ref_id: R24-
+      name: "Prot\xE9ger le cas \xE9ch\xE9ant les flux d'administration dans un tunnel\
+        \ VPN IPsec"
+      implementation_groups:
+      - nrm
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:6
+      ref_id: R25
+      name: "\xC9tudier la mise en oeuvre d'une rupture protocolaire des flux d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r26
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:6
+      ref_id: R26
+      name: "Renoncer \xE0 la rupture protocolaire pour les besoins en confidentialit\xE9"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Identification, authentification et droits d'administration
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r27
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R27
+      name: "Utiliser des comptes d'administration d\xE9di\xE9s"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r28
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R28
+      name: "Prot\xE9ger l'acc\xE8s aux annuaires des comptes d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r29
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R29
+      name: "R\xE9server les comptes d'administration aux seules actions d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r30
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R30
+      name: "Utiliser par d\xE9faut des comptes d'administration individuels"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R31
+      name: "Journaliser les \xE9v\xE9nements li\xE9s aux comptes d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r32
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R32
+      name: "Pr\xE9voir un processus de gestion des comptes d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r33
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R33
+      name: "Se r\xE9f\xE9rer au RGS pour choisir les m\xE9canismes d'authentification"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r34
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R34
+      name: "Modifier les mots de passe par d\xE9faut des comptes natifs"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r35
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R35
+      name: Stocker les mots de passe dans un coffre-fort de mots de passe
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r36
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R36
+      name: "Privil\xE9gier une authentification double facteur pour les actions d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r37
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R37
+      name: "Utiliser des certificats \xE9lectroniques de confiance pour l'authentification"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r38
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R38
+      name: "Mettre en \u0153uvre une gestion centralis\xE9e de l'authentification"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r39
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R39
+      name: "Respecter le principe du moindre privil\xE8ge dans l'attribution des\
+        \ droits d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r40
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R40
+      name: "Attribuer les droits d'administration \xE0 des groupes"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r41
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:7
+      ref_id: R41
+      name: "D\xE9ployer des politiques de s\xE9curit\xE9"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: "Maintien en condition de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r42
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:8
+      ref_id: R42
+      name: "R\xE9aliser scrupuleusement le MCS du SI d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r43
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:8
+      ref_id: R43
+      name: "Mettre en place des serveurs relais pour la r\xE9cup\xE9ration des mises\
+        \ \xE0 jour"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r44
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:8
+      ref_id: R44
+      name: "Valider les correctifs de s\xE9curit\xE9 avant leur g\xE9n\xE9ralisation"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: "Sauvegarde, journalisation et supervision de la s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r45
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:9
+      ref_id: R45
+      name: "D\xE9finir une politique de sauvegarde du SI d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r46
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:9
+      ref_id: R46
+      name: "D\xE9dier une zone d'administration \xE0 la journalisation"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r47
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:9
+      ref_id: R47
+      name: "Centraliser la collecte des journaux d'\xE9v\xE9nements"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: "Administration \xE0 distance et nomadisme"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r48
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:10
+      ref_id: R48
+      name: "Installer un filtre de confidentialit\xE9 sur le poste d'administration\
+        \ nomade"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r49
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:10
+      ref_id: R49
+      name: "Utiliser un tunnel VPN IPsec pour la connexion du poste d'administration\
+        \ \xE0 distance"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r50
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:10
+      ref_id: R50
+      name: "Emp\xEAcher toute modification de la configuration VPN du poste d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r51
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:10
+      ref_id: R51
+      name: "D\xE9dier un concentrateur VPN IPsec physique pour l'administration \xE0\
+        \ distance"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: "Syst\xE8mes d'\xE9changes s\xE9curis\xE9s"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r52
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:11
+      ref_id: R52
+      name: "D\xE9ployer des syst\xE8mes d'\xE9changes s\xE9curis\xE9s"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r53
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:11
+      ref_id: R53
+      name: "D\xE9dier le syst\xE8me d'\xE9change interne au SI d'administration"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r54
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:11
+      ref_id: R54
+      name: "N'autoriser que des protocoles de transfert vers le syst\xE8me d'\xE9\
+        change externe"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r55
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:11
+      ref_id: R55
+      name: "Limiter au strict besoin op\xE9rationnel l'acc\xE8s au syst\xE8me d'\xE9\
+        change externe"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r56
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:11
+      ref_id: R56
+      name: "Ne pas s'authentifier avec un compte d'administration sur le syst\xE8\
+        me d'\xE9change externe"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r57
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:11
+      ref_id: R57
+      name: "Ne pas stocker de donn\xE9es de mani\xE8re permanente dans un syst\xE8\
+        me d'\xE9change externe"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r58
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:11
+      ref_id: R58
+      name: "Analyser le contenu des donn\xE9es \xE9chang\xE9es par le syst\xE8me\
+        \ d'\xE9change externe"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: "Administration par des tiers et assistance \xE0 distance"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r59
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R59
+      name: "Recourir \xE0 une prestation d'infog\xE9rance qualifi\xE9e d'un PAMS"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r60
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R60
+      name: "Int\xE9grer au contrat d'infog\xE9rance les exigences de s\xE9curit\xE9\
+        \ d'acc\xE8s \xE0 distance"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r61
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R61
+      name: "Imposer une s\xE9curisation \xE0 l'\xE9tat de l'art des postes de travail\
+        \ des administrateurs tiers"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r62
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R62
+      name: "D\xE9dier une cha\xEEne d'acc\xE8s \xE0 distance pour les administrateurs\
+        \ tiers"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r63
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R63
+      name: Utiliser un tunnel VPN IPSec pour la connexion du poste de travail des
+        administrateurs tiers
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r63-
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R63-
+      name: Utiliser un tunnel VPN TLS pour la connexion du poste de travail des administrateurs
+        tiers
+      implementation_groups:
+      - nrm
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r64
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R64
+      name: "D\xE9dier des comptes d'acc\xE8s et des comptes d'administration aux\
+        \ administrateurs tiers"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r65+
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R65+
+      name: "D\xE9dier un annuaire aux comptes d'acc\xE8s des administrateurs tiers"
+      implementation_groups:
+      - nrp
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r66
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R66
+      name: "Activer \xE0 la demande les comptes des administrateurs tiers"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r67
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R67
+      name: Renforcer l'authentification des administrateurs tiers
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r68
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R68
+      name: "Mettre en oeuvre un rebond \xE9ph\xE9m\xE8re en coupure de la terminaison\
+        \ VPN et du SI administr\xE9"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r69
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R69
+      name: "Mettre en oeuvre un contr\xF4le d'acc\xE8s strict et une tra\xE7abilit\xE9\
+        \ pour les administrateurs"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r70
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R70
+      name: "Utiliser un bo\xEEtier mat\xE9riel d'acquisition vid\xE9o pour l'assistance\
+        \ \xE0 distance"
+      implementation_groups:
+      - nr
+    - urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:r71
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-admin-securisee-si:12
+      ref_id: R71
+      name: "Mettre en oeuvre une solution logicielle d\xE9di\xE9e pour l'assistance\
+        \ \xE0 distance"
+      implementation_groups:
+      - nr
