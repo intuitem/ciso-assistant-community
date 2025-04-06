@@ -455,20 +455,10 @@ export const listViewFields = {
 		}
 	},
 	vulnerabilities: {
-		head: [
-			'ref_id',
-			'name',
-			'description',
-			'status',
-			'severity',
-			'applied_controls',
-			'folder',
-			'labels'
-		],
+		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
 		body: [
 			'ref_id',
 			'name',
-			'description',
 			'status',
 			'severity',
 			'applied_controls',
@@ -895,8 +885,16 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
-		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels'],
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'severity', 'status', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'findings_assessment',
+			'severity',
+			'status',
+			'filtering_labels'
+		],
 		filters: { filtering_labels: LABELS_FILTER }
 	},
 	incidents: {

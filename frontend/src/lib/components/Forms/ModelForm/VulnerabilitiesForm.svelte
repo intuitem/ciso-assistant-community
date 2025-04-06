@@ -34,17 +34,19 @@
 
 <Select
 	{form}
-	options={[
-		{ label: '--', value: -1 },
-		{ label: m.low(), value: 0 },
-		{ label: m.medium(), value: 1 },
-		{ label: m.high(), value: 2 },
-		{ label: m.critical(), value: 3 }
-	]}
+	options={model.selectOptions['severity']}
 	field="severity"
 	label={m.severity()}
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="assets"
+	optionsExtraFields={[['folder', 'str']]}
+	field="assets"
+	label={m.assets()}
 />
 <AutocompleteSelect
 	multiple
