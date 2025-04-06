@@ -3810,6 +3810,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "requirement_assessments",
         "name",
         "timeline_entries",
+        "filtering_labels",
     ]
     search_fields = ["name"]
 
