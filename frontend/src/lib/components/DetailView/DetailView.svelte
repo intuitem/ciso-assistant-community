@@ -283,11 +283,9 @@
 											{:else if key === 'severity' && data.urlModel !== 'incidents'}
 												<!-- We must add translations for the following severity levels -->
 												<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
-												{@const stringifiedSeverity =
-													value < 0
-														? '--'
-														: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
-															m.undefined())}
+												{@const stringifiedSeverity = !value
+													? '--'
+													: (safeTranslate(value) ?? m.undefined())}
 												{stringifiedSeverity}
 											{:else if key === 'children_assets'}
 												{#if Object.keys(value).length > 0}
