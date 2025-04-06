@@ -107,6 +107,8 @@ from tprm.models import Entity
 from .models import *
 from .serializers import *
 
+from .models import Severity
+
 from serdes.utils import (
     get_domain_export_objects,
     import_export_serializer_class,
