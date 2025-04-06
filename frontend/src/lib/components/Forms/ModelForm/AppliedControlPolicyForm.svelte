@@ -62,15 +62,14 @@
 		bind:cachedValue={formDataCache['eta']}
 	/>
 	<AutocompleteSelect
-		multiple
 		{form}
-		createFromSelection={true}
-		optionsEndpoint="filtering-labels"
-		optionsLabelField="label"
-		field="filtering_labels"
-		helpText={m.labelsHelpText()}
-		label={m.labels()}
-		allowUserOptions="append"
+		multiple
+		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
+		field="evidences"
+		cacheLock={cacheLocks['evidences']}
+		bind:cachedValue={formDataCache['evidences']}
+		label={m.evidences()}
 	/>
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 		<TextField
@@ -87,16 +86,6 @@
 			label={m.priority()}
 			cacheLock={cacheLocks['priority']}
 			bind:cachedValue={formDataCache['priority']}
-		/>
-		<AutocompleteSelect
-			{form}
-			multiple
-			optionsEndpoint="evidences"
-			optionsExtraFields={[['folder', 'str']]}
-			field="evidences"
-			cacheLock={cacheLocks['evidences']}
-			bind:cachedValue={formDataCache['evidences']}
-			label={m.evidences()}
 		/>
 
 		<AutocompleteSelect
@@ -179,6 +168,17 @@
 			helpText={m.linkHelpText()}
 			cacheLock={cacheLocks['link']}
 			bind:cachedValue={formDataCache['link']}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			createFromSelection={true}
+			optionsEndpoint="filtering-labels"
+			optionsLabelField="label"
+			field="filtering_labels"
+			helpText={m.labelsHelpText()}
+			label={m.labels()}
+			allowUserOptions="append"
 		/>
 	</Dropdown>
 {/if}

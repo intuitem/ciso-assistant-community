@@ -135,7 +135,7 @@
 			</svelte:fragment>
 		</AccordionItem>
 
-		<AccordionItem>
+		<AccordionItem open>
 			<svelte:fragment slot="summary"
 				><span class="font-semibold">{m.SPConfiguration()}</span></svelte:fragment
 			>

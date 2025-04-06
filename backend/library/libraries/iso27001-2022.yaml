@@ -4,9 +4,10 @@ ref_id: ISO/IEC 27001:2022
 name: International standard ISO/IEC 27001:2022
 description: "Information security, cybersecurity and privacy protection \u2014 Information\
   \ security management systems \u2014 Requirements"
-copyright: See https://www.iso.org/standard/27001
-version: 7
-publication_date: 2024-03-02
+copyright: This is the outline of the ISO27001-2022 standard. You can purchase the
+  full standard from https://www.iso.org/standard/27001
+version: 8
+publication_date: 2025-04-05
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -15,7 +16,8 @@ translations:
     description: "S\xE9curit\xE9 de l'information, cybers\xE9curit\xE9 et protection\
       \ de la vie priv\xE9e \u2014 Information syst\xE8me de management de la s\xE9\
       curit\xE9 \u2014 Exigences"
-    copyright: Voir https://www.iso.org/standard/27001
+    copyright: "Ce document est un r\xE9sum\xE9 de la norme ISO27001-2022. Vous pouvez\
+      \ acheter le standard complet sur https://www.iso.org/standard/27001"
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
@@ -3509,7 +3511,7 @@ objects:
           name: Journalisation
           description: "Cette mesure de s\xE9curit\xE9 permet la journalisation des\
             \ activit\xE9s au sein des syst\xE8mes pour soutenir la surveillance,\
-            \ la d\xE9tection des incidents et les enqu\xEAtes m\xE9dico-l\xE9gales."
+            \ la d\xE9tection des incidents et les analyses forensiques."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
       assessable: true
       depth: 3

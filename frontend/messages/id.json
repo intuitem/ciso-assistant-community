@@ -432,7 +432,7 @@
 	"etaHelpText": "Perkiraan waktu kedatangan",
 	"dueDateHelpText": "Tanggal batas waktu penyelesaian penilaian",
 	"expiryDateHelpText": "Tanggal di mana objek tidak lagi berlaku",
-	"linkHelpText": "URL eksternal untuk tindak lanjut (contoh: tiket Jira)",
+	"linkHelpText": "URL eksternal untuk pelacakan atau referensi (mis. sharepoint, jira, dll.)",
 	"effortHelpText": "Upaya yang diperlukan untuk menerapkan kontrol",
 	"costHelpText": "Biaya yang diperlukan untuk menerapkan kontrol",
 	"riskAcceptanceJusitficationHelpText": "Justifikasi penerimaan risiko. Hanya penyetuju yang dapat mengedit bidang ini.",

@@ -428,7 +428,7 @@
 	"etaHelpText": "Tiempo estimado de llegada",
 	"dueDateHelpText": "Fecha en la que se debe completar la evaluación",
 	"expiryDateHelpText": "Fecha en la que el objeto ya no es válido",
-	"linkHelpText": "URL externa para el seguimiento de acciones (por ejemplo, ticket de Jira)",
+	"linkHelpText": "URL externo para seguimiento o referencia (ej. sharepoint, jira, etc.)",
 	"effortHelpText": "El esfuerzo necesario para implementar el control aplicado",
 	"costHelpText": "El costo requerido para implementar el control aplicado.",
 	"riskAcceptanceJusitficationHelpText": "Justificación para la aceptación de riesgos. Solo el aprobador puede editar este campo.",
