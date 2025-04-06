@@ -2272,6 +2272,12 @@ class Vulnerability(
         verbose_name=_("Applied controls"),
         related_name="vulnerabilities",
     )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name=_("Assets"),
+        related_name="vulnerabilities",
+    )
     security_exceptions = models.ManyToManyField(
         SecurityException,
         blank=True,
