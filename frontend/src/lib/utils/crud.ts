@@ -923,7 +923,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		// 	{ field: 'findings', urlModel: 'reference-controls' },
 		// 	{ field: 'findings', urlModel: 'applied-controls' }
 		// ],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},
 	incidents: {
 		name: 'incident',

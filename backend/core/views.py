@@ -817,6 +817,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
@@ -4950,6 +4951,11 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Finding.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Severity.choices))
 
 
 class IncidentViewSet(BaseModelViewSet):
