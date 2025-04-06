@@ -158,6 +158,7 @@ class RiskMatrixImportExportSerializer(BaseModelSerializer):
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
 

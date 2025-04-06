@@ -423,7 +423,8 @@ export const vulnerabilitySchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional().default(''),
 	status: z.string().default('--'),
-	severity: z.number().default(-1),
+	severity: z.number().default(-1).optional(),
+	assets: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional()

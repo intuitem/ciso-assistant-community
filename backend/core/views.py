@@ -817,6 +817,10 @@ class VulnerabilityViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
 
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Severity.choices))
+
 
 class FilteringLabelViewSet(BaseModelViewSet):
     """
@@ -4825,7 +4829,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
-        return Response(dict(SecurityException.Severity.choices))
+        return Response(dict(Severity.choices))
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
