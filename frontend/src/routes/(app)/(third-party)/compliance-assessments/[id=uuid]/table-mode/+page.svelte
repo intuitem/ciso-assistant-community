@@ -4,12 +4,10 @@
 	import Score from '$lib/components/Forms/Score.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import {
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import {
