@@ -477,11 +477,11 @@
 	"deleteUserMessage": "Are you sure you want to delete the following user: {name}?",
 	"download": "Download",
 	"loading": "Loading",
-	"open": "Opened",
+	"open": "Open",
 	"mitigate": "Mitigated",
 	"accept": "Accepted",
 	"avoid": "Avoided",
-	"transfer": "Shared",
+	"transfer": "Transfered",
 	"primary": "Primary",
 	"support": "Supporting",
 	"toDo": "To do",
@@ -1413,5 +1413,6 @@
 	"auditName": "Audit Name",
 	"createRiskAssessment": "Initiate a risk assessment as well",
 	"riskAssessmentName": "Risk Assessment Name",
-	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available."
+	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available.",
+	"youCanSetPAsswordHere": "You can set your password here."
 }
