@@ -6,7 +6,7 @@ from settings import API_URL, TOKEN, VERIFY_CERTIFICATE
 
 
 def get_api_headers(content_type: str = "", extra_headers: dict = {}) -> dict:
-    headers = {"Authorization": f"Token {TOKEN}", "Accept": "application/json"}
+    headers = {"Authorization": f"Token {TOKEN}"}
     if content_type:
         headers["Content-Type"] = content_type
     if extra_headers:

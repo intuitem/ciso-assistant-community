@@ -269,16 +269,16 @@ def upload_file_to_evidence(
     Uploads the file to the evidence upload endpoint.
     """
     extra_headers = {
-        "Content-Disposition": f"attachment; filename={urllib.parse.quote(file_name)}"
+        "Content-Disposition": f"attachment; filename={urllib.parse.quote(file_name)}",
     }
-    endpoint = f"{API_URL}/evidences/"
+    endpoint = f"{API_URL}/evidences/{evidence_id}/upload/"
     logger.info(
         "Uploading attachment to evidence", evidence_id=evidence_id, file_name=file_name
     )
     response = requests.post(
         endpoint,
         headers=get_api_headers(extra_headers=extra_headers),
-        data=file_obj,
+        files=[(urllib.parse.quote(file_name), file_obj.read())],
         verify=VERIFY_CERTIFICATE,
     )
     if not response.ok:
@@ -287,6 +287,8 @@ def upload_file_to_evidence(
             evidence_id=evidence_id,
             status_code=response.status_code,
             response=response.text,
+            request_headers=response.request.headers,
+            endpoint=endpoint,
         )
         raise Exception(
             f"Failed to update evidence {evidence_id}: {response.status_code}, {response.text}"
