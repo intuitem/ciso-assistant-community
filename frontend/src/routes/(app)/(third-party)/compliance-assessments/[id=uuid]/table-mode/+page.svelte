@@ -228,6 +228,31 @@
 	function getClassesText(mappingInferenceResult) {
 		return complianceResultColorMap[mappingInferenceResult] === '#000000' ? 'text-white' : '';
 	}
+	// Create separate superForm instances for each requirement assessment
+	let scoreForms = {};
+	let docScoreForms = {};
+	let isScoredForms = {};
+	$: {
+		// Initialize the form instances
+		data.requirement_assessments.forEach((requirementAssessment, index) => {
+			const id = requirementAssessment.id;
+			if (!scoreForms[id]) {
+				scoreForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-score-${id}-${index}`
+				});
+			}
+			if (!docScoreForms[id]) {
+				docScoreForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-documentation-score-${id}-${index}`
+				});
+			}
+			if (!isScoredForms[id]) {
+				isScoredForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-is-scored-${id}-${index}`
+				});
+			}
+		});
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -507,9 +532,7 @@
 						<div class="flex flex-col w-full place-items-center">
 							{#if !shallow}
 								<Score
-									form={superForm(requirementAssessment.scoreForm, {
-										id: `requirement-score-${requirementAssessment.id}`
-									})}
+									form={scoreForms[requirementAssessment.id]}
 									min_score={data.compliance_assessment.min_score}
 									max_score={data.compliance_assessment.max_score}
 									scores_definition={data.compliance_assessment.scores_definition}
@@ -525,9 +548,7 @@
 								>
 									<div slot="left">
 										<Checkbox
-											form={superForm(requirementAssessment.scoreForm, {
-												id: `requirement-is-scored-${requirementAssessment.id}`
-											})}
+											form={isScoredForms[requirementAssessment.id]}
 											field="is_scored"
 											label={''}
 											helpText={m.scoringHelpText()}
@@ -543,9 +564,7 @@
 								</Score>
 								{#if data.compliance_assessment.show_documentation_score}
 									<Score
-										form={superForm(requirementAssessment.scoreForm, {
-											id: `requirement-documentation-score-${requirementAssessment.id}`
-										})}
+										form={docScoreForms[requirementAssessment.id]}
 										min_score={data.compliance_assessment.min_score}
 										max_score={data.compliance_assessment.max_score}
 										field="documentation_score"
