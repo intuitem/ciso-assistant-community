@@ -28,7 +28,7 @@
 
 		const grid = {
 			left: 150,
-			right: 50,
+			right: 10,
 			top: 50,
 			bottom: 50
 		};
