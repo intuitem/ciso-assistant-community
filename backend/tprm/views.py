@@ -87,6 +87,9 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",
+                "has_questions": ea.compliance_assessment.has_questions
+                if ea.compliance_assessment
+                else False,
             }
 
             completion = (
@@ -127,7 +130,7 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-    filterset_fields = ["provider_entity"]
+    filterset_fields = ["provider_entity", "assets"]
 
     def perform_create(self, serializer):
         serializer.save()

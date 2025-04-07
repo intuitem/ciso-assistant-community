@@ -2,10 +2,12 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { beforeUpdate, onMount } from 'svelte';
-	import { formFieldProxy } from 'sveltekit-superforms';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
+	import * as m from '$paraglide/messages.js';
+	import { toCamelCase } from '$lib/utils/locales';
 
 	interface Option {
 		label: string;
@@ -21,7 +23,8 @@
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 
-	export let form;
+	export let form: SuperForm<Record<string, unknown>, any>;
+	export let resetForm = false;
 	export let multiple = false;
 	export let nullable = false;
 	export let mandatory = false;
@@ -102,7 +105,7 @@
 	let selectedValues: (string | undefined)[] = [];
 	let isInternalUpdate = false;
 	let optionsLoaded = Boolean(options.length);
-	let initialValue = $value; // Store initial value
+	const initialValue = resetForm ? undefined : $value; // Store initial value
 	const default_value = nullable ? null : selectedValues[0];
 
 	const multiSelectOptions = {
@@ -336,7 +339,7 @@
 				<span class="text-indigo-600">{option.label}</span>
 				<span class="text-sm text-gray-500"> (suggested)</span>
 			{:else if translateOptions && option.label}
-				{safeTranslate(option.label)}
+				{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
 			{:else}
 				{option.label || option}
 			{/if}

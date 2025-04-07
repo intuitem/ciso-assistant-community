@@ -37,7 +37,7 @@
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
@@ -45,7 +45,6 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { invalidateAll } from '$app/navigation';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -67,6 +66,7 @@
 				formAction: '?/createAppliedControl',
 				model: data.measureModel,
 				debug: false,
+				invalidateAll: false,
 				suggestions: { reference_control: reference_controls }
 			}
 		};
@@ -157,11 +157,9 @@
 		applyAction: true,
 		resetForm: false,
 		validators: zod(schema),
-		taintedMessage: m.taintedFormMessage(),
+		taintedMessage: false,
 		validationMethod: 'auto'
 	});
-
-	const formStore = requirementAssessmentForm.form;
 
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 
@@ -197,29 +195,43 @@
 
 	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = false;
-	function forceRefresh() {
+
+	$: formStore = requirementAssessmentForm.form;
+
+	$: if (form?.newControls) {
 		refreshKey = !refreshKey;
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				applied_controls: [...current.applied_controls, ...form?.newControls]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
 	}
 
-	$: if (form && form.newControl) {
-		forceRefresh();
-		$formStore.applied_controls.push(form.newControl);
+	$: if (form?.newEvidence) {
+		refreshKey = !refreshKey;
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				evidences: [...current.evidences, form?.newEvidence]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
 	}
 
-	$: if (form && form.newControls) {
-		forceRefresh();
-		for (const control of form.newControls) {
-			$formStore.applied_controls.push(control);
-		}
-	}
-
-	$: if (form && form.newEvidence) {
-		forceRefresh();
-		$formStore.evidences.push(form.newEvidence);
-	}
-
-	$: if (form && form.newSecurityException) {
-		$formStore.security_exceptions.push(form.newSecurityException);
+	$: if (form?.newSecurityException) {
+		refreshKey = !refreshKey;
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				security_exceptions: [...current.security_exceptions, form?.newSecurityException]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
 	}
 </script>
 
@@ -507,13 +519,15 @@
 										><i class="fa-solid fa-plus mr-2" />{m.addSecurityException()}</button
 									>
 								</span>
-								<AutocompleteSelect
-									multiple
-									{form}
-									optionsEndpoint="security-exceptions"
-									optionsExtraFields={[['folder', 'str']]}
-									field="security_exceptions"
-								/>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="security-exceptions"
+										optionsExtraFields={[['folder', 'str']]}
+										field="security_exceptions"
+									/>
+								{/key}
 								<ModelTable
 									source={$page.data.tables['security-exceptions']}
 									hideFilters={true}

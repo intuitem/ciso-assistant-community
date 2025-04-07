@@ -3,7 +3,7 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { safeTranslate } from '$lib/utils/i18n.js';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 
 	export let data;
 

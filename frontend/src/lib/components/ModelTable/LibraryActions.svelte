@@ -2,7 +2,7 @@
 	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 
 	export let meta: any;

@@ -12,7 +12,7 @@
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
 	import type {
 		PopupSettings,
@@ -26,9 +26,10 @@
 
 	import { goto } from '$app/navigation';
 	import { listViewFields } from '$lib/utils/table';
+	import { canPerformAction } from '$lib/utils/access-control';
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
+	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
 
 	const popupHover: PopupSettings = {
 		event: 'hover',
@@ -40,6 +41,7 @@
 	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
+	export let displayModelTable = true;
 
 	exclude = [...exclude, ...defaultExcludes];
 
@@ -168,7 +170,15 @@
 	}
 
 	const user = $page.data.user;
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${data.model.name}`);
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: data.model.name,
+		domain:
+			data.model.name === 'folder'
+				? data.data.id
+				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
+	});
 
 	$: displayEditButton = function () {
 		return (
@@ -259,7 +269,7 @@
 							<dd class="text-gray-700 sm:col-span-2">
 								<ul class="">
 									<li
-										class="list-none"
+										class="list-none whitespace-pre-line"
 										data-testid={!(value instanceof Array)
 											? key.replace('_', '-') + '-field-value'
 											: null}
@@ -270,14 +280,12 @@
 												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 													>{value.name}</Anchor
 												>
-											{:else if key === 'severity'}
+											{:else if key === 'severity' && data.urlModel !== 'incidents'}
 												<!-- We must add translations for the following severity levels -->
 												<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
-												{@const stringifiedSeverity =
-													value < 0
-														? '--'
-														: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
-															m.undefined())}
+												{@const stringifiedSeverity = !value
+													? '--'
+													: (safeTranslate(value) ?? m.undefined())}
 												{stringifiedSeverity}
 											{:else if key === 'children_assets'}
 												{#if Object.keys(value).length > 0}
@@ -363,7 +371,7 @@
 												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 													>{value}</Anchor
 												>
-											{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date')}
+											{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date' || key === 'timestamp')}
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
@@ -473,7 +481,7 @@
 	</div>
 </div>
 
-{#if relatedModels.length > 0}
+{#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
 		<TabGroup justify="justify-center">
 			{#each relatedModels as [urlmodel, model], index}

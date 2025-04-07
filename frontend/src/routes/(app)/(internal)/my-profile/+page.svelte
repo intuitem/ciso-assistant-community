@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getLocale } from '$paraglide/runtime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	function filterUserData() {
 		const filtered = {};
@@ -24,7 +25,12 @@
 	}
 
 	const user = $page.data.user;
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_user`);
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: 'user',
+		domain: user.root_folder_id
+	});
 </script>
 
 <div class="flex flex-col bg-white card shadow-lg p-4 space-y-4">
