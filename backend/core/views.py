@@ -4019,6 +4019,66 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         return response
 
+    @action(detail=True, name="Get action plan CSV")
+    def action_plan_csv(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) in object_ids_view:
+            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+            requirement_assessments = compliance_assessment.get_requirement_assessments(
+                include_non_assessable=False
+            )
+            queryset = AppliedControl.objects.filter(
+                requirement_assessments__in=requirement_assessments
+            ).distinct()
+
+            # Use the same serializer to maintain consistency - to review
+            serializer = ComplianceAssessmentActionPlanSerializer(
+                queryset, many=True, context={"pk": pk}
+            )
+
+            response = HttpResponse(content_type="text/csv")
+            response["Content-Disposition"] = (
+                f'attachment; filename="action_plan_{pk}.csv"'
+            )
+
+            writer = csv.writer(response)
+
+            writer.writerow(
+                [
+                    "Name",
+                    "Description",
+                    "Priority",
+                    "Status",
+                    "ETA",
+                    "Covered requirements",
+                ]
+            )
+
+            for item in serializer.data:
+                writer.writerow(
+                    [
+                        item.get("name"),
+                        item.get("description"),
+                        item.get("priority"),
+                        item.get("status"),
+                        item.get("eta"),
+                        "\n".join(
+                            [
+                                ra.get("str")
+                                for ra in item.get("requirement_assessments")
+                            ]
+                        ),
+                    ]
+                )
+
+            return response
+        else:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
