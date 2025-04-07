@@ -186,6 +186,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 71. CIS benchmark for Kubernetes v1.10 🌐
 72. De tekniske minimumskrav for statslige myndigheder 🇩🇰
 73. Google SAIF framework 🤖
+74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
+75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
+76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
 
 
 ### Community contributions

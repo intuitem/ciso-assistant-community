@@ -309,7 +309,8 @@ export const EvidenceSchema = z.object({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().optional().nullable()
+	link: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
 });
 
 export const GeneralSettingsSchema = z.object({
@@ -423,7 +424,8 @@ export const vulnerabilitySchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional().default(''),
 	status: z.string().default('--'),
-	severity: z.number().default(-1),
+	severity: z.number().default(-1).optional(),
+	assets: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional()
@@ -627,11 +629,11 @@ export const TimelineEntrySchema = z.object({
 	entry: z.string(),
 	entry_type: z.string().default('observation'),
 	timestamp: z
-		.union([z.literal('').transform(() => null), z.string().datetime({ local: true })])
+		.string()
+		.datetime({ local: true })
 		.refine((val) => !val || new Date(val) <= new Date(), {
 			message: m.timestampCannotBeInTheFuture()
-		})
-		.default(() => new Date().toISOString()),
+		}),
 	observation: z.string().optional().nullable(),
 	evidences: z.string().uuid().optional().array().optional()
 });

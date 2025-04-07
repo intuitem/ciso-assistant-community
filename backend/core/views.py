@@ -107,6 +107,8 @@ from tprm.models import Entity
 from .models import *
 from .serializers import *
 
+from .models import Severity
+
 from serdes.utils import (
     get_domain_export_objects,
     import_export_serializer_class,
@@ -816,6 +818,11 @@ class VulnerabilityViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Severity.choices))
 
 
 class FilteringLabelViewSet(BaseModelViewSet):
@@ -3803,6 +3810,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "requirement_assessments",
         "name",
         "timeline_entries",
+        "filtering_labels",
     ]
     search_fields = ["name"]
 
@@ -4825,7 +4833,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
-        return Response(dict(SecurityException.Severity.choices))
+        return Response(dict(Severity.choices))
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -4946,6 +4954,11 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Finding.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get severity choices")
+    def severity(self, request):
+        return Response(dict(Severity.choices))
 
 
 class IncidentViewSet(BaseModelViewSet):
