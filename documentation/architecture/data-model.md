@@ -1584,10 +1584,9 @@ TASK_NODE {
     string name
     string description
     int    iteration
-    date   due_date
 
-    date   eta
-    date   completion_date
+    date   task_date
+    date   eta_or_completion_date
     enum   status "pending, in progress, completed, cancelled"
     string observation
 
@@ -1607,7 +1606,7 @@ is_template indicates this task is the start of a recurring series. If true, the
   "properties": {
     "frequency": {
       "type": "string",
-      "enum": ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+      "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
     },
     "days_of_week": {
       "type": "array",
@@ -1618,15 +1617,14 @@ is_template indicates this task is the start of a recurring series. If true, the
       },
       "description": "Optional. Days of the week (0=Sunday, 6=Saturday)"
     },
-    "days_of_month": {
+    "week_of_month": {
       "type": "array",
       "items": {
         "type": "integer",
-        "minimum": -31,
-        "maximum": 31,
-        "not": { "enum": [0] }
+        "minimum": -1,
+        "maximum": 3,
       },
-      "description": "Optional. Days of the month (negative values count from the month's end, e.g., -1 for last day)"
+      "description": "Optional. for a given weekday, which one in the month (0 for first, -1 for last)"
     },
     "months_of_year": {
       "type": "array",
