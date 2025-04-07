@@ -4145,29 +4145,31 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
     ]
     SCHEDULE_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "https://ciso-assistant.com/schemas/task-node/schedule.schema.json",
-        "title": "Schedule",
-        "description": "Schedule definition of a task",
+        "title": "Schedule Definition",
         "type": "object",
         "properties": {
+            "interval": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Number of periods to wait before repeating (e.g., every 2 days, 3 weeks).",
+            },
             "frequency": {
                 "type": "string",
-                "enum": ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+                "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
             },
             "days_of_week": {
                 "type": "array",
                 "items": {"type": "integer", "minimum": 0, "maximum": 6},
                 "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
             },
-            "days_of_month": {
+            "week_of_month": {
                 "type": "array",
                 "items": {
                     "type": "integer",
-                    "minimum": -31,
-                    "maximum": 31,
-                    "not": {"enum": [0]},
+                    "minimum": -1,
+                    "maximum": 3,
                 },
-                "description": "Optional. Days of the month (negative values count from the month's end, e.g., -1 for last day)",
+                "description": "Optional. for a given weekday, which one in the month (0 for first, -1 for last)",
             },
             "months_of_year": {
                 "type": "array",
@@ -4200,17 +4202,18 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
     }
 
     ref_id = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+        max_length=100, null=True, blank=True, verbose_name="reference id"
     )
     iteration = models.IntegerField(default=0)
-    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
-    completion_date = models.DateField(
-        null=True, blank=True, verbose_name=_("Completion date")
+    task_date = models.DateField(null=True, blank=True, verbose_name="Task date")
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    eta_or_completion_date = models.DateField(
+        null=True, blank=True, verbose_name="ETA or Completion date"
     )
 
     owner = models.ForeignKey(
         User,
-        verbose_name=_("Owner"),
+        verbose_name="Owner",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -4224,7 +4227,7 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
     is_template = models.BooleanField(default=False)
     enabled = models.BooleanField(default=True)
     schedule = models.JSONField(
-        verbose_name=_("Schedule definition"),
+        verbose_name="Schedule definition",
         blank=True,
         null=True,
         validators=[JSONSchemaInstanceValidator(SCHEDULE_JSONSCHEMA)],
@@ -4236,7 +4239,7 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
         null=True,
         blank=True,
     )
-    
+
     assets = models.ManyToManyField(
         Asset,
         verbose_name="Related assets",
