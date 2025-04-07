@@ -1,0 +1,300 @@
+urn: urn:intuitem:risk:library:cps-234
+locale: en
+ref_id: cps-234
+name: Prudential Standard CPS 234
+description: 'This Prudential Standard aims to ensure that an APRA-regulated entity
+  takes
+
+  measures to be resilient against information security incidents (including cyber-
+
+  attacks) by maintaining an information security capability commensurate with
+
+  information security vulnerabilities and threats.
+
+  https://www.apra.gov.au/sites/default/files/cps_234_july_2019_for_public_release.pdf'
+copyright: APRA
+version: 2
+publication_date: 2019-07-01
+provider: APRA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cps-234
+    ref_id: cps-234
+    name: Prudential Standard CPS 234
+    description: 'This Prudential Standard aims to ensure that an APRA-regulated entity
+      takes
+
+      measures to be resilient against information security incidents (including cyber-
+
+      attacks) by maintaining an information security capability commensurate with
+
+      information security vulnerabilities and threats.
+
+      https://www.apra.gov.au/sites/default/files/cps_234_july_2019_for_public_release.pdf'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cps-234:node1
+      assessable: false
+      depth: 1
+      name: Roles and responsibilities
+    - urn: urn:intuitem:risk:req_node:cps-234:13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node1
+      ref_id: '13'
+      description: The Board is ultimately responsible for the information security
+        of the entity. The Board must ensure that the entity maintains information
+        security in a manner commensurate with the size and extent of threats to its
+        information assets, and which enables the continued sound operation of the
+        entity.
+    - urn: urn:intuitem:risk:req_node:cps-234:14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node1
+      ref_id: '14'
+      description: An APRA-regulated entity must clearly define the information security-related
+        roles and responsibilities of the Board, senior management, governing bodies
+        and individuals with responsibility for decision-making, approval, oversight,
+        operations and other information security functions.
+    - urn: urn:intuitem:risk:req_node:cps-234:node2
+      assessable: false
+      depth: 1
+      name: Information security capability
+    - urn: urn:intuitem:risk:req_node:cps-234:15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node2
+      ref_id: '15'
+      description: An APRA-regulated entity must maintain an information security
+        capability commensurate with the size and extent of threats to its information
+        assets, and which enables the continued sound operation of the entity.
+    - urn: urn:intuitem:risk:req_node:cps-234:16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node2
+      ref_id: '16'
+      description: Where information assets are managed by a related party or third
+        party, the APRA-regulated entity must assess the information security capability
+        of that party, commensurate with the potential consequences of an information
+        security incident affecting those assets.
+    - urn: urn:intuitem:risk:req_node:cps-234:17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node2
+      ref_id: '17'
+      description: An APRA-regulated entity must actively maintain its information
+        security capability with respect to changes in vulnerabilities and threats,
+        including those resulting from changes to information assets or its business
+        environment.
+    - urn: urn:intuitem:risk:req_node:cps-234:node3
+      assessable: false
+      depth: 1
+      name: Policy framework
+    - urn: urn:intuitem:risk:req_node:cps-234:18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node3
+      ref_id: '18'
+      description: An APRA-regulated entity must maintain an information security
+        policy framework commensurate with its exposures to vulnerabilities and threats.
+    - urn: urn:intuitem:risk:req_node:cps-234:19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node3
+      ref_id: '19'
+      description: An APRA-regulated entity's information security policy framework
+        must provide direction on the responsibilities of all parties who have an
+        obligation to maintain information security.
+    - urn: urn:intuitem:risk:req_node:cps-234:node4
+      assessable: false
+      depth: 1
+      name: Information asset identification and classification
+    - urn: urn:intuitem:risk:req_node:cps-234:20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node4
+      ref_id: '20'
+      description: An APRA-regulated entity must classify its information assets,
+        including those managed by related parties and third parties, by criticality
+        and sensitivity. This classification must reflect the degree to which an information
+        security incident affecting an information asset has the potential to affect,
+        financially or non-financially, the entity or the interests of depositors,
+        policyholders, beneficiaries or other customers.
+    - urn: urn:intuitem:risk:req_node:cps-234:node5
+      assessable: false
+      depth: 1
+      name: Implementation of controls
+    - urn: urn:intuitem:risk:req_node:cps-234:21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node5
+      ref_id: '21'
+      description: "An APRA-regulated entity must have information security controls\
+        \ to protect its information assets, including those managed by related parties\
+        \ and third parties, that are implemented in a timely manner and that are\
+        \ commensurate with:\n (a) vulnerabilities and threats to the information\
+        \ assets; \n(b) the criticality and sensitivity of the information assets;\n\
+        (c) the stage at which the information assets are within their life-cycle;\
+        \ and\n(d) the potential consequences of an information security incident."
+    - urn: urn:intuitem:risk:req_node:cps-234:22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node5
+      ref_id: '22'
+      description: Where an APRA-regulated entity's information assets are managed
+        by a related party or third party, the APRA-regulated entity must evaluate
+        the design of that party's information security controls that protects the
+        information assets of the APRA-regulated entity.
+    - urn: urn:intuitem:risk:req_node:cps-234:node6
+      assessable: false
+      depth: 1
+      name: Incident management
+    - urn: urn:intuitem:risk:req_node:cps-234:23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node6
+      ref_id: '23'
+      description: An APRA-regulated entity must have robust mechanisms in place to
+        detect and respond to information security incidents in a timely manner.
+    - urn: urn:intuitem:risk:req_node:cps-234:24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node6
+      ref_id: '24'
+      description: An APRA-regulated entity must maintain plans to respond to information
+        security incidents that the entity considers could plausibly occur (information
+        security response plans).
+    - urn: urn:intuitem:risk:req_node:cps-234:25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node6
+      ref_id: '25'
+      description: 'An APRA-regulated entity''s information security response plans
+        must include the mechanisms in place for: (a) managing all relevant stages
+        of an incident, from detection to post-incident review; and (b) escalation
+        and reporting of information security incidents to the Board, other governing
+        bodies and individuals responsible for information security incident management
+        and oversight, as appropriate.'
+    - urn: urn:intuitem:risk:req_node:cps-234:26
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node6
+      ref_id: '26'
+      description: An APRA-regulated entity must annually review and test its information
+        security response plans to ensure they remain effective and fit-for-purpose.
+    - urn: urn:intuitem:risk:req_node:cps-234:node7
+      assessable: false
+      depth: 1
+      name: Testing control effectiveness
+    - urn: urn:intuitem:risk:req_node:cps-234:27
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node7
+      ref_id: '27'
+      description: "An APRA-regulated entity must test the effectiveness of its information\
+        \ security controls through a systematic testing program. The nature and frequency\
+        \ of the systematic testing must be commensurate with:\n(a) the rate at which\
+        \ the vulnerabilities and threats change;\n(b) the criticality and sensitivity\
+        \ of the information asset;\n(c) the consequences of an information security\
+        \ incident;\n(d) the risks associated with exposure to environments where\
+        \ the APRA-regulated entity is unable to enforce its information security\
+        \ policies; and \n(e) the materiality and frequency of change to information\
+        \ assets."
+    - urn: urn:intuitem:risk:req_node:cps-234:28
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node7
+      ref_id: '28'
+      description: Where an APRA-regulated entity's information assets are managed
+        by a related party or a third party, and the APRA-regulated entity is reliant
+        on that party's information security control testing, the APRA-regulated entity
+        must assess whether the nature and frequency of testing of controls in respect
+        of those information assets is commensurate with paragraphs 27(a) to 27(e)
+        of this Prudential Standard.
+    - urn: urn:intuitem:risk:req_node:cps-234:29
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node7
+      ref_id: '29'
+      description: An APRA-regulated entity must escalate and report to the Board
+        or senior management any testing results that identify information security
+        control deficiencies that cannot be remediated in a timely manner.
+    - urn: urn:intuitem:risk:req_node:cps-234:30
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node7
+      ref_id: '30'
+      description: An APRA-regulated entity must ensure that testing is conducted
+        by appropriately skilled and functionally independent specialists.
+    - urn: urn:intuitem:risk:req_node:cps-234:31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node7
+      ref_id: '31'
+      description: An APRA-regulated entity must review the sufficiency of the testing
+        program at least annually or when there is a material change to information
+        assets or the business environment.
+    - urn: urn:intuitem:risk:req_node:cps-234:node8
+      assessable: false
+      depth: 1
+      name: Internal audit
+    - urn: urn:intuitem:risk:req_node:cps-234:32
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node8
+      ref_id: '32'
+      description: An APRA-regulated entity's internal audit activities must include
+        a review of the design and operating effectiveness of information security
+        controls, including those maintained by related parties and third parties
+        (information security control assurance).
+    - urn: urn:intuitem:risk:req_node:cps-234:33
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node8
+      ref_id: '33'
+      description: An APRA-regulated entity must ensure that the information security
+        control assurance is provided by personnel appropriately skilled in providing
+        such assurance.
+    - urn: urn:intuitem:risk:req_node:cps-234:34
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node8
+      ref_id: '34'
+      description: 'An APRA-regulated entity''s internal audit function must assess
+        the information security control assurance provided by a related party or
+        third party where:
+
+        (a) an information security incident affecting the information assets has
+        the potential to materially affect, financially or non-financially, the entity
+        or the interests of depositors, policyholders, beneficiaries or other customers;
+        and
+
+        (b) internal audit intends to rely on the information security control assurance
+        provided by the related party or third party.'
+    - urn: urn:intuitem:risk:req_node:cps-234:node9
+      assessable: false
+      depth: 1
+      name: APRA notification
+    - urn: urn:intuitem:risk:req_node:cps-234:35
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node9
+      ref_id: '35'
+      description: 'An APRA-regulated entity must notify APRA as soon as possible
+        and, in any case, no later than 72 hours, after becoming aware of an information
+        security incident that:
+
+        (a) materially affected, or had the potential to materially affect, financially
+        or non-financially, the entity or the interests of depositors, policyholders,
+        beneficiaries or other customers; or
+
+        (b) has been notified to other regulators, either in Australia or other jurisdictions.'
+    - urn: urn:intuitem:risk:req_node:cps-234:36
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cps-234:node9
+      ref_id: '36'
+      description: An APRA-regulated entity must notify APRA as soon as possible and,
+        in any case, no later than 10 business days, after it becomes aware of a material
+        information security control weakness which the entity expects it will not
+        be able to remediate in a timely manner.

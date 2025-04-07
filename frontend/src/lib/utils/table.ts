@@ -455,20 +455,10 @@ export const listViewFields = {
 		}
 	},
 	vulnerabilities: {
-		head: [
-			'ref_id',
-			'name',
-			'description',
-			'status',
-			'severity',
-			'applied_controls',
-			'folder',
-			'labels'
-		],
+		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
 		body: [
 			'ref_id',
 			'name',
-			'description',
 			'status',
 			'severity',
 			'applied_controls',
@@ -698,10 +688,11 @@ export const listViewFields = {
 		breadcrumb_link_disabled: true
 	},
 	evidences: {
-		head: ['name', 'file', 'size', 'description', 'folder'],
-		body: ['name', 'attachment', 'size', 'description', 'folder'],
+		head: ['name', 'file', 'size', 'description', 'folder', 'labels'],
+		body: ['name', 'attachment', 'size', 'description', 'folder', 'filtering_labels'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	requirements: {
@@ -895,8 +886,16 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'labels'],
-		body: ['ref_id', 'name', 'description', 'findings_assessment', 'status', 'filtering_labels'],
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'severity', 'status', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'findings_assessment',
+			'severity',
+			'status',
+			'filtering_labels'
+		],
 		filters: { filtering_labels: LABELS_FILTER }
 	},
 	incidents: {

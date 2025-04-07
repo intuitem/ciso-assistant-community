@@ -158,8 +158,10 @@ class RiskMatrixImportExportSerializer(BaseModelSerializer):
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    severity = serializers.CharField(source="get_severity_display")
 
     class Meta:
         model = Vulnerability
@@ -917,6 +919,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = Evidence
@@ -1244,6 +1247,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
+    severity = serializers.CharField(source="get_severity_display")
 
     class Meta:
         model = Finding
