@@ -3,7 +3,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import Score from '../Score.svelte';
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -36,4 +36,15 @@
 	fullDonut
 	min_score={1}
 	max_score={4}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
+	field="assets"
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
 />

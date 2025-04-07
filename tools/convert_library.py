@@ -338,6 +338,78 @@ def get_color(wb, cell):
     return "#" + color
 
 
+def build_reference_control_ids_set():
+    """
+    Builds a set of all reference control IDs from the reference_controls tab.
+    This will be used to validate references to controls in the requirements tab.
+    """
+    control_ids = set()
+
+    # Find the reference_controls tab name
+    ref_control_tab = None
+    for tab_name, tab_type in library_vars_dict["tab"].items():
+        if tab_type == "reference_controls":
+            ref_control_tab = tab_name
+            break
+
+    if not ref_control_tab:
+        print(
+            "WARNING: No reference_controls tab found. Cannot validate control references."
+        )
+        return control_ids
+
+    # Process the reference_controls tab to extract all IDs
+    is_header = True
+    for row in dataframe[ref_control_tab]:
+        if is_header:
+            header = read_header(row)
+            is_header = False
+            if "ref_id" not in header:
+                print("WARNING: No ref_id column found in reference_controls tab.")
+                return control_ids
+        elif any(c.value for c in row):
+            ref_id = (
+                str(row[header["ref_id"]].value).strip()
+                if row[header["ref_id"]].value
+                else None
+            )
+            if ref_id:
+                control_ids.add(ref_id.lower())
+
+    return control_ids
+
+
+def validate_control_references(requirement_nodes, control_ids_set):
+    """
+    Validate that all referenced controls in requirements exist in the control set.
+
+    Args:
+        requirement_nodes: List of processed requirement nodes
+        control_ids_set: Set of valid reference control IDs
+    """
+    missing_controls = set()
+    for node in requirement_nodes:
+        if "reference_controls" in node:
+            for control_urn in node["reference_controls"]:
+                # Extract the ID part from the URN
+                # Format is typically like "urn:base_urn:control_id"
+                control_id = control_urn.split(":")[-1]
+
+                if control_id not in control_ids_set:
+                    missing_controls.add(control_id)
+                    print(
+                        f"WARNING: Reference control '{control_id}' referenced in requirement '{node.get('ref_id', node['urn'])}' does not exist."
+                    )
+
+    if missing_controls:
+        print(
+            f"\nFound {len(missing_controls)} missing controls: {', '.join(missing_controls)}"
+        )
+        print("Please fix these references before uploading your file.")
+    else:
+        print("All reference control references are valid.")
+
+
 def get_question(tab):
     print("processing answers")
     found_answers = {}
@@ -491,7 +563,7 @@ for tab in dataframe:
                     else:
                         p = parent_for_depth[depth]
                         c = count_for_depth[depth]
-                        urn = f"{p}:{c}"
+                        urn = f"{p}:{c}" if p else f"{root_nodes_urn}:node{c}"
                         count_for_depth[depth] += 1
                 if urn in urn_unicity_checker:
                     print("URN duplicate:", urn)
@@ -921,6 +993,11 @@ if risk_matrix:
     translations = get_translations_content(library_vars, "risk_matrix")
     if translations:
         library["objects"]["risk_matrix"][0]["translations"] = translations
+
+if has_reference_controls and has_framework:
+    print("\nValidating reference control references...")
+    control_ids_set = build_reference_control_ids_set()
+    validate_control_references(requirement_nodes, control_ids_set)
 
 print("generating", output_file_name)
 with open(output_file_name, "w", encoding="utf8") as file:

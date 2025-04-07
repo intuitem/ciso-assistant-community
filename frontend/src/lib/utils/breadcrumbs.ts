@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import { goto as _goto } from '$app/navigation';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 export interface Breadcrumb {
 	label: string;

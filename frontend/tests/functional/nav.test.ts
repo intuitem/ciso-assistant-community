@@ -1,7 +1,7 @@
 import { safeTranslate } from '$lib/utils/i18n';
-import { availableLanguageTags, setLanguageTag } from '../../src/paraglide/runtime.js';
+import { locales, setLocale } from '../../src/paraglide/runtime.js';
 import { expect, setHttpResponsesListener, test } from '../utils/test-utils.js';
-import * as m from '$paraglide/messages.js';
+import { m } from '$paraglide/messages';
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
 	test.slow();
@@ -59,18 +59,18 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 
 	await test.step('translation panel is working properly', async () => {
 		await analyticsPage.goto();
-		const locales = [...availableLanguageTags];
-		const index = locales.indexOf('en');
+		const locales_ = [...locales];
+		const index = locales_.indexOf('en');
 		if (index !== -1) {
-			locales.splice(index, 1);
-			locales.push('en');
+			locales_.splice(index, 1);
+			locales_.push('en');
 		}
-		for (const languageTag of locales) {
+		for (const getLocale of locales_) {
 			await sideBar.moreButton.click();
 			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 			await expect(sideBar.languageSelect).toBeVisible();
-			setLanguageTag(languageTag);
-			await sideBar.languageSelect.selectOption(languageTag);
+			setLocale(getLocale);
+			await sideBar.languageSelect.selectOption(getLocale);
 			await logedPage.hasTitle(m.analytics());
 		}
 	});

@@ -8,8 +8,8 @@
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
+	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
 	import { ProgressRadial, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
@@ -150,7 +150,7 @@
 				<p class="text-md leading-5 text-gray-700">
 					<strong>{m.publicationDate()}</strong>: {formatDateOrDateTime(
 						data.library.publication_date,
-						languageTag()
+						getLocale()
 					)}
 				</p>
 			{/if}

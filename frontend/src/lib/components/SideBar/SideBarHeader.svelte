@@ -3,7 +3,7 @@
 </script>
 
 <header>
-	<div class="flex flex-row space-x-4 border-b pb-3 items-center justify-center">
+	<a href="/analytics" class="flex flex-col space-x-4 border-b pb-3 items-center justify-center">
 		<Logo />
-	</div>
+	</a>
 </header>

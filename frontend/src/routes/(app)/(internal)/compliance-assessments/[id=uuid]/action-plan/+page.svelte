@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 
 	export let data;
@@ -20,7 +20,7 @@
 		'requirements-assessments': 'matchingRequirements'
 	};
 
-	const AppliedControls: TableSource = {
+	const appliedControls: TableSource = {
 		head: appliedControlsHead,
 		body: [],
 		meta: []
@@ -65,11 +65,10 @@
 	<div class="">
 		<ModelTable
 			URLModel="applied-controls"
-			source={AppliedControls}
+			source={appliedControls}
 			search={true}
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
-			tags={false}
 			baseEndpoint="/compliance-assessments/{$page.params.id}/action-plan"
 			fields={[
 				'name',
@@ -81,7 +80,7 @@
 				'expiry_date',
 				'effort',
 				'cost',
-				'requirement-assessments'
+				'requirement_assessments'
 			]}
 		/>
 	</div>

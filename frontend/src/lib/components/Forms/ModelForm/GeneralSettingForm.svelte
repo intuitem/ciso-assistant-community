@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import NumberField from '../NumberField.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';

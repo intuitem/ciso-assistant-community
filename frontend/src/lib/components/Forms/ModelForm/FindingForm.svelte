@@ -4,7 +4,7 @@
 	import Select from '../Select.svelte';
 	import { defaults, type SuperForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud';
@@ -94,13 +94,7 @@
 />
 <Select
 	{form}
-	options={[
-		{ label: '--', value: -1 },
-		{ label: m.low(), value: 0 },
-		{ label: m.medium(), value: 1 },
-		{ label: m.high(), value: 2 },
-		{ label: m.critical(), value: 3 }
-	]}
+	options={model.selectOptions['severity']}
 	field="severity"
 	label={m.severity()}
 	cacheLock={cacheLocks['severity']}
