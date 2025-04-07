@@ -3,19 +3,19 @@
 from django.db import migrations
 import re
 
+
 def fix_privacy_prefix(apps, schema_editor):
     # Processing model
     Processing = apps.get_model("privacy", "Processing")
     for obj in Processing.objects.all():
-        if not re.match(r"^privacy_.*", obj.legal_basis) :
+        if not re.match(r"^privacy_.*", obj.legal_basis):
             obj.legal_basis = "privacy_" + obj.legal_basis
             obj.save()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('privacy', '0003_migrate_privacy_prefixes'),
+        ("privacy", "0003_migrate_privacy_prefixes"),
     ]
 
     operations = [
