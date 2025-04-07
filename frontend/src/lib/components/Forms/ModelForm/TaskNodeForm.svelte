@@ -30,6 +30,23 @@
 <TextField
 	type="date"
 	{form}
+	field="task_date"
+	label={m.date()}
+	cacheLock={cacheLocks['task_date']}
+	bind:cachedValue={formDataCache['task_date']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="eta_or_completion_date"
+	label={m.completionDate()}
+	helpText={m.completionDateHelpText()}
+	cacheLock={cacheLocks['eta_or_completion_date']}
+	bind:cachedValue={formDataCache['eta_or_completion_date']}
+/>
+<TextField
+	type="date"
+	{form}
 	field="due_date"
 	label={m.dueDate()}
 	cacheLock={cacheLocks['due_date']}
@@ -40,10 +57,10 @@
 	multiple
 	optionsEndpoint="users?is_third_party=false"
 	optionsLabelField="email"
-	field="owner"
-	cacheLock={cacheLocks['owner']}
-	bind:cachedValue={formDataCache['owner']}
-	label={m.owner()}
+	field="assigned_to"
+	cacheLock={cacheLocks['assigned_to']}
+	bind:cachedValue={formDataCache['assigned_to']}
+	label={m.assignedTo()}
 />
 <Checkbox {form} field="is_template" label={m.isRecurrent()} helpText={m.isRecurrentHelpText()} />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
@@ -101,15 +118,6 @@
 		label={m.riskAssessments()}
 	/>
 </Dropdown>
-<TextField
-	type="date"
-	{form}
-	field="completion_date"
-	label={m.completionDate()}
-	helpText={m.completionDateHelpText()}
-	cacheLock={cacheLocks['completion_date']}
-	bind:cachedValue={formDataCache['completion_date']}
-/>
 <TextArea
 	{form}
 	field="observation"

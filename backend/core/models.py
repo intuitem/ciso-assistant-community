@@ -4211,11 +4211,9 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
         null=True, blank=True, verbose_name="ETA or Completion date"
     )
 
-    owner = models.ForeignKey(
+    assigned_to = models.ManyToManyField(
         User,
-        verbose_name="Owner",
-        on_delete=models.SET_NULL,
-        null=True,
+        verbose_name="Assigned to",
         blank=True,
     )
 
