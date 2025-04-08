@@ -88,7 +88,7 @@ except (KeyError, TypeError):
     )
 
 
-def check_auth():
+def get_access_token():
     if Path(".tmp.yaml").exists():
         with open(".tmp.yaml", "r") as yfile:
             auth_data = yaml.safe_load(yfile)

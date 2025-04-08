@@ -7,7 +7,7 @@ from s3fs import S3FileSystem
 
 import requests
 
-from settings import API_URL, S3_URL, VERIFY_CERTIFICATE, check_auth
+from settings import API_URL, S3_URL, VERIFY_CERTIFICATE, get_access_token
 
 from loguru import logger
 
@@ -70,7 +70,7 @@ def get_object_ids(
         selector,
         selector_mapping=selector_mapping,
         endpoint=search_endpoint,
-        token=str(check_auth()),
+        token=str(get_access_token()),
         verify_certificate=VERIFY_CERTIFICATE,
     )
 
@@ -95,7 +95,7 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": f"Token {check_auth()}",
+            "Authorization": f"Token {get_access_token()}",
         },
         verify=VERIFY_CERTIFICATE,
     )
@@ -244,7 +244,7 @@ def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str
         response = requests.post(
             objects_endpoint,
             data={"name": values.get("name", name)},
-            headers={"Authorization": f"Token {check_auth()}"},
+            headers={"Authorization": f"Token {get_access_token()}"},
             verify=VERIFY_CERTIFICATE,
         )
         if not response.ok:
@@ -320,7 +320,8 @@ def update_applied_controls_with_evidence(
         for control in applied_controls:
             control_endpoint = f"{API_URL}/applied-controls/{control}/"
             get_response = requests.get(
-                control_endpoint, headers={"Authorization": f"Token {check_auth()}"}
+                control_endpoint,
+                headers={"Authorization": f"Token {get_access_token()}"},
             )
             control_data = get_response.json()
             evidences = control_data.get("evidences", [])
@@ -332,7 +333,7 @@ def update_applied_controls_with_evidence(
             update_response = requests.patch(
                 control_endpoint,
                 json={"evidences": [e.get("id") for e in evidences] + [evidence_id]},
-                headers={"Authorization": f"Token {check_auth()}"},
+                headers={"Authorization": f"Token {get_access_token()}"},
             )
             if not update_response.ok:
                 logger.error(
