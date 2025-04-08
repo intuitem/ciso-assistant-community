@@ -18,3 +18,4 @@ caddy_data/
 charts/custom-values.yaml
 **/charts/*/charts
 *.bak
+charts/ciso-assistant-next/custom.yaml
