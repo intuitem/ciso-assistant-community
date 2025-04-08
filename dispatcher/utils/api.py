@@ -1,12 +1,45 @@
-import json
-
-from loguru import logger
 import requests
-from settings import API_URL, TOKEN, VERIFY_CERTIFICATE
+from settings import API_URL, check_auth
+
+session = requests.Session()
+
+
+def update_session_token():
+    session.headers.update({"Authorization": f"Bearer {check_auth()}"})
+
+
+def get(url, **kwargs):
+    response = session.get(url, **kwargs)
+    response.raise_for_status()
+    return response
+
+
+def post(url, **kwargs):
+    response = session.post(url, **kwargs)
+    response.raise_for_status()
+    return response
+
+
+def patch(url, **kwargs):
+    response = session.patch(url, **kwargs)
+    response.raise_for_status()
+    return response
+
+
+def put(url, **kwargs):
+    response = session.put(url, **kwargs)
+    response.raise_for_status()
+    return response
+
+
+def delete(url, **kwargs):
+    response = session.delete(url, **kwargs)
+    response.raise_for_status()
+    return response
 
 
 def get_api_headers(content_type: str = "", extra_headers: dict = {}) -> dict:
-    headers = {"Authorization": f"Token {TOKEN}"}
+    headers = {"Authorization": f"Token {check_auth()}"}
     if content_type:
         headers["Content-Type"] = content_type
     if extra_headers:

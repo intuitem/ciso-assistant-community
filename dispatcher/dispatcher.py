@@ -17,10 +17,10 @@ from settings import (
     USER_EMAIL,
     USER_PASSWORD,
     ERRORS_TOPIC,
-    TOKEN,
-    check_auth,
     init_config,
 )
+
+import utils.api as api
 
 from loguru import logger
 
@@ -67,6 +67,7 @@ def _auth(email, password):
         with open(".tmp.yaml", "w") as yfile:
             yaml.safe_dump(res.json(), yfile)
             logger.info("Looks good, you can move to other commands.")
+        api.update_session_token()
     else:
         logger.error(
             "Check your credentials again. You can set them on the config file or on the command line.",

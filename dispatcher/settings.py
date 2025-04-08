@@ -95,6 +95,3 @@ def check_auth():
             return auth_data["token"]
     else:
         click.echo("Could not find authentication data.", err=True)
-
-
-TOKEN = check_auth()
