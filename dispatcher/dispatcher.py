@@ -66,7 +66,7 @@ def _auth(email, password):
     if res.status_code == 200:
         with open(".tmp.yaml", "w") as yfile:
             yaml.safe_dump(res.json(), yfile)
-            logger.info("Looks good, you can move to other commands.")
+            logger.success("Successfully authenticated. Token saved to .tmp.yaml")
         api.update_session_token()
     else:
         logger.error(
@@ -107,15 +107,20 @@ def consume():
                 message = json.loads(msg.value.decode("utf-8"))
             except Exception as e:
                 logger.error(f"Error decoding message: {e}")
-            else:
-                if message.get("message_type") not in message_registry.REGISTRY:
-                    logger.error(
-                        "Message type not supported. Skipping. Check the message registry for supported events.",
-                        message_type=message.get("message_type"),
-                        supported_message_types=list(message_registry.REGISTRY.keys()),
-                    )
-                    continue
-                logger.info(f"Processing event: {message.get('message_type')}")
+                continue
+
+            if message.get("message_type") not in message_registry.REGISTRY:
+                logger.error(
+                    "Message type not supported. Skipping. Check the message registry for supported events.",
+                    message_type=message.get("message_type"),
+                    supported_message_types=list(message_registry.REGISTRY.keys()),
+                )
+                continue
+
+            logger.info(f"Processing event: {message.get('message_type')}")
+
+            # Wrap the processing in a loop that allows for retries.
+            while True:
                 try:
                     message_registry.REGISTRY[message.get("message_type")](message)
                 except requests.exceptions.RequestException as e:
@@ -125,23 +130,23 @@ def consume():
                             f"Request failed with status code {e.response.status_code} and message: {e.response.text}"
                         )
                         if e.response.status_code == 401:
-                            if AUTO_RENEW_SESSION:
-                                try:
-                                    logger.debug(
-                                        "Automatic session renewal enabled, attempting silent reauthentication."
-                                    )
-                                    _auth(USER_EMAIL, USER_PASSWORD)
-                                    continue
-                                except Exception as e:
-                                    logger.error(
-                                        "Silent reauthentication failed. Please run the `auth` command.",
-                                        e,
-                                    )
-                                    raise
-                            logger.error(
-                                "Session expired. Please run the `auth` command."
-                            )
-                            raise
+                            if not AUTO_RENEW_SESSION:
+                                logger.error(
+                                    "Session expired. Please run the `auth` command."
+                                )
+                                raise
+                            try:
+                                logger.debug(
+                                    "Automatic session renewal enabled, attempting silent reauthentication."
+                                )
+                                _auth(USER_EMAIL, USER_PASSWORD)
+                                continue
+                            except Exception as e:
+                                logger.error(
+                                    "Silent reauthentication failed. Please run the `auth` command.",
+                                    e,
+                                )
+                                raise
 
                 except Exception as e:
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
@@ -152,6 +157,10 @@ def consume():
                             {"message": message, "error": str(e)}
                         ).encode(),
                     )
+                    break  # break out of retry loop; we don't want to retry on non-request errors
+                else:
+                    # Processing succeeded; break out of the retry loop.
+                    break
 
     except UnsupportedCodecError as e:
         logger.exception("KO", e)
