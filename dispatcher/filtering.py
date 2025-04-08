@@ -49,21 +49,20 @@ def process_selector(
     results_list = []
     next_url = endpoint
     while next_url:
-        response = requests.get(
-            next_url,
-            params=query_params if next_url == endpoint else {},
-            headers=headers,
-            verify=verify_certificate,
-        )
-        if not response.ok:
+        try:
+            response = requests.get(
+                next_url,
+                params=query_params if next_url == endpoint else {},
+                headers=headers,
+                verify=verify_certificate,
+            )
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
             logger.error(
                 "Search failed",
-                status_code=response.status_code,
-                response=response.text,
+                response=e.response,
             )
-            raise Exception(
-                f"Search API call failed with status {response.status_code}: {response.text}"
-            )
+            raise
 
         data = response.json()
         if isinstance(data, dict) and "results" in data:

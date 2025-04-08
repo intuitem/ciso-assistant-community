@@ -16,6 +16,7 @@ GLOBAL_FOLDER_ID = os.getenv("GLOBAL_FOLDER_ID", "")
 USER_EMAIL = os.getenv("USER_EMAIL", "user@company.org")
 USER_PASSWORD = os.getenv("USER_PASSWORD", "")
 TOKEN = os.getenv("TOKEN", "")
+AUTO_RENEW_SESSION = os.getenv("AUTO_RENEW_SESSION", "False") == "True"
 
 ERRORS_TOPIC = os.getenv("ERRORS_TOPIC", "errors")
 

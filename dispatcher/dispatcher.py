@@ -11,11 +11,14 @@ from kafka.errors import UnsupportedCodecError
 from messages import message_registry
 from settings import (
     API_URL,
+    AUTO_RENEW_SESSION,
     DEBUG,
     VERIFY_CERTIFICATE,
     USER_EMAIL,
     USER_PASSWORD,
     ERRORS_TOPIC,
+    TOKEN,
+    check_auth,
     init_config,
 )
 
@@ -45,10 +48,7 @@ def cli():
     pass
 
 
-@click.command()
-@click.option("--email", required=False)
-@click.option("--password", required=False)
-def auth(email, password):
+def _auth(email, password):
     """Authenticate to get a temp token (config file or params). Pass the email and password or set them on the config file"""
     url = f"{API_URL}/iam/login/"
     if email and password:
@@ -72,6 +72,14 @@ def auth(email, password):
             "Check your credentials again. You can set them on the config file or on the command line.",
         )
         logger.error(res.json())
+
+
+@click.command()
+@click.option("--email", required=False)
+@click.option("--password", required=False)
+def auth(email: str, password: str):
+    """Authenticate to get a temp token (config file or params). Pass the email and password or set them on the config file"""
+    return _auth(email, password)
 
 
 @click.command()
@@ -109,6 +117,31 @@ def consume():
                 logger.info(f"Processing event: {message.get('message_type')}")
                 try:
                     message_registry.REGISTRY[message.get("message_type")](message)
+                except requests.exceptions.RequestException as e:
+                    logger.error("Request failed", response=e.response)
+                    if e.response is not None:
+                        logger.error(
+                            f"Request failed with status code {e.response.status_code} and message: {e.response.text}"
+                        )
+                        if e.response.status_code == 401:
+                            if AUTO_RENEW_SESSION:
+                                try:
+                                    logger.debug(
+                                        "Automatic session renewal enabled, attempting silent reauthentication."
+                                    )
+                                    _auth(USER_EMAIL, USER_PASSWORD)
+                                    continue
+                                except Exception as e:
+                                    logger.error(
+                                        "Silent reauthentication failed. Please run the `auth` command.",
+                                        e,
+                                    )
+                                    raise
+                            logger.error(
+                                "Session expired. Please run the `auth` command."
+                            )
+                            raise
+
                 except Exception as e:
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
                     logger.exception("Message could not be consumed")
