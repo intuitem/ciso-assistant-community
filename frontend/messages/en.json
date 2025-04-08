@@ -1424,5 +1424,8 @@
 	"isRecurrentHelpText": "Check if the task is recurrent",
 	"youCanSetPAsswordHere": "You can set your password here.",
 	"date": "Date",
-	"assignedTo": "Assigned to"
+	"assignedTo": "Assigned to",
+	"interval": "Interval",
+	"intervalHelpText": "The interval between each frequencency",
+	"frequency": "Frequency"
 }

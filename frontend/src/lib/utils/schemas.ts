@@ -644,7 +644,10 @@ export const TaskNodeSchema = z.object({
 	status: z.string().default('pending'),
 	assigned_to: z.string().optional().array().optional(),
 	ref_id: z.string().optional(),
-	start_date: z.string().optional(),
+	task_date: z
+		.string()
+		.default(() => new Date().toISOString())
+		.optional(),
 	due_date: z.string().optional(),
 	eta_or_completion_date: z.string().optional(),
 	observation: z.string().optional(),
@@ -653,7 +656,17 @@ export const TaskNodeSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
-	risk_assessments: z.string().uuid().optional().array().optional()
+	risk_assessments: z.string().uuid().optional().array().optional(),
+	schedule: z
+		.object({
+			interval: z.number().min(1).positive().default(1).optional(),
+			frequency: z.string().optional(),
+			weeks_of_month: z.number().min(-1).max(3).array().optional(),
+			days_of_week: z.number().min(0).max(6).array().optional(),
+			months_of_year: z.number().min(1).max(12).array().optional(),
+			end_date: z.string().optional()
+		})
+		.optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

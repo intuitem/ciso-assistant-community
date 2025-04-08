@@ -4162,7 +4162,7 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
                 "items": {"type": "integer", "minimum": 0, "maximum": 6},
                 "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
             },
-            "week_of_month": {
+            "weeks_of_month": {
                 "type": "array",
                 "items": {
                     "type": "integer",
@@ -4176,7 +4176,7 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
                 "items": {"type": "integer", "minimum": 1, "maximum": 12},
                 "description": "Optional. Months of the year (1=January, 12=December)",
             },
-            "endDate": {
+            "end_date": {
                 "type": ["string", "null"],
                 "format": "date",
                 "description": "Optional. Date when recurrence ends.",
@@ -4197,7 +4197,7 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
                 "description": "Optional. JSON object for future exceptions handling.",
             },
         },
-        "required": ["frequency"],
+        "required": ["interval", "frequency"],
         "additionalProperties": False,
     }
 
