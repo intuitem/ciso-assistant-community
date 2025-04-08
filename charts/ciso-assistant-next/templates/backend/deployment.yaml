@@ -103,7 +103,7 @@ spec:
           - name: EMAIL_PORT
             value: {{ .Values.backend.config.smtp.primary.port | quote }}
           - name: EMAIL_USE_TLS
-            value: {{ .Values.backend.config.smtp.primary.useTls | quote }}
+            value: {{ ternary "True" "False" .Values.backend.config.smtp.primary.useTls | quote }}
           {{- if .Values.backend.config.smtp.primary.username }}
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.primary.username | quote }}
@@ -227,7 +227,7 @@ spec:
           - name: EMAIL_PORT
             value: {{ .Values.backend.config.smtp.primary.port | quote }}
           - name: EMAIL_USE_TLS
-            value: {{ .Values.backend.config.smtp.primary.useTls | quote }}
+            value: {{ ternary "True" "False" .Values.backend.config.smtp.primary.useTls | quote }}
           {{- if .Values.backend.config.smtp.primary.username }}
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.primary.username | quote }}
