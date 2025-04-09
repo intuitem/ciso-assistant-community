@@ -39,16 +39,24 @@ else
   # Prompt for superuser credentials:
   read -p "Enter superuser email: " SUPERUSER_EMAIL
 
-  # Prompt for password and confirmation
-  read -sp "Enter superuser password: " SUPERUSER_PASSWORD
-  echo
-  read -sp "Confirm superuser password: " SUPERUSER_PASSWORD_CONFIRM
-  echo
-
-  if [ "$SUPERUSER_PASSWORD" != "$SUPERUSER_PASSWORD_CONFIRM" ]; then
-    echo "Passwords do not match. Aborting."
-    exit 1
-  fi
+  # Allow up to 3 attempts for matching passwords
+  max_attempts=3
+  attempt=0
+  while true; do
+    read -sp "Enter superuser password: " SUPERUSER_PASSWORD
+    echo
+    read -sp "Confirm superuser password: " SUPERUSER_PASSWORD_CONFIRM
+    echo
+    if [ "$SUPERUSER_PASSWORD" == "$SUPERUSER_PASSWORD_CONFIRM" ]; then
+      break
+    fi
+    attempt=$((attempt + 1))
+    if [ $attempt -ge $max_attempts ]; then
+      echo "Passwords did not match after ${max_attempts} attempts. Aborting."
+      exit 1
+    fi
+    echo "Passwords do not match. Please try again. (Attempt $((attempt + 1)) of ${max_attempts})"
+  done
 
   # Pass the credentials into the container.
   docker compose -f "${DOCKER_COMPOSE_FILE}" exec -e DJANGO_SUPERUSER_EMAIL="${SUPERUSER_EMAIL}" -e DJANGO_SUPERUSER_PASSWORD="${SUPERUSER_PASSWORD}" backend \
