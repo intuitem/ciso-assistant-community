@@ -9,25 +9,18 @@ from kafka import KafkaConsumer, KafkaProducer
 from kafka.errors import UnsupportedCodecError
 
 from messages import message_registry
-from settings import (
-    API_URL,
-    AUTO_RENEW_SESSION,
-    DEBUG,
-    VERIFY_CERTIFICATE,
-    USER_EMAIL,
-    USER_PASSWORD,
-    ERRORS_TOPIC,
-    init_config,
-)
+import settings
+from settings import init_config
 
 import utils.api as api
 
 from loguru import logger
 
+
 log_message_format = (
     "<green>{time}</green> | <level>{level}</level> | <level>{message}</level>"
 )
-if DEBUG:
+if settings.DEBUG:
     log_message_format += " | <magenta>{extra}</magenta>"
 
 logger.remove(0)
@@ -50,19 +43,21 @@ def cli():
 
 def _auth(email, password):
     """Authenticate to get a temp token (config file or params). Pass the email and password or set them on the config file"""
-    url = f"{API_URL}/iam/login/"
+    url = f"{settings.API_URL}/iam/login/"
     if email and password:
         data = {"username": email, "password": password}
     else:
         logger.info("trying credentials from the config file")
-        if USER_EMAIL and USER_PASSWORD:
-            data = {"username": USER_EMAIL, "password": USER_PASSWORD}
+        if settings.USER_EMAIL and settings.USER_PASSWORD:
+            data = {"username": settings.USER_EMAIL, "password": settings.USER_PASSWORD}
         else:
             logger.error("Could not find any usable credentials.")
             sys.exit(1)
     headers = {"accept": "application/json", "Content-Type": "application/json"}
 
-    res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.post(
+        url, json=data, headers=headers, verify=settings.VERIFY_CERTIFICATE
+    )
     if res.status_code == 200:
         with open(".tmp.yaml", "w") as yfile:
             yaml.safe_dump(res.json(), yfile)
@@ -130,7 +125,7 @@ def consume():
                             f"Request failed with status code {e.response.status_code} and message: {e.response.text}"
                         )
                         if e.response.status_code == 401:
-                            if not AUTO_RENEW_SESSION:
+                            if not settings.AUTO_RENEW_SESSION:
                                 logger.error(
                                     "Session expired. Please run the `auth` command."
                                 )
@@ -139,7 +134,7 @@ def consume():
                                 logger.debug(
                                     "Automatic session renewal enabled, attempting silent reauthentication."
                                 )
-                                _auth(USER_EMAIL, USER_PASSWORD)
+                                _auth(settings.USER_EMAIL, settings.USER_PASSWORD)
                                 continue
                             except Exception as e:
                                 logger.error(
@@ -152,7 +147,7 @@ def consume():
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
                     logger.exception("Message could not be consumed")
                     error_producer.send(
-                        ERRORS_TOPIC,
+                        settings.ERRORS_TOPIC,
                         value=json.dumps(
                             {"message": message, "error": str(e)}
                         ).encode(),
