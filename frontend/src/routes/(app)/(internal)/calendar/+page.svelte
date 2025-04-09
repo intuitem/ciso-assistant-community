@@ -24,7 +24,7 @@
 		});
 	}
 	for (let i = 0; i < task_nodes.length; i++) {
-		let date = new Date(task_nodes[i].due_date);
+		let date = new Date(task_nodes[i].task_date);
 		info.push({
 			label: 'Task: ' + task_nodes[i].name,
 			date: date,

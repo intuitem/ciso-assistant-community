@@ -11,6 +11,8 @@ import time
 from django.db.models import F, Count, Avg, Q, ExpressionWrapper, FloatField
 from collections import defaultdict
 from django_filters.filterset import filterset_factory
+import dateutil.relativedelta as rd
+import calendar
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -5029,3 +5031,278 @@ class TaskNodeViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
+    
+    @action(detail=True, name="Get future tasks")
+    def future(self, request, pk):
+        # Get query parameters
+        task_obj = self.get_object()
+        start_date = task_obj.task_date
+        end_date = task_obj.schedule.get("end_date")
+        
+        if not start_date or not end_date:
+            return Response(
+                {"error": "Both start_date and end_date parameters are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            start_date = datetime.strptime(str(start_date), '%Y-%m-%d').date()
+            end_date = datetime.strptime(str(end_date), '%Y-%m-%d').date()
+        except ValueError:
+            return Response(
+                {"error": "Invalid date format. Use YYYY-MM-DD"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # 1. Get all task templates
+        task_templates = TaskNode.objects.filter(is_template=True, enabled=True)
+        
+        # 2. Generate occurrences for each template within date range
+        future_tasks = []
+        for template in task_templates:
+            tasks = self._generate_occurrences(template, start_date, end_date)
+            future_tasks.extend(tasks)
+            
+        # 3. Get existing tasks in the date range
+        existing_tasks = TaskNode.objects.filter(
+            Q(is_template=False) & 
+            Q(enabled=True) &
+            (
+                (Q(task_date__gte=start_date) & Q(task_date__lte=end_date)) |
+                (Q(due_date__gte=start_date) & Q(due_date__lte=end_date))
+            )
+        )
+        
+        # 4. Serialize existing tasks
+        existing_tasks_data = TaskNodeReadSerializer(existing_tasks, many=True).data
+        
+        # 5. Combine data
+        all_tasks = existing_tasks_data + future_tasks
+        
+        return Response(all_tasks)
+
+    def _generate_occurrences(self, template, start_date, end_date):
+        """
+        Generates future occurrences for a task template without storing them in the database.
+        Returns a list of dictionaries representing future tasks.
+        """
+        occurrences = []
+        
+        if not template.schedule:
+            return occurrences
+            
+        # Determine start date
+        base_date = template.task_date or datetime.now().date()
+        
+        # If base date is in the future and within our range, it's our first occurrence
+        if start_date <= base_date <= end_date:
+            occurrences.append(self._create_task_dict(template, base_date, 0))
+        
+        # Get recurrence settings
+        end_recurrence_date = template.schedule.get('end_date')
+        max_occurrences = template.schedule.get('occurrences')
+        
+        if end_recurrence_date:
+            end_recurrence_date = datetime.strptime(end_recurrence_date, '%Y-%m-%d').date()
+            if end_recurrence_date < start_date:
+                return occurrences  # Recurrence ended before our range
+        
+        # Find next occurrence after base_date that's >= start_date
+        current_date = base_date
+        occurrence_count = 0
+        
+        # Advance until we reach the date range
+        while current_date < start_date:
+            current_date = self._calculate_next_date(template, current_date)
+            occurrence_count += 1
+            
+            if not current_date:  # End of recurrence
+                return occurrences
+                
+            if max_occurrences and occurrence_count >= max_occurrences:
+                return occurrences
+        
+        # Now generate occurrences in the range
+        while current_date and current_date <= end_date:
+            # Check if recurrence has ended
+            if end_recurrence_date and current_date > end_recurrence_date:
+                break
+                
+            if max_occurrences and occurrence_count >= max_occurrences:
+                break
+            
+            # Add the occurrence
+            occurrences.append(self._create_task_dict(template, current_date, occurrence_count))
+            
+            # Move to next date
+            current_date = self._calculate_next_date(template, current_date)
+            occurrence_count += 1
+        
+        return occurrences
+
+    def _calculate_next_date(self, template, base_date):
+        """Calculates the date of the next occurrence based on the recurrence schedule."""
+        if not template.schedule:
+            return None
+        
+        frequency = template.schedule.get('frequency')
+        interval = template.schedule.get('interval', 1)
+        
+        if frequency == 'DAILY':
+            return base_date + timedelta(days=interval)
+        elif frequency == 'WEEKLY':
+            days_of_week = template.schedule.get('days_of_week')
+            if days_of_week:
+                return self._find_next_weekday(base_date, days_of_week, interval)
+            else:
+                return base_date + timedelta(weeks=interval)
+        elif frequency == 'MONTHLY':
+            weeks_of_month = template.schedule.get('weeks_of_month')
+            if weeks_of_month:
+                return self._find_next_monthly_week(base_date, weeks_of_month, interval)
+            else:
+                return base_date + rd.relativedelta(months=interval)
+        elif frequency == 'YEARLY':
+            months_of_year = template.schedule.get('months_of_year')
+            if months_of_year:
+                return self._find_next_yearly_month(base_date, months_of_year, interval)
+            else:
+                return base_date + rd.relativedelta(years=interval)
+        else:
+            return None
+
+    def _create_task_dict(self, template, task_date, iteration):
+        """
+        Creates a dictionary representing a future task based on the template.
+        This task is not saved to the database.
+        """
+        # Calculate due date based on application logic
+        due_date = None
+        if template.due_date and template.task_date:
+            # If template has a due date, calculate the delta to apply
+            delta = template.due_date - template.task_date
+            due_date = task_date + delta
+        
+        # Create a dictionary with all necessary properties
+        task_dict = {
+            'id': f"virtual_{template.id}_{iteration}",  # Virtual ID for generated tasks
+            'name': template.name,
+            'description': template.description,
+            'ref_id': template.ref_id,
+            'iteration': iteration,
+            'task_date': task_date.isoformat(),
+            'due_date': due_date.isoformat() if due_date else None,
+            'status': 'pending',
+            'is_virtual': True,  # Indication that this is a virtual task
+            'generator_id': template.id,
+            'is_template': False,
+            'enabled': True,
+        }
+        
+        # Add M2M relationships
+        task_dict['assigned_to'] = [user.id for user in template.assigned_to.all()]
+        task_dict['assets'] = [asset.id for asset in template.assets.all()]
+        task_dict['applied_controls'] = [control.id for control in template.applied_controls.all()]
+        
+        return task_dict
+
+    def _find_next_weekday(self, base_date, days_of_week, interval):
+        """Finds the next valid weekday after base_date."""
+        # Convert days from 0-6 (Sun-Sat) to 0-6 (Mon-Sun) for dateutil
+        # Note: Python uses 0-6 for Mon-Sun, adjust as needed
+        dow_mapping = {0: 6, 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5}  # If 0=Sun in your system
+        
+        # Sort days for easier traversal
+        days = sorted([dow_mapping.get(d, d) for d in days_of_week])
+        
+        # Current weekday (0=Monday, 6=Sunday)
+        current_weekday = base_date.weekday()
+        
+        # Find the next valid day
+        next_day = None
+        for day in days:
+            if day > current_weekday:
+                next_day = day
+                break
+        
+        if next_day is None:
+            # If no day found, take first valid day of next week
+            next_day = days[0]
+            days_to_add = (7 - current_weekday) + next_day
+        else:
+            days_to_add = next_day - current_weekday
+        
+        # Add interval weeks if needed (for weeks > 1)
+        if interval > 1:
+            days_to_add += (interval - 1) * 7
+        
+        return base_date + timedelta(days=days_to_add)
+
+    def _find_next_monthly_week(self, base_date, weeks_of_month, interval):
+        """Finds the next occurrence for a monthly recurrence with specific weeks."""
+        # Calculate the next month
+        next_date = base_date + rd.relativedelta(months=interval)
+        next_month = next_date.month
+        next_year = next_date.year
+        
+        # Find the first day of the next month
+        first_day = date(next_year, next_month, 1)
+        
+        # Sort weeks for easier traversal
+        for week in sorted(weeks_of_month):
+            # Calculate day offset to reach specified week
+            days_to_add = (week - 1) * 7
+            target_date = first_day + timedelta(days=days_to_add)
+            
+            # Check if date is within the next month
+            if target_date.month == next_month:
+                return target_date
+        
+        # If no valid date found, return first day of the month
+        return first_day
+
+    def _find_next_yearly_month(self, base_date, months_of_year, interval):
+        """Finds the next occurrence for a yearly recurrence with specific months."""
+        current_year = base_date.year
+        current_month = base_date.month
+        
+        # Sort months for easier traversal
+        sorted_months = sorted(months_of_year)
+        
+        # Find next month in current year
+        next_month = None
+        for month in sorted_months:
+            if month > current_month:
+                next_month = month
+                next_year = current_year
+                break
+        
+        # If no next month in current year, take first month of next year
+        if next_month is None:
+            next_month = sorted_months[0]
+            next_year = current_year + interval
+        
+        # Calculate the first day of the target month
+        target_date = date(next_year, next_month, 1)
+        
+        # Get additional schedule parameters
+        schedule = self.get_object().schedule
+        weeks_of_month = schedule.get('weeks_of_month')
+        days_of_week = schedule.get('days_of_week')
+        
+        # Adjust day based on schedule parameters
+        if weeks_of_month and days_of_week:
+            # Find day based on week of month and day of week
+            weekday_index = days_of_week[0] if days_of_week else 0
+            week_number = weeks_of_month[0] if weeks_of_month else 1
+            
+            # Calculate days to add to get to the specified week and day
+            first_weekday = target_date.weekday()
+            days_to_add = ((week_number - 1) * 7) + ((weekday_index - first_weekday) % 7)
+            
+            # Return the calculated date
+            return target_date + timedelta(days=days_to_add)
+        else:
+            # Use same day as base_date
+            day = min(base_date.day, calendar.monthrange(next_year, next_month)[1])
+            return date(next_year, next_month, day)
