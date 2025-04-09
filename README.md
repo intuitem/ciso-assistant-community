@@ -278,7 +278,8 @@ You can then reach CISO Assistant using your web browser at [https://localhost:8
 For the following executions, use "docker compose up" directly.
 
 > [!TIP]
-> If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
+> If you want a fresh install, simply delete the `db` volume, where the database is stored. Use `docker volume ls` to find the volume, and `docker volume rm` to delete it.
+
 
 ## Docker-compose on remote
 
@@ -511,6 +512,20 @@ Set DJANGO_DEBUG=False for security reason.
 
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
+
+## Migrating `docker-compose` from Bind Mount to Named Volumes
+
+To simplify Docker usage, we have migrated from **bind mounts** to **named volumes** in our setup.
+
+### **🔹 How to Migrate Your Data**
+Run the following script with the path to your existing data directory:
+```sh
+config/docker-migrate-dir-to-volume.sh <path_to_your_data_directory>
+```
+
+This will create:
+- ciso-assistant-community_db → Used by the backend and Huey.
+- ciso-assistant-community_caddy_data (only if caddy/ exists) → Used by Caddy.
 
 ## Supported languages 🌐
 
