@@ -5033,7 +5033,7 @@ class TaskNodeViewSet(BaseModelViewSet):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
     
     @action(detail=True, name="Get future tasks")
-    def future(self, request, pk):
+    def schedule(self, request, pk):
         # Get query parameters
         task_obj = self.get_object()
         start_date = task_obj.task_date
@@ -5093,10 +5093,7 @@ class TaskNodeViewSet(BaseModelViewSet):
             
         # Determine start date
         base_date = template.task_date or datetime.now().date()
-        
-        # If base date is in the future and within our range, it's our first occurrence
-        if start_date <= base_date <= end_date:
-            occurrences.append(self._create_task_dict(template, base_date, 0))
+        frequency = template.schedule.get('frequency')
         
         # Get recurrence settings
         end_recurrence_date = template.schedule.get('end_date')
@@ -5107,22 +5104,36 @@ class TaskNodeViewSet(BaseModelViewSet):
             if end_recurrence_date < start_date:
                 return occurrences  # Recurrence ended before our range
         
-        # Find next occurrence after base_date that's >= start_date
+        # We'll handle the base_date specially to determine if it fits the schedule
         current_date = base_date
         occurrence_count = 0
         
-        # Advance until we reach the date range
-        while current_date < start_date:
-            current_date = self._calculate_next_date(template, current_date)
-            occurrence_count += 1
-            
-            if not current_date:  # End of recurrence
-                return occurrences
-                
-            if max_occurrences and occurrence_count >= max_occurrences:
-                return occurrences
+        # Check if the base_date fits the schedule pattern
+        fits_schedule = False
+        if frequency == 'DAILY':
+            fits_schedule = True
+        elif frequency == 'WEEKLY':
+            days_of_week = template.schedule.get('days_of_week', [])
+            fits_schedule = not days_of_week or current_date.weekday() - 1 in days_of_week
+        elif frequency == 'MONTHLY':
+            weeks_of_month = template.schedule.get('weeks_of_month', [])
+            # Calculate which week of the month this date falls in (1-indexed)
+            day = current_date.day
+            week_of_month = ((day - 1) // 7) + 1
+            fits_schedule = not weeks_of_month or week_of_month in weeks_of_month
+        elif frequency == 'YEARLY':
+            months_of_year = template.schedule.get('months_of_year', [])
+            fits_schedule = not months_of_year or current_date.month in months_of_year
         
-        # Now generate occurrences in the range
+        # Add the base_date to occurrences if it fits the schedule and is in our date range
+        if fits_schedule and start_date <= current_date <= end_date:
+            occurrences.append(self._create_task_dict(template, current_date, occurrence_count))
+            occurrence_count += 1
+        
+        # Get the next date according to the schedule
+        current_date = self._calculate_next_date(template, base_date)
+        
+        # Now generate subsequent occurrences in the range
         while current_date and current_date <= end_date:
             # Check if recurrence has ended
             if end_recurrence_date and current_date > end_recurrence_date:
@@ -5131,12 +5142,13 @@ class TaskNodeViewSet(BaseModelViewSet):
             if max_occurrences and occurrence_count >= max_occurrences:
                 break
             
-            # Add the occurrence
-            occurrences.append(self._create_task_dict(template, current_date, occurrence_count))
+            # Add the occurrence if it's in our date range
+            if start_date <= current_date:
+                occurrences.append(self._create_task_dict(template, current_date, occurrence_count))
+                occurrence_count += 1
             
             # Move to next date
             current_date = self._calculate_next_date(template, current_date)
-            occurrence_count += 1
         
         return occurrences
 
@@ -5293,16 +5305,22 @@ class TaskNodeViewSet(BaseModelViewSet):
         # Adjust day based on schedule parameters
         if weeks_of_month and days_of_week:
             # Find day based on week of month and day of week
-            weekday_index = days_of_week[0] if days_of_week else 0
-            week_number = weeks_of_month[0] if weeks_of_month else 1
-            
-            # Calculate days to add to get to the specified week and day
-            first_weekday = target_date.weekday()
-            days_to_add = ((week_number - 1) * 7) + ((weekday_index - first_weekday) % 7)
-            
-            # Return the calculated date
-            return target_date + timedelta(days=days_to_add)
+            for week_number in sorted(weeks_of_month):
+                for weekday_index in sorted(days_of_week):
+                    # Calculate days to add to get to the specified week and day
+                    first_weekday = target_date.weekday()
+                    days_to_add = ((week_number - 1) * 7) + ((weekday_index - first_weekday) % 7)
+                
+                    # Calculate the target date
+                    potential_date = target_date + timedelta(days=days_to_add)
+
+                # Check if the potential date is within the same month
+                if potential_date.month == next_month:
+                    return potential_date
         else:
             # Use same day as base_date
             day = min(base_date.day, calendar.monthrange(next_year, next_month)[1])
             return date(next_year, next_month, day)
+
+        # If no valid date found, return the first day of the target month
+        return target_date
