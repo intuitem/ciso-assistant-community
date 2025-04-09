@@ -74,7 +74,9 @@ services:
       - kafka1
     environment:
       - BOOTSTRAP_SERVERS=kafka1:9092
-      - API_URL=localhost:8443
+      - API_URL=backend:8443
+      - VERIFY_CERTIFICATE=True
+      - AUTO_RENEW_SESSION=True
 
   # Courtesy of conduktor https://github.com/conduktor/kafka-stack-docker-compose
   # Licensed under Apache 2.0 (f7dffb7)
