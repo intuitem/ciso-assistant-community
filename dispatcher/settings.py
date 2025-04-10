@@ -91,17 +91,88 @@ def save_yaml_config(config, config_path=DEFAULT_CONFIG_PATH):
 
 @click.command()
 @click.option("-y", is_flag=True, help="Automatically confirm configuration reset.")
-def init_config(y):
-    """Initialize (or reset) the configuration file using current environment settings."""
-    env_conf = load_env_config()
-    # Build a template configuration from env variables.
-    template_config = {
-        "rest": {
-            "url": env_conf["rest"]["url"],
-            "verify_certificate": env_conf["rest"]["verify_certificate"],
-        },
-        "credentials": env_conf["credentials"],
-    }
+@click.option(
+    "--interactive", is_flag=True, help="Prompt interactively for configuration values."
+)
+def init_config(y, interactive):
+    """
+    Initialize (or reset) the configuration file.
+
+    In non-interactive mode, the configuration is built from environment variables.
+    In interactive mode, you'll be prompted for each setting with defaults pre-filled.
+    """
+    if interactive:
+        # Prompt interactively for each setting, using env variables as defaults.
+
+        rest_url = click.prompt(
+            "Enter the API URL for the dispatcher. This is the exposed URL of the CISO Assistant backend's API.",
+            default=os.getenv("API_URL", "https://localhost:8443"),
+        )
+        verify_default = os.getenv("VERIFY_CERTIFICATE", "True") == "True"
+        verify_certificate = click.confirm(
+            "Should the dispatcher verify SSL certificates?",
+            default=verify_default,
+        )
+
+        authentication_mode = click.prompt(
+            "Enter your mode of authentication (credentials/token)",
+            default="credentials",
+        )
+
+        auto_renew_session = False
+        user_email = None
+        user_password = None
+        access_token = None
+
+        if authentication_mode == "credentials":
+            user_email = click.prompt(
+                "Enter user email", default=os.getenv("USER_EMAIL", "user@company.org")
+            )
+            # Use confirmation_prompt for passwords to ensure they match.
+            user_password = click.prompt(
+                "Enter user password",
+                hide_input=True,
+                confirmation_prompt=True,
+                default=os.getenv("USER_PASSWORD", ""),
+            )
+            auto_renew_default = os.getenv("AUTO_RENEW_SESSION", "True") == "True"
+            auto_renew_session = click.confirm(
+                "Enable silent reauthentication on session expiry?",
+                default=auto_renew_default,
+            )
+
+        else:
+            access_token = click.prompt(
+                "Enter access token", hide_input=True, default=os.getenv("TOKEN", "")
+            )
+
+        errors_topic = click.prompt(
+            "Enter the topic name for error messages (e.g., 'errors')",
+            default=os.getenv("ERRORS_TOPIC", "errors"),
+        )
+        s3_url = click.prompt(
+            "Enter the S3 storage URL (e.g., http://localhost:9000)",
+            default=os.getenv("S3_URL", "http://localhost:9000"),
+        )
+
+        template_config = {
+            "rest": {
+                "url": rest_url,
+                "verify_certificate": verify_certificate,
+            },
+            "credentials": {
+                "email": user_email,
+                "password": user_password,
+            },
+            "TOKEN": access_token,
+            "AUTO_RENEW_SESSION": auto_renew_session,
+            "ERRORS_TOPIC": errors_topic,
+            "S3_URL": s3_url,
+        }
+    else:
+        env_conf = load_env_config()
+        template_config = deep_merge(load_yaml_config(), env_conf)
+
     if y or click.confirm(
         f"This will create/reset '{DEFAULT_CONFIG_PATH}'. Do you wish to continue?"
     ):
