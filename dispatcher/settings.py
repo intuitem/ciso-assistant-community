@@ -145,8 +145,11 @@ ERRORS_TOPIC = config.get("ERRORS_TOPIC", "errors")
 S3_URL = config.get("S3_URL", "http://localhost:9000")
 
 
-def get_access_token(token_file=".tmp.yaml"):
-    """Retrieve the access token from a temporary YAML file."""
+def get_access_token(token_file=".tmp.yaml", token_env=os.getenv("TOKEN")):
+    """Retrieve the access token from environment or a temporary YAML file."""
+    if token_env:
+        return token_env
+
     token_path = Path(token_file)
     if token_path.exists():
         try:
