@@ -476,17 +476,16 @@ def _calculate_next_occurrence(task, base_date):
             return base_date + rd.relativedelta(months=interval)
 
         # First, check if the current date can be an occurrence in the current month
-        if _date_matches_schedule(task, base_date):
-            next_date = base_date + timedelta(
-                days=1
-            )  # Move forward one day to find the next occurrence
-            same_month_date = next_date
+        next_date = base_date + timedelta(
+            days=1
+        )  # Move forward one day to find the next occurrence
+        same_month_date = next_date
 
-            # Search for a valid date within the same month
-            while same_month_date.month == base_date.month:
-                if _date_matches_schedule(task, same_month_date):
-                    return same_month_date
-                same_month_date += timedelta(days=1)
+        # Search for a valid date within the same month
+        while same_month_date.month == base_date.month:
+            if _date_matches_schedule(task, same_month_date):
+                return same_month_date
+            same_month_date += timedelta(days=1)
 
         # Complex case: we need to find specific week/day in the next month
         target_month = base_date.month + interval
