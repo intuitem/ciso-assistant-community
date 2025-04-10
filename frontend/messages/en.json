@@ -1419,8 +1419,8 @@
 	"tasksNodes": "Tasks",
 	"addTask": "Add task",
 	"addTaskNode": "Add task",
-	"etaCompletionDate": "ETA/Completion Date",
-	"etaCompletionDateHelpText": "The date when the task is expected to be completed or was completed",
+	"etaOrCompletionDate": "ETA/Completion Date",
+	"etaOrCompletionDateHelpText": "The date when the task is expected to be completed or was completed",
 	"completionDateHelpText": "The date when the task was completed",
 	"isRecurrent": "Recurrent",
 	"isRecurrentHelpText": "Check if the task is recurrent",
@@ -1448,5 +1448,7 @@
 	"fourth": "Fourth",
 	"last": "Last",
 	"taskDateHelpText": "the date or start date of the task",
-	"scehdule": "Schedule"
+	"scehdule": "Schedule",
+	"task_date": "Date",
+	"isTemplate": "Recurrent"
 }

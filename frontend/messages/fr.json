@@ -1419,8 +1419,8 @@
 	"tasksNodes": "Tâches",
 	"addTask": "Ajouter une tâche",
 	"addTaskNode": "Ajouter une tâche",
-	"etaCompletionDate": "Date d'ETA/achèvement",
-	"etaCompletionDateHelpText": "La date à laquelle la tâche est censée être terminée ou a été terminée",
+	"etaOrCompletionDate": "Date d'ETA/achèvement",
+	"etaOrCompletionDateHelpText": "La date à laquelle la tâche est censée être terminée ou a été terminée",
 	"completionDateHelpText": "La date à laquelle la tâche a été terminée",
 	"isRecurrent": "Récurrent",
 	"isRecurrentHelpText": "Cochez si la tâche est récurrente",
@@ -1448,5 +1448,7 @@
 	"fourth": "Quatrième",
 	"last": "Dernier",
 	"taskDateHelpText": "La date ou date de début de la tâche",
-	"schedule": "Programme"
+	"schedule": "Programme",
+	"task_date": "Date",
+	"isTemplate": "Recurrence"
 }

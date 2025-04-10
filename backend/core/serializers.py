@@ -1406,10 +1406,11 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
+    assigned_to = FieldsRelatedField(many=True)
 
     class Meta:
         model = TaskNode
-        fields = "__all__"
+        exclude = ["schedule", "iteration", "generator"]
 
 
 class TaskNodeWriteSerializer(BaseModelSerializer):
