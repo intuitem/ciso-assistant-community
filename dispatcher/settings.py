@@ -92,7 +92,10 @@ def save_yaml_config(config, config_path=DEFAULT_CONFIG_PATH):
 @click.command()
 @click.option("-y", is_flag=True, help="Automatically confirm configuration reset.")
 @click.option(
-    "--interactive", is_flag=True, help="Prompt interactively for configuration values."
+    "-i",
+    "--interactive",
+    is_flag=True,
+    help="Prompt interactively for configuration values.",
 )
 def init_config(y, interactive):
     """
