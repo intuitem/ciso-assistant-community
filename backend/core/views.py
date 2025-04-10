@@ -4050,9 +4050,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             [
                 "Name",
                 "Description",
+                "Category",
+                "CSF Function",
                 "Priority",
                 "Status",
                 "ETA",
+                "Expiry date",
+                "Effort",
+                "Cost",
                 "Covered requirements",
             ]
         )
@@ -4062,9 +4067,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 [
                     item.get("name"),
                     item.get("description"),
+                    item.get("category"),
+                    item.get("csf_function"),
                     item.get("priority"),
                     item.get("status"),
                     item.get("eta"),
+                    item.get("expiry_date"),
+                    item.get("effort"),
+                    item.get("cost"),
                     "\n".join(
                         [ra.get("str") for ra in item.get("requirement_assessments")]
                     ),
