@@ -278,7 +278,7 @@ def upload_file_to_evidence(
     response = requests.post(
         endpoint,
         headers=get_api_headers(extra_headers=extra_headers),
-        files=[(urllib.parse.quote(file_name), file_obj.read())],
+        data=file_obj.read(),
         verify=VERIFY_CERTIFICATE,
     )
     if not response.ok:
