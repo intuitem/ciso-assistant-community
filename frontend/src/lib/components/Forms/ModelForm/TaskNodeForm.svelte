@@ -4,13 +4,11 @@
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import RadioGroupInput from '../RadioGroupInput.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import Search from '$lib/components/ModelTable/Search.svelte';
 	import NumberField from '../NumberField.svelte';
 
 	export let form: SuperValidated<any>;
@@ -21,8 +19,6 @@
 
 	const { value: is_template } = formFieldProxy(form, 'is_template');
 	const { value: frequency } = formFieldProxy(form, 'schedule.frequency');
-
-	console.log(frequency);
 </script>
 
 <AutocompleteSelect

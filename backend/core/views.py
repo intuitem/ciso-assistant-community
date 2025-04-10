@@ -5032,36 +5032,31 @@ class TaskNodeViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
     
-    @action(detail=True, name="Get future tasks")
-    def schedule(self, request, pk):
-        # Get task template
-        task_template = self.get_object()
-        
-        # Get query parameters
-        start_date_param = task_template.task_date
-        end_date_param = task_template.schedule.get('end_date')
-        
-        if not start_date_param or not end_date_param:
-            return Response(
-                {"error": "Both start_date and end_date parameters are required"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            start_date = datetime.strptime(str(start_date_param), '%Y-%m-%d').date()
-            end_date = datetime.strptime(str(end_date_param), '%Y-%m-%d').date()
-        except ValueError:
-            return Response(
-                {"error": "Invalid date format. Use YYYY-MM-DD"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+    @action(detail=False, name="Get tasks for the calendar")
+    def calendar(self, request):
         # 1. Get all task templates
         task_templates = TaskNode.objects.filter(is_template=True, enabled=True)
         
         # 2. Generate occurrences for each template within date range
         future_tasks = []
         for template in task_templates:
+            start_date_param = template.task_date
+            end_date_param = template.schedule.get('end_date')
+            
+            if not start_date_param or not end_date_param:
+                return Response(
+                    {"error": "Both start_date and end_date parameters are required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                start_date = datetime.strptime(str(start_date_param), '%Y-%m-%d').date()
+                end_date = datetime.strptime(str(end_date_param), '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             tasks = self._generate_occurrences(template, start_date, end_date)
             future_tasks.extend(tasks)
             
@@ -5534,7 +5529,7 @@ class TaskNodeViewSet(BaseModelViewSet):
         
         # Create a dictionary with all necessary properties
         task_dict = {
-            'id': f"virtual_{template.id}_{iteration}",  # Virtual ID for generated tasks
+            'id': template.id,  # Virtual ID for generated tasks
             'name': template.name,
             'description': template.description,
             'ref_id': template.ref_id,
