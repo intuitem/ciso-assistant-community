@@ -8,6 +8,7 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
+from dateutil import relativedelta
 from django.db.models import F, Count, Avg, Q, ExpressionWrapper, FloatField
 from collections import defaultdict
 from django_filters.filterset import filterset_factory
@@ -1307,7 +1308,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "security_exceptions": ["exact"],
             "owner": ["exact"],
             "findings": ["exact"],
-            "eta": ["exact", "lte", "gte", "lt", "gt"],
+            "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
         }
 
 
@@ -1975,7 +1976,13 @@ class RiskAcceptanceFilterSet(df.FilterSet):
 
     class Meta:
         model = RiskAcceptance
-        fields = ["folder", "state", "approver", "risk_scenarios", "to_review"]
+        fields = {
+            "folder": ["exact"],
+            "state": ["exact"],
+            "approver": ["exact"],
+            "risk_scenarios": ["exact"],
+            "expiry_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+        }
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
@@ -2179,13 +2186,23 @@ class UserViewSet(BaseModelViewSet):
 
         return super().destroy(request, *args, **kwargs)
 
-    @action(detail=True, name="Get user tasks")
-    def tasks(self, request, pk):
+    @action(
+        detail=True, name="Get user tasks", url_path="tasks/(?P<start>.+)/(?P<end>.+)"
+    )
+    def tasks(
+        self,
+        request,
+        pk,
+        start=timezone.now().date(),
+        end=timezone.now().date() + relativedelta.relativedelta(months=1),
+    ):
         return Response(
             task_calendar(
                 TaskNode.objects.filter(
                     is_template=True, enabled=True, assigned_to=request.user
-                )
+                ),
+                start,
+                end,
             )
         )
 
@@ -5041,8 +5058,19 @@ class TaskNodeViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
 
-    @action(detail=False, name="Get tasks for the calendar")
-    def calendar(self, request):
+    @action(
+        detail=False,
+        name="Get tasks for the calendar",
+        url_path="calendar/(?P<start>.+)/(?P<end>.+)",
+    )
+    def calendar(
+        self,
+        request,
+        start=timezone.now().date(),
+        end=timezone.now().date() + relativedelta.relativedelta(months=1),
+    ):
         return Response(
-            task_calendar(TaskNode.objects.filter(is_template=True, enabled=True))
+            task_calendar(
+                TaskNode.objects.filter(is_template=True, enabled=True), start, end
+            )
         )

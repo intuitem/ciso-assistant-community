@@ -1,36 +1,39 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import Calendar from '$lib/components/Calendar/Calendar.svelte';
+	import type { PageData } from './$types';
 
-	export let data;
-	const appliedControls = data.appliedControls;
-	const riskAcceptances = data.riskAcceptances;
-	const tasks = data.tasks;
-	let info: object[] = [];
+	export let data: PageData;
 
-	for (let i = 0; i < appliedControls.length; i++) {
-		const date = new Date(appliedControls[i].eta);
-		info.push({
-			label: 'AC: ' + appliedControls[i].name,
-			date: date,
-			link: `/applied-controls/${appliedControls[i].id}`
-		});
+	$: year = parseInt($page.params.year);
+	$: month = parseInt($page.params.month);
+
+	function createCalendarEvents(
+		appliedControls: Record<string, string>[],
+		riskAcceptances: Record<string, string>[],
+		tasks: Record<string, string>[]
+	): Array<{ label: string; date: Date; link: string }> {
+		const events = [
+			...appliedControls.map((control: Record<string, string>) => ({
+				label: `AC: ${control.name}`,
+				date: new Date(control.eta),
+				link: `/applied-controls/${control.id}`
+			})),
+			...riskAcceptances.map((ra: Record<string, string>) => ({
+				label: `RA: ${ra.name}`,
+				date: new Date(ra.expiry_date),
+				link: `/risk-acceptances/${ra.id}`
+			})),
+			...tasks.map((task: Record<string, string>) => ({
+				label: `Task: ${task.name}`,
+				date: new Date(task.task_date),
+				link: `/task-nodes/${task.id}`
+			}))
+		];
+		return events;
 	}
-	for (let i = 0; i < riskAcceptances.length; i++) {
-		const date = new Date(riskAcceptances[i].expiry_date);
-		info.push({
-			label: 'RA: ' + riskAcceptances[i].name,
-			date: date,
-			link: `/risk-acceptances/${riskAcceptances[i].id}`
-		});
-	}
-	for (let i = 0; i < tasks.length; i++) {
-		const date = new Date(tasks[i].task_date);
-		info.push({
-			label: 'Task: ' + tasks[i].name,
-			date: date,
-			link: `/task-nodes/${tasks[i].id}`
-		});
-	}
+
+	$: info = createCalendarEvents(data.appliedControls, data.riskAcceptances, data.tasks);
 </script>
 
-<Calendar {info} />
+<Calendar {info} {year} {month} />

@@ -9,8 +9,8 @@
 	const today = new Date();
 	export let month = today.getMonth() + 1;
 	export let year = today.getFullYear();
-	const daysInMonth = new Date(year, month, 0).getDate();
-	const firstDay = new Date(year, month - 1, 1).getDay();
+	$: daysInMonth = new Date(year, month, 0).getDate();
+	$: firstDay = new Date(year, month - 1, 1).getDay();
 
 	const daysOfWeek = [
 		m.monday(),
@@ -99,13 +99,13 @@
 		</div>
 		<div class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg p-2">
 			<div class="flex w-full h-full justify-between items-start">
-				<button
-					on:click={currentMonth}
+				<a
+					href={currentMonth()}
 					class="font-light text-lg border rounded-lg border-white p-2 hover:bg-white text-white hover:text-primary-500 transition duration-300"
 				>
 					<i class="fas fa-calendar-day" />
 					{m.today()}
-				</button>
+				</a>
 			</div>
 		</div>
 	</div>

@@ -680,18 +680,19 @@ def _generate_occurrences(template, start_date, end_date):
     return occurrences
 
 
-def task_calendar(task_templates, start, end):
+def task_calendar(task_templates, start=None, end=None):
     """Generate calendar of future tasks for the given templates."""
     future_tasks = []
 
     for template in task_templates:
-        start_date_param = template.task_date or datetime.now().date()
-        end_date_param = template.schedule.get("end_date")
+        start_date_param = start or template.task_date or datetime.now().date()
+        end_date_param = end or template.schedule.get("end_date")
 
-        # Default end date is 2 years from start date
         if not end_date_param:
             start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
-            end_date_param = (start_date + timedelta(days=2 * 365)).strftime("%Y-%m-%d")
+            end_date_param = (start_date + rd.relativedelta(months=1)).strftime(
+                "%Y-%m-%d"
+            )
 
         try:
             start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
