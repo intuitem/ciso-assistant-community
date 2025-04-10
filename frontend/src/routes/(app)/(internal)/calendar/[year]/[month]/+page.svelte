@@ -16,7 +16,7 @@
 		});
 	}
 	for (let i = 0; i < riskAcceptances.length; i++) {
-		const date = new Date(riskAcceptances[i].eta);
+		const date = new Date(riskAcceptances[i].expiry_date);
 		info.push({
 			label: 'RA: ' + riskAcceptances[i].name,
 			date: date,

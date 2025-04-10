@@ -1,20 +1,16 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import Day from './Day.svelte';
-	import Notifications from './Notifications.svelte';
-	import { showNotification } from '$lib/utils/stores';
 
 	import { m } from '$paraglide/messages';
 
 	export let info: object[];
 
-	let showNotificationBool = JSON.parse($showNotification);
-
-	let today = new Date();
-	let month = today.getMonth() + 1;
-	let year = today.getFullYear();
-	let daysInMonth = new Date(year, month, 0).getDate();
-	let firstDay = new Date(year, month - 1, 1).getDay();
+	const today = new Date();
+	export let month = today.getMonth() + 1;
+	export let year = today.getFullYear();
+	const daysInMonth = new Date(year, month, 0).getDate();
+	const firstDay = new Date(year, month - 1, 1).getDay();
 
 	const daysOfWeek = [
 		m.monday(),
@@ -40,38 +36,24 @@
 		m.december()
 	];
 
-	function todayDay() {
-		month = today.getMonth() + 1;
-		year = today.getFullYear();
-		daysInMonth = new Date(year, month, 0).getDate();
-		firstDay = new Date(year, month - 1, 1).getDay();
+	function currentMonth() {
+		return `/calendar/${today.getFullYear()}/${today.getMonth() + 1}`;
 	}
 
-	function nextMonth() {
+	function nextMonth(year: number, month: number) {
 		if (month == 12) {
-			month = 1;
-			year += 1;
+			return `/calendar/${year + 1}/1`;
 		} else {
-			month += 1;
+			return `/calendar/${year}/${month + 1}`;
 		}
-		daysInMonth = new Date(year, month, 0).getDate();
-		firstDay = new Date(year, month - 1, 1).getDay();
 	}
 
-	function prevMonth() {
+	function prevMonth(year: number, month: number) {
 		if (month == 1) {
-			month = 12;
-			year -= 1;
+			return `/calendar/${year - 1}/12`;
 		} else {
-			month -= 1;
+			return `/calendar/${year}/${month - 1}`;
 		}
-		daysInMonth = new Date(year, month, 0).getDate();
-		firstDay = new Date(year, month - 1, 1).getDay();
-	}
-
-	function notification() {
-		showNotificationBool = !showNotificationBool;
-		showNotification.set(showNotificationBool.toString());
 	}
 </script>
 
@@ -81,17 +63,17 @@
 			class="flex flex-col items-center justify-center bg-gradient-to-r from-primary-500 to-secondary-400 text-white rounded-lg h-1/6 text-3xl font-semibold p-2 shadow-md"
 		>
 			<div class="flex flex-row justify-between w-3/4">
-				<button class="sticky" on:click={prevMonth}>
+				<a class="sticky" href={prevMonth(year, month)}>
 					<i class="fas fa-chevron-left" />
-				</button>
+				</a>
 				{#key month}
 					<p in:fly={{ delay: 100, duration: 300 }}>
 						{monthNames[month - 1].toUpperCase()}, {year}
 					</p>
 				{/key}
-				<button on:click={nextMonth}>
+				<a href={nextMonth(year, month)}>
 					<i class="fas fa-chevron-right" />
-				</button>
+				</a>
 			</div>
 		</div>
 		<div class="grid grid-cols-7 gap-5 font-semibold">
@@ -118,23 +100,13 @@
 		<div class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg p-2">
 			<div class="flex w-full h-full justify-between items-start">
 				<button
-					on:click={todayDay}
+					on:click={currentMonth}
 					class="font-light text-lg border rounded-lg border-white p-2 hover:bg-white text-white hover:text-primary-500 transition duration-300"
 				>
 					<i class="fas fa-calendar-day" />
 					{m.today()}
 				</button>
-				<!-- <button
-					on:click={notification}
-					class="font-light text-lg border rounded-lg border-white p-2 hover:bg-white text-white hover:text-secondary-400 transition duration-300"
-				>
-					<i class="fa-solid fa-envelope" />
-					Notifications
-				</button> -->
 			</div>
 		</div>
 	</div>
-	<!-- {#if showNotificationBool}
-		<Notifications {info} />
-	{/if} -->
 </div>
