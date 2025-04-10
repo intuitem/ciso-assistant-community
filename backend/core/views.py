@@ -91,7 +91,7 @@ from core.utils import (
     RoleCodename,
     UserGroupCodename,
     compare_schema_versions,
-    task_calendar
+    task_calendar,
 )
 
 from ebios_rm.models import (
@@ -2178,10 +2178,16 @@ class UserViewSet(BaseModelViewSet):
                 )
 
         return super().destroy(request, *args, **kwargs)
-    
+
     @action(detail=True, name="Get user tasks")
     def tasks(self, request, pk):
-        return Response(task_calendar(TaskNode.objects.filter(is_template=True, enabled=True, assigned_to=request.user)))
+        return Response(
+            task_calendar(
+                TaskNode.objects.filter(
+                    is_template=True, enabled=True, assigned_to=request.user
+                )
+            )
+        )
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -5034,7 +5040,9 @@ class TaskNodeViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
-    
+
     @action(detail=False, name="Get tasks for the calendar")
     def calendar(self, request):
-        return Response(task_calendar(TaskNode.objects.filter(is_template=True, enabled=True)))
+        return Response(
+            task_calendar(TaskNode.objects.filter(is_template=True, enabled=True))
+        )
