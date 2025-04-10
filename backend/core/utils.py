@@ -282,134 +282,134 @@ def time_state(date_str: str) -> dict:
     else:
         return {"name": "today", "hexcolor": "#fbbf24"}
 
+def _convert_to_python_weekday(day):
+    """Converts from 0=Sunday to 0=Monday weekday format"""
+    return (day - 1) % 7
+
+
+def _get_month_range(year, month):
+    """Returns first and last day of given month"""
+    first_day = date(year, month, 1)
+    last_day = date(year, month, calendar.monthrange(year, month)[1])
+    return first_day, last_day
+
+
+def _get_nth_weekday_of_month(year, month, weekday, n):
+    """Gets the nth occurrence of a specific weekday in a month"""
+    first_day, last_day = _get_month_range(year, month)
+    
+    if n < 0:  # Handle negative indexing (from end of month)
+        current_date = last_day
+        count = 0
+        while current_date >= first_day:
+            if current_date.weekday() == weekday:
+                count -= 1
+                if count == n:
+                    return current_date
+            current_date -= timedelta(days=1)
+        return None
+    else:  # Handle positive indexing (from start of month)
+        current_date = first_day
+        days_to_add = (weekday - current_date.weekday()) % 7
+        first_occurrence = current_date + timedelta(days=days_to_add)
+        target_date = first_occurrence + timedelta(days=(n - 1) * 7)
+        
+        # Check if still in same month
+        return target_date if target_date.month == month else None
+
 
 def _date_matches_schedule(task, date_to_check):
     """Checks if a given date matches the schedule pattern"""
-    frequency = task.schedule.get("frequency")
-
+    schedule = task.schedule
+    frequency = schedule.get("frequency")
+    
     if frequency == "DAILY":
         return True
-
-    elif frequency == "WEEKLY":
-        days_of_week = task.schedule.get("days_of_week", [])
-        # If days_of_week is empty, any day matches
-        if not days_of_week:
-            return True
-        # Python's weekday() returns 0 for Monday, 6 for Sunday
-        # Convert to 0=Sunday, 6=Saturday if needed
-        weekday = date_to_check.weekday()
-        # Convert Python's weekday to 0=Sunday format
-        adjusted_weekday = (weekday + 1) % 7
-        return adjusted_weekday in days_of_week
-
+        
+    # Python's weekday() returns 0 for Monday, 6 for Sunday
+    # Convert to 0=Sunday, 6=Saturday for our system
+    weekday = date_to_check.weekday()
+    adjusted_weekday = (weekday + 1) % 7
+    
+    if frequency == "WEEKLY":
+        days_of_week = schedule.get("days_of_week", [])
+        return not days_of_week or adjusted_weekday in days_of_week
+        
     elif frequency == "MONTHLY":
-        days_of_week = task.schedule.get("days_of_week", [])
-        weeks_of_month = task.schedule.get("weeks_of_month", [])
-
+        days_of_week = schedule.get("days_of_week", [])
+        weeks_of_month = schedule.get("weeks_of_month", [])
+        
         # If both are empty, any day matches
         if not days_of_week and not weeks_of_month:
             return True
-
-        matches = True
-
+            
         # Check days of week if specified
-        if days_of_week:
-            weekday = date_to_check.weekday()
-            adjusted_weekday = (weekday + 1) % 7
-            matches = matches and (adjusted_weekday in days_of_week)
-
-            # If no match on day of week, exit early
-            if not matches:
-                return False
-
+        if days_of_week and adjusted_weekday not in days_of_week:
+            return False
+            
         # Check weeks of month if specified
         if weeks_of_month:
-            # For a specific day of the week, calculate its position in the month
-            # (1st Monday, 2nd Monday, etc.)
-            weekday = date_to_check.weekday()
-            adjusted_weekday = (weekday + 1) % 7
-
-            # If a day of the week is specified, check if it matches
-            if days_of_week and adjusted_weekday in days_of_week:
-                # Calculate the occurrence of this day in the month
-                day = date_to_check.day
-                # Find the first day of the month
-                first_day = date(date_to_check.year, date_to_check.month, 1)
-                # Find the first matching day of the week in the month
-                first_matching_day = first_day
-                while first_matching_day.weekday() != weekday:
-                    first_matching_day += timedelta(days=1)
-
-                # Calculate which occurrence of the day it is
-                occurrence = ((date_to_check.day - first_matching_day.day) // 7) + 1
-
-                # Check if it's the last occurrence (-1)
-                if -1 in weeks_of_month:
-                    # Find the first day of the next month
-                    if date_to_check.month == 12:
-                        next_month = date(date_to_check.year + 1, 1, 1)
-                    else:
-                        next_month = date(
-                            date_to_check.year, date_to_check.month + 1, 1
-                        )
-
-                    # Go back to the last day of the current month
-                    last_day = next_month - timedelta(days=1)
-
-                    # Go back to the last matching day of the week
-                    last_matching_day = last_day
-                    while last_matching_day.weekday() != weekday:
-                        last_matching_day -= timedelta(days=1)
-
-                    # If our date is this last matching day, it's the last occurrence
-                    if date_to_check == last_matching_day:
-                        return True
-
-                # Check if the occurrence is in the list of specified weeks
-                return occurrence in weeks_of_month
-            else:
-                return False
-
-        return matches
-
+            # Calculate which occurrence of the weekday it is in the month
+            first_day = date(date_to_check.year, date_to_check.month, 1)
+            first_matching_day = first_day
+            
+            while first_matching_day.weekday() != weekday:
+                first_matching_day += timedelta(days=1)
+                
+            occurrence = ((date_to_check.day - first_matching_day.day) // 7) + 1
+            
+            # Check if it's the last occurrence (-1)
+            if -1 in weeks_of_month:
+                next_month = date(
+                    date_to_check.year + (1 if date_to_check.month == 12 else 0),
+                    1 if date_to_check.month == 12 else date_to_check.month + 1,
+                    1
+                )
+                last_day = next_month - timedelta(days=1)
+                last_matching_day = last_day
+                
+                while last_matching_day.weekday() != weekday:
+                    last_matching_day -= timedelta(days=1)
+                    
+                if date_to_check == last_matching_day:
+                    return True
+                    
+            return occurrence in weeks_of_month
+            
+        return True
+        
     elif frequency == "YEARLY":
-        months_of_year = task.schedule.get("months_of_year", [])
-        days_of_week = task.schedule.get("days_of_week", [])
-        weeks_of_month = task.schedule.get("weeks_of_month", [])
-
-        # First check month
+        months_of_year = schedule.get("months_of_year", [])
+        days_of_week = schedule.get("days_of_week", [])
+        weeks_of_month = schedule.get("weeks_of_month", [])
+        
+        # Check month
         if months_of_year and date_to_check.month not in months_of_year:
             return False
-
+            
         # If no further restrictions, any day in valid months matches
         if not days_of_week and not weeks_of_month:
             return True
-
-        # Check day of week if specified
-        if days_of_week:
-            weekday = date_to_check.weekday()
-            adjusted_weekday = (weekday + 1) % 7
-            if adjusted_weekday not in days_of_week:
-                return False
-
-        # Check week of month if specified
+            
+        # Check day of week
+        if days_of_week and adjusted_weekday not in days_of_week:
+            return False
+            
+        # Check week of month
         if weeks_of_month:
-            # Calculate week of month (1-indexed)
             day = date_to_check.day
             week_of_month = ((day - 1) // 7) + 1
-
+            
             # Check for last week special case (-1)
-            last_day = calendar.monthrange(date_to_check.year, date_to_check.month)[1]
-            days_left = last_day - date_to_check.day
-            is_last_week = days_left < 7
-
-            if -1 in weeks_of_month and is_last_week:
-                return True
-
+            if -1 in weeks_of_month:
+                last_day = calendar.monthrange(date_to_check.year, date_to_check.month)[1]
+                if last_day - date_to_check.day < 7:
+                    return True
+                    
             return week_of_month in weeks_of_month
-
+            
         return True
-
+        
     return False
 
 
@@ -417,276 +417,177 @@ def _calculate_next_occurrence(task, base_date):
     """Calculates the next occurrence date based on the schedule"""
     if not task.schedule:
         return None
-
-    frequency = task.schedule.get("frequency")
-    interval = task.schedule.get("interval", 1)
-
+        
+    schedule = task.schedule
+    frequency = schedule.get("frequency")
+    interval = schedule.get("interval", 1)
+    
     if frequency == "DAILY":
         return base_date + timedelta(days=1)
-
+        
     elif frequency == "WEEKLY":
-        days_of_week = task.schedule.get("days_of_week", [])
-
+        days_of_week = schedule.get("days_of_week", [])
+        
         if not days_of_week:
-            # Simple case: just add interval weeks
             return base_date + timedelta(weeks=interval)
-
-        # Get current weekday (0=Monday, 6=Sunday in Python)
+            
         current_weekday = base_date.weekday()
-        # Convert to 0=Sunday format
         current_dow_adjusted = (current_weekday + 1) % 7
-
-        # Sort days for easier traversal
         sorted_days = sorted(days_of_week)
-
+        
         # Find next day in the same week
-        next_day = None
-        for day in sorted_days:
-            if day > current_dow_adjusted:
-                next_day = day
-                break
-
+        next_day = next((day for day in sorted_days if day > current_dow_adjusted), None)
+        
         if next_day is not None:
             # Calculate days to add
-            days_to_add = next_day - current_dow_adjusted
-            # Python's weekday adjustment
-            if next_day == 0:  # Sunday needs special handling
-                days_to_add = 7 - current_weekday
-            else:
-                days_to_add = (next_day - 1) - current_weekday
-                if days_to_add <= 0:
-                    days_to_add += 7
+            python_weekday = _convert_to_python_weekday(next_day)
+            days_to_add = (python_weekday - current_weekday) % 7
+            if days_to_add == 0:  # Same day next week
+                days_to_add = 7
             return base_date + timedelta(days=days_to_add)
         else:
-            # Move to first day of next week (potentially skipping weeks based on interval)
-            days_to_first = (7 - current_weekday + sorted_days[0] - 1) % 7
-            if days_to_first == 0:
-                days_to_first = 7
-
-            # Add interval - 1 additional weeks
-            days_to_add = days_to_first + (7 * (interval - 1))
+            # Move to first day of next week
+            first_day_next_week = sorted_days[0]
+            python_weekday = _convert_to_python_weekday(first_day_next_week)
+            days_to_add = (python_weekday - current_weekday) % 7
+            if days_to_add == 0:  # Same day next week
+                days_to_add = 7
+            days_to_add += 7 * (interval - 1)  # Add interval weeks
             return base_date + timedelta(days=days_to_add)
-
+            
     elif frequency == "MONTHLY":
-        days_of_week = task.schedule.get("days_of_week", [])
-        weeks_of_month = task.schedule.get("weeks_of_month", [])
-
+        days_of_week = schedule.get("days_of_week", [])
+        weeks_of_month = schedule.get("weeks_of_month", [])
+        
         if not days_of_week and not weeks_of_month:
-            # Simple case: just add interval months
             return base_date + rd.relativedelta(months=interval)
-
-        # First, check if the current date can be an occurrence in the current month
-        next_date = base_date + timedelta(
-            days=1
-        )  # Move forward one day to find the next occurrence
-        same_month_date = next_date
-
-        # Search for a valid date within the same month
-        while same_month_date.month == base_date.month:
-            if _date_matches_schedule(task, same_month_date):
-                return same_month_date
-            same_month_date += timedelta(days=1)
-
-        # Complex case: we need to find specific week/day in the next month
+            
+        # Check remaining days in current month first
+        next_date = base_date + timedelta(days=1)
+        while next_date.month == base_date.month:
+            if _date_matches_schedule(task, next_date):
+                return next_date
+            next_date += timedelta(days=1)
+            
+        # Calculate for next month(s)
         target_month = base_date.month + interval
         target_year = base_date.year
-
+        
         # Adjust year if needed
         while target_month > 12:
             target_month -= 12
             target_year += 1
-
+            
+        possible_dates = []
+        
         if weeks_of_month and days_of_week:
-            possible_dates = []
-
-            # Sort for deterministic behavior
-            sorted_weeks = sorted(weeks_of_month)
-            sorted_days = sorted(days_of_week)
-
-            # Calculate all possible dates
-            for week in sorted_weeks:
-                for day in sorted_days:
-                    # Handle negative week values (counting from end of month)
-                    if week < 0:
-                        # Get last day of month
+            for week in sorted(weeks_of_month):
+                for day in sorted(days_of_week):
+                    python_weekday = _convert_to_python_weekday(day)
+                    
+                    if week < 0:  # Last occurrence of weekday
                         last_day = calendar.monthrange(target_year, target_month)[1]
                         last_date = date(target_year, target_month, last_day)
-
-                        # Find last occurrence of day in month
-                        # Convert day (0=Sunday) to Python's weekday (0=Monday)
-                        python_weekday = (day - 1) % 7
-
-                        # Calculate days to subtract
+                        
+                        # Find last occurrence of this weekday
                         days_diff = (last_date.weekday() - python_weekday) % 7
-                        if days_diff == 0:
-                            days_diff = 7
-
-                        # Calculate date
-                        target_date = last_date - timedelta(days=days_diff)
-
-                        # Check if it's in the right month
+                        if days_diff > 0:
+                            target_date = last_date - timedelta(days=days_diff)
+                        else:
+                            target_date = last_date - timedelta(days=7 - days_diff)
+                            
                         if target_date.month == target_month:
                             possible_dates.append(target_date)
                     else:
-                        # Normal case: counting from beginning of month
-                        first_date = date(target_year, target_month, 1)
-
-                        # Calculate days to add to reach first occurrence of weekday
-                        # Convert day (0=Sunday) to Python's weekday (0=Monday)
-                        python_weekday = (day - 1) % 7
-
-                        # Calculate days to add
-                        days_diff = (python_weekday - first_date.weekday()) % 7
-                        first_occurrence = first_date + timedelta(days=days_diff)
-
-                        # Add weeks to get to the specified week
-                        days_to_add = (week - 1) * 7
-                        target_date = first_occurrence + timedelta(days=days_to_add)
-
-                        # Check if it's in the right month
-                        if target_date.month == target_month:
+                        target_date = _get_nth_weekday_of_month(target_year, target_month, python_weekday, week)
+                        if target_date:
                             possible_dates.append(target_date)
-
-            # Return earliest date after base_date
-            valid_dates = [d for d in possible_dates if d > base_date]
-            if valid_dates:
-                return min(valid_dates)
-
-            # If no valid dates, try next interval
-            return _calculate_next_occurrence(
-                task, base_date + rd.relativedelta(months=interval)
-            )
         else:
-            # Just use same day in next month
+            # Use same day in next month(s)
             day = min(base_date.day, calendar.monthrange(target_year, target_month)[1])
-            return date(target_year, target_month, day)
-
+            possible_dates.append(date(target_year, target_month, day))
+            
+        # Return earliest date after base_date
+        valid_dates = [d for d in possible_dates if d > base_date]
+        if valid_dates:
+            return min(valid_dates)
+            
+        # Try next interval if no valid dates found
+        return _calculate_next_occurrence(task, base_date + rd.relativedelta(months=interval))
+        
     elif frequency == "YEARLY":
-        months_of_year = task.schedule.get("months_of_year", [])
-        days_of_week = task.schedule.get("days_of_week", [])
-        weeks_of_month = task.schedule.get("weeks_of_month", [])
-
+        months_of_year = schedule.get("months_of_year", [])
+        days_of_week = schedule.get("days_of_week", [])
+        weeks_of_month = schedule.get("weeks_of_month", [])
+        
         if not months_of_year and not days_of_week and not weeks_of_month:
-            # Simple case: just add interval years
             return base_date + rd.relativedelta(years=interval)
-
+            
         target_year = base_date.year
-
-        # If we're already past all months in current year, move to next year
+        
+        # If we're past all months in current year, move to next year
         if months_of_year and base_date.month > max(months_of_year):
             target_year += interval
-        else:
-            # Otherwise, we might still have valid months this year
-            if base_date.month == 12:
-                target_year += interval
-
+        elif base_date.month == 12:  # End of year case
+            target_year += interval
+            
+        sorted_months = sorted(months_of_year) if months_of_year else [base_date.month]
         possible_dates = []
-
-        # Find all possible dates in the target year
-        if months_of_year:
-            sorted_months = sorted(months_of_year)
-        else:
-            # If months not specified, use the base date month
-            sorted_months = [base_date.month]
-
+        
         for month in sorted_months:
             if not days_of_week and not weeks_of_month:
                 # Same day each year
                 last_day_of_month = calendar.monthrange(target_year, month)[1]
                 day = min(base_date.day, last_day_of_month)
                 possible_dates.append(date(target_year, month, day))
+            elif weeks_of_month and days_of_week:
+                # Specific week/day combinations
+                for week in sorted(weeks_of_month):
+                    for day in sorted(days_of_week):
+                        python_weekday = _convert_to_python_weekday(day)
+                        
+                        if week < 0:  # From end of month
+                            target_date = _get_nth_weekday_of_month(target_year, month, python_weekday, week)
+                            if target_date:
+                                possible_dates.append(target_date)
+                        else:
+                            target_date = _get_nth_weekday_of_month(target_year, month, python_weekday, week)
+                            if target_date:
+                                possible_dates.append(target_date)
+            elif days_of_week:
+                # All occurrences of specified weekdays in month
+                for day in range(1, calendar.monthrange(target_year, month)[1] + 1):
+                    check_date = date(target_year, month, day)
+                    adjusted_weekday = (check_date.weekday() + 1) % 7
+                    if adjusted_weekday in days_of_week:
+                        possible_dates.append(check_date)
             else:
-                # Need to find specific week/day combinations
-                if weeks_of_month and days_of_week:
-                    for week in sorted(weeks_of_month):
-                        for day in sorted(days_of_week):
-                            # Handle negative week values (counting from end of month)
-                            if week < 0:
-                                # Get last day of month
-                                last_day = calendar.monthrange(target_year, month)[1]
-                                last_date = date(target_year, month, last_day)
-
-                                # Find last occurrence of day in month
-                                # Convert day (0=Sunday) to Python's weekday (0=Monday)
-                                python_weekday = (day - 1) % 7
-
-                                # Calculate days to subtract
-                                days_diff = (last_date.weekday() - python_weekday) % 7
-                                target_date = last_date - timedelta(days=days_diff)
-
-                                # For last week, check if within 7 days of month end
-                                if week == -1 and last_day - target_date.day < 7:
-                                    possible_dates.append(target_date)
-                            else:
-                                # Normal case: counting from beginning of month
-                                first_date = date(target_year, month, 1)
-
-                                # Convert day (0=Sunday) to Python's weekday (0=Monday)
-                                python_weekday = (day - 1) % 7
-
-                                # Calculate days to add to reach first occurrence of weekday
-                                days_diff = (python_weekday - first_date.weekday()) % 7
-                                first_occurrence = first_date + timedelta(
-                                    days=days_diff
-                                )
-
-                                # Add weeks to get to the specified week
-                                days_to_add = (week - 1) * 7
-                                target_date = first_occurrence + timedelta(
-                                    days=days_to_add
-                                )
-
-                                # Check if it's in the right month
-                                if target_date.month == month:
-                                    possible_dates.append(target_date)
-                elif days_of_week:
-                    # Just specified days of week
-                    # Find all occurrences of these days in the month
-                    last_day = calendar.monthrange(target_year, month)[1]
-                    for day in range(1, last_day + 1):
-                        check_date = date(target_year, month, day)
-                        weekday = check_date.weekday()
-                        adjusted_weekday = (weekday + 1) % 7
-                        if adjusted_weekday in days_of_week:
-                            possible_dates.append(check_date)
-                else:
-                    # Just specified weeks of month
-                    day = base_date.day
-                    possible_dates.append(
-                        date(
-                            target_year,
-                            month,
-                            min(day, calendar.monthrange(target_year, month)[1]),
-                        )
-                    )
-
+                # Just specified weeks of month
+                day = min(base_date.day, calendar.monthrange(target_year, month)[1])
+                possible_dates.append(date(target_year, month, day))
+                
         # Return earliest date after base_date
         valid_dates = [d for d in possible_dates if d > base_date]
         if valid_dates:
             return min(valid_dates)
-
+            
         # If no valid dates, try next interval
-        next_year = target_year + interval
-        return date(next_year, sorted_months[0], 1)
-
+        return date(target_year + interval, sorted_months[0], 1)
+        
     return None
 
 
 def _create_task_dict(task, task_date, iteration):
-    """
-    Creates a dictionary representing a future task based on the template.
-    This task is not saved to the database.
-    """
-    # Calculate due date based on application logic
+    """Creates a dictionary representing a future task based on the template."""
+    # Calculate due date if applicable
     due_date = None
     if task.due_date and task.task_date:
-        # If task has a due date, calculate the delta to apply
         delta = task.due_date - task.task_date
         due_date = task_date + delta
-
-    # Create a dictionary with all necessary properties
+        
+    # Create task dictionary with all necessary properties
     task_dict = {
-        "id": task.id,  # Template ID for generated tasks
+        "id": task.id,
         "name": task.name,
         "description": task.description,
         "ref_id": task.ref_id,
@@ -694,109 +595,82 @@ def _create_task_dict(task, task_date, iteration):
         "task_date": task_date.isoformat(),
         "due_date": due_date.isoformat() if due_date else None,
         "status": "pending",
-        "is_virtual": True,  # Indication that this is a virtual task
+        "is_virtual": True,
         "generator_id": task.id,
         "is_template": False,
         "enabled": True,
+        # Add M2M relationships
+        "assigned_to": [user.id for user in task.assigned_to.all()],
+        "assets": [asset.id for asset in task.assets.all()],
+        "applied_controls": [control.id for control in task.applied_controls.all()],
+        "compliance_assessments": [assessment.id for assessment in task.compliance_assessments.all()],
+        "risk_assessments": [assessment.id for assessment in task.risk_assessments.all()]
     }
-
-    # Add M2M relationships
-    task_dict["assigned_to"] = [user.id for user in task.assigned_to.all()]
-    task_dict["assets"] = [asset.id for asset in task.assets.all()]
-    task_dict["applied_controls"] = [
-        control.id for control in task.applied_controls.all()
-    ]
-    task_dict["compliance_assessments"] = [
-        assessment.id for assessment in task.compliance_assessments.all()
-    ]
-    task_dict["risk_assessments"] = [
-        assessment.id for assessment in task.risk_assessments.all()
-    ]
-
+    
     return task_dict
 
 
 def _generate_occurrences(template, start_date, end_date):
-    """
-    Generates future occurrences for a task template without storing them in the database.
-    Returns a list of dictionaries representing future tasks.
-    """
+    """Generates future occurrences for a task template."""
     occurrences = []
-
+    
     if not template.schedule:
         return occurrences
-
-    # Determine start date - use template's task_date if available
-    base_date = template.task_date
-    if not base_date:
-        # If no task_date defined, use today
-        base_date = datetime.now().date()
-
+        
+    # Determine start date
+    base_date = template.task_date or datetime.now().date()
+    
     # Get recurrence settings
-    end_recurrence_date_str = template.schedule.get("end_date")
     end_recurrence_date = None
+    end_recurrence_date_str = template.schedule.get("end_date")
     if end_recurrence_date_str:
-        end_recurrence_date = datetime.strptime(
-            end_recurrence_date_str, "%Y-%m-%d"
-        ).date()
+        end_recurrence_date = datetime.strptime(end_recurrence_date_str, "%Y-%m-%d").date()
         if end_recurrence_date < start_date:
             return occurrences  # Recurrence ended before our range
-
+            
     max_occurrences = template.schedule.get("occurrences")
-
-    # Start from the first date that falls on or after start_date
+    
+    # Find first occurrence on or after start_date
     current_date = base_date
-
-    # If base_date is before start_date, find first occurrence after start_date
-    if base_date < start_date:
-        while current_date < start_date:
-            next_date = _calculate_next_occurrence(template, current_date)
-            if not next_date or (
-                end_recurrence_date and next_date > end_recurrence_date
-            ):
-                return occurrences  # No occurrences in our range
-            current_date = next_date
-
+    while current_date < start_date:
+        next_date = _calculate_next_occurrence(template, current_date)
+        if not next_date or (end_recurrence_date and next_date > end_recurrence_date):
+            return occurrences  # No occurrences in our range
+        current_date = next_date
+        
     occurrence_count = 0
-
+    
     # Generate occurrences in the date range
     while current_date and current_date <= end_date:
         # Check if recurrence has ended
-        if end_recurrence_date and current_date > end_recurrence_date:
+        if (end_recurrence_date and current_date > end_recurrence_date) or \
+           (max_occurrences and occurrence_count >= max_occurrences):
             break
-
-        if max_occurrences and occurrence_count >= max_occurrences:
-            break
-
-        # Check if this date matches the schedule pattern
+            
+        # Generate task if date matches schedule pattern
         if _date_matches_schedule(template, current_date):
-            occurrences.append(
-                _create_task_dict(template, current_date, occurrence_count)
-            )
+            occurrences.append(_create_task_dict(template, current_date, occurrence_count))
             occurrence_count += 1
-
+            
         # Calculate next date
         current_date = _calculate_next_occurrence(template, current_date)
-
+        
     return occurrences
 
 
 def task_calendar(task_templates):
-    # Generate occurrences for each template within date range
+    """Generate calendar of future tasks for the given templates."""
     future_tasks = []
+    
     for template in task_templates:
-        start_date_param = template.task_date
+        start_date_param = template.task_date or datetime.now().date()
         end_date_param = template.schedule.get("end_date")
-
-        # Set start date to now if not provided
-        if not start_date_param:
-            start_date_param = datetime.now().date()
-
-        # Set end date to 2 years from start date if not provided
+        
+        # Default end date is 2 years from start date
         if not end_date_param:
             start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
-            end_date_param = start_date + timedelta(days=2 * 365)
-
+            end_date_param = (start_date + timedelta(days=2 * 365)).strftime("%Y-%m-%d")
+            
         try:
             start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
             end_date = datetime.strptime(str(end_date_param), "%Y-%m-%d").date()
@@ -805,8 +679,8 @@ def task_calendar(task_templates):
                 {"error": "Invalid date format. Use YYYY-MM-DD"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+            
         tasks = _generate_occurrences(template, start_date, end_date)
         future_tasks.extend(tasks)
-
+        
     return future_tasks
