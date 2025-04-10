@@ -37,7 +37,7 @@ auth_data = dict()
 
 @click.group()
 def cli():
-    """CLICA is the CLI tool to interact with CISO Assistant REST API."""
+    """The CISO Assistant dispatcher is a command line tool that consumes messages from a Kafka topic and processes them."""
     pass
 
 
@@ -80,6 +80,9 @@ def auth(email: str, password: str):
 
 @click.command()
 def consume():
+    """
+    Consume messages from the Kafka topic and process them.
+    """
     consumer = KafkaConsumer(
         # topic
         "observation",
