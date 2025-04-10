@@ -48,7 +48,7 @@
 	bind:cachedValue={formDataCache['is_template']}
 />
 {#if $is_template}
-	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-clock" header={m.schedule()}>
+	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-calendar-days" header={m.schedule()}>
 		<div class="flex w-full items-center space-x-3">
 			<span class="mt-5 font-semibold text-sm text-gray-800">{m.each()}</span>
 			<NumberField
