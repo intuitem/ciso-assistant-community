@@ -35,21 +35,22 @@
 	{form}
 	field="task_date"
 	label={m.date()}
+	helpText={m.taskDateHelpText()}
 	cacheLock={cacheLocks['task_date']}
 	bind:cachedValue={formDataCache['task_date']}
 />
 <Checkbox
 	{form}
 	field="is_template"
-	label={m.isRecurrent()}
+	label={m.recurrent()}
 	helpText={m.isRecurrentHelpText()}
 	cacheLock={cacheLocks['is_template']}
 	bind:cachedValue={formDataCache['is_template']}
 />
 {#if $is_template}
-	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-clock" header={m.schedule()}>
 		<div class="flex w-full items-center space-x-3">
-			<span class="mt-5 font-thin text-md text-gray-800">Each</span>
+			<span class="mt-5 font-semibold text-sm text-gray-800">{m.each()}</span>
 			<NumberField
 				{form}
 				field="interval"
@@ -64,10 +65,10 @@
 				valuePath="schedule.frequency"
 				disableDoubleDash={true}
 				options={[
-					{ value: 'DAILY', label: 'day' },
-					{ value: 'WEEKLY', label: 'week' },
-					{ value: 'MONTHLY', label: 'month' },
-					{ value: 'YEARLY', label: 'year' }
+					{ value: 'DAILY', label: m.day() },
+					{ value: 'WEEKLY', label: m.week() },
+					{ value: 'MONTHLY', label: m.month() },
+					{ value: 'YEARLY', label: m.year() }
 				]}
 				cacheLock={cacheLocks['frequency']}
 				bind:cachedValue={formDataCache['frequency']}
@@ -76,7 +77,7 @@
 		</div>
 		<div class="flex w-full items-center space-x-3">
 			{#if $frequency == 'MONTHLY' || $frequency == 'YEARLY'}
-				<span class="mt-5 font-thin text-md text-gray-800">The</span>
+				<span class="mt-5 font-semibold text-sm text-gray-800">{m.the()}</span>
 				<AutocompleteSelect
 					{form}
 					multiple
@@ -86,21 +87,18 @@
 					valuePath="schedule.weeks_of_month"
 					disableDoubleDash={true}
 					options={[
-						{ value: 1, label: 'First' },
-						{ value: 2, label: 'Second' },
-						{ value: 3, label: 'Third' },
-						{ value: 4, label: 'Fourth' },
-						{ value: -1, label: 'Last' }
+						{ value: 1, label: m.first() },
+						{ value: 2, label: m.second() },
+						{ value: 3, label: m.third() },
+						{ value: 4, label: m.fourth() },
+						{ value: -1, label: m.last() }
 					]}
 					cacheLock={cacheLocks['weeks_of_month']}
 					bind:cachedValue={formDataCache['weeks_of_month']}
-					label={'weeks'}
+					label={m.weeks()}
 				/>
 			{/if}
 			{#if $frequency == 'WEEKLY' || $frequency == 'MONTHLY' || $frequency == 'YEARLY'}
-				{#if $frequency == 'WEEKLY'}
-					<span class="mt-5 font-thin text-md text-gray-800">On</span>
-				{/if}
 				<AutocompleteSelect
 					{form}
 					multiple
@@ -110,23 +108,23 @@
 					valuePath="schedule.days_of_week"
 					disableDoubleDash={true}
 					options={[
-						{ value: 1, label: 'Monday' },
-						{ value: 2, label: 'Tuesday' },
-						{ value: 3, label: 'Wednesday' },
-						{ value: 4, label: 'Thursday' },
-						{ value: 5, label: 'Friday' },
-						{ value: 6, label: 'Saturday' },
-						{ value: 7, label: 'Sunday' }
+						{ value: 1, label: m.monday() },
+						{ value: 2, label: m.tuesday() },
+						{ value: 3, label: m.wednesday() },
+						{ value: 4, label: m.thursday() },
+						{ value: 5, label: m.friday() },
+						{ value: 6, label: m.saturday() },
+						{ value: 7, label: m.sunday() }
 					]}
 					cacheLock={cacheLocks['days_of_week']}
 					bind:cachedValue={formDataCache['days_of_week']}
-					label={'days'}
+					label={m.days()}
 				/>
 			{/if}
 		</div>
 		{#if $frequency == 'YEARLY'}
 			<div class="flex w-full items-center space-x-3">
-				<span class="mt-5 font-thin text-md text-gray-800">Of</span>
+				<span class="mt-5 font-semibold text-sm text-gray-800">{m.of()}</span>
 				<AutocompleteSelect
 					{form}
 					multiple
@@ -135,22 +133,22 @@
 					valuePath="schedule.months_of_year"
 					disableDoubleDash={true}
 					options={[
-						{ value: 1, label: 'January' },
-						{ value: 2, label: 'February' },
-						{ value: 3, label: 'March' },
-						{ value: 4, label: 'April' },
-						{ value: 5, label: 'May' },
-						{ value: 6, label: 'June' },
-						{ value: 7, label: 'July' },
-						{ value: 8, label: 'August' },
-						{ value: 9, label: 'September' },
-						{ value: 10, label: 'October' },
-						{ value: 11, label: 'November' },
-						{ value: 12, label: 'December' }
+						{ value: 1, label: m.january() },
+						{ value: 2, label: m.february() },
+						{ value: 3, label: m.march() },
+						{ value: 4, label: m.april() },
+						{ value: 5, label: m.may() },
+						{ value: 6, label: m.june() },
+						{ value: 7, label: m.july() },
+						{ value: 8, label: m.august() },
+						{ value: 9, label: m.september() },
+						{ value: 10, label: m.october() },
+						{ value: 11, label: m.november() },
+						{ value: 12, label: m.december() }
 					]}
 					cacheLock={cacheLocks['months_of_year']}
 					bind:cachedValue={formDataCache['months_of_year']}
-					label={'month'}
+					label={m.month()}
 				/>
 			</div>
 		{/if}
@@ -159,7 +157,7 @@
 			{form}
 			field="end_date"
 			valuePath="schedule.end_date"
-			label={'end date'}
+			label={m.endDate()}
 			cacheLock={cacheLocks['end_date']}
 			bind:cachedValue={formDataCache['end_date']}
 		/>
@@ -169,8 +167,8 @@
 	type="date"
 	{form}
 	field="eta_or_completion_date"
-	label={m.completionDate()}
-	helpText={m.completionDateHelpText()}
+	label={m.etaCompletionDate()}
+	helpText={m.etaCompletionDateHelpText()}
 	cacheLock={cacheLocks['eta_or_completion_date']}
 	bind:cachedValue={formDataCache['eta_or_completion_date']}
 />
