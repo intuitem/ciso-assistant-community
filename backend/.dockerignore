@@ -4,6 +4,7 @@
 .git*
 .pytest*
 .idea*
+.venv
 .dockerignore
 Dockerfile
 db
