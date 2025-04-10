@@ -4159,7 +4159,7 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
             },
             "days_of_week": {
                 "type": "array",
-                "items": {"type": "integer", "minimum": 0, "maximum": 6},
+                "items": {"type": "integer", "minimum": 1, "maximum": 7},
                 "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
             },
             "weeks_of_month": {
@@ -4167,9 +4167,9 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
                 "items": {
                     "type": "integer",
                     "minimum": -1,
-                    "maximum": 3,
+                    "maximum": 4,
                 },
-                "description": "Optional. for a given weekday, which one in the month (0 for first, -1 for last)",
+                "description": "Optional. for a given weekday, which one in the month (1 for first, -1 for last)",
             },
             "months_of_year": {
                 "type": "array",
@@ -4270,6 +4270,13 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
     class Meta:
         verbose_name = _("Task node")
         verbose_name_plural = _("Task nodes")
+
+    def save(self, *args, **kwargs):
+        if self.schedule and "days_of_week" in self.schedule:
+            self.schedule["days_of_week"] = [
+                day % 7 for day in self.schedule["days_of_week"]
+            ]
+        super().save(*args, **kwargs)
 
 
 common_exclude = ["created_at", "updated_at"]

@@ -661,8 +661,8 @@ export const TaskNodeSchema = z.object({
 		.object({
 			interval: z.number().min(1).positive().default(1).optional(),
 			frequency: z.string().optional(),
-			weeks_of_month: z.number().min(-1).max(3).array().optional(),
-			days_of_week: z.number().min(0).max(6).array().optional(),
+			weeks_of_month: z.number().min(-1).max(4).array().optional(),
+			days_of_week: z.number().min(1).max(7).array().optional(),
 			months_of_year: z.number().min(1).max(12).array().optional(),
 			end_date: z.string().optional()
 		})

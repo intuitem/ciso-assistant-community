@@ -48,98 +48,111 @@
 />
 {#if $is_template}
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-		<NumberField
-			{form}
-			field="interval"
-			valuePath="schedule.interval"
-			label={m.interval()}
-			helpText={m.intervalHelpText()}
-			cacheLock={cacheLocks['interval']}
-			bind:cachedValue={formDataCache['interval']}
-		/>
-		<Select
-			{form}
-			field="frequency"
-			valuePath="schedule.frequency"
-			disableDoubleDash={true}
-			options={[
-				{ value: 'DAILY', label: 'day' },
-				{ value: 'WEEKLY', label: 'week' },
-				{ value: 'MONTHLY', label: 'month' },
-				{ value: 'YEARLY', label: 'year' }
-			]}
-			cacheLock={cacheLocks['frequency']}
-			bind:cachedValue={formDataCache['frequency']}
-			label={m.frequency()}
-		/>
-		{#if $frequency == 'MONTHLY' || $frequency == 'YEARLY'}
-			<AutocompleteSelect
+		<div class="flex w-full items-center space-x-3">
+			<span class="mt-5 font-thin text-md text-gray-800">Each</span>
+			<NumberField
 				{form}
-				multiple
-				translateOptions={false}
-				field="weeks_of_month"
-				valuePath="schedule.weeks_of_month"
+				field="interval"
+				valuePath="schedule.interval"
+				label={m.interval()}
+				cacheLock={cacheLocks['interval']}
+				bind:cachedValue={formDataCache['interval']}
+			/>
+			<Select
+				{form}
+				field="frequency"
+				valuePath="schedule.frequency"
 				disableDoubleDash={true}
 				options={[
-					{ value: 1, label: 'First' },
-					{ value: 2, label: 'Second' },
-					{ value: 3, label: 'Third' },
-					{ value: 4, label: 'Fourth' },
-					{ value: -1, label: 'Last' }
+					{ value: 'DAILY', label: 'day' },
+					{ value: 'WEEKLY', label: 'week' },
+					{ value: 'MONTHLY', label: 'month' },
+					{ value: 'YEARLY', label: 'year' }
 				]}
-				cacheLock={cacheLocks['weeks_of_month']}
-				bind:cachedValue={formDataCache['weeks_of_month']}
-				label={'weeks'}
+				cacheLock={cacheLocks['frequency']}
+				bind:cachedValue={formDataCache['frequency']}
+				label={m.frequency()}
 			/>
-		{/if}
-		{#if $frequency == 'WEEKLY' || $frequency == 'MONTHLY' || $frequency == 'YEARLY'}
-			<AutocompleteSelect
-				{form}
-				multiple
-				translateOptions={false}
-				field="days_of_week"
-				valuePath="schedule.days_of_week"
-				disableDoubleDash={true}
-				options={[
-					{ value: 1, label: 'Monday' },
-					{ value: 2, label: 'Tuesday' },
-					{ value: 3, label: 'Wednesday' },
-					{ value: 4, label: 'Thursday' },
-					{ value: 5, label: 'Friday' },
-					{ value: 6, label: 'Saturday' },
-					{ value: 0, label: 'Sunday' }
-				]}
-				cacheLock={cacheLocks['days_of_week']}
-				bind:cachedValue={formDataCache['days_of_week']}
-				label={'days'}
-			/>
-		{/if}
+		</div>
+		<div class="flex w-full items-center space-x-3">
+			{#if $frequency == 'MONTHLY' || $frequency == 'YEARLY'}
+				<span class="mt-5 font-thin text-md text-gray-800">The</span>
+				<AutocompleteSelect
+					{form}
+					multiple
+					baseClass="w-full"
+					translateOptions={false}
+					field="weeks_of_month"
+					valuePath="schedule.weeks_of_month"
+					disableDoubleDash={true}
+					options={[
+						{ value: 1, label: 'First' },
+						{ value: 2, label: 'Second' },
+						{ value: 3, label: 'Third' },
+						{ value: 4, label: 'Fourth' },
+						{ value: -1, label: 'Last' }
+					]}
+					cacheLock={cacheLocks['weeks_of_month']}
+					bind:cachedValue={formDataCache['weeks_of_month']}
+					label={'weeks'}
+				/>
+			{/if}
+			{#if $frequency == 'WEEKLY' || $frequency == 'MONTHLY' || $frequency == 'YEARLY'}
+				{#if $frequency == 'WEEKLY'}
+					<span class="mt-5 font-thin text-md text-gray-800">On</span>
+				{/if}
+				<AutocompleteSelect
+					{form}
+					multiple
+					baseClass="w-full"
+					translateOptions={false}
+					field="days_of_week"
+					valuePath="schedule.days_of_week"
+					disableDoubleDash={true}
+					options={[
+						{ value: 1, label: 'Monday' },
+						{ value: 2, label: 'Tuesday' },
+						{ value: 3, label: 'Wednesday' },
+						{ value: 4, label: 'Thursday' },
+						{ value: 5, label: 'Friday' },
+						{ value: 6, label: 'Saturday' },
+						{ value: 7, label: 'Sunday' }
+					]}
+					cacheLock={cacheLocks['days_of_week']}
+					bind:cachedValue={formDataCache['days_of_week']}
+					label={'days'}
+				/>
+			{/if}
+		</div>
 		{#if $frequency == 'YEARLY'}
-			<AutocompleteSelect
-				{form}
-				multiple
-				translateOptions={false}
-				field="months_of_year"
-				valuePath="schedule.months_of_year"
-				disableDoubleDash={true}
-				options={[
-					{ value: 1, label: 'January' },
-					{ value: 2, label: 'February' },
-					{ value: 3, label: 'March' },
-					{ value: 4, label: 'April' },
-					{ value: 5, label: 'May' },
-					{ value: 6, label: 'June' },
-					{ value: 7, label: 'July' },
-					{ value: 8, label: 'August' },
-					{ value: 9, label: 'September' },
-					{ value: 10, label: 'October' },
-					{ value: 11, label: 'November' },
-					{ value: 12, label: 'December' }
-				]}
-				cacheLock={cacheLocks['months_of_year']}
-				bind:cachedValue={formDataCache['months_of_year']}
-				label={'month'}
-			/>
+			<div class="flex w-full items-center space-x-3">
+				<span class="mt-5 font-thin text-md text-gray-800">Of</span>
+				<AutocompleteSelect
+					{form}
+					multiple
+					translateOptions={false}
+					field="months_of_year"
+					valuePath="schedule.months_of_year"
+					disableDoubleDash={true}
+					options={[
+						{ value: 1, label: 'January' },
+						{ value: 2, label: 'February' },
+						{ value: 3, label: 'March' },
+						{ value: 4, label: 'April' },
+						{ value: 5, label: 'May' },
+						{ value: 6, label: 'June' },
+						{ value: 7, label: 'July' },
+						{ value: 8, label: 'August' },
+						{ value: 9, label: 'September' },
+						{ value: 10, label: 'October' },
+						{ value: 11, label: 'November' },
+						{ value: 12, label: 'December' }
+					]}
+					cacheLock={cacheLocks['months_of_year']}
+					bind:cachedValue={formDataCache['months_of_year']}
+					label={'month'}
+				/>
+			</div>
 		{/if}
 		<TextField
 			type="date"

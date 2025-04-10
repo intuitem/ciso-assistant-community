@@ -795,7 +795,7 @@ def task_calendar(task_templates):
         # Set end date to 2 years from start date if not provided
         if not end_date_param:
             start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
-            end_date_param = start_date + timedelta(days=2*365)
+            end_date_param = start_date + timedelta(days=2 * 365)
 
         try:
             start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
