@@ -283,15 +283,15 @@ def time_state(date_str: str) -> dict:
         return {"name": "today", "hexcolor": "#fbbf24"}
 
 
-def _date_matches_schedule(template, date_to_check):
+def _date_matches_schedule(task, date_to_check):
     """Checks if a given date matches the schedule pattern"""
-    frequency = template.schedule.get("frequency")
+    frequency = task.schedule.get("frequency")
 
     if frequency == "DAILY":
         return True
 
     elif frequency == "WEEKLY":
-        days_of_week = template.schedule.get("days_of_week", [])
+        days_of_week = task.schedule.get("days_of_week", [])
         # If days_of_week is empty, any day matches
         if not days_of_week:
             return True
@@ -303,8 +303,8 @@ def _date_matches_schedule(template, date_to_check):
         return adjusted_weekday in days_of_week
 
     elif frequency == "MONTHLY":
-        days_of_week = template.schedule.get("days_of_week", [])
-        weeks_of_month = template.schedule.get("weeks_of_month", [])
+        days_of_week = task.schedule.get("days_of_week", [])
+        weeks_of_month = task.schedule.get("weeks_of_month", [])
 
         # If both are empty, any day matches
         if not days_of_week and not weeks_of_month:
@@ -373,9 +373,9 @@ def _date_matches_schedule(template, date_to_check):
         return matches
 
     elif frequency == "YEARLY":
-        months_of_year = template.schedule.get("months_of_year", [])
-        days_of_week = template.schedule.get("days_of_week", [])
-        weeks_of_month = template.schedule.get("weeks_of_month", [])
+        months_of_year = task.schedule.get("months_of_year", [])
+        days_of_week = task.schedule.get("days_of_week", [])
+        weeks_of_month = task.schedule.get("weeks_of_month", [])
 
         # First check month
         if months_of_year and date_to_check.month not in months_of_year:
@@ -413,19 +413,19 @@ def _date_matches_schedule(template, date_to_check):
     return False
 
 
-def _calculate_next_occurrence(template, base_date):
+def _calculate_next_occurrence(task, base_date):
     """Calculates the next occurrence date based on the schedule"""
-    if not template.schedule:
+    if not task.schedule:
         return None
 
-    frequency = template.schedule.get("frequency")
-    interval = template.schedule.get("interval", 1)
+    frequency = task.schedule.get("frequency")
+    interval = task.schedule.get("interval", 1)
 
     if frequency == "DAILY":
         return base_date + timedelta(days=1)
 
     elif frequency == "WEEKLY":
-        days_of_week = template.schedule.get("days_of_week", [])
+        days_of_week = task.schedule.get("days_of_week", [])
 
         if not days_of_week:
             # Simple case: just add interval weeks
@@ -468,15 +468,15 @@ def _calculate_next_occurrence(template, base_date):
             return base_date + timedelta(days=days_to_add)
 
     elif frequency == "MONTHLY":
-        days_of_week = template.schedule.get("days_of_week", [])
-        weeks_of_month = template.schedule.get("weeks_of_month", [])
+        days_of_week = task.schedule.get("days_of_week", [])
+        weeks_of_month = task.schedule.get("weeks_of_month", [])
 
         if not days_of_week and not weeks_of_month:
             # Simple case: just add interval months
             return base_date + rd.relativedelta(months=interval)
 
         # First, check if the current date can be an occurrence in the current month
-        if _date_matches_schedule(template, base_date):
+        if _date_matches_schedule(task, base_date):
             next_date = base_date + timedelta(
                 days=1
             )  # Move forward one day to find the next occurrence
@@ -484,7 +484,7 @@ def _calculate_next_occurrence(template, base_date):
 
             # Search for a valid date within the same month
             while same_month_date.month == base_date.month:
-                if _date_matches_schedule(template, same_month_date):
+                if _date_matches_schedule(task, same_month_date):
                     return same_month_date
                 same_month_date += timedelta(days=1)
 
@@ -555,7 +555,7 @@ def _calculate_next_occurrence(template, base_date):
 
             # If no valid dates, try next interval
             return _calculate_next_occurrence(
-                template, base_date + rd.relativedelta(months=interval)
+                task, base_date + rd.relativedelta(months=interval)
             )
         else:
             # Just use same day in next month
@@ -563,9 +563,9 @@ def _calculate_next_occurrence(template, base_date):
             return date(target_year, target_month, day)
 
     elif frequency == "YEARLY":
-        months_of_year = template.schedule.get("months_of_year", [])
-        days_of_week = template.schedule.get("days_of_week", [])
-        weeks_of_month = template.schedule.get("weeks_of_month", [])
+        months_of_year = task.schedule.get("months_of_year", [])
+        days_of_week = task.schedule.get("days_of_week", [])
+        weeks_of_month = task.schedule.get("weeks_of_month", [])
 
         if not months_of_year and not days_of_week and not weeks_of_month:
             # Simple case: just add interval years
@@ -673,45 +673,45 @@ def _calculate_next_occurrence(template, base_date):
     return None
 
 
-def _create_task_dict(template, task_date, iteration):
+def _create_task_dict(task, task_date, iteration):
     """
     Creates a dictionary representing a future task based on the template.
     This task is not saved to the database.
     """
     # Calculate due date based on application logic
     due_date = None
-    if template.due_date and template.task_date:
-        # If template has a due date, calculate the delta to apply
-        delta = template.due_date - template.task_date
+    if task.due_date and task.task_date:
+        # If task has a due date, calculate the delta to apply
+        delta = task.due_date - task.task_date
         due_date = task_date + delta
 
     # Create a dictionary with all necessary properties
     task_dict = {
-        "id": template.id,  # Template ID for generated tasks
-        "name": template.name,
-        "description": template.description,
-        "ref_id": template.ref_id,
+        "id": task.id,  # Template ID for generated tasks
+        "name": task.name,
+        "description": task.description,
+        "ref_id": task.ref_id,
         "iteration": iteration,
         "task_date": task_date.isoformat(),
         "due_date": due_date.isoformat() if due_date else None,
         "status": "pending",
         "is_virtual": True,  # Indication that this is a virtual task
-        "generator_id": template.id,
+        "generator_id": task.id,
         "is_template": False,
         "enabled": True,
     }
 
     # Add M2M relationships
-    task_dict["assigned_to"] = [user.id for user in template.assigned_to.all()]
-    task_dict["assets"] = [asset.id for asset in template.assets.all()]
+    task_dict["assigned_to"] = [user.id for user in task.assigned_to.all()]
+    task_dict["assets"] = [asset.id for asset in task.assets.all()]
     task_dict["applied_controls"] = [
-        control.id for control in template.applied_controls.all()
+        control.id for control in task.applied_controls.all()
     ]
     task_dict["compliance_assessments"] = [
-        assessment.id for assessment in template.compliance_assessments.all()
+        assessment.id for assessment in task.compliance_assessments.all()
     ]
     task_dict["risk_assessments"] = [
-        assessment.id for assessment in template.risk_assessments.all()
+        assessment.id for assessment in task.risk_assessments.all()
     ]
 
     return task_dict
@@ -783,7 +783,7 @@ def _generate_occurrences(template, start_date, end_date):
 
 
 def task_calendar(task_templates):
-    # 1. Generate occurrences for each template within date range
+    # Generate occurrences for each template within date range
     future_tasks = []
     for template in task_templates:
         start_date_param = template.task_date
