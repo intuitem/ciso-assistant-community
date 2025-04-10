@@ -2178,6 +2178,10 @@ class UserViewSet(BaseModelViewSet):
                 )
 
         return super().destroy(request, *args, **kwargs)
+    
+    @action(detail=True, name="Get user tasks")
+    def tasks(self, request, pk):
+        return Response(task_calendar(TaskNode.objects.filter(is_template=True, enabled=True, assigned_to=request.user)))
 
 
 class UserGroupViewSet(BaseModelViewSet):

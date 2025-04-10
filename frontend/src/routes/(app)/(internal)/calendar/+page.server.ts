@@ -2,10 +2,10 @@ import { BASE_API_URL } from '$lib/utils/constants';
 
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({ fetch }) => {
+export const load = (async ({ fetch, locals }) => {
 	const sm_endpoint = `${BASE_API_URL}/applied-controls/`;
 	const ra_endpoint = `${BASE_API_URL}/risk-acceptances/`;
-	const task_endpoint = `${BASE_API_URL}/task-nodes/calendar/`;
+	const task_endpoint = `${BASE_API_URL}/users/${locals.user.id}/tasks/`;
 
 	const res = await fetch(sm_endpoint);
 	const applied_controls = await res.json().then((res) => res.results);
