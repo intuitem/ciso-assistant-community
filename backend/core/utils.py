@@ -788,11 +788,14 @@ def task_calendar(task_templates):
         start_date_param = template.task_date
         end_date_param = template.schedule.get("end_date")
 
-        if not start_date_param or not end_date_param:
-            return Response(
-                {"error": "Both start_date and end_date parameters are required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # Set start date to now if not provided
+        if not start_date_param:
+            start_date_param = datetime.now().date()
+
+        # Set end date to 2 years from start date if not provided
+        if not end_date_param:
+            start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
+            end_date_param = start_date + timedelta(days=2*365)
 
         try:
             start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
@@ -802,6 +805,7 @@ def task_calendar(task_templates):
                 {"error": "Invalid date format. Use YYYY-MM-DD"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
         tasks = _generate_occurrences(template, start_date, end_date)
         future_tasks.extend(tasks)
 
