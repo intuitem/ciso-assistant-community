@@ -595,6 +595,7 @@ class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
+    status = serializers.CharField(source="get_status_display")
     cost = serializers.FloatField()
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
