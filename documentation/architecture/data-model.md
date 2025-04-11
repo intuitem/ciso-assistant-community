@@ -1570,100 +1570,102 @@ A finding can have related reference controls, applied controls, vulnerabilities
 ```mermaid
 erDiagram
 
-ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE     : contains
-TASK_NODE     |o--o{ TASK_NODE             : generates
-user          }o--o{ TASK_NODE             : owns
-TASK_NODE     }o--o| TASK_NODE             : is_subtask_of
-TASK_NODE     }o--o{ ASSET                 : relates_to
-TASK_NODE     }o--o{ APPLIED_CONTROL       : relates_to
-TASK_NODE     }o--o{ COMPLIANCE_ASSESSMENT : relates_to
-TASK_NODE     }o--o{ RISK_ASSESSMENT       : relates_to
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_TEMPLATE         : contains
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE             : contains
+TASK_TEMPLATE         |o--o{ TASK_NODE             : generates
+TASK_TEMPLATE         }o--o{ TASK_NODE             : owns
+TASK_TEMPLATE         }o--o| TASK_TEMPLATE         : is_subtask_of
+TASK_TEMPLATE         }o--o{ ASSET                 : relates_to
+TASK_TEMPLATE         }o--o{ APPLIED_CONTROL       : relates_to
+TASK_TEMPLATE         }o--o{ COMPLIANCE_ASSESSMENT : relates_to
+TASK_TEMPLATE         }o--o{ RISK_ASSESSMENT       : relates_to
+TASK_NODE             }o--o{ EVIDENCE              : contains
 
-TASK_NODE {
+TASK_TEMPLATE {
     string ref_id
     string name
     string description
-    int    iteration
 
     date   task_date
-    date   eta_or_completion_date
-    enum   status "pending, in progress, completed, cancelled"
-    string observation
-
-    bool   is_template
     json   schedule_definition
     bool   enabled
 }
+
+TASK_NODE {
+    date   due_date
+    enum   status "pending, in progress, completed, cancelled"
+    string observation
+}
 ```
 
-is_template indicates this task is the start of a recurring series. If true, the schedule_definition contains the following fields:
+The schedule_definition contains the following fields:
 
 ```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Schedule Definition",
-  "type": "object",
-  "properties": {
-    "frequency": {
-      "type": "string",
-      "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+SCHEDULE_JSONSCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Schedule Definition",
+    "type": "object",
+    "properties": {
+        "interval": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of periods to wait before repeating (e.g., every 2 days, 3 weeks).",
+        },
+        "frequency": {
+            "type": "string",
+            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+        },
+        "days_of_week": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 7},
+            "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
+        },
+        "weeks_of_month": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 4,
+            },
+            "description": "Optional. for a given weekday, which one in the month (1 for first, -1 for last)",
+        },
+        "months_of_year": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 12},
+            "description": "Optional. Months of the year (1=January, 12=December)",
+        },
+        "start_date": {
+            "type": ["string"],
+            "format": "date",
+            "description": "Date when recurrence begins.",
+        },
+        "end_date": {
+            "type": ["string"],
+            "format": "date",
+            "description": "Date when recurrence ends.",
+        },
+        "occurrences": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "description": "Optional. Number of occurrences before recurrence stops.",
+        },
+        "overdue_behavior": {
+            "type": "string",
+            "enum": ["DELAY_NEXT", "NO_IMPACT"],
+            "default": "NO_IMPACT",
+            "description": "Optional. Behavior when tasks become overdue.",
+        },
+        "exceptions": {
+            "type": ["object", "null"],
+            "description": "Optional. JSON object for future exceptions handling.",
+        },
     },
-    "days_of_week": {
-      "type": "array",
-      "items": {
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 6
-      },
-      "description": "Optional. Days of the week (0=Sunday, 6=Saturday)"
-    },
-    "week_of_month": {
-      "type": "array",
-      "items": {
-        "type": "integer",
-        "minimum": -1,
-        "maximum": 3,
-      },
-      "description": "Optional. for a given weekday, which one in the month (0 for first, -1 for last)"
-    },
-    "months_of_year": {
-      "type": "array",
-      "items": {
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 12
-      },
-      "description": "Optional. Months of the year (1=January, 12=December)"
-    },
-    "endDate": {
-      "type": ["string", "null"],
-      "format": "date",
-      "description": "Optional. Date when recurrence ends."
-    },
-    "occurrences": {
-      "type": ["integer", "null"],
-      "minimum": 1,
-      "description": "Optional. Number of occurrences before recurrence stops."
-    },
-    "overdue_behavior": {
-      "type": "string",
-      "enum": ["DELAY_NEXT", "NO_IMPACT"],
-      "default": "NO_IMPACT",
-      "description": "Optional. Behavior when tasks become overdue."
-    },
-    "exceptions": {
-      "type": ["object", "null"],
-      "description": "Optional. JSON object for future exceptions handling."
-    }
-  },
-  "required": ["frequency"],
-  "additionalProperties": false
+    "required": ["interval", "frequency"],
+    "additionalProperties": False,
 }
 ```
 
 When enabled is set to False, the schedule is suspended.
-
-The iteration field is read_only. Its value is 0 for a one-off or template task, and increases by one for each element of a series.
 
 The following concepts will not be included in the MVP:
 - subtasks
