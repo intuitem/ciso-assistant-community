@@ -30,7 +30,7 @@ test('redirect to the right page after login', async ({ loginPage, page }) => {
 	const currentDate = new Date();
 	const year = currentDate.getFullYear();
 	const month = currentDate.getMonth() + 1;
-await expect(page).toHaveURL(`/calendar/${year}/${month}`);
+	await expect(page).toHaveURL(`/calendar/${year}/${month}`);
 });
 
 test('login invalid message is showing properly', async ({ loginPage, page }) => {
