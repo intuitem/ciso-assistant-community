@@ -46,6 +46,7 @@ class DummyTask:
         self.task_date = kwargs.get("task_date")  # Must be a date or string
         self.due_date = kwargs.get("due_date")  # Must be a date or None
         self.schedule = kwargs.get("schedule", {})
+        self.is_template = kwargs.get("is_template", True)
         # Relations are simulated by DummyQuerySet
         self.assigned_to = DummyQuerySet(kwargs.get("assigned_to", [1]))
         self.assets = DummyQuerySet(kwargs.get("assets", [10]))
