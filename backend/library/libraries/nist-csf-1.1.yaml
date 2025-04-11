@@ -1,12 +1,13 @@
 urn: urn:intuitem:risk:library:nist-csf-1.1
 locale: en
 ref_id: NIST-CSF-1.1
-name: NIST CSF v1.1
+name: NIST CSF version 1.1
 description: National Institute of Standards and Technology - Cybersecurity Framework
+  (CSF 1.1)
 copyright: With the exception of material marked as copyrighted, information presented
   on NIST sites are considered public information and may be distributed or copied.
-version: 2
-publication_date: 2024-03-02
+version: 3
+publication_date: 2025-04-11
 provider: NIST
 packager: intuitem
 objects:
@@ -24,6 +25,15 @@ objects:
         is managed in an ad hoc manner.
 
         There is limited awareness of cybersecurity risks at the organizational level.'
+      translations:
+        fr:
+          name: Partiel
+          description: "L\u2019application de la strat\xE9gie de gestion des risques\
+            \ cybers\xE9curit\xE9 de l\u2019organisation est g\xE9r\xE9e de mani\xE8\
+            re ad hoc.\nLa sensibilisation aux risques cybers\xE9curit\xE9 est limit\xE9\
+            e au niveau organisationnel.\nLes pratiques de gestion des risques sont\
+            \ approuv\xE9es par la direction, mais ne sont peut-\xEAtre pas \xE9tablies\
+            \ comme une politique \xE0 l\u2019\xE9chelle de l\u2019organisation."
     - score: 2
       name: Risk informed
       description: 'Risk management practices are approved by management but may not
@@ -32,6 +42,15 @@ objects:
         There is an awareness of cybersecurity risks at the organizational level,
         but an organization-wide approach to managing cybersecurity risks has not
         been established.'
+      translations:
+        fr:
+          name: "Inform\xE9 des risques"
+          description: "Les pratiques de gestion des risques sont approuv\xE9es par\
+            \ la direction, mais ne sont peut-\xEAtre pas \xE9tablies comme une politique\
+            \ \xE0 l\u2019\xE9chelle de l\u2019organisation.\nIl existe une sensibilisation\
+            \ aux risques cybers\xE9curit\xE9 au niveau de l\u2019organisation, mais\
+            \ une approche globale pour les g\xE9rer n\u2019a pas \xE9t\xE9 mise en\
+            \ place."
     - score: 3
       name: Repeatable
       description: "The organization\u2019s risk management practices are formally\
@@ -39,6 +58,15 @@ objects:
         \ are regularly updated based on the application of risk management processes\
         \ to changes in business/mission requirements, threats, and technological\
         \ landscape."
+      translations:
+        fr:
+          name: "R\xE9p\xE9table"
+          description: "Les pratiques de gestion des risques de l\u2019organisation\
+            \ sont formellement approuv\xE9es et exprim\xE9es sous forme de politique.\n\
+            Les pratiques cybers\xE9curit\xE9 de l\u2019organisation sont r\xE9guli\xE8\
+            rement mises \xE0 jour en fonction de l\u2019application des processus\
+            \ de gestion des risques, pour r\xE9pondre \xE0 l\u2019\xE9volution des\
+            \ exigences m\xE9tiers ou missions, des menaces et du paysage technologique."
     - score: 4
       name: Adaptive
       description: 'There is an organization-wide approach to managing cybersecurity
@@ -48,24 +76,47 @@ objects:
         The organization adapts its cybersecurity practices based on previous and
         current cybersecurity activities, including lessons learned and predictive
         indicators.'
+      translations:
+        fr:
+          name: Adaptatif
+          description: "L\u2019organisation dispose d\u2019une approche \xE0 l\u2019\
+            \xE9chelle de l\u2019entreprise pour g\xE9rer les risques cybers\xE9curit\xE9\
+            , en utilisant des politiques, processus et proc\xE9dures inform\xE9s\
+            \ par les risques pour traiter les \xE9v\xE9nements potentiels.\nL\u2019\
+            organisation adapte ses pratiques cybers\xE9curit\xE9 en fonction des\
+            \ activit\xE9s pass\xE9es et pr\xE9sentes, y compris les retours d\u2019\
+            exp\xE9rience et les indicateurs pr\xE9dictifs."
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
       assessable: false
       depth: 1
       ref_id: ID
       name: Identify
+      translations:
+        fr:
+          name: Identifier
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
       ref_id: ID.AM
       name: Asset Management
+      translations:
+        fr:
+          name: Gestion des actifs
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
       ref_id: ID.AM-1
       description: Physical devices and systems within the organization are inventoried.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9veloppez un processus d\u2019inventaire garantissant\
+            \ en permanence un recensement exhaustif de vos \xE9quipements TIC (Asset)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-2
       assessable: true
       depth: 3
@@ -73,18 +124,33 @@ objects:
       ref_id: ID.AM-2
       description: Software platforms and applications within the organization are
         inventoried.
+      translations:
+        fr:
+          name: null
+          description: Inventoriez toutes les plateformes, licences et applications
+            logicielles dans votre entreprise.
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
       ref_id: ID.AM-3
       description: Organizational communication and data flows are mapped.
+      translations:
+        fr:
+          name: null
+          description: "Listez tous les flux de communication et de transferts de\
+            \ donn\xE9es en interne."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
       ref_id: ID.AM-4
       description: External information systems are catalogued.
+      translations:
+        fr:
+          name: null
+          description: "Listez tous les syst\xE8mes TIC externes cruciaux pour votre\
+            \ entreprise."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-5
       assessable: true
       depth: 3
@@ -93,6 +159,12 @@ objects:
       description: Resources (e.g., hardware, devices, data, time, personnel, and
         software) are prioritized based on their classification, criticality, and
         business value.
+      translations:
+        fr:
+          name: null
+          description: "Etablissez des priorit\xE9s pour les ressources inventori\xE9\
+            es (\xE9quipements, donn\xE9es, temps, personnel et applications) selon\
+            \ leur criticit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-6
       assessable: true
       depth: 3
@@ -100,12 +172,21 @@ objects:
       ref_id: ID.AM-6
       description: Cybersecurity roles and responsibilities for the entire workforce
         and third-party stakeholders (e.g., suppliers, customers, partners) are established.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez clairement les r\xF4les et les responsabilit\xE9\
+            s en mati\xE8re de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
       ref_id: ID.BE
       name: Business Environment
+      translations:
+        fr:
+          name: "Environnement op\xE9rationnel"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-1
       assessable: true
       depth: 3
@@ -113,6 +194,11 @@ objects:
       ref_id: ID.BE-1
       description: "The organization\u2019s role in the supply chain is identified\
         \ and communicated."
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez, documentez et communiquez le r\xF4le exact\
+            \ de votre entreprise dans la cha\xEEne d\u2019approvisionnement (critique)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-2
       assessable: true
       depth: 3
@@ -120,6 +206,12 @@ objects:
       ref_id: ID.BE-2
       description: "The organization\u2019s place in critical infrastructure and its\
         \ industry sector is identified and communicated."
+      translations:
+        fr:
+          name: null
+          description: "Identifiez et communiquez l\u2019importance de votre entreprise\
+            \ en tant qu\u2019infrastructure vitale et sa position dans le secteur\
+            \ critique."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-3
       assessable: true
       depth: 3
@@ -127,6 +219,11 @@ objects:
       ref_id: ID.BE-3
       description: Priorities for organizational mission, objectives, and activities
         are established and communicated.
+      translations:
+        fr:
+          name: null
+          description: "Evaluez et hi\xE9rarchisez les objectifs, les t\xE2ches et\
+            \ les activit\xE9s dans l\u2019entreprise."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-4
       assessable: true
       depth: 3
@@ -134,6 +231,11 @@ objects:
       ref_id: ID.BE-4
       description: Dependencies and critical functions for delivery of critical services
         are established.
+      translations:
+        fr:
+          name: null
+          description: "Listez tous les syst\xE8mes TIC externes cruciaux pour votre\
+            \ entreprise."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-5
       assessable: true
       depth: 3
@@ -142,18 +244,34 @@ objects:
       description: Resilience requirements to support delivery of critical services
         are established for all operating states (e.g. under duress/attack, during
         recovery, normal operations).
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez les exigences de r\xE9silience pour les activit\xE9\
+            s de l'entreprise dans toutes les situations op\xE9rationnelles (par exemple\
+            \ pendant une prise d'otage ou une attaque, en cas de reprise, en r\xE9\
+            gime nominal)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
       ref_id: ID.GV
       name: Governance
+      translations:
+        fr:
+          name: Gouvernance
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
       ref_id: ID.GV-1
       description: Organizational cybersecurity policy is established and communicated.
+      translations:
+        fr:
+          name: null
+          description: "\xC9dictez une politique de s\xE9curit\xE9 informatique dans\
+            \ votre entreprise."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
       assessable: true
       depth: 3
@@ -161,6 +279,12 @@ objects:
       ref_id: ID.GV-2
       description: Cybersecurity roles and responsibilities are coordinated and aligned
         with internal roles and external partners.
+      translations:
+        fr:
+          name: null
+          description: "Convenir entre les responsables internes (gestion des risques\
+            \ par ex.) et des partenaires externes, des r\xF4les et des responsabilit\xE9\
+            s en mati\xE8re de s\xE9curit\xE9 informatique."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-3
       assessable: true
       depth: 3
@@ -168,6 +292,12 @@ objects:
       ref_id: ID.GV-3
       description: Legal and regulatory requirements regarding cybersecurity, including
         privacy and civil liberties obligations, are understood and managed.
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que votre entreprise respecte toutes les exigences\
+            \ l\xE9gales et r\xE9glementaires en mati\xE8re de cybers\xE9curit\xE9\
+            , y compris au niveau de la protection des donn\xE9es."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-4
       assessable: true
       depth: 3
@@ -175,18 +305,32 @@ objects:
       ref_id: ID.GV-4
       description: Governance and risk management processes address cybersecurity
         risks.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les cyber-risques sont bien int\xE9gr\xE9\
+            s dans la gestion des risques pour toute l\u2019entreprise."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
       ref_id: ID.RA
       name: Risk Assessment
+      translations:
+        fr:
+          name: "\xC9valuation des risques"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
       ref_id: ID.RA-1
       description: Asset vulnerabilities are identified and documented.
+      translations:
+        fr:
+          name: null
+          description: "Identifiez les faiblesses (techniques) de vos \xE9quipements\
+            \ et documentez-les."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-2
       assessable: true
       depth: 3
@@ -194,18 +338,33 @@ objects:
       ref_id: ID.RA-2
       description: Cyber threat intelligence is received from information sharing
         forums and sources.
+      translations:
+        fr:
+          name: null
+          description: "Participez \xE0 des forums et \xE0 des r\xE9unions d\u2019\
+            experts pour \xE9changer des informations et \xEAtre au courant des cybermenaces."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
       ref_id: ID.RA-3
       description: Threats, both internal and external, are identified and documented.
+      translations:
+        fr:
+          name: null
+          description: "Identifiez et documentez les cybermenaces, aussi bien internes\
+            \ qu\u2019externes."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
       ref_id: ID.RA-4
       description: Potential business impacts and likelihoods are identified.
+      translations:
+        fr:
+          name: null
+          description: "Identifiez l\u2019impact potentiel des cybermenaces sur vos\
+            \ activit\xE9s et \xE9valuez leur probabilit\xE9 d\u2019occurrence."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-5
       assessable: true
       depth: 3
@@ -213,18 +372,33 @@ objects:
       ref_id: ID.RA-5
       description: Threats, vulnerabilities, likelihoods, and impacts are used to
         determine risk.
+      translations:
+        fr:
+          name: null
+          description: "\xC9valuez les risques pour votre entreprise en fonction des\
+            \ menaces, des vuln\xE9rabilit\xE9s, de l\u2019impact (sur ses activit\xE9\
+            s) et de leur probabilit\xE9 d\u2019occurrence."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
       ref_id: ID.RA-6
       description: Risk responses are identified and prioritized.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez les mesures \xE0 prendre imm\xE9diatement lorsqu\u2019\
+            un risque se concr\xE9tise et fixez des priorit\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
       ref_id: ID.RM
       name: Risk Management Strategy
+      translations:
+        fr:
+          name: "Strat\xE9gie de gestion des risques"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-1
       assessable: true
       depth: 3
@@ -232,12 +406,23 @@ objects:
       ref_id: ID.RM-1
       description: Risk management processes are established, managed, and agreed
         to by organizational stakeholders.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez les processus de gestion des risques, g\xE9\
+            rez-les activement et faites-les confirmer par les personnes impliqu\xE9\
+            es ou les parties prenantes."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
       ref_id: ID.RM-2
       description: Organizational risk tolerance is determined and clearly expressed.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez et communiquez les risques supportables pour\
+            \ votre entreprise."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-3
       assessable: true
       depth: 3
@@ -245,12 +430,23 @@ objects:
       ref_id: ID.RM-3
       description: "The organization\u2019s determination of risk tolerance is informed\
         \ by its role in critical infrastructure and sector specific risk analysis."
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les risques supportables sont \xE9valu\xE9\
+            s en prenant en compte l\u2019importance de votre entreprise du fait qu\u2019\
+            elle exploite une infrastructure critique. Prenez \xE9galement en consid\xE9\
+            ration, dans votre analyse, les risques propres au secteur."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
       ref_id: ID.SC
       name: Supply Chain Risk Management
+      translations:
+        fr:
+          name: "Gestion des risques li\xE9s \xE0 la chaine d'approvisionnement"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
       assessable: true
       depth: 3
@@ -258,6 +454,13 @@ objects:
       ref_id: ID.SC-1
       description: Cyber supply chain risk management processes are identified, established,
         assessed, managed, and agreed to by organizational stakeholders.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez des processus clairs pour g\xE9rer les risques\
+            \ li\xE9s \xE0 une perturbation dans la cha\xEEne d\u2019approvisionnement.\
+            \ Faites contr\xF4ler et valider ces processus par toutes les parties\
+            \ prenantes."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
       assessable: true
       depth: 3
@@ -266,6 +469,12 @@ objects:
       description: Suppliers and third party partners of information systems, components,
         and services are identified, prioritized, and assessed using a cyber supply
         chain risk assessment process.
+      translations:
+        fr:
+          name: null
+          description: "Identifiez les fournisseurs et les prestataires de services\
+            \ cruciaux pour vos syst\xE8mes, composants et services critiques \xE0\
+            \ partir des processus d\xE9finis ci-dessus et fixez les priorit\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-3
       assessable: true
       depth: 3
@@ -274,6 +483,13 @@ objects:
       description: "Contracts with suppliers and third-party partners are used to\
         \ implement appropriate measures designed to meet the objectives of an organization\u2019\
         s cybersecurity program and Cyber Supply Chain Risk Management Plan."
+      translations:
+        fr:
+          name: null
+          description: "Exigez de vos fournisseurs et prestataires de services qu\u2019\
+            ils s\u2019engagent contractuellement \xE0 d\xE9velopper et mettre en\
+            \ oeuvre des mesures appropri\xE9es pour atteindre les objectifs du processus\
+            \ pour g\xE9rer les risques li\xE9s \xE0 la cha\xEEne d\u2019approvisionnement."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-4
       assessable: true
       depth: 3
@@ -282,6 +498,13 @@ objects:
       description: Suppliers and third-party partners are routinely assessed using
         audits, test results, or other forms of evaluations to confirm they are meeting
         their contractual obligations.
+      translations:
+        fr:
+          name: null
+          description: "Faites un suivi syst\xE9matique pour vous assurer que tous\
+            \ vos fournisseurs et prestataires de services remplissent leurs obligations\
+            \ conform\xE9ment aux exigences. Faites-le v\xE9rifier r\xE9guli\xE8rement\
+            \ par des rapports d\u2019audit ou par les r\xE9sultats des tests techniques."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-5
       assessable: true
       depth: 3
@@ -289,17 +512,32 @@ objects:
       ref_id: ID.SC-5
       description: Response and recovery planning and testing are conducted with suppliers
         and third-party providers.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez avec vos fournisseurs et prestataires les processus\
+            \ pour r\xE9agir et r\xE9cup\xE9rer apr\xE8s des probl\xE8mes de cybers\xE9\
+            curit\xE9. Validez ces processus par des simulations."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
       assessable: false
       depth: 1
       ref_id: PR
       name: Protect
+      translations:
+        fr:
+          name: "Prot\xE9ger"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
       ref_id: PR.AC
       name: Identity Management, Authentication and Access Control
+      translations:
+        fr:
+          name: "Gestion des identit\xE9s, authentification et contr\xF4le d'acc\xE8\
+            s"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
       assessable: true
       depth: 3
@@ -307,18 +545,36 @@ objects:
       ref_id: PR.AC-1
       description: Identities and credentials are issued, managed, verified, revoked,
         and audited for authorized devices, users and processes.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez un processus clair pour octroyer et g\xE9rer\
+            \ les autorisations et les donn\xE9es d\u2019identification pour utilisateurs,\
+            \ appareils/machines et processus."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
       ref_id: PR.AC-2
       description: Physical access to assets is managed and protected.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que seules les personnes autoris\xE9es ont physiquement\
+            \ acc\xE8s aux \xE9quipements TIC. Prenez des mesures concr\xE8tes pour\
+            \ garantir que les ressources TIC sont prot\xE9g\xE9es contre tout acc\xE8\
+            s physique non autoris\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
       ref_id: PR.AC-3
       description: Remote access is managed.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez les processus pour g\xE9rer les acc\xE8s \xE0\
+            \ distance."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-4
       assessable: true
       depth: 3
@@ -326,6 +582,11 @@ objects:
       ref_id: PR.AC-4
       description: Access permissions and authorizations are managed, incorporating
         the principles of least privilege and separation of duties.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez les niveaux d\u2019autorisation en \xE9tant\
+            \ le plus restrictif possible et s\xE9parez les fonctions."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-5
       assessable: true
       depth: 3
@@ -333,6 +594,12 @@ objects:
       ref_id: PR.AC-5
       description: Network integrity is protected (e.g., network segregation, network
         segmentation).
+      translations:
+        fr:
+          name: null
+          description: "V\xE9rifiez que l\u2019int\xE9grit\xE9 de votre r\xE9seau\
+            \ est prot\xE9g\xE9e. S\xE9parez votre r\xE9seau au niveau logique comme\
+            \ physique, si c\u2019est n\xE9cessaire et judicieux."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-6
       assessable: true
       depth: 3
@@ -340,6 +607,12 @@ objects:
       ref_id: PR.AC-6
       description: Identities are proofed and bound to credentials and asserted in
         interactions.
+      translations:
+        fr:
+          name: null
+          description: "N\u2019attribuez des identit\xE9s num\xE9riques qu\u2019\xE0\
+            \ des personnes ou \xE0 des processus que vous avez clairement identifi\xE9\
+            s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-7
       assessable: true
       depth: 3
@@ -348,24 +621,45 @@ objects:
       description: "Users, devices, and other assets are authenticated (e.g., single-factor,\
         \ multi-factor) commensurate with the risk of the transaction (e.g., individuals\u2019\
         \ security and privacy risks and other organizational risks)."
+      translations:
+        fr:
+          name: null
+          description: "Les utilisateurs, \xE9quipements et autres biens sont authentif\xE9\
+            s avec un niveau de s\xE9curit\xE9 (simple facteur, multi-facteur) coh\xE9\
+            rent avec le risque encouru. "
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
       ref_id: PR.AT
       name: Awareness and Training
+      translations:
+        fr:
+          name: Sensibilisation et formation
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
       ref_id: PR.AT-1
       description: All users are informed and trained.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que tous vos collaborateurs soient sensibilis\xE9\
+            s et form\xE9s en mati\xE8re de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
       ref_id: PR.AT-2
       description: Privileged users understand their roles and responsibilities.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que les utilisateurs ayant des niveaux d\u2019\
+            autorisation \xE9lev\xE9s soient conscients de leur r\xF4le et de leurs\
+            \ responsabilit\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-3
       assessable: true
       depth: 3
@@ -373,12 +667,23 @@ objects:
       ref_id: PR.AT-3
       description: Third-party stakeholders (e.g., suppliers, customers, partners)
         understand their roles and responsibilities.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que tous les acteurs ext\xE9rieurs \xE0 votre\
+            \ entreprise (fournisseurs, clients, partenaires) soient conscients de\
+            \ leur r\xF4le et de leurs responsabilit\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
       ref_id: PR.AT-4
       description: Senior executives understand their roles and responsibilities.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que tous les cadres soient conscients de leurs\
+            \ r\xF4les sp\xE9cifiques et de leurs responsabilit\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-5
       assessable: true
       depth: 3
@@ -386,24 +691,46 @@ objects:
       ref_id: PR.AT-5
       description: Physical and cybersecurity personnel understand their roles and
         responsibilities.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que les responsables de la s\xE9curit\xE9\
+            \ physique et de la s\xE9curit\xE9 informatique soient conscients de leurs\
+            \ r\xF4les sp\xE9cifiques et de leurs responsabilit\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
       ref_id: PR.DS
       name: Data Security
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 des donn\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
       ref_id: PR.DS-1
       description: Data-at-rest is protected.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les donn\xE9es stock\xE9es sont prot\xE9\
+            g\xE9es (contre toute atteinte ou pr\xE9judice en termes de confidentialit\xE9\
+            , d\u2019int\xE9grit\xE9 et de disponibilit\xE9)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
       ref_id: PR.DS-2
       description: Data-in-transit is protected.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les donn\xE9es sont prot\xE9g\xE9es pendant\
+            \ leur transmission (contre toute atteinte ou pr\xE9judice en termes de\
+            \ confidentialit\xE9, d\u2019int\xE9grit\xE9 et de disponibilit\xE9)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-3
       assessable: true
       depth: 3
@@ -411,18 +738,36 @@ objects:
       ref_id: PR.DS-3
       description: Assets are formally managed throughout removal, transfers, and
         disposition.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce qu\u2019un processus formel soit d\xE9fini\
+            \ pour votre mat\xE9riel TIC afin de prot\xE9ger les donn\xE9es lorsque\
+            \ des \xE9quipements sont supprim\xE9s, d\xE9plac\xE9s ou remplac\xE9\
+            s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
       ref_id: PR.DS-4
       description: Adequate capacity to ensure availability is maintained.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que vos \xE9quipements TIC aient une r\xE9\
+            serve de capacit\xE9 suffisante afin que vos donn\xE9es soient toujours\
+            \ disponibles."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
       ref_id: PR.DS-5
       description: Protections against data leaks are implemented.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que des mesures appropri\xE9es sont mises en\
+            \ oeuvre contre les fuites de donn\xE9es."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-6
       assessable: true
       depth: 3
@@ -430,6 +775,12 @@ objects:
       ref_id: PR.DS-6
       description: Integrity checking mechanisms are used to verify software, firmware,
         and information integrity.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez un processus pour v\xE9rifier l\u2019int\xE9\
+            grit\xE9 du micrologiciel, des syst\xE8mes d\u2019exploitation, des logiciels\
+            \ d\u2019application et des donn\xE9es."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-7
       assessable: true
       depth: 3
@@ -437,18 +788,32 @@ objects:
       ref_id: PR.DS-7
       description: The development and testing environment(s) are separate from the
         production environment.
+      translations:
+        fr:
+          name: null
+          description: "Pour le d\xE9veloppement et les tests, ayez un environnement\
+            \ informatique totalement ind\xE9pendant des syst\xE8mes de production."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
       ref_id: PR.DS-8
       description: Integrity checking mechanisms are used to verify hardware integrity.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez un processus pour v\xE9rifier l\u2019int\xE9\
+            grit\xE9 du mat\xE9riel utilis\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
       ref_id: PR.IP
       name: Information Protection Processes and Procedures
+      translations:
+        fr:
+          name: "Processus et proc\xE9dures de protection de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-1
       assessable: true
       depth: 3
@@ -457,24 +822,48 @@ objects:
       description: A baseline configuration of information technology/industrial control
         systems is created and maintained incorporating security principles (e.g.
         concept of least functionality).
+      translations:
+        fr:
+          name: null
+          description: "G\xE9n\xE9rez une configuration standard pour l\u2019infrastructure\
+            \ d\u2019information et de communication, ainsi que pour les syst\xE8\
+            mes de contr\xF4le industriels. Assurez-vous que cette configuration par\
+            \ d\xE9faut ob\xE9it aux r\xE8gles usuelles de s\xE9curit\xE9 (par ex.\
+            \ redondance N-1, configuration minimale, etc.)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       ref_id: PR.IP-2
       description: A System Development Life Cycle to manage systems is implemented.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez un processus \xAB cycle de vie \xBB pour l\u2019\
+            utilisation des \xE9quipements TIC."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       ref_id: PR.IP-3
       description: Configuration change control processes are in place.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez un processus pour contr\xF4ler les changements\
+            \ de configuration."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       ref_id: PR.IP-4
       description: Backups of information are conducted, maintained, and tested.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que des sauvegardes informatiques (backups) sont\
+            \ effectu\xE9es, g\xE9r\xE9es et test\xE9es r\xE9guli\xE8rement (+ qu\u2019\
+            on peut restaurer les donn\xE9es sauvegard\xE9es)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-5
       assessable: true
       depth: 3
@@ -482,24 +871,45 @@ objects:
       ref_id: PR.IP-5
       description: Policy and regulations regarding the physical operating environment
         for organizational assets are met.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que toutes les exigences (r\xE9glementaires)\
+            \ et les directives concernant les \xE9quipements \xAB physiques \xBB\
+            \ soient respect\xE9es."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       ref_id: PR.IP-6
       description: Data is destroyed according to policy.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que les donn\xE9es soient toujours d\xE9truites\
+            \ selon les prescriptions."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       ref_id: PR.IP-7
       description: Protection processes are improved.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9veloppez et am\xE9liorez r\xE9guli\xE8rement vos processus\
+            \ de s\xE9curit\xE9 informatique."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       ref_id: PR.IP-8
       description: Effectiveness of protection technologies is shared.
+      translations:
+        fr:
+          name: null
+          description: "Discutez de l\u2019efficacit\xE9 des diff\xE9rentes technologies\
+            \ de protection avec vos partenaires."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-9
       assessable: true
       depth: 3
@@ -508,12 +918,22 @@ objects:
       description: Response plans (Incident Response and Business Continuity) and
         recovery plans (Incident Recovery and Disaster Recovery) are in place and
         managed.
+      translations:
+        fr:
+          name: null
+          description: "Instaurez des processus pour r\xE9agir aux cyberincidents.\
+            \ (Incident Response-Planing, Business Continuity Management, Incident\
+            \ Recovery, Disaster Recovery)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-10
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       ref_id: PR.IP-10
       description: Response and recovery plans are tested.
+      translations:
+        fr:
+          name: null
+          description: "Testez les plans de r\xE9action et de r\xE9cup\xE9ration."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-11
       assessable: true
       depth: 3
@@ -521,18 +941,33 @@ objects:
       ref_id: PR.IP-11
       description: Cybersecurity is included in human resources practices (e.g., deprovisioning,
         personnel screening).
+      translations:
+        fr:
+          name: null
+          description: "Tenez compte de la cybers\xE9curit\xE9 d\xE8s le processus\
+            \ de recrutement (en v\xE9rifiant les ant\xE9c\xE9dents ou par des contr\xF4\
+            les de s\xE9curit\xE9 personnels, par ex.)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-12
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
       ref_id: PR.IP-12
       description: A vulnerability management plan is developed and implemented.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9veloppez et mettez en oeuvre un processus pour traiter\
+            \ les failles rep\xE9r\xE9es."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
       ref_id: PR.MA
       name: Maintenance
+      translations:
+        fr:
+          name: Maintenance
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-1
       assessable: true
       depth: 3
@@ -540,6 +975,14 @@ objects:
       ref_id: PR.MA-1
       description: Maintenance and repair of organizational assets are performed and
         logged, with approved and controlled tools.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que le fonctionnement, la maintenance et les\
+            \ \xE9ventuelles r\xE9parations des \xE9quipements soient enregistr\xE9\
+            s et document\xE9s (journalisation). Assurez-vous qu\u2019elles sont effectu\xE9\
+            es rapidement et en ne recourant qu\u2019\xE0 des moyens test\xE9s et\
+            \ approuv\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-2
       assessable: true
       depth: 3
@@ -547,12 +990,22 @@ objects:
       ref_id: PR.MA-2
       description: Remote maintenance of organizational assets is approved, logged,
         and performed in a manner that prevents unauthorized access.
+      translations:
+        fr:
+          name: null
+          description: "Enregistrez et documentez \xE9galement les travaux de maintenance\
+            \ de vos syst\xE8mes distants. Assurez-vous qu\u2019aucun acc\xE8s non\
+            \ autoris\xE9 n\u2019est possible."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
       ref_id: PR.PT
       name: Protective Technology
+      translations:
+        fr:
+          name: Technologie de protection
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-1
       assessable: true
       depth: 3
@@ -560,6 +1013,11 @@ objects:
       ref_id: PR.PT-1
       description: Audit/log records are determined, documented, implemented, and
         reviewed in accordance with policy.
+      translations:
+        fr:
+          name: null
+          description: "G\xE9n\xE9rez et v\xE9rifiez ces fichiers r\xE9guli\xE8rement,\
+            \ selon les exigences et les directives."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-2
       assessable: true
       depth: 3
@@ -567,6 +1025,11 @@ objects:
       ref_id: PR.PT-2
       description: Removable media is protected and its use restricted according to
         policy.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les supports amovibles sont prot\xE9g\xE9\
+            s et que leur utilisation se fait dans le strict respect des directives."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-3
       assessable: true
       depth: 3
@@ -574,12 +1037,22 @@ objects:
       ref_id: PR.PT-3
       description: The principle of least functionality is incorporated by configuring
         systems to provide only essential capabilities.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que votre syst\xE8me soit configur\xE9 pour\
+            \ toujours fonctionner, m\xEAme en mode d\xE9grad\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
       ref_id: PR.PT-4
       description: Communications and control networks are protected.
+      translations:
+        fr:
+          name: null
+          description: "Assurez la protection de vos r\xE9seaux de communication et\
+            \ de contr\xF4le."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-5
       assessable: true
       depth: 3
@@ -587,17 +1060,32 @@ objects:
       ref_id: PR.PT-5
       description: Mechanisms (e.g., failsafe, load balancing, hot swap) are implemented
         to achieve resilience requirements in normal and adverse situations.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez des sc\xE9narios pour les diff\xE9rents modes\
+            \ de fonctionnement de vos syst\xE8mes. Par ex. : fonctionnalit\xE9s en\
+            \ cas d\u2019attaque, fonctionnalit\xE9s pendant la phase de r\xE9cup\xE9\
+            ration, fonctionnalit\xE9s normales pendant l\u2019exploitation."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
       assessable: false
       depth: 1
       ref_id: DE
       name: Detect
+      translations:
+        fr:
+          name: "D\xE9tecter"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
       ref_id: DE.AE
       name: Anomalies and Events
+      translations:
+        fr:
+          name: "Anomalies et \xE9v\xE9nements"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-1
       assessable: true
       depth: 3
@@ -605,12 +1093,23 @@ objects:
       ref_id: DE.AE-1
       description: A baseline of network operations and expected data flows for users
         and systems is established and managed.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez des valeurs par d\xE9faut pour les op\xE9rations\
+            \ r\xE9seau licites et les flux de donn\xE9es pr\xE9vus pour les utilisateurs\
+            \ et les syst\xE8mes. Surveillez ces valeurs en permanence."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
       ref_id: DE.AE-2
       description: Detected events are analyzed to understand attack targets and methods.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les incidents de cybers\xE9curit\xE9 d\xE9\
+            tect\xE9s sont analys\xE9s quant \xE0 leurs objectifs et m\xE9thodes."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-3
       assessable: true
       depth: 3
@@ -618,30 +1117,54 @@ objects:
       ref_id: DE.AE-3
       description: Event data are collected and correlated from multiple sources and
         sensors.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les informations sur les incidents de cybers\xE9\
+            curit\xE9 provenant de diff\xE9rentes sources et capteurs sont compil\xE9\
+            es et exploit\xE9es."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
       ref_id: DE.AE-4
       description: Impact of events is determined.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9terminez les cons\xE9quences probables des incidents."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
       ref_id: DE.AE-5
       description: Incident alert thresholds are established.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez les valeurs limites au-del\xE0 desquelles les\
+            \ incidents de cybers\xE9curit\xE9 doivent g\xE9n\xE9rer des alertes."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
       ref_id: DE.CM
       name: Security Continuous Monitoring
+      translations:
+        fr:
+          name: "Surveillance continue de la s\xE9curit\xE9"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
       ref_id: DE.CM-1
       description: The network is monitored to detect potential cybersecurity events.
+      translations:
+        fr:
+          name: null
+          description: "Mettez en place une surveillance permanente du r\xE9seau pour\
+            \ d\xE9tecter les incidents de cybers\xE9curit\xE9 potentiels."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-2
       assessable: true
       depth: 3
@@ -649,6 +1172,12 @@ objects:
       ref_id: DE.CM-2
       description: The physical environment is monitored to detect potential cybersecurity
         events.
+      translations:
+        fr:
+          name: null
+          description: "Mettez en place une surveillance continue (monitorage) de\
+            \ tous les \xE9quipements et des b\xE2timents pour d\xE9tecter les incidents\
+            \ de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-3
       assessable: true
       depth: 3
@@ -656,18 +1185,33 @@ objects:
       ref_id: DE.CM-3
       description: Personnel activity is monitored to detect potential cybersecurity
         events.
+      translations:
+        fr:
+          name: null
+          description: "Mettez en place un monitorage de l\u2019utilisation des TIC\
+            \ par les employ\xE9s pour d\xE9tecter les incidents de cybers\xE9curit\xE9\
+            \ potentiels."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
       ref_id: DE.CM-4
       description: Malicious code is detected.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 pouvoir d\xE9tecter les maliciels."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
       ref_id: DE.CM-5
       description: Unauthorized mobile code is detected.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 pouvoir d\xE9tecter les maliciels sur les appareils\
+            \ mobiles."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-6
       assessable: true
       depth: 3
@@ -675,6 +1219,12 @@ objects:
       ref_id: DE.CM-6
       description: External service provider activity is monitored to detect potential
         cybersecurity events.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les activit\xE9s des prestataires de services\
+            \ externes sont surveill\xE9es (monitor\xE9es) pour d\xE9tecter d\u2019\
+            \xE9ventuels incidents de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
       assessable: true
       depth: 3
@@ -682,18 +1232,32 @@ objects:
       ref_id: DE.CM-7
       description: Monitoring for unauthorized personnel, connections, devices, and
         software is performed.
+      translations:
+        fr:
+          name: null
+          description: "Surveillez votre syst\xE8me en permanence pour \xEAtre certain\
+            \ que des activit\xE9s ou acc\xE8s li\xE9s \xE0 des personnes, \xE9quipements\
+            \ ou logiciels non autoris\xE9s seront d\xE9tect\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
       ref_id: DE.CM-8
       description: Vulnerability scans are performed.
+      translations:
+        fr:
+          name: null
+          description: "Proc\xE9dez \xE0 des tests de vuln\xE9rabilit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
       ref_id: DE.DP
       name: Detection Processes
+      translations:
+        fr:
+          name: "Processus de d\xE9tection"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-1
       assessable: true
       depth: 3
@@ -701,53 +1265,96 @@ objects:
       ref_id: DE.DP-1
       description: Roles and responsibilities for detection are well defined to ensure
         accountability.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez clairement les r\xF4les et les responsabilit\xE9\
+            s pour que tous sachent bien qui est responsable de quoi et qui a telles\
+            \ ou telles comp\xE9tences."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
       ref_id: DE.DP-2
       description: Detection activities comply with all applicable requirements.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les processus de d\xE9tection correspondent\
+            \ aux exigences et conditions fix\xE9es."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
       ref_id: DE.DP-3
       description: Detection processes are tested.
+      translations:
+        fr:
+          name: null
+          description: "Testez vos processus de d\xE9tection."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
       ref_id: DE.DP-4
       description: Event detection information is communicated.
+      translations:
+        fr:
+          name: null
+          description: "Communiquez aux personnes concern\xE9es (par ex. fournisseurs,\
+            \ clients, partenaires, autorit\xE9s) les incidents que vous avez d\xE9\
+            tect\xE9s."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
       ref_id: DE.DP-5
       description: Detection processes are continuously improved.
+      translations:
+        fr:
+          name: null
+          description: "Am\xE9liorez en permanence vos processus de d\xE9tection."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
       assessable: false
       depth: 1
       ref_id: RS
       name: Respond
+      translations:
+        fr:
+          name: "R\xE9pondre"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
       ref_id: RS.RP
       name: Response Planning
+      translations:
+        fr:
+          name: "Planification de la r\xE9ponse"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp
       ref_id: RS.RP-1
       description: Response plan is executed during or after an incident.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que le plan d\u2019intervention est correctement\
+            \ suivi et rapidement ex\xE9cut\xE9 si un incident de cybers\xE9curit\xE9\
+            \ est d\xE9tect\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
       ref_id: RS.CO
       name: Communications
+      translations:
+        fr:
+          name: Communications
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-1
       assessable: true
       depth: 3
@@ -755,18 +1362,36 @@ objects:
       ref_id: RS.CO-1
       description: Personnel know their roles and order of operations when a response
         is needed.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que toutes les personnes connaissent leurs t\xE2\
+            ches et la marche \xE0 suivre lorsqu\u2019elles doivent r\xE9agir \xE0\
+            \ un incident de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
       ref_id: RS.CO-2
       description: Incidents are reported consistent with established criteria.
+      translations:
+        fr:
+          name: null
+          description: "D\xE9finissez des crit\xE8res pour les communications et assurez-vous\
+            \ que les incidents de cybers\xE9curit\xE9 sont signal\xE9s et trait\xE9\
+            s conform\xE9ment \xE0 ces crit\xE8res."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
       ref_id: RS.CO-3
       description: Information is shared consistent with response plans.
+      translations:
+        fr:
+          name: null
+          description: "Partagez les informations sur les incidents de cybers\xE9\
+            curit\xE9 relev\xE9s \u2013 ainsi que les enseignements qui en d\xE9coulent\
+            \ \u2013 selon ces crit\xE8res pr\xE9d\xE9finis."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-4
       assessable: true
       depth: 3
@@ -774,6 +1399,11 @@ objects:
       ref_id: RS.CO-4
       description: Coordination with stakeholders occurs consistent with response
         plans.
+      translations:
+        fr:
+          name: null
+          description: "Coordonnez-vous avec les parties prenantes selon ces crit\xE8\
+            res."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-5
       assessable: true
       depth: 3
@@ -781,36 +1411,64 @@ objects:
       ref_id: RS.CO-5
       description: Voluntary information sharing occurs with external stakeholders
         to achieve broader cybersecurity situational awareness.
+      translations:
+        fr:
+          name: null
+          description: "Am\xE9liorez la sensibilisation aux incidents de cybers\xE9\
+            curit\xE9 gr\xE2ce \xE0 des \xE9changes r\xE9guliers avec vos partenaires."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
       ref_id: RS.AN
       name: Analysis
+      translations:
+        fr:
+          name: Analyse
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
       ref_id: RS.AN-1
       description: Notifications from detection systems are investigated.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les alertes \xE9manant de syst\xE8mes de\
+            \ d\xE9tection sont prises en compte et d\xE9clenchent des enqu\xEAtes.\_"
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
       ref_id: RS.AN-2
       description: The impact of the incident is understood.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 pouvoir \xE9valuer correctement l\u2019impact\
+            \ d\u2019un incident de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
       ref_id: RS.AN-3
       description: Forensics are performed.
+      translations:
+        fr:
+          name: null
+          description: "Effectuez une analyse technique apr\xE8s chaque incident."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
       ref_id: RS.AN-4
       description: Incidents are categorized consistent with response plans.
+      translations:
+        fr:
+          name: null
+          description: "Classez les incidents selon les exigences du plan de r\xE9\
+            action."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-5
       assessable: true
       depth: 3
@@ -819,24 +1477,45 @@ objects:
       description: Processes are established to receive, analyze and respond to vulnerabilities
         disclosed to the organization from internal and external sources (e.g. internal
         testing, security bulletins, or security researchers)
+      translations:
+        fr:
+          name: null
+          description: "Des processus sont \xE9tablis pour recevoir, analyser et traiter\
+            \ les failles report\xE9es \xE0 l'organisation par des sources internes\
+            \ et externes (par exemple lors de tests d'intrusion, via des bulletins\
+            \ de s\xE9curit\xE9 ou des chercheurs en s\xE9curit\xE9)."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
       ref_id: RS.MI
       name: Mitigation
+      translations:
+        fr:
+          name: "Att\xE9nuation"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
       ref_id: RS.MI-1
       description: Incidents are contained.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les incidents de cybers\xE9curit\xE9 peuvent\
+            \ \xEAtre circonscrits et que vous pouvez stopper leur propagation."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
       ref_id: RS.MI-2
       description: Incidents are mitigated.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous de pouvoir r\xE9duire l\u2019impact des incidents\
+            \ de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-3
       assessable: true
       depth: 3
@@ -844,77 +1523,137 @@ objects:
       ref_id: RS.MI-3
       description: Newly identified vulnerabilities are mitigated or documented as
         accepted risks.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 r\xE9duire au maximum les failles r\xE9cemment\
+            \ d\xE9couvertes ou r\xE9f\xE9rencez-les comme des risques acceptables."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
       ref_id: RS.IM
       name: Improvements
+      translations:
+        fr:
+          name: "Am\xE9liorations"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
       ref_id: RS.IM-1
       description: Response plans incorporate lessons learned.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les enseignements tir\xE9s des pr\xE9c\xE9\
+            dents incidents de cybers\xE9curit\xE9 sont int\xE9gr\xE9s \xE0 vos plans\
+            \ d\u2019intervention."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
       ref_id: RS.IM-2
       description: Response strategies are updated.
+      translations:
+        fr:
+          name: null
+          description: "Actualisez vos strat\xE9gies de r\xE9action."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
       assessable: false
       depth: 1
       ref_id: RC
       name: Recover
+      translations:
+        fr:
+          name: "R\xE9tablir"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
       ref_id: RC.RP
       name: Recovery Planning
+      translations:
+        fr:
+          name: "Planification du r\xE9tablissement"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp
       ref_id: RC.RP-1
       description: Recovery plan is executed during or after a cybersecurity incident.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que le plan de r\xE9cup\xE9ration est suivi \xE0\
+            \ la lettre en cas d\u2019incident de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
       ref_id: RC.IM
       name: Improvements
+      translations:
+        fr:
+          name: "Am\xE9liorations"
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
       ref_id: RC.IM-1
       description: Recovery plans incorporate lessons learned.
+      translations:
+        fr:
+          name: null
+          description: "Assurez-vous que les enseignements tir\xE9s des pr\xE9c\xE9\
+            dents incidents de cybers\xE9curit\xE9 sont int\xE9gr\xE9s \xE0 vos plans\
+            \ de r\xE9cup\xE9ration."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
       ref_id: RC.IM-2
       description: Recovery strategies are updated.
+      translations:
+        fr:
+          name: null
+          description: "Actualisez vos strat\xE9gies de r\xE9cup\xE9ration."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
       ref_id: RC.CO
       name: Communications
+      translations:
+        fr:
+          name: Communications
+          description: null
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
       ref_id: RC.CO-1
       description: Public relations are managed.
+      translations:
+        fr:
+          name: null
+          description: "Anticipez les r\xE9actions du public pour ne pas d\xE9grader\
+            \ la r\xE9putation de votre entreprise."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
       ref_id: RC.CO-2
       description: Reputation is repaired after an incident.
+      translations:
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que votre entreprise retrouve vite une image\
+            \ positive apr\xE8s un incident de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-3
       assessable: true
       depth: 3
@@ -922,3 +1661,9 @@ objects:
       ref_id: RC.CO-3
       description: Recovery activities are communicated to internal and external stakeholders
         as well as executive and management teams.
+      translations:
+        fr:
+          name: null
+          description: "Communiquez \xE0 l\u2019interne aux parties prenantes tout\
+            \ ce que vous avez entrepris en mati\xE8re de r\xE9cup\xE9ration, sans\
+            \ oublier les cadres et la direction."
