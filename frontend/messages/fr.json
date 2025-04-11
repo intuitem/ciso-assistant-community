@@ -1414,7 +1414,6 @@
 	"createRiskAssessment": "Initier une analyse de risque également",
 	"riskAssessmentName": "Nom de l'analyse de risque",
 	"noDataAvailable": "Pas de données pour cette visualisation. Rafraîchir la page quand celles-ci sont disponibles.",
-	"youCanSetPAsswordHere": "Vous pouvez définir votre mot de passe ici.",
 	"tasks": "Tâches",
 	"tasksNodes": "Tâches",
 	"addTask": "Ajouter une tâche",

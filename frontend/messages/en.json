@@ -1414,7 +1414,6 @@
 	"createRiskAssessment": "Initiate a risk assessment as well",
 	"riskAssessmentName": "Risk Assessment Name",
 	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available.",
-	"youCanSetPAsswordHere": "You can set your password here.",
 	"tasks": "Tasks",
 	"tasksNodes": "Tasks",
 	"addTask": "Add task",
@@ -1448,7 +1447,7 @@
 	"fourth": "Fourth",
 	"last": "Last",
 	"taskDateHelpText": "The task date or the start of its recurrence",
-	"scehdule": "Schedule",
+	"schedule": "Schedule",
 	"taskDate": "Date",
 	"isTemplate": "Recurrent"
 }

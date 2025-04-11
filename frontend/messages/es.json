@@ -913,5 +913,5 @@
 	"cannotDeleteAutoTimeline": "No se pueden eliminar las entradas de cronología automáticas",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "La marca de tiempo no puede ser en el futuro",
-	"youCanSetPAsswordHere": "Puede establecer su contraseña aquí."
+	"youCanSetPasswordHere": "Puede establecer su contraseña aquí."
 }

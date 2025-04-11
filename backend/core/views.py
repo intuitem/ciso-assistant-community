@@ -2193,12 +2193,18 @@ class UserViewSet(BaseModelViewSet):
         self,
         request,
         pk,
-        start=timezone.now().date(),
-        end=timezone.now().date() + relativedelta.relativedelta(months=1),
+        start=None,
+        end=None,
     ):
+        if start is None:
+            start = timezone.now().date()
+        if end is None:
+            end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
             task_calendar(
-                TaskNode.objects.filter(enabled=True, assigned_to=request.user),
+                TaskNode.objects.filter(
+                    is_template=True, enabled=True, assigned_to=request.user
+                ),
                 start,
                 end,
             )
@@ -5064,9 +5070,13 @@ class TaskNodeViewSet(BaseModelViewSet):
     def calendar(
         self,
         request,
-        start=timezone.now().date(),
-        end=timezone.now().date() + relativedelta.relativedelta(months=1),
+        start=None,
+        end=None,
     ):
+        if start is None:
+            start = timezone.now().date()
+        if end is None:
+            end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
             task_calendar(
                 TaskNode.objects.filter(is_template=True, enabled=True), start, end
