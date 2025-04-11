@@ -2202,9 +2202,7 @@ class UserViewSet(BaseModelViewSet):
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
             task_calendar(
-                TaskNode.objects.filter(
-                    enabled=True, assigned_to=request.user
-                ),
+                TaskNode.objects.filter(enabled=True, assigned_to=request.user),
                 start,
                 end,
             )
@@ -5078,7 +5076,5 @@ class TaskNodeViewSet(BaseModelViewSet):
         if end is None:
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
-            task_calendar(
-                TaskNode.objects.filter(enabled=True), start, end
-            )
+            task_calendar(TaskNode.objects.filter(enabled=True), start, end)
         )

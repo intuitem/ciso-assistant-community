@@ -4135,14 +4135,7 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.save()
 
 
-# tasks management
-class TaskNode(NameDescriptionMixin, FolderMixin):
-    TASK_STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("in_progress", "In progress"),
-        ("completed", "Completed"),
-        ("cancelled", "Cancelled"),
-    ]
+class TaskTemplate(NameDescriptionMixin):
     SCHEDULE_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "Schedule Definition",
@@ -4204,40 +4197,20 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name="reference id"
     )
-    iteration = models.IntegerField(default=0)
-    task_date = models.DateField(null=True, blank=True, verbose_name="Task date")
-    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
-    eta_or_completion_date = models.DateField(
-        null=True, blank=True, verbose_name="ETA or Completion date"
-    )
 
-    assigned_to = models.ManyToManyField(
-        User,
-        verbose_name="Assigned to",
-        blank=True,
-    )
-
-    status = models.CharField(
-        max_length=50, default="pending", choices=TASK_STATUS_CHOICES
-    )
-    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
-
-    is_template = models.BooleanField(default=False)
-    enabled = models.BooleanField(default=True)
     schedule = models.JSONField(
         verbose_name="Schedule definition",
         blank=True,
         null=True,
         validators=[JSONSchemaInstanceValidator(SCHEDULE_JSONSCHEMA)],
     )
+    enabled = models.BooleanField(default=True)
 
-    generator = models.ForeignKey(
-        "TaskNode",
-        on_delete=models.CASCADE,
-        null=True,
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
         blank=True,
     )
-
     assets = models.ManyToManyField(
         Asset,
         verbose_name="Related assets",
@@ -4265,6 +4238,35 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
         blank=True,
         help_text="Risk assessments related to the task",
         related_name="tasks",
+    )
+
+
+# tasks management
+class TaskNode(NameDescriptionMixin, FolderMixin):
+    TASK_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+
+    status = models.CharField(
+        max_length=50, default="pending", choices=TASK_STATUS_CHOICES
+    )
+
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+    generator = models.ForeignKey(
+        "TaskTemplate",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
     )
 
     class Meta:
