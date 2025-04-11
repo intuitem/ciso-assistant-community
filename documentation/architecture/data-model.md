@@ -1606,7 +1606,7 @@ erDiagram
 ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_TEMPLATE         : contains
 ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE             : contains
 TASK_TEMPLATE         |o--o{ TASK_NODE             : generates
-TASK_TEMPLATE         }o--o{ TASK_NODE             : owns
+USER                  }o--o{ TASK_TEMPLATE         : owns
 TASK_TEMPLATE         }o--o| TASK_TEMPLATE         : is_subtask_of
 TASK_TEMPLATE         }o--o{ ASSET                 : relates_to
 TASK_TEMPLATE         }o--o{ APPLIED_CONTROL       : relates_to
@@ -1688,19 +1688,27 @@ SCHEDULE_JSONSCHEMA = {
             "default": "NO_IMPACT",
             "description": "Optional. Behavior when tasks become overdue.",
         },
-        "exceptions": {
-            "type": ["object", "null"],
-            "description": "Optional. JSON object for future exceptions handling.",
-        },
     },
-    "required": ["interval", "frequency"],
+    "required": ["interval", "frequency", "start_date", "end_date"],
     "additionalProperties": False,
 }
 ```
 
-When enabled is set to False, the schedule is suspended.
+The task_date is copied in the start_date of the schedule for recurring tasks.
+
+The task_date is copied in the due_date of the task_node for a non-recurring task.
+
+When enabled is set to False, the schedule is suspended (for recurring task), and generated tasks are hidden (past and future).
 
 The following concepts will not be included in the MVP:
 - subtasks
 - exceptions
 - overdue_behavior (will be NO_IMPACT)
+
+### Implementation
+
+Future task_nodes are generated partially in advance at creation/update of a task_template and with a daily refresh done with huey. This shall take in account end_date, and the following limits:
+- 5 years for yearly frequency
+- 24 months for monthly frequency
+- 53 weeks for weekly frequency
+- 63 days for daily frequency
