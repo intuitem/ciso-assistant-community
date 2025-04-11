@@ -426,7 +426,7 @@ def _calculate_next_occurrence(task, base_date):
     interval = schedule.get("interval", 1)
 
     if frequency == "DAILY":
-        return base_date + timedelta(days=1)
+        return base_date + timedelta(days=interval)
 
     elif frequency == "WEEKLY":
         days_of_week = schedule.get("days_of_week", [])
