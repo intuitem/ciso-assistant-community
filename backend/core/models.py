@@ -4135,6 +4135,152 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.save()
 
 
+class TaskTemplate(NameDescriptionMixin):
+    SCHEDULE_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Schedule Definition",
+        "type": "object",
+        "properties": {
+            "interval": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Number of periods to wait before repeating (e.g., every 2 days, 3 weeks).",
+            },
+            "frequency": {
+                "type": "string",
+                "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+            },
+            "days_of_week": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 7},
+                "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
+            },
+            "weeks_of_month": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": -1,
+                    "maximum": 4,
+                },
+                "description": "Optional. for a given weekday, which one in the month (1 for first, -1 for last)",
+            },
+            "months_of_year": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 12},
+                "description": "Optional. Months of the year (1=January, 12=December)",
+            },
+            "end_date": {
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Optional. Date when recurrence ends.",
+            },
+            "occurrences": {
+                "type": ["integer", "null"],
+                "minimum": 1,
+                "description": "Optional. Number of occurrences before recurrence stops.",
+            },
+            "overdue_behavior": {
+                "type": "string",
+                "enum": ["DELAY_NEXT", "NO_IMPACT"],
+                "default": "NO_IMPACT",
+                "description": "Optional. Behavior when tasks become overdue.",
+            },
+            "exceptions": {
+                "type": ["object", "null"],
+                "description": "Optional. JSON object for future exceptions handling.",
+            },
+        },
+        "required": ["interval", "frequency"],
+        "additionalProperties": False,
+    }
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="reference id"
+    )
+
+    schedule = models.JSONField(
+        verbose_name="Schedule definition",
+        blank=True,
+        null=True,
+        validators=[JSONSchemaInstanceValidator(SCHEDULE_JSONSCHEMA)],
+    )
+    enabled = models.BooleanField(default=True)
+
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name="Related assets",
+        blank=True,
+        help_text="Assets related to the task",
+        related_name="tasks",
+    )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name="Applied controls",
+        blank=True,
+        help_text="Applied controls related to the task",
+        related_name="tasks",
+    )
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        verbose_name="Compliance assessments",
+        blank=True,
+        help_text="Compliance assessments related to the task",
+        related_name="tasks",
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        verbose_name="Risk assessments",
+        blank=True,
+        help_text="Risk assessments related to the task",
+        related_name="tasks",
+    )
+
+
+# tasks management
+class TaskNode(NameDescriptionMixin, FolderMixin):
+    TASK_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+
+    status = models.CharField(
+        max_length=50, default="pending", choices=TASK_STATUS_CHOICES
+    )
+
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+    generator = models.ForeignKey(
+        "TaskTemplate",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("Task node")
+        verbose_name_plural = _("Task nodes")
+
+    def save(self, *args, **kwargs):
+        if self.schedule and "days_of_week" in self.schedule:
+            self.schedule["days_of_week"] = [
+                day % 7 for day in self.schedule["days_of_week"]
+            ]
+        super().save(*args, **kwargs)
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(

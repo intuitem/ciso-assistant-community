@@ -39,7 +39,7 @@
 				<i class="fa-solid fa-key" />
 			</div>
 			<p class="text-gray-600 text-sm text-center">
-				{m.youCanSetPAsswordHere()}<br />
+				{m.youCanSetPasswordHere()}<br />
 			</p>
 			<!-- SuperForm with dataType 'form' -->
 			<div class="flex w-full">

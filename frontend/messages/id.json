@@ -1095,6 +1095,6 @@
 	"addFinding": "Tambahkan temuan",
 	"selectEvidence": "Pilih bukti",
 	"timestampCannotBeInTheFuture": "Timestamp tidak boleh di masa depan",
-	"youCanSetPAsswordHere": "Anda dapat mengatur kata sandi di sini.",
+	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini.",
 	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali."
 }

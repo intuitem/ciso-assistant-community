@@ -8,6 +8,7 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
+from dateutil import relativedelta
 from django.db.models import F, Count, Avg, Q, ExpressionWrapper, FloatField
 from collections import defaultdict
 from django_filters.filterset import filterset_factory
@@ -91,6 +92,7 @@ from core.utils import (
     RoleCodename,
     UserGroupCodename,
     compare_schema_versions,
+    task_calendar,
 )
 
 from ebios_rm.models import (
@@ -1306,7 +1308,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "security_exceptions": ["exact"],
             "owner": ["exact"],
             "findings": ["exact"],
-            "eta": ["exact", "lte", "gte", "lt", "gt"],
+            "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
         }
 
 
@@ -1974,7 +1976,13 @@ class RiskAcceptanceFilterSet(df.FilterSet):
 
     class Meta:
         model = RiskAcceptance
-        fields = ["folder", "state", "approver", "risk_scenarios", "to_review"]
+        fields = {
+            "folder": ["exact"],
+            "state": ["exact"],
+            "approver": ["exact"],
+            "risk_scenarios": ["exact"],
+            "expiry_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+        }
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
@@ -2177,6 +2185,28 @@ class UserViewSet(BaseModelViewSet):
                 )
 
         return super().destroy(request, *args, **kwargs)
+
+    @action(
+        detail=True, name="Get user tasks", url_path="tasks/(?P<start>.+)/(?P<end>.+)"
+    )
+    def tasks(
+        self,
+        request,
+        pk,
+        start=None,
+        end=None,
+    ):
+        if start is None:
+            start = timezone.now().date()
+        if end is None:
+            end = timezone.now().date() + relativedelta.relativedelta(months=1)
+        return Response(
+            task_calendar(
+                TaskNode.objects.filter(enabled=True, assigned_to=request.user),
+                start,
+                end,
+            )
+        )
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -5085,3 +5115,30 @@ class TimelineEntryViewSet(BaseModelViewSet):
         ]:
             raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
         return super().perform_destroy(instance)
+
+
+class TaskNodeViewSet(BaseModelViewSet):
+    model = TaskNode
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(TaskNode.TASK_STATUS_CHOICES))
+
+    @action(
+        detail=False,
+        name="Get tasks for the calendar",
+        url_path="calendar/(?P<start>.+)/(?P<end>.+)",
+    )
+    def calendar(
+        self,
+        request,
+        start=None,
+        end=None,
+    ):
+        if start is None:
+            start = timezone.now().date()
+        if end is None:
+            end = timezone.now().date() + relativedelta.relativedelta(months=1)
+        return Response(
+            task_calendar(TaskNode.objects.filter(enabled=True), start, end)
+        )
