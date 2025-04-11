@@ -1447,8 +1447,8 @@
 	"third": "Troisième",
 	"fourth": "Quatrième",
 	"last": "Dernier",
-	"taskDateHelpText": "La date ou date de début de la tâche",
+	"taskDateHelpText": "La date de la tâche ou du début de sa récurrence",
 	"schedule": "Programme",
-	"task_date": "Date",
+	"taskDate": "Date",
 	"isTemplate": "Recurrence"
 }

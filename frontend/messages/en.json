@@ -1447,8 +1447,8 @@
 	"third": "Third",
 	"fourth": "Fourth",
 	"last": "Last",
-	"taskDateHelpText": "the date or start date of the task",
+	"taskDateHelpText": "The task date or the start of its recurrence",
 	"scehdule": "Schedule",
-	"task_date": "Date",
+	"taskDate": "Date",
 	"isTemplate": "Recurrent"
 }

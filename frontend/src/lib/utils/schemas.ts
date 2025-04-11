@@ -646,7 +646,13 @@ export const TaskNodeSchema = z.object({
 	ref_id: z.string().optional(),
 	task_date: z
 		.string()
-		.default(() => new Date().toISOString())
+		.default(() => {
+			const date = new Date();
+			const year = date.getFullYear();
+			const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+			const day = String(date.getDate()).padStart(2, '0');
+			return `${year}-${month}-${day}`;
+		})
 		.optional(),
 	due_date: z.string().optional(),
 	eta_or_completion_date: z.string().optional(),
@@ -659,12 +665,16 @@ export const TaskNodeSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	schedule: z
 		.object({
-			interval: z.number().min(1).positive().default(1).optional(),
+			interval: z.number().min(1).positive().optional(),
 			frequency: z.string().optional(),
 			weeks_of_month: z.number().min(-1).max(4).array().optional(),
 			days_of_week: z.number().min(1).max(7).array().optional(),
 			months_of_year: z.number().min(1).max(12).array().optional(),
 			end_date: z.string().optional()
+		})
+		.default({
+			interval: 1,
+			frequency: 'DAILY'
 		})
 		.optional()
 });
