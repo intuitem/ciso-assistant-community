@@ -2198,9 +2198,7 @@ class UserViewSet(BaseModelViewSet):
     ):
         return Response(
             task_calendar(
-                TaskNode.objects.filter(
-                    is_template=True, enabled=True, assigned_to=request.user
-                ),
+                TaskNode.objects.filter(enabled=True, assigned_to=request.user),
                 start,
                 end,
             )

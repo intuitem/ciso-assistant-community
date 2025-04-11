@@ -685,6 +685,10 @@ def task_calendar(task_templates, start=None, end=None):
     future_tasks = []
 
     for template in task_templates:
+        if not template.is_template:
+            future_tasks.append(_create_task_dict(template, template.task_date, 0))
+            continue
+
         start_date_param = start or template.task_date or datetime.now().date()
         end_date_param = end or template.schedule.get("end_date")
 
