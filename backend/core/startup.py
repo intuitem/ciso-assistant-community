@@ -52,7 +52,7 @@ READER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "view_incident",
     "view_timelineentry",
-    "view_task",
+    "view_tasknode",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -94,7 +94,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "view_incident",
     "view_timelineentry",
-    "view_task",
+    "view_tasknode",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -222,10 +222,10 @@ ANALYST_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
-    "add_task",
-    "view_task",
-    "change_task",
-    "delete_task",
+    "add_tasknode",
+    "view_tasknode",
+    "change_tasknode",
+    "delete_tasknode",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -361,10 +361,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
-    "add_task",
-    "view_task",
-    "change_task",
-    "delete_task",
+    "add_tasknode",
+    "view_tasknode",
+    "change_tasknode",
+    "delete_tasknode",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -562,7 +562,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
-    # tasks,
+    # tasknodes,
     "add_tasknode",
     "view_tasknode",
     "change_tasknode",
