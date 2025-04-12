@@ -92,7 +92,7 @@ from core.utils import (
     UserGroupCodename,
     compare_schema_versions,
     _generate_occurrences,
-    _create_task_dict
+    _create_task_dict,
 )
 from dateutil import relativedelta as rd
 
@@ -2204,7 +2204,9 @@ class UserViewSet(BaseModelViewSet):
         return Response(
             TaskTemplateViewSet.task_calendar(
                 self=self,
-                task_templates=TaskTemplate.objects.filter(enabled=True, assigned_to=request.user),
+                task_templates=TaskTemplate.objects.filter(
+                    enabled=True, assigned_to=request.user
+                ),
                 start=start,
                 end=end,
             )
@@ -5057,7 +5059,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
-    
+
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
         tasks_list = []
@@ -5086,38 +5088,37 @@ class TaskTemplateViewSet(BaseModelViewSet):
             tasks_list.extend(tasks)
 
         processed_tasks_identifiers = set()  # Track tasks we've already processed
-    
+
         # Sort tasks by due date
         sorted_tasks = sorted(tasks_list, key=lambda x: x["due_date"])
-        
+
         # Process all past tasks and next 10 upcoming tasks
         current_date = datetime.now().date()
-        
+
         # First separate past and future tasks
         past_tasks = [task for task in sorted_tasks if task["due_date"] <= current_date]
         next_tasks = [task for task in sorted_tasks if task["due_date"] > current_date]
 
-        
         # Combined list of tasks to process (past and next 10)
         tasks_to_process = past_tasks + next_tasks
-        
+
         # Directly modify tasks in the original tasks_list
         for i in range(len(tasks_list)):
             task = tasks_list[i]
             task_date = task["due_date"]
             task_template_id = task["task_template"]
-            
+
             # Create a unique identifier for this task to avoid duplication
             task_identifier = (task_template_id, task_date)
-            
+
             # Skip if we've already processed this task
             if task_identifier in processed_tasks_identifiers:
                 continue
-                
+
             # Check if this task should be processed (is in past or next 10)
             if task in tasks_to_process:
                 processed_tasks_identifiers.add(task_identifier)
-                
+
                 # Get or create the TaskNode
                 task_node, created = TaskNode.objects.get_or_create(
                     task_template=TaskTemplate.objects.get(id=task_template_id),
@@ -5128,10 +5129,10 @@ class TaskTemplateViewSet(BaseModelViewSet):
                         "status": "pending",
                     },
                 )
-                
+
                 # Replace the task dictionary with the actual TaskNode in the original list
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
-        
+
         return tasks_list
 
     def perform_update(self, serializer):
@@ -5151,16 +5152,20 @@ class TaskTemplateViewSet(BaseModelViewSet):
                 end_date = datetime.now().date() + rd.relativedelta(years=1)
             elif task_template.schedule["frequency"] == "YEARLY":
                 end_date = datetime.now().date() + rd.relativedelta(years=5)
-        
+
             # Generate the task nodes
-            self.task_calendar(task_templates=TaskTemplate.objects.filter(id=task_template.id), start=start_date, end=end_date)
+            self.task_calendar(
+                task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                start=start_date,
+                end=end_date,
+            )
         else:
             TaskNode.objects.create(
                 name=task_template.name,
                 description=task_template.description,
                 due_date=task_template.task_date,
                 status="pending",
-                task_template=task_template
+                task_template=task_template,
             )
 
     @action(
@@ -5179,14 +5184,18 @@ class TaskTemplateViewSet(BaseModelViewSet):
         if end is None:
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
-            self.task_calendar(task_templates=TaskTemplate.objects.filter(enabled=True), start=start, end=end)
+            self.task_calendar(
+                task_templates=TaskTemplate.objects.filter(enabled=True),
+                start=start,
+                end=end,
+            )
         )
 
 
 class TaskNodeViewSet(BaseModelViewSet):
     model = TaskNode
     filterset_fields = ["status", "task_template"]
-    
+
     @action(detail=False, name="Get Task Node status choices")
     def status(srlf, request):
-        return(Response(dict(TaskNode.TASK_STATUS_CHOICES)))
+        return Response(dict(TaskNode.TASK_STATUS_CHOICES))

@@ -681,7 +681,7 @@ export const TaskNodeSchema = z.object({
 	due_date: z.string().optional(),
 	status: z.string().optional(),
 	observation: z.string().optional(),
-	evidences: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -730,7 +730,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
 	'task-templates': TaskTemplateSchema,
-	'task-nodes': TaskNodeSchema,
+	'task-nodes': TaskNodeSchema
 };
 
 export const modelSchema = (model: string) => {

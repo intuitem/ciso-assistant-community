@@ -4137,14 +4137,13 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
 
 # tasks management
 class TaskTemplateManager(models.Manager):
-    
     def create_task_template(self, **kwargs):
         return super().create(**kwargs)
 
 
 class TaskTemplate(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     objects = TaskTemplateManager()
-    
+
     SCHEDULE_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "Schedule Definition",

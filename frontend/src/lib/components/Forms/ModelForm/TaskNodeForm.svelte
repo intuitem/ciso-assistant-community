@@ -8,7 +8,7 @@
 	import * as m from '$paraglide/messages.js';
 
 	export let form: SuperValidated<any>;
-    export let model: ModelInfo;
+	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 </script>
@@ -23,26 +23,26 @@
 	bind:cachedValue={formDataCache['due_date']}
 />
 <Select
-    {form}
-    field="status"
-    label={m.status()}
-    options={model.selectOptions['status']}
-    cacheLock={cacheLocks['status']}
-    bind:cachedValue={formDataCache['status']}
+	{form}
+	field="status"
+	label={m.status()}
+	options={model.selectOptions['status']}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
 />
 <TextArea
-    {form}
-    field="observation"
-    label={m.observation()}
-    cacheLock={cacheLocks['observation']}
-    bind:cachedValue={formDataCache['observation']}
+	{form}
+	field="observation"
+	label={m.observation()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
 />
 <AutocompleteSelect
-    multiple
-    {form}
-    optionsEndpoint="evidences"
-    optionsExtraFields={[['folder', 'str']]}
-    optionsLabelField="auto"
-    field="evidences"
-    label={m.evidences()}
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	field="evidences"
+	label={m.evidences()}
 />

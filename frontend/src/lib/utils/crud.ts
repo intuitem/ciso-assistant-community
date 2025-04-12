@@ -959,7 +959,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'taskTemplates',
 		verboseName: 'Task template',
 		verboseNamePlural: 'Task templates',
-		reverseForeignKeyFields: [{ field: 'generator', urlModel: 'task-nodes', disableAddDeleteButtons: true }]
+		reverseForeignKeyFields: [
+			{ field: 'generator', urlModel: 'task-nodes', disableAddDeleteButtons: true }
+		]
 	},
 	'task-nodes': {
 		name: 'tasknode',
@@ -974,7 +976,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' }
 		]
 	}
-
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');

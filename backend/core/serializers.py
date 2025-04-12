@@ -1421,6 +1421,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
 class TaskNodeReadSerializer(BaseModelSerializer):
     task_template = FieldsRelatedField()
+
     class Meta:
         model = TaskNode
         fields = "__all__"
