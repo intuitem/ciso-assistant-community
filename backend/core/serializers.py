@@ -1429,7 +1429,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = TaskNode
-        fields = "__all__"
+        exclude = ["to_delete"]
 
 
 class TaskNodeWriteSerializer(BaseModelSerializer):

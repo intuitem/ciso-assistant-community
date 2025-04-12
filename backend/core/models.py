@@ -4300,6 +4300,8 @@ class TaskNode(AbstractBaseModel, FolderMixin):
         related_name="task_nodes",
     )
 
+    to_delete = models.BooleanField(default=False)
+
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"

@@ -5128,17 +5128,16 @@ class TaskTemplateViewSet(BaseModelViewSet):
                         "folder": task_template.folder,
                     },
                 )
-
+                task_node.to_delete = False
+                task_node.save(update_fields=["to_delete"])
                 # Replace the task dictionary with the actual TaskNode in the original list
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
 
         return tasks_list
 
-    def perform_update(self, serializer):
-        task_template = serializer.save()
-
-        # Delete all existing TaskNode instances associated with this TaskTemplate
-        TaskNode.objects.filter(task_template=task_template).delete()
+    def _sync_task_nodes(self, task_template: TaskTemplate):
+        # Soft-delete all existing TaskNode instances associated with this TaskTemplate
+        TaskNode.objects.filter(task_template=task_template).update(to_delete=True)
 
         # Determine the end date based on the frequency
         if task_template.is_recurrent:
@@ -5158,15 +5157,16 @@ class TaskTemplateViewSet(BaseModelViewSet):
                 start=start_date,
                 end=end_date,
             )
+
         else:
             TaskNode.objects.create(
-                name=task_template.name,
-                description=task_template.description,
                 due_date=task_template.task_date,
                 status="pending",
                 task_template=task_template,
                 folder=task_template.folder,
             )
+        # garbage-collect
+        TaskNode.objects.filter(to_delete=True).delete()
 
     @action(
         detail=False,
@@ -5191,6 +5191,14 @@ class TaskTemplateViewSet(BaseModelViewSet):
             )
         )
 
+    def perform_update(self, serializer):
+        task_template = serializer.save()
+        self._sync_task_nodes(task_template)
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        self._sync_task_nodes(serializer.instance)
+
 
 class TaskNodeViewSet(BaseModelViewSet):
     model = TaskNode
@@ -5200,7 +5208,7 @@ class TaskNodeViewSet(BaseModelViewSet):
     def status(srlf, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
 
-    def list(self, request, *args, **kwargs):
-        generator = request.query_params.get("generator")
-        print("coucou42", generator)
-        return super().list(request, *args, **kwargs)
+    def perform_create(self, serializer):
+        instance: TaskNode = serializer.save()
+        instance.save()
+        return super().perform_create(serializer)
