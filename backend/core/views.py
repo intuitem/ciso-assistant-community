@@ -5120,13 +5120,15 @@ class TaskTemplateViewSet(BaseModelViewSet):
                 processed_tasks_identifiers.add(task_identifier)
 
                 # Get or create the TaskNode
+                task_template = TaskTemplate.objects.get(id=task_template_id)
                 task_node, created = TaskNode.objects.get_or_create(
-                    task_template=TaskTemplate.objects.get(id=task_template_id),
+                    task_template=task_template,
                     due_date=task_date,
                     defaults={
                         "name": task["name"],
                         "description": task["description"],
                         "status": "pending",
+                        "folder": task_template.folder,
                     },
                 )
 
@@ -5166,6 +5168,7 @@ class TaskTemplateViewSet(BaseModelViewSet):
                 due_date=task_template.task_date,
                 status="pending",
                 task_template=task_template,
+                folder=task_template.folder,
             )
 
     @action(
