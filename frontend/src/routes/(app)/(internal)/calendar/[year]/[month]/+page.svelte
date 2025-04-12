@@ -25,7 +25,7 @@
 				link: `/risk-acceptances/${ra.id}`
 			})),
 			...tasks.map((task: Record<string, string>) => ({
-				label: `Task: ${task.name}`,
+				label: `Task: ${task.task_template.str}`,
 				date: new Date(task.due_date),
 				link: task.virtual ? `/task-templates/${task.id}` : `/task-nodes/${task.id}`
 			}))

@@ -677,7 +677,6 @@ export const TaskTemplateSchema = z.object({
 });
 
 export const TaskNodeSchema = z.object({
-	...NameDescriptionMixin,
 	due_date: z.string().optional(),
 	status: z.string().optional(),
 	observation: z.string().optional(),

@@ -960,7 +960,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Task template',
 		verboseNamePlural: 'Task templates',
 		reverseForeignKeyFields: [
-			{ field: 'generator', urlModel: 'task-nodes', disableAddDeleteButtons: true }
+			{ field: 'task_template', urlModel: 'task-nodes', disableAddDeleteButtons: true }
 		]
 	},
 	'task-nodes': {

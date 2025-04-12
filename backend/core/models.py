@@ -2198,7 +2198,6 @@ class AppliedControl(
         reqs = 0  # compliance requirements
         scenarios = 0  # risk scenarios
         sh_actions = 0  # stakeholder tprm actions
-
         reqs = RequirementNode.objects.filter(
             requirementassessment__applied_controls=self
         ).count()
@@ -4141,7 +4140,7 @@ class TaskTemplateManager(models.Manager):
         return super().create(**kwargs)
 
 
-class TaskTemplate(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class TaskTemplate(NameDescriptionMixin, FolderMixin):
     objects = TaskTemplateManager()
 
     SCHEDULE_JSONSCHEMA = {
@@ -4272,7 +4271,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         super().save(*args, **kwargs)
 
 
-class TaskNode(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class TaskNode(AbstractBaseModel, FolderMixin):
     TASK_STATUS_CHOICES = [
         ("pending", "Pending"),
         ("in_progress", "In progress"),

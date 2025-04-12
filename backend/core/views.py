@@ -5063,7 +5063,6 @@ class TaskTemplateViewSet(BaseModelViewSet):
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
         tasks_list = []
-
         for template in task_templates:
             if not template.is_recurrent:
                 tasks_list.append(_create_task_dict(template, template.task_date))
@@ -5125,8 +5124,6 @@ class TaskTemplateViewSet(BaseModelViewSet):
                     task_template=task_template,
                     due_date=task_date,
                     defaults={
-                        "name": task["name"],
-                        "description": task["description"],
                         "status": "pending",
                         "folder": task_template.folder,
                     },
@@ -5202,3 +5199,8 @@ class TaskNodeViewSet(BaseModelViewSet):
     @action(detail=False, name="Get Task Node status choices")
     def status(srlf, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
+
+    def list(self, request, *args, **kwargs):
+        generator = request.query_params.get("generator")
+        print("coucou42", generator)
+        return super().list(request, *args, **kwargs)
