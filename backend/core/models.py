@@ -4195,7 +4195,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         "additionalProperties": False,
     }
 
-    task_date = models.CharField(null=True, blank=True, verbose_name="Date")
+    task_date = models.DateField(null=True, blank=True, verbose_name="Date")
 
     is_recurrent = models.BooleanField(default=False)
 

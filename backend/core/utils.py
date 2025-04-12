@@ -615,7 +615,7 @@ def _generate_occurrences(template, start_date, end_date):
 
     # Determine start date
     base_date = (
-        datetime.strptime(str(template.task_date), "%Y-%m-%d").date()
+        template.task_date
         or datetime.now().date()
     )
 
