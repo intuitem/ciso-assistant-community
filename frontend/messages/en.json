@@ -1449,5 +1449,9 @@
 	"taskDateHelpText": "The task date or the start of its recurrence",
 	"schedule": "Schedule",
 	"taskDate": "Date",
-	"isTemplate": "Recurrent"
+	"isTemplate": "Recurrent",
+	"taskNode": "Task occurence",
+	"taskNodes": "Tasks occurences",
+	"associatedTaskNodes": "Instances review",
+	"nextOccurence": "Next occurence"
 }
