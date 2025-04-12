@@ -1453,5 +1453,6 @@
 	"taskNode": "Task occurence",
 	"taskNodes": "Tasks occurences",
 	"associatedTaskNodes": "Instances review",
-	"nextOccurence": "Next occurence"
+	"nextOccurence": "Next occurence",
+	"taskTemplate": "Task template"
 }
