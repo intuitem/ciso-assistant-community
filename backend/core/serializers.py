@@ -1417,3 +1417,16 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskTemplate
         fields = "__all__"
+
+
+class TaskNodeReadSerializer(BaseModelSerializer):
+    task_template = FieldsRelatedField()
+    class Meta:
+        model = TaskNode
+        fields = "__all__"
+
+
+class TaskNodeWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = TaskNode
+        exclude = ["task_template"]

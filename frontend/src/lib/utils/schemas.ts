@@ -676,6 +676,14 @@ export const TaskTemplateSchema = z.object({
 		.optional()
 });
 
+export const TaskNodeSchema = z.object({
+	...NameDescriptionMixin,
+	due_date: z.string().optional(),
+	status: z.string().optional(),
+	observation: z.string().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -721,7 +729,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'findings-assessments': FindingsAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
-	'task-templates': TaskTemplateSchema
+	'task-templates': TaskTemplateSchema,
+	'task-nodes': TaskNodeSchema,
 };
 
 export const modelSchema = (model: string) => {

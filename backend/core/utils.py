@@ -11,8 +11,6 @@ from rest_framework.exceptions import ValidationError
 import structlog
 import calendar
 from dateutil import relativedelta as rd
-from rest_framework.response import Response
-from rest_framework import status
 
 logger = structlog.get_logger(__name__)
 
@@ -596,11 +594,12 @@ def _create_task_dict(task, task_date):
     # Create task dictionary with all necessary properties
     task_dict = {
         "id": task.id,
+        "virtual": True,
         "name": task.name,
         "description": task.description,
         "due_date": task_date,
         "status": "pending",
-        "generator": task.id,
+        "task_template": task.id,
     }
 
     return task_dict
@@ -655,36 +654,3 @@ def _generate_occurrences(template, start_date, end_date):
         current_date = _calculate_next_occurrence(template, current_date)
 
     return occurrences
-
-
-def task_calendar(task_templates, start=None, end=None):
-    """Generate calendar of future tasks for the given templates."""
-    future_tasks = []
-
-    for template in task_templates:
-        if not template.is_recurrent:
-            future_tasks.append(_create_task_dict(template, template.task_date))
-            continue
-
-        start_date_param = start or template.task_date or datetime.now().date()
-        end_date_param = end or template.schedule.get("end_date")
-
-        if not end_date_param:
-            start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
-            end_date_param = (start_date + rd.relativedelta(months=1)).strftime(
-                "%Y-%m-%d"
-            )
-
-        try:
-            start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
-            end_date = datetime.strptime(str(end_date_param), "%Y-%m-%d").date()
-        except ValueError:
-            return Response(
-                {"error": "Invalid date format. Use YYYY-MM-DD"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        tasks = _generate_occurrences(template, start_date, end_date)
-        future_tasks.extend(tasks)
-
-    return future_tasks

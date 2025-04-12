@@ -125,6 +125,18 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const TASK_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'task-nodes/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -909,6 +921,13 @@ export const listViewFields = {
 	'task-templates': {
 		head: ['name', 'description', 'status', 'owner'],
 		body: ['name', 'description', 'status', 'owner']
+	},
+	'task-nodes': {
+		head: ['due_date', 'status','evidences'],
+		body: ['due_date', 'status','evidences'],
+		filters: {
+			status: TASK_STATUS_FILTER
+		}
 	},
 	extra: {
 		filters: {

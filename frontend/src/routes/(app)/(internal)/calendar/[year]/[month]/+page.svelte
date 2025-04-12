@@ -27,7 +27,7 @@
 			...tasks.map((task: Record<string, string>) => ({
 				label: `Task: ${task.name}`,
 				date: new Date(task.due_date),
-				link: `/task-templates/${task.id}`
+				link: task.virtual ? `/task-templates/${task.id}` : `/task-nodes/${task.id}`
 			}))
 		];
 		return events;

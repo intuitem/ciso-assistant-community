@@ -4136,7 +4136,15 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
 
 
 # tasks management
+class TaskTemplateManager(models.Manager):
+    
+    def create_task_template(self, **kwargs):
+        return super().create(**kwargs)
+
+
 class TaskTemplate(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    objects = TaskTemplateManager()
+    
     SCHEDULE_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "Schedule Definition",
@@ -4154,7 +4162,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "days_of_week": {
                 "type": "array",
                 "items": {"type": "integer", "minimum": 1, "maximum": 7},
-                "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
+                "description": "Optional. Days of the week (Monday=1, Sunday=7)",
             },
             "weeks_of_month": {
                 "type": "array",
@@ -4255,10 +4263,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             self.schedule["days_of_week"] = [
                 day % 7 if day > 6 else day for day in self.schedule["days_of_week"]
             ]
-        super().save(*args, **kwargs)
 
-    def create(self, *args, **kwargs):
-        return super().create(*args, **kwargs)
+        # Check if there are any TaskNode instances that are not within the date range
+        if self.schedule and "end_date" in self.schedule:
+            end_date = self.schedule["end_date"]
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+            # Delete TaskNode instances that have a due date after the end date
+            TaskNode.objects.filter(task_template=self, due_date__gt=end_date).delete()
+        super().save(*args, **kwargs)
 
 
 class TaskNode(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
@@ -4277,7 +4289,7 @@ class TaskNode(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
-    generator = models.ForeignKey(
+    task_template = models.ForeignKey(
         "TaskTemplate",
         on_delete=models.CASCADE,
         null=True,

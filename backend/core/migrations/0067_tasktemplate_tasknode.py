@@ -274,7 +274,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "generator",
+                    "task_template",
                     models.ForeignKey(
                         blank=True,
                         null=True,
