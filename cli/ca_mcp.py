@@ -88,7 +88,7 @@ async def get_risk_scenarios():
         rprint(f"Error: No risk scenarios found", file=sys.stderr)
         return
     scenarios = [
-        f"|{rs.get('name')}|{rs.get('description')}|{rs.get('current_level')}|{rs.get('residual_level')}|{rs.get('domain')}|"
+        f"|{rs.get('name')}|{rs.get('description')}|{rs.get('current_level')}|{rs.get('residual_level')}|{rs.get('folder')}|"
         for rs in data["results"]
     ]
     return (
@@ -119,11 +119,41 @@ async def get_applied_controls():
         rprint(f"Error: No applied controls found", file=sys.stderr)
         return
     items = [
-        f"|{item.get('name')}|{item.get('description')}|{item.get('status')}|{item.get('eta')}|{item.get('domain')}|"
+        f"|{item.get('name')}|{item.get('description')}|{item.get('status')}|{item.get('eta')}|{item.get('folder')['str']}|"
         for item in data["results"]
     ]
     return (
         "|name|description|status|eta|domain|"
+        + "\n|---|---|---|---|\n"
+        + "\n".join(items)
+    )
+
+
+@mcp.tool()
+async def get_audits_progress():
+    """Get the audits progress
+    Query CISO Assistant compliance engine for audits progress
+    """
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+    }
+    # Get evidence ID by name
+    url = f"{API_URL}/compliance-assessments/"
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    data = res.json()
+
+    if res.status_code != 200:
+        rprint(f"Error: check credentials or filename.", file=sys.stderr)
+        return
+    if not data["results"]:
+        rprint(f"Error: No audits found", file=sys.stderr)
+        return
+    items = [
+        f"|{item.get('name')}|{item.get('framework')['str']}|{item.get('status')}|{item.get('progress')}|{item.get('folder')['str']}|"
+        for item in data["results"]
+    ]
+    return (
+        "|name|framework|status|progress|domain|"
         + "\n|---|---|---|---|\n"
         + "\n".join(items)
     )
