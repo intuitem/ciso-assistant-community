@@ -88,13 +88,44 @@ async def get_risk_scenarios():
         rprint(f"Error: No risk scenarios found", file=sys.stderr)
         return
     scenarios = [
-        f"|{rs.get('name')}|{rs.get('description')}|{rs.get('current_level')}|{rs.get('residual_level')}|"
+        f"|{rs.get('name')}|{rs.get('description')}|{rs.get('current_level')}|{rs.get('residual_level')}|{rs.get('domain')}|"
         for rs in data["results"]
     ]
     return (
-        "|name|description|current_level|residual_level|"
+        "|name|description|current_level|residual_level|domain|"
         + "\n|---|---|---|---|\n"
         + "\n".join(scenarios)
+    )
+
+
+@mcp.tool()
+async def get_applied_controls():
+    """Get applied controls
+
+    Query CISO Assistant combined action plan
+    """
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+    }
+    # Get evidence ID by name
+    url = f"{API_URL}/applied-controls/"
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    data = res.json()
+
+    if res.status_code != 200:
+        rprint(f"Error: check credentials or filename.", file=sys.stderr)
+        return
+    if not data["results"]:
+        rprint(f"Error: No applied controls found", file=sys.stderr)
+        return
+    items = [
+        f"|{item.get('name')}|{item.get('description')}|{item.get('status')}|{item.get('eta')}|{item.get('domain')}|"
+        for item in data["results"]
+    ]
+    return (
+        "|name|description|status|eta|domain|"
+        + "\n|---|---|---|---|\n"
+        + "\n".join(items)
     )
 
 
