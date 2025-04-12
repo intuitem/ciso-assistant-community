@@ -26,8 +26,8 @@
 			})),
 			...tasks.map((task: Record<string, string>) => ({
 				label: `Task: ${task.name}`,
-				date: new Date(task.task_date),
-				link: `/task-nodes/${task.id}`
+				date: new Date(task.due_date),
+				link: `/task-templates/${task.id}`
 			}))
 		];
 		return events;

@@ -953,13 +953,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'entry_type' }],
 		reverseForeignKeyFields: [{ field: 'timeline_entries', urlModel: 'evidences' }]
 	},
-	'task-nodes': {
-		name: 'tasknode',
-		localName: 'taskNode',
-		localNamePlural: 'taskNodes',
-		verboseName: 'Task node',
-		verboseNamePlural: 'Task nodes',
-		foreignKeyFields: [{ field: 'owner', urlModel: 'users' }],
+	'task-templates': {
+		name: 'tasktemplate',
+		localName: 'taskTemplate',
+		localNamePlural: 'taskTemplates',
+		verboseName: 'Task template',
+		verboseNamePlural: 'Task templates',
 		selectFields: [{ field: 'status' }]
 	}
 };

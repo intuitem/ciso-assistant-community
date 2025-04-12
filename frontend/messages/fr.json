@@ -1417,7 +1417,7 @@
 	"tasks": "Tâches",
 	"tasksNodes": "Tâches",
 	"addTask": "Ajouter une tâche",
-	"addTaskNode": "Ajouter une tâche",
+	"addTaskTemplate": "Ajouter une tâche",
 	"etaOrCompletionDate": "Date d'ETA/achèvement",
 	"etaOrCompletionDateHelpText": "La date à laquelle la tâche est censée être terminée ou a été terminée",
 	"completionDateHelpText": "La date à laquelle la tâche a été terminée",

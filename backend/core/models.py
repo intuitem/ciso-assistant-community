@@ -4135,7 +4135,8 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.save()
 
 
-class TaskTemplate(NameDescriptionMixin):
+# tasks management
+class TaskTemplate(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     SCHEDULE_JSONSCHEMA = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "Schedule Definition",
@@ -4194,6 +4195,10 @@ class TaskTemplate(NameDescriptionMixin):
         "additionalProperties": False,
     }
 
+    task_date = models.CharField(null=True, blank=True, verbose_name="Date")
+
+    is_recurrent = models.BooleanField(default=False)
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name="reference id"
     )
@@ -4216,33 +4221,47 @@ class TaskTemplate(NameDescriptionMixin):
         verbose_name="Related assets",
         blank=True,
         help_text="Assets related to the task",
-        related_name="tasks",
+        related_name="task_templates",
     )
     applied_controls = models.ManyToManyField(
         AppliedControl,
         verbose_name="Applied controls",
         blank=True,
         help_text="Applied controls related to the task",
-        related_name="tasks",
+        related_name="task_templates",
     )
     compliance_assessments = models.ManyToManyField(
         ComplianceAssessment,
         verbose_name="Compliance assessments",
         blank=True,
         help_text="Compliance assessments related to the task",
-        related_name="tasks",
+        related_name="task_templates",
     )
     risk_assessments = models.ManyToManyField(
         RiskAssessment,
         verbose_name="Risk assessments",
         blank=True,
         help_text="Risk assessments related to the task",
-        related_name="tasks",
+        related_name="task_templates",
     )
 
+    class Meta:
+        verbose_name = "Task template"
+        verbose_name_plural = "Task templates"
 
-# tasks management
-class TaskNode(NameDescriptionMixin, FolderMixin):
+    def save(self, *args, **kwargs):
+        if self.schedule and "days_of_week" in self.schedule:
+            # Only modify values that are not already in range 0-6
+            self.schedule["days_of_week"] = [
+                day % 7 if day > 6 else day for day in self.schedule["days_of_week"]
+            ]
+        super().save(*args, **kwargs)
+
+    def create(self, *args, **kwargs):
+        return super().create(*args, **kwargs)
+
+
+class TaskNode(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     TASK_STATUS_CHOICES = [
         ("pending", "Pending"),
         ("in_progress", "In progress"),
@@ -4267,18 +4286,13 @@ class TaskNode(NameDescriptionMixin, FolderMixin):
     evidences = models.ManyToManyField(
         Evidence,
         blank=True,
+        help_text="Evidences related to the task",
+        related_name="task_nodes",
     )
 
     class Meta:
-        verbose_name = _("Task node")
-        verbose_name_plural = _("Task nodes")
-
-    def save(self, *args, **kwargs):
-        if self.schedule and "days_of_week" in self.schedule:
-            self.schedule["days_of_week"] = [
-                day % 7 for day in self.schedule["days_of_week"]
-            ]
-        super().save(*args, **kwargs)
+        verbose_name = "Task node"
+        verbose_name_plural = "Task nodes"
 
 
 common_exclude = ["created_at", "updated_at"]

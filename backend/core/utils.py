@@ -590,38 +590,17 @@ def _calculate_next_occurrence(task, base_date):
     return None
 
 
-def _create_task_dict(task, task_date, iteration):
+def _create_task_dict(task, task_date):
     """Creates a dictionary representing a future task based on the template."""
-    # Calculate due date if applicable
-    due_date = None
-    if task.due_date and task.task_date:
-        delta = task.due_date - task.task_date
-        due_date = task_date + delta
 
     # Create task dictionary with all necessary properties
     task_dict = {
         "id": task.id,
         "name": task.name,
         "description": task.description,
-        "ref_id": task.ref_id,
-        "iteration": iteration,
-        "task_date": task_date.isoformat(),
-        "due_date": due_date.isoformat() if due_date else None,
+        "due_date": task_date,
         "status": "pending",
-        "is_virtual": True,
-        "generator_id": task.id,
-        "is_template": False,
-        "enabled": True,
-        # Add M2M relationships
-        "assigned_to": [user.id for user in task.assigned_to.all()],
-        "assets": [asset.id for asset in task.assets.all()],
-        "applied_controls": [control.id for control in task.applied_controls.all()],
-        "compliance_assessments": [
-            assessment.id for assessment in task.compliance_assessments.all()
-        ],
-        "risk_assessments": [
-            assessment.id for assessment in task.risk_assessments.all()
-        ],
+        "generator": task.id,
     }
 
     return task_dict
@@ -635,7 +614,10 @@ def _generate_occurrences(template, start_date, end_date):
         return occurrences
 
     # Determine start date
-    base_date = template.task_date or datetime.now().date()
+    base_date = (
+        datetime.strptime(str(template.task_date), "%Y-%m-%d").date()
+        or datetime.now().date()
+    )
 
     # Get recurrence settings
     end_recurrence_date = None
@@ -669,9 +651,7 @@ def _generate_occurrences(template, start_date, end_date):
 
         # Generate task if date matches schedule pattern
         if _date_matches_schedule(template, current_date):
-            occurrences.append(
-                _create_task_dict(template, current_date, occurrence_count)
-            )
+            occurrences.append(_create_task_dict(template, current_date))
             occurrence_count += 1
 
         # Calculate next date
@@ -685,8 +665,8 @@ def task_calendar(task_templates, start=None, end=None):
     future_tasks = []
 
     for template in task_templates:
-        if not template.is_template:
-            future_tasks.append(_create_task_dict(template, template.task_date, 0))
+        if not template.is_recurrent:
+            future_tasks.append(_create_task_dict(template, template.task_date))
             continue
 
         start_date_param = start or template.task_date or datetime.now().date()

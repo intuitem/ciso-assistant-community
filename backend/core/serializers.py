@@ -1400,7 +1400,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
         return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data
 
 
-class TaskNodeReadSerializer(BaseModelSerializer):
+class TaskTemplateReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -1409,11 +1409,11 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
 
     class Meta:
-        model = TaskNode
-        exclude = ["schedule", "iteration", "generator"]
+        model = TaskTemplate
+        exclude = ["schedule"]
 
 
-class TaskNodeWriteSerializer(BaseModelSerializer):
+class TaskTemplateWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = TaskNode
+        model = TaskTemplate
         fields = "__all__"

@@ -2202,7 +2202,7 @@ class UserViewSet(BaseModelViewSet):
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
             task_calendar(
-                TaskNode.objects.filter(enabled=True, assigned_to=request.user),
+                TaskTemplate.objects.filter(enabled=True, assigned_to=request.user),
                 start,
                 end,
             )
@@ -5053,12 +5053,8 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
-class TaskNodeViewSet(BaseModelViewSet):
-    model = TaskNode
-
-    @action(detail=False, name="Get status choices")
-    def status(self, request):
-        return Response(dict(TaskNode.TASK_STATUS_CHOICES))
+class TaskTemplateViewSet(BaseModelViewSet):
+    model = TaskTemplate
 
     @action(
         detail=False,
@@ -5076,5 +5072,5 @@ class TaskNodeViewSet(BaseModelViewSet):
         if end is None:
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
-            task_calendar(TaskNode.objects.filter(enabled=True), start, end)
+            task_calendar(TaskTemplate.objects.filter(enabled=True), start, end)
         )

@@ -638,7 +638,7 @@ export const TimelineEntrySchema = z.object({
 	evidences: z.string().uuid().optional().array().optional()
 });
 
-export const TaskNodeSchema = z.object({
+export const TaskTemplateSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	status: z.string().default('pending'),
@@ -654,10 +654,7 @@ export const TaskNodeSchema = z.object({
 			return `${year}-${month}-${day}`;
 		})
 		.optional(),
-	due_date: z.string().optional(),
-	eta_or_completion_date: z.string().optional(),
-	observation: z.string().optional(),
-	is_template: z.boolean().optional(),
+	is_recurrent: z.boolean().optional(),
 	enabled: z.boolean().default(true).optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
@@ -724,7 +721,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'findings-assessments': FindingsAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
-	'task-nodes': TaskNodeSchema
+	'task-templates': TaskTemplateSchema
 };
 
 export const modelSchema = (model: string) => {

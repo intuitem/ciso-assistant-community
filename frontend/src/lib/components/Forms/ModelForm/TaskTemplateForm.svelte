@@ -17,7 +17,7 @@
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
 
-	const { value: is_template } = formFieldProxy(form, 'is_template');
+	const { value: is_recurrent } = formFieldProxy(form, 'is_recurrent');
 	const { value: frequency } = formFieldProxy(form, 'schedule.frequency');
 </script>
 
@@ -41,13 +41,13 @@
 />
 <Checkbox
 	{form}
-	field="is_template"
+	field="is_recurrent"
 	label={m.recurrent()}
 	helpText={m.isRecurrentHelpText()}
-	cacheLock={cacheLocks['is_template']}
-	bind:cachedValue={formDataCache['is_template']}
+	cacheLock={cacheLocks['is_recurrent']}
+	bind:cachedValue={formDataCache['is_recurrent']}
 />
-{#if $is_template}
+{#if $is_recurrent}
 	<Dropdown
 		open={false}
 		style="hover:text-primary-700"
@@ -168,23 +168,6 @@
 		/>
 	</Dropdown>
 {/if}
-<TextField
-	type="date"
-	{form}
-	field="eta_or_completion_date"
-	label={m.etaOrCompletionDate()}
-	helpText={m.etaOrCompletionDateHelpText()}
-	cacheLock={cacheLocks['eta_or_completion_date']}
-	bind:cachedValue={formDataCache['eta_or_completion_date']}
-/>
-<TextField
-	type="date"
-	{form}
-	field="due_date"
-	label={m.dueDate()}
-	cacheLock={cacheLocks['due_date']}
-	bind:cachedValue={formDataCache['due_date']}
-/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -196,15 +179,6 @@
 	label={m.assignedTo()}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	<Select
-		{form}
-		field="status"
-		disableDoubleDash={true}
-		options={model.selectOptions['status']}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
-		label={m.status()}
-	/>
 	<TextField
 		{form}
 		field="ref_id"
@@ -250,11 +224,4 @@
 		label={m.riskAssessments()}
 	/>
 </Dropdown>
-<TextArea
-	{form}
-	field="observation"
-	label={m.observation()}
-	cacheLock={cacheLocks['observation']}
-	bind:cachedValue={formDataCache['observation']}
-/>
 <Checkbox {form} field="enabled" label={m.enabled()} />

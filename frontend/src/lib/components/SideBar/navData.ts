@@ -134,7 +134,7 @@ export const navData = {
 				{
 					name: 'tasks',
 					fa_icon: 'fa-solid fa-note-sticky',
-					href: '/task-nodes'
+					href: '/task-templates'
 				}
 			]
 		},
