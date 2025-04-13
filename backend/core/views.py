@@ -2244,52 +2244,7 @@ class FolderViewSet(BaseModelViewSet):
         """
         serializer.save()
         folder = Folder.objects.get(id=serializer.data["id"])
-        if folder.content_type == Folder.ContentType.DOMAIN:
-            readers = UserGroup.objects.create(
-                name=UserGroupCodename.READER, folder=folder, builtin=True
-            )
-            approvers = UserGroup.objects.create(
-                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
-            )
-            analysts = UserGroup.objects.create(
-                name=UserGroupCodename.ANALYST, folder=folder, builtin=True
-            )
-            managers = UserGroup.objects.create(
-                name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True
-            )
-            ra1 = RoleAssignment.objects.create(
-                user_group=readers,
-                role=Role.objects.get(name=RoleCodename.READER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra1.perimeter_folders.add(folder)
-            ra2 = RoleAssignment.objects.create(
-                user_group=approvers,
-                role=Role.objects.get(name=RoleCodename.APPROVER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra2.perimeter_folders.add(folder)
-            ra3 = RoleAssignment.objects.create(
-                user_group=analysts,
-                role=Role.objects.get(name=RoleCodename.ANALYST),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra3.perimeter_folders.add(folder)
-            ra4 = RoleAssignment.objects.create(
-                user_group=managers,
-                role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra4.perimeter_folders.add(folder)
-            # Clear the cache after a new folder is created - purposely clearing everything
+        Folder.create_default_ug_and_ra(folder)
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -2752,6 +2707,7 @@ class FolderViewSet(BaseModelViewSet):
                     name=domain_name, content_type=Folder.ContentType.DOMAIN
                 )
                 link_dump_database_ids["base_folder"] = base_folder
+                Folder.create_default_ug_and_ra(base_folder)
 
                 # Check for missing libraries after folder creation
                 for library in required_libraries:
