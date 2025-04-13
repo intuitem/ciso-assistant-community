@@ -105,7 +105,9 @@ def ebios_rm_visual_analysis(study):
     for each asset, get the related_feared_events within the study and their gravity,
     for each related feared event, get the RoTo
     """
-    rotos = RoTo.objects.filter(ebios_rm_study=study)
+    rotos = RoTo.objects.filter(ebios_rm_study=study).prefetch_related(
+        "feared_events__assets"
+    )
     for ro_to in rotos:
         entry = {
             "ro": ro_to.risk_origin,
