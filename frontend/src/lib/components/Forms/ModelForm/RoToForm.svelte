@@ -101,7 +101,7 @@
 		{form}
 		options={model.selectOptions['activity']}
 		field="activity"
-		label={m.activity()}
+		label={m.ro_activity()}
 		cacheLock={cacheLocks['activity']}
 		bind:cachedValue={formDataCache['activity']}
 		helpText={m.activityHelpText()}
