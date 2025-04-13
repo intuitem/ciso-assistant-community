@@ -674,7 +674,14 @@ export const TaskTemplateSchema = z.object({
 			frequency: 'DAILY'
 		})
 		.optional()
-});
+}).refine(
+    (data) =>
+      !data.schedule || // schedule is not used
+      (data.schedule && data.schedule.end_date), // if used, end_date must be present
+    {
+      path: ['schedule', 'end_date'],
+      message: 'end_date is required when schedule is provided.'
+    });
 
 export const TaskNodeSchema = z.object({
 	due_date: z.string().optional(),
