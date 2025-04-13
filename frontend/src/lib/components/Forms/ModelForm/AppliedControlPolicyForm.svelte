@@ -155,12 +155,12 @@
 		/>
 		<Select
 			{form}
-			options={model.selectOptions['impact']}
-			field="impact"
-			label={m.impact()}
+			options={model.selectOptions['control_impact']}
+			field="control_impact"
+			label={m.controlImpact()}
 			helpText={m.impactHelpText()}
-			cacheLock={cacheLocks['impact']}
-			bind:cachedValue={formDataCache['impact']}
+			cacheLock={cacheLocks['control_impact']}
+			bind:cachedValue={formDataCache['control_impact']}
 		/>
 		<NumberField
 			{form}

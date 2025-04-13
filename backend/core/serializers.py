@@ -567,7 +567,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
-    impact = serializers.CharField(source="get_impact_display")
+    control_impact = serializers.CharField(source="get_control_impact_display")
     cost = serializers.FloatField()
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     assets = FieldsRelatedField(many=True)
@@ -596,6 +596,7 @@ class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
+    control_impact = serializers.CharField(source="get_control_impact_display")
     status = serializers.CharField(source="get_status_display")
     cost = serializers.FloatField()
 
@@ -635,7 +636,7 @@ class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
             "category",
             "csf_function",
             "effort",
-            "impact",
+            "control_impact",
             "cost",
             "ranking_score",
             "requirement_assessments",
@@ -675,7 +676,7 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
             "expiry_date",
             "link",
             "effort",
-            "impact",
+            "control_impact",
             "cost",
             "evidences",
         ]

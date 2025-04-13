@@ -103,6 +103,7 @@ interface ForeignKeyField {
 }
 
 interface Field {
+	keyNameOverride?: string;
 	field: string;
 	type?: 'date' | 'datetime';
 }
@@ -248,7 +249,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'csf_function' },
 			{ field: 'priority' },
 			{ field: 'effort' },
-			{ field: 'impact' },
+			{ field: 'control_impact' },
 			{ field: 'cost' },
 			{ field: 'status' },
 			{ field: 'created_at', type: 'datetime' },
@@ -290,7 +291,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'category' },
 			{ field: 'csf_function' },
 			{ field: 'effort' },
-			{ field: 'impact', valueType: 'number' },
+			{ field: 'control_impact', valueType: 'number' },
 			{ field: 'priority' }
 		],
 		filters: [
@@ -299,7 +300,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'category' },
 			{ field: 'csf_function' },
 			{ field: 'effort' },
-			{ field: 'impact' },
+			{ field: 'control_impact' },
 			{ field: 'folder' },
 			{ field: 'owner' },
 			{ field: 'priority' }
@@ -332,7 +333,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'csf_function' },
 			{ field: 'effort' },
-			{ field: 'impact', valueType: 'number' },
+			{ field: 'control_impact', valueType: 'number' },
 			{ field: 'priority' }
 		],
 		filters: [
@@ -340,7 +341,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'csf_function' },
 			{ field: 'effort' },
-			{ field: 'impact' },
+			{ field: 'control_impact' },
 			{ field: 'folder' },
 			{ field: 'owner' },
 			{ field: 'priority' }

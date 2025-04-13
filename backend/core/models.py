@@ -2113,7 +2113,7 @@ class AppliedControl(
         verbose_name=_("Effort"),
     )
 
-    impact = models.SmallIntegerField(
+    control_impact = models.SmallIntegerField(
         verbose_name="Impact", choices=IMPACT, null=True, blank=True
     )
 

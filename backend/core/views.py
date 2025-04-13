@@ -987,7 +987,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "reference_control",
                 "eta",
                 "effort",
-                "impact",
+                "control_impact",
                 "cost",
                 "link",
                 "status",
@@ -1015,7 +1015,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
-                    mtg.impact,
+                    mtg.control_impact,
                     mtg.priority,
                     mtg.cost,
                     mtg.link,
@@ -1297,7 +1297,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "priority": ["exact"],
             "reference_control": ["exact"],
             "effort": ["exact"],
-            "impact": ["exact"],
+            "control_impact": ["exact"],
             "cost": ["exact"],
             "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
@@ -1349,7 +1349,7 @@ class AppliedControlViewSet(BaseModelViewSet):
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get impact choices")
-    def impact(self, request):
+    def control_impact(self, request):
         return Response(dict(AppliedControl.IMPACT))
 
     @action(detail=False, name="Get all applied controls owners")
