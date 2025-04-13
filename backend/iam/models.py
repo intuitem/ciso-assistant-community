@@ -229,7 +229,6 @@ class Folder(NameDescriptionMixin):
             # Clear the cache after a new folder is created - purposely clearing everything
 
 
-
 class FolderMixin(models.Model):
     """
     Add foreign key to Folder, defaults to root folder
