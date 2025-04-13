@@ -1450,9 +1450,9 @@
 	"schedule": "Schedule",
 	"taskDate": "Date",
 	"isTemplate": "Recurrent",
-	"taskNode": "Task occurence",
-	"taskNodes": "Tasks occurences",
+	"taskNode": "Task occurrence",
+	"taskNodes": "Tasks occurrences",
 	"associatedTaskNodes": "Instances review",
-	"nextOccurence": "Next occurence",
+	"nextOccurrence": "Next occurrence",
 	"taskTemplate": "Task template"
 }

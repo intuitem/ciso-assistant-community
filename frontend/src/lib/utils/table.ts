@@ -919,7 +919,7 @@ export const listViewFields = {
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	'task-templates': {
-		head: ['name', 'description', 'status', 'owner', 'nextOccurence'],
+		head: ['name', 'description', 'status', 'owner', 'nextOccurrence'],
 		body: ['name', 'description', 'status', 'owner', 'task_date']
 	},
 	'task-nodes': {

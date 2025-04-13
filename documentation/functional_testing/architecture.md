@@ -195,7 +195,7 @@ And we would also have `A._page = B._page = C._page = D._page`.
 A `Page`/`Element` class can have an optional `CONTEXT` static attribute of type `Context` (type defined in `./utils/core/element.ts`).
 Also all `Element` objects have an internal private context `this._context` which can be accessed by multiple methods defined in the the `Element` fundamental class like `getContext` or `getHasContext`.
 The context of an `Element` represents the aggregation of all its **context sources**.
-When looking for a context value, the `Element` protected context-methods will look for the value in all the **context sources** in a specific order, when a value is found this value is returned even if occurences of this value exist in other **context sources**.
+When looking for a context value, the `Element` protected context-methods will look for the value in all the **context sources** in a specific order, when a value is found this value is returned even if occurrences of this value exist in other **context sources**.
 So if we have 2 **context sources** `A` and `B`, if `B` has a higher priority than `A` and both `B` and `A` have a `"someValue"` context value, then the context value of `"someValue"` will be equal to `A["someValue"]` instead of `B["someValue"]`.
 
 Here is the list of the **context sources** order from the highest to the lowest priority:
