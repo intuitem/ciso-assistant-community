@@ -2,6 +2,11 @@ from django.db.models.query import QuerySet
 import math
 import random
 from global_settings.models import GlobalSettings
+from .models import EbiosRMStudy, FearedEvent, RoTo
+from core.models import Asset
+from django.shortcuts import get_object_or_404
+
+from icecream import ic
 
 
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
@@ -91,3 +96,23 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
         r_data[cluser_id].append(vector)
 
     return {"current": c_data, "residual": r_data}
+
+
+def ebios_rm_visual_analysis(study):
+    output = list()  # list of dict with strucuted data
+    """
+    assets,
+    for each asset, get the related_feared_events within the study and their gravity,
+    for each related feared event, get the RoTo
+    """
+    feared_events = study.fearedevent_set.all()
+    for fe in feared_events:
+        entry = {
+            "name": fe.name,
+            "gravity": fe.gravity,
+            "assets": [a.name for a in fe.assets.all()],
+            "roto": [roto.name for roto in fe.ro_to_couples.all()],
+        }
+        output.append(entry)
+    print(output)
+    return output
