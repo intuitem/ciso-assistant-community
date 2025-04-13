@@ -1125,6 +1125,7 @@
 	"ebiosWs5_3": "Define security measures",
 	"ebiosWs5_4": "Assess and document residual risks",
 	"ebiosWs5_5": "Establish risk monitoring framework",
+	"ro_activity": "Activity level",
 	"activity": "Step",
 	"ebiosRmMatrixHelpText": "Risk matrix used as a reference for the study",
 	"activityOne": "Step 1",
