@@ -40,8 +40,11 @@
 
 	onMount(() => {
 		const cachedValue = Number(localStorage.getItem('rowsPerPageCache') ?? '10');
-		rowsPerPage.set(cachedValue);
-		setRowsPerPage();
+
+		if ($rowsPerPage !== cachedValue) {
+			rowsPerPage.set(cachedValue); // will trigger reactivity
+			handler.invalidate(); // refetch with updated rowsPerPage
+		}
 	});
 
 	const options = [5, 10, 20, 50, 100];
