@@ -93,7 +93,7 @@ async def get_risk_scenarios():
     ]
     return (
         "|name|description|current_level|residual_level|domain|"
-        + "\n|---|---|---|---|\n"
+        + "\n|---|---|---|---|---|\n"
         + "\n".join(scenarios)
     )
 
@@ -124,7 +124,7 @@ async def get_applied_controls():
     ]
     return (
         "|name|description|status|eta|domain|"
-        + "\n|---|---|---|---|\n"
+        + "\n|---|---|---|---|---|\n"
         + "\n".join(items)
     )
 
@@ -154,7 +154,7 @@ async def get_audits_progress():
     ]
     return (
         "|name|framework|status|progress|domain|"
-        + "\n|---|---|---|---|\n"
+        + "\n|---|---|---|---|---|\n"
         + "\n".join(items)
     )
 
