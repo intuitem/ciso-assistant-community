@@ -804,7 +804,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		],
-		selectFields: [{ field: 'category' }]
+		selectFields: [{ field: 'category' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'stakeholders',
+				urlModel: 'applied-controls'
+			}
+		]
 	},
 	'strategic-scenarios': {
 		endpointUrl: 'ebios-rm/strategic-scenarios',

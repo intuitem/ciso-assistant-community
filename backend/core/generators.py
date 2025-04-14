@@ -553,6 +553,7 @@ def gen_audit_context(id, doc, tree, lang):
             .filter(applied_controls=ac.id)
             .count()
         )
+        print(f"[{ac.name}] {ac.category}: {type(ac.category)}")
         p1_controls.append(
             {
                 "name": ac.name,
