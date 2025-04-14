@@ -46,6 +46,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	}
 	model.selectOptions = selectOptions;
 
+	const missingAttackPathResponse = await fetch(
+		`${BASE_API_URL}/ebios-rm/strategic-scenarios/get_strategic_scenario_without_attack_path/`
+	);
+	const scenariosWithoutAttackPath = missingAttackPathResponse.ok
+		? await missingAttackPathResponse.json()
+		: [];
+
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
 			obj[key] = listViewFields[URLModel as urlModel].head[index];
@@ -60,7 +67,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
-	return { createForm, deleteForm, model, URLModel, table };
+	return { createForm, deleteForm, model, URLModel, table, scenariosWithoutAttackPath };
 };
 
 export const actions: Actions = {

@@ -182,6 +182,14 @@ class StrategicScenarioViewSet(BaseModelViewSet):
         "ebios_rm_study",
     ]
 
+    @action(detail=False, methods=["get"])
+    def get_strategic_scenario_without_attack_path(self, request):
+        """
+        Get strategic scenarios that are not linked to any attack path.
+        """
+        qs = StrategicScenario.objects.filter(attack_paths__isnull=True).distinct()
+        return Response(qs.values("id", "name"))
+
 
 class AttackPathFilter(df.FilterSet):
     used = df.BooleanFilter(method="is_used", label="Used")

@@ -6,6 +6,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/stores';
+	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -29,8 +30,33 @@
 		};
 		modalStore.trigger(modal);
 	}
+	const missingScenarios = data.scenariosWithoutAttackPath;
 </script>
 
+{#if missingScenarios.length > 0}
+	<section class="my-6">
+		<div
+			class="flex items-start gap-3 rounded-xl border border-yellow-300 bg-yellow-100 p-4 shadow-sm"
+		>
+			<div class="text-yellow-600 mt-1">
+				<i class="fa-solid fa-triangle-exclamation text-xl"></i>
+			</div>
+			<div>
+				<h2 class="font-semibold text-yellow-800 text-md mb-1">
+					{m.reminderWarningStrategicScenarios()}
+				</h2>
+				<p class="text-yellow-700 text-sm leading-snug mb-1">
+					{m.addAttackPathToDoOperationalScenarios()}
+				</p>
+				<ul class="list-disc list-inside text-yellow-700 text-sm">
+					{#each missingScenarios as scenario}
+						<li>{scenario.name ?? `ID: ${scenario.id}`}</li>
+					{/each}
+				</ul>
+			</div>
+		</div>
+	</section>
+{/if}
 <ModelTable
 	source={data.table}
 	deleteForm={data.deleteForm}
