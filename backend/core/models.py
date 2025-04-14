@@ -925,9 +925,6 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
             "If the risk matrix is set as disabled, it will not be available for selection for new risk assessments."
         ),
     )
-    provider = models.CharField(
-        max_length=200, blank=True, null=True, verbose_name=_("Provider")
-    )
 
     @property
     def is_used(self) -> bool:
