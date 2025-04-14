@@ -461,6 +461,16 @@ def gen_audit_context(id, doc, tree, lang):
             "non_compliant": "Non compliant",
             "not_applicable": "Not applicable",
             "not_assessed": "Not assessed",
+            "to_do": "To do",
+            "on_hold": "On hold",
+            "in_progress": "In progress",
+            "deprecated": "Deprecated",
+            "active": "Active",
+            "policy": "Policy",
+            "process": "Process",
+            "technical": "Technical",
+            "physical": "Physical",
+            "procedure": "Procedure",
         },
         "fr": {
             "compliant": "Conformes",
@@ -468,6 +478,16 @@ def gen_audit_context(id, doc, tree, lang):
             "non_compliant": "Non conformes",
             "not_applicable": "Non applicables",
             "not_assessed": "Non évalués",
+            "to_do": "À faire",
+            "on_hold": "En attente",
+            "in_progress": "En cours",
+            "deprecated": "Déprécié",
+            "active": "Actif",
+            "policy": "Politique",
+            "process": "Processus",
+            "technical": "Technique",
+            "physical": "Physique",
+            "procedure": "Procédure",
         },
     }
 
@@ -511,7 +531,13 @@ def gen_audit_context(id, doc, tree, lang):
     ac_total = applied_controls.count()
     status_cnt = applied_controls.values("status").annotate(count=Count("id"))
     ac_chart_data = [
-        {"category": item["status"], "value": item["count"]} for item in status_cnt
+        {
+            "category": i18n_dict[lang][item["status"]]
+            if item["status"] in i18n_dict[lang]
+            else item["status"],
+            "value": item["count"],
+        }
+        for item in status_cnt
     ]
     p1_controls = list()
     full_controls = list()
@@ -525,8 +551,12 @@ def gen_audit_context(id, doc, tree, lang):
             {
                 "name": ac.name,
                 "description": ac.description,
-                "status": ac.status,
-                "category": ac.category,
+                "status": i18n_dict[lang][ac.status]
+                if ac.status in i18n_dict[lang]
+                else ac.status,
+                "category": i18n_dict[lang][ac.category]
+                if ac.category in i18n_dict[lang]
+                else ac.category,
                 "coverage": requirements_count,
             }
         )
@@ -542,9 +572,13 @@ def gen_audit_context(id, doc, tree, lang):
                 "name": ac.name,
                 "description": ac.description,
                 "prio": f"P{ac.priority}" if ac.priority else "-",
-                "status": ac.status,
+                "status": i18n_dict[lang][ac.status]
+                if ac.status in i18n_dict[lang]
+                else ac.status,
                 "eta": ac.eta,
-                "category": ac.category,
+                "category": i18n_dict[lang][ac.category]
+                if ac.category in i18n_dict[lang]
+                else ac.category,
                 "coverage": requirements_count,
             }
         )
