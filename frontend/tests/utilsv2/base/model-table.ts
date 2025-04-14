@@ -9,5 +9,14 @@ export class ModelTable extends Element {
 		this._columnNames = null;
 	}
 
-	getRow() {}
+	/**
+	 * Gets a specific row from the table
+	 * @param index The row index to retrieve
+	 * @returns The row element
+	 * @todo Implement this method
+	 */
+	getRow(index?: number) {
+		// TODO: Implement row retrieval logic
+		throw new Error('Method not implemented');
+	}
 }

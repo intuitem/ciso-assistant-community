@@ -19,7 +19,7 @@ export class Sidebar extends Element {
 	 * Clicks on the toggle button, which either opens or closes the sidebar depending on its current visibility.
 	 */
 	async doToggle() {
-		this._toggleButton.click();
+		await this._toggleButton.click();
 	}
 
 	/** Check if the sidebar is opened. */
