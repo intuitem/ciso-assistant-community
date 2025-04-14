@@ -987,6 +987,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "reference_control",
                 "eta",
                 "effort",
+                "control_impact",
                 "cost",
                 "link",
                 "status",
@@ -1014,6 +1015,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
+                    mtg.control_impact,
                     mtg.priority,
                     mtg.cost,
                     mtg.link,
@@ -1295,6 +1297,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "priority": ["exact"],
             "reference_control": ["exact"],
             "effort": ["exact"],
+            "control_impact": ["exact"],
             "cost": ["exact"],
             "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
@@ -1343,6 +1346,11 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
         return Response(dict(AppliedControl.EFFORT))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get impact choices")
+    def control_impact(self, request):
+        return Response(dict(AppliedControl.IMPACT))
 
     @action(detail=False, name="Get all applied controls owners")
     def owner(self, request):
@@ -4057,6 +4065,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "ETA",
                 "Expiry date",
                 "Effort",
+                "Impact",
                 "Cost",
                 "Covered requirements",
             ]
@@ -4074,6 +4083,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     item.get("eta"),
                     item.get("expiry_date"),
                     item.get("effort"),
+                    item.get("impact"),
                     item.get("cost"),
                     "\n".join(
                         [ra.get("str") for ra in item.get("requirement_assessments")]
@@ -4855,6 +4865,7 @@ def export_mp_csv(request):
         "eta",
         "priority",
         "effort",
+        "impact",
         "cost",
         "link",
         "status",
@@ -4878,6 +4889,7 @@ def export_mp_csv(request):
             mtg.reference_control,
             mtg.eta,
             mtg.effort,
+            mtg.impact,
             mtg.cost,
             mtg.link,
             mtg.status,
@@ -5028,10 +5040,12 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Incident.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Incident.Severity.choices))

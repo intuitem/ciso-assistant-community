@@ -2018,13 +2018,15 @@ class AppliedControl(
     CSF_FUNCTION = ReferenceControl.CSF_FUNCTION
 
     EFFORT = [
-        ("S", _("Small")),
-        ("M", _("Medium")),
-        ("L", _("Large")),
-        ("XL", _("Extra Large")),
+        ("XS", "Extra Small"),
+        ("S", "Small"),
+        ("M", "Medium"),
+        ("L", "Large"),
+        ("XL", "Extra Large"),
     ]
 
-    MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}
+    IMPACT = [(1, "Very Low"), (2, "Low"), (3, "Medium"), (4, "High"), (5, "Very High")]
+    MAP_EFFORT = {None: -1, "XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
     # todo: think about a smarter model for ranking
     reference_control = models.ForeignKey(
         ReferenceControl,
@@ -2110,6 +2112,11 @@ class AppliedControl(
         help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
         verbose_name=_("Effort"),
     )
+
+    control_impact = models.SmallIntegerField(
+        verbose_name="Impact", choices=IMPACT, null=True, blank=True
+    )
+
     cost = models.FloatField(
         null=True,
         help_text=_("Cost of the measure (using globally-chosen currency)"),

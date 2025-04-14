@@ -162,6 +162,7 @@ export const AppliedControlSchema = z.object({
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
+	control_impact: z.number().optional().nullable(),
 	cost: z.number().multipleOf(0.000001).optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
