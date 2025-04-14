@@ -567,6 +567,10 @@ def gen_audit_context(id, doc, tree, lang):
     chart_spider = InlineImage(doc, spider_chart_buffer, width=Cm(15))
     ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
+    if IGs == "" and audit.framework.implementation_groups_definition:
+        IGs = ", ".join(
+            [x.get("name") for x in audit.framework.implementation_groups_definition]
+        )
     context = {
         "audit": audit,
         "date": now().strftime("%d/%m/%Y"),
