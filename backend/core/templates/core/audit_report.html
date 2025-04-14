@@ -42,9 +42,15 @@
         <div>
             <p class='font-semibold'>{% trans "Selected implementation groups" %}</p>
             <ul>
+              {% if not compliance_assessment.get_selected_implementation_groups and compliance_assessment.framework.implementation_groups_definition %}
+                {% for group in compliance_assessment.framework.implementation_groups_definition %}
+                    <li>{{ group.name }}</li>
+                {% endfor %}
+              {% else %}
                 {% for group in compliance_assessment.get_selected_implementation_groups %}
                     <li>{{ group }}</li>
                 {% endfor %}
+              {% endif %}
             </ul>
         </div>
     </div>
