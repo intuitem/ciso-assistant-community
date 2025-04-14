@@ -667,7 +667,7 @@ export const TaskTemplateSchema = z.object({
 			weeks_of_month: z.number().min(-1).max(4).array().optional(),
 			days_of_week: z.number().min(1).max(7).array().optional(),
 			months_of_year: z.number().min(1).max(12).array().optional(),
-			end_date: z.string().optional()
+			end_date: z.union([z.literal('').transform(() => undefined), z.string().optional()])
 		})
 		.default({
 			interval: 1,
