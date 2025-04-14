@@ -14,55 +14,57 @@
 
 	const chart_id = `${name}_div`;
 	onMount(async () => {
-		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
-		// specify chart configuration item and data
+		if (tree?.length > 0) {
+			const echarts = await import('echarts');
+			let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+			// specify chart configuration item and data
 
-		var option = {
-			toolbox: {
-				show: true,
-				feature: {
-					restore: { show: true }
+			var option = {
+				toolbox: {
+					show: true,
+					feature: {
+						restore: { show: true }
+					}
+				},
+				title: {
+					subtext: title
+				},
+				tooltip: {
+					trigger: 'item',
+					formatter: '{b}/data: {c}'
+				},
+				series: {
+					type: 'treemap',
+					// type: 'sunburst',
+					// emphasis: {
+					//     focus: 'ancestor'
+					// },
+					//upperLabel: {
+					//	show: true
+					//},
+					leafDepth: 1,
+					roam: false,
+					visibleMin: 1,
+					colorSaturation: [0.3, 0.4],
+					data: tree,
+					radius: [30, '95%'],
+					sort: undefined,
+					itemStyle: {
+						borderRadius: 7,
+						borderWidth: 2
+					}
 				}
-			},
-			title: {
-				subtext: title
-			},
-			tooltip: {
-				trigger: 'item',
-				formatter: '{b}/data: {c}'
-			},
-			series: {
-				type: 'treemap',
-				// type: 'sunburst',
-				// emphasis: {
-				//     focus: 'ancestor'
-				// },
-				//upperLabel: {
-				//	show: true
-				//},
-				leafDepth: 1,
-				roam: false,
-				visibleMin: 1,
-				colorSaturation: [0.3, 0.4],
-				data: tree,
-				radius: [30, '95%'],
-				sort: undefined,
-				itemStyle: {
-					borderRadius: 7,
-					borderWidth: 2
-				}
-			}
-		};
+			};
 
-		// console.debug(option);
+			// console.debug(option);
 
-		// use configuration item and data specified to show chart
-		chart.setOption(option);
+			// use configuration item and data specified to show chart
+			chart.setOption(option);
 
-		window.addEventListener('resize', function () {
-			chart.resize();
-		});
+			window.addEventListener('resize', function () {
+				chart.resize();
+			});
+		}
 	});
 </script>
 

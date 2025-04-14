@@ -721,6 +721,13 @@ def startup(sender: AppConfig, **kwargs):
         except Exception as e:
             logger.error("Error creating superuser", exc_info=e)
 
+    # add administrators group to superusers (for resiliency)
+    administrators = UserGroup.objects.get(
+        name="BI-UG-ADM", folder=Folder.get_root_folder()
+    )
+    for u in User.objects.filter(is_superuser=True):
+        u.user_groups.add(administrators)
+
 
 class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"

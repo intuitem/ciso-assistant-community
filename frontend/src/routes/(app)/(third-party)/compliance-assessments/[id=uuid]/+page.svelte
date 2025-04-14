@@ -413,6 +413,10 @@
 					{#if !$page.data.user.is_third_party}
 						<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 						<a
+							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/csv"
+							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+						>
+						<a
 							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/pdf"
 							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 						>

@@ -403,10 +403,12 @@
 	"low": "Low",
 	"high": "High",
 	"veryHigh": "Very high",
+	"extraSmall": "Extra-small",
 	"small": "Small",
 	"medium": "Medium",
 	"large": "Large",
 	"extraLarge": "Extra-large",
+	"controlImpact": "Impact",
 	"scope": "Scope",
 	"reader": "Reader",
 	"lastUpdate": "Last update",
@@ -1125,6 +1127,7 @@
 	"ebiosWs5_3": "Define security measures",
 	"ebiosWs5_4": "Assess and document residual risks",
 	"ebiosWs5_5": "Establish risk monitoring framework",
+	"ro_activity": "Activity level",
 	"activity": "Step",
 	"ebiosRmMatrixHelpText": "Risk matrix used as a reference for the study",
 	"activityOne": "Step 1",
@@ -1414,5 +1417,6 @@
 	"createRiskAssessment": "Initiate a risk assessment as well",
 	"riskAssessmentName": "Risk Assessment Name",
 	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available.",
-	"youCanSetPAsswordHere": "You can set your password here."
+	"youCanSetPAsswordHere": "You can set your password here.",
+	"impactHelpText": "Estimation of the control's impact"
 }
