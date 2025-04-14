@@ -67,19 +67,18 @@ backend:
     smtp:
       # -- Default from email address
       defaultFrom: no-reply@ciso-assistant.net
-      # -- Name of an existing secret resource containing the primary SMTP password in a 'email-primary-password' key
+      # -- Name of an existing secret resource containing the SMTP password in a 'email-primary-password' key
       existingSecret: ""
-      primary:
-        # -- Primary SMTP hostname
-        host: primary.cool-mailer.net
-        # -- Primary SMTP post
-        port: 25
-        # -- Enable TLS for primary SMTP
-        useTls: true
-        # -- Primary SMTP username
-        username: ""
-        # -- Primary SMTP password
-        password: ""
+      # -- SMTP hostname
+      host: primary.cool-mailer.net
+      # -- SMTP post
+      port: 25
+      # -- Enable TLS for SMTP
+      useTls: false
+      # -- SMTP username
+      username: ""
+      # -- SMTP password
+      password: ""
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
     ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
