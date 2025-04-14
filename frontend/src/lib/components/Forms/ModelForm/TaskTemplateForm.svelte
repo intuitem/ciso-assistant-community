@@ -30,15 +30,16 @@
 	label={m.domain()}
 	hidden={initialData.folder}
 />
-<TextField
-	type="date"
-	{form}
-	field="task_date"
-	label={m.date()}
-	helpText={m.taskDateHelpText()}
-	cacheLock={cacheLocks['task_date']}
-	bind:cachedValue={formDataCache['task_date']}
-/>
+{#if !$is_recurrent}
+	<TextField
+		type="date"
+		{form}
+		field="task_date"
+		label={m.date()}
+		cacheLock={cacheLocks['task_date']}
+		bind:cachedValue={formDataCache['task_date']}
+	/>
+{/if}
 <Checkbox
 	{form}
 	field="is_recurrent"
@@ -49,11 +50,19 @@
 />
 {#if $is_recurrent}
 	<Dropdown
-		open={false}
+		open={true}
 		style="hover:text-primary-700"
 		icon="fa-solid fa-calendar-days"
 		header={m.schedule()}
 	>
+		<TextField
+			type="date"
+			{form}
+			field="task_date"
+			label={m.startDate()}
+			cacheLock={cacheLocks['task_date']}
+			bind:cachedValue={formDataCache['task_date']}
+		/>
 		<div class="flex w-full items-center space-x-3">
 			<span class="mt-5 font-semibold text-sm text-gray-800">{m.each()}</span>
 			<NumberField
