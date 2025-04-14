@@ -209,6 +209,9 @@
 			</div>
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
+			<div slot="action">
+				<a class="" href={`${$page.url.pathname}/visual/`}>Visual Analysis</a>
+			</div>
 			<div slot="content">
 				<Card
 					count={data.data.roto_count}
