@@ -153,6 +153,15 @@
 			cacheLock={cacheLocks['effort']}
 			bind:cachedValue={formDataCache['effort']}
 		/>
+		<Select
+			{form}
+			options={model.selectOptions['control_impact']}
+			field="control_impact"
+			label={m.controlImpact()}
+			helpText={m.impactHelpText()}
+			cacheLock={cacheLocks['control_impact']}
+			bind:cachedValue={formDataCache['control_impact']}
+		/>
 		<NumberField
 			{form}
 			field="cost"
