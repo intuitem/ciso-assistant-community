@@ -1418,5 +1418,6 @@
 	"riskAssessmentName": "Nom de l'analyse de risque",
 	"noDataAvailable": "Pas de données pour cette visualisation. Rafraîchir la page quand celles-ci sont disponibles.",
 	"youCanSetPAsswordHere": "Vous pouvez définir votre mot de passe ici.",
-	"impactHelpText": "Estimation de l'impact de la mesure"
+	"impactHelpText": "Estimation de l'impact de la mesure",
+	"selectAsset": "Sélectionner un actif"
 }
