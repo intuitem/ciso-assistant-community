@@ -51,7 +51,12 @@
 	}
 </script>
 
-<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel} baseEndpoint="/compliance-assessments?ebios_rm_studies={data.data.id}">
+<ModelTable
+	source={data.table}
+	deleteForm={data.deleteForm}
+	{URLModel}
+	baseEndpoint="/compliance-assessments?ebios_rm_studies={data.data.id}"
+>
 	<div slot="optButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 			<button
