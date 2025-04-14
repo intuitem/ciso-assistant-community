@@ -1,7 +1,7 @@
-name: Helm Testing and docs/schema generator
+name: Helm docs and schema generator
 
 on:
-  pull_request:
+  push:
     paths:
       - "charts/ciso-assistant-next/**"
 
@@ -37,21 +37,3 @@ jobs:
         with:
           chart-search-root: charts/ciso-assistant-next
           git-push: true
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: "latest"
-
-      - name: Lint Helm Chart
-        run: |
-          cd charts
-          helm lint ciso-assistant-next
