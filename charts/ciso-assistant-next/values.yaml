@@ -73,13 +73,13 @@ backend:
         # -- Primary SMTP hostname
         host: primary.cool-mailer.net
         # -- Primary SMTP post
-        port: 587
+        port: 25
         # -- Enable TLS for primary SMTP
         useTls: true
         # -- Primary SMTP username
-        username: apikey
+        username: ""
         # -- Primary SMTP password
-        password: "primary_password_here"
+        password: ""
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
     ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
