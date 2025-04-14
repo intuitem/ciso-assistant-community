@@ -3,7 +3,7 @@
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import TextField from '../TextArea.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
