@@ -5143,13 +5143,23 @@ class TaskTemplateViewSet(BaseModelViewSet):
         if task_template.is_recurrent:
             start_date = task_template.task_date
             if task_template.schedule["frequency"] == "DAILY":
-                end_date = datetime.now().date() + rd.relativedelta(months=2)
+                delta = rd.relativedelta(months=2)
             elif task_template.schedule["frequency"] == "WEEKLY":
-                end_date = datetime.now().date() + rd.relativedelta(months=4)
+                delta = rd.relativedelta(months=4)
             elif task_template.schedule["frequency"] == "MONTHLY":
-                end_date = datetime.now().date() + rd.relativedelta(years=1)
+                delta = rd.relativedelta(years=1)
             elif task_template.schedule["frequency"] == "YEARLY":
-                end_date = datetime.now().date() + rd.relativedelta(years=5)
+                delta = rd.relativedelta(years=5)
+
+            end_date_param = task_template.schedule.get("end_date")
+            if end_date_param:
+                end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
+            else:
+                end_date = datetime.now().date() + delta
+
+            # Ensure end_date is not before the calculated delta
+            if end_date < datetime.now().date() + delta:
+                end_date = datetime.now().date() + delta
 
             # Generate the task nodes
             self.task_calendar(
