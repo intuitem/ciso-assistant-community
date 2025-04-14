@@ -100,11 +100,6 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
 
 def ebios_rm_visual_analysis(study):
     output = list()  # list of dict with strucuted data
-    """
-    assets,
-    for each asset, get the related_feared_events within the study and their gravity,
-    for each related feared event, get the RoTo
-    """
     rotos = RoTo.objects.filter(ebios_rm_study=study).prefetch_related(
         "feared_events__assets"
     )
