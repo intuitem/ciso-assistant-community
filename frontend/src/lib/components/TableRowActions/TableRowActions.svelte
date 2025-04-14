@@ -98,19 +98,21 @@
 
 	const user = $page.data.user;
 
-	$: canDeleteObject = model
-		? $page.params.id
-			? canPerformAction({
-					user,
-					action: 'delete',
-					model: model.name,
-					domain:
-						model.name === 'folder'
-							? row.meta.id
-							: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-				}) && !preventDelete
-			: Object.hasOwn(user.permissions, `delete_${model.name}`)
-		: false;
+	$: canDeleteObject =
+		!preventDelete &&
+		(model
+			? $page.params.id
+				? canPerformAction({
+						user,
+						action: 'delete',
+						model: model.name,
+						domain:
+							model.name === 'folder'
+								? row.meta.id
+								: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+					})
+				: Object.hasOwn(user.permissions, `delete_${model.name}`)
+			: false);
 	$: canEditObject = model
 		? $page.params.id
 			? canPerformAction({
