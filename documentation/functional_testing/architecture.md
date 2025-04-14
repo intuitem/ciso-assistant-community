@@ -2,17 +2,29 @@
 # Conventions
 
 The expression `{REPO_BASE}` represents the base of the git repository.
+
 All folders and files related to the functional tests must be stored under the **functional test base path** which location is `{REPO_BASE}/frontend/tests`.
+
 All the relative paths cited in this spec will be relative to the **functional test base path**.
+
 So for example the folder `./utils/core` as cited in this spec would therefore be located at `{REPO_BASE}/frontend/tests/utils/core`.
+
 The syntax `{...}` represents either a part of a string/variable name/typescript code.
+
 The syntax `{ClassName}` just represents the same thing as `{...}` except that it precises what the content represents and in what case it should be written to.
+
 For example `{some-name}.ts` mean that the part between curly braces represents "some name" that you can give to the file, and the `some-name` is written in kebab-case which indicates that the name of this file (before the `.ts` extension) should be written in kebab-case.
+
 The terms written in bold **like this** represent specific concepts explicitely defined somewhere in this spec.
+
 For now we have both `./utilsv2` and `./utils`, `./utils` is the deprecated utils codebase while `./utilsv2` contain the refactored version of `./utils` with the new architecture describe in this spec.
+
 This spec describe how the test codebase should be, not how it is at this exact moment.
+
 Therefore all mentions of relative paths starting with `./utils` in this spec represent the future `./utils` folder, which is currently named `./utilsv2` until the end of the refactoring.
+
 When code in the current `./utils` complelty stops being used by the functional tests the current `./utils` folder will be erased and the current `./utilsv2` folder will be renamed into the new `./utils` folder as described in this spec.
+
 Some examples written with the syntax `(e.g. {...})` may not be in the codebase.
 
 # File Architecture
@@ -193,9 +205,14 @@ And we would also have `A._page = B._page = C._page = D._page`.
 ### Context of an Element
 
 A `Page`/`Element` class can have an optional `CONTEXT` static attribute of type `Context` (type defined in `./utils/core/element.ts`).
+
 Also all `Element` objects have an internal private context `this._context` which can be accessed by multiple methods defined in the the `Element` fundamental class like `getContext` or `getHasContext`.
+
 The context of an `Element` represents the aggregation of all its **context sources**.
-When looking for a context value, the `Element` protected context-methods will look for the value in all the **context sources** in a specific order, when a value is found this value is returned even if occurrences of this value exist in other **context sources**.
+
+
+When looking for a context value, the `Element` protected context-methods will look for the value in all the **context sources** in a specific order, when a value is found this value is returned even if occurences of this value exist in other **context sources**.
+
 So if we have 2 **context sources** `A` and `B`, if `B` has a higher priority than `A` and both `B` and `A` have a `"someValue"` context value, then the context value of `"someValue"` will be equal to `A["someValue"]` instead of `B["someValue"]`.
 
 Here is the list of the **context sources** order from the highest to the lowest priority:
@@ -224,7 +241,9 @@ All methods must be named after one of the folliwing prefixes:
 - `Abstract methods` Are methods implemented in a **base class**, an abstract method purely exist to indicate that this method must be implemented in its **derive classes** with the same function signature. An abstract method must be a single call to the `notImplemented` function defined in `./utils/core/base.ts`.
 - `Protected methods` Are `protected` and defined either in a **base class** or **fundamental class**. They are methods prefixed with an underscore (e.g. `_getSubElement`) these methods are meant to exclusively be called internally.
 For example a regular methods `doSomething` defined in multiple **derived classes** of the same **base class** `BaseClass` may just be a wrapper around a `BaseClass._doSomething` method under the hood.
+
 Note that a wrapped **protected method** will usually also be paired with an **abstract method** version if itself.
+
 So we could also have a `doSomething` abstract method in `BaseClass` to indicate that the **derived classes** must implement a `doSomething` method with the same function signature as the one declared in the **base class**.
 
 # Miscellaneous

@@ -41,7 +41,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 
 	await test.step('user email is showing properly', async () => {
 		await expect(sideBar.userEmailDisplay).toHaveText(logedPage.email);
-		//TODO test also that user name and first name are displayed instead of the email when sets
+		//TOD0 test also that user name and first name are displayed instead of the email when sets
 	});
 
 	await test.step('user profile panel is working properly', async () => {
@@ -105,15 +105,20 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 });
 
-test('sidebar component tests', async ({ logedPage, sideBar }) => {
+import { test as testV2, expect as expectV2 } from '../utilsv2/core/base';
+
+testV2('sidebar component tests', async ({ loginPage }) => {
 	await test.step('sidebar can be collapsed and expanded', async () => {
-		if (await logedPage.page.locator('#driver-dummy-element').isVisible()) {
-			await logedPage.page.locator('.driver-popover-close-btn').first().click();
-		}
-		sideBar.toggleButton.click();
-		await expect(sideBar.toggleButton).toHaveClass(/rotate-180/);
-		sideBar.toggleButton.click();
-		await expect(sideBar.toggleButton).not.toHaveClass(/rotate-180/);
+		await loginPage.gotoSelf();
+		const analyticsPage = await loginPage.doLoginAdminP();
+		await analyticsPage.checkSelf(expectV2);
+		await analyticsPage.doCloseModal();
+
+		const sidebar = analyticsPage.getSidebar();
+		await sidebar.doToggle();
+		await sidebar.checkIsOpened(expectV2);
+		await sidebar.doToggle();
+		await sidebar.checkIsClosed(expectV2);
 	});
 });
 

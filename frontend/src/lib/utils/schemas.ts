@@ -162,6 +162,7 @@ export const AppliedControlSchema = z.object({
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
+	control_impact: z.number().optional().nullable(),
 	cost: z.number().multipleOf(0.000001).optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
@@ -508,7 +509,7 @@ export const fearedEventsSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
 	gravity: z.number().optional().default(-1),
-	is_selected: z.boolean().optional(),
+	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
 	ebios_rm_study: z.string(),
 	assets: z.string().uuid().optional().array().optional(),
@@ -523,7 +524,7 @@ export const roToSchema = z.object({
 	motivation: z.number().default(0).optional(),
 	resources: z.number().default(0).optional(),
 	activity: z.number().min(0).max(4).optional().default(0),
-	is_selected: z.boolean().optional().default(false),
+	is_selected: z.boolean().default(true),
 	justification: z.string().optional()
 });
 
@@ -542,7 +543,7 @@ export const StakeholderSchema = z.object({
 	residual_maturity: z.number().min(1).max(4).default(1).optional(),
 	residual_trust: z.number().min(1).max(4).default(1).optional(),
 	residual_criticality: z.number().min(0).max(16).default(0).optional(),
-	is_selected: z.boolean().optional(),
+	is_selected: z.boolean().default(true),
 	justification: z.string().optional()
 });
 
@@ -557,7 +558,7 @@ export const AttackPathSchema = z.object({
 	...NameDescriptionMixin,
 	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
-	is_selected: z.boolean().optional(),
+	is_selected: z.boolean().default(true),
 	justification: z.string().optional()
 });
 
@@ -567,7 +568,7 @@ export const operationalScenarioSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	operating_modes_description: z.string(),
 	likelihood: z.number().optional().default(-1),
-	is_selected: z.boolean().optional().default(false),
+	is_selected: z.boolean().default(true),
 	justification: z.string().optional()
 });
 
