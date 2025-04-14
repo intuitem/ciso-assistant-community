@@ -2365,7 +2365,8 @@ objects:
       translations:
         fr:
           name: "\xC9valuation des risques "
-          description: null
+          description: "Le risque de cybers\xE9curit\xE9 pour l\u2019organisation,\
+            \ les actifs et\nles individus est compris par l\u2019organisation"
           annotation: null
         es:
           name: "Evaluaci\xF3n de riesgos "
@@ -2800,7 +2801,9 @@ objects:
       translations:
         fr:
           name: "Am\xE9lioration"
-          description: null
+          description: "Les am\xE9liorations aux processus, proc\xE9dures et activit\xE9\
+            s de gestion des risques de cybers\xE9curit\xE9 organisationnels sont\
+            \ identifi\xE9es dans toutes les Fonctions du CSF."
           annotation: null
         es:
           name: Mejora
@@ -3363,7 +3366,9 @@ objects:
       translations:
         fr:
           name: Sensibilisation et formation
-          description: null
+          description: "Le personnel de l\u2019organisation re\xE7oit une sensibilisation\
+            \ et une formation \xE0 la cybers\xE9curit\xE9 afin qu\u2019il puisse\
+            \ accomplir ses t\xE2ches li\xE9es \xE0 la cybers\xE9curit\xE9"
           annotation: null
         es:
           name: "Concienciaci\xF3n y capacitaci\xF3n "
@@ -3516,7 +3521,9 @@ objects:
       translations:
         fr:
           name: "S\xE9curit\xE9 des donn\xE9es"
-          description: null
+          description: "Les donn\xE9es sont g\xE9r\xE9es conform\xE9ment \xE0 la strat\xE9\
+            gie de risque de l\u2019organisation afin de prot\xE9ger la confidentialit\xE9\
+            , l\u2019int\xE9grit\xE9 et la disponibilit\xE9 des informations"
           annotation: null
         es:
           name: Seguridad de datos
@@ -3721,7 +3728,11 @@ objects:
       translations:
         fr:
           name: "S\xE9curit\xE9 de la plateforme"
-          description: null
+          description: "Le mat\xE9riel, les logiciels (p. ex., les micrologiciels,\
+            \ les syst\xE8mes d\u2019exploitation, les applications) et les services\
+            \ des plateformes physiques et virtuelles sont g\xE9r\xE9s conform\xE9\
+            ment \xE0 la strat\xE9gie de risque de l\u2019organisation pour prot\xE9\
+            ger leur confidentialit\xE9, leur int\xE9grit\xE9 et leur disponibilit\xE9"
           annotation: null
         es:
           name: Seguridad de plataformas
@@ -4012,7 +4023,10 @@ objects:
       translations:
         fr:
           name: "R\xE9silience des infrastructures technologiques"
-          description: null
+          description: "Les architectures de s\xE9curit\xE9 sont g\xE9r\xE9es avec\
+            \ la strat\xE9gie de risque de l\u2019organisation pour prot\xE9ger la\
+            \ confidentialit\xE9, l\u2019int\xE9grit\xE9 et la disponibilit\xE9 des\
+            \ actifs, ainsi que la r\xE9silience organisationnelle"
           annotation: null
         es:
           name: "Resistencia de la infraestructura tecnol\xF3gica "
@@ -4465,7 +4479,10 @@ objects:
       translations:
         fr:
           name: "Analyse des \xE9v\xE9nements ind\xE9sirables"
-          description: null
+          description: "Les anomalies, les indicateurs de compromission et d\u2019\
+            autres \xE9v\xE9nements potentiellement ind\xE9sirables sont analys\xE9\
+            s pour caract\xE9riser les \xE9v\xE9nements et d\xE9tecter les incidents\
+            \ de cybers\xE9curit\xE9"
           annotation: null
         es:
           name: "An\xE1lisis de eventos adversos"
@@ -4935,7 +4952,9 @@ objects:
       translations:
         fr:
           name: Analyse des incidents
-          description: null
+          description: "Des enqu\xEAtes sont men\xE9es pour garantir une r\xE9ponse\
+            \ efficace et soutenir les activit\xE9s criminalistiques et de r\xE9cup\xE9\
+            ration"
           annotation: null
         es:
           name: "An\xE1lisis de incidentes "
@@ -5101,7 +5120,9 @@ objects:
       translations:
         fr:
           name: "Rapports et communications en mati\xE8re de r\xE9ponse aux incidents"
-          description: null
+          description: "Les activit\xE9s de r\xE9ponse sont coordonn\xE9es avec les\
+            \ parties prenantes internes et externes, comme l\u2019exigent les lois,\
+            \ les r\xE9glementations ou les politiques"
           annotation: null
         es:
           name: "Notificaci\xF3n y comunicaci\xF3n de la respuesta al incidente "
@@ -5225,7 +5246,8 @@ objects:
       translations:
         fr:
           name: "Att\xE9nuation des incidents"
-          description: null
+          description: "Les activit\xE9s sont r\xE9alis\xE9es pour emp\xEAcher l\u2019\
+            expansion d\u2019un \xE9v\xE9nement et att\xE9nuer ses effets"
           annotation: null
         es:
           name: "Mitigaci\xF3n de incidentes "
@@ -5585,7 +5607,8 @@ objects:
       translations:
         fr:
           name: "Communication de r\xE9cup\xE9ration apr\xE8s incident"
-          description: null
+          description: "Les activit\xE9s de restauration sont coordonn\xE9es avec\
+            \ les parties internes et externes"
           annotation: null
         es:
           name: "Comunicaci\xF3n de la recuperaci\xF3n del incidente "
