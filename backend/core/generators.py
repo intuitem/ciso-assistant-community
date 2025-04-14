@@ -461,6 +461,16 @@ def gen_audit_context(id, doc, tree, lang):
             "non_compliant": "Non compliant",
             "not_applicable": "Not applicable",
             "not_assessed": "Not assessed",
+            "to_do": "To do",
+            "on_hold": "On hold",
+            "in_progress": "In progress",
+            "deprecated": "Deprecated",
+            "active": "Active",
+            "policy": "Policy",
+            "process": "Process",
+            "technical": "Technical",
+            "physical": "Physical",
+            "procedure": "Procedure",
         },
         "fr": {
             "compliant": "Conformes",
@@ -468,25 +478,43 @@ def gen_audit_context(id, doc, tree, lang):
             "non_compliant": "Non conformes",
             "not_applicable": "Non applicables",
             "not_assessed": "Non évalués",
+            "to_do": "À faire",
+            "on_hold": "En attente",
+            "in_progress": "En cours",
+            "deprecated": "Déprécié",
+            "active": "Actif",
+            "policy": "Politique",
+            "process": "Processus",
+            "technical": "Technique",
+            "physical": "Physique",
+            "procedure": "Procédure",
         },
     }
 
+    def safe_translate(lang: str, key: str) -> str:
+        if key is None or key == "--":
+            return "-"
+        return i18n_dict[lang][key] if key in i18n_dict[lang] else key
+
     donut_data = [
-        {"category": i18n_dict[lang]["compliant"], "value": aggregated["compliant"]},
         {
-            "category": i18n_dict[lang]["partially_compliant"],
+            "category": safe_translate(lang, "compliant"),
+            "value": aggregated["compliant"],
+        },
+        {
+            "category": safe_translate(lang, "partially_compliant"),
             "value": aggregated["partially_compliant"],
         },
         {
-            "category": i18n_dict[lang]["non_compliant"],
+            "category": safe_translate(lang, "non_compliant"),
             "value": aggregated["non_compliant"],
         },
         {
-            "category": i18n_dict[lang]["not_applicable"],
+            "category": safe_translate(lang, "not_applicable"),
             "value": aggregated["not_applicable"],
         },
         {
-            "category": i18n_dict[lang]["not_assessed"],
+            "category": safe_translate(lang, "not_assessed"),
             "value": aggregated["not_assessed"],
         },
     ]
@@ -511,7 +539,11 @@ def gen_audit_context(id, doc, tree, lang):
     ac_total = applied_controls.count()
     status_cnt = applied_controls.values("status").annotate(count=Count("id"))
     ac_chart_data = [
-        {"category": item["status"], "value": item["count"]} for item in status_cnt
+        {
+            "category": safe_translate(lang, item["status"]),
+            "value": item["count"],
+        }
+        for item in status_cnt
     ]
     p1_controls = list()
     full_controls = list()
@@ -521,12 +553,13 @@ def gen_audit_context(id, doc, tree, lang):
             .filter(applied_controls=ac.id)
             .count()
         )
+        print(f"[{ac.name}] {ac.category}: {type(ac.category)}")
         p1_controls.append(
             {
                 "name": ac.name,
-                "description": ac.description,
-                "status": ac.status,
-                "category": ac.category,
+                "description": safe_translate(lang, ac.description),  # None -> "-"
+                "status": safe_translate(lang, ac.status),
+                "category": safe_translate(lang, ac.category),
                 "coverage": requirements_count,
             }
         )
@@ -540,11 +573,11 @@ def gen_audit_context(id, doc, tree, lang):
         full_controls.append(
             {
                 "name": ac.name,
-                "description": ac.description,
+                "description": safe_translate(lang, ac.description),  # None -> "-"
                 "prio": f"P{ac.priority}" if ac.priority else "-",
-                "status": ac.status,
-                "eta": ac.eta,
-                "category": ac.category,
+                "status": safe_translate(lang, ac.status),
+                "eta": safe_translate(lang, ac.eta),  # None -> "-"
+                "category": safe_translate(lang, ac.category),
                 "coverage": requirements_count,
             }
         )
