@@ -61,7 +61,7 @@ def add_missing_ug_and_ra(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0066_evidence_filtering_labels"),
+        ("core", "0067_appliedcontrol_control_impact_and_more"),
     ]
 
     operations = [
