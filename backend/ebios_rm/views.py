@@ -195,7 +195,11 @@ class StrategicScenarioViewSet(BaseModelViewSet):
         """
         Get strategic scenarios that are not linked to any attack path.
         """
-        qs = StrategicScenario.objects.filter(attack_paths__isnull=True).distinct()
+        ebios_rm_study = request.query_params.get("ebios_rm_study")
+        qs = StrategicScenario.objects.filter(attack_paths__isnull=True)
+        if ebios_rm_study:
+            qs = qs.filter(ebios_rm_study=ebios_rm_study)
+        qs = qs.distinct()
         return Response(qs.values("id", "name"))
 
 
