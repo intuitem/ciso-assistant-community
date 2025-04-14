@@ -71,6 +71,7 @@
 	export let baseEndpoint: string = `/${URLModel}`;
 	export let detailQueryParameter: string | undefined = undefined;
 	export let fields: string[] = [];
+	export let canSelectObject = false;
 
 	export let hideFilters = false;
 
@@ -272,6 +273,9 @@
 		{/if}
 		<div class="flex space-x-2 items-center">
 			<slot name="optButton" />
+			{#if canSelectObject}
+				<slot name="selectButton" />
+			{/if}
 			{#if canCreateObject}
 				<slot name="addButton" />
 			{/if}
