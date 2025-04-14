@@ -1418,5 +1418,6 @@
 	"riskAssessmentName": "Risk Assessment Name",
 	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available.",
 	"youCanSetPAsswordHere": "You can set your password here.",
-	"impactHelpText": "Estimation of the control's impact"
+	"impactHelpText": "Estimation of the control's impact",
+	"selectAsset": "Select an asset"
 }
