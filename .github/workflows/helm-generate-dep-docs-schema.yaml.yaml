@@ -1,4 +1,4 @@
-name: Helm docs and schema generator
+name: Generate Helm dependencies, docs and schema
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - "charts/ciso-assistant-next/**"
 
 jobs:
-  generate-helm-json-schema:
+  generate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,26 +16,26 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}
+
+      - name: Build Dependencies
+        run: |
+          helm dependency build charts/ciso-assistant-next
 
       - name: Generate values schema json
         uses: losisin/helm-values-schema-json-action@v1
         with:
           working-directory: charts/ciso-assistant-next
           input: values.yaml
-          git-push: true
-
-  generate-helm-docs:
-    runs-on: ubuntu-latest
-    needs: generate-helm-json-schema
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository }}
-          ref: ${{ github.ref }}
 
       - name: Generate helm-docs
         uses: losisin/helm-docs-github-action@v1
         with:
           chart-search-root: charts/ciso-assistant-next
-          git-push: true
+
+      - name: Commit and push if it changed
+        run: |-
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "update helm auto-gen files" || exit 0
+          git push

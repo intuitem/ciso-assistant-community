@@ -70,7 +70,7 @@ backend:
       # -- Name of an existing secret resource containing the SMTP password in a 'email-primary-password' key
       existingSecret: ""
       # -- SMTP hostname
-      host: primary.cool-mailer.net
+      host: smtp.server.local
       # -- SMTP post
       port: 25
       # -- Enable TLS for SMTP
