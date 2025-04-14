@@ -403,10 +403,12 @@
 	"low": "Faible",
 	"high": "Haut",
 	"veryHigh": "Très haut",
+	"extraSmall": "Très petit",
 	"small": "Petit",
 	"medium": "Moyen",
 	"large": "Grand",
 	"extraLarge": "Très grand",
+	"controlImpact": "Impact",
 	"scope": "Périmètre",
 	"reader": "Lecteur",
 	"lastUpdate": "Dernière mise à jour",
@@ -1125,6 +1127,7 @@
 	"ebiosWs5_3": "Définir les mesures de sécurité",
 	"ebiosWs5_4": "Évaluer et documenter les risques résiduels",
 	"ebiosWs5_5": "Mettre en place le cadre de suivi des risques",
+	"ro_activity": "Niveau d'activité",
 	"activity": "Activité",
 	"ebiosRmMatrixHelpText": "Matrice de risque utilisée pour l'étude :",
 	"activityOne": "Activité 1",
@@ -1414,5 +1417,6 @@
 	"createRiskAssessment": "Initier une analyse de risque également",
 	"riskAssessmentName": "Nom de l'analyse de risque",
 	"noDataAvailable": "Pas de données pour cette visualisation. Rafraîchir la page quand celles-ci sont disponibles.",
-	"youCanSetPAsswordHere": "Vous pouvez définir votre mot de passe ici."
+	"youCanSetPAsswordHere": "Vous pouvez définir votre mot de passe ici.",
+	"impactHelpText": "Estimation de l'impact de la mesure"
 }
