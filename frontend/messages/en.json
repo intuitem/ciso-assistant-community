@@ -403,10 +403,12 @@
 	"low": "Low",
 	"high": "High",
 	"veryHigh": "Very high",
+	"extraSmall": "Extra-small",
 	"small": "Small",
 	"medium": "Medium",
 	"large": "Large",
 	"extraLarge": "Extra-large",
+	"controlImpact": "Impact",
 	"scope": "Scope",
 	"reader": "Reader",
 	"lastUpdate": "Last update",
@@ -1415,5 +1417,7 @@
 	"createRiskAssessment": "Initiate a risk assessment as well",
 	"riskAssessmentName": "Risk Assessment Name",
 	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available.",
-	"youCanSetPAsswordHere": "You can set your password here."
+	"youCanSetPAsswordHere": "You can set your password here.",
+	"impactHelpText": "Estimation of the control's impact",
+	"selectAsset": "Select an asset"
 }
