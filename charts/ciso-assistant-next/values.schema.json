@@ -3,8 +3,10 @@
     "additionalProperties": false,
     "properties": {
         "backend": {
+            "additionalProperties": false,
             "properties": {
                 "config": {
+                    "additionalProperties": false,
                     "properties": {
                         "databaseType": {
                             "type": "string"
@@ -22,6 +24,7 @@
                             "type": "string"
                         },
                         "smtp": {
+                            "additionalProperties": false,
                             "properties": {
                                 "defaultFrom": {
                                     "type": "string"
@@ -51,6 +54,7 @@
                     "type": "object"
                 },
                 "containerSecurityContext": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
@@ -58,6 +62,7 @@
                     "type": "array"
                 },
                 "huey": {
+                    "additionalProperties": false,
                     "properties": {
                         "env": {
                             "type": "array"
@@ -66,6 +71,7 @@
                             "type": "string"
                         },
                         "resources": {
+                            "additionalProperties": false,
                             "properties": {},
                             "type": "object"
                         }
@@ -73,6 +79,7 @@
                     "type": "object"
                 },
                 "image": {
+                    "additionalProperties": false,
                     "properties": {
                         "imagePullPolicy": {
                             "type": "string"
@@ -96,8 +103,10 @@
                     "type": "string"
                 },
                 "persistence": {
+                    "additionalProperties": false,
                     "properties": {
                         "localStorage": {
+                            "additionalProperties": false,
                             "properties": {
                                 "accessMode": {
                                     "type": "string"
@@ -118,6 +127,7 @@
                             "type": "object"
                         },
                         "sqlite": {
+                            "additionalProperties": false,
                             "properties": {
                                 "accessMode": {
                                     "type": "string"
@@ -144,16 +154,20 @@
                     "type": "integer"
                 },
                 "resources": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
                 "service": {
+                    "additionalProperties": false,
                     "properties": {
                         "annotations": {
+                            "additionalProperties": false,
                             "properties": {},
                             "type": "object"
                         },
                         "labels": {
+                            "additionalProperties": false,
                             "properties": {},
                             "type": "object"
                         },
@@ -170,6 +184,7 @@
             "type": "object"
         },
         "externalPgsql": {
+            "additionalProperties": false,
             "properties": {
                 "database": {
                     "type": "string"
@@ -193,8 +208,10 @@
             "type": "object"
         },
         "frontend": {
+            "additionalProperties": false,
             "properties": {
                 "config": {
+                    "additionalProperties": false,
                     "properties": {
                         "bodySizeLimit": {
                             "type": "string"
@@ -203,6 +220,7 @@
                     "type": "object"
                 },
                 "containerSecurityContext": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
@@ -210,6 +228,7 @@
                     "type": "array"
                 },
                 "image": {
+                    "additionalProperties": false,
                     "properties": {
                         "imagePullPolicy": {
                             "type": "string"
@@ -236,16 +255,20 @@
                     "type": "integer"
                 },
                 "resources": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
                 "service": {
+                    "additionalProperties": false,
                     "properties": {
                         "annotations": {
+                            "additionalProperties": false,
                             "properties": {},
                             "type": "object"
                         },
                         "labels": {
+                            "additionalProperties": false,
                             "properties": {},
                             "type": "object"
                         },
@@ -265,11 +288,13 @@
             "type": "string"
         },
         "global": {
+            "additionalProperties": false,
             "properties": {
                 "clusterDomain": {
                     "type": "string"
                 },
                 "commonLabels": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
@@ -280,6 +305,7 @@
                     "type": "string"
                 },
                 "image": {
+                    "additionalProperties": false,
                     "properties": {
                         "imagePullPolicy": {
                             "type": "string"
@@ -297,10 +323,12 @@
                     "type": "array"
                 },
                 "nodeSelector": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
                 "securityContext": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
@@ -314,8 +342,10 @@
             "type": "object"
         },
         "ingress": {
+            "additionalProperties": false,
             "properties": {
                 "annotations": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
@@ -326,6 +356,7 @@
                     "type": "string"
                 },
                 "labels": {
+                    "additionalProperties": false,
                     "properties": {},
                     "type": "object"
                 },
@@ -336,8 +367,10 @@
                     "type": "string"
                 },
                 "tls": {
+                    "additionalProperties": false,
                     "properties": {
                         "certificateSecret": {
+                            "additionalProperties": false,
                             "properties": {},
                             "type": "object"
                         },
@@ -357,15 +390,19 @@
             "type": "string"
         },
         "postgresql": {
+            "additionalProperties": false,
             "properties": {
                 "enabled": {
                     "type": "boolean"
                 },
                 "global": {
+                    "additionalProperties": false,
                     "properties": {
                         "postgresql": {
+                            "additionalProperties": false,
                             "properties": {
                                 "auth": {
+                                    "additionalProperties": false,
                                     "properties": {
                                         "database": {
                                             "type": "string"
@@ -389,8 +426,10 @@
                     "type": "object"
                 },
                 "primary": {
+                    "additionalProperties": false,
                     "properties": {
                         "persistence": {
+                            "additionalProperties": false,
                             "properties": {
                                 "size": {
                                     "type": "string"
