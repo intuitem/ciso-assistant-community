@@ -63,12 +63,12 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
 | backend.name | string | `"backend"` | Backend container name |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
-| backend.persistence.localStorage.enabled | bool | `true` | Enable Local Storage persistence |
+| backend.persistence.localStorage.enabled | bool | `false` | Enable Local Storage persistence |
 | backend.persistence.localStorage.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC |
 | backend.persistence.localStorage.size | string | `"5Gi"` | Local Storage persistant volume size |
 | backend.persistence.localStorage.storageClass | string | `""` | Local Storage persistant volume storageClass |
 | backend.persistence.sqlite.accessMode | string | `"ReadWriteOnce"` | SQLite persistant volume accessMode |
-| backend.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence (for backend and/or Huey) # Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite` |
+| backend.persistence.sqlite.enabled | bool | `false` | Enable SQLite persistence (for backend and/or Huey) # Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite` |
 | backend.persistence.sqlite.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for sqlite |
 | backend.persistence.sqlite.size | string | `"5Gi"` | SQLite persistant volume size |
 | backend.persistence.sqlite.storageClass | string | `""` | SQLite persistant volume storageClass |
@@ -113,7 +113,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | global.tls | bool | `false` | Globally enable TLS (URLs, etc.) |
 | global.tolerations | list | `[]` | Default tolerations for all components |
 | ingress.annotations | object | `{}` | Additional ingress annotations |
-| ingress.enabled | bool | `true` | Enable an ingress resource for the CISO Assistant |
+| ingress.enabled | bool | `false` | Enable an ingress resource for the CISO Assistant |
 | ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | ingress.labels | object | `{}` | Additional ingress labels |
 | ingress.path | string | `"/"` | The path to CISO Assistant |

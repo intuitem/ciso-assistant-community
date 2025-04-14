@@ -114,7 +114,7 @@ backend:
     sqlite:
       # -- Enable SQLite persistence (for backend and/or Huey)
       ## Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite`
-      enabled: true
+      enabled: false
       # -- SQLite persistant volume size
       size: 5Gi
       # -- SQLite persistant volume storageClass
@@ -125,7 +125,7 @@ backend:
       existingClaim: ""
     localStorage:
       # -- Enable Local Storage persistence
-      enabled: true
+      enabled: false
       # -- Local Storage persistant volume size
       size: 5Gi
       # -- Local Storage persistant volume storageClass
@@ -264,7 +264,7 @@ frontend:
 # Note: host value is inherited from global.domain
 ingress:
   # -- Enable an ingress resource for the CISO Assistant
-  enabled: true
+  enabled: false
   # -- Additional ingress labels
   labels: {}
   # -- Additional ingress annotations
