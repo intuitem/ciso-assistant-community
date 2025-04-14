@@ -1305,6 +1305,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
             "assets": ["exact"],
+            "stakeholders": ["exact"],
             "progress_field": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
