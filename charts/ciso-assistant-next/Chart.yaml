@@ -10,6 +10,6 @@ sources:
   - https://github.com/intuitem/ciso-assistant-community
 dependencies:
   - name: postgresql
-    version: "16.6.0"
+    version: "16.6.3"
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: postgresql.enabled

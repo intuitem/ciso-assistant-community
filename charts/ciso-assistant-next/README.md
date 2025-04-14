@@ -18,7 +18,7 @@ A Helm chart for CISO Assistant k8s's deployment
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/bitnamicharts | postgresql | 16.6.0 |
+| oci://registry-1.docker.io/bitnamicharts | postgresql | 16.6.3 |
 
 ## Installing the chart
 
