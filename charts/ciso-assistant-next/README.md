@@ -42,7 +42,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.config.emailAdmin | string | `"admin@example.net"` | Admin email for initial configuration |
 | backend.config.smtp.defaultFrom | string | `"no-reply@ciso-assistant.net"` | Default from email address |
 | backend.config.smtp.existingSecret | string | `""` | Name of an existing secret resource containing the SMTP password in a 'email-primary-password' key |
-| backend.config.smtp.host | string | `"primary.cool-mailer.net"` | SMTP hostname |
+| backend.config.smtp.host | string | `"smtp.server.local"` | SMTP hostname |
 | backend.config.smtp.password | string | `""` | SMTP password |
 | backend.config.smtp.port | int | `25` | SMTP post |
 | backend.config.smtp.useTls | bool | `false` | Enable TLS for SMTP |
