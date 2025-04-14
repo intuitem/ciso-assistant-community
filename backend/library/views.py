@@ -3,6 +3,7 @@ import json
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery
 from rest_framework import viewsets, status
+from django.conf import settings
 
 from rest_framework.status import (
     HTTP_201_CREATED,
@@ -40,7 +41,30 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-class StoredLibraryFilterSet(df.FilterSet):
+class MultiStringFilter(df.CharFilter):
+    def filter(self, qs, value):
+        values = self.parent.data.getlist(self.field_name)
+        if values:
+            return qs.filter(**{f"{self.field_name}__in": values})
+        return qs
+
+
+class LibraryMixinFilterSet(df.FilterSet):
+    locale = df.MultipleChoiceFilter(
+        choices=[(language[0], language[0]) for language in settings.LANGUAGES],
+        method="filter_locale",
+    )
+    provider = MultiStringFilter(field_name="provider")
+
+    def filter_locale(self, queryset, name, value: list[str]):
+        union_qs = Q(locale__in=value)
+        for _value in value:
+            union_qs |= Q(translations__has_key=_value)
+
+        return queryset.filter(union_qs)
+
+
+class StoredLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
         choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
         method="filter_object_type",
@@ -232,7 +256,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
         return Response(LibraryImporter.OBJECT_FIELDS)
 
 
-class LoadedLibraryFilterSet(df.FilterSet):
+class LoadedLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
         choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
         method="filter_object_type",
