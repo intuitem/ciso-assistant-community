@@ -158,7 +158,7 @@
 					regionHeadCell="uppercase bg-gray-50 text-gray-700"
 					source={data.table}
 					URLModel="feared-events"
-					baseEndpoint={"feared-events/?ro_to_couples=" + roto.id}
+					baseEndpoint={'feared-events/?ro_to_couples=' + roto.id}
 				></ModelTable>
 			</div>
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
