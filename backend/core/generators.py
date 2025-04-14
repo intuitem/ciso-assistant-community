@@ -308,6 +308,10 @@ def plot_spider_chart(data, colors=None, title=None):
 
 
 def gen_audit_context(id, doc, tree, lang):
+    """
+    Generates an audit context dictionary with aggregated compliance data, localized labels, and embedded charts.
+    
+    Compiles compliance assessment results, category scores, control coverage, and status breakdowns from the provided assessment tree and database objects. Produces chart images for compliance status, completion, and control distribution, and localizes all labels and descriptions according to the specified language. Returns a context dictionary suitable for document generation or reporting.
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -492,6 +496,11 @@ def gen_audit_context(id, doc, tree, lang):
     }
 
     def safe_translate(lang: str, key: str) -> str:
+        """
+        Safely translates a key using the specified language, returning a fallback if unavailable.
+        
+        If the key is None or a placeholder ("--"), returns a dash ("-"). If the key is not found in the translation dictionary for the given language, returns the key itself.
+        """
         if key is None or key == "--":
             return "-"
         return i18n_dict[lang].get(key, key)
