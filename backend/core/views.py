@@ -5287,6 +5287,12 @@ class TaskTemplateViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         super().perform_create(serializer)
         self._sync_task_nodes(serializer.instance)
+    
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk):
+        serializer_class = self.get_serializer_class(action="update")
+        self._sync_task_nodes(self.get_object())  # Synchronize task nodes when fetching a task template
+        return Response(serializer_class(super().get_object()).data)
 
 
 class TaskNodeViewSet(BaseModelViewSet):
