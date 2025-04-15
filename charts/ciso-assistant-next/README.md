@@ -35,6 +35,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| backend.annotations | object | `{}` | Backend deployment annotations |
 | backend.config.databaseType | string | `"sqlite"` | Set the database type (sqlite, pgsql or externalPgsql) # Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section |
 | backend.config.djangoDebug | bool | `false` | Enable Django debug mode |
 | backend.config.djangoExistingSecretKey | string | `""` | Name of an existing secret resource containing the django secret in a 'django-secret-key' key |
@@ -68,6 +69,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.persistence.sqlite.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for sqlite |
 | backend.persistence.sqlite.size | string | `"5Gi"` | SQLite persistant volume size |
 | backend.persistence.sqlite.storageClass | string | `""` | SQLite persistant volume storageClass |
+| backend.podAnnotations | object | `{}` | Backend pod annotations |
 | backend.replicas | int | `1` | The number of backend pods to run |
 | backend.resources | object | `{}` | Resources for the backend |
 | backend.service.annotations | object | `{}` | Backend service annotations |
@@ -80,6 +82,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | externalPgsql.password | string | `""` | Password of an external PostgreSQL instance to connect |
 | externalPgsql.port | int | `5432` | Port of an external PostgreSQL to connect |
 | externalPgsql.user | string | `"ciso-assistant"` | User of an external PostgreSQL instance to connect |
+| frontend.annotations | object | `{}` | Frontend deployment annotations |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
 | frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
@@ -89,6 +92,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | frontend.image.tag | string | `""` (defaults to global.image.tag) | Tag to use for the frontend |
 | frontend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
 | frontend.name | string | `"frontend"` | Frontend container name |
+| frontend.podAnnotations | object | `{}` | Frontend pod annotations |
 | frontend.replicas | int | `1` | The number of frontend pods to run |
 | frontend.resources | object | `{}` | Resources for the frontend |
 | frontend.service.annotations | object | `{}` | Frontend service annotations |
