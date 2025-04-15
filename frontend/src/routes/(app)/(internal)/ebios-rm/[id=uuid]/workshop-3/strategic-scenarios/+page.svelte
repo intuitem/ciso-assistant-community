@@ -30,10 +30,10 @@
 		};
 		modalStore.trigger(modal);
 	}
-	const missingScenarios = data.scenariosWithoutAttackPath;
 </script>
 
-{#if missingScenarios.length > 0}
+{#if data.scenariosWithoutAttackPath.count > 0}
+	{@const missingScenarios = data.scenariosWithoutAttackPath.results}
 	<section class="my-6">
 		<div
 			class="flex items-start gap-3 rounded-xl border border-yellow-300 bg-yellow-100 p-4 shadow-sm"

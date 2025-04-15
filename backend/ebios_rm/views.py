@@ -186,21 +186,10 @@ class StakeholderViewSet(BaseModelViewSet):
 class StrategicScenarioViewSet(BaseModelViewSet):
     model = StrategicScenario
 
-    filterset_fields = [
-        "ebios_rm_study",
-    ]
-
-    @action(detail=False, methods=["get"])
-    def get_strategic_scenario_without_attack_path(self, request):
-        """
-        Get strategic scenarios that are not linked to any attack path.
-        """
-        ebios_rm_study = request.query_params.get("ebios_rm_study")
-        qs = StrategicScenario.objects.filter(attack_paths__isnull=True)
-        if ebios_rm_study:
-            qs = qs.filter(ebios_rm_study=ebios_rm_study)
-        qs = qs.distinct()
-        return Response(qs.values("id", "name"))
+    filterset_fields = {
+        "ebios_rm_study": ["exact"],
+        "attack_paths": ["exact", "isnull"],
+    }
 
 
 class AttackPathFilter(df.FilterSet):

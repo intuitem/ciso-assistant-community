@@ -47,7 +47,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	model.selectOptions = selectOptions;
 
 	const missingAttackPathResponse = await fetch(
-		`${BASE_API_URL}/ebios-rm/strategic-scenarios/get_strategic_scenario_without_attack_path/`
+		`${BASE_API_URL}/ebios-rm/strategic-scenarios?ebios_rm_study=${params.id}&attack_paths__isnull=true`
 	);
 	const scenariosWithoutAttackPath = missingAttackPathResponse.ok
 		? await missingAttackPathResponse.json()
