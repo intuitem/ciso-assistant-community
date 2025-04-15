@@ -21,7 +21,7 @@
 
 	const user = $page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	const model = URL_MODEL_MAP['compliance-assessments'];
+	const model = URL_MODEL_MAP['perimeters'];
 	const canEditObject = (perimeter): boolean =>
 		canPerformAction({
 			user,
