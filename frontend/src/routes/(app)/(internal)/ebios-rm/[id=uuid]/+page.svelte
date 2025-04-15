@@ -210,7 +210,11 @@
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
 			<div slot="action">
-				<a class="" href={`${$page.url.pathname}/visual/`}>Visual Analysis</a>
+				<a
+					class="text-orange-600 hover:text-purple-600 font-medium"
+					href={`${$page.url.pathname}/visual/`}
+					><i class="fa-solid fa-chart-diagram mr-2"></i>{m.visualAnalysis()}</a
+				>
 			</div>
 			<div slot="content">
 				<Card
