@@ -50,6 +50,7 @@
 				{/if}
 			</div>
 		</div>
+		<slot name="action" />
 		<slot name="content">
 			{#if meta}
 				<div class="flex mx-auto">

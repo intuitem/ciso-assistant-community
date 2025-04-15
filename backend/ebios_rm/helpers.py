@@ -2,6 +2,10 @@ from django.db.models.query import QuerySet
 import math
 import random
 from global_settings.models import GlobalSettings
+from .models import EbiosRMStudy, FearedEvent, RoTo
+from core.models import Asset
+
+import textwrap
 
 
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
@@ -91,3 +95,89 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
         r_data[cluser_id].append(vector)
 
     return {"current": c_data, "residual": r_data}
+
+
+def wrap_text(text, width=30):
+    return textwrap.fill(text, width=width)
+
+
+def ebios_rm_visual_analysis(study):
+    tree = list()  # list of dict with strucuted data
+    rotos = (
+        RoTo.objects.filter(ebios_rm_study=study)
+        .prefetch_related("feared_events__assets")
+        .distinct()
+    )
+    nodes = []
+    links = []
+    nodes_idx = dict()
+    N = 0
+    categories = [
+        {"name": "Risk Origin"},
+        {"name": "Target Objective"},
+        {"name": "Feared Event"},
+        {"name": "Asset"},
+    ]
+    feared_events = FearedEvent.objects.filter(ebios_rm_study=study).distinct()
+    assets = study.assets.all()
+    for a in assets:
+        nodes.append({"name": a.name, "category": 3})
+        nodes_idx[f"{a.id}-AS"] = N
+        N += 1
+    for fe in feared_events:
+        nodes.append({"name": wrap_text(fe.name), "category": 2})
+        nodes_idx[f"{fe.id}-FE"] = N
+        N += 1
+    for ro_to in rotos:
+        nodes.append(
+            {
+                "name": ro_to.risk_origin,
+                "category": 0,
+            }
+        )
+        nodes_idx[f"{ro_to.id}-RO"] = N
+        N += 1
+        nodes.append(
+            {
+                "name": wrap_text(ro_to.target_objective),
+                "category": 1,
+            }
+        )
+        nodes_idx[f"{ro_to.id}-TO"] = N
+        N += 1
+        links.append(
+            {
+                "source": nodes_idx[f"{ro_to.id}-RO"],
+                "target": nodes_idx[f"{ro_to.id}-TO"],
+                "value": "aims",
+            }
+        )
+        entry = {
+            "ro": ro_to.risk_origin,
+            "to": ro_to.target_objective,
+            "feared_events": [
+                {"name": fe.name, "assets": [a.name for a in fe.assets.all()]}
+                for fe in ro_to.feared_events.all()
+            ],
+        }
+        for fe in ro_to.feared_events.all():
+            links.append(
+                {
+                    "source": nodes_idx[f"{ro_to.id}-RO"],
+                    "target": nodes_idx[f"{fe.id}-FE"],
+                    "value": "generates",
+                }
+            )
+            for a in fe.assets.all():
+                links.append(
+                    {
+                        "source": nodes_idx[f"{fe.id}-FE"],
+                        "target": nodes_idx[f"{a.id}-AS"],
+                        "value": "concerns",
+                    }
+                )
+        tree.append(entry)
+    return {
+        "tree": tree,
+        "graph": {"nodes": nodes, "links": links, "categories": categories},
+    }
