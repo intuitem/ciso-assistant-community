@@ -47,7 +47,7 @@
 {#key month}
 	<button
 		in:fly={{ delay: 100, duration: 300 }}
-		class="flex flex-col p-2 rounded-md text-sm h-[8rem] max-h-[8rem] border
+		class="flex flex-col p-1 rounded-md text-sm h-[8rem] max-h-[8rem] border
 		       {isPast
 			? 'bg-gray-300 text-gray-500 cursor-pointer hover:bg-gray-400'
 			: 'border-gray-200 bg-white cursor-pointer hover:bg-gray-100'} 
@@ -63,7 +63,17 @@
 			<div class="flex flex-col justify-center h-full w-full space-y-1">
 				{#each visibleItems as item}
 					<span
-						class="flex justify-center cursor-pointer unstyled hover:bg-primary-200 text-primary-700 bg-primary-50 px-1 rounded-md"
+						class="flex justify-center cursor-pointer unstyled px-1 rounded-md border-l-2
+						{item.color === 'primary'
+							? 'hover:bg-primary-200 text-primary-700 bg-primary-50 border-l-primary-500'
+							: ''}
+						{item.color === 'secondary'
+							? 'hover:bg-green-200 text-green-700 bg-green-50 border-l-green-500'
+							: ''}
+						{item.color === 'tertiary'
+							? 'hover:bg-tertiary-200 text-tertiary-700 bg-tertiary-50 border-l-tertiary-500'
+							: ''}
+						"
 					>
 						<Anchor href={item.link} stopPropagation={true}>
 							{#if $showSidePanel}

@@ -18,19 +18,22 @@
 				label: `AC: ${control.name}`,
 				date: new Date(control.eta),
 				link: `/applied-controls/${control.id}`,
-				users: control.owner
+				users: control.owner,
+				color: 'tertiary'
 			})),
 			...riskAcceptances.map((ra: Record<string, string>) => ({
 				label: `RA: ${ra.name}`,
 				date: new Date(ra.expiry_date),
 				link: `/risk-acceptances/${ra.id}`,
-				users: ra.approver ? [ra.approver] : []
+				users: ra.approver ? [ra.approver] : [],
+				color: 'secondary'
 			})),
 			...tasks.map((task: Record<string, string>) => ({
 				label: `TA: ${task.name}`,
 				date: new Date(task.due_date),
 				link: task.virtual ? `/task-templates/${task.id}` : `/task-nodes/${task.id}`,
-				users: task.assigned_to
+				users: task.assigned_to,
+				color: 'primary'
 			}))
 		];
 		return events;

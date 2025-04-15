@@ -173,9 +173,21 @@
 				{#if selectedDayItems.length > 0}
 					<ul class="space-y-2">
 						{#each selectedDayItems as item}
-							<li class="p-3 bg-primary-50 rounded-md hover:bg-primary-100 transition duration-200">
+							<li
+								class="p-3 bg-primary-50 rounded-md hover:bg-primary-100 transition duration-200 border-l-2
+								{item.color === 'primary'
+									? 'hover:bg-primary-200 text-primary-700 bg-primary-50 border-l-primary-500'
+									: ''}
+								{item.color === 'secondary'
+									? 'hover:bg-green-200 text-green-700 bg-green-50 border-l-green-500'
+									: ''}
+								{item.color === 'tertiary'
+									? 'hover:bg-tertiary-200 text-tertiary-700 bg-tertiary-50 border-l-tertiary-500'
+									: ''}
+								"
+							>
 								<Anchor href={item.link} class="block">
-									<div class="font-medium text-primary-700">{item.label}</div>
+									<div class="font-medium">{item.label}</div>
 									{#if item.description}
 										<div class="text-sm text-gray-600 mt-1">{item.description}</div>
 									{/if}
