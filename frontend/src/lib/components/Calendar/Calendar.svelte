@@ -96,10 +96,10 @@
 	<div
 		class="flex flex-col rounded-lg bg-white h-full {$showSidePanel
 			? 'w-2/3'
-			: 'w-full'} p-2 space-y-3 shadow-xl"
+			: 'w-full'} p-2 space-y-1 shadow-xl"
 	>
 		<div
-			class="flex flex-col items-center justify-center bg-gradient-to-r from-primary-500 to-secondary-400 text-white rounded-lg h-1/6 p-2 text-3xl font-semibold shadow-md"
+			class="flex flex-col items-center justify-center bg-gradient-to-r from-primary-500 to-secondary-400 text-white rounded-lg p-2 text-3xl font-semibold shadow-md"
 		>
 			<div class="flex flex-row justify-between w-3/4">
 				<a class="sticky" href={prevMonth(year, month)}>
@@ -139,7 +139,7 @@
 			{/each}
 		</div>
 		<div
-			class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg h-20 p-2"
+			class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg p-2"
 		>
 			<div class="flex w-full h-full justify-between items-center">
 				<a
@@ -158,8 +158,8 @@
 	{#if $showSidePanel && $selectedDay}
 		<div
 			class="flex flex-col rounded-lg bg-white h-full w-1/3 p-4 space-y-3 shadow-xl"
-			in:fly={{ x: -300, duration: 300 }}
-			out:fly={{ x: -300, duration: 300 }}
+			in:fly={{ x: 300, duration: 300 }}
+			out:fly={{ x: 300, duration: 300 }}
 		>
 			<div class="flex justify-between items-center mb-4">
 				<h2 class="text-xl font-bold text-primary-700">
