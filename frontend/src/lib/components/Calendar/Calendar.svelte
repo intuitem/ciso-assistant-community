@@ -138,9 +138,7 @@
 				{/key}
 			{/each}
 		</div>
-		<div
-			class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg p-2"
-		>
+		<div class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg p-2">
 			<div class="flex w-full h-full justify-between items-center">
 				<a
 					href={currentMonth()}
