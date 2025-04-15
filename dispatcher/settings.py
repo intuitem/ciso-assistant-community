@@ -37,7 +37,7 @@ def load_env_config():
     """Load configuration values from environment variables."""
     # Note: For booleans, we compare to the string "True"
     config = {
-        "DEBUG": os.getenv("DEBUG", False),
+        "debug": os.getenv("DEBUG", False),
         "rest": {
             "url": os.getenv("API_URL"),
             "verify_certificate": os.getenv("VERIFY_CERTIFICATE") == "True" or None,
@@ -46,11 +46,12 @@ def load_env_config():
             "email": os.getenv("USER_EMAIL"),
             "password": os.getenv("USER_PASSWORD"),
         },
-        "GLOBAL_FOLDER_ID": os.getenv("GLOBAL_FOLDER_ID"),
-        "TOKEN": os.getenv("TOKEN"),
-        "AUTO_RENEW_SESSION": os.getenv("AUTO_RENEW_SESSION") == "True" or None,
-        "ERRORS_TOPIC": os.getenv("ERRORS_TOPIC"),
-        "S3_URL": os.getenv("S3_URL"),
+        "global_folder_id": os.getenv("GLOBAL_FOLDER_ID"),
+        "token": os.getenv("TOKEN"),
+        "auto_renew_session": os.getenv("AUTO_RENEW_SESSION") == "True" or None,
+        "bootstrap_servers": os.getenv("BOOTSTRAP_SERVERS", "http://localhost:9092"),
+        "errors_topic": os.getenv("ERRORS_TOPIC"),
+        "s3_url": os.getenv("S3_URL"),
     }
     logger.trace("Loaded environment configuration", config=config)
     return config
@@ -149,6 +150,10 @@ def init_config(y, interactive):
                 "Enter access token", hide_input=True, default=os.getenv("TOKEN", "")
             )
 
+        bootstrap_servers = click.prompt(
+            "Enter the URLs of the Kafka brokers (comma-separated), e.g., 'localhost:9092'",
+            default=os.getenv("BOOTSTRAP_SERVERS", "localhost:9092"),
+        )
         errors_topic = click.prompt(
             "Enter the topic name for error messages (e.g., 'errors')",
             default=os.getenv("ERRORS_TOPIC", "errors"),
@@ -167,10 +172,11 @@ def init_config(y, interactive):
                 "email": user_email,
                 "password": user_password,
             },
-            "TOKEN": access_token,
-            "AUTO_RENEW_SESSION": auto_renew_session,
-            "ERRORS_TOPIC": errors_topic,
-            "S3_URL": s3_url,
+            "token": access_token,
+            "auto_renew_session": auto_renew_session,
+            "bootstrap_servers": bootstrap_servers,
+            "errors_topic": errors_topic,
+            "s3_url": s3_url,
         }
     else:
         env_conf = load_env_config()
@@ -209,14 +215,15 @@ if (
     )
     # You might choose to exit here or allow CLI override
 
-DEBUG = config.get("DEBUG", False)
+DEBUG = config.get("debug", False)
 API_URL = config.get("rest", {}).get("url", "https://localhost:8443")
 VERIFY_CERTIFICATE = config.get("rest", {}).get("verify_certificate", True)
 USER_EMAIL = config["credentials"].get("email", "user@company.org")
 USER_PASSWORD = config["credentials"].get("password", "")
-AUTO_RENEW_SESSION = config.get("AUTO_RENEW_SESSION", False)
-ERRORS_TOPIC = config.get("ERRORS_TOPIC", "errors")
-S3_URL = config.get("S3_URL", "http://localhost:9000")
+AUTO_RENEW_SESSION = config.get("auto_renew_session", False)
+BOOTSTRAP_SERVERS = config.get("bootstrap_servers", "localhost:9092")
+ERRORS_TOPIC = config.get("errors_topic", "errors")
+S3_URL = config.get("s3_url", "http://localhost:9000")
 
 
 def get_access_token(token_file=".tmp.yaml", token_env=os.getenv("TOKEN")):
