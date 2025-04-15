@@ -17,12 +17,14 @@
 			...appliedControls.map((control: Record<string, string>) => ({
 				label: `AC: ${control.name}`,
 				date: new Date(control.eta),
-				link: `/applied-controls/${control.id}`
+				link: `/applied-controls/${control.id}`,
+				users: control.owner
 			})),
 			...riskAcceptances.map((ra: Record<string, string>) => ({
 				label: `RA: ${ra.name}`,
 				date: new Date(ra.expiry_date),
-				link: `/risk-acceptances/${ra.id}`
+				link: `/risk-acceptances/${ra.id}`,
+				users: ra.approver ? [ra.approver] : []
 			})),
 			...tasks.map((task: Record<string, string>) => ({
 				label: `TA: ${task.name}`,

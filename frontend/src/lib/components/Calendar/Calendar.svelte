@@ -3,7 +3,7 @@
 	import Day from './Day.svelte';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
-	import { showAllTasks } from '$lib/utils/stores';
+	import { showAllEvents } from '$lib/utils/stores';
 	import { writable } from 'svelte/store';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
@@ -84,7 +84,7 @@
 	let filteredInfo = info;
 
 	$: {
-		if (!$showAllTasks) {
+		if (!$showAllEvents) {
 			filteredInfo = info.filter((event) => event.users.some((userObj) => userObj.id === user.id));
 		} else {
 			filteredInfo = info;
@@ -147,8 +147,8 @@
 					<i class="fas fa-calendar-day" />
 					{m.today()}
 				</a>
-				<SlideToggle name="tasks-toggle" bind:checked={$showAllTasks} active="bg-green-500"
-					><span class="text-white font-light text-lg">{m.showAllTasks()}</span></SlideToggle
+				<SlideToggle name="tasks-toggle" bind:checked={$showAllEvents} active="bg-green-500"
+					><span class="text-white font-light text-lg">{m.showAllEvents()}</span></SlideToggle
 				>
 			</div>
 		</div>

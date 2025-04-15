@@ -20,7 +20,7 @@ export const hideSuggestions = persisted('hideSuggestions', requirementAssessmen
 	storage: 'session'
 });
 
-export const showAllTasks = persisted('showAllTasks', true, {
+export const showAllEvents = persisted('showAllEvents', true, {
 	storage: 'session'
 });
 
