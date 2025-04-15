@@ -69,6 +69,7 @@
 	deleteForm={data.deleteForm}
 	{URLModel}
 	canSelectObject={canEditObject}
+	baseEndpoint="/compliance-assessments?ebios_rm_studies={data.data.id}"
 >
 	<div slot="selectButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
