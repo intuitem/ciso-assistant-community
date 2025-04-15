@@ -81,6 +81,10 @@ export class PageDetail extends BasePage {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
 							.toHaveText('Reference ID');
+					} else if (key === 'owners') {
+						await expect
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
+							.toHaveText('Assigned to');
 					} else {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
