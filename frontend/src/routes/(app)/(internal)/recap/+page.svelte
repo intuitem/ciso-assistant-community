@@ -1,10 +1,12 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	export let data: PageData;
 
@@ -16,6 +18,17 @@
 		'not_applicable',
 		'to_do'
 	] as const;
+
+	const user = $page.data.user;
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	const model = URL_MODEL_MAP['compliance-assessments'];
+	const canEditObject = (perimeter): boolean =>
+		canPerformAction({
+			user,
+			action: 'change',
+			model: model.name,
+			domain: perimeter.folder?.id
+		});
 </script>
 
 <div class="px-4 pb-4 space-y-8">
@@ -88,17 +101,19 @@
 						</div>
 						<div class="lg:absolute lg:top-2 lg:right-4 mt-2 space-x-1">
 							<div class="flex flex-row lg:flex-col space-x-1 lg:space-x-0 lg:space-y-1">
-								<Anchor
-									href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=3"
-									prefixCrumbs={[
-										{
-											label: compliance_assessment.name,
-											href: `/compliance-assessments/${compliance_assessment.id}`
-										}
-									]}
-									class="btn variant-filled-primary w-1/2 lg:w-full"
-									><i class="fa-solid fa-edit mr-2" /> {m.edit()}
-								</Anchor>
+								{#if canEditObject(perimeter)}
+									<Anchor
+										href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=3"
+										prefixCrumbs={[
+											{
+												label: compliance_assessment.name,
+												href: `/compliance-assessments/${compliance_assessment.id}`
+											}
+										]}
+										class="btn variant-filled-primary w-1/2 lg:w-full"
+										><i class="fa-solid fa-edit mr-2" /> {m.edit()}
+									</Anchor>
+								{/if}
 								<a
 									href="/compliance-assessments/{compliance_assessment.id}/export"
 									class="btn variant-filled-primary w-1/2 lg:w-full"
