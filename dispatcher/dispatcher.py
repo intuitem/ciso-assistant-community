@@ -83,6 +83,7 @@ def consume():
     """
     Consume messages from the Kafka topic and process them.
     """
+    logger.info("Starting consumer", bootstrap_servers=settings.BOOTSTRAP_SERVERS)
     consumer = KafkaConsumer(
         # topic
         "observation",
@@ -93,12 +94,13 @@ def consume():
         # value_deserializer=lambda v: v,
     )
 
+    logger.info("Starting producer", bootstrap_servers=settings.BOOTSTRAP_SERVERS)
     error_producer = KafkaProducer(
-        bootstrap_servers=os.getenv(settings.BOOTSTRAP_SERVERS, "localhost:9092"),
+        bootstrap_servers=settings.BOOTSTRAP_SERVERS,
     )
 
     try:
-        logger.info("Starting consumer")
+        logger.info("CISO Assistant dispatcher up and running. Listening for messages.")
         for msg in consumer:
             logger.trace("Consumed record.", key=msg.key, value=msg.value)
             try:
