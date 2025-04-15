@@ -750,8 +750,8 @@
 	"conclusionSemiColon": "Conclusion:",
 	"observationSemiColon": "Observation:",
 	"tableMode": "Table mode",
-	"owner": "Owner",
-	"owners": "Owners",
+	"owner": "Assigned to",
+	"owners": "Assigned to",
 	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the governance menu.",
 	"licenseSeats": "License seats",
 	"licenseExpiration": "License expiration",
@@ -1418,5 +1418,6 @@
 	"riskAssessmentName": "Risk Assessment Name",
 	"noDataAvailable": "Not enough data for this visualisation. Refresh when more content is available.",
 	"youCanSetPAsswordHere": "You can set your password here.",
-	"impactHelpText": "Estimation of the control's impact"
+	"impactHelpText": "Estimation of the control's impact",
+	"selectAsset": "Select an asset"
 }

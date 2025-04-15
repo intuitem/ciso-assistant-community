@@ -7,6 +7,8 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { m } from '$paraglide/messages';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
+	import { page } from '$app/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -49,14 +51,31 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	const user = $page.data.user;
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: data.model.name,
+		domain:
+			data.model.name === 'folder'
+				? data.data.id
+				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
+	});
 </script>
 
-<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
-	<div slot="optButton">
+<ModelTable
+	source={data.table}
+	deleteForm={data.deleteForm}
+	{URLModel}
+	canSelectObject={canEditObject}
+	baseEndpoint="/compliance-assessments?ebios_rm_studies={data.data.id}"
+>
+	<div slot="selectButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 			<button
 				class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
-				data-testid="opt-button"
+				data-testid="select-button"
 				title={m.selectAudit()}
 				on:click={modalUpdateForm}
 				><i class="fa-solid fa-hand-pointer"></i>
