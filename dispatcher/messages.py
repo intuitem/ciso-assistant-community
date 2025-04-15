@@ -11,6 +11,7 @@ from settings import API_URL, S3_URL, VERIFY_CERTIFICATE, get_access_token
 
 from loguru import logger
 
+import settings
 from utils.api import get_api_headers
 
 
@@ -200,7 +201,12 @@ def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
         return file_name, in_memory_file
 
     elif "file_s3_bucket" in values and "file_s3_key" in values:
-        s3 = S3FileSystem(anon=True, endpoint_url=S3_URL)
+        s3 = S3FileSystem(
+            anon=False,
+            endpoint_url=S3_URL,
+            key=settings.S3_ACCESS_KEY,
+            secret=settings.S3_SECRET_KEY,
+        )
         bucket = values["file_s3_bucket"]
         key = values["file_s3_key"]
         file_path = f"{bucket}/{key}"

@@ -49,9 +49,11 @@ def load_env_config():
         "global_folder_id": os.getenv("GLOBAL_FOLDER_ID"),
         "token": os.getenv("TOKEN"),
         "auto_renew_session": os.getenv("AUTO_RENEW_SESSION") == "True" or None,
-        "bootstrap_servers": os.getenv("BOOTSTRAP_SERVERS", "http://localhost:9092"),
+        "bootstrap_servers": os.getenv("BOOTSTRAP_SERVERS"),
         "errors_topic": os.getenv("ERRORS_TOPIC"),
         "s3_url": os.getenv("S3_URL"),
+        "s3_access_key": os.getenv("S3_ACCESS_KEY"),
+        "s3_secret_key": os.getenv("S3_SECRET_KEY"),
     }
     logger.trace("Loaded environment configuration", config=config)
     return config
@@ -162,6 +164,15 @@ def init_config(y, interactive):
             "Enter the S3 storage URL (e.g., http://localhost:9000)",
             default=os.getenv("S3_URL", "http://localhost:9000"),
         )
+        s3_access_key = click.prompt(
+            "Enter your S3 access key (leave blank if you are using pre-signed URLs to authenticate requests to your S3 storage)",
+        )
+        s3_secret_key = None
+        if s3_access_key:
+            s3_secret_key = click.prompt(
+                "Enter your S3 secret key",
+                hide_input=True,
+            )
 
         template_config = {
             "rest": {
@@ -177,6 +188,8 @@ def init_config(y, interactive):
             "bootstrap_servers": bootstrap_servers,
             "errors_topic": errors_topic,
             "s3_url": s3_url,
+            "s3_access_key": s3_access_key,
+            "s3_secret_key": s3_secret_key,
         }
     else:
         env_conf = load_env_config()
@@ -224,6 +237,8 @@ AUTO_RENEW_SESSION = config.get("auto_renew_session", False)
 BOOTSTRAP_SERVERS = config.get("bootstrap_servers", "localhost:9092")
 ERRORS_TOPIC = config.get("errors_topic", "errors")
 S3_URL = config.get("s3_url", "http://localhost:9000")
+S3_ACCESS_KEY = config.get("s3_access_key", "")
+S3_SECRET_KEY = config.get("s3_secret_key", "")
 
 
 def get_access_token(token_file=".tmp.yaml", token_env=os.getenv("TOKEN")):
