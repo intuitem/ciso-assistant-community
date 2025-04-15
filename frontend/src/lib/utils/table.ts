@@ -919,8 +919,8 @@ export const listViewFields = {
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	'task-templates': {
-		head: ['name', 'description', 'owner', 'nextOccurrence'],
-		body: ['name', 'description', 'owner', 'task_date']
+		head: ['name', 'description', 'owner', 'lastOccurrenceStatus', 'nextOccurrence'],
+		body: ['name', 'description', 'owner', 'last_occurrence_status', 'next_occurrence']
 	},
 	'task-nodes': {
 		head: ['due_date', 'status', 'evidences'],

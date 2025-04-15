@@ -1457,8 +1457,10 @@
 	"taskNodes": "Tasks occurrences",
 	"associatedTaskNodes": "Instances review",
 	"nextOccurrence": "Next occurrence",
-	"taskTemplate": "Task template",
+	"taskTemplate": "Task",
+	"taskTemplates": "Tasks",
 	"youCanSetPAsswordHere": "You can set your password here.",
 	"impactHelpText": "Estimation of the control's impact",
-	"selectAsset": "Select an asset"
+	"selectAsset": "Select an asset",
+	"lastOccurrenceStatus": "Last occurrence status"
 }

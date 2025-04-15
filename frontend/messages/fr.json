@@ -1455,5 +1455,12 @@
 	"isTemplate": "Recurrence",
 	"youCanSetPAsswordHere": "Vous pouvez définir votre mot de passe ici.",
 	"impactHelpText": "Estimation de l'impact de la mesure",
-	"selectAsset": "Sélectionner un actif"
+	"selectAsset": "Sélectionner un actif",
+	"lastOccurrenceStatus": "Statut de la dernière occurrence",
+	"nextOccurrence": "Prochaine occurrence",
+	"taskTemplate": "Tâche",
+	"taskTemplates": "Tâches",
+	"taskNode": "Occurrence de tâche",
+	"taskNodes": "Occurrences de tâches",
+	"associatedTaskNodes": "Révision des instances"
 }

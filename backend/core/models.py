@@ -4255,6 +4255,29 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         related_name="task_templates",
     )
 
+    @property
+    def next_occurrence(self):
+        today = datetime.today().date()
+        task_nodes = TaskNode.objects.filter(
+            task_template=self, due_date__gte=today
+        ).order_by("due_date")
+        return task_nodes.first().due_date if task_nodes.exists() else None
+
+    @property
+    def last_occurrence_status(self):
+        today = datetime.today().date()
+        task_nodes = TaskNode.objects.filter(
+            task_template=self, due_date__lte=today
+        ).order_by("-due_date")
+        if self.is_recurrent:
+            return task_nodes[1].status if task_nodes.exists() else None
+        else:
+            return (
+                TaskNode.objects.get(task_template=self).status
+                if TaskNode.objects.filter(task_template=self).exists()
+                else None
+            )
+
     class Meta:
         verbose_name = "Task template"
         verbose_name_plural = "Task templates"

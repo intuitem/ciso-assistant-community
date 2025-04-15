@@ -53,7 +53,7 @@ READER_PERMISSIONS_LIST = [
     "view_incident",
     "view_timelineentry",
     "view_tasknode",
-    "view_tasktemplate"
+    "view_tasktemplate",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -96,7 +96,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_incident",
     "view_timelineentry",
     "view_tasknode",
-    "view_tasktemplate"
+    "view_tasktemplate",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
