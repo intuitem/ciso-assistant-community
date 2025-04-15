@@ -1420,5 +1420,6 @@
 	"youCanSetPAsswordHere": "Vous pouvez définir votre mot de passe ici.",
 	"reminderWarningStrategicScenarios": "Rappel : N'oubliez pas d'identifier les chemins d'attaque pour réaliser les scénarios opérationnels.",
 	"addAttackPathToDoOperationalScenarios": "Vous devez ajouter un chemin d'attaque à ces scénarios stratégiques si vous souhaitez les utiliser dans les scénarios opérationnels :",
-	"impactHelpText": "Estimation de l'impact de la mesure"
+	"impactHelpText": "Estimation de l'impact de la mesure",
+	"selectAsset": "Sélectionner un actif"
 }

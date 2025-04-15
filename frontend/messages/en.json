@@ -1420,5 +1420,6 @@
 	"youCanSetPAsswordHere": "You can set your password here.",
 	"reminderWarningStrategicScenarios": "Reminder: Do not forget to identify Attacks Paths to do operational scenarios",
 	"addAttackPathToDoOperationalScenarios": "You have to add an attack path to these strategic scenarios if you want to use them in the operational scenarios:",
-	"impactHelpText": "Estimation of the control's impact"
+	"impactHelpText": "Estimation of the control's impact",
+	"selectAsset": "Select an asset"
 }
