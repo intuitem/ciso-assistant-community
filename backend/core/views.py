@@ -2196,31 +2196,6 @@ class UserViewSet(BaseModelViewSet):
 
         return super().destroy(request, *args, **kwargs)
 
-    @action(
-        detail=True, name="Get user tasks", url_path="tasks/(?P<start>.+)/(?P<end>.+)"
-    )
-    def tasks(
-        self,
-        request,
-        pk,
-        start=None,
-        end=None,
-    ):
-        if start is None:
-            start = timezone.now().date()
-        if end is None:
-            end = timezone.now().date() + relativedelta.relativedelta(months=1)
-        return Response(
-            TaskTemplateViewSet.task_calendar(
-                self=self,
-                task_templates=TaskTemplate.objects.filter(
-                    enabled=True, assigned_to=request.user
-                ),
-                start=start,
-                end=end,
-            )
-        )
-
 
 class UserGroupViewSet(BaseModelViewSet):
     """
@@ -5215,47 +5190,48 @@ class TaskTemplateViewSet(BaseModelViewSet):
         return tasks_list
 
     def _sync_task_nodes(self, task_template: TaskTemplate):
-        # Soft-delete all existing TaskNode instances associated with this TaskTemplate
-        TaskNode.objects.filter(task_template=task_template).update(to_delete=True)
+        with transaction.atomic():
+            # Soft-delete all existing TaskNode instances associated with this TaskTemplate
+            TaskNode.objects.filter(task_template=task_template).update(to_delete=True)
 
-        # Determine the end date based on the frequency
-        if task_template.is_recurrent:
-            start_date = task_template.task_date
-            if task_template.schedule["frequency"] == "DAILY":
-                delta = rd.relativedelta(months=2)
-            elif task_template.schedule["frequency"] == "WEEKLY":
-                delta = rd.relativedelta(months=4)
-            elif task_template.schedule["frequency"] == "MONTHLY":
-                delta = rd.relativedelta(years=1)
-            elif task_template.schedule["frequency"] == "YEARLY":
-                delta = rd.relativedelta(years=5)
+            # Determine the end date based on the frequency
+            if task_template.is_recurrent:
+                start_date = task_template.task_date
+                if task_template.schedule["frequency"] == "DAILY":
+                    delta = rd.relativedelta(months=2)
+                elif task_template.schedule["frequency"] == "WEEKLY":
+                    delta = rd.relativedelta(months=4)
+                elif task_template.schedule["frequency"] == "MONTHLY":
+                    delta = rd.relativedelta(years=1)
+                elif task_template.schedule["frequency"] == "YEARLY":
+                    delta = rd.relativedelta(years=5)
 
-            end_date_param = task_template.schedule.get("end_date")
-            if end_date_param:
-                end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
+                end_date_param = task_template.schedule.get("end_date")
+                if end_date_param:
+                    end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
+                else:
+                    end_date = datetime.now().date() + delta
+
+                # Ensure end_date is not before the calculated delta
+                if end_date < datetime.now().date() + delta:
+                    end_date = datetime.now().date() + delta
+
+                # Generate the task nodes
+                self.task_calendar(
+                    task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                    start=start_date,
+                    end=end_date,
+                )
+
             else:
-                end_date = datetime.now().date() + delta
-
-            # Ensure end_date is not before the calculated delta
-            if end_date < datetime.now().date() + delta:
-                end_date = datetime.now().date() + delta
-
-            # Generate the task nodes
-            self.task_calendar(
-                task_templates=TaskTemplate.objects.filter(id=task_template.id),
-                start=start_date,
-                end=end_date,
-            )
-
-        else:
-            TaskNode.objects.create(
-                due_date=task_template.task_date,
-                status="pending",
-                task_template=task_template,
-                folder=task_template.folder,
-            )
-        # garbage-collect
-        TaskNode.objects.filter(to_delete=True).delete()
+                TaskNode.objects.create(
+                    due_date=task_template.task_date,
+                    status="pending",
+                    task_template=task_template,
+                    folder=task_template.folder,
+                )
+            # garbage-collect
+            TaskNode.objects.filter(to_delete=True).delete()
 
     @action(
         detail=False,
@@ -5287,11 +5263,13 @@ class TaskTemplateViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         super().perform_create(serializer)
         self._sync_task_nodes(serializer.instance)
-    
+
     @action(detail=True, name="Get write data")
     def object(self, request, pk):
         serializer_class = self.get_serializer_class(action="update")
-        self._sync_task_nodes(self.get_object())  # Synchronize task nodes when fetching a task template
+        self._sync_task_nodes(
+            self.get_object()
+        )  # Synchronize task nodes when fetching a task template
         return Response(serializer_class(super().get_object()).data)
 
 

@@ -4329,6 +4329,10 @@ class TaskNode(AbstractBaseModel, FolderMixin):
 
     to_delete = models.BooleanField(default=False)
 
+    @property
+    def assigned_to(self):
+        return self.task_template.assigned_to
+
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"

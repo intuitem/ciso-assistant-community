@@ -1430,6 +1430,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     task_template = FieldsRelatedField()
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
+    assigned_to = FieldsRelatedField(many=True)
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""

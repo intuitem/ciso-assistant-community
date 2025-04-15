@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import Day from './Day.svelte';
+	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import { page } from '$app/stores';
+	import { showAllTasks } from '$lib/utils/stores';
 
 	import { m } from '$paraglide/messages';
 
@@ -55,6 +58,17 @@
 			return `/calendar/${year}/${month - 1}`;
 		}
 	}
+
+	const user = $page.data.user;
+	let filteredInfo = info;
+
+	$: {
+		if (!$showAllTasks) {
+			filteredInfo = info.filter((event) => event.users.some((userObj) => userObj.id === user.id));
+		} else {
+			filteredInfo = info;
+		}
+	}
 </script>
 
 <div class="flex flex-row h-full space-x-2">
@@ -94,11 +108,13 @@
 				{/each}
 			{/if}
 			{#each Array.from({ length: daysInMonth }, (_, i) => i + 1) as day}
-				<Day {day} {month} {year} {info} />
+				{#key filteredInfo}
+					<Day {day} {month} {year} info={filteredInfo} />
+				{/key}
 			{/each}
 		</div>
 		<div class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg p-2">
-			<div class="flex w-full h-full justify-between items-start">
+			<div class="flex w-full h-full justify-between items-center">
 				<a
 					href={currentMonth()}
 					class="font-light text-lg border rounded-lg border-white p-2 hover:bg-white text-white hover:text-primary-500 transition duration-300"
@@ -106,6 +122,9 @@
 					<i class="fas fa-calendar-day" />
 					{m.today()}
 				</a>
+				<SlideToggle name="tasks-toggle" bind:checked={$showAllTasks} active="bg-green-500"
+					><span class="text-white font-light text-lg">{m.showAllTasks()}</span></SlideToggle
+				>
 			</div>
 		</div>
 	</div>

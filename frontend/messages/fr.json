@@ -1462,5 +1462,6 @@
 	"taskTemplates": "Tâches",
 	"taskNode": "Occurrence de tâche",
 	"taskNodes": "Occurrences de tâches",
-	"associatedTaskNodes": "Révision des instances"
+	"associatedTaskNodes": "Révision des instances",
+	"showAllTasks": "Afficher toutes les tâches"
 }
