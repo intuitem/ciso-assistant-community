@@ -6,7 +6,7 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import { pageTitle, clientSideToast } from '$lib/utils/stores';
+	import { pageTitle, clientSideToast, currentModel } from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
 	import { m } from '$paraglide/messages';
@@ -59,6 +59,7 @@
 	}
 </script>
 
+{@debug data}
 <!-- App Shell -->
 <AppShell
 	slotPageContent="p-8 bg-gradient-to-br from-violet-100 to-slate-200"
@@ -75,6 +76,7 @@
 			>
 				{safeTranslate($pageTitle)}
 			</span>
+			<span><i class="ml-2 fa-solid fa-circle-question"></i> {$currentModel}</span>
 			{#if data?.user?.is_admin}
 				<button
 					on:click={modalQuickStart}

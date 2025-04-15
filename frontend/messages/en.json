@@ -1244,6 +1244,7 @@
 	"ebiosWs4_1_tooltip": "You need at least one selected Attack Path from a Strategic Scenario to elaborate an operational scenario",
 	"ebiosWs4_2_tooltip": "You need at least one Operational Scenario to evaluate its likelihood",
 	"ebiosWs5_tooltip": "No risk assessment has been conducted yet",
+	"explanationConcept": "Concept overview",
 	"govern": "Govern",
 	"identify": "Identify",
 	"protect": "Protect",

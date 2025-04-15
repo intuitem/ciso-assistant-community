@@ -2,17 +2,19 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { driverInstance } from '$lib/utils/stores';
+	import { driverInstance, currentModel } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
 
 	import { onMount } from 'svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
 	$: URLModel = data.URLModel;
+	$: currentModel.set(URLModel);
 
 	const modalStore: ModalStore = getModalStore();
 
