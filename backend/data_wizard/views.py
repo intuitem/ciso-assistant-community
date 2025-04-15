@@ -192,6 +192,7 @@ class LoadFileView(APIView):
             control_data = {
                 "ref_id": record.get("ref_id", ""),
                 "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
                 "folder": domain,
                 "status": record.get("status", "to_do"),
                 "priority": priority,
