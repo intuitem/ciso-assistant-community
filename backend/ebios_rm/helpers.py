@@ -5,6 +5,8 @@ from global_settings.models import GlobalSettings
 from .models import EbiosRMStudy, FearedEvent, RoTo
 from core.models import Asset
 
+import textwrap
+
 
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     qs = stakeholders_queryset
@@ -95,6 +97,10 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     return {"current": c_data, "residual": r_data}
 
 
+def wrap_text(text, width=30):
+    return textwrap.fill(text, width=width)
+
+
 def ebios_rm_visual_analysis(study):
     tree = list()  # list of dict with strucuted data
     rotos = (
@@ -119,7 +125,7 @@ def ebios_rm_visual_analysis(study):
         nodes_idx[f"{a.id}-AS"] = N
         N += 1
     for fe in feared_events:
-        nodes.append({"name": fe.name, "category": 2})
+        nodes.append({"name": wrap_text(fe.name), "category": 2})
         nodes_idx[f"{fe.id}-FE"] = N
         N += 1
     for ro_to in rotos:
@@ -133,7 +139,7 @@ def ebios_rm_visual_analysis(study):
         N += 1
         nodes.append(
             {
-                "name": ro_to.target_objective,
+                "name": wrap_text(ro_to.target_objective),
                 "category": 1,
             }
         )
