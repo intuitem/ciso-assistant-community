@@ -28,17 +28,19 @@
 	{#if day == today.getDate() && month == today.getMonth() + 1 && year == today.getFullYear()}
 		<div
 			in:fly={{ delay: 100, duration: 300 }}
-			class="flex flex-col border border-gray-200 p-2 bg-indigo-500 text-white rounded-lg text-sm"
+			class="flex flex-col border border-gray-200 p-2 rounded-md text-sm h-[8rem] max-h-[8rem]"
 		>
-			{day}
+			<span class="font-bold bg-primary-500 w-fit text-white rounded-full py-0.5 px-1">{day}</span>
 			{#if displayInfo(day, month, year)}
-				<div class="flex flex-col justify-center h-full">
+				<div class="flex flex-col justify-center h-full space-y-1">
 					{#each displayInfo(day, month, year) as eta}
-						<li class="unstyled hover:underline">
+						<span
+							class="flex justify-center cursor-pointer unstyled hover:bg-primary-200 text-primary-700 bg-primary-50 px-1 rounded-md"
+						>
 							<Anchor href={eta[1]}>
 								{eta[0]}
 							</Anchor>
-						</li>
+						</span>
 					{/each}
 				</div>
 			{/if}
@@ -46,17 +48,19 @@
 	{:else if (day < today.getDate() && month == today.getMonth() + 1 && year == today.getFullYear()) || (month < today.getMonth() + 1 && year == today.getFullYear()) || year < today.getFullYear()}
 		<div
 			in:fly={{ delay: 100, duration: 300 }}
-			class="flex flex-col border p-2 bg-gray-300 text-gray-500 rounded-lg text-sm"
+			class="flex flex-col border p-2 bg-gray-300 text-gray-500 rounded-md text-sm h-[8rem] max-h-[8rem]"
 		>
 			{day}
 			{#if displayInfo(day, month, year)}
-				<div class="flex flex-col justify-center h-full">
+				<div class="flex flex-col justify-center h-full space-y-1">
 					{#each displayInfo(day, month, year) as eta}
-						<li class="unstyled hover:underline text-red-500">
+						<span
+							class="flex justify-center cursor-pointer unstyled hover:bg-primary-200 text-primary-700 bg-primary-50 px-1 rounded-md"
+						>
 							<Anchor href={eta[1]}>
 								{eta[0]}
 							</Anchor>
-						</li>
+						</span>
 					{/each}
 				</div>
 			{/if}
@@ -64,17 +68,19 @@
 	{:else}
 		<div
 			in:fly={{ delay: 100, duration: 300 }}
-			class="flex flex-col border border-gray-200 p-2 rounded-lg bg-white text-sm"
+			class="flex flex-col border border-gray-200 p-2 rounded-md bg-white text-sm h-[8rem] max-h-[8rem]"
 		>
 			{day}
 			{#if displayInfo(day, month, year)}
-				<div class="flex flex-col justify-center h-full">
+				<div class="flex flex-col justify-center h-full space-y-1">
 					{#each displayInfo(day, month, year) as eta}
-						<li class="unstyled hover:underline text-primary-500">
+						<span
+							class="flex justify-center cursor-pointer unstyled hover:bg-primary-200 text-primary-700 bg-primary-50 px-1 rounded-md"
+						>
 							<Anchor href={eta[1]}>
 								{eta[0]}
 							</Anchor>
-						</li>
+						</span>
 					{/each}
 				</div>
 			{/if}

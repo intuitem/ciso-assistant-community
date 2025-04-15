@@ -74,7 +74,7 @@
 <div class="flex flex-row h-full space-x-2">
 	<div class="flex flex-col rounded-lg bg-white h-full w-full p-2 space-y-3 shadow-xl">
 		<div
-			class="flex flex-col items-center justify-center bg-gradient-to-r from-primary-500 to-secondary-400 text-white rounded-lg h-1/6 text-3xl font-semibold p-2 shadow-md"
+			class="flex flex-col items-center justify-center bg-gradient-to-r from-primary-500 to-secondary-400 text-white rounded-lg h-1/6 p-2 text-3xl font-semibold shadow-md"
 		>
 			<div class="flex flex-row justify-between w-3/4">
 				<a class="sticky" href={prevMonth(year, month)}>
@@ -113,7 +113,9 @@
 				{/key}
 			{/each}
 		</div>
-		<div class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg p-2">
+		<div
+			class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg h-20 p-2"
+		>
 			<div class="flex w-full h-full justify-between items-center">
 				<a
 					href={currentMonth()}
