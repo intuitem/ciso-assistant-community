@@ -198,7 +198,6 @@ export const test = base.extend<Fixtures>({
 			{ name: 'threats', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'treatment', type: type.SELECT },
 			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
-			{ name: 'existing_controls', type: type.TEXT },
 			{ name: 'current_proba', type: type.SELECT },
 			{ name: 'current_impact', type: type.SELECT },
 			{ name: 'applied_controls', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
@@ -569,7 +568,6 @@ export class TestContent {
 					treatment: 'Accepted',
 					//TODO add risk_assessment & threats
 					assets: [vars.folderName + '/' + vars.assetName],
-					existing_controls: 'Test Existing Controls',
 					current_proba: 'High',
 					current_impact: 'Medium',
 					applied_controls: [vars.folderName + '/' + vars.appliedControlName],

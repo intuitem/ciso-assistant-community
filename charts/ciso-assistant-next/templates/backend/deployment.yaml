@@ -103,7 +103,7 @@ spec:
           - name: EMAIL_PORT
             value: {{ .Values.backend.config.smtp.primary.port | quote }}
           - name: EMAIL_USE_TLS
-            value: {{ .Values.backend.config.smtp.primary.useTls | quote }}
+            value: {{ ternary "True" "False" .Values.backend.config.smtp.primary.useTls | quote }}
           {{- if .Values.backend.config.smtp.primary.username }}
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.primary.username | quote }}
@@ -227,7 +227,7 @@ spec:
           - name: EMAIL_PORT
             value: {{ .Values.backend.config.smtp.primary.port | quote }}
           - name: EMAIL_USE_TLS
-            value: {{ .Values.backend.config.smtp.primary.useTls | quote }}
+            value: {{ ternary "True" "False" .Values.backend.config.smtp.primary.useTls | quote }}
           {{- if .Values.backend.config.smtp.primary.username }}
           - name: EMAIL_HOST_USER
             value: {{ .Values.backend.config.smtp.primary.username | quote }}
@@ -275,10 +275,18 @@ spec:
       {{- if .Values.backend.persistence.sqlite.enabled }}
       - name: sqlite-data
         persistentVolumeClaim:
+          {{- if .Values.backend.persistence.sqlite.existingClaim }}
+          claimName: {{ .Values.backend.persistence.sqlite.existingClaim }}
+          {{- else }}
           claimName: {{ include "ciso-assistant.fullname" . }}-sqlite
+          {{- end }}
       {{- end }}
       {{- if .Values.backend.persistence.localStorage.enabled }}
       - name: localstorage-data
         persistentVolumeClaim:
+          {{- if .Values.backend.persistence.localStorage.existingClaim }}
+          claimName: {{ .Values.backend.persistence.localStorage.existingClaim }}
+          {{- else }}
           claimName: {{ include "ciso-assistant.fullname" . }}-localstorage
+          {{- end }}
       {{- end }}

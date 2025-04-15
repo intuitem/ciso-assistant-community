@@ -9,8 +9,9 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -23,6 +24,8 @@
 	export let URLModel: urlModel | string | undefined;
 	export let identifierField = 'id';
 	export let preventDelete = false;
+	export let baseClass =
+		'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end';
 
 	export let hasBody = false;
 
@@ -94,8 +97,35 @@
 	}
 
 	const user = $page.data.user;
-	$: canDeleteObject = Object.hasOwn(user.permissions, `delete_${model?.name}`) && !preventDelete;
-	$: canEditObject = Object.hasOwn(user.permissions, `change_${model?.name}`);
+
+	$: canDeleteObject =
+		!preventDelete &&
+		(model
+			? $page.params.id
+				? canPerformAction({
+						user,
+						action: 'delete',
+						model: model.name,
+						domain:
+							model.name === 'folder'
+								? row.meta.id
+								: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+					})
+				: Object.hasOwn(user.permissions, `delete_${model.name}`)
+			: false);
+	$: canEditObject = model
+		? $page.params.id
+			? canPerformAction({
+					user,
+					action: 'change',
+					model: model.name,
+					domain:
+						model.name === 'folder'
+							? row.meta.id
+							: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
+				})
+			: Object.hasOwn(user.permissions, `change_${model.name}`)
+		: false;
 
 	$: displayDetail = detailURL;
 	$: displayEdit =
@@ -106,9 +136,7 @@
 	$: displayDelete = canDeleteObject && deleteForm !== undefined;
 </script>
 
-<span
-	class="space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end"
->
+<span class={baseClass}>
 	<slot name="head" />
 	<slot name="body" />
 	{#if !hasBody}

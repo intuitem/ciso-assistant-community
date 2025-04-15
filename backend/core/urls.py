@@ -80,6 +80,8 @@ router.register(
     r"findings-assessments", FindingsAssessmentViewSet, basename="findings-assessments"
 )
 router.register(r"findings", FindingViewSet, basename="findings")
+router.register(r"incidents", IncidentViewSet, basename="incidents")
+router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -100,6 +102,7 @@ urlpatterns = [
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("ebios-rm/", include("ebios_rm.urls")),
+    path("privacy/", include("privacy.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
@@ -125,6 +128,7 @@ urlpatterns = [
         "compliance-assessments/<uuid:pk>/action-plan/",
         ComplianceAssessmentActionPlanList.as_view(),
     ),
+    path("quick-start/", QuickStartView.as_view(), name="quick-start"),
 ]
 
 # Additional modules take precedence over the default modules

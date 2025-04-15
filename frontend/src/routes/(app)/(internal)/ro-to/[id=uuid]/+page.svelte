@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 	import { pageTitle } from '$lib/utils/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -158,6 +158,7 @@
 					regionHeadCell="uppercase bg-gray-50 text-gray-700"
 					source={data.table}
 					URLModel="feared-events"
+					baseEndpoint={'feared-events/?ro_to_couples=' + roto.id}
 				></ModelTable>
 			</div>
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">

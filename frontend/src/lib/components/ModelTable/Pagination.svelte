@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { afterNavigate } from '$app/navigation';
 	export let handler: DataHandler;
 
 	const pageNumber = handler.getPageNumber();
+	const rowsPerPage = handler.getRowsPerPage();
 	const pageCount = handler.getPageCount();
 	const pages = handler.getPages({ ellipsis: true });
 
@@ -14,9 +15,32 @@
 		handler.invalidate();
 	};
 
+	const listViewEndpointRegex = /^\/[a-zA-Z0-9_\-]+$/;
+	let currentEndpoint: string | null = null;
+
+	$: if (
+		$page.url &&
+		listViewEndpointRegex.test($page.url.pathname) &&
+		currentEndpoint === $page.url.pathname
+	) {
+		const endpoint = $page.url.pathname;
+		const cache = JSON.parse(localStorage.getItem('pageNumberCache') ?? '{}');
+		cache[endpoint] = [$pageNumber, $rowsPerPage];
+		localStorage.setItem('pageNumberCache', JSON.stringify(cache));
+	}
+
 	afterNavigate(() => {
-		if ($page.url) {
-			handler.setPage(1);
+		// The second condition prevents afterNavigate from being executed more than once when the URL changes.
+		if ($page.url && $page.url.pathname !== currentEndpoint) {
+			const endpoint = $page.url.pathname;
+			let newPageNumber = 1;
+			if (listViewEndpointRegex.test(endpoint)) {
+				const cache = JSON.parse(localStorage.getItem('pageNumberCache') ?? '{}');
+				const [savedPageNumber] = cache[endpoint] ?? [];
+				newPageNumber = Number(savedPageNumber ?? '1');
+			}
+			handler.setPage(newPageNumber);
+			currentEndpoint = endpoint;
 		}
 	});
 </script>

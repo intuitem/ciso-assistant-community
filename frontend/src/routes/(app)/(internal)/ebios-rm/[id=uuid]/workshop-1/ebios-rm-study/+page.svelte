@@ -1,13 +1,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { TabGroup, Tab, getModalStore } from '@skeletonlabs/skeleton';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -51,7 +53,37 @@
 		}
 	});
 
+	function modalUpdateForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: UpdateModal,
+			props: {
+				form: data.updateForm,
+				model: data.updatedModel,
+				object: data.object,
+				context: 'selectAsset'
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.selectAsset()
+		};
+		modalStore.trigger(modal);
+	}
+
 	let tabSet = 0;
+
+	const user = $page.data.user;
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: data.model.name,
+		domain:
+			data.model.name === 'folder'
+				? data.data.id
+				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
+	});
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -78,13 +110,15 @@
 					{safeTranslate(ebiosRmStudy.status)}
 				</span>
 			</div>
-			<Anchor
-				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-				class="btn variant-filled-primary h-fit"
-			>
-				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
-				{m.edit()}
-			</Anchor>
+			{#if canEditObject}
+				<Anchor
+					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+					class="btn variant-filled-primary h-fit"
+				>
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					{m.edit()}
+				</Anchor>
+			{/if}
 		</div>
 		<div class="flex justify-center items-center w-full gap-5">
 			<span class="text-sm text-gray-500"
@@ -186,16 +220,35 @@
 											source={model.table}
 											deleteForm={model.deleteForm}
 											URLModel={urlmodel}
+											canSelectObject={canEditObject}
 											baseEndpoint="/assets?ebios_rm_studies={$page.params.id}"
 										>
-											<button
-												slot="addButton"
-												class="btn variant-filled-primary self-end my-auto"
-												on:click={(_) => modalCreateForm(model)}
-												><i class="fa-solid fa-plus mr-2 lowercase" />{safeTranslate(
-													'add-' + model.info.localName
-												)}</button
-											>
+											<div slot="selectButton">
+												<span
+													class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
+												>
+													<button
+														class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
+														data-testid="select-button"
+														title={m.selectAsset()}
+														on:click={(_) => modalUpdateForm()}
+														><i class="fa-solid fa-hand-pointer"></i>
+													</button>
+												</span>
+											</div>
+											<div slot="addButton">
+												<span
+													class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
+												>
+													<button
+														class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+														data-testid="add-button"
+														title={safeTranslate('add-' + data.model.localName)}
+														on:click={(_) => modalCreateForm(model)}
+														><i class="fa-solid fa-file-circle-plus"></i>
+													</button>
+												</span>
+											</div>
 										</ModelTable>
 									{/if}
 								{/if}

@@ -19,7 +19,7 @@
 	import { isDark } from '$lib/utils/helpers';
 	import { listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import {
 		popup,
@@ -37,6 +37,7 @@
 	import RowsPerPage from './RowsPerPage.svelte';
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	// Props
 	export let source: TableSource = { head: [], body: [] };
@@ -70,8 +71,11 @@
 	export let baseEndpoint: string = `/${URLModel}`;
 	export let detailQueryParameter: string | undefined = undefined;
 	export let fields: string[] = [];
+	export let canSelectObject = false;
 
 	export let hideFilters = false;
+
+	export let folderId: string = '';
 
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
@@ -141,7 +145,8 @@
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
-		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0) ||
+		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
 
 	const filterInitialData = $page.url.searchParams.entries();
 
@@ -199,7 +204,21 @@
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	$: model = URL_MODEL_MAP[URLModel];
-	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
+	$: canCreateObject = model
+		? $page.params.id
+			? canPerformAction({
+					user,
+					action: 'add',
+					model: model.name,
+					domain:
+						folderId ||
+						$page.data?.data?.folder?.id ||
+						$page.data?.data?.folder ||
+						$page.params.id ||
+						user.root_folder_id
+				})
+			: Object.hasOwn(user.permissions, `add_${model.name}`)
+		: false;
 	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
@@ -254,6 +273,9 @@
 		{/if}
 		<div class="flex space-x-2 items-center">
 			<slot name="optButton" />
+			{#if canSelectObject}
+				<slot name="selectButton" />
+			{/if}
 			{#if canCreateObject}
 				<slot name="addButton" />
 			{/if}
@@ -344,7 +366,7 @@
 											>
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
-										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
 											{formatDateOrDateTime(value, getLocale())}
 										{:else if [true, false].includes(value)}
 											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
@@ -362,7 +384,12 @@
 												</span>
 											</div>
 										{:else}
-											{safeTranslate(value ?? '-')}
+											<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+											{#if value?.length > 300}
+												{safeTranslate(value ?? '-').slice(0, 300)}...
+											{:else}
+												{safeTranslate(value ?? '-')}
+											{/if}
 										{/if}
 									</span>
 								{/if}

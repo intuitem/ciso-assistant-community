@@ -5,7 +5,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { locales, getLocale, setLocale } from '$paraglide/runtime';
 	import { LOCALE_MAP } from '$lib/utils/locales';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { setCookie } from '$lib/utils/cookies';
 
 	import { createEventDispatcher, onMount } from 'svelte';
@@ -26,7 +26,8 @@
 		urdu: m.urdu(),
 		czech: m.czech(),
 		swedish: m.swedish(),
-		indonesian: m.indonesian()
+		indonesian: m.indonesian(),
+		danish: m.danish()
 	};
 
 	const modalStore = getModalStore();
@@ -46,7 +47,8 @@
 		ur: 'اردو',
 		cs: 'Český',
 		sv: 'Svenska',
-		id: 'Bahasa Indonesia'
+		id: 'Bahasa Indonesia',
+		da: 'Dansk'
 	};
 
 	let value = getLocale();

@@ -158,8 +158,10 @@ class RiskMatrixImportExportSerializer(BaseModelSerializer):
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    severity = serializers.CharField(source="get_severity_display")
 
     class Meta:
         model = Vulnerability
@@ -209,6 +211,16 @@ class RiskAcceptanceReadSerializer(BaseModelSerializer):
 
 
 class PerimeterWriteSerializer(BaseModelSerializer):
+    def validate_name(self, value):
+        """
+        Check that the folder perimeter name does not contain the character "/"
+        """
+        if "/" in value:
+            raise serializers.ValidationError(
+                "The name cannot contain '/' for a Perimeter."
+            )
+        return value
+
     class Meta:
         model = Perimeter
         exclude = ["created_at"]
@@ -303,7 +315,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Asset
-        fields = "__all__"
+        exclude = ["business_value"]
 
     def validate_parent_assets(self, parent_assets):
         """
@@ -346,7 +358,6 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "type",
             "name",
             "description",
-            "business_value",
             "reference_link",
             "security_objectives",
             "disaster_recovery_objectives",
@@ -366,6 +377,7 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 class ReferenceControlReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = ReferenceControl
@@ -421,6 +433,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
 class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = Threat
@@ -554,7 +567,10 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
+    control_impact = serializers.CharField(source="get_control_impact_display")
     cost = serializers.FloatField()
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    assets = FieldsRelatedField(many=True)
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
@@ -580,6 +596,8 @@ class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
+    control_impact = serializers.CharField(source="get_control_impact_display")
+    status = serializers.CharField(source="get_status_display")
     cost = serializers.FloatField()
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
@@ -618,6 +636,7 @@ class ComplianceAssessmentActionPlanSerializer(BaseModelSerializer):
             "category",
             "csf_function",
             "effort",
+            "control_impact",
             "cost",
             "ranking_score",
             "requirement_assessments",
@@ -657,6 +676,7 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
             "expiry_date",
             "link",
             "effort",
+            "control_impact",
             "cost",
             "evidences",
         ]
@@ -807,6 +827,16 @@ class FolderWriteSerializer(BaseModelSerializer):
             "content_type",
         ]
 
+    def validate_name(self, value):
+        """
+        Check that the folder name does not contain the character "/"
+        """
+        if "/" in value:
+            raise serializers.ValidationError(
+                "The name cannot contain '/' for a Folder."
+            )
+        return value
+
 
 class FolderReadSerializer(BaseModelSerializer):
     parent_folder = FieldsRelatedField()
@@ -894,6 +924,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = Evidence
@@ -1199,7 +1230,6 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
-    str = serializers.CharField(source="__str__")
     owner = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
 
@@ -1215,7 +1245,6 @@ class FindingWriteSerializer(BaseModelSerializer):
 
 
 class FindingReadSerializer(FindingWriteSerializer):
-    str = serializers.CharField(source="__str__")
     owner = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField()
     vulnerabilities = FieldsRelatedField(many=True)
@@ -1223,7 +1252,154 @@ class FindingReadSerializer(FindingWriteSerializer):
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
+    severity = serializers.CharField(source="get_severity_display")
 
     class Meta:
         model = Finding
         fields = "__all__"
+
+
+class QuickStartSerializer(serializers.Serializer):
+    folder = serializers.UUIDField(required=False)
+    audit_name = serializers.CharField()
+    framework = serializers.CharField()
+    create_risk_assessment = serializers.BooleanField()
+    risk_assessment_name = serializers.CharField(required=False)
+    risk_matrix = serializers.CharField(required=False)
+
+    def save(self, **kwargs):
+        return self.create(self.validated_data)
+
+    def create(self, validated_data):
+        folder_data = {
+            "content_type": Folder.ContentType.DOMAIN,
+            "name": "Starter",
+        }
+        folder = Folder.objects.filter(**folder_data).first()
+        if not folder:
+            folder_serializer = FolderWriteSerializer(
+                data=folder_data, context=self.context
+            )
+            if not folder_serializer.is_valid(raise_exception=True):
+                return None
+            folder = folder_serializer.save()
+
+        perimeter_data = {
+            "folder": folder.id,
+            "name": "Starter",
+        }
+        perimeter = Perimeter.objects.filter(**perimeter_data).first()
+        if not perimeter:
+            perimeter_serializer = PerimeterWriteSerializer(
+                data=perimeter_data, context=self.context
+            )
+            if not perimeter_serializer.is_valid(raise_exception=True):
+                return None
+            perimeter = perimeter_serializer.save()
+
+        framework_lib_urn = validated_data["framework"]
+        if not LoadedLibrary.objects.filter(urn=framework_lib_urn).exists():
+            framework_stored_lib = StoredLibrary.objects.get(urn=framework_lib_urn)
+            try:
+                framework_stored_lib.load()
+            except Exception as e:
+                logger.error(e)
+                raise serializers.ValidationError(
+                    {"error": "Could not load the selected framework library"}
+                )
+        framework_lib = LoadedLibrary.objects.get(urn=framework_lib_urn)
+        framework = Framework.objects.get(library=framework_lib)
+        compliance_assessment_data = {
+            "folder": folder.id,
+            "perimeter": perimeter.id,
+            "framework": framework.id,
+            "name": validated_data["audit_name"],
+        }
+        compliance_asssessment_serializer = ComplianceAssessmentWriteSerializer(
+            data=compliance_assessment_data, context=self.context
+        )
+        if not compliance_asssessment_serializer.is_valid(raise_exception=True):
+            return None
+        audit = compliance_asssessment_serializer.save()
+        audit.create_requirement_assessments()
+
+        created_objects = {
+            "folder": FolderReadSerializer(folder).data,
+            "perimeter": PerimeterReadSerializer(perimeter).data,
+            "complianceassessment": ComplianceAssessmentReadSerializer(audit).data,
+        }
+
+        if not validated_data["create_risk_assessment"]:
+            return created_objects
+
+        matrix_lib_urn = validated_data["risk_matrix"]
+        if not LoadedLibrary.objects.filter(urn=matrix_lib_urn).exists():
+            matrix_stored_lib = StoredLibrary.objects.get(urn=matrix_lib_urn)
+            try:
+                matrix_stored_lib.load()
+            except Exception as e:
+                logger.error(e)
+                raise serializers.ValidationError(
+                    {"error": "Could not load the selected risk matrix library"}
+                )
+        matrix_lib = LoadedLibrary.objects.get(urn=matrix_lib_urn)
+        matrix = RiskMatrix.objects.get(library=matrix_lib)
+
+        risk_assessment_data = {
+            "folder": folder.id,
+            "perimeter": perimeter.id,
+            "risk_matrix": matrix.id,
+            "name": validated_data["risk_assessment_name"],
+        }
+        risk_asssessment_serializer = RiskAssessmentWriteSerializer(
+            data=risk_assessment_data, context=self.context
+        )
+        if not risk_asssessment_serializer.is_valid(raise_exception=True):
+            return created_objects
+        risk_assessment = risk_asssessment_serializer.save()
+        created_objects["riskassessment"] = RiskAssessmentReadSerializer(
+            risk_assessment
+        ).data
+
+        return created_objects
+
+
+class TimelineEntryWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = TimelineEntry
+        exclude = ["created_at", "updated_at"]
+
+
+class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
+    str = serializers.CharField(source="__str__", read_only=True)
+    author = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    incident = FieldsRelatedField()
+
+    class Meta:
+        model = TimelineEntry
+        exclude = ["evidences"]
+
+
+class IncidentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Incident
+        exclude = ["created_at", "updated_at"]
+
+
+class IncidentReadSerializer(IncidentWriteSerializer):
+    threats = FieldsRelatedField(many=True)
+    owners = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
+    qualifications = FieldsRelatedField(["name"], many=True)
+    severity = serializers.CharField(source="get_severity_display", read_only=True)
+    status = serializers.CharField(source="get_status_display", read_only=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Incident
+        fields = "__all__"
+
+    def get_timeline_entries(self, obj):
+        """Returns a serialized list of timeline entries related to the incident."""
+        return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data

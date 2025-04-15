@@ -9,7 +9,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalStore } from '@skeletonlabs/skeleton';
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
 

@@ -8,7 +8,7 @@
 
 	import { getCookie, setCookie } from '$lib/utils/cookies';
 	import { driverInstance } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -274,23 +274,24 @@
 	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
 </script>
 
-<aside
-	class="flex w-64 shadow transition-all duration-300 fixed h-screen overflow-visible top-0 left-0 z-20 {classesSidebarOpen(
-		open
-	)}"
->
-	<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
-		<SideBarHeader />
-		<SideBarNavigation />
-		<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
-	</nav>
-</aside>
-{#if $loading}
-	<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-[1000]">
-		<div class="flex flex-col items-center space-y-2">
-			<LoadingSpinner></LoadingSpinner>
+<div data-testid="sidebar">
+	<aside
+		class="flex w-64 shadow transition-all duration-300 fixed h-screen overflow-visible top-0 left-0 z-20 {classesSidebarOpen(
+			open
+		)}"
+	>
+		<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
+			<SideBarHeader />
+			<SideBarNavigation />
+			<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
+		</nav>
+	</aside>
+	{#if $loading}
+		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-[1000]">
+			<div class="flex flex-col items-center space-y-2">
+				<LoadingSpinner></LoadingSpinner>
+			</div>
 		</div>
-	</div>
-{/if}
-
-<SideBarToggle bind:open />
+	{/if}
+	<SideBarToggle bind:open />
+</div>
