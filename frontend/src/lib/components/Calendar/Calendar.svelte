@@ -4,6 +4,8 @@
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { showAllTasks } from '$lib/utils/stores';
+	import { writable } from 'svelte/store';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	import { m } from '$paraglide/messages';
 
@@ -14,6 +16,25 @@
 	export let year = today.getFullYear();
 	$: daysInMonth = new Date(year, month, 0).getDate();
 	$: firstDay = new Date(year, month - 1, 1).getDay();
+
+	// Store pour la gestion du panel latéral
+	export const selectedDay = writable(null);
+	export const showSidePanel = writable(false);
+
+	// Fonction pour fermer le panel
+	function closePanel() {
+		$showSidePanel = false;
+	}
+
+	// Fonction pour obtenir les items du jour sélectionné
+	$: selectedDayItems = $selectedDay
+		? filteredInfo.filter(
+				(item) =>
+					item.date.getDate() === $selectedDay.day &&
+					item.date.getMonth() + 1 === $selectedDay.month &&
+					item.date.getFullYear() === $selectedDay.year
+			)
+		: [];
 
 	const daysOfWeek = [
 		m.monday(),
@@ -72,7 +93,11 @@
 </script>
 
 <div class="flex flex-row h-full space-x-2">
-	<div class="flex flex-col rounded-lg bg-white h-full w-full p-2 space-y-3 shadow-xl">
+	<div
+		class="flex flex-col rounded-lg bg-white h-full {$showSidePanel
+			? 'w-2/3'
+			: 'w-full'} p-2 space-y-3 shadow-xl"
+	>
 		<div
 			class="flex flex-col items-center justify-center bg-gradient-to-r from-primary-500 to-secondary-400 text-white rounded-lg h-1/6 p-2 text-3xl font-semibold shadow-md"
 		>
@@ -109,7 +134,7 @@
 			{/if}
 			{#each Array.from({ length: daysInMonth }, (_, i) => i + 1) as day}
 				{#key filteredInfo}
-					<Day {day} {month} {year} info={filteredInfo} />
+					<Day {day} {month} {year} info={filteredInfo} {selectedDay} {showSidePanel} />
 				{/key}
 			{/each}
 		</div>
@@ -130,4 +155,42 @@
 			</div>
 		</div>
 	</div>
+	{#if $showSidePanel && $selectedDay}
+		<div
+			class="flex flex-col rounded-lg bg-white h-full w-1/3 p-4 space-y-3 shadow-xl"
+			in:fly={{ x: -300, duration: 300 }}
+			out:fly={{ x: -300, duration: 300 }}
+		>
+			<div class="flex justify-between items-center mb-4">
+				<h2 class="text-xl font-bold text-primary-700">
+					{$selectedDay.day}
+					{monthNames[$selectedDay.month - 1]}, {$selectedDay.year}
+				</h2>
+				<button on:click={closePanel} class="text-gray-500 hover:text-gray-700 focus:outline-none">
+					<i class="fas fa-times"></i>
+				</button>
+			</div>
+
+			<div class="overflow-y-auto flex-grow">
+				{#if selectedDayItems.length > 0}
+					<ul class="space-y-2">
+						{#each selectedDayItems as item}
+							<li class="p-3 bg-primary-50 rounded-md hover:bg-primary-100 transition duration-200">
+								<Anchor href={item.link} class="block">
+									<div class="font-medium text-primary-700">{item.label}</div>
+									{#if item.description}
+										<div class="text-sm text-gray-600 mt-1">{item.description}</div>
+									{/if}
+								</Anchor>
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<div class="text-center text-gray-500 py-8">
+						{m.noEvents()}
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
 </div>

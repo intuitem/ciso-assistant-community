@@ -1463,5 +1463,6 @@
 	"taskNode": "Occurrence de tâche",
 	"taskNodes": "Occurrences de tâches",
 	"associatedTaskNodes": "Révision des instances",
-	"showAllTasks": "Afficher toutes les tâches"
+	"showAllTasks": "Afficher toutes les tâches",
+	"noEvents": "Aucun événement pour ce jour"
 }

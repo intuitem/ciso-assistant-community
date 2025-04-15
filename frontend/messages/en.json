@@ -1463,5 +1463,6 @@
 	"impactHelpText": "Estimation of the control's impact",
 	"selectAsset": "Select an asset",
 	"lastOccurrenceStatus": "Last occurrence status",
-	"showAllTasks": "Show all tasks"
+	"showAllTasks": "Show all tasks",
+	"noEvents": "No events for this day"
 }
