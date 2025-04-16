@@ -129,8 +129,31 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
-MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
-MEDIA_URL = ""
+
+USE_S3 = os.getenv("USE_S3", "False") == "True"
+
+if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    AWS_ACCESS_KEY_ID = os.getenv("ROOT_USER", "admin")
+    AWS_SECRET_ACCESS_KEY = os.getenv("ROOT_PASSWORD", "admin123")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME", "my-django-bucket")
+    AWS_S3_ENDPOINT_URL = os.getenv("ENDPOINT", "http://localhost:9000")
+
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = True
+
+else:
+    MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
+    MEDIA_URL = ""
 
 PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 
@@ -165,6 +188,7 @@ INSTALLED_APPS = [
     "allauth.mfa",
     "huey.contrib.djhuey",
     "auditlog",
+    "storages",
 ]
 
 MIDDLEWARE = [
