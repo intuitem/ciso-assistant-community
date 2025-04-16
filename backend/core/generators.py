@@ -494,7 +494,7 @@ def gen_audit_context(id, doc, tree, lang):
     def safe_translate(lang: str, key: str) -> str:
         if key is None or key == "--":
             return "-"
-        return i18n_dict[lang][key] if key in i18n_dict[lang] else key
+        return i18n_dict[lang].get(key, key)
 
     donut_data = [
         {
