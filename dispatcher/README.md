@@ -1,46 +1,13 @@
 # CISO Assistant Dispatcher
 
-The **CISO Assistant Dispatcher** is a command-line tool that bridges event-driven messaging with a REST API to orchestrate actions based on incoming Kafka messages.
-
----
-
-## Features
-
-- **Message dispatching:** Automatically routes messages to appropriate handlers based on their `message_type`.
-- **Error handling:** Catches processing errors and publishes detailed error messages to a designated error topic.
-- **REST API integration:** Supports authentication and interaction with the CISO Assistant REST API.
-- **Dynamic configuration:** Reads configuration from a YAML file (`.dispatcher_config.yaml`) with defaults overridable via environment variables.
-- **Extensible:** A modular design using a message registry makes it easy to add new message types and functionality.
-
----
-
-## Quick start
-
-1. **Clone the repository:**
-
-   ```bash
-   git clone https://github.com/intuitem/ciso-assistant-community.git
-   cd ciso-assistant-community/dispatcher
-   ```
-
-2. **Run the sample full-stack docker compose deployment**
-
-```bash
-docker compose -f sample/fullstack-build-zk-single-kafka-single.yml up -d
-```
-
-This will start a full stack deployment with a single zookeeper and a single kafka broker. The dispatcher will be started as well.
-The kafka bootstrap server will be available at `localhost:9092` and the dispatcher will be consuming messages from the `observation` topic.
-You will also be able to access CISO Assistant through `https://localhost:8443`
+The **CISO Assistant Dispatcher** is a command-line tool that bridges event-driven messaging with the CISO Assistant API to orchestrate actions based on incoming Kafka messages.
 
 ## Prerequisites
 
 - **Python 3.8+**
-- A running Kafka cluster (e.g., [Redpanda](https://redpanda.com/))
+- A running Kafka cluster (can be any Kafka-compatible cluster, e.g. [Redpanda](https://redpanda.com/))
 - Access to the CISO Assistant REST API
 - Required Python packages (see [Installation](#installation) below)
-
----
 
 ## Installation
 
@@ -53,33 +20,48 @@ You will also be able to access CISO Assistant through `https://localhost:8443`
 
 2. **Install dependencies using `uv`:**
 
-This project uses `uv` for dependency management. If you haven't installed uv yet, follow the instructions on its [documentation](https://docs.astral.sh/uv/).
-To install the project dependencies, run:
-
-```bash
-uv sync
-```
-
-This command will install all required packages as specified in the `pyproject.toml`.
-
-3. **Set environment variables:**
-
-   You can override default settings using environment variables. For example:
+   This project uses `uv` for dependency management. If you haven't installed uv yet, follow the instructions on its [documentation](https://docs.astral.sh/uv/).
+   To install the project dependencies, run:
 
    ```bash
-   export BOOTSTRAP_SERVERS="localhost:9092"
-   export API_URL="https://your-api.domain.com"
-   export USER_EMAIL="your_email@company.org"
-   export USER_PASSWORD="your_password"
-   export ERRORS_TOPIC="errors"
-   export S3_URL="http://localhost:9000"
+   uv sync
    ```
 
----
+   This command will install all required packages as specified in the `pyproject.toml`.
+
+3. **Run the interactive configuration script:**
+
+   ```bash
+   uv run dispatcher.py init-config -i
+   ```
+
+4. Consume messages from the `observation` topic
+
+   ```bash
+   uv run dispatcher.py consume
+   ```
 
 ## Configuration
 
-The dispatcher uses a YAML configuration file (`.dispatcher_config.yaml`) to store API URL, credentials, and other settings.
+You can configure the dispatcher using environment variables, the `init-config` command, or the `.dispatcher_config` configuration file.
+
+### Environment variables reference
+
+```bash
+DEBUG=True/False # Set to true to enable debug logging
+
+API_URL=https://localhost:8443 # The URL of the CISO Assistant REST API
+USER_EMAIL=user@company.org
+USER_PASSWORD=your_password
+AUTO_RENEW_SESSION=True/False # Set to true to enable automatic token refresh, do not set if using token-based authentication
+USER_TOKEN=your_ciso_assistant_access_token # Personal Access Token, do not set if using credentials-based authentication
+VERIFY_CERTIFICATE=True/False # Set to trure to verify SSL certificates between the dispatcher and API
+BOOTSTRAP_SERVERS=localhost:9092 # The Kafka bootstrap servers, comma separated list
+ERRORS_TOPIC=errors # The Kafka topic to send errors to
+S3_URL=localhost:9000 # The URL of the S3 storage
+S3_ACCESS_KEY=your_access_key # The access key for S3 storage
+S3_SECRET_KEY=your_secret_key # The secret key for S3 storage
+```
 
 ### Initializing the config file
 
@@ -144,8 +126,6 @@ The URL of the S3 storage can be set in the configuration file or via the `S3_UR
 
 Requests to the S3 storage are authenticated using the `S3_ACCESS_KEY` and `S3_SECRET_KEY` settings as environment variables or in the configuration file.
 
----
-
 ## Usage
 
 The dispatcher is invoked via its CLI interface. Below are the available commands:
@@ -203,6 +183,10 @@ Below are some example messages that can be consumed by the dispatcher. Save the
 
 #### upload_attachment
 
+Attachments can be uploaded either as base64 encoded data or fetched from a S3 bucket.
+
+##### Using base64 encoded data
+
 ```json
 {
   "message_type": "upload_attachment",
@@ -220,10 +204,29 @@ Below are some example messages that can be consumed by the dispatcher. Save the
 }
 ```
 
-### Initialize configuration
-
-Reset or create the configuration file used by the dispatcher.
+##### Using S3
 
 ```bash
-python dispatcher.py init-config
+{
+  "message_type": "upload_attachment",
+  "selector": {
+    "name": "Sample evidence",
+    "ref_id": "bar"
+  },
+  "values": {
+    "applied_controls": {
+      "ref_id": "foo"
+    },
+    "file_s3_bucket": "my_bucket",
+    "file_s3_key": "sample.jpeg"
+  }
+}
 ```
+
+## Deployment
+
+The dispatcher can be used as a CLI tool or deployed as a service. To deploy it as a service, you can use Docker or any other containerization tool.
+
+Out of the box, we provide a Dockerfile and the `make_config.py` script to generate a docker compose file containing CISO Assistant and the dispatcher.
+
+The `make_config.py` script is accessible under `config/make_config.py`. Please refer to the readme file in the `config` directory for more information on how to use it.
