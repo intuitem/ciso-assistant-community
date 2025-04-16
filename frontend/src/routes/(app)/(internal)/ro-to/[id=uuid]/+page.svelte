@@ -43,8 +43,6 @@
 			model: model.name,
 			domain: roto.folder?.id
 		});
-
-
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -59,15 +57,14 @@
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
 			</Anchor>
 			{#if canEditObject(roto)}
-			<Anchor
-				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-				class="btn variant-filled-primary h-fit"
-			>
-				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
-				{m.edit()}
-			</Anchor>
+				<Anchor
+					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+					class="btn variant-filled-primary h-fit"
+				>
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					{m.edit()}
+				</Anchor>
 			{/if}
-
 		</div>
 		<div
 			id="activityOne"

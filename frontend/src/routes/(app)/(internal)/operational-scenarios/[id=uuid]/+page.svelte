@@ -8,7 +8,6 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-
 	export let data: PageData;
 
 	const operationalScenario = data.data;
@@ -52,8 +51,6 @@
 			model: model.name,
 			domain: operational_scenarios.folder?.id
 		});
-
-
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -84,13 +81,13 @@
 				</p>
 			</div>
 			{#if canEditObject(operationalScenario)}
-			<a
-				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-				class="btn variant-filled-primary h-fit justify-self-end"
-			>
-				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
-				{m.edit()}
-			</a>
+				<a
+					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+					class="btn variant-filled-primary h-fit justify-self-end"
+				>
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					{m.edit()}
+				</a>
 			{/if}
 		</div>
 		<div
