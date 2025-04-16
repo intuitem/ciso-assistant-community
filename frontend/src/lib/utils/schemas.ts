@@ -639,6 +639,51 @@ export const TimelineEntrySchema = z.object({
 	evidences: z.string().uuid().optional().array().optional()
 });
 
+export const TaskTemplateSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	status: z.string().default('pending'),
+	assigned_to: z.string().optional().array().optional(),
+	ref_id: z.string().optional(),
+	task_date: z
+		.string()
+		.default(() => {
+			const date = new Date();
+			const year = date.getFullYear();
+			const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+			const day = String(date.getDate()).padStart(2, '0');
+			return `${year}-${month}-${day}`;
+		})
+		.optional(),
+	is_recurrent: z.boolean().optional(),
+	enabled: z.boolean().default(true).optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
+	compliance_assessments: z.string().uuid().optional().array().optional(),
+	risk_assessments: z.string().uuid().optional().array().optional(),
+	schedule: z
+		.object({
+			interval: z.number().min(1).positive().optional(),
+			frequency: z.string().optional(),
+			weeks_of_month: z.number().min(-1).max(4).array().optional(),
+			days_of_week: z.number().min(1).max(7).array().optional(),
+			months_of_year: z.number().min(1).max(12).array().optional(),
+			end_date: z.union([z.literal('').transform(() => undefined), z.string().optional()])
+		})
+		.default({
+			interval: 1,
+			frequency: 'DAILY'
+		})
+		.optional()
+});
+
+export const TaskNodeSchema = z.object({
+	due_date: z.string().optional(),
+	status: z.string().optional(),
+	observation: z.string().optional(),
+	evidences: z.string().uuid().optional().array().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -683,7 +728,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
 	incidents: IncidentSchema,
-	'timeline-entries': TimelineEntrySchema
+	'timeline-entries': TimelineEntrySchema,
+	'task-templates': TaskTemplateSchema,
+	'task-nodes': TaskNodeSchema
 };
 
 export const modelSchema = (model: string) => {

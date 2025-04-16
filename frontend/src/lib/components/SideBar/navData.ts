@@ -130,6 +130,11 @@ export const navData = {
 					name: 'incidents',
 					fa_icon: 'fa-solid fa-bug',
 					href: '/incidents'
+				},
+				{
+					name: 'tasks',
+					fa_icon: 'fa-solid fa-note-sticky',
+					href: '/task-templates'
 				}
 			]
 		},
