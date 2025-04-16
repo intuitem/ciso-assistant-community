@@ -144,7 +144,7 @@ if USE_S3:
 
     AWS_ACCESS_KEY_ID = os.getenv("ROOT_USER", "admin")
     AWS_SECRET_ACCESS_KEY = os.getenv("ROOT_PASSWORD", "admin123")
-    AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME", "my-django-bucket")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME", "my-ciso-bucket")
     AWS_S3_ENDPOINT_URL = os.getenv("ENDPOINT", "http://localhost:9000")
 
     AWS_S3_FILE_OVERWRITE = False
