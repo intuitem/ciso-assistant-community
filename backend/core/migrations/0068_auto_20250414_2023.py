@@ -9,7 +9,11 @@ def add_missing_ug_and_ra(apps, schema_editor):
     UserGroup = apps.get_model("iam", "UserGroup")
     RoleAssignment = apps.get_model("iam", "RoleAssignment")
     Role = apps.get_model("iam", "Role")
-    root_folder = Folder.objects.get(content_type="GL")
+    root_folder = Folder.objects.filter(content_type="GL").first()
+    if not root_folder:
+        print("Skipping migration: root folder (GL) not found.")
+        return
+
     for folder in Folder.objects.filter(content_type="DO"):
         if not RoleAssignment.objects.filter(perimeter_folders=folder):
             print(f" [Repair folder {folder.name}]", end="")
