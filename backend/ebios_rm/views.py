@@ -185,9 +185,10 @@ class StakeholderViewSet(BaseModelViewSet):
 class StrategicScenarioViewSet(BaseModelViewSet):
     model = StrategicScenario
 
-    filterset_fields = [
-        "ebios_rm_study",
-    ]
+    filterset_fields = {
+        "ebios_rm_study": ["exact"],
+        "attack_paths": ["exact", "isnull"],
+    }
 
 
 class AttackPathFilter(df.FilterSet):
