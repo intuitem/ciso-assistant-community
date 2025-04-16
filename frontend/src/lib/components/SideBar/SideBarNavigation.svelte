@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { navData } from '$lib/components/SideBar/navData';
+	import { ffNav } from './ffNav';
+	import { loadFeatureFlags as ff } from '$lib/feature-flags';
 
 	import SideBarItem from '$lib/components/SideBar/SideBarItem.svelte';
 	import SideBarCategory from '$lib/components/SideBar/SideBarCategory.svelte';
