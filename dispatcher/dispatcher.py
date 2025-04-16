@@ -6,7 +6,7 @@ import requests
 import json
 import yaml
 from kafka import KafkaConsumer, KafkaProducer
-from kafka.errors import UnsupportedCodecError
+from kafka.errors import NoBrokersAvailable, UnsupportedCodecError
 
 from messages import message_registry
 import settings
@@ -84,20 +84,36 @@ def consume():
     Consume messages from the Kafka topic and process them.
     """
     logger.info("Starting consumer", bootstrap_servers=settings.BOOTSTRAP_SERVERS)
-    consumer = KafkaConsumer(
-        # topic
-        "observation",
-        # consumer configs
-        bootstrap_servers=settings.BOOTSTRAP_SERVERS,
-        group_id="my-group",
-        auto_offset_reset="earliest",
-        # value_deserializer=lambda v: v,
-    )
+    try:
+        consumer = KafkaConsumer(
+            # topic
+            "observation",
+            # consumer configs
+            bootstrap_servers=settings.BOOTSTRAP_SERVERS,
+            group_id="my-group",
+            auto_offset_reset="earliest",
+            # value_deserializer=lambda v: v,
+        )
+    except NoBrokersAvailable as e:
+        logger.error(
+            "No brokers available. Please check your Kafka configuration and make sure your broker is running",
+            bootstrap_servers=settings.BOOTSTRAP_SERVERS,
+            error=e,
+        )
+        sys.exit(1)
 
     logger.info("Starting producer", bootstrap_servers=settings.BOOTSTRAP_SERVERS)
-    error_producer = KafkaProducer(
-        bootstrap_servers=settings.BOOTSTRAP_SERVERS,
-    )
+    try:
+        error_producer = KafkaProducer(
+            bootstrap_servers=settings.BOOTSTRAP_SERVERS,
+        )
+    except NoBrokersAvailable as e:
+        logger.error(
+            "No brokers available. Please check your Kafka configuration and make sure your broker is running",
+            bootstrap_servers=settings.BOOTSTRAP_SERVERS,
+            error=e,
+        )
+        sys.exit(1)
 
     try:
         logger.info("CISO Assistant dispatcher up and running. Listening for messages.")
