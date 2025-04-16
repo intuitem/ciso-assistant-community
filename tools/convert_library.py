@@ -556,7 +556,7 @@ for tab in dataframe:
                     else:
                         p = parent_for_depth[depth]
                         c = count_for_depth[depth]
-                        urn = f"{p}:{c}"
+                        urn = f"{p}:{c}" if p else f"{root_nodes_urn}:node{c}"
                         count_for_depth[depth] += 1
                 if urn in urn_unicity_checker:
                     print("URN duplicate:", urn)

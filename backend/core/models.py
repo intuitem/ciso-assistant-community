@@ -219,6 +219,14 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         )
 
 
+class Severity(models.IntegerChoices):
+    UNDEFINED = -1, "undefined"
+    LOW = 0, "low"
+    MEDIUM = 1, "medium"
+    HIGH = 2, "high"
+    CRITICAL = 3, "critical"
+
+
 class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
@@ -944,9 +952,6 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
             "If the risk matrix is set as disabled, it will not be available for selection for new risk assessments."
         ),
     )
-    provider = models.CharField(
-        max_length=200, blank=True, null=True, verbose_name=_("Provider")
-    )
 
     @property
     def is_used(self) -> bool:
@@ -1458,13 +1463,6 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
 
 
 class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
-    class Severity(models.IntegerChoices):
-        UNDEFINED = -1, "undefined"
-        LOW = 0, "low"
-        MEDIUM = 1, "medium"
-        HIGH = 2, "high"
-        CRITICAL = 3, "critical"
-
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
@@ -1826,7 +1824,9 @@ class Asset(
         return super().save(*args, **kwargs)
 
 
-class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Evidence(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
     # TODO: Manage file upload to S3/MiniO
     attachment = models.FileField(
         #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
@@ -1888,6 +1888,131 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         return hashlib.sha256(self.attachment.read()).hexdigest()
 
 
+class Incident(NameDescriptionMixin, FolderMixin):
+    class Status(models.TextChoices):
+        NEW = "new", "New"
+        ONGOING = "ongoing", "Ongoing"
+        RESOLVED = "resolved", "Resolved"
+        CLOSED = "closed", "Closed"
+        DISMISSED = "dismissed", "Dismissed"
+
+    class Severity(models.IntegerChoices):
+        SEV1 = 1, "Critical"
+        SEV2 = 2, "Major"
+        SEV3 = 3, "Moderate"
+        SEV4 = 4, "Minor"
+        SEV5 = 5, "Low"
+        UNDEFINED = 6, "unknown"
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.NEW,
+    )
+    severity = models.PositiveSmallIntegerField(
+        choices=Severity.choices,
+        default=Severity.SEV3,
+    )
+    threats = models.ManyToManyField(
+        Threat,
+        related_name="incidents",
+        verbose_name="Threats",
+        blank=True,
+    )
+    owners = models.ManyToManyField(
+        User,
+        related_name="incidents",
+        verbose_name="Owners",
+        blank=True,
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        related_name="incidents",
+        verbose_name="Assets",
+        blank=True,
+    )
+    qualifications = models.ManyToManyField(
+        Qualification,
+        related_name="incidents",
+        verbose_name="Qualifications",
+        blank=True,
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = "Incident"
+        verbose_name_plural = "Incidents"
+
+
+class TimelineEntry(AbstractBaseModel, FolderMixin):
+    """
+    Timeline entry objects describe the evolution of an incident
+    """
+
+    class EntryType(models.TextChoices):
+        DETECTION = "detection", "Detection"
+        MITIGATION = "mitigation", "Mitigation"
+        OBSERVATION = "observation", "Observation"
+        SEVERITY_CHANGED = "severity_changed", "Severity changed"
+        STATUS_CHANGED = "status_changed", "Status changed"
+
+        @classmethod
+        def get_manual_entry_types(cls):
+            return filter(
+                lambda x: x[0] in ["detection", "mitigation", "observation"],
+                cls.choices,
+            )
+
+    incident = models.ForeignKey(
+        Incident,
+        on_delete=models.CASCADE,
+        related_name="timeline_entries",
+        verbose_name=_("Incident"),
+    )
+    entry = models.CharField(max_length=200, verbose_name="Entry", unique=False)
+    entry_type = models.CharField(
+        max_length=20,
+        choices=EntryType.choices,
+        default=EntryType.OBSERVATION,
+        verbose_name="Entry type",
+    )
+    timestamp = models.DateTimeField(
+        verbose_name="Timestamp", unique=False, default=now
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="timeline_entries",
+        verbose_name="Author",
+        null=True,
+        blank=True,
+    )
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+    evidences = models.ManyToManyField(
+        Evidence,
+        related_name="timeline_entries",
+        verbose_name="Evidence",
+        blank=True,
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    def __str__(self):
+        return f"{self.entry}"
+
+    def save(self, *args, **kwargs):
+        if self.timestamp > now():
+            raise ValidationError("Timestamp cannot be in the future.")
+        if not self.folder and self.incident:
+            self.folder = self.incident.folder
+        super().save(*args, **kwargs)
+
+
 class AppliedControl(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
@@ -1917,13 +2042,15 @@ class AppliedControl(
     CSF_FUNCTION = ReferenceControl.CSF_FUNCTION
 
     EFFORT = [
-        ("S", _("Small")),
-        ("M", _("Medium")),
-        ("L", _("Large")),
-        ("XL", _("Extra Large")),
+        ("XS", "Extra Small"),
+        ("S", "Small"),
+        ("M", "Medium"),
+        ("L", "Large"),
+        ("XL", "Extra Large"),
     ]
 
-    MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}
+    IMPACT = [(1, "Very Low"), (2, "Low"), (3, "Medium"), (4, "High"), (5, "Very High")]
+    MAP_EFFORT = {None: -1, "XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
     # todo: think about a smarter model for ranking
     reference_control = models.ForeignKey(
         ReferenceControl,
@@ -1939,6 +2066,13 @@ class AppliedControl(
         Evidence,
         blank=True,
         verbose_name=_("Evidences"),
+        related_name="applied_controls",
+    )
+
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name=_("Assets"),
         related_name="applied_controls",
     )
 
@@ -2002,6 +2136,11 @@ class AppliedControl(
         help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
         verbose_name=_("Effort"),
     )
+
+    control_impact = models.SmallIntegerField(
+        verbose_name="Impact", choices=IMPACT, null=True, blank=True
+    )
+
     cost = models.FloatField(
         null=True,
         help_text=_("Cost of the measure (using globally-chosen currency)"),
@@ -2156,15 +2295,19 @@ class Vulnerability(
         default=Status.UNDEFINED,
         verbose_name=_("Status"),
     )
-    severity = models.IntegerField(
-        default=-1,
-        verbose_name=_("Severity"),
-        help_text=_("The severity of the vulnerability"),
+    severity = models.SmallIntegerField(
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
     applied_controls = models.ManyToManyField(
         AppliedControl,
         blank=True,
         verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        blank=True,
+        verbose_name=_("Assets"),
         related_name="vulnerabilities",
     )
     security_exceptions = models.ManyToManyField(
@@ -3137,6 +3280,85 @@ class ComplianceAssessment(Assessment):
 
         return requirement_assessments_list
 
+    def get_threats_metrics(self):
+        # Check if the framework has any threats mappings
+        has_threats = RequirementNode.objects.filter(
+            framework=self.framework, threats__isnull=False
+        ).exists()
+
+        if not has_threats:
+            return {
+                "threats": [],
+                "total_unique_threats": 0,
+                "total_non_compliant": 0,
+                "total_partially_compliant": 0,
+            }
+
+        problematic_assessments = [
+            assessment
+            for assessment in self.get_requirement_assessments(
+                include_non_assessable=False
+            )
+            if assessment.result
+            in [
+                RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                RequirementAssessment.Result.NON_COMPLIANT,
+            ]
+        ]
+
+        threat_metrics = {}
+
+        # Process each problematic requirement assessment
+        for assessment in problematic_assessments:
+            threats = assessment.requirement.threats.all()
+
+            for threat in threats:
+                if threat.id not in threat_metrics:
+                    threat_metrics[threat.id] = {
+                        "id": threat.id,
+                        "name": threat.name,
+                        "display_long": threat.display_long,
+                        "urn": threat.urn,
+                        "non_compliant_count": 0,
+                        "partially_compliant_count": 0,
+                        "total_issues": 0,
+                        "requirement_assessments": [],
+                    }
+
+                if assessment.result == RequirementAssessment.Result.NON_COMPLIANT:
+                    threat_metrics[threat.id]["non_compliant_count"] += 1
+                elif (
+                    assessment.result
+                    == RequirementAssessment.Result.PARTIALLY_COMPLIANT
+                ):
+                    threat_metrics[threat.id]["partially_compliant_count"] += 1
+
+                threat_metrics[threat.id]["total_issues"] += 1
+
+                if assessment.id not in [
+                    ra.get("id")
+                    for ra in threat_metrics[threat.id]["requirement_assessments"]
+                ]:
+                    threat_metrics[threat.id]["requirement_assessments"].append(
+                        {
+                            "id": assessment.id,
+                            "requirement_id": assessment.requirement.id,
+                            "requirement_name": assessment.requirement.display_short,
+                            "result": assessment.result,
+                        }
+                    )
+
+        return {
+            "threats": list(threat_metrics.values()),
+            "total_unique_threats": len(threat_metrics),
+            "total_non_compliant": sum(
+                t["non_compliant_count"] for t in threat_metrics.values()
+            ),
+            "total_partially_compliant": sum(
+                t["partially_compliant_count"] for t in threat_metrics.values()
+            ),
+        }
+
     def get_requirements_status_count(self):
         requirements_status_count = []
         for st in RequirementAssessment.Status:
@@ -3526,6 +3748,16 @@ class ComplianceAssessment(Assessment):
         else:
             return 0
 
+    @property
+    def has_questions(self) -> bool:
+        requirement_assessments = self.get_requirement_assessments(
+            include_non_assessable=False
+        )
+        for ra in requirement_assessments:
+            if ra.requirement.question:
+                return True
+        return False
+
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
@@ -3823,10 +4055,8 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
-    severity = models.IntegerField(
-        default=-1,
-        verbose_name=_("Severity"),
-        help_text=_("The severity of the finding"),
+    severity = models.SmallIntegerField(
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
     status = models.CharField(
         verbose_name="Status",
@@ -4012,6 +4242,14 @@ auditlog.register(
 )
 auditlog.register(
     Vulnerability,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Incident,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TimelineEntry,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

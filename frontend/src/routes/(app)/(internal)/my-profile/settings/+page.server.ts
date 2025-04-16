@@ -5,7 +5,7 @@ import { activateTOTPSchema } from './mfa/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
 import { z } from 'zod';
 

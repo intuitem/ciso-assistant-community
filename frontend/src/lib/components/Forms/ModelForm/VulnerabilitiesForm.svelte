@@ -4,7 +4,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -34,17 +34,19 @@
 
 <Select
 	{form}
-	options={[
-		{ label: '--', value: -1 },
-		{ label: m.low(), value: 0 },
-		{ label: m.medium(), value: 1 },
-		{ label: m.high(), value: 2 },
-		{ label: m.critical(), value: 3 }
-	]}
+	options={model.selectOptions['severity']}
 	field="severity"
 	label={m.severity()}
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="assets"
+	optionsExtraFields={[['folder', 'str']]}
+	field="assets"
+	label={m.assets()}
 />
 <AutocompleteSelect
 	multiple

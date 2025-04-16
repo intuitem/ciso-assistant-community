@@ -3,7 +3,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import { page } from '$app/stores';
 
@@ -25,7 +25,7 @@
 	});
 </script>
 
-{#if context != 'selectAudit'}
+{#if context != 'selectAudit' && context != 'selectAsset'}
 	<TextField
 		{form}
 		field="name"
@@ -35,7 +35,7 @@
 		data-focusindex="0"
 	/>
 {/if}
-{#if context !== 'ebiosRmStudy' && context !== 'selectAudit'}
+{#if context !== 'ebiosRmStudy' && context !== 'selectAudit' && context !== 'selectAsset'}
 	<TextField
 		{form}
 		field="version"
@@ -154,7 +154,7 @@
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
-{:else}
+{:else if context === 'selectAudit'}
 	<AutocompleteSelect
 		multiple
 		{form}
@@ -163,5 +163,17 @@
 		cacheLock={cacheLocks['compliance_assessments']}
 		bind:cachedValue={formDataCache['compliance_assessments']}
 		label={m.complianceAssessment()}
+	/>
+{:else if context === 'selectAsset'}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="assets"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="assets"
+		cacheLock={cacheLocks['assets']}
+		bind:cachedValue={formDataCache['assets']}
+		label={m.assets()}
 	/>
 {/if}

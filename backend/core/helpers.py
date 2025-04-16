@@ -857,11 +857,11 @@ def build_audits_stats(user):
     )
     data = list()
     names = list()
-    uuids = dict()
+    uuids = list()
     for audit in ComplianceAssessment.objects.filter(id__in=object_ids):
         data.append([rs[0] for rs in audit.get_requirements_result_count()])
         names.append(audit.name)
-        uuids[audit.name] = audit.id
+        uuids.append(audit.id)
     return {"data": data, "names": names, "uuids": uuids}
 
 

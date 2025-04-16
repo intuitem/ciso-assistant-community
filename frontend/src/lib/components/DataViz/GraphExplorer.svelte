@@ -11,6 +11,17 @@
 	export let initLayout = 'circular';
 	export let edgeLength = 50;
 	export let name = 'graph';
+	export let color = [
+		'#5470c6',
+		'#91cc75',
+		'#fac858',
+		'#ee6666',
+		'#73c0de',
+		'#3ba272',
+		'#fc8452',
+		'#9a60b4',
+		'#ea7ccc'
+	];
 
 	let searchQuery = '';
 	let chart: echarts.ECharts;
@@ -19,8 +30,15 @@
 	let resizeTimeout: ReturnType<typeof setTimeout>;
 
 	// Add custom formatter for tooltip to show custom edge label format
+	// Rename to reflect that it now handles both edges and nodes
 	const getCustomEdgeFormatter = () => {
 		return (params) => {
+			// Truncate function - truncates text to maxLength and adds ellipsis
+			const truncate = (text, maxLength = 25) => {
+				if (text.length <= maxLength) return text;
+				return text.substring(0, maxLength) + '...';
+			};
+
 			if (params.dataType === 'edge') {
 				// Find source and target node names
 				const sourceNode = data.nodes.find(
@@ -30,13 +48,26 @@
 					(node) => node.id === params.data.target || node.name === params.data.target
 				);
 
-				const sourceLabel = sourceNode ? sourceNode.name : 'unknown';
-				const targetLabel = targetNode ? targetNode.name : 'unknown';
+				// Get labels with fallback to 'unknown'
+				let sourceLabel = sourceNode ? sourceNode.name : 'unknown';
+				let targetLabel = targetNode ? targetNode.name : 'unknown';
 				const value = params.data.value || '';
+
+				// Apply truncation
+				sourceLabel = truncate(sourceLabel);
+				targetLabel = truncate(targetLabel);
 
 				// Return formatted label with src and tgt in bold, value in italic
 				return `<b>${sourceLabel}</b> - <i>${value}</i> - <b>${targetLabel}</b>`;
+			} else if (params.dataType === 'node') {
+				// For nodes, truncate the name
+				const nodeName = params.name || params.data.name || 'unnamed';
+				const truncatedName = truncate(nodeName);
+
+				// You can add additional node properties here if needed
+				return `<b>${truncatedName}</b>`;
 			}
+
 			return params.name;
 		};
 	};
@@ -71,6 +102,7 @@
 			top: '30',
 			left: 'right'
 		},
+		color: color,
 		series: [
 			{
 				type: 'graph',
