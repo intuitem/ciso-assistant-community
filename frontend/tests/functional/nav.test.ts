@@ -26,7 +26,12 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 						await expect(logedPage.modalTitle).not.toBeVisible();
 						continue;
 					}
-					await expect(page).toHaveURL(item.href);
+					if (item.href === '/calendar') {
+						const currentDate = new Date();
+						const year = currentDate.getFullYear();
+						const month = currentDate.getMonth() + 1;
+						await expect(page).toHaveURL(`/calendar/${year}/${month}`);
+					} else await expect(page).toHaveURL(item.href);
 					await logedPage.hasTitle(safeTranslate(item.name));
 					//await logedPage.hasBreadcrumbPath([safeTranslate(item.name)]); //TODO: fix me
 				}
@@ -115,4 +120,14 @@ testV2('sidebar component tests', async ({ loginPage }) => {
 		await sidebar.doToggle();
 		await sidebar.checkIsClosed(expectV2);
 	});
+});
+
+test('redirect to the right page after login', async ({ loginPage, page }) => {
+	await page.goto('/login?next=/calendar');
+	await loginPage.hasUrl(1);
+	await loginPage.login();
+	const currentDate = new Date();
+	const year = currentDate.getFullYear();
+	const month = currentDate.getMonth() + 1;
+	await expect(page).toHaveURL(`/calendar/${year}/${month}`);
 });

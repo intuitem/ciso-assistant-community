@@ -905,6 +905,6 @@
 	"cannotDeleteAutoTimeline": "Nie można usunąć automatycznych wpisów osi czasu",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "Znacznik czasu nie może być w przyszłości",
-	"youCanSetPAsswordHere": "Możesz ustawić swoje hasło tutaj.",
+	"youCanSetPasswordHere": "Możesz ustawić swoje hasło tutaj.",
 	"filterby": "Filtruj według"
 }

@@ -964,6 +964,29 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'entry_type' }],
 		reverseForeignKeyFields: [{ field: 'timeline_entries', urlModel: 'evidences' }]
+	},
+	'task-templates': {
+		name: 'tasktemplate',
+		localName: 'taskTemplate',
+		localNamePlural: 'taskTemplates',
+		verboseName: 'Task template',
+		verboseNamePlural: 'Task templates',
+		reverseForeignKeyFields: [
+			{ field: 'task_template', urlModel: 'task-nodes', disableAddDeleteButtons: true }
+		]
+	},
+	'task-nodes': {
+		name: 'tasknode',
+		localName: 'taskNode',
+		localNamePlural: 'taskNodes',
+		verboseName: 'Task node',
+		verboseNamePlural: 'Task nodes',
+		selectFields: [{ field: 'status' }],
+		foreignKeyFields: [
+			{ field: 'task_template', urlModel: 'task-templates' },
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'folder', urlModel: 'folders' }
+		]
 	}
 };
 
