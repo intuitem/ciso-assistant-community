@@ -58,6 +58,12 @@ backend:
   # -- The number of backend pods to run
   replicas: 1
 
+  # -- Backend deployment annotations
+  annotations: {}
+
+  # -- Backend pod annotations
+  podAnnotations: {}
+
   ## Backend specific config
   config:
     # -- Admin email for initial configuration
@@ -198,6 +204,12 @@ frontend:
 
   # -- The number of frontend pods to run
   replicas: 1
+
+  # -- Frontend deployment annotations
+  annotations: {}
+
+  # -- Frontend pod annotations
+  podAnnotations: {}
 
   ## Frontend specific config
   config:
