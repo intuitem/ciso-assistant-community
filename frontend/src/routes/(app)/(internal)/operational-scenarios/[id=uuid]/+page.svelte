@@ -6,6 +6,8 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { canPerformAction } from '$lib/utils/access-control';
+
 
 	export let data: PageData;
 
@@ -39,6 +41,19 @@
 		target: 'popupRiskLevel',
 		placement: 'bottom'
 	};
+
+	const user = $page.data.user;
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	const model = URL_MODEL_MAP['operational-scenarios'];
+	const canEditObject = (operational_scenarios): boolean =>
+		canPerformAction({
+			user,
+			action: 'change',
+			model: model.name,
+			domain: operational_scenarios.folder?.id
+		});
+
+
 </script>
 
 <div class="card p-4 bg-white shadow-lg">
@@ -68,6 +83,7 @@
 					{/if}
 				</p>
 			</div>
+			{#if canEditObject(operationalScenario)}
 			<a
 				href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
 				class="btn variant-filled-primary h-fit justify-self-end"
@@ -75,6 +91,7 @@
 				<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
 				{m.edit()}
 			</a>
+			{/if}
 		</div>
 		<div
 			id="activityOne"
