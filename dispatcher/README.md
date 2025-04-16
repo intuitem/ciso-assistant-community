@@ -81,38 +81,68 @@ This command will install all required packages as specified in the `pyproject.t
 
 The dispatcher uses a YAML configuration file (`.dispatcher_config.yaml`) to store API URL, credentials, and other settings.
 
-- **Initializing the config file:**
+### Initializing the config file
 
-  Run the `init_config` command to create or reset the configuration file:
+Run the `init-config` command to create or reset the configuration file:
 
-  ```bash
-  python dispatcher.py init-config
-  ```
+```bash
+python dispatcher.py init-config
+```
 
-  This command creates a file with the following structure:
+You can add the `-i` flag for an interactive mode, which will prompt you for the necessary information.
 
-  ```yaml
-  rest:
-    url: "https://localhost:8443"
-    verify_certificate: True
-  credentials:
-    email: "user@company.org"
-    password: ""
-  ```
+This command creates a file with the following structure:
 
-  Update this file with your actual REST API credentials.
+```yaml
+rest:
+  url: "https://localhost:8443"
+  verify_certificate: True
+credentials:
+  email: "user@company.org"
+  password: ""
+```
 
-- **Authentication:**
+Update this file with your actual REST API credentials.
 
-  Use the `auth` command to authenticate with the REST API and store a temporary token:
+### Authentication
 
-  ```bash
-  python dispatcher.py auth --email your_email@company.org --password your_password
-  ```
+Use the `auth` command to authenticate with the REST API.
+There are currently two modes of authentication supported by the dispatcher:
 
-  If you have specified the credentials in the configuration file, you can skip the `--email` and `--password` arguments.
+- Token-based authentication
+- Credentials-based authentication
 
-  The authentication token will be saved in a temporary file (`.tmp.yaml`).
+#### Token-based authentication
+
+This is done using a Personal Access Token (PAT) that you can generate in CISO Assistant.
+To use token-based authentication, you need to set the `USER_TOKEN` environment variable or specify it in the configuration file or during interactive configuration definition using the `init-config` with the `-i` flag enabled.
+
+#### Credentials-based authentication
+
+This is done using your email and password. You can specify these credentials in the configuration file or pass them as command-line arguments to the `auth` command.
+
+```bash
+python dispatcher.py auth --email your_email@company.org --password your_password
+```
+
+If you have specified the credentials in the configuration file, or in the `USER_EMAIL` and `USER_PASSWORD` environment variables, you can skip the `--email` and `--password` arguments.
+
+> [!WARNING]
+> Multi-factor authentication is not yet supported in the dispatcher. Accounts with MFA enabled will not be able to authenticate using the dispatcher.
+
+#### Automatic token refresh
+
+Using credentials-based authentication, it is possible to enable silent re-authentication on token expiration. You can do so using the `auto_renew_session` setting. As usual, it can be set either as environment variable or in the configuration file.
+
+The authentication token will be saved in a temporary file (`.tmp.yaml`).
+
+### S3 storage configuration
+
+The URL of the S3 storage can be set in the configuration file or via the `S3_URL` environment variable. The dispatcher will use this URL to upload files when processing messages.
+
+#### Authenticate requests to the S3 storage
+
+Requests to the S3 storage are authenticated using the `S3_ACCESS_KEY` and `S3_SECRET_KEY` settings as environment variables or in the configuration file.
 
 ---
 
