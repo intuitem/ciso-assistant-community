@@ -1,30 +1,25 @@
-from time import sleep
 import uuid
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.image import DockerImage
 from testcontainers.core.waiting_utils import wait_for_logs
-from testcontainers.kafka import RedpandaContainer
+from testcontainers.kafka import KafkaContainer
 from pathlib import Path
+from click.testing import CliRunner
 
 import pytest
+
+import dispatcher as ds
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 BACKEND_DIR = BASE_DIR.parent / "backend"
 
-# @pytest.fixture(scope="session")
-# def redpanda():
-#     with RedpandaContainer() as redpanda:
-#         connection = redpanda.get_bootstrap_server()
-#         print(f"Redpanda running at {connection}")
-#         yield redpanda
-#
-#
-# @pytest.fixture(scope="session")
-# def dispatcher():
-#     with DockerImage(path=BASE_DIR) as image:
-#         with DockerContainer(image=str(image)) as container:
-#             wait_for_logs(container, "Starting consumer")
-#             yield container
+
+@pytest.fixture(scope="session")
+def kafka():
+    with KafkaContainer() as kafka:
+        connection = kafka.get_bootstrap_server()
+        print(f"Kafka running at {connection}")
+        yield kafka
 
 
 @pytest.fixture(scope="session")
@@ -44,8 +39,32 @@ def api():
             )
             .with_exposed_ports(8000) as container
         ):
-            for i in range(10):
-                sleep(1)
-                logs = container.get_logs()
-                print(logs[0].decode())
+            wait_for_logs(container, "Booting worker with pid")
             yield container
+
+
+@pytest.fixture(scope="session")
+def dispatcher():
+    """Fixture to provide a CLI runner for testing."""
+    return CliRunner(mix_stderr=False)
+
+
+def test_api_is_running(api: DockerContainer):
+    # assert api.get_exposed_port(8000) == 8000
+    assert "No migrations to apply" in api.get_logs()[0].decode()
+    assert api.get_exposed_port(8000)
+
+
+def test_kafka_is_running(kafka: KafkaContainer):
+    assert kafka.get_bootstrap_server() is not None
+    assert kafka.get_exposed_port(9092), (
+        f"Kafka is not running on port 9092, but on {kafka.ports}"
+    )
+
+
+def test_dispatcher_is_running(
+    dispatcher: CliRunner,
+):
+    result = dispatcher.invoke(ds.auth, ["--help"])
+    assert result.exit_code == 0
+    assert "Usage:" in result.output
