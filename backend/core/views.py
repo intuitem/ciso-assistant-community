@@ -3966,6 +3966,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        ordering = request.query_params.get("ordering", "")
+        ordering_fields = [field.strip() for field in ordering.split(",") if field]
+
+        if any(field.lstrip("-") == "progress" for field in ordering_fields):
+            reverse = ordering_fields[0].startswith("-")  # use only first 'progress'
+            results = sorted(
+                response.data["results"],  # assumes paginated response
+                key=lambda x: x.get("progress", 0),
+                reverse=reverse,
+            )
+            response.data["results"] = results
+
+        return response
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
