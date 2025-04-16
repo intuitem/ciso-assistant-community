@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 4 }}
+  {{- with .Values.backend.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.backend.replicas }}
   selector:
@@ -14,6 +18,9 @@ spec:
     metadata:
       annotations:
         checksum/secret-backend: {{ include (print $.Template.BasePath "/backend/secret.yaml") . | sha256sum }}
+        {{- with .Values.backend.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 8 }}
     spec:
