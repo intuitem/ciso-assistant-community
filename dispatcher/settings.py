@@ -43,11 +43,10 @@ def load_env_config():
             "verify_certificate": os.getenv("VERIFY_CERTIFICATE") == "True" or None,
         },
         "credentials": {
+            "token": os.getenv("USER_TOKEN"),
             "email": os.getenv("USER_EMAIL"),
             "password": os.getenv("USER_PASSWORD"),
         },
-        "global_folder_id": os.getenv("GLOBAL_FOLDER_ID"),
-        "token": os.getenv("TOKEN"),
         "auto_renew_session": os.getenv("AUTO_RENEW_SESSION") == "True" or None,
         "bootstrap_servers": os.getenv("BOOTSTRAP_SERVERS"),
         "errors_topic": os.getenv("ERRORS_TOPIC"),
@@ -149,7 +148,9 @@ def init_config(y, interactive):
 
         else:
             access_token = click.prompt(
-                "Enter access token", hide_input=True, default=os.getenv("TOKEN", "")
+                "Enter access token",
+                hide_input=True,
+                default=os.getenv("USER_TOKEN", ""),
             )
 
         bootstrap_servers = click.prompt(
@@ -180,10 +181,10 @@ def init_config(y, interactive):
                 "verify_certificate": verify_certificate,
             },
             "credentials": {
+                "token": access_token,
                 "email": user_email,
                 "password": user_password,
             },
-            "token": access_token,
             "auto_renew_session": auto_renew_session,
             "bootstrap_servers": bootstrap_servers,
             "errors_topic": errors_topic,
@@ -241,10 +242,12 @@ S3_ACCESS_KEY = config.get("s3_access_key", "")
 S3_SECRET_KEY = config.get("s3_secret_key", "")
 
 
-def get_access_token(token_file=".tmp.yaml", token_env=os.getenv("TOKEN")):
+def get_access_token(
+    token_file=".tmp.yaml", user_token=config["credentials"].get("token")
+):
     """Retrieve the access token from environment or a temporary YAML file."""
-    if token_env:
-        return token_env
+    if user_token:
+        return user_token
 
     token_path = Path(token_file)
     if token_path.exists():
