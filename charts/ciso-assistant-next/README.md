@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.3.5](https://img.shields.io/badge/Version-0.3.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.3.6](https://img.shields.io/badge/AppVersion-v2.3.6-informational?style=flat-square)
+![Version: 0.3.6](https://img.shields.io/badge/Version-0.3.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v2.3.9](https://img.shields.io/badge/AppVersion-v2.3.9-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -14,7 +14,7 @@ A Helm chart for CISO Assistant k8s's deployment
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/bitnamicharts | postgresql | 16.6.0 |
+| oci://registry-1.docker.io/bitnamicharts | postgresql | 16.6.3 |
 
 ## Installing the chart
 
@@ -41,12 +41,12 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.config.djangoSecretKey | string | `"changeme"` | Set Django secret key |
 | backend.config.emailAdmin | string | `"admin@example.net"` | Admin email for initial configuration |
 | backend.config.smtp.defaultFrom | string | `"no-reply@ciso-assistant.net"` | Default from email address |
-| backend.config.smtp.existingSecret | string | `""` | Name of an existing secret resource containing the primary SMTP password in a 'email-primary-password' key |
-| backend.config.smtp.primary.host | string | `"primary.cool-mailer.net"` | Primary SMTP hostname |
-| backend.config.smtp.primary.password | string | `"primary_password_here"` | Primary SMTP password |
-| backend.config.smtp.primary.port | int | `587` | Primary SMTP post |
-| backend.config.smtp.primary.useTls | bool | `true` | Enable TLS for primary SMTP |
-| backend.config.smtp.primary.username | string | `"apikey"` | Primary SMTP username |
+| backend.config.smtp.existingSecret | string | `""` | Name of an existing secret resource containing the SMTP password in a 'email-primary-password' key |
+| backend.config.smtp.host | string | `"smtp.server.local"` | SMTP hostname |
+| backend.config.smtp.password | string | `""` | SMTP password |
+| backend.config.smtp.port | int | `25` | SMTP post |
+| backend.config.smtp.useTls | bool | `false` | Enable TLS for SMTP |
+| backend.config.smtp.username | string | `""` | SMTP username |
 | backend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | backend.env | list | `[]` | Environment variables to pass to backend |
 | backend.huey.env | list | `[]` | Environment variables to pass to Huey |
@@ -59,12 +59,12 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | backend.imagePullSecrets | list | `[]` (defaults to global.imagePullSecrets) | Secrets with credentials to pull images from a private registry |
 | backend.name | string | `"backend"` | Backend container name |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
-| backend.persistence.localStorage.enabled | bool | `true` | Enable Local Storage persistence |
+| backend.persistence.localStorage.enabled | bool | `false` | Enable Local Storage persistence |
 | backend.persistence.localStorage.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC |
 | backend.persistence.localStorage.size | string | `"5Gi"` | Local Storage persistant volume size |
 | backend.persistence.localStorage.storageClass | string | `""` | Local Storage persistant volume storageClass |
 | backend.persistence.sqlite.accessMode | string | `"ReadWriteOnce"` | SQLite persistant volume accessMode |
-| backend.persistence.sqlite.enabled | bool | `true` | Enable SQLite persistence (for backend and/or Huey) # Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite` |
+| backend.persistence.sqlite.enabled | bool | `false` | Enable SQLite persistence (for backend and/or Huey) # Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite` |
 | backend.persistence.sqlite.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for sqlite |
 | backend.persistence.sqlite.size | string | `"5Gi"` | SQLite persistant volume size |
 | backend.persistence.sqlite.storageClass | string | `""` | SQLite persistant volume storageClass |
@@ -109,7 +109,7 @@ helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-a
 | global.tls | bool | `false` | Globally enable TLS (URLs, etc.) |
 | global.tolerations | list | `[]` | Default tolerations for all components |
 | ingress.annotations | object | `{}` | Additional ingress annotations |
-| ingress.enabled | bool | `true` | Enable an ingress resource for the CISO Assistant |
+| ingress.enabled | bool | `false` | Enable an ingress resource for the CISO Assistant |
 | ingress.ingressClassName | string | `""` | Defines which ingress controller will implement the resource |
 | ingress.labels | object | `{}` | Additional ingress labels |
 | ingress.path | string | `"/"` | The path to CISO Assistant |
