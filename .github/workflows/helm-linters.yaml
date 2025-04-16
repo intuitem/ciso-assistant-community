@@ -1,0 +1,53 @@
+name: Helm Linters
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+    paths:
+      - "charts/ciso-assistant-next/**"
+  workflow_dispatch:
+
+jobs:
+  helm-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: "latest"
+
+      - name: Lint Helm Chart
+        run: |
+          cd charts
+          helm lint ciso-assistant-next
+
+  helm-check-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Helm Dependencies lock
+        run: |
+          helm dependency build charts/ciso-assistant-next
+
+  helm-check-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check values schema json
+        uses: losisin/helm-values-schema-json-action@v1
+        with:
+          working-directory: charts/ciso-assistant-next
+          input: values.yaml
+          fail-on-diff: true
+
+  helm-check-helm-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate helm-docs
+        uses: losisin/helm-docs-github-action@v1
+        with:
+          chart-search-root: charts/ciso-assistant-next
+          fail-on-diff: true

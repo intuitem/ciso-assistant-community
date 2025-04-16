@@ -67,19 +67,18 @@ backend:
     smtp:
       # -- Default from email address
       defaultFrom: no-reply@ciso-assistant.net
-      # -- Name of an existing secret resource containing the primary SMTP password in a 'email-primary-password' key
+      # -- Name of an existing secret resource containing the SMTP password in a 'email-primary-password' key
       existingSecret: ""
-      primary:
-        # -- Primary SMTP hostname
-        host: primary.cool-mailer.net
-        # -- Primary SMTP post
-        port: 587
-        # -- Enable TLS for primary SMTP
-        useTls: true
-        # -- Primary SMTP username
-        username: apikey
-        # -- Primary SMTP password
-        password: "primary_password_here"
+      # -- SMTP hostname
+      host: smtp.server.local
+      # -- SMTP post
+      port: 25
+      # -- Enable TLS for SMTP
+      useTls: false
+      # -- SMTP username
+      username: ""
+      # -- SMTP password
+      password: ""
 
     # -- Set the database type (sqlite, pgsql or externalPgsql)
     ## Note : PostgreSQL database configuration at `postgresql` or `externalPgsql` section
@@ -115,7 +114,7 @@ backend:
     sqlite:
       # -- Enable SQLite persistence (for backend and/or Huey)
       ## Note: Needed for Huey, also when `backend.config.databaseType` is not set to `sqlite`
-      enabled: true
+      enabled: false
       # -- SQLite persistant volume size
       size: 5Gi
       # -- SQLite persistant volume storageClass
@@ -126,7 +125,7 @@ backend:
       existingClaim: ""
     localStorage:
       # -- Enable Local Storage persistence
-      enabled: true
+      enabled: false
       # -- Local Storage persistant volume size
       size: 5Gi
       # -- Local Storage persistant volume storageClass
@@ -265,7 +264,7 @@ frontend:
 # Note: host value is inherited from global.domain
 ingress:
   # -- Enable an ingress resource for the CISO Assistant
-  enabled: true
+  enabled: false
   # -- Additional ingress labels
   labels: {}
   # -- Additional ingress annotations
