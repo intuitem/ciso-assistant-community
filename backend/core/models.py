@@ -2202,7 +2202,6 @@ class AppliedControl(
         reqs = 0  # compliance requirements
         scenarios = 0  # risk scenarios
         sh_actions = 0  # stakeholder tprm actions
-
         reqs = RequirementNode.objects.filter(
             requirementassessment__applied_controls=self
         ).count()
@@ -4137,6 +4136,206 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
+
+
+# tasks management
+class TaskTemplateManager(models.Manager):
+    def create_task_template(self, **kwargs):
+        return super().create(**kwargs)
+
+
+class TaskTemplate(NameDescriptionMixin, FolderMixin):
+    objects = TaskTemplateManager()
+
+    SCHEDULE_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Schedule Definition",
+        "type": "object",
+        "properties": {
+            "interval": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Number of periods to wait before repeating (e.g., every 2 days, 3 weeks).",
+            },
+            "frequency": {
+                "type": "string",
+                "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+            },
+            "days_of_week": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 7},
+                "description": "Optional. Days of the week (Monday=1, Sunday=7)",
+            },
+            "weeks_of_month": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": -1,
+                    "maximum": 4,
+                },
+                "description": "Optional. for a given weekday, which one in the month (1 for first, -1 for last)",
+            },
+            "months_of_year": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 12},
+                "description": "Optional. Months of the year (1=January, 12=December)",
+            },
+            "end_date": {
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Optional. Date when recurrence ends.",
+            },
+            "occurrences": {
+                "type": ["integer", "null"],
+                "minimum": 1,
+                "description": "Optional. Number of occurrences before recurrence stops.",
+            },
+            "overdue_behavior": {
+                "type": "string",
+                "enum": ["DELAY_NEXT", "NO_IMPACT"],
+                "default": "NO_IMPACT",
+                "description": "Optional. Behavior when tasks become overdue.",
+            },
+            "exceptions": {
+                "type": ["object", "null"],
+                "description": "Optional. JSON object for future exceptions handling.",
+            },
+        },
+        "required": ["interval", "frequency"],
+        "additionalProperties": False,
+    }
+
+    task_date = models.DateField(null=True, blank=True, verbose_name="Date")
+
+    is_recurrent = models.BooleanField(default=False)
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="reference id"
+    )
+
+    schedule = models.JSONField(
+        verbose_name="Schedule definition",
+        blank=True,
+        null=True,
+        validators=[JSONSchemaInstanceValidator(SCHEDULE_JSONSCHEMA)],
+    )
+    enabled = models.BooleanField(default=True)
+
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name="Related assets",
+        blank=True,
+        help_text="Assets related to the task",
+        related_name="task_templates",
+    )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name="Applied controls",
+        blank=True,
+        help_text="Applied controls related to the task",
+        related_name="task_templates",
+    )
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        verbose_name="Compliance assessments",
+        blank=True,
+        help_text="Compliance assessments related to the task",
+        related_name="task_templates",
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        verbose_name="Risk assessments",
+        blank=True,
+        help_text="Risk assessments related to the task",
+        related_name="task_templates",
+    )
+
+    @property
+    def next_occurrence(self):
+        today = datetime.today().date()
+        task_nodes = TaskNode.objects.filter(
+            task_template=self, due_date__gte=today
+        ).order_by("due_date")
+        return task_nodes.first().due_date if task_nodes.exists() else None
+
+    @property
+    def last_occurrence_status(self):
+        today = datetime.today().date()
+        task_nodes = TaskNode.objects.filter(
+            task_template=self, due_date__lte=today
+        ).order_by("-due_date")
+        if self.is_recurrent:
+            return task_nodes[1].status if task_nodes.exists() else None
+        else:
+            return (
+                TaskNode.objects.get(task_template=self).status
+                if TaskNode.objects.filter(task_template=self).exists()
+                else None
+            )
+
+    class Meta:
+        verbose_name = "Task template"
+        verbose_name_plural = "Task templates"
+
+    def save(self, *args, **kwargs):
+        if self.schedule and "days_of_week" in self.schedule:
+            # Only modify values that are not already in range 0-6
+            self.schedule["days_of_week"] = [
+                day % 7 if day > 6 else day for day in self.schedule["days_of_week"]
+            ]
+
+        # Check if there are any TaskNode instances that are not within the date range
+        if self.schedule and "end_date" in self.schedule:
+            end_date = self.schedule["end_date"]
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+            # Delete TaskNode instances that have a due date after the end date
+            TaskNode.objects.filter(task_template=self, due_date__gt=end_date).delete()
+        super().save(*args, **kwargs)
+
+
+class TaskNode(AbstractBaseModel, FolderMixin):
+    TASK_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+
+    status = models.CharField(
+        max_length=50, default="pending", choices=TASK_STATUS_CHOICES
+    )
+
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+    task_template = models.ForeignKey(
+        "TaskTemplate",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        help_text="Evidences related to the task",
+        related_name="task_nodes",
+    )
+
+    to_delete = models.BooleanField(default=False)
+
+    @property
+    def assigned_to(self):
+        return self.task_template.assigned_to
+
+    class Meta:
+        verbose_name = "Task node"
+        verbose_name_plural = "Task nodes"
 
 
 common_exclude = ["created_at", "updated_at"]
