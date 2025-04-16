@@ -2188,6 +2188,27 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+class UserGroupOrderingFilter(filters.OrderingFilter):
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+
+        # Replace 'localization_dict' with 'folder'
+        mapped_ordering = []
+        for field in ordering:
+            if field.lstrip("-") == "localization_dict":
+                is_desc = field.startswith("-")
+                mapped_field = "folder"
+                if is_desc:
+                    mapped_field = "-" + mapped_field
+                mapped_ordering.append(mapped_field)
+            else:
+                mapped_ordering.append(field)
+
+        return mapped_ordering
+
+
 class UserGroupViewSet(BaseModelViewSet):
     """
     API endpoint that allows user groups to be viewed or edited
@@ -2195,7 +2216,9 @@ class UserGroupViewSet(BaseModelViewSet):
 
     model = UserGroup
     ordering = ["builtin", "name"]
+    ordering_fields = ["localization_dict"]
     filterset_fields = ["folder"]
+    filter_backends = [UserGroupOrderingFilter]
 
 
 class RoleViewSet(BaseModelViewSet):
