@@ -89,8 +89,16 @@ def process_selector(
             raise Exception(
                 error_message,
             )
+        if "id" not in results_list[0]:
+            logger.error("Result missing 'id' field", result=results_list[0])
+            raise Exception("API result is missing required 'id' field")
         return results_list[0].get("id")
     elif target == "multiple":
+        # Check if any result is missing an id field
+        missing_ids = [i for i, item in enumerate(results_list) if "id" not in item]
+        if missing_ids:
+            logger.error(f"Results at indices {missing_ids} missing 'id' field")
+            raise Exception("Some API results are missing required 'id' field")
         return [item.get("id") for item in results_list]
     else:
         raise Exception(f"Unknown target specified in selector: {target}")
