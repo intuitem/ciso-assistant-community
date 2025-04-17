@@ -28,7 +28,7 @@ services:
       # Tells Seastar (the framework Redpanda uses under the hood) to use 1 core on the system.
       - --smp 1
       - --default-log-level=info
-    image: docker.redpanda.com/redpandadata/redpanda:v24.3.9
+    image: docker.redpanda.com/redpandadata/redpanda:v25.1.1
     container_name: redpanda-0
     volumes:
       - redpanda-0:/var/lib/redpanda/data
@@ -41,7 +41,7 @@ services:
       - 19644:9644
   console:
     container_name: redpanda-console
-    image: docker.redpanda.com/redpandadata/console:v2.8.5
+    image: docker.redpanda.com/redpandadata/console:v3.0.0
     networks:
       - redpanda_network
     entrypoint: /bin/sh
@@ -51,9 +51,9 @@ services:
       CONSOLE_CONFIG_FILE: |
         kafka:
           brokers: ["redpanda-0:9092"]
-          schemaRegistry:
-            enabled: true
-            urls: ["http://redpanda-0:8081"]
+        schemaRegistry:
+          enabled: true
+          urls: ["http://redpanda-0:8081"]
         redpanda:
           adminApi:
             enabled: true
