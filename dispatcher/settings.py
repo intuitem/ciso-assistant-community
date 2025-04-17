@@ -47,6 +47,12 @@ def load_env_config():
             "email": os.getenv("USER_EMAIL"),
             "password": os.getenv("USER_PASSWORD"),
         },
+        "kafka": {
+            "use_auth": os.getenv("KAFKA_USE_AUTH") == "True" or None,
+            "sasl_mechanism": os.getenv("KAFKA_SASL_MECHANISM"),
+            "sasl_plain_username": os.getenv("KAFKA_USERNAME"),
+            "sasl_plain_password": os.getenv("KAFKA_PASSWORD"),
+        },
         "auto_renew_session": os.getenv("AUTO_RENEW_SESSION") == "True" or None,
         "bootstrap_servers": os.getenv("BOOTSTRAP_SERVERS"),
         "errors_topic": os.getenv("ERRORS_TOPIC"),
@@ -157,6 +163,21 @@ def init_config(y, interactive):
             "Enter the URLs of the Kafka brokers (comma-separated), e.g., 'localhost:9092'",
             default=os.getenv("BOOTSTRAP_SERVERS", "localhost:9092"),
         )
+        kafka_use_auth = click.confirm(
+            "Does your Kafka broker require authentication?", default=True
+        )
+        kafka_sasl_mechanism = "PLAIN"  # OAUTHBEARER will be available in the future
+        kafka_username = None
+        kafka_password = None
+        match kafka_sasl_mechanism:
+            case "PLAIN":
+                kafka_username = click.prompt(
+                    "Enter your Kafka username",
+                )
+                kafka_password = click.prompt(
+                    "Enter your Kafka password",
+                    hide_input=True,
+                )
         errors_topic = click.prompt(
             "Enter the topic name for error messages (e.g., 'errors')",
             default=os.getenv("ERRORS_TOPIC", "errors"),
@@ -184,6 +205,12 @@ def init_config(y, interactive):
                 "token": access_token,
                 "email": user_email,
                 "password": user_password,
+            },
+            "kafka": {
+                "use_auth": kafka_use_auth,
+                "sasl_mechanism": kafka_sasl_mechanism,
+                "sasl_plain_username": kafka_username,
+                "sasl_plain_password": kafka_password,
             },
             "auto_renew_session": auto_renew_session,
             "bootstrap_servers": bootstrap_servers,
@@ -236,6 +263,10 @@ USER_EMAIL = config["credentials"].get("email", "user@company.org")
 USER_PASSWORD = config["credentials"].get("password", "")
 AUTO_RENEW_SESSION = config.get("auto_renew_session", False)
 BOOTSTRAP_SERVERS = config.get("bootstrap_servers", "localhost:9092")
+KAFKA_USE_AUTH = config.get("kafka", {}).get("use_auth", False)
+KAFKA_SASL_MECHANISM = config.get("kafka", {}).get("sasl_mechanism", "PLAIN")
+KAFKA_USERNAME = config.get("kafka", {}).get("sasl_plain_username", "")
+KAFKA_PASSWORD = config.get("kafka", {}).get("sasl_plain_password", "")
 ERRORS_TOPIC = config.get("errors_topic", "errors")
 S3_URL = config.get("s3_url", "http://localhost:9000")
 S3_ACCESS_KEY = config.get("s3_access_key", "")

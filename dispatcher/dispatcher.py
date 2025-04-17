@@ -16,6 +16,8 @@ import utils.api as api
 
 from loguru import logger
 
+from utils.kafka import build_kafka_config
+
 
 log_message_format = (
     "<green>{time}</green> | <level>{level}</level> | <level>{message}</level>"
@@ -83,15 +85,16 @@ def consume():
     """
     Consume messages from the Kafka topic and process them.
     """
+    kafka_cfg = build_kafka_config()
     logger.info("Starting consumer", bootstrap_servers=settings.BOOTSTRAP_SERVERS)
     try:
         consumer = KafkaConsumer(
             # topic
             "observation",
             # consumer configs
-            bootstrap_servers=settings.BOOTSTRAP_SERVERS,
             group_id="my-group",
             auto_offset_reset="earliest",
+            **kafka_cfg,
             # value_deserializer=lambda v: v,
         )
     except NoBrokersAvailable as e:
@@ -105,7 +108,7 @@ def consume():
     logger.info("Starting producer", bootstrap_servers=settings.BOOTSTRAP_SERVERS)
     try:
         error_producer = KafkaProducer(
-            bootstrap_servers=settings.BOOTSTRAP_SERVERS,
+            **kafka_cfg,
         )
     except NoBrokersAvailable as e:
         logger.error(
@@ -116,7 +119,12 @@ def consume():
         sys.exit(1)
 
     try:
-        logger.info("CISO Assistant dispatcher up and running. Listening for messages.")
+        logger.info(
+            "Dispatcher up and running %s.",
+            "(authenticated)"
+            if kafka_cfg.get("security_protocol")
+            else "(unauthenticated)",
+        )
         for msg in consumer:
             logger.trace("Consumed record.", key=msg.key, value=msg.value)
             try:
