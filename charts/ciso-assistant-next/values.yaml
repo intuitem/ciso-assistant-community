@@ -103,7 +103,7 @@ backend:
     # -- Huey container name
     name: huey
 
-    # -- Environment variables to pass to Huey 
+    # -- Environment variables to pass to Huey
     env: []
 
     # -- Resources for Huey
