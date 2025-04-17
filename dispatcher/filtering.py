@@ -34,7 +34,7 @@ def process_selector(
     target = selector.pop("target", "single")
 
     if selector_mapping:
-        for key, value in selector.items():
+        for key, _ in selector.items():
             if key in selector_mapping:
                 selector[selector_mapping[key]] = selector.pop(key)
 
