@@ -31,21 +31,21 @@ global:
   imagePullSecrets: []
 
   # -- Labels to add to all deployed objects
-  commonLabels: {}
+  commonLabels: {} # @schema additionalProperties: true
 
   # -- Kubernetes cluster domain name
   clusterDomain: cluster.local
 
   # -- Toggle and define pod-level security context
   # @default -- `{}`
-  securityContext: {}
+  securityContext: {} # @schema additionalProperties: true
   #  fsGroupChangePolicy: Always
   #  sysctls: []
   #  supplementalGroups: []
   #  fsGroup: 1001
 
   # -- Default node selector for all components
-  nodeSelector: {}
+  nodeSelector: {} # @schema additionalProperties: true
 
   # -- Default tolerations for all components
   tolerations: []
@@ -59,10 +59,10 @@ backend:
   replicas: 1
 
   # -- Backend deployment annotations
-  annotations: {}
+  annotations: {} # @schema additionalProperties: true
 
   # -- Backend pod annotations
-  podAnnotations: {}
+  podAnnotations: {} # @schema additionalProperties: true
 
   ## Backend specific config
   config:
@@ -103,11 +103,11 @@ backend:
     # -- Huey container name
     name: huey
 
-    # -- Environment variables to pass to Huey
+    # -- Environment variables to pass to Huey 
     env: []
 
     # -- Resources for Huey
-    resources: {}
+    resources: {} # @schema additionalProperties: true
       #   requests:
       #     cpu: 100m
       #     memory: 512Mi
@@ -160,7 +160,7 @@ backend:
   imagePullSecrets: []
 
   # -- Resources for the backend
-  resources: {}
+  resources: {} # @schema additionalProperties: true
     #   requests:
     #     cpu: 100m
     #     memory: 512Mi
@@ -173,8 +173,8 @@ backend:
 
   # -- Toggle and define container-level security context
   # @default -- `{}`
-  containerSecurityContext: {}
-  #  seLinuxOptions: {}
+  containerSecurityContext: {} # @schema additionalProperties: true
+  #  seLinuxOptions: {} # @schema additionalProperties: true
   #  runAsUser: 1001
   #  runAsGroup: 1001
   #  runAsNonRoot: true
@@ -189,9 +189,9 @@ backend:
   ## Backend service configuration
   service:
     # -- Backend service annotations
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true
     # -- Backend service labels
-    labels: {}
+    labels: {} # @schema additionalProperties: true
     # -- Backend service http port
     port: 80
     # -- Backend service port name
@@ -206,10 +206,10 @@ frontend:
   replicas: 1
 
   # -- Frontend deployment annotations
-  annotations: {}
+  annotations: {} # @schema additionalProperties: true
 
   # -- Frontend pod annotations
-  podAnnotations: {}
+  podAnnotations: {} # @schema additionalProperties: true
 
   ## Frontend specific config
   config:
@@ -235,7 +235,7 @@ frontend:
   imagePullSecrets: []
 
   # -- Resources for the frontend
-  resources: {}
+  resources: {} # @schema additionalProperties: true
     #   requests:
     #     cpu: 100m
     #     memory: 512Mi
@@ -248,8 +248,8 @@ frontend:
 
   # -- Toggle and define container-level security context
   # @default -- `{}`
-  containerSecurityContext: {}
-  #  seLinuxOptions: {}
+  containerSecurityContext: {} # @schema additionalProperties: true
+  #  seLinuxOptions: {} # @schema additionalProperties: true
   #  runAsUser: 1001
   #  runAsGroup: 1001
   #  runAsNonRoot: true
@@ -264,9 +264,9 @@ frontend:
   ## Frontend service configuration
   service:
     # -- Frontend service annotations
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true
     # -- Frontend service labels
-    labels: {}
+    labels: {} # @schema additionalProperties: true
     # -- Frontend service http port
     port: 80
     # -- Frontend service port name
@@ -278,9 +278,9 @@ ingress:
   # -- Enable an ingress resource for the CISO Assistant
   enabled: false
   # -- Additional ingress labels
-  labels: {}
+  labels: {} # @schema additionalProperties: true
   # -- Additional ingress annotations
-  annotations: {}
+  annotations: {} # @schema additionalProperties: true
     # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     # cert-manager.io/cluster-issuer: letsencrypt
   # -- Defines which ingress controller will implement the resource
@@ -296,7 +296,7 @@ ingress:
     existingSecret: ""
     # -- Custom TLS certificate as secret
     ## Note: 'key' and 'certificate' are expected in PEM format
-    certificateSecret: {}
+    certificateSecret: {} # @schema additionalProperties: true
       # key: |-
       #   -----BEGIN RSA PRIVATE KEY-----
       #   ...
