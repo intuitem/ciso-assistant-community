@@ -1,13 +1,12 @@
 import base64
 import io
-import json
 import urllib.parse
-from filtering import process_selector
+from .filtering import process_selector
 from s3fs import S3FileSystem
 
 import requests
 
-from settings import API_URL, S3_URL, VERIFY_CERTIFICATE, get_access_token
+from .settings import API_URL, S3_URL, VERIFY_CERTIFICATE, get_access_token
 
 from loguru import logger
 
