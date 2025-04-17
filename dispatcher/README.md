@@ -9,7 +9,7 @@ The **CISO Assistant Dispatcher** is a command-line tool that bridges event-driv
 - Access to the CISO Assistant REST API
 - Required Python packages (see [Installation](#installation) below)
 
-## Installation
+## Running the dispatcher as a CLI tool
 
 1. **Clone the repository:**
 
@@ -41,9 +41,45 @@ The **CISO Assistant Dispatcher** is a command-line tool that bridges event-driv
    uv run dispatcher.py consume
    ```
 
+## Running the dispatcher as a dockerized service
+
+> [!NOTE]
+> It is recommended you use environment variables to configure the dispatcher if you are running it as a Docker container.
+> Please check the [Environment variables reference](#environment-variables-reference) section for the full specification.
+
+### Running the dispatcher on its own
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/intuitem/ciso-assistant-community.git
+   cd ciso-assistant-community/dispatcher
+   ```
+
+2. **Build the Docker image:**
+
+   ```bash
+   docker build -t ciso-assistant-dispatcher .
+   ```
+
+3. **Run the dispatcher container**
+
+   ```bash
+   docker run -d \
+   --name ciso-assistant-dispatcher \
+   -e API_URL=https://localhost:8443 \
+   -e BOOTSTRAP_SERVERS=localhost:9092 \
+   -e USER_EMAIL=user@company.org \
+   -e USER_PASSWORD=your_password \
+   ciso-assistant-dispatcher
+   ```
+
 ## Configuration
 
 You can configure the dispatcher using environment variables, the `init-config` command, or the `.dispatcher_config` configuration file.
+
+> [!NOTE]
+> Configuration from environment variables takes precedence over the configuration file. If both are set for a given setting, the environment variable will be used.
 
 ### Environment variables reference
 
@@ -53,9 +89,9 @@ DEBUG=True/False # Set to true to enable debug logging
 API_URL=https://localhost:8443 # The URL of the CISO Assistant REST API
 USER_EMAIL=user@company.org
 USER_PASSWORD=your_password
-AUTO_RENEW_SESSION=True/False # Set to true to enable automatic token refresh, do not set if using token-based authentication
+AUTO_RENEW_SESSION=True/False # Set to True to enable automatic token refresh, do not set if using token-based authentication
 USER_TOKEN=your_ciso_assistant_access_token # Personal Access Token, do not set if using credentials-based authentication
-VERIFY_CERTIFICATE=True/False # Set to trure to verify SSL certificates between the dispatcher and API
+VERIFY_CERTIFICATE=True/False # Set to True to verify SSL certificates between the dispatcher and API
 BOOTSTRAP_SERVERS=localhost:9092 # The Kafka bootstrap servers, comma separated list
 ERRORS_TOPIC=errors # The Kafka topic to send errors to
 S3_URL=localhost:9000 # The URL of the S3 storage
