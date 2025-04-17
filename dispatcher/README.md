@@ -154,7 +154,7 @@ If you have specified the credentials in the configuration file, or in the `USER
 
 #### Automatic token refresh
 
-Using credentials-based authentication, it is possible to enable silent re-authentication on token expiration. You can do so using the `auto_renew_session` setting. As usual, it can be set either as environment variable or in the configuration file.
+Using credentials-based authentication, it is possible to enable silent re-authentication on token expiration. You can do so using the `auto_renew_session` setting. As usual, it can be set either as an environment variable or in the configuration file.
 
 The authentication token will be saved in a temporary file (`.tmp.yaml`).
 
@@ -168,7 +168,7 @@ Requests to the S3 storage are authenticated using the `S3_ACCESS_KEY` and `S3_S
 
 ## Usage
 
-The dispatcher is invoked via its CLI interface. Below are the available commands:
+The dispatcher is invoked via its CLI. Below are the available commands:
 
 ### Consuming messages
 
