@@ -190,6 +190,7 @@ def consume():
         logger.exception("KO", e)
         # raise e
     finally:
+        consumer.close()
         error_producer.flush()
         error_producer.close()
 
