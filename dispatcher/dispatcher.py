@@ -120,10 +120,7 @@ def consume():
 
     try:
         logger.info(
-            "Dispatcher up and running %s.",
-            "(authenticated)"
-            if kafka_cfg.get("security_protocol")
-            else "(unauthenticated)",
+            f"Dispatcher up and running {'(authenticated)' if kafka_cfg.get('security_protocol') else '(unauthenticated)'}",
         )
         for msg in consumer:
             logger.trace("Consumed record.", key=msg.key, value=msg.value)

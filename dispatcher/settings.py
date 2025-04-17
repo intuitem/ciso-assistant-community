@@ -195,7 +195,6 @@ def init_config(y, interactive):
                 "Enter your S3 secret key",
                 hide_input=True,
             )
-
         template_config = {
             "rest": {
                 "url": rest_url,
