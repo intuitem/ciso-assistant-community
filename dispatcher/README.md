@@ -86,9 +86,9 @@ credentials:
 
 Update this file with your actual REST API credentials.
 
-### Authentication
+### Authentication to the CISO Assistant API
 
-Use the `auth` command to authenticate with the REST API.
+Use the `auth` command to authenticate with the CISO Assistant API.
 There are currently two modes of authentication supported by the dispatcher:
 
 - Token-based authentication
@@ -130,17 +130,7 @@ Requests to the S3 storage are authenticated using the `S3_ACCESS_KEY` and `S3_S
 
 The dispatcher is invoked via its CLI interface. Below are the available commands:
 
-### Authenticate
-
-Obtain a temporary token by authenticating with the REST API.
-
-```bash
-python dispatcher.py auth --email your_email@company.org --password your_password
-```
-
-If credentials are not provided on the command line, the tool will try to load them from the configuration file.
-
-### Consume messages
+### Consuming messages
 
 Start the dispatcher to consume messages from the Kafka `observation` topic. The consumer will process each message, dispatch it to the corresponding handler, and send errors to the error topic if needed.
 
@@ -148,11 +138,18 @@ Start the dispatcher to consume messages from the Kafka `observation` topic. The
 python dispatcher.py consume
 ```
 
-### Example messages
+### Messages reference
 
-Below are some example messages that can be consumed by the dispatcher. Save these messages as JSON and send them to the `observation` topic.
+Below are the messages that can be consumed by the dispatcher. These must be sent as JSON to the `observation` Kafka topic.
 
 #### update_applied_control
+
+Updates one or many applied controls.
+
+Fields:
+
+- `selector`: Identifies the target applied control to update.
+- `values`: The updated values of the target applied controls. Please read the API specification for the full list of supported fields.
 
 ```json
 {
@@ -167,6 +164,13 @@ Below are some example messages that can be consumed by the dispatcher. Save the
 ```
 
 #### update_requirement_assessment
+
+Updates one or many requirement assessments.
+
+Fields:
+
+- `selector`: Identifies the target requirement assessment to update.
+- `values`: The updated values of the target requirement assessments. Please read the API specification for the full list of supported fields.
 
 ```json
 {
@@ -183,7 +187,17 @@ Below are some example messages that can be consumed by the dispatcher. Save the
 
 #### upload_attachment
 
-Attachments can be uploaded either as base64 encoded data or fetched from a S3 bucket.
+Uploads an attachment either from base64 encoded data or fetched from a S3 bucket.
+
+Fields:
+
+- `selector`: Identifies the target evidence to upload the attachment to. If not specified, a new evidence will be created with `file_name` as its name.
+- `values`
+  - `applied_controls`: The applied control to which the evidence is attached. If not specified, the evidence will be created/modified without it being attached to an additional control. If the target evidence already has controls, the applied controls will be added to the existing ones.
+  - `file_content`: The base64 encoded content of the file to upload. This field is required if `file_s3_bucket` is not specified.
+  - `file_name`: The name of the file to upload. This field is required if `file_s3_key` is not specified.
+  - `file_s3_bucket`: The S3 bucket where the file is stored. This field is required if `file_content` is not specified.
+  - `file_s3_key`: The S3 key where the file is stored. This field is required if `file_content` is not specified.
 
 ##### Using base64 encoded data
 
@@ -221,7 +235,30 @@ Attachments can be uploaded either as base64 encoded data or fetched from a S3 b
     "file_s3_key": "sample.jpeg"
   }
 }
+
 ```
+
+### Selectors
+
+A selector is an object used to identify the target resource in CISO Assistant. It contains key/value pairs that are used to filter the resource. These can be any filters that are supported by the CISO Assistant API (e.g. `ref_id`, `name`, `eta`...).
+
+You can find the full list of supported filters in the API specification, accessible on `<CISO_ASSISTANT_API_URL>/schema/swagger/`
+
+Selector schema:
+
+```json
+{
+  "selector": {
+    "target": "single | multiple"
+    "key1": "value1",
+    "key2": "value2"
+  }
+}
+```
+
+#### Selector target
+
+Set to `single` if not specified. This can be either `single` or `multiple`. This is used to identify a message's target resources.
 
 ## Deployment
 
