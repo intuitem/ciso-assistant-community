@@ -168,6 +168,7 @@ def consume():
                                     e,
                                 )
                                 raise
+                        raise
 
                 except Exception as e:
                     # NOTE: This exception is necessary to avoid the dispatcher stopping and not consuming any more messages.
