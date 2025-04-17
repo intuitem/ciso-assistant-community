@@ -243,15 +243,11 @@ if "rest" not in config or "url" not in config["rest"]:
         "API URL is missing in configuration. Check your config file or environment variables.",
     )
     sys.exit(1)
-if (
-    "credentials" not in config
-    or not config["credentials"].get("email")
-    or not config["credentials"].get("password")
-):
+creds = config.get("credentials", {})
+if not (creds.get("token") or (creds.get("email") and creds.get("password"))):
     logger.error(
         "Missing credentials in configuration. Please set USER_EMAIL and USER_PASSWORD via environment variables or in the config file.",
     )
-    # You might choose to exit here or allow CLI override
 
 DEBUG = config.get("debug", False)
 API_URL = config.get("rest", {}).get("url", "https://localhost:8443")
