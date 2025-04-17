@@ -216,7 +216,7 @@ def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
             logger.error(
                 "Failed to open file from S3", bucket=bucket, key=key, error=str(e)
             )
-            raise Exception(f"Failed to open file from S3: {e}")
+            raise Exception(f"Failed to open file from S3: {e}") from e
         logger.info("Loaded file from S3", file_name=file_name, bucket=bucket, key=key)
         return file_name, in_memory_file
 
