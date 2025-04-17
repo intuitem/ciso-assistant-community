@@ -107,11 +107,28 @@ def get_config():
                 default="errors",
             ).ask(),
             "authentication": questionary.select(
-                "How would you like to authenticate to the dispatcher (credentials/token)?",
+                "How would you like to authenticate requests to the CISO Assistant API using the dispatcher (credentials/token)?",
                 choices=["credentials", "token"],
                 default="credentials",
             ).ask(),
         }
+        if config["kafka_dispatcher"]["authentication"] == "credentials":
+            config["kafka_dispatcher"]["credentials"] = {
+                "user_email": questionary.text(
+                    "Enter the email of the CISO Assistant user account"
+                ).ask(),
+                "user_password": questionary.password(
+                    "Enter the password of the CISO Assistant user account"
+                ).ask(),
+            }
+            config["kafka_dispatcher"]["auto_renew_session"] = questionary.confirm(
+                "Enable silent reauthentication to the CISO Assistant API on session expiry?",
+                default=True,
+            ).ask()
+        elif config["kafka_dispatcher"]["authentication"] == "token":
+            config["kafka_dispatcher"]["token"] = questionary.password(
+                "Enter access token"
+            ).ask()
         kafka_use_auth = questionary.confirm(
             "Does your Kafka broker require authentication?",
             default=False,
@@ -126,19 +143,6 @@ def get_config():
                 "Enter the password of your Kafka service account"
             ).ask()
 
-        if config["kafka_dispatcher"]["authentication"] == "credentials":
-            config["kafka_dispatcher"]["credentials"] = {
-                "user_email": questionary.text("Enter user email").ask(),
-                "user_password": questionary.password("Enter user password").ask(),
-            }
-            config["kafka_dispatcher"]["auto_renew_session"] = questionary.confirm(
-                "Enable silent reauthentication on session expiry?",
-                default=True,
-            ).ask()
-        elif config["kafka_dispatcher"]["authentication"] == "token":
-            config["kafka_dispatcher"]["token"] = questionary.password(
-                "Enter access token"
-            ).ask()
         use_s3 = questionary.confirm(
             "Would you like to connect a S3 bucket to the dispatcher? This can be used e.g. to upload files to the CISO Assistant backend.",
             default=True,
