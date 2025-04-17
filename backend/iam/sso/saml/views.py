@@ -158,6 +158,7 @@ class FinishACSView(SAMLViewMixin, View):
             user.first_name = idp_first_names[0] if idp_first_names else user.first_name
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.is_sso = True
+            user.set_unusable_password()
             user.save()
             token = generate_token(user)
             login.state["next"] += f"sso/authenticate/{token}"
