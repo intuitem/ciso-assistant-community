@@ -11,7 +11,7 @@
 
 	interface Option {
 		label: string;
-		value: string;
+		value: string | number;
 		suggested?: boolean;
 	}
 
@@ -20,7 +20,9 @@
 	export let fieldContext: FieldContext = 'form-input';
 
 	export let label: string | undefined = undefined;
+	export let baseClass = '';
 	export let field: string;
+	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
 
 	export let form: SuperForm<Record<string, unknown>, any>;
@@ -99,7 +101,7 @@
 	};
 	export let cachedValue: any[] | undefined = undefined;
 
-	const { value, errors, constraints } = formFieldProxy(form, field);
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	let selected: (typeof options)[] = [];
 	let selectedValues: (string | undefined)[] = [];
@@ -297,7 +299,7 @@
 	});
 </script>
 
-<div {hidden}>
+<div class={baseClass} {hidden}>
 	{#if label !== undefined}
 		{#if $constraints?.required || mandatory}
 			<label class="text-sm font-semibold" for={field}

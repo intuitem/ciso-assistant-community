@@ -26,7 +26,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: 'Caution',
-			body: 'The following will create multiple objects in batch mode and possibly on differnt domains. This operation cannot be undone and you will need to do the clean up in case of an issue.',
+			body: 'The following will create multiple objects in batch mode and possibly on different domains. This operation cannot be undone and you will need to do the clean up in case of an issue.',
 			response: (r: boolean) => {
 				if (r) formElement.requestSubmit();
 			}
