@@ -272,10 +272,10 @@ S3_ACCESS_KEY = config.get("s3_access_key", "")
 S3_SECRET_KEY = config.get("s3_secret_key", "")
 
 
-def get_access_token(
-    token_file=".tmp.yaml", user_token=config["credentials"].get("token")
-):
+def get_access_token(token_file=".tmp.yaml", user_token=None):
     """Retrieve the access token from environment or a temporary YAML file."""
+    if user_token is None:
+        user_token = config["credentials"].get("token")
     if user_token:
         return user_token
 

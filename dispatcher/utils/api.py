@@ -38,7 +38,9 @@ def delete(url, **kwargs):
     return response
 
 
-def get_api_headers(content_type: str = "", extra_headers: dict = {}) -> dict:
+def get_api_headers(content_type: str = "", extra_headers: dict | None = None) -> dict:
+    if extra_headers is None:
+        extra_headers = {}
     headers = {"Authorization": f"Token {get_access_token()}"}
     if content_type:
         headers["Content-Type"] = content_type
