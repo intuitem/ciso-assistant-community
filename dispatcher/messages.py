@@ -4,8 +4,6 @@ import urllib.parse
 from .filtering import process_selector
 from s3fs import S3FileSystem
 
-import requests
-
 from .settings import API_URL, S3_URL, VERIFY_CERTIFICATE, get_access_token
 
 from loguru import logger
@@ -313,7 +311,7 @@ def update_applied_controls_with_evidence(
     """
     If applied controls are provided in the values, update each with the new evidence.
     """
-    applied_controls_selector: list[dict] = values.get("applied_controls", [])
+    applied_controls_selector: dict = values.get("applied_controls", {})
     if applied_controls_selector:
         logger.info(
             "Updating applied controls with evidence",
