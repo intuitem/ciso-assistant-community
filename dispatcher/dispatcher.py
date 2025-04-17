@@ -60,16 +60,15 @@ def _auth(email, password):
     res = requests.post(
         url, json=data, headers=headers, verify=settings.VERIFY_CERTIFICATE
     )
-    if res.status_code == 200:
+    if res.ok:
         with open(".tmp.yaml", "w") as yfile:
             yaml.safe_dump(res.json(), yfile)
             logger.success("Successfully authenticated. Token saved to .tmp.yaml")
         api.update_session_token()
     else:
         logger.error(
-            "Check your credentials again. You can set them on the config file or on the command line.",
+            "Authentication failed. Check your credentials again. You can set them on the config file or on the command line.",
         )
-        logger.error(res.json())
 
 
 @click.command()
