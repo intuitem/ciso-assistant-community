@@ -90,13 +90,12 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     Updates a single object using a PATCH request and returns the updated object.
     """
     patch_url = f"{API_URL}/{resource_endpoint}/{obj_id}/"
-    data = json.dumps(values)
 
     logger.debug(f"Updating {resource_endpoint} {obj_id}", values=values)
 
     res = requests.patch(
         patch_url,
-        data,
+        json=values,
         headers={
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -332,6 +331,7 @@ def update_applied_controls_with_evidence(
             get_response = requests.get(
                 control_endpoint,
                 headers={"Authorization": f"Token {get_access_token()}"},
+                verify=VERIFY_CERTIFICATE,
             )
             control_data = get_response.json()
             evidences = control_data.get("evidences", [])
@@ -344,6 +344,7 @@ def update_applied_controls_with_evidence(
                 control_endpoint,
                 json={"evidences": [e.get("id") for e in evidences] + [evidence_id]},
                 headers={"Authorization": f"Token {get_access_token()}"},
+                verify=VERIFY_CERTIFICATE,
             )
             if not update_response.ok:
                 logger.error(
