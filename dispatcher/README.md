@@ -260,7 +260,7 @@ Fields:
 
 ##### Using S3
 
-```bash
+```json
 {
   "message_type": "upload_attachment",
   "selector": {
@@ -275,7 +275,6 @@ Fields:
     "file_s3_key": "sample.jpeg"
   }
 }
-
 ```
 
 ### Selectors
