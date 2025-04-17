@@ -67,6 +67,7 @@ def _auth(email, password):
         logger.error(
             "Authentication failed. Check your credentials again. You can set them on the config file or on the command line.",
         )
+        sys.exit(1)
 
 
 @click.command()
