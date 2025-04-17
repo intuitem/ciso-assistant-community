@@ -57,9 +57,7 @@ def _auth(email, password):
             sys.exit(1)
     headers = {"accept": "application/json", "Content-Type": "application/json"}
 
-    res = requests.post(
-        url, json=data, headers=headers, verify=settings.VERIFY_CERTIFICATE
-    )
+    res = api.post(url, json=data, headers=headers, verify=settings.VERIFY_CERTIFICATE)
     if res.ok:
         with open(".tmp.yaml", "w") as yfile:
             yaml.safe_dump(res.json(), yfile)

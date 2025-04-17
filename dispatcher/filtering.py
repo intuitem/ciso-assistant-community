@@ -1,5 +1,6 @@
 import requests
 from loguru import logger
+import utils.api as api
 
 
 def process_selector(
@@ -50,7 +51,7 @@ def process_selector(
     next_url = endpoint
     while next_url:
         try:
-            response = requests.get(
+            response = api.get(
                 next_url,
                 params=query_params if next_url == endpoint else {},
                 headers=headers,

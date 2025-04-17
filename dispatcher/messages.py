@@ -12,6 +12,7 @@ from loguru import logger
 
 import settings
 from utils.api import get_api_headers
+import utils.api as api
 
 
 class MessageRegistry:
@@ -92,7 +93,7 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
 
     logger.debug(f"Updating {resource_endpoint} {obj_id}", values=values)
 
-    res = requests.patch(
+    res = api.patch(
         patch_url,
         json=values,
         headers={
@@ -249,7 +250,7 @@ def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str
         logger.info("Found object", object_id=object_id)
     else:
         logger.info("Creating new object with name: {}", name, values=values)
-        response = requests.post(
+        response = api.post(
             objects_endpoint,
             data={"name": values.get("name", name)},
             headers={"Authorization": f"Token {get_access_token()}"},
@@ -283,7 +284,7 @@ def upload_file_to_evidence(
     logger.info(
         "Uploading attachment to evidence", evidence_id=evidence_id, file_name=file_name
     )
-    response = requests.post(
+    response = api.post(
         endpoint,
         headers=get_api_headers(extra_headers=extra_headers),
         data=file_obj.read(),
@@ -327,7 +328,7 @@ def update_applied_controls_with_evidence(
             raise Exception("No applied controls found for the provided selector.")
         for control in applied_controls:
             control_endpoint = f"{API_URL}/applied-controls/{control}/"
-            get_response = requests.get(
+            get_response = api.get(
                 control_endpoint,
                 headers={"Authorization": f"Token {get_access_token()}"},
                 verify=VERIFY_CERTIFICATE,
@@ -339,7 +340,7 @@ def update_applied_controls_with_evidence(
                 control=control_data,
                 evidence=evidence_id,
             )
-            update_response = requests.patch(
+            update_response = api.patch(
                 control_endpoint,
                 json={"evidences": [e.get("id") for e in evidences] + [evidence_id]},
                 headers={"Authorization": f"Token {get_access_token()}"},
