@@ -20,4 +20,4 @@ COPY . .
 RUN uv sync --frozen
 
 EXPOSE 8000
-ENTRYPOINT ["uv", "run", "bash", "startup.sh"]
+ENTRYPOINT ["uv", "run", "bash", "entrypoint.sh"]
