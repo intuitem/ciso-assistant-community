@@ -1802,6 +1802,7 @@ class Evidence(
 ):
     # TODO: Manage file upload to S3/MiniO
     attachment = models.FileField(
+        #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
         blank=True,
         null=True,
         help_text=_("Attachment for evidence (eg. screenshot, log file, etc.)"),
