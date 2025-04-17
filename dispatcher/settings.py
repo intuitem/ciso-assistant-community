@@ -37,7 +37,7 @@ def load_env_config():
     """Load configuration values from environment variables."""
     # Note: For booleans, we compare to the string "True"
     config = {
-        "debug": os.getenv("DEBUG", False),
+        "debug": os.getenv("DEBUG", "").lower() == "true" or None,
         "rest": {
             "url": os.getenv("API_URL"),
             "verify_certificate": os.getenv("VERIFY_CERTIFICATE") == "True" or None,
