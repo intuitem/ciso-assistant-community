@@ -5,7 +5,10 @@ session = requests.Session()
 
 
 def update_session_token():
-    session.headers.update({"Authorization": f"Token {get_access_token()}"})
+    token = get_access_token()
+    if token is None:
+        raise ValueError("Failed to obtain access token for API authentication")
+    session.headers.update({"Authorization": f"Token {token}"})
 
 
 def get(url, **kwargs):
