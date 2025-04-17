@@ -1,4 +1,4 @@
-import settings
+from dispatcher import settings
 
 
 def build_kafka_config(use_auth: bool = settings.KAFKA_USE_AUTH) -> dict:
