@@ -12,30 +12,40 @@ def update_session_token():
 
 
 def get(url, **kwargs):
+    if "timeout" not in kwargs:
+        kwargs["timeout"] = 30  # Default timeout of 30 seconds
     response = session.get(url, **kwargs)
     response.raise_for_status()
     return response
 
 
 def post(url, **kwargs):
+    if "timeout" not in kwargs:
+        kwargs["timeout"] = 30  # Default timeout of 30 seconds
     response = session.post(url, **kwargs)
     response.raise_for_status()
     return response
 
 
 def patch(url, **kwargs):
+    if "timeout" not in kwargs:
+        kwargs["timeout"] = 30  # Default timeout of 30 seconds
     response = session.patch(url, **kwargs)
     response.raise_for_status()
     return response
 
 
 def put(url, **kwargs):
+    if "timeout" not in kwargs:
+        kwargs["timeout"] = 30  # Default timeout of 30 seconds
     response = session.put(url, **kwargs)
     response.raise_for_status()
     return response
 
 
 def delete(url, **kwargs):
+    if "timeout" not in kwargs:
+        kwargs["timeout"] = 30  # Default timeout of 30 seconds
     response = session.delete(url, **kwargs)
     response.raise_for_status()
     return response
