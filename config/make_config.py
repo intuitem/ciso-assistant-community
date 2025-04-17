@@ -148,6 +148,9 @@ def get_config():
             default=True,
         ).ask()
 
+        config["kafka_dispatcher"]["s3_url"] = ""
+        config["kafka_dispatcher"]["s3_access_key"] = ""
+        config["kafka_dispatcher"]["s3_secret_key"] = ""
         if use_s3:
             config["kafka_dispatcher"]["s3_url"] = questionary.text(
                 "Enter the S3 storage URL (e.g., http://localhost:9000)",
