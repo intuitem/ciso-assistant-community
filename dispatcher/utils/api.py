@@ -5,7 +5,7 @@ session = requests.Session()
 
 
 def update_session_token():
-    session.headers.update({"Authorization": f"Bearer {get_access_token()}"})
+    session.headers.update({"Authorization": f"Token {get_access_token()}"})
 
 
 def get(url, **kwargs):
