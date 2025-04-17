@@ -241,7 +241,6 @@ config = deep_merge(file_config, env_config)
 if "rest" not in config or "url" not in config["rest"]:
     logger.error(
         "API URL is missing in configuration. Check your config file or environment variables.",
-        config=config,
     )
     sys.exit(1)
 if (
@@ -251,7 +250,6 @@ if (
 ):
     logger.error(
         "Missing credentials in configuration. Please set USER_EMAIL and USER_PASSWORD via environment variables or in the config file.",
-        config=config,
     )
     # You might choose to exit here or allow CLI override
 
