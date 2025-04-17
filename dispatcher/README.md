@@ -235,9 +235,8 @@ Fields:
 - `values`
   - `applied_controls`: The applied control to which the evidence is attached. If not specified, the evidence will be created/modified without it being attached to an additional control. If the target evidence already has controls, the applied controls will be added to the existing ones.
   - `file_content`: The base64 encoded content of the file to upload. This field is required if `file_s3_bucket` is not specified.
-  - `file_name`: The name of the file to upload. This field is required if `file_s3_key` is not specified.
+  - `file_name`: The name of the file to upload. This field is required.
   - `file_s3_bucket`: The S3 bucket where the file is stored. This field is required if `file_content` is not specified.
-  - `file_s3_key`: The S3 key where the file is stored. This field is required if `file_content` is not specified.
 
 ##### Using base64 encoded data
 
@@ -272,7 +271,7 @@ Fields:
       "ref_id": "foo"
     },
     "file_s3_bucket": "my_bucket",
-    "file_s3_key": "sample.jpeg"
+    "file_name": "sample.jpeg"
   }
 }
 ```

@@ -185,12 +185,12 @@ def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
     """
     Determines how to load the file.
     If a base64 encoded content is provided under 'file_content', it decodes it.
-    If S3 details are provided (i.e. 'file_s3_bucket' and 'file_s3_key'), it opens the file from S3.
+    If S3 details are provided (i.e. 'file_s3_bucket'), it opens the file from S3.
     """
-    file_name = values.get("file_name") or values.get("file_s3_key")
+    file_name = values.get("file_name")
     if not file_name:
-        logger.error("No file_name or file_s3_key provided")
-        raise Exception("No file_name or file_s3_key provided")
+        logger.error("No file_name provided")
+        raise Exception("No file_name provided")
 
     if "file_content" in values:
         file_content_b64 = values.get("file_content")
@@ -202,7 +202,7 @@ def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
         logger.info("Loaded file from base64 encoded content", file_name=file_name)
         return file_name, in_memory_file
 
-    elif "file_s3_bucket" in values and "file_s3_key" in values:
+    elif "file_s3_bucket" in values:
         s3 = S3FileSystem(
             anon=False,
             endpoint_url=S3_URL,
@@ -210,7 +210,7 @@ def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
             secret=settings.S3_SECRET_KEY,
         )
         bucket = values["file_s3_bucket"]
-        key = values["file_s3_key"]
+        key = file_name
         file_path = f"{bucket}/{key}"
         try:
             in_memory_file = s3.open(file_path, "rb")
