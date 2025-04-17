@@ -75,10 +75,14 @@ def get_object_ids(
         verify_certificate=VERIFY_CERTIFICATE,
     )
 
-    if isinstance(result, list):
-        return result
-    else:
-        return [result]
+    if result is None:
+        logger.error(
+            "Selector query returned no ids",
+            selector=selector,
+            endpoint=search_endpoint,
+        )
+        raise Exception("No objects matched the provided selector.")
+    return result if isinstance(result, list) else [result]
 
 
 def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> dict:
