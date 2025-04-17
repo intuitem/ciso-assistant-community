@@ -54,7 +54,10 @@ def delete(url, **kwargs):
 def get_api_headers(content_type: str = "", extra_headers: dict | None = None) -> dict:
     if extra_headers is None:
         extra_headers = {}
-    headers = {"Authorization": f"Token {get_access_token()}"}
+    token = get_access_token()
+    if token is None:
+        raise ValueError("Failed to obtain access token for API authentication")
+    headers = {"Authorization": f"Token {token}"}
     if content_type:
         headers["Content-Type"] = content_type
     if extra_headers:
