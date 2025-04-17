@@ -55,12 +55,16 @@ def process_selector(
                 params=query_params if next_url == endpoint else {},
                 headers=headers,
                 verify=verify_certificate,
+                timeout=30,
             )
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.error(
                 "Search failed",
                 response=e.response,
+                status_code=e.response.status_code
+                if hasattr(e, "response") and e.response
+                else None,
             )
             raise
 
