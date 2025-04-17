@@ -112,6 +112,20 @@ def get_config():
                 default="credentials",
             ).ask(),
         }
+        kafka_use_auth = questionary.confirm(
+            "Does your Kafka broker require authentication?",
+            default=False,
+        ).ask()
+        config["kafka_dispatcher"]["use_auth"] = kafka_use_auth
+        if kafka_use_auth:
+            config["kafka_dispatcher"]["sasl_mechanism"] = "PLAIN"
+            config["kafka_dispatcher"]["sasl_username"] = questionary.text(
+                "Enter the username of your Kafka service account"
+            ).ask()
+            config["kafka_dispatcher"]["sasl_password"] = questionary.password(
+                "Enter the password of your Kafka service account"
+            ).ask()
+
         if config["kafka_dispatcher"]["authentication"] == "credentials":
             config["kafka_dispatcher"]["credentials"] = {
                 "user_email": questionary.text("Enter user email").ask(),
@@ -129,11 +143,20 @@ def get_config():
             "Would you like to connect a S3 bucket to the dispatcher? This can be used e.g. to upload files to the CISO Assistant backend.",
             default=True,
         ).ask()
+
         if use_s3:
             config["kafka_dispatcher"]["s3_url"] = questionary.text(
                 "Enter the S3 storage URL (e.g., http://localhost:9000)",
                 default="http://localhost:9000",
             ).ask()
+            config["kafka_dispatcher"]["s3_access_key"] = questionary.text(
+                "Enter the S3 access key (leave blank if using public S3 storage)",
+            ).ask()
+            config["kafka_dispatcher"]["s3_secret_key"] = ""
+            if config["kafka_dispatcher"]["s3_access_key"]:
+                config["kafka_dispatcher"]["s3_secret_key"] = questionary.password(
+                    "Enter the S3 secret key",
+                ).ask()
     else:
         config["kafka_dispatcher"] = {"enabled": False}
 
@@ -170,9 +193,12 @@ def generate_compose_file(config):
     # Render template with configuration
     compose_content = template.render(config)
 
+    lines = compose_content.splitlines()
+    filtered = [line for line in lines if line.strip() != ""]
+
     # Write to docker-compose-custom.yml
     with open("docker-compose-custom.yml", "w") as f:
-        f.write(compose_content)
+        f.write("\n".join(filtered))
 
 
 def validate_cert_paths(config):
