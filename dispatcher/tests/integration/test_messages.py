@@ -13,6 +13,9 @@ import dispatcher as ds
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 BACKEND_DIR = BASE_DIR.parent / "backend"
 
+DJANGO_SUPERUSER_EMAIL = "admin@tests.com"
+DJANGO_SUPERUSER_PASSWORD = "badpass12345"
+
 
 @pytest.fixture(scope="session")
 def kafka():
@@ -25,12 +28,11 @@ def kafka():
 @pytest.fixture(scope="session")
 def api():
     with DockerImage(path=BACKEND_DIR) as image:
-        DJANGO_SUPERUSER_PASSWORD = str(uuid.uuid4())
         with (
             DockerContainer(image=str(image))
             .with_env("ALLOWED_HOSTS", "backend,localhost")
             .with_env("DJANGO_DEBUG", "True")
-            .with_env("DJANGO_SUPERUSER_EMAIL", "admin@tests.com")
+            .with_env("DJANGO_SUPERUSER_EMAIL", DJANGO_SUPERUSER_EMAIL)
             .with_env("DJANGO_SUPERUSER_PASSWORD", DJANGO_SUPERUSER_PASSWORD)
             .with_volume_mapping(
                 str(BACKEND_DIR / "db"),
@@ -44,7 +46,7 @@ def api():
 
 
 @pytest.fixture(scope="session")
-def dispatcher():
+def cli():
     """Fixture to provide a CLI runner for testing."""
     return CliRunner(mix_stderr=False)
 
@@ -57,14 +59,32 @@ def test_api_is_running(api: DockerContainer):
 
 def test_kafka_is_running(kafka: KafkaContainer):
     assert kafka.get_bootstrap_server() is not None
-    assert kafka.get_exposed_port(9092), (
-        f"Kafka is not running on port 9092, but on {kafka.ports}"
+    assert kafka.get_exposed_port(9093), (
+        f"Kafka is not running on port 9093, but on {kafka.ports}"
     )
 
 
 def test_dispatcher_is_running(
-    dispatcher: CliRunner,
+    cli: CliRunner,
 ):
-    result = dispatcher.invoke(ds.auth, ["--help"])
+    result = cli.invoke(ds.cli, ["--help"])
     assert result.exit_code == 0
     assert "Usage:" in result.output
+
+
+def test_dispatcher_can_authenticate_using_credentials(
+    cli: CliRunner, api: DockerContainer
+):
+    result = cli.invoke(
+        ds.cli,
+        [
+            "auth",
+            "--email",
+            DJANGO_SUPERUSER_EMAIL,
+            "--password",
+            DJANGO_SUPERUSER_PASSWORD,
+        ],
+    )
+    assert result.exit_code == 0
+    print(vars(result))
+    assert "Successfully authenticated" in result.output
