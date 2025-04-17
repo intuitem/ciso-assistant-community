@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 uv run dispatcher.py init-config -y
 uv run dispatcher.py auth
