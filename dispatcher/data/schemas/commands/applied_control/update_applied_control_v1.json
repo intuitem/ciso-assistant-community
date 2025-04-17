@@ -4,7 +4,9 @@
   "type": "object",
   "properties": {
     "message_type": {
-      "type": "string"
+      "type": "string",
+      "enum": ["update_applied_control"],
+      "description": "Identifies the message type for routing"
     },
     "selector": {
       "type": "object",
@@ -15,7 +17,7 @@
     "values": {
       "type": "object",
       "additionalProperties": {
-        "type": "string"
+        "type": ["string", "number", "boolean", "null"]
       }
     }
   },

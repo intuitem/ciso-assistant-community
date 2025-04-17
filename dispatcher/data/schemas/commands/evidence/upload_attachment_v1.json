@@ -4,7 +4,9 @@
   "type": "object",
   "properties": {
     "message_type": {
-      "type": "string"
+      "type": "string",
+      "enum": ["upload_attachment"],
+      "description": "Identifies the message type for routing"
     },
     "selector": {
       "type": "object",
@@ -19,7 +21,12 @@
           "type": "string"
         },
         "file_content": {
-          "type": "string"
+          "type": "string",
+          "description": "Base64 encoded content of the file"
+        },
+        "file_s3_bucket": {
+          "type": "string",
+          "description": "S3 bucket name where the file is stored"
         },
         "applied_controls": {
           "type": "object",
@@ -27,10 +34,8 @@
             "type": "string"
           }
         }
-      },
-      "required": ["file_name", "file_content", "applied_controls"]
+      }
     }
   },
   "required": ["message_type", "selector", "values"]
 }
-
