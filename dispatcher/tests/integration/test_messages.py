@@ -52,7 +52,6 @@ def cli():
 
 
 def test_api_is_running(api: DockerContainer):
-    # assert api.get_exposed_port(8000) == 8000
     assert "No migrations to apply" in api.get_logs()[0].decode()
     assert api.get_exposed_port(8000)
 
