@@ -5,6 +5,11 @@
         "backend": {
             "additionalProperties": false,
             "properties": {
+                "annotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
                 "config": {
                     "additionalProperties": false,
                     "properties": {
@@ -54,7 +59,7 @@
                     "type": "object"
                 },
                 "containerSecurityContext": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
@@ -71,7 +76,7 @@
                             "type": "string"
                         },
                         "resources": {
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {},
                             "type": "object"
                         }
@@ -150,11 +155,16 @@
                     },
                     "type": "object"
                 },
+                "podAnnotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
                 "replicas": {
                     "type": "integer"
                 },
                 "resources": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
@@ -162,12 +172,12 @@
                     "additionalProperties": false,
                     "properties": {
                         "annotations": {
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {},
                             "type": "object"
                         },
                         "labels": {
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {},
                             "type": "object"
                         },
@@ -210,6 +220,11 @@
         "frontend": {
             "additionalProperties": false,
             "properties": {
+                "annotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
                 "config": {
                     "additionalProperties": false,
                     "properties": {
@@ -220,7 +235,7 @@
                     "type": "object"
                 },
                 "containerSecurityContext": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
@@ -251,11 +266,16 @@
                 "name": {
                     "type": "string"
                 },
+                "podAnnotations": {
+                    "additionalProperties": true,
+                    "properties": {},
+                    "type": "object"
+                },
                 "replicas": {
                     "type": "integer"
                 },
                 "resources": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
@@ -263,12 +283,12 @@
                     "additionalProperties": false,
                     "properties": {
                         "annotations": {
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {},
                             "type": "object"
                         },
                         "labels": {
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {},
                             "type": "object"
                         },
@@ -294,7 +314,7 @@
                     "type": "string"
                 },
                 "commonLabels": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
@@ -323,12 +343,12 @@
                     "type": "array"
                 },
                 "nodeSelector": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
                 "securityContext": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
@@ -345,7 +365,7 @@
             "additionalProperties": false,
             "properties": {
                 "annotations": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
@@ -356,7 +376,7 @@
                     "type": "string"
                 },
                 "labels": {
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {},
                     "type": "object"
                 },
@@ -370,7 +390,7 @@
                     "additionalProperties": false,
                     "properties": {
                         "certificateSecret": {
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {},
                             "type": "object"
                         },
