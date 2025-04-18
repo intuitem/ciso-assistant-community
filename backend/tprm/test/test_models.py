@@ -1,7 +1,5 @@
-import pytest
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
-from django.utils import timezone
 
 from tprm.models import Entity, EntityAssessment, Representative, Solution
 from iam.models import Folder
