@@ -12,6 +12,7 @@ const config = {
 	darkMode: 'class',
 	content: [
 		'./src/**/*.{html,js,svelte,ts}',
+		'./node_modules/layerchart/**/*.{svelte,js}',
 		// 3. Append the path to the Skeleton package
 		join(require.resolve('@skeletonlabs/skeleton'), '../**/*.{html,js,svelte,ts}')
 	],
