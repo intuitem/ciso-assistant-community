@@ -155,8 +155,7 @@ if USE_S3:
     if not AWS_S3_ENDPOINT_URL:
         logger.error("AWS_S3_ENDPOINT_URL must be set")
     if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_ENDPOINT_URL:
-        raise ImproperlyConfigured("AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_S3_ENDPOINT_URL must be set when USE_S3=True")
-        #exit(1)
+        exit(1)
 
     logger.info("AWS_STORAGE_BUCKET_NAME: %s", AWS_STORAGE_BUCKET_NAME)
     logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
