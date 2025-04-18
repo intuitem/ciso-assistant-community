@@ -38,17 +38,12 @@ class TestEntity(TestCase):
         mock_root_folder = MagicMock()
         mock_folder_class.get_root_folder.return_value = mock_root_folder
         
-        # Créer une entité builtin
         entity = Entity.objects.create(
             name="Main Entity",
             builtin=True,
             folder=self.entity_folder
         )
         
-        # Mock la relation many-to-many pour éviter d'avoir à ajouter un réel objet
-        # Cette approche évite d'avoir à créer un vrai dossier et de l'ajouter
-        
-        # Le reste de votre test avec les mocks pour Entity.objects
         with patch('tprm.models.Entity.objects') as mock_objects:
             mock_filter = MagicMock()
             mock_filter2 = MagicMock()
@@ -61,7 +56,6 @@ class TestEntity(TestCase):
             
             result = Entity.get_main_entity()
             
-            # Vérifier que les bons filtres sont appliqués
             mock_objects.filter.assert_called_once_with(builtin=True)
             mock_filter.filter.assert_called_once()
             mock_filter2.order_by.assert_called_once_with("created_at")
@@ -72,7 +66,7 @@ class TestEntity(TestCase):
 
 class TestEntityAssessment(TestCase):
     def setUp(self):
-        """Configuration initiale pour les tests sur EntityAssessment."""
+        """Initial setup for testing on EntityAssessment."""
         self.folder = Folder.objects.create(name="Test Folder")
         self.entity = Entity.objects.create(
             name="Test Entity",
@@ -80,7 +74,7 @@ class TestEntityAssessment(TestCase):
         )
         
     def test_entity_assessment_creation(self):
-        """Test de la création d'une évaluation d'entité."""
+        """Testing the creation of an entity assessment."""
         assessment = EntityAssessment.objects.create(
             name="Test Assessment",
             description="Test description",
@@ -92,7 +86,7 @@ class TestEntityAssessment(TestCase):
             trust=3,
             entity=self.entity,
             folder=self.folder,
-            perimeter=None,  # Si perimeter peut être null
+            perimeter=None, # Assuming perimeter is not used in this test
             conclusion=EntityAssessment.Conclusion.WARNING
         )
         
@@ -110,7 +104,7 @@ class TestEntityAssessment(TestCase):
 
 class TestRepresentative(TestCase):
     def setUp(self):
-        """Configuration initiale pour les tests sur Representative."""
+        """Initial setup for testing on Representative."""
         self.folder = Folder.objects.create(name="Test Folder")
         self.entity = Entity.objects.create(
             name="Test Entity",
@@ -118,7 +112,7 @@ class TestRepresentative(TestCase):
         )
         
     def test_representative_creation(self):
-        """Test de la création d'un représentant."""
+        """Testing the creation of a representative."""
         representative = Representative.objects.create(
             entity=self.entity,
             email="test@example.com",
@@ -141,7 +135,7 @@ class TestRepresentative(TestCase):
 
 class TestSolution(TestCase):
     def setUp(self):
-        """Configuration initiale pour les tests sur Solution."""
+        """Initial setup for testing on Solution."""
         self.folder = Folder.objects.create(name="Test Folder")
         self.provider_entity = Entity.objects.create(
             name="Provider Entity",
@@ -156,7 +150,7 @@ class TestSolution(TestCase):
         )
         
     def test_solution_creation(self):
-        """Test de la création d'une solution."""
+        """Testing the creation of a solution."""
         solution = Solution.objects.create(
             name="Test Solution",
             description="Test description",
