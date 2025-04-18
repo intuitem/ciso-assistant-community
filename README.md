@@ -84,7 +84,7 @@ Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your wo
 clone the repo:
 
 ```
-git clone https://github.com/intuitem/ciso-assistant-community.git
+git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
 ```
 
 and run the starter script
@@ -190,7 +190,6 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
 
-
 ### Community contributions
 
 1. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
@@ -208,7 +207,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 <br/>
 
 > [!NOTE]
-> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> Frameworks with `*` require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 
@@ -224,7 +223,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - NIST 800-82
 - ASD ISM 🇦🇺
 - Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
-
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
