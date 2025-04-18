@@ -1404,3 +1404,44 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     def get_timeline_entries(self, obj):
         """Returns a serialized list of timeline entries related to the incident."""
         return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data
+
+
+class TaskTemplateReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    compliance_assessments = FieldsRelatedField(many=True)
+    risk_assessments = FieldsRelatedField(many=True)
+    assigned_to = FieldsRelatedField(many=True)
+    next_occurrence = serializers.DateField(read_only=True)
+    last_occurrence_status = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = TaskTemplate
+        exclude = ["schedule"]
+
+
+class TaskTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = TaskTemplate
+        fields = "__all__"
+
+
+class TaskNodeReadSerializer(BaseModelSerializer):
+    task_template = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    name = serializers.SerializerMethodField()
+    assigned_to = FieldsRelatedField(many=True)
+
+    def get_name(self, obj):
+        return obj.task_template.name if obj.task_template else ""
+
+    class Meta:
+        model = TaskNode
+        exclude = ["to_delete"]
+
+
+class TaskNodeWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = TaskNode
+        exclude = ["task_template"]

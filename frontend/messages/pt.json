@@ -909,5 +909,5 @@
 	"cannotDeleteAutoTimeline": "As entradas automáticas da linha do tempo não podem ser excluídas",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "O carimbo de data/hora não pode estar no futuro",
-	"youCanSetPAsswordHere": "Você pode definir sua senha aqui."
+	"youCanSetPasswordHere": "Você pode definir sua senha aqui."
 }

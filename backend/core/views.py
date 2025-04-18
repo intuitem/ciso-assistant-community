@@ -8,9 +8,9 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
-from django.db.models import F, Count, Avg, Q, ExpressionWrapper, FloatField
+from dateutil import relativedelta
+from django.db.models import F, Count, Q, ExpressionWrapper, FloatField
 from collections import defaultdict
-from django_filters.filterset import filterset_factory
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -91,7 +91,10 @@ from core.utils import (
     RoleCodename,
     UserGroupCodename,
     compare_schema_versions,
+    _generate_occurrences,
+    _create_task_dict,
 )
+from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -1310,7 +1313,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "security_exceptions": ["exact"],
             "owner": ["exact"],
             "findings": ["exact"],
-            "eta": ["exact", "lte", "gte", "lt", "gt"],
+            "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
         }
 
 
@@ -1795,7 +1798,30 @@ class AppliedControlViewSet(BaseModelViewSet):
 
 
 class ComplianceAssessmentActionPlanList(generics.ListAPIView):
-    filterset_fields = ["reference_control"]
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "category": ["exact"],
+        "csf_function": ["exact"],
+        "priority": ["exact"],
+        "reference_control": ["exact"],
+        "effort": ["exact"],
+        "control_impact": ["exact"],
+        "cost": ["exact"],
+        "filtering_labels": ["exact"],
+        "risk_scenarios": ["exact"],
+        "risk_scenarios_e": ["exact"],
+        "requirement_assessments": ["exact"],
+        "evidences": ["exact"],
+        "assets": ["exact"],
+        "stakeholders": ["exact"],
+        "progress_field": ["exact"],
+        "security_exceptions": ["exact"],
+        "owner": ["exact"],
+        "findings": ["exact"],
+        "eta": ["exact", "lte", "gte", "lt", "gt"],
+    }
+
     serializer_class = ComplianceAssessmentActionPlanSerializer
     filter_backends = [
         DjangoFilterBackend,
@@ -1983,7 +2009,13 @@ class RiskAcceptanceFilterSet(df.FilterSet):
 
     class Meta:
         model = RiskAcceptance
-        fields = ["folder", "state", "approver", "risk_scenarios", "to_review"]
+        fields = {
+            "folder": ["exact"],
+            "state": ["exact"],
+            "approver": ["exact"],
+            "risk_scenarios": ["exact"],
+            "expiry_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+        }
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
@@ -2188,6 +2220,27 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+class UserGroupOrderingFilter(filters.OrderingFilter):
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+
+        # Replace 'localization_dict' with 'folder'
+        mapped_ordering = []
+        for field in ordering:
+            if field.lstrip("-") == "localization_dict":
+                is_desc = field.startswith("-")
+                mapped_field = "folder"
+                if is_desc:
+                    mapped_field = "-" + mapped_field
+                mapped_ordering.append(mapped_field)
+            else:
+                mapped_ordering.append(field)
+
+        return mapped_ordering
+
+
 class UserGroupViewSet(BaseModelViewSet):
     """
     API endpoint that allows user groups to be viewed or edited
@@ -2195,7 +2248,9 @@ class UserGroupViewSet(BaseModelViewSet):
 
     model = UserGroup
     ordering = ["builtin", "name"]
+    ordering_fields = ["localization_dict"]
     filterset_fields = ["folder"]
+    filter_backends = [UserGroupOrderingFilter]
 
 
 class RoleViewSet(BaseModelViewSet):
@@ -3934,6 +3989,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        ordering = request.query_params.get("ordering", "")
+        ordering_fields = [field.strip() for field in ordering.split(",") if field]
+
+        if any(field.lstrip("-") == "progress" for field in ordering_fields):
+            reverse = ordering_fields[0].startswith("-")  # use only first 'progress'
+            results = sorted(
+                response.data["results"],  # assumes paginated response
+                key=lambda x: x.get("progress", 0),
+                reverse=reverse,
+            )
+            response.data["results"] = results
+
+        return response
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -5100,3 +5172,179 @@ class TimelineEntryViewSet(BaseModelViewSet):
         ]:
             raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
         return super().perform_destroy(instance)
+
+
+class TaskTemplateViewSet(BaseModelViewSet):
+    model = TaskTemplate
+
+    def task_calendar(self, task_templates, start=None, end=None):
+        """Generate calendar of tasks for the given templates."""
+        tasks_list = []
+        for template in task_templates:
+            if not template.is_recurrent:
+                tasks_list.append(_create_task_dict(template, template.task_date))
+                continue
+
+            start_date_param = start or template.task_date or datetime.now().date()
+            end_date_param = end or template.schedule.get("end_date")
+
+            if not end_date_param:
+                start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
+                end_date_param = (start_date + rd.relativedelta(months=1)).strftime(
+                    "%Y-%m-%d"
+                )
+
+            try:
+                start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
+                end_date = datetime.strptime(str(end_date_param), "%Y-%m-%d").date()
+            except ValueError:
+                return {"error": "Invalid date format. Use YYYY-MM-DD"}
+
+            tasks = _generate_occurrences(template, start_date, end_date)
+            tasks_list.extend(tasks)
+
+        processed_tasks_identifiers = set()  # Track tasks we've already processed
+
+        # Sort tasks by due date
+        sorted_tasks = sorted(tasks_list, key=lambda x: x["due_date"])
+
+        # Process all past tasks and next 10 upcoming tasks
+        current_date = datetime.now().date()
+
+        # First separate past and future tasks
+        past_tasks = [task for task in sorted_tasks if task["due_date"] <= current_date]
+        next_tasks = [task for task in sorted_tasks if task["due_date"] > current_date]
+
+        # Combined list of tasks to process (past and next 10)
+        tasks_to_process = past_tasks + next_tasks
+
+        # Directly modify tasks in the original tasks_list
+        for i in range(len(tasks_list)):
+            task = tasks_list[i]
+            task_date = task["due_date"]
+            task_template_id = task["task_template"]
+
+            # Create a unique identifier for this task to avoid duplication
+            task_identifier = (task_template_id, task_date)
+
+            # Skip if we've already processed this task
+            if task_identifier in processed_tasks_identifiers:
+                continue
+
+            # Check if this task should be processed (is in past or next 10)
+            if task in tasks_to_process:
+                processed_tasks_identifiers.add(task_identifier)
+
+                # Get or create the TaskNode
+                task_template = TaskTemplate.objects.get(id=task_template_id)
+                task_node, created = TaskNode.objects.get_or_create(
+                    task_template=task_template,
+                    due_date=task_date,
+                    defaults={
+                        "status": "pending",
+                        "folder": task_template.folder,
+                    },
+                )
+                task_node.to_delete = False
+                task_node.save(update_fields=["to_delete"])
+                # Replace the task dictionary with the actual TaskNode in the original list
+                tasks_list[i] = TaskNodeReadSerializer(task_node).data
+
+        return tasks_list
+
+    def _sync_task_nodes(self, task_template: TaskTemplate):
+        with transaction.atomic():
+            # Soft-delete all existing TaskNode instances associated with this TaskTemplate
+            TaskNode.objects.filter(task_template=task_template).update(to_delete=True)
+
+            # Determine the end date based on the frequency
+            if task_template.is_recurrent:
+                start_date = task_template.task_date
+                if task_template.schedule["frequency"] == "DAILY":
+                    delta = rd.relativedelta(months=2)
+                elif task_template.schedule["frequency"] == "WEEKLY":
+                    delta = rd.relativedelta(months=4)
+                elif task_template.schedule["frequency"] == "MONTHLY":
+                    delta = rd.relativedelta(years=1)
+                elif task_template.schedule["frequency"] == "YEARLY":
+                    delta = rd.relativedelta(years=5)
+
+                end_date_param = task_template.schedule.get("end_date")
+                if end_date_param:
+                    end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
+                else:
+                    end_date = datetime.now().date() + delta
+
+                # Ensure end_date is not before the calculated delta
+                if end_date < datetime.now().date() + delta:
+                    end_date = datetime.now().date() + delta
+
+                # Generate the task nodes
+                self.task_calendar(
+                    task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                    start=start_date,
+                    end=end_date,
+                )
+
+            else:
+                TaskNode.objects.create(
+                    due_date=task_template.task_date,
+                    status="pending",
+                    task_template=task_template,
+                    folder=task_template.folder,
+                )
+            # garbage-collect
+            TaskNode.objects.filter(to_delete=True).delete()
+
+    @action(
+        detail=False,
+        name="Get tasks for the calendar",
+        url_path="calendar/(?P<start>.+)/(?P<end>.+)",
+    )
+    def calendar(
+        self,
+        request,
+        start=None,
+        end=None,
+    ):
+        if start is None:
+            start = timezone.now().date()
+        if end is None:
+            end = timezone.now().date() + relativedelta.relativedelta(months=1)
+        return Response(
+            self.task_calendar(
+                task_templates=TaskTemplate.objects.filter(enabled=True),
+                start=start,
+                end=end,
+            )
+        )
+
+    def perform_update(self, serializer):
+        task_template = serializer.save()
+        self._sync_task_nodes(task_template)
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        self._sync_task_nodes(serializer.instance)
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk):
+        serializer_class = self.get_serializer_class(action="update")
+        self._sync_task_nodes(
+            self.get_object()
+        )  # Synchronize task nodes when fetching a task template
+        return Response(serializer_class(super().get_object()).data)
+
+
+class TaskNodeViewSet(BaseModelViewSet):
+    model = TaskNode
+    filterset_fields = ["status", "task_template"]
+
+    @action(detail=False, name="Get Task Node status choices")
+    def status(srlf, request):
+        return Response(dict(TaskNode.TASK_STATUS_CHOICES))
+
+    def perform_create(self, serializer):
+        instance: TaskNode = serializer.save()
+        instance.save()
+        return super().perform_create(serializer)
