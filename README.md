@@ -339,14 +339,16 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# Use S3 Bucket for attachments saving
-export USE_S3=False #Default Ciso-Assistant has USE_S3 to False, put True to activate the feature
+# CISO Assistant will use filesystem storage backend bu default.
+# You can use a S3 Bucket by declaring these variables 
+# The S3 bucket must be created before starting CISO Assistant
+export USE_S3=True
 export AWS_ACCESS_KEY_ID=<XXX>
 export AWS_SECRET_ACCESS_KEY=<XXX>
 export AWS_STORAGE_BUCKET_NAME=<your-bucket-name>
 export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>
 
-# Add a second backup mailer
+# Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
 export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE=<XXX>
