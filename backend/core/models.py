@@ -3074,7 +3074,7 @@ class ComplianceAssessment(Assessment):
                 "total": total,
                 "per_status": per_status,
                 "per_result": per_result,
-                "progress_perc": self.get_progress,
+                "progress_perc": self.get_progress(),
                 "score": self.get_global_score(),
             },
         }
