@@ -158,8 +158,6 @@ if USE_S3:
     if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_ENDPOINT_URL:
         exit(1)
 
-    logger.info("AWS_ACCESS_KEY_ID: %s", AWS_ACCESS_KEY_ID)
-    logger.info("AWS_SECRET_ACCESS_KEY: %s", AWS_SECRET_ACCESS_KEY)
     logger.info("AWS_STORAGE_BUCKET_NAME: %s", AWS_STORAGE_BUCKET_NAME)
     logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
 
