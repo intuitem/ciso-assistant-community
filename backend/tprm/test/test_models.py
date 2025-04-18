@@ -32,20 +32,23 @@ class TestEntity(TestCase):
         self.assertFalse(entity.builtin)
         
     @patch('tprm.models.Folder')
-    def test_get_main_entity(self, mock_folder):
+    @patch('tprm.models.Entity.owned_folders')
+    def test_get_main_entity(self, mock_owned_folders, mock_folder_class):
         """Testing the get_main_entity method."""
         mock_root_folder = MagicMock()
-        mock_folder.get_root_folder.return_value = mock_root_folder
+        mock_folder_class.get_root_folder.return_value = mock_root_folder
         
-        # Create a builtin entity that owns the root folder
+        # Créer une entité builtin
         entity = Entity.objects.create(
             name="Main Entity",
             builtin=True,
             folder=self.entity_folder
         )
-        entity.owned_folders.add(mock_root_folder)
         
-        # Mock the queryset for Entity.objects.filter()
+        # Mock la relation many-to-many pour éviter d'avoir à ajouter un réel objet
+        # Cette approche évite d'avoir à créer un vrai dossier et de l'ajouter
+        
+        # Le reste de votre test avec les mocks pour Entity.objects
         with patch('tprm.models.Entity.objects') as mock_objects:
             mock_filter = MagicMock()
             mock_filter2 = MagicMock()
@@ -75,7 +78,6 @@ class TestEntityAssessment(TestCase):
             name="Test Entity",
             folder=self.folder
         )
-        self.perimeter = MagicMock()
         
     def test_entity_assessment_creation(self):
         """Test de la création d'une évaluation d'entité."""
@@ -90,7 +92,7 @@ class TestEntityAssessment(TestCase):
             trust=3,
             entity=self.entity,
             folder=self.folder,
-            perimeter=self.perimeter,
+            perimeter=None,  # Si perimeter peut être null
             conclusion=EntityAssessment.Conclusion.WARNING
         )
         
