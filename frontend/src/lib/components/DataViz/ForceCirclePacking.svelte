@@ -34,11 +34,10 @@
 				const data = params.data;
 				let tooltipContent = `<div style="font-style:italic; font-weight: bold;">${data.name}</div>`;
 
-				// Add subItems to tooltip if available
-				if (data.subItems && Array.isArray(data.subItems)) {
+				if (data.items && Array.isArray(data.items)) {
 					tooltipContent += `<div style="margin-top: 5px; border-top: 1px solid #ddd; padding-top: 5px;">
 						<strong>Resulting from:</strong>
-						<div style="white-space: pre-line; margin-top: 3px;">${data.subItems.join('<br>')}</div>
+						<div style="white-space: pre-line; margin-top: 3px;">${data.items.join('<br>')}</div>
 					</div>`;
 				}
 
@@ -65,7 +64,6 @@
 			{
 				type: 'graph',
 				layout: layout,
-				symbolSize: 20,
 				animation: false,
 				zoom: 10,
 				symbolSize: function (value, params) {

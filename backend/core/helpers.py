@@ -1181,20 +1181,30 @@ def threats_count_per_name(user: User) -> Dict[str, List]:
 def get_folder_content(folder: Folder):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
-        content.append({"name": f.name, "children": get_folder_content(f)})
+        content.append(
+            {
+                "name": f.name,
+                "itemStyle": {"color": "#8338ec"},
+                "children": get_folder_content(f),
+            }
+        )
     for p in Perimeter.objects.filter(folder=folder).distinct():
         content.append(
             {
                 "name": p.name,
+                "symbol": "circle",
+                "itemStyle": {"color": "#3a86ff"},
                 "children": [
                     {
-                        "name": "audits",
+                        "name": "Audits",
+                        "symbol": "diamond",
                         "value": ComplianceAssessment.objects.filter(
                             perimeter=p
                         ).count(),
                     },
                     {
-                        "name": "risk assessments",
+                        "name": "Risk assessments",
+                        "symbol": "diamond",
                         "value": RiskAssessment.objects.filter(perimeter=p).count(),
                     },
                 ],
