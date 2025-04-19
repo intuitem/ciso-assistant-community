@@ -264,11 +264,18 @@ export const UserEditSchema = z.object({
 	first_name: z.string().optional(),
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
+	is_local: z. boolean().optional(),
+	is_sso: z. boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
-export const UserCreateSchema = z.object({ email: z.string().email() });
-export const ChangePasswordSchema = z.object({
+export const UserCreateSchema = z.object({
+	email: z.string().email(),
+	is_local: z.boolean().default(false),
+	is_sso: z.boolean().default(false)
+  });
+
+  export const ChangePasswordSchema = z.object({
 	old_password: z.string(),
 	new_password: z.string(),
 	confirm_new_password: z.string()

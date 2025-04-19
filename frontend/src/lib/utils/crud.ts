@@ -1108,6 +1108,9 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 				is_sso: {
 					true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
 				},
+				is_local: {
+					true: { text: 'Local', cssClasses: 'badge bg-violet-200' }
+				},
 				is_third_party: {
 					true: { text: 'Third party', cssClasses: 'badge bg-stone-200' }
 				}

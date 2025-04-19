@@ -261,7 +261,6 @@ class UserManager(BaseUserManager):
         On mail error, raise a corresponding exception, but the user is properly created
         TODO: find a better way to manage mailing error
         """
-
         validate_email(email)
         email = self.normalize_email(email)
         user = self.model(
@@ -271,6 +270,8 @@ class UserManager(BaseUserManager):
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
             folder=_get_root_folder(),
+            is_sso=extra_fields.get("is_sso", False),
+            is_local=extra_fields.get("is_local", True),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
@@ -345,6 +346,10 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
+    is_local = models.BooleanField(
+        default=True,
+        help_text=_("True if the account has local credentials"),
+    )
     is_sso = models.BooleanField(default=False)
     is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
@@ -393,6 +398,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
+        if self.is_superuser and not self.is_active:
+            # avoid deactivation of superuser
+            self.is_active = True
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
 

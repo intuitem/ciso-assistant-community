@@ -1121,9 +1121,19 @@ Names of built-in objects can be internationalized.
 
 ## SSO
 
-A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
+A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user can use SSO. A boolean is_local indicates if the user can use local password. Both fields can be set/reset by the admin.
 
-SSO Settings are defined in a dedicated object SSO_SETTINGS.
+The superuser has "is_local" forced to true.
+
+is_local defaults to true is SSO is not activated. is_sso defaults to true if SSO is activated.
+
+When is_local=False for a user, the password is deactivated and deleted (set_unusable_password method in Dango). When is_local is set to True, the password is still empty, but the user can ask for a password reset, or the admin can set a new password.
+
+If a user asks for password reset while having is_local=False, the normal message is shown. The normal message is enriched to warn that SSO users may not ask for a password reset.
+
+Global SSO settings for the instance are defined in a dedicated object SSO_SETTINGS.
+
+
 
 ## TPRM evolution
 

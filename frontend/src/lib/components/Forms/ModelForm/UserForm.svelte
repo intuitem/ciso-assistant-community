@@ -5,13 +5,13 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import { page } from '$app/stores';
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let shape: any = {};
 </script>
-
 <TextField
 	{form}
 	field="email"
@@ -50,6 +50,11 @@
 {#if shape.is_active}
 	<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 {/if}
+
+<Checkbox {form} field="is_local" label="is Local" helpText="" />
+
+<Checkbox {form} field="is_sso" label="is SSO" helpText="" />
+
 <span class="text-gray-500 pt-5">
 	⚠️ {m.createdUserWillHaveNoRights()}
 </span>
