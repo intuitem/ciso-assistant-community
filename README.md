@@ -30,33 +30,44 @@ Star the project 🌟 to get releases notification and help growing the communit
 ![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
 
-CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
+CISO Assistant brings a different take to Cyber Security management and **GRC** practices:
 
-- by explicitly decoupling compliance from cybersecurity controls implementation
-- has built-in standards, security controls and threats
-- risk assessment and remediation plan follow-up
-- allows to manage a catalog for security controls and threats
-- you can bring your own framework as well using a simple syntax
-- manage audit, evidences collection and report generation
+- it is designed as a hub to bring multiple concepts related to cyber security management with smart links,
+- it is designed as a multi-paradigm tool that can suits different backgrounds and expectations,
+- it explicitly decouple compliance from cybersecurity controls implementation to reuse them accross the whole platform,
+- it promotes reusibility and links between objects instead of repeating the work,
+- built with an API-first approach to allow managing the objects with the UI or external **automation**,
+- has A LOT of built-in standards, security controls and threats,
+- offers an open format to customize objects and reuse them,
+- includes risk assessment and remediation plan follow-up
+- you can bring your own framework as well using a simple syntax and tooblox
+- has multiple data import / export capabilities using multiple channels and formats (UI, reports, CLI, Kafka, etc)
 
-Our vision is to provide a one stop shop for cyber security posture management and cover the layers of **GRC** (Governance, Risk and Compliance). As practitioners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
 
-CyberSecurity teams need to use GRC as a foundation to structure their program and implement the right tools and processes to mitigate the risks, and leave the rest to CISO Assistant 🐙
+Our vision is to provide a one-stop-shop for cyber security  management and modernize **GRC** (Governance, Risk and Compliance) practices through simplification. As practitioners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling but we learned a lot and wanted to create a community around the same principles that are basically common sense. As we keep learning with our users and customers, CISO Assistant keeps growing extra arms with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of data input or output 🐙.
 
-The vision of the tool is based on these fundamental objects:
+Here is an extract of the fundamental objects:
 
 ![](core_objects.png)
 
-There are other concepts and models used to provide other features. The full details are available in the [data model](documentation/architecture/data-model.md).
+For the full details of the data model, you can check [data model](documentation/architecture/data-model.md).
 
-The decoupling concept is a pillar of the app and allows you to save a considerable amount of time:
+## Features
+
+Here is an overview of CISO Assistant features and capabilities:
+
+![overview](features.png)
+
+CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a company specialized in Cyber Security, Cloud and Data/AI.
+
+## Decoupling concept
+
+The decoupling concept is a pillar of the platform and allows you to save a considerable amount of time:
 
 - reuse previous assessments,
 - assess a scope against multiple frameworks at the same time,
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
-
-## Decoupling concept
 
 Here is an illustration of the **decoupling** principle and its advantages:
 
@@ -66,13 +77,7 @@ https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
 
 ![](./documentation/system-architecture.png)
 
-## Features
 
-Here is an overview of CISO Assistant features and capabilities:
-
-![overview](features.png)
-
-CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
 
 ## Quick Start 🚀
 
@@ -93,7 +98,7 @@ and run the starter script
 ./docker-compose.sh
 ```
 
-If you are looking for other installation options, you might want to check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
+If you are looking for other installation options for self-hosting, check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
 
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
@@ -255,7 +260,7 @@ Make sure you have a recent version of docker (>= 27.0).
 1. Clone the repository
 
 ```sh
-git clone https://github.com/intuitem/ciso-assistant-community.git
+git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
@@ -276,13 +281,6 @@ When asked for, enter your email and password for your superuser.
 You can then reach CISO Assistant using your web browser at [https://localhost:8443/](https://localhost:8443/)
 
 For the following executions, use "docker compose up" directly.
-
-> [!TIP]
-> If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
-
-## Docker-compose on remote
-
-For docker setup on a remote server or hypervisor, checkout the [specific instructions here](https://intuitem.gitbook.io/ciso-assistant/deployment/remote-virtualization)
 
 ## Setting up CISO Assistant for development
 
