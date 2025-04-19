@@ -23,24 +23,22 @@
 				trigger: 'item',
 				triggerOn: 'mousemove'
 			},
+			color: ['#625FFF'],
 			title: { text: title },
 			series: [
 				{
 					type: 'tree',
 					roam: true,
-
+					orient: 'vertical',
 					data: [tree],
 					symbol: 'square',
-					itemStyle: {
-						color: '#ebb610'
-					},
-					symbolSize: 12,
+					symbolSize: 30,
 					initialTreeDepth: 1,
 					label: {
 						position: 'left',
 						verticalAlign: 'middle',
 						align: 'right',
-						fontSize: 10
+						fontSize: 13
 					},
 
 					leaves: {

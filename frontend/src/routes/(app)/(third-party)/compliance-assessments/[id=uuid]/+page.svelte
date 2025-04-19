@@ -81,6 +81,7 @@
 	}
 
 	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -589,7 +590,7 @@
 		</div>
 
 		<div class="threats-content">
-			<TreeChart tree={data.threats.tree} name="threats_tree" height="h-[600px]" />
+			<ForceCirclePacking data={data.threats.graph} name="threats_graph" height="h-[600px]" />
 		</div>
 	</dialog>
 {/if}
