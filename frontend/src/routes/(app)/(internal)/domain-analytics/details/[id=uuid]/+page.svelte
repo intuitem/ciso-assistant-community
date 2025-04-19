@@ -4,16 +4,28 @@
 	import type { PageData } from './$types';
 	export let data: PageData;
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
+	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
+	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
+	$: totalRisksCount = data.risks_count_per_level.current.reduce(
+		(sum, level) => sum + level.value,
+		0
+	);
+
+	// Reactive boolean that checks if there are any risks (sum > 0)
+	$: hasRisks = totalRisksCount > 0;
 </script>
 
-<main class="bg-white">
-	<div class="grid grid-cols-4 p-2 gap-2">
-		{#await data.stream.metrics}
-			<div class="col-span-3 lg:col-span-1">
-				<div>Refreshing data ..</div>
-				<LoadingSpinner />
-			</div>
-		{:then metrics}
+{@debug data}
+<main class="bg-white p-2">
+	{#await data.stream.metrics}
+		<div class="col-span-3 lg:col-span-1">
+			<div>Refreshing data ..</div>
+			<LoadingSpinner />
+		</div>
+	{:then metrics}
+		<div class="grid grid-cols-4 p-2 gap-2">
+			<!---->
 			<fieldset
 				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2"
 			>
@@ -21,23 +33,77 @@
 					><i class="fa-solid fa-shield-halved m-2"></i>{m.appliedControls()}</legend
 				>
 				<Card count={metrics.controls.total} label={m.sumpageTotal()} />
-				<div class="col-span-full"></div>
 				<Card count={metrics.controls.active} label={m.sumpageActive()} />
 				<Card count={metrics.controls.deprecated} label={m.sumpageDeprecated()} />
-				<div class="col-span-full"></div>
+				<div class="col-span-3 row-span-3 bg-white">
+					<NightingaleChart name="nightingale" values={metrics.csf_functions} />
+				</div>
 				<Card count={metrics.controls.to_do} label={m.sumpageToDo()} />
 				<Card count={metrics.controls.in_progress} label={m.sumpageInProgress()} />
 				<Card count={metrics.controls.on_hold} label={m.sumpageOnHold()} />
-				<div class="col-span-full"></div>
 				<Card count={metrics.controls.p1} label={m.sumpageP1()} />
 				<Card count={metrics.controls.eta_missed} label={m.sumpageEtaMissed()} />
 			</fieldset>
-		{:catch error}
-			<div class="col-span-3 lg:col-span-1">
-				<p class="text-red-500">Error loading metrics</p>
-			</div>
-		{/await}
-		<div class="border col-span-full panel">compliance</div>
-		<div class="border col-span-full">risk</div>
-	</div>
+			<!---->
+			<fieldset
+				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2"
+			>
+				<legend class="m-2 text-lg font-bold capitalize"
+					><i class="fa-solid fa-shield-halved m-2"></i>{m.compliance()}</legend
+				>
+				<div class="col-span-5 row-span-3">
+					<StackedBarsNormalized
+						names={metrics.audits_stats.names}
+						data={metrics.audits_stats.data}
+						uuids={metrics.audits_stats.uuids}
+					/>
+				</div>
+				<Card count="{metrics.compliance.progress_avg}%" label={m.sumpageAvgProgress()} />
+				<Card count={metrics.compliance.non_compliant_items} label={m.sumpageNonCompliantItems()} />
+				<Card count={metrics.compliance.evidences} label={m.sumpageEvidences()} />
+			</fieldset>
+			<!---->
+			<fieldset
+				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2"
+			>
+				<legend class="m-2 text-lg font-bold capitalize"
+					><i class="fa-solid fa-shield-halved m-2"></i>{m.risk()}</legend
+				>
+				<div class="col-span-2 row-span-2 h-80 bg-white">
+					{#if hasRisks}
+						<HalfDonutChart
+							name="current_h"
+							title={m.sumpageTitleCurrentRisks()}
+							values={data.risks_count_per_level.current}
+							colors={data.risks_count_per_level.current.map((object) => object.color)}
+						/>
+					{:else}
+						<p>{m.noDataAvailable()}</p>
+					{/if}
+				</div>
+				<Card count={metrics.risk.assessments} label={m.sumpageAssessments()} />
+				<Card count={metrics.risk.scenarios} label={m.sumpageScenarios()} />
+				<div class="col-span-2 row-span-2 h-80 bg-white">
+					{#if hasRisks}
+						<HalfDonutChart
+							name="residual_h"
+							title={m.sumpageTitleResidualRisks()}
+							values={data.risks_count_per_level.residual}
+							colors={data.risks_count_per_level.residual.map((object) => object.color)}
+						/>
+					{:else}
+						<p>{m.noDataAvailable()}</p>
+					{/if}
+				</div>
+				<Card count={metrics.risk.threats} label={m.sumpageMappedThreats()} />
+				<Card count={metrics.risk.acceptances} label={m.sumpageRiskAccepted()} />
+			</fieldset>
+			<!---->
+		</div>
+	{:catch error}
+		<div class="col-span-3 lg:col-span-1">
+			<p class="text-red-500">Error loading metrics</p>
+		</div>
+	{/await}
 </main>
+<!---->

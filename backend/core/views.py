@@ -1966,7 +1966,10 @@ class RiskScenarioViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get risk count per level")
     def count_per_level(self, request):
-        return Response({"results": risks_count_per_level(request.user)})
+        folder_id = request.query_params.get("folder", None)
+        return Response(
+            {"results": risks_count_per_level(request.user, None, folder_id)}
+        )
 
     @action(detail=False, name="Get risk scenarios count per status")
     def per_status(self, request):
@@ -3434,7 +3437,8 @@ def get_metrics_view(request):
     """
     API endpoint that returns the counters
     """
-    return Response({"results": get_metrics(request.user)})
+    folder_id = request.query_params.get("folder", None)
+    return Response({"results": get_metrics(request.user, folder_id)})
 
 
 # TODO: Add all the proper docstrings for the following list of functions

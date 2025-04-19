@@ -627,15 +627,20 @@ def applied_control_per_reference_control(user: User):
 
 
 def aggregate_risks_per_field(
-    user: User, field: str, residual: bool = False, risk_assessments: list | None = None
+    user: User,
+    field: str,
+    residual: bool = False,
+    risk_assessments: list | None = None,
+    folder_id=None,
 ):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     (
         object_ids_view,
         _,
         _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskScenario
-    )
+    ) = RoleAssignment.get_accessible_object_ids(scoped_folder, user, RiskScenario)
     parsed_matrices: list = get_parsed_matrices(
         user=user, risk_assessments=risk_assessments
     )
@@ -668,12 +673,14 @@ def aggregate_risks_per_field(
     return values
 
 
-def risks_count_per_level(user: User, risk_assessments: list | None = None):
+def risks_count_per_level(
+    user: User, risk_assessments: list | None = None, folder_id=None
+):
     current_level = list()
     residual_level = list()
 
     for r in aggregate_risks_per_field(
-        user, "name", risk_assessments=risk_assessments
+        user, "name", risk_assessments=risk_assessments, folder_id=folder_id
     ).items():
         current_level.append(
             {
@@ -682,9 +689,12 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
                 "color": r[1]["color"],
             }
         )
-
     for r in aggregate_risks_per_field(
-        user, "name", residual=True, risk_assessments=risk_assessments
+        user,
+        "name",
+        residual=True,
+        risk_assessments=risk_assessments,
+        folder_id=folder_id,
     ).items():
         residual_level.append(
             {
@@ -851,9 +861,12 @@ def build_audits_tree_metrics(user):
     return tree
 
 
-def build_audits_stats(user):
+def build_audits_stats(user, folder_id=None):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, ComplianceAssessment
+        scoped_folder, user, ComplianceAssessment
     )
     data = list()
     names = list()
@@ -865,7 +878,7 @@ def build_audits_stats(user):
     return {"data": data, "names": names, "uuids": uuids}
 
 
-def csf_functions(user):
+def csf_functions(user, folder_id=None):
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, AppliedControl
     )
@@ -888,17 +901,27 @@ def csf_functions(user):
     return data
 
 
-def get_metrics(user: User):
-    def viewable_items(model):
+def get_metrics(user: User, folder_id):
+    def viewable_items(model, folder_id=None):
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, model
+            scoped_folder, user, model
         )
         return model.objects.filter(id__in=object_ids)
 
-    viewable_controls = viewable_items(AppliedControl)
+    viewable_controls = viewable_items(AppliedControl, folder_id)
+    viewable_risk_assessments = viewable_items(RiskAssessment, folder_id)
+    viewable_compliance_assessments = viewable_items(ComplianceAssessment, folder_id)
+    viewable_risk_scenarios = viewable_items(RiskScenario, folder_id)
+    viewable_threats = viewable_items(Threat, folder_id)
+    viewable_risk_acceptances = viewable_items(RiskAcceptance, folder_id)
+    viewable_evidences = viewable_items(Evidence, folder_id)
+    viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
     controls_count = viewable_controls.count()
     progress_avg = math.ceil(
-        mean([x.progress for x in viewable_items(ComplianceAssessment)] or [0])
+        mean([x.progress for x in viewable_compliance_assessments] or [0])
     )
     missed_eta_count = (
         viewable_controls.filter(
@@ -920,31 +943,29 @@ def get_metrics(user: User):
             "eta_missed": missed_eta_count,
         },
         "risk": {
-            "assessments": viewable_items(RiskAssessment).count(),
-            "scenarios": viewable_items(RiskScenario).count(),
-            "threats": viewable_items(Threat)
-            .filter(risk_scenarios__isnull=False)
+            "assessments": viewable_risk_assessments.count(),
+            "scenarios": viewable_risk_scenarios.count(),
+            "threats": viewable_threats.filter(risk_scenarios__isnull=False)
             .distinct()
             .count(),
-            "acceptances": viewable_items(RiskAcceptance).count(),
+            "acceptances": viewable_risk_acceptances.count(),
         },
         "compliance": {
-            "used_frameworks": viewable_items(ComplianceAssessment)
-            .values("framework_id")
+            "used_frameworks": viewable_compliance_assessments.values("framework_id")
             .distinct()
             .count(),
-            "audits": viewable_items(ComplianceAssessment).count(),
-            "active_audits": viewable_items(ComplianceAssessment)
-            .filter(status__in=["in_progress", "in_review", "done"])
-            .count(),
-            "evidences": viewable_items(Evidence).count(),
-            "non_compliant_items": viewable_items(RequirementAssessment)
-            .filter(result="non_compliant")
-            .count(),
+            "audits": viewable_compliance_assessments.count(),
+            "active_audits": viewable_compliance_assessments.filter(
+                status__in=["in_progress", "in_review", "done"]
+            ).count(),
+            "evidences": viewable_evidences.count(),
+            "non_compliant_items": viewable_requirement_assessments.filter(
+                result="non_compliant"
+            ).count(),
             "progress_avg": progress_avg,
         },
-        "audits_stats": build_audits_stats(user),
-        "csf_functions": csf_functions(user),
+        "audits_stats": build_audits_stats(user, folder_id),
+        "csf_functions": csf_functions(user, folder_id),
     }
     return data
 
