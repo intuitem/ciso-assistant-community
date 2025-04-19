@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0011_replace_slash_in_folder_names'),
+        ("iam", "0011_replace_slash_in_folder_names"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='is_local',
-            field=models.BooleanField(default=True, help_text='True if the account has local credentials'),
+            model_name="user",
+            name="is_local",
+            field=models.BooleanField(
+                default=True, help_text="True if the account has local credentials"
+            ),
         ),
     ]
