@@ -1178,7 +1178,7 @@ def threats_count_per_name(user: User) -> Dict[str, List]:
     return {"labels": labels, "values": values}
 
 
-def get_folder_content(folder: Folder):
+def get_folder_content(folder: Folder, include_perimeters=True):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
         content.append(
@@ -1189,28 +1189,29 @@ def get_folder_content(folder: Folder):
                 "children": get_folder_content(f),
             }
         )
-    for p in Perimeter.objects.filter(folder=folder).distinct():
-        content.append(
-            {
-                "name": p.name,
-                "symbol": "circle",
-                "itemStyle": {"color": "#3a86ff"},
-                "children": [
-                    {
-                        "name": "Audits",
-                        "symbol": "diamond",
-                        "value": ComplianceAssessment.objects.filter(
-                            perimeter=p
-                        ).count(),
-                    },
-                    {
-                        "name": "Risk assessments",
-                        "symbol": "diamond",
-                        "value": RiskAssessment.objects.filter(perimeter=p).count(),
-                    },
-                ],
-            }
-        )
+    if include_perimeters:
+        for p in Perimeter.objects.filter(folder=folder).distinct():
+            content.append(
+                {
+                    "name": p.name,
+                    "symbol": "circle",
+                    "itemStyle": {"color": "#3a86ff"},
+                    "children": [
+                        {
+                            "name": "Audits",
+                            "symbol": "diamond",
+                            "value": ComplianceAssessment.objects.filter(
+                                perimeter=p
+                            ).count(),
+                        },
+                        {
+                            "name": "Risk assessments",
+                            "symbol": "diamond",
+                            "value": RiskAssessment.objects.filter(perimeter=p).count(),
+                        },
+                    ],
+                }
+            )
 
     return content
 

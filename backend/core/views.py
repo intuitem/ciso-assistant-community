@@ -2366,8 +2366,12 @@ class FolderViewSet(BaseModelViewSet):
         """
         Returns the tree of domains and perimeters
         """
-        tree = {"name": "Global", "children": []}
+        # Get include_perimeters parameter from query params, default to True if not provided
+        include_perimeters = request.query_params.get(
+            "include_perimeters", "True"
+        ).lower() in ["true", "1", "yes"]
 
+        tree = {"name": "Global", "children": []}
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
@@ -2383,11 +2387,14 @@ class FolderViewSet(BaseModelViewSet):
                 "name": folder.name,
                 "symbol": "roundRect",
                 "uuid": folder.id,
-                "children": get_folder_content(folder),
             }
+            folder_content = get_folder_content(
+                folder, include_perimeters=include_perimeters
+            )
+            if len(folder_content) > 0:
+                entry.update({"children": folder_content})
             folders_list.append(entry)
         tree.update({"children": folders_list})
-
         return Response(tree)
 
     @action(detail=False, methods=["get"])

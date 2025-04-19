@@ -30,7 +30,7 @@
 	};
 </script>
 
-<div>{JSON.stringify(data.data, null, 2)}</div>
+{JSON.stringify(data.data, null, 2)}
 <main class="bg-white card p-4">
 	<TreeView tree={data.data} />
 </main>
