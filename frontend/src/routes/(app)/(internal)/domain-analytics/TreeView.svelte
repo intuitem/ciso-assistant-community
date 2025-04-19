@@ -11,7 +11,7 @@
 	let expanded = _expansionState[name] || false;
 
 	// Generate href from uuid if it exists
-	const href = uuid ? `/details/${uuid}/` : null;
+	const href = uuid ? `/domain-analytics/details/${uuid}/` : null;
 
 	const toggleExpansion = () => {
 		expanded = _expansionState[name] = !expanded;

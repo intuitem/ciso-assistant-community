@@ -2382,6 +2382,7 @@ class FolderViewSet(BaseModelViewSet):
             entry = {
                 "name": folder.name,
                 "symbol": "roundRect",
+                "uuid": folder.id,
                 "children": get_folder_content(folder),
             }
             folders_list.append(entry)

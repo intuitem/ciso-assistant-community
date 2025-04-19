@@ -1184,6 +1184,7 @@ def get_folder_content(folder: Folder):
         content.append(
             {
                 "name": f.name,
+                "uuid": f.id,
                 "itemStyle": {"color": "#8338ec"},
                 "children": get_folder_content(f),
             }
