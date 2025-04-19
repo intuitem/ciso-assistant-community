@@ -30,48 +30,61 @@ Star the project 🌟 to get releases notification and help growing the communit
 ![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
 
-CISO Assistant brings a different take to Cyber Security management and **GRC** practices:
+CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
-- it is designed as a hub to bring multiple concepts related to cyber security management with smart links,
-- it is designed as a multi-paradigm tool that can suits different backgrounds and expectations,
-- it explicitly decouple compliance from cybersecurity controls implementation to reuse them accross the whole platform,
-- it promotes reusibility and links between objects instead of repeating the work,
-- built with an API-first approach to allow managing the objects with the UI or external **automation**,
-- has A LOT of built-in standards, security controls and threats,
-- offers an open format to customize objects and reuse them,
-- includes risk assessment and remediation plan follow-up
-- you can bring your own framework as well using a simple syntax and tooblox
-- has multiple data import / export capabilities using multiple channels and formats (UI, reports, CLI, Kafka, etc)
+- Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,  
+- Built as a **multi-paradigm** tool that adapts to different backgrounds, methodologies, and expectations,  
+- Explicitly **decouples** compliance from cybersecurity controls, enabling reusability across the platform,  
+- Promotes **reusability** and interlinking instead of redundant work,  
+- Developed with an **API-first** approach to support both UI interaction and external **automation**,  
+- Comes packed with a wide range of built-in standards, security controls, and threat libraries,  
+- Offers an **open format** to customize and reuse your own objects and frameworks,  
+- Includes built-in **risk assessment** and **remediation tracking** workflows,  
+- Supports custom frameworks via a simple syntax and flexible tooling,  
+- Provides rich **import/export** capabilities across various channels and formats (UI, CLI, Kafka, reports, etc.).
 
+Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.  
 
-Our vision is to provide a one-stop-shop for cyber security  management and modernize **GRC** (Governance, Risk and Compliance) practices through simplification. As practitioners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling but we learned a lot and wanted to create a community around the same principles that are basically common sense. As we keep learning with our users and customers, CISO Assistant keeps growing extra arms with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of data input or output 🐙.
+As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.  
 
-Here is an extract of the fundamental objects:
+We’re constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
 
-![](core_objects.png)
+---
 
-For the full details of the data model, you can check [data model](documentation/architecture/data-model.md).
+## Core Concepts
+
+Here’s a snapshot of the fundamental building blocks in CISO Assistant:
+
+![Core Objects](core_objects.png)
+
+For full details, check the [data model documentation](documentation/architecture/data-model.md).
+
+---
 
 ## Features
 
-Here is an overview of CISO Assistant features and capabilities:
+Explore the full range of features and capabilities:
 
-![overview](features.png)
+![Features Overview](features.png)
 
-CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a company specialized in Cyber Security, Cloud and Data/AI.
+CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
 
-## Decoupling concept
+---
 
-The decoupling concept is a pillar of the platform and allows you to save a considerable amount of time:
+## Decoupling Concept
 
-- reuse previous assessments,
-- assess a scope against multiple frameworks at the same time,
-- leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
-- balance controls implementation and compliance follow-up
+At the heart of CISO Assistant lies the **decoupling principle**, which enables powerful use cases and major time savings:
+
+- Reuse past assessments across scopes or frameworks,  
+- Evaluate a single scope against multiple frameworks simultaneously,  
+- Let CISO Assistant handle reporting and consistency checks so you can focus on remediation,  
+- Separate control implementation from compliance tracking.
 
 Here is an illustration of the **decoupling** principle and its advantages:
 
 https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
+
+
 
 ## System architecture
 
