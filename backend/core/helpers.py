@@ -1181,14 +1181,15 @@ def threats_count_per_name(user: User) -> Dict[str, List]:
 def get_folder_content(folder: Folder, include_perimeters=True):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
-        content.append(
-            {
-                "name": f.name,
-                "uuid": f.id,
-                "itemStyle": {"color": "#8338ec"},
-                "children": get_folder_content(f),
-            }
-        )
+        entry = {
+            "name": f.name,
+            "uuid": f.id,
+            "itemStyle": {"color": "#8338ec"},
+        }
+        children = get_folder_content(f)
+        if len(children) > 0:
+            entry.update({"children": children})
+        content.append(entry)
     if include_perimeters:
         for p in Perimeter.objects.filter(folder=folder).distinct():
             content.append(
