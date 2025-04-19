@@ -2379,7 +2379,11 @@ class FolderViewSet(BaseModelViewSet):
             .filter(id__in=viewable_objects, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
-            entry = {"name": folder.name, "children": get_folder_content(folder)}
+            entry = {
+                "name": folder.name,
+                "symbol": "roundRect",
+                "children": get_folder_content(folder),
+            }
             folders_list.append(entry)
         tree.update({"children": folders_list})
 
@@ -4531,6 +4535,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         self.check_object_permissions(request, compliance_assessment)
 
         threat_metrics = compliance_assessment.get_threats_metrics()
+        print(threat_metrics)
         if threat_metrics.get("total_unique_threats") == 0:
             return Response(threat_metrics, status=status.HTTP_200_OK)
         children = []
@@ -4545,7 +4550,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 }
             )
         tree = {"name": "Threats", "children": children}
-        threat_metrics.update({"tree": tree})
+        nodes = []
+        for th in threat_metrics["threats"]:
+            nodes.append(
+                {
+                    "name": th["name"],
+                    "value": len(th["requirement_assessments"]),
+                    "items": [
+                        f"{ra['requirement_name']} ({ra['result']})"
+                        for ra in th["requirement_assessments"]
+                    ],
+                }
+            )
+        threat_metrics.update({"tree": tree, "graph": {"nodes": nodes}})
 
         return Response(threat_metrics, status=status.HTTP_200_OK)
 
