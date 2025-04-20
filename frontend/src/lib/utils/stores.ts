@@ -20,6 +20,10 @@ export const hideSuggestions = persisted('hideSuggestions', requirementAssessmen
 	storage: 'session'
 });
 
+export const showAllEvents = persisted('showAllEvents', true, {
+	storage: 'session'
+});
+
 export const lastAccordionItem = persisted('lastAccordionItem', '');
 
 const expandedNodes: TreeViewNode[] = [];
