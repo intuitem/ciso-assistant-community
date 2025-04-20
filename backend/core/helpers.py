@@ -386,14 +386,17 @@ def filter_graph_by_implementation_groups(
     return filtered_graph
 
 
-def get_parsed_matrices(user: User, risk_assessments: list | None = None):
+def get_parsed_matrices(
+    user: User, risk_assessments: list | None = None, folder_id=None
+):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     (
         object_ids_view,
         _,
         _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskScenario
-    )
+    ) = RoleAssignment.get_accessible_object_ids(scoped_folder, user, RiskScenario)
     if risk_assessments is None:
         risk_matrices = list(
             RiskScenario.objects.filter(id__in=object_ids_view)
@@ -642,7 +645,7 @@ def aggregate_risks_per_field(
         _,
     ) = RoleAssignment.get_accessible_object_ids(scoped_folder, user, RiskScenario)
     parsed_matrices: list = get_parsed_matrices(
-        user=user, risk_assessments=risk_assessments
+        user=user, risk_assessments=risk_assessments, folder_id=folder_id
     )
     values = dict()
     for m in parsed_matrices:
@@ -1210,7 +1213,7 @@ def get_folder_content(folder: Folder, include_perimeters=True):
             "uuid": f.id,
             "itemStyle": {"color": "#8338ec"},
         }
-        children = get_folder_content(f)
+        children = get_folder_content(f, include_perimeters=include_perimeters)
         if len(children) > 0:
             entry.update({"children": children})
         content.append(entry)
