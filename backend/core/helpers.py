@@ -882,8 +882,11 @@ def build_audits_stats(user, folder_id=None):
 
 
 def csf_functions(user, folder_id=None):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )
     viewable_controls = AppliedControl.objects.filter(id__in=object_ids)
     cnt = dict()
