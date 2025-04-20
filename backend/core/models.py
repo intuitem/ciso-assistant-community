@@ -3059,6 +3059,12 @@ class ComplianceAssessment(Assessment):
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
 
+    def create_snapshot(self):
+        snapshot = ComplianceAssessmentSnapshot.objects.create_snapshot(
+            compliance_assessment=self, key_indicators={}, data={}
+        )
+        logger.info(f"created snapshot {snapshot.id} for {self.name}")
+
     def upsert_daily_metrics(self):
         per_status = dict()
         per_result = dict()
@@ -4336,6 +4342,39 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
+
+
+class SnapshotManager(models.Manager):
+    def create_snapshot(self, compliance_assessment, key_indicators, data, format=1):
+        latest = (
+            self.filter(compliance_assessment=compliance_assessment)
+            .order_by("-revision")
+            .first()
+        )
+
+        revision = 1
+        if latest:
+            revision = latest.revision + 1
+
+        return self.create(
+            compliance_assessment=compliance_assessment,
+            revision=revision,
+            key_indicators=key_indicators,
+            data=data,
+            format=format,
+        )
+
+
+class ComplianceAssessmentSnapshot(AbstractBaseModel):
+    format = models.IntegerField(default=1)
+    compliance_assessment = models.ForeignKey(
+        "ComplianceAssessment", on_delete=models.CASCADE
+    )
+    revision = models.IntegerField(default=1)
+    key_indicators = models.JSONField()
+    data = models.JSONField()
+
+    objects = SnapshotManager()
 
 
 common_exclude = ["created_at", "updated_at"]
