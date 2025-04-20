@@ -444,7 +444,8 @@ class ThreatViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
-        return Response({"results": threats_count_per_name(request.user)})
+        folder_id = request.query_params.get("folder", None)
+        return Response({"results": threats_count_per_name(request.user, folder_id)})
 
     @action(detail=False, methods=["get"])
     def ids(self, request):

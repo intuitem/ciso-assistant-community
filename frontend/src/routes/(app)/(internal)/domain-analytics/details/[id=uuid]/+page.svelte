@@ -7,6 +7,7 @@
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
+	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
 	$: totalRisksCount = data.risks_count_per_level.current.reduce(
 		(sum, level) => sum + level.value,
 		0
@@ -27,29 +28,29 @@
 		<div class="grid grid-cols-4 p-2 gap-2">
 			<!---->
 			<fieldset
-				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2"
+				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-gradient-to-b from-slate-50 to-white"
 			>
-				<legend class="m-2 text-lg font-bold capitalize"
+				<legend class="m-2 text-lg font-bold capitalize font-serif"
 					><i class="fa-solid fa-shield-halved m-2"></i>{m.appliedControls()}</legend
 				>
 				<Card count={metrics.controls.total} label={m.sumpageTotal()} />
 				<Card count={metrics.controls.active} label={m.sumpageActive()} />
-				<Card count={metrics.controls.deprecated} label={m.sumpageDeprecated()} />
-				<div class="col-span-3 row-span-3 bg-white">
+				<Card count={metrics.controls.deprecated} label={m.sumpageDeprecated()} emphasis={true} />
+				<div class="col-span-3 row-span-3 bg-white shadow">
 					<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 				</div>
 				<Card count={metrics.controls.to_do} label={m.sumpageToDo()} />
 				<Card count={metrics.controls.in_progress} label={m.sumpageInProgress()} />
-				<Card count={metrics.controls.on_hold} label={m.sumpageOnHold()} />
-				<Card count={metrics.controls.p1} label={m.sumpageP1()} />
-				<Card count={metrics.controls.eta_missed} label={m.sumpageEtaMissed()} />
+				<Card count={metrics.controls.on_hold} label={m.sumpageOnHold()} emphasis={true} />
+				<Card count={metrics.controls.p1} label={m.sumpageP1()} emphasis={true} />
+				<Card count={metrics.controls.eta_missed} label={m.sumpageEtaMissed()} emphasis={true} />
 			</fieldset>
 			<!---->
 			<fieldset
-				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2"
+				class="fieldset col-span-full border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-gradient-to-b from-slate-50 to-white"
 			>
-				<legend class="m-2 text-lg font-bold capitalize"
-					><i class="fa-solid fa-shield-halved m-2"></i>{m.compliance()}</legend
+				<legend class="m-2 text-lg font-bold capitalize font-serif"
+					><i class="fa-solid fa-list-check m-2"></i>{m.compliance()}</legend
 				>
 				<div class="col-span-5 row-span-3">
 					<StackedBarsNormalized
@@ -59,17 +60,35 @@
 					/>
 				</div>
 				<Card count="{metrics.compliance.progress_avg}%" label={m.sumpageAvgProgress()} />
-				<Card count={metrics.compliance.non_compliant_items} label={m.sumpageNonCompliantItems()} />
+				<Card
+					count={metrics.compliance.non_compliant_items}
+					label={m.sumpageNonCompliantItems()}
+					emphasis={true}
+				/>
 				<Card count={metrics.compliance.evidences} label={m.sumpageEvidences()} />
 			</fieldset>
 			<!---->
 			<fieldset
-				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2"
+				class="fieldset col-span-full bg-slate-50 border-slate-300 border rounded-lg grid grid-cols-6 gap-2 p-2 bg-slate-50"
 			>
-				<legend class="m-2 text-lg font-bold capitalize"
-					><i class="fa-solid fa-shield-halved m-2"></i>{m.risk()}</legend
+				<legend class="m-2 text-lg font-bold capitalize font-serif"
+					><i class="fa-solid fa-biohazard m-2"></i>{m.risk()}</legend
 				>
-				<div class="col-span-2 row-span-2 h-80 bg-white">
+				<div class="col-span-2 row-span-2 bg-white shadow">
+					{#if data.threats_count.results.labels.length > 0}
+						<RadarChart
+							name="threatRadar"
+							title={m.threatRadarChart()}
+							labels={data.threats_count.results.labels}
+							values={data.threats_count.results.values}
+						/>
+					{:else}
+						<div class="py-4 flex items-center justify-center">
+							<p class="">{m.noThreatsMapped()}</p>
+						</div>
+					{/if}
+				</div>
+				<div class="col-span-2 row-span-2 h-80 bg-white shadow">
 					{#if hasRisks}
 						<HalfDonutChart
 							name="current_h"
@@ -81,9 +100,7 @@
 						<p>{m.noDataAvailable()}</p>
 					{/if}
 				</div>
-				<Card count={metrics.risk.assessments} label={m.sumpageAssessments()} />
-				<Card count={metrics.risk.scenarios} label={m.sumpageScenarios()} />
-				<div class="col-span-2 row-span-2 h-80 bg-white">
+				<div class="col-span-2 row-span-2 h-80 bg-white shadow">
 					{#if hasRisks}
 						<HalfDonutChart
 							name="residual_h"
@@ -95,6 +112,9 @@
 						<p>{m.noDataAvailable()}</p>
 					{/if}
 				</div>
+				<div></div>
+				<Card count={metrics.risk.assessments} label={m.sumpageAssessments()} />
+				<Card count={metrics.risk.scenarios} label={m.sumpageScenarios()} />
 				<Card count={metrics.risk.threats} label={m.sumpageMappedThreats()} />
 				<Card count={metrics.risk.acceptances} label={m.sumpageRiskAccepted()} />
 			</fieldset>

@@ -1167,12 +1167,15 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
     }
 
 
-def threats_count_per_name(user: User) -> Dict[str, List]:
+def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     object_ids_view, _, _ = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Threat
+        scoped_folder, user, Threat
     )
     viewable_scenarios = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskScenario
+        scoped_folder, user, RiskScenario
     )[0]
 
     # Updated field name from 'riskscenario' to 'risk_scenarios'
