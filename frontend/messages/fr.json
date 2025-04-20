@@ -1467,5 +1467,6 @@
 	"taskNodes": "Occurrences de tâches",
 	"associatedTaskNodes": "Révision des instances",
 	"showAllEvents": "Afficher tous les événements",
-	"noEvents": "Aucun événement pour ce jour"
+	"noEvents": "Aucun événement pour ce jour",
+	"domainAnalytics": "Analytiques par domaine"
 }

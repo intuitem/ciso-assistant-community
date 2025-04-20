@@ -1467,5 +1467,6 @@
 	"selectAsset": "Select an asset",
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
-	"noEvents": "No events for this day"
+	"noEvents": "No events for this day",
+	"domainAnalytics": "Domain Analytics"
 }
