@@ -3059,13 +3059,7 @@ class ComplianceAssessment(Assessment):
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
 
-    def create_snapshot(self):
-        snapshot = ComplianceAssessmentSnapshot.objects.create_snapshot(
-            compliance_assessment=self, key_indicators={}, data={}
-        )
-        logger.info(f"created snapshot {snapshot.id} for {self.name}")
-
-    def upsert_daily_metrics(self):
+    def key_indicators(self):
         per_status = dict()
         per_result = dict()
         for item in self.get_requirements_status_count():
@@ -3073,7 +3067,11 @@ class ComplianceAssessment(Assessment):
 
         for item in self.get_requirements_result_count():
             per_result[item[1]] = item[0]
-        total = RequirementAssessment.objects.filter(compliance_assessment=self).count()
+        total = (
+            RequirementAssessment.objects.filter(compliance_assessment=self)
+            .filter(requirement__assessable=True)
+            .count()
+        )
         data = {
             "reqs": {
                 "total": total,
@@ -3083,7 +3081,41 @@ class ComplianceAssessment(Assessment):
                 "score": self.get_global_score(),
             },
         }
+        return data
 
+    def create_snapshot(self):
+        logger.info(f"creating snapshot for {self.name}")
+        key_indicators = self.key_indicators()
+        requirements_assessments = []
+        for ra in RequirementAssessment.objects.filter(
+            compliance_assessment=self
+        ).exclude(result=RequirementAssessment.Result.NOT_ASSESSED):
+            entry = {
+                "id": str(ra.id),
+                "result": ra.result,
+                "status": ra.status,
+                "score": ra.score,
+                "doc_score": ra.documentation_score,
+            }
+            requirements_assessments.append(entry)
+        data = {"requirements_assessments": requirements_assessments}
+        ac = [
+            {"id": str(ac.id), "status": ac.status}
+            for ac in AppliedControl.objects.filter(
+                requirement_assessments__compliance_assessment=self
+            )
+        ]
+        if len(ac) > 0:
+            data.update({"applied_controls": ac})
+        snapshot = ComplianceAssessmentSnapshot.objects.create_snapshot(
+            compliance_assessment=self,
+            key_indicators=key_indicators,
+            data=data,
+        )
+        logger.info(f"created snapshot {snapshot.id} for {self.name}")
+
+    def upsert_daily_metrics(self):
+        data = self.key_indicators()
         HistoricalMetric.update_daily_metric(
             model=self.__class__.__name__, object_id=self.id, data=data
         )
