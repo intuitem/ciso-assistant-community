@@ -192,8 +192,8 @@ AUTH_TOKEN_TTL = int(
 AUTH_TOKEN_AUTO_REFRESH = (
     os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
 )  # prevents token from expiring while user is active
-AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = int(
-    os.environ.get("AUTH_TOKEN_AUTO_REFRESH_MAX_TTL", default=60 * 60 * 10)
+AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
+    int(os.environ.get("AUTH_TOKEN_AUTO_REFRESH_MAX_TTL", default=60 * 60 * 10)) or None
 )  # absolute timeout for auto-refresh, defaults to 10 hours. token expires after this time even if the user is active
 
 
