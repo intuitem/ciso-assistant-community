@@ -1283,6 +1283,7 @@ class QuickStartSerializer(serializers.Serializer):
             if not folder_serializer.is_valid(raise_exception=True):
                 return None
             folder = folder_serializer.save()
+            Folder.create_default_ug_and_ra(folder)
 
         perimeter_data = {
             "folder": folder.id,
