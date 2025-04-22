@@ -4,6 +4,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let item: any; // TODO: type this
+	export let sideBarVisibility;
 
 	$: classesActive = (href: string) =>
 		href === $page.url.pathname
@@ -12,17 +13,20 @@
 </script>
 
 {#each item as item}
-	<Anchor
-		href={item.href}
-		breadcrumbAction="replace"
-		class="unstyled flex whitespace-nowrap items-center py-2 text-sm font-normal rounded-token {classesActive(
-			item.href ?? ''
-		)}"
-		data-testid={'accordion-item-' + item.href.substring(1)}
-	>
-		<span class="px-4 flex items-center w-full space-x-2 text-xs" id={item.name}>
-			<i class="{item.fa_icon} w-1/12" />
-			<span class="text-sm tracking-wide truncate">{safeTranslate(item.name)}</span>
-		</span>
-	</Anchor>
+	<!-- undefined and true must be shown -->
+	{#if sideBarVisibility[item.name] !== false}
+		<Anchor
+			href={item.href}
+			breadcrumbAction="replace"
+			class="unstyled flex whitespace-nowrap items-center py-2 text-sm font-normal rounded-token {classesActive(
+				item.href ?? ''
+			)}"
+			data-testid={'accordion-item-' + item.href.substring(1)}
+		>
+			<span class="px-4 flex items-center w-full space-x-2 text-xs" id={item.name}>
+				<i class="{item.fa_icon} w-1/12" />
+				<span class="text-sm tracking-wide truncate">{safeTranslate(item.name)}</span>
+			</span>
+		</Anchor>
+	{/if}
 {/each}

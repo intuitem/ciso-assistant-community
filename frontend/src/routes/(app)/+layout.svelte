@@ -43,6 +43,22 @@
 
 	export let data: PageData;
 	export let form: ActionData;
+	export let sideBarVisibility = {
+		xRays: false,
+		incidents: false,
+		tasks: true,
+		riskAcceptances: false,
+		securityExceptions: false,
+		followUp: false,
+		ebiosRM: false,
+		scoringAssistant: false,
+		vulnerabilities: false,
+		compliance: false,
+		thirdPartyCategory: false,
+		privacy: false,
+		Experimental: false
+	};
+
 	const modalStore: ModalStore = getModalStore();
 	function modalQuickStart(): void {
 		let modalComponent: ModalComponent = {
@@ -65,7 +81,7 @@
 	regionPage="transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
 >
 	<svelte:fragment slot="sidebarLeft">
-		<SideBar bind:open={sidebarOpen} />
+		<SideBar bind:open={sidebarOpen} {sideBarVisibility} />
 	</svelte:fragment>
 	<svelte:fragment slot="pageHeader">
 		<AppBar background="bg-white" padding="py-2 px-4" class="relative">
