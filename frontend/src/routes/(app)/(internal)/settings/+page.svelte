@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { SSOSettingsSchema, GeneralSettingsSchema } from '$lib/utils/schemas';
+	import { SSOSettingsSchema, GeneralSettingsSchema, featureFlagSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 
@@ -15,8 +15,22 @@
 	>
 	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key" /> {m.sso()}</Tab
 	>
+	<Tab bind:group={tabSet} name="featureFlags" value={2}
+		><i class="fa-solid fa-flag" /> {m.featuredFlags()}</Tab
+	>
 </TabGroup>
-{#if tabSet === 1}
+{#if tabSet === 2}
+	<div>
+		<span class="text-gray-500">{m.configureFeaturedFlags()}</span>
+		<ModelForm
+			form={data.featureFlagForm}
+			schema={featureFlagSchema}
+			model={data.featureFlagModel}
+			cancelButton={false}
+			action="?/featureflags"
+		/>
+	</div>
+{:else if tabSet === 1}
 	<div>
 		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
 		<ModelForm

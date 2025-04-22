@@ -324,6 +324,10 @@ export const GeneralSettingsSchema = z.object({
 	interface_agg_scenario_matrix: z.boolean().optional()
 });
 
+export const featureFlagSchema = z.object({
+	feature_flags: z.string()
+});
+
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().optional(),
 	provider: z.string().default('saml'),
@@ -704,6 +708,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
+	'feature-flags': featureFlagSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

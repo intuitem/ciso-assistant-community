@@ -13,6 +13,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
     class Names(models.TextChoices):
         GENERAL = "general", "General"
         SSO = "sso", "SSO"
+        FEATURE_FLAGS = "feature-flags", "Feature Flags"
 
     # Name of the setting category.
     name = models.CharField(

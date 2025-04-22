@@ -1465,5 +1465,9 @@
 	"selectAsset": "Select an asset",
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
+	"featuredFlags": "Featured flags",
+	"configureFeaturedFlags": "Configure featured flags to enable or disable specific features in the application.",
+	"allow_all": "Allow all",
+	"featureFlagSettingsUpdated": "Feature flag settings updated",
 	"noEvents": "No events for this day"
 }

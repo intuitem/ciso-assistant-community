@@ -1,7 +1,7 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { SSOSettingsSchema, GeneralSettingsSchema } from '$lib/utils/schemas';
+import { SSOSettingsSchema, GeneralSettingsSchema, featureFlagSchema } from '$lib/utils/schemas';
 import { m } from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -14,11 +14,15 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) =>
 		res.json()
 	);
+	const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/object/`).then(
+		(res) => res.json()
+	);
 
 	const selectOptions: Record<string, any> = {};
 
 	const ssoModel = getModelInfo('sso-settings');
 	const generalSettingModel = getModelInfo('general-settings');
+	const featureFlagModel = getModelInfo('feature-flags');
 
 	if (ssoModel.selectFields) {
 		for (const selectField of ssoModel.selectFields) {
@@ -38,6 +42,24 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	}
 
 	ssoModel.selectOptions = selectOptions;
+
+	if (featureFlagModel.selectFields) {
+		for (const selectField of featureFlagModel.selectFields) {
+			const url = `${BASE_API_URL}/settings/feature-flags/${selectField.field}/`;
+			const response = await fetch(url);
+			if (response.ok) {
+				selectOptions[selectField.field] = await response.json().then((data) =>
+					Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: selectField.valueType === 'number' ? parseInt(key) : key
+					}))
+				);
+			} else {
+				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+			}
+		}
+	}
+	featureFlagModel.selectOptions = selectOptions;
 
 	if (generalSettingModel.selectFields) {
 		for (const selectField of generalSettingModel.selectFields) {
@@ -62,6 +84,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const generalSettingForm = await superValidate(generalSettings, zod(GeneralSettingsSchema), {
 		errors: false
 	});
+	const featureFlagForm = await superValidate(featureFlagSettings, zod(GeneralSettingsSchema), {
+		errors: false
+	});
 
 	return {
 		ssoSettings,
@@ -70,6 +95,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		generalSettings,
 		generalSettingForm,
 		generalSettingModel,
+		featureFlagSettings,
+		featureFlagForm,
+		featureFlagModel,
 		title: m.settings()
 	};
 };
@@ -123,6 +151,32 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		setFlash({ type: 'success', message: m.generalSettingsUpdated() }, event);
+
+		return { form };
+	},
+	featureflags: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = featureFlagSchema;
+		const form = await superValidate(formData, zod(schema));
+		const endpoint = `${BASE_API_URL}/settings/feature-flags/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'PUT',
+			body: JSON.stringify({
+				value: form.data
+			})
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.featureFlagSettingsUpdated() }, event);
 
 		return { form };
 	}

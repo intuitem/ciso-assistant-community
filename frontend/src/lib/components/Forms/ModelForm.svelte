@@ -26,6 +26,7 @@
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
+	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
@@ -319,6 +320,8 @@
 		<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'general-settings'}
 		<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
+	{:else if URLModel === 'feature-flags'}
+		<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
 	{:else if URLModel === 'processings'}

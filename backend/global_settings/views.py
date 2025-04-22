@@ -6,7 +6,11 @@ from rest_framework.decorators import action
 
 from iam.sso.models import SSOSettings
 
-from .serializers import GlobalSettingsSerializer, GeneralSettingsSerializer
+from .serializers import (
+    GlobalSettingsSerializer,
+    GeneralSettingsSerializer,
+    FeatureFlagsSerializer,
+)
 
 from .models import GlobalSettings
 
@@ -32,6 +36,56 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
             {"detail": "Global settings can only be updated through data migrations."},
             status=405,
         )
+
+
+class FeatureFlagsViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = FeatureFlagsSerializer
+    queryset = GlobalSettings.objects.filter(name="feature-flags")
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj = self.model.objects.get(name="feature-flags")
+        obj.is_published = True  # we could do that at creation, but it's ok here
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk=None):
+        default_settings = {
+            "feature_flags": "allow_all",
+        }
+
+        settings, created = GlobalSettings.objects.get_or_create(name="feature-flags")
+
+        if created or not all(key in settings.value for key in default_settings):
+            existing_value = settings.value or {}
+            updated_value = {**default_settings, **existing_value}
+            settings.value = updated_value
+            settings.save()
+
+        return Response(FeatureFlagsSerializer(settings).data.get("value"))
+
+    @action(detail=True, name="Get feature flags")
+    def feature_flags(self, request):
+        choices = {
+            "allow_all": "allow_all",
+            "governance": "governance",
+            "risk": "risk",
+            "compliance": "compliance",
+        }
+        return Response(choices)
 
 
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
