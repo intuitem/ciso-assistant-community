@@ -3177,6 +3177,24 @@ class ComplianceAssessment(Assessment):
 
         return created_assessments
 
+    def sync_to_applied_controls(self):
+        """
+        the logic is to get the requirement assessments that have applied controls attached
+        then for each:
+        if one applied control attached:
+            if the AC status is active, toggle requirement assessment to compliant
+            if the AC status is in (deprecated, in_progress, on_hold), toggle requirement assessment to partially compliant
+            if the AC status is in (to_do), toggle the requirement assessment to non_compliant
+            if the AC status is in (--), toggle the requirement assessment to not_reviewed
+        if two more applied controls are attached:
+            if all AC are active, toggle to compliant
+            if one AC is in (deprecated, in_progress, on_hold), toggle to partially compliant
+            if all AC is in (to_do) toggle the requirement to non_compliant
+            if all the AC status in (--) toggle the requirement to not_reviewed
+
+        """
+        pass
+
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
