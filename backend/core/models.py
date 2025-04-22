@@ -3087,9 +3087,8 @@ class ComplianceAssessment(Assessment):
         logger.info(f"creating snapshot for {self.name}")
         key_indicators = self.key_indicators()
         requirements_assessments = []
-        for ra in RequirementAssessment.objects.filter(
-            compliance_assessment=self
-        ).exclude(result=RequirementAssessment.Result.NOT_ASSESSED):
+        for ra in RequirementAssessment.objects.filter(compliance_assessment=self):
+            # ).exclude(result=RequirementAssessment.Result.NOT_ASSESSED):#probably a risky optimization
             entry = {
                 "id": str(ra.id),
                 "result": ra.result,
