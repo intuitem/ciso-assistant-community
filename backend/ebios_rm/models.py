@@ -247,7 +247,7 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
-    fields_to_check = ["name", "ref_id"]
+    fields_to_check = ["ebios_rm_study", "name", "ref_id"]
 
     class Meta:
         verbose_name = _("Feared event")
@@ -362,7 +362,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
-    fields_to_check = ["target_objective", "risk_origin"]
+    fields_to_check = ["ebios_rm_study", "target_objective", "risk_origin"]
 
     def __str__(self) -> str:
         return f"{self.get_risk_origin_display()} - {self.target_objective}"
@@ -475,7 +475,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
-    fields_to_check = ["entity", "category"]
+    fields_to_check = ["ebios_rm_study", "entity", "category"]
 
     class Meta:
         verbose_name = _("Stakeholder")
@@ -548,7 +548,7 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
     )
     ref_id = models.CharField(max_length=100, blank=True)
 
-    fields_to_check = ["name", "ref_id"]
+    fields_to_check = ["ebios_rm_study", "name", "ref_id"]
 
     class Meta:
         verbose_name = _("Strategic Scenario")
@@ -593,7 +593,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
-    fields_to_check = ["name", "ref_id"]
+    fields_to_check = ["ebios_rm_study", "name", "ref_id"]
 
     class Meta:
         verbose_name = _("Attack path")
