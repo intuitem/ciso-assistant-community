@@ -83,6 +83,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 			}
 		});
 		event.locals.settings = await generalSettings.json();
+
+		const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/object/`, {
+			credentials: 'include',
+			headers: {
+				'content-type': 'application/json',
+				Authorization: `Token ${event.cookies.get('token')}`
+			}
+		});
+		event.locals.featureflags = await featureFlagSettings.json();
 	}
 
 	return await resolve(event);

@@ -1468,6 +1468,6 @@
 	"featuredFlags": "Featured flags",
 	"configureFeaturedFlags": "Configure featured flags to enable or disable specific features in the application.",
 	"allow_all": "Allow all",
-	"featureFlagSettingsUpdated": "Feature flag settings updated",
+	"featureFlagSettingsUpdated": "Feature flag settings updated. Please refresh the page to apply the changes.",
 	"noEvents": "No events for this day"
 }

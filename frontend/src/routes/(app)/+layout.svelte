@@ -43,21 +43,72 @@
 
 	export let data: PageData;
 	export let form: ActionData;
+
 	export let sideBarVisibility = {
-		xRays: false,
-		incidents: false,
+		xRays: true,
+		incidents: true,
 		tasks: true,
-		riskAcceptances: false,
-		securityExceptions: false,
-		followUp: false,
-		ebiosRM: false,
-		scoringAssistant: false,
-		vulnerabilities: false,
-		compliance: false,
-		thirdPartyCategory: false,
-		privacy: false,
-		Experimental: false
+		riskAcceptances: true,
+		securityExceptions: true,
+		followUp: true,
+		ebiosRM: true,
+		scoringAssistant: true,
+		vulnerabilities: true,
+		compliance: true,
+		thirdPartyCategory: true,
+		privacy: true,
+		Experimental: true
 	};
+
+	if (data?.featureflags?.feature_flags == 'allow_all') {
+		sideBarVisibility = {
+			xRays: true,
+			incidents: true,
+			tasks: true,
+			riskAcceptances: true,
+			securityExceptions: true,
+			followUp: true,
+			ebiosRM: true,
+			scoringAssistant: true,
+			vulnerabilities: true,
+			compliance: true,
+			thirdPartyCategory: true,
+			privacy: true,
+			Experimental: false
+		};
+	} else if (data?.featureflags?.feature_flags == 'risk') {
+		sideBarVisibility = {
+			xRays: false,
+			incidents: false,
+			tasks: false,
+			riskAcceptances: true,
+			securityExceptions: true,
+			followUp: false,
+			ebiosRM: true,
+			scoringAssistant: true,
+			vulnerabilities: true,
+			compliance: false,
+			thirdPartyCategory: false,
+			privacy: false,
+			Experimental: false
+		};
+	} else if (data?.featureflags?.feature_flags == 'compliance') {
+		sideBarVisibility = {
+			xRays: false,
+			incidents: false,
+			tasks: false,
+			riskAcceptances: false,
+			securityExceptions: false,
+			followUp: false,
+			ebiosRM: false,
+			scoringAssistant: false,
+			vulnerabilities: false,
+			compliance: true,
+			thirdPartyCategory: false,
+			privacy: false,
+			Experimental: false
+		};
+	}
 
 	const modalStore: ModalStore = getModalStore();
 	function modalQuickStart(): void {
