@@ -3,44 +3,43 @@ name: Test Generator Backend
 # Exécution en priorité à chaque push ou PR sur main/develop
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, feat/test-generator-AI]
     paths:
       - 'backend/**'
       - 'tools/test_generator/backend/**'
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.txt'
-      - '**/*.png'
-      - '**/poetry.lock'
+      - '!**/*.md'
+      - '!**/*.txt'
+      - '!**/*.png'
+      - '!**/poetry.lock'
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, ]
     types: [opened, synchronize]
     paths:
       - 'backend/**'
       - 'tools/test_generator/backend/**'
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.txt'
-      - '**/*.png'
-      - '**/poetry.lock'
+      - '!**/*.md'
+      - '!**/*.txt'
+      - '!**/*.png'
+      - '!**/poetry.lock'
   workflow_dispatch:  # Permet de déclencher manuellement
 
 # Ce flag permet de s'assurer que cette action est considérée comme critique
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+#concurrency:
+  #group: ${{ github.workflow }}-${{ github.ref }}
+  #cancel-in-progress: false
 
 jobs:
   test-generator-backend:
+    if: github.head_ref == 'feat/test-generator-ai'
     name: Generate Backend Tests
     runs-on: ubuntu-latest
     # Définir ce job comme requis pour les autres workflows
-    outputs:
-      completed: ${{ steps.set-output.outputs.completed }}
+    #outputs:
+      #completed: ${{ steps.set-output.outputs.completed }}
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Récupérer l'historique Git complet
       
@@ -65,7 +64,7 @@ jobs:
           cat backend_diff.patch
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       
@@ -81,18 +80,3 @@ jobs:
           else
             echo "No relevant backend files found for test generation."
           fi
-      
-      # Cette étape définit un output qui sera utilisé pour la dépendance des autres workflows
-      - name: Set output
-        id: set-output
-        run: echo "completed=true" >> $GITHUB_OUTPUT
-      
-      # Artefacts pour le débogage et référence future
-      - name: Upload diff artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: backend-diff-files
-          path: |
-            backend_diff.patch
-            backend_diff_files.txt
-            backend_relevant_files.txt
