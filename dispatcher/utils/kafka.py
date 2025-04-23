@@ -1,11 +1,22 @@
 import settings
-import logging
+import sys
 
-import logging.config
-import structlog
+from loguru import logger
 
-logging.config.dictConfig(settings.LOGGING)
-logger = structlog.getLogger(__name__)
+log_message_format = (
+    "<green>{time}</green> | <level>{level}</level> | <level>{message}</level>"
+)
+if settings.DEBUG:
+    log_message_format += " | <magenta>{extra}</magenta>"
+
+logger.remove(0)
+logger.add(
+    sys.stderr,
+    format=log_message_format,
+    colorize=True,
+    backtrace=True,
+    diagnose=True,
+)
 
 
 def build_kafka_config(use_auth: bool = settings.KAFKA_USE_AUTH) -> dict:

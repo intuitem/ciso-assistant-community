@@ -263,7 +263,9 @@ if not (creds.get("token") or (creds.get("email") and creds.get("password"))):
     )
 
 DEBUG = config.get("debug", False)
-API_URL = config.get("rest", {}).get("url", "https://localhost:8443").rstrip("/")
+API_URL = config.get("rest", {}).get("url", "https://localhost:8443")
+if API_URL:
+    API_URL = API_URL.rstrip("/")
 VERIFY_CERTIFICATE = config.get("rest", {}).get("verify_certificate", True)
 USER_EMAIL = config["credentials"].get("email", "user@company.org")
 USER_PASSWORD = config["credentials"].get("password", "")
