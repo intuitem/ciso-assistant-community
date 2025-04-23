@@ -88,7 +88,6 @@ class EntitySerializersTestCase(TestCase):
         self.assertIn('created_at', data)
         self.assertIn('updated_at', data)
 
-
 class EntityAssessmentSerializersTestCase(TestCase):
     """Tests for EntityAssessment-related serializers"""
     def setUp(self):
@@ -216,6 +215,9 @@ class EntityAssessmentSerializersTestCase(TestCase):
         
         self.assertEqual(updated_assessment.name, "Updated Assessment")
         self.assertIn(new_rep, updated_assessment.representatives.all())
+
+        self.assertEqual(updated_assessment.representatives.count(), 1)
+        self.assertNotIn(self.representative, updated_assessment.representatives.all())
         
         mock_assign.assert_called_once()
 
@@ -269,6 +271,16 @@ class RepresentativeSerializersTestCase(TestCase):
             serializer.save()
         
         mock_create_or_update.assert_called_once()
+
+        call_args = mock_create_or_update.call_args[0]
+        self.assertIsInstance(call_args[0], Representative)
+        
+        self.assertEqual(call_args[0].email, data['email'])
+        self.assertEqual(call_args[0].first_name, data['first_name'])
+        self.assertEqual(call_args[0].last_name, data['last_name'])
+        
+        self.assertEqual(call_args[1], data['create_user'])
+
 
     @patch('iam.models.RoleAssignment.is_access_allowed', return_value=True)
     @patch('iam.models.User.objects.filter')
