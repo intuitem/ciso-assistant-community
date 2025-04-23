@@ -1,6 +1,6 @@
 name: Test Generator Backend
 
-# Exécution en priorité à chaque push ou PR sur main/develop
+# Trigger on every push or PR to main/develop/feat/test-generator-AI
 on:
   push:
     branches: [main, develop, feat/test-generator-AI]
@@ -12,7 +12,7 @@ on:
       - '!**/*.png'
       - '!**/poetry.lock'
   pull_request:
-    branches: [main, develop, ]
+    branches: [main, develop]
     types: [opened, synchronize]
     paths:
       - 'backend/**'
@@ -21,7 +21,7 @@ on:
       - '!**/*.txt'
       - '!**/*.png'
       - '!**/poetry.lock'
-  workflow_dispatch:  # Permet de déclencher manuellement
+  workflow_dispatch:  # Allows manual triggering
 
 # Ce flag permet de s'assurer que cette action est considérée comme critique
 #concurrency:
@@ -40,9 +40,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Récupérer l'historique Git complet
+          fetch-depth: 0  # Get full Git history
       
       - name: Get Git diff
+      # This step fetches the diff between the current branch and the main branch
         id: get_diff
         run: |
           echo "Fetching main branch..."
@@ -68,6 +69,7 @@ jobs:
           python-version: '3.10'
       
       - name: Filter relevant files
+        id: filter_files
         run: |
           echo "Filtering Python files for test generation..."
           grep '\.py$' backend_diff_files.txt | grep -Ev '/tests?/' | grep -v 'migrations/' > backend_relevant_files.txt || true
@@ -78,4 +80,26 @@ jobs:
             cat backend_relevant_files.txt
           else
             echo "No relevant backend files found for test generation."
+          fi  
+
+      - name: Find related files
+        id: find_related_files
+        run: |
+          cp tools/test_generator/scripts/find_related_files.py ./find_related_files.py
+          
+          chmod +x find_related_files.py
+          
+          python find_related_files.py backend_relevant_files.txt $GITHUB_WORKSPACE
+          
+          if [ -s all_files.txt ]; then
+            echo "===== Original files with their dependancies ====="
+            cat dependencies_map.json | jq
+            
+            echo "===== List of all files to be analyzed ====="
+            cat all_files.txt
+            
+            cp all_files.txt backend_final_files.txt
+          else
+            echo "No related files found."
+            cp backend_relevant_files.txt backend_final_files.txt
           fi
