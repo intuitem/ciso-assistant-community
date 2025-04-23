@@ -85,7 +85,7 @@ jobs:
       - name: Find related files
         id: find_related_files
         run: |
-          cp tools/test_generator/scripts/find_related_files.py ./find_related_files.py
+          cp tools/test_generator/backend/scripts/find_related_files.py ./find_related_files.py
           
           chmod +x find_related_files.py
           
