@@ -325,7 +325,19 @@ export const GeneralSettingsSchema = z.object({
 });
 
 export const featureFlagSchema = z.object({
-	feature_flags: z.string()
+	xrays: z.boolean().optional(),
+	incidents: z.boolean().optional(),
+	tasks: z.boolean().optional(),
+	risk_acceptances: z.boolean().optional(),
+	exceptions: z.boolean().optional(),
+	follow_up: z.boolean().optional(),
+	scoring_assistant: z.boolean().optional(),
+	vulnerabilities: z.boolean().optional(),
+	compliance: z.boolean().optional(),
+	tprm: z.boolean().optional(),
+	ebiosrm: z.boolean().optional(),
+	privacy: z.boolean().optional(),
+	experimental: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

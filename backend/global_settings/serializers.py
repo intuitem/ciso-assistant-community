@@ -12,7 +12,21 @@ GENERAL_SETTINGS_KEYS = [
     "notifications_enable_mailing",
 ]
 
-FEATURE_FLAGS_SETTINGS_KEYS = ["feature_flags"]
+FEATURE_FLAGS_SETTINGS_KEYS = [
+    "xrays",
+    "incidents",
+    "tasks",
+    "risk_acceptances",
+    "exceptions",
+    "follow_up",
+    "ebiosrm",
+    "scoring_assistant",
+    "vulnerabilities",
+    "compliance",
+    "tprm",
+    "privacy",
+    "experimental",
+]
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):

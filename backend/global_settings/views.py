@@ -64,7 +64,19 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
         default_settings = {
-            "feature_flags": "allow_all",
+            "xrays": False,
+            "incidents": False,
+            "tasks": False,
+            "risk_acceptances": False,
+            "exceptions": False,
+            "follow_up": False,
+            "ebiosrm": False,
+            "scoring_assistant": False,
+            "vulnerabilities": False,
+            "compliance": False,
+            "tprm": False,
+            "privacy": False,
+            "experimental": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="feature-flags")
@@ -77,15 +89,62 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 
         return Response(FeatureFlagsSerializer(settings).data.get("value"))
 
-    @action(detail=True, name="Get feature flags")
+    @action(detail=True, name="Get interface settings")
     def feature_flags(self, request):
-        choices = {
-            "allow_all": "allow_all",
-            "governance": "governance",
-            "risk": "risk",
-            "compliance": "compliance",
+        xrays = {
+            "xrays": self.get_object().value.get("xrays"),
         }
-        return Response(choices)
+        incidents = {
+            "incidents": self.get_object().value.get("incidents"),
+        }
+        tasks = {
+            "tasks": self.get_object().value.get("tasks"),
+        }
+        risk_acceptances = {
+            "risk_acceptances": self.get_object().value.get("risk_acceptances"),
+        }
+        exceptions = {
+            "exceptions": self.get_object().value.get("exceptions"),
+        }
+        follow_up = {
+            "follow_up": self.get_object().value.get("follow_up"),
+        }
+        ebiosrm = {
+            "ebiosrm": self.get_object().value.get("ebiosrm"),
+        }
+        scoring_assistant = {
+            "scoring_assistant": self.get_object().value.get("scoring_assistant"),
+        }
+        vulnerabilities = {
+            "vulnerabilities": self.get_object().value.get("vulnerabilities"),
+        }
+        compliance = {
+            "compliance": self.get_object().value.get("compliance"),
+        }
+        tprm = {
+            "tprm": self.get_object().value.get("tprm"),
+        }
+        privacy = {
+            "privacy": self.get_object().value.get("privacy"),
+        }
+        experimental = {
+            "experimental": self.get_object().value.get("experimental"),
+        }
+        return Response(
+            xrays,
+            incidents,
+            tasks,
+            risk_acceptances,
+            exceptions,
+            follow_up,
+            ebiosrm,
+            scoring_assistant,
+            vulnerabilities,
+            compliance,
+            tprm,
+            privacy,
+            experimental,
+        )
 
 
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
