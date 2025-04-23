@@ -1461,6 +1461,8 @@
 	"taskTemplate": "Task",
 	"taskTemplates": "Tasks",
 	"youCanSetPAsswordHere": "You can set your password here.",
+	"reminderWarningStrategicScenarios": "Reminder: Do not forget to identify Attacks Paths to do operational scenarios",
+	"addAttackPathToDoOperationalScenarios": "You have to add an attack path to these strategic scenarios if you want to use them in the operational scenarios:",
 	"impactHelpText": "Estimation of the control's impact",
 	"selectAsset": "Select an asset",
 	"lastOccurrenceStatus": "Last occurrence status",
@@ -1469,5 +1471,6 @@
 	"configureFeaturedFlags": "Configure featured flags to enable or disable specific features in the application.",
 	"allow_all": "Allow all",
 	"featureFlagSettingsUpdated": "Feature flag settings updated. Please refresh the page to apply the changes.",
-	"noEvents": "No events for this day"
+	"noEvents": "No events for this day",
+	"domainAnalytics": "Domain Analytics"
 }

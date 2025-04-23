@@ -31,7 +31,7 @@
 		</div>
 		<div class="mt-auto">
 			<p class="text-4xl font-bold text-left">{count}</p>
-			<div class="text-sm">{label}</div>
+			<div class="text-sm capitalize">{label}</div>
 		</div>
 	</Anchor>
 {:else}
@@ -46,7 +46,7 @@
 		</div>
 		<div class="mt-auto">
 			<p class="text-4xl font-bold text-left">{count}</p>
-			<div class="text-sm">{label}</div>
+			<div class="text-sm capitalize">{label}</div>
 		</div>
 	</div>
 {/if}
