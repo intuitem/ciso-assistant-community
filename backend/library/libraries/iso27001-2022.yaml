@@ -4,9 +4,10 @@ ref_id: ISO/IEC 27001:2022
 name: International standard ISO/IEC 27001:2022
 description: "Information security, cybersecurity and privacy protection \u2014 Information\
   \ security management systems \u2014 Requirements"
-copyright: See https://www.iso.org/standard/27001
-version: 7
-publication_date: 2024-03-02
+copyright: This is the outline of the ISO27001-2022 standard. You can purchase the
+  full standard from https://www.iso.org/standard/27001
+version: 9
+publication_date: 2025-04-16
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -15,7 +16,8 @@ translations:
     description: "S\xE9curit\xE9 de l'information, cybers\xE9curit\xE9 et protection\
       \ de la vie priv\xE9e \u2014 Information syst\xE8me de management de la s\xE9\
       curit\xE9 \u2014 Exigences"
-    copyright: Voir https://www.iso.org/standard/27001
+    copyright: "Ce document est un r\xE9sum\xE9 de la norme ISO27001-2022. Vous pouvez\
+      \ acheter le standard complet sur https://www.iso.org/standard/27001"
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
@@ -2116,6 +2118,8 @@ objects:
         goals, and ensuring alignment with compliance requirements.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.1
       translations:
         fr:
           name: "Politiques de s\xE9curit\xE9 de l'information"
@@ -2135,6 +2139,8 @@ objects:
         of responsibilities, periodic reviews, and enforcement mechanisms.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.2
       translations:
         fr:
           name: "Fonctions et responsabilit\xE9s li\xE9es \xE0 la s\xE9curit\xE9 de\
@@ -2155,6 +2161,8 @@ objects:
         access restrictions, and regular audits.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.3
       translations:
         fr:
           name: "S\xE9paration des t\xE2ches"
@@ -2173,6 +2181,8 @@ objects:
         allocating resources, and overseeing compliance.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.4
       translations:
         fr:
           name: "Responsabilit\xE9s de la direction"
@@ -2192,6 +2202,8 @@ objects:
         protocols, maintaining updated contact lists, and assigning responsibilities.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.5
       translations:
         fr:
           name: "Contact avec les autorit\xE9s"
@@ -2211,6 +2223,8 @@ objects:
         in forums, memberships, and collaborative initiatives.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.6
       translations:
         fr:
           name: "Contact avec des groupes d'int\xE9r\xEAt sp\xE9cifiques"
@@ -2229,6 +2243,8 @@ objects:
         feeds, analyzing trends, and sharing actionable insights.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.7
       translations:
         fr:
           name: Renseignements sur les menaces
@@ -2248,6 +2264,8 @@ objects:
         checkpoints during project lifecycles.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.8
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans la gestion de projet"
@@ -2267,6 +2285,8 @@ objects:
         classification by sensitivity.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.9
       translations:
         fr:
           name: "Inventaire des informations et autres actifs associ\xE9s"
@@ -2285,6 +2305,8 @@ objects:
         training, and enforcement mechanisms.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.10
       translations:
         fr:
           name: "Utilisation correcte des informations et autres actifs associ\xE9\
@@ -2304,6 +2326,8 @@ objects:
         and decommissioning protocols.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.11
       translations:
         fr:
           name: Restitution des actifs
@@ -2322,6 +2346,8 @@ objects:
         schemes, access restrictions, and labeling guidelines.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.12
       translations:
         fr:
           name: Classification des informations
@@ -2341,6 +2367,8 @@ objects:
         templates, training, and audits.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.13
       translations:
         fr:
           name: Marquage des informations
@@ -2359,6 +2387,8 @@ objects:
         and secure transfer protocols.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.14
       translations:
         fr:
           name: Transfert des informations
@@ -2377,6 +2407,8 @@ objects:
         access, multi-factor authentication, and periodic reviews.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.15
       translations:
         fr:
           name: "Contr\xF4le d'acc\xE8s"
@@ -2396,6 +2428,8 @@ objects:
         lifecycle management, and access provisioning.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.16
       translations:
         fr:
           name: "Gestion des identit\xE9s"
@@ -2415,6 +2449,8 @@ objects:
         and periodic password updates.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.17
       translations:
         fr:
           name: Informations d'authentification
@@ -2433,6 +2469,8 @@ objects:
         access revocation, and automated access management.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.18
       translations:
         fr:
           name: "Droits d'acc\xE8s"
@@ -2452,6 +2490,8 @@ objects:
         and ongoing monitoring.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.19
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans les relations avec les fournisseurs"
@@ -2470,6 +2510,8 @@ objects:
         audits, and defined penalties for violations.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.20
       translations:
         fr:
           name: "La s\xE9curit\xE9 de l'information dans les accords conclus avec\
@@ -2489,6 +2531,8 @@ objects:
         assessments, supplier evaluations, and incident response protocols.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.21
       translations:
         fr:
           name: "Gestion de la s\xE9curit\xE9 de l'information dans la cha\xEEne d'approvisionnement\
@@ -2509,6 +2553,8 @@ objects:
         agreements, periodic reviews, and contract updates.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.22
       translations:
         fr:
           name: "Surveillance, r\xE9vision et gestion des changements des services\
@@ -2529,6 +2575,8 @@ objects:
         compliance reviews.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.23
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans l'utilisation de services en\
@@ -2548,6 +2596,8 @@ objects:
         training exercises, and communication protocols.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.24
       translations:
         fr:
           name: "Planification et pr\xE9paration de la gestion des incidents de s\xE9\
@@ -2567,6 +2617,8 @@ objects:
         analysis, risk evaluation, and mitigation plans.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.25
       translations:
         fr:
           name: "\xC9valuation des \xE9v\xE9nements de s\xE9curit\xE9 de l'information\
@@ -2587,6 +2639,8 @@ objects:
         reporting, escalation protocols, and containment strategies.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.26
       translations:
         fr:
           name: "R\xE9ponse aux incidents de s\xE9curit\xE9 de l'information"
@@ -2605,6 +2659,8 @@ objects:
         post-incident reviews, action plans, and policy updates.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.27
       translations:
         fr:
           name: "Tirer des enseignements des incidents de s\xE9curit\xE9 de l'information"
@@ -2624,6 +2680,8 @@ objects:
         procedures, secure storage, and access controls.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.28
       translations:
         fr:
           name: Collecte de preuves
@@ -2643,6 +2701,8 @@ objects:
         plans, backup systems, and failover mechanisms.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.29
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information pendant une perturbation"
@@ -2661,6 +2721,8 @@ objects:
         systems, and disaster recovery sites.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.30
       translations:
         fr:
           name: "Pr\xE9paration des TIC la continuit\xE9 d'activit\xE9"
@@ -2680,6 +2742,8 @@ objects:
         reviews, audits, and evidence documentation.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.31
       translations:
         fr:
           name: "Exigences l\xE9gales, statutaires, r\xE9glementaires et contractuelles"
@@ -2698,6 +2762,8 @@ objects:
         restrictions, encryption, and legal agreements.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.32
       translations:
         fr:
           name: " Droits de propri\xE9t\xE9 intellectuelle"
@@ -2716,6 +2782,8 @@ objects:
         secure storage, and access controls.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.33
       translations:
         fr:
           name: Protection des enregistrements
@@ -2735,6 +2803,8 @@ objects:
         encryption, and compliance with privacy laws.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.34
       translations:
         fr:
           name: "Protection de la vie priv\xE9e et des donn\xE9es \xE0 caract\xE8\
@@ -2754,6 +2824,8 @@ objects:
         risk assessments, and follow-up actions.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.35
       translations:
         fr:
           name: "R\xE9vision ind\xE9pendante de la s\xE9curit\xE9 de l'information"
@@ -2772,6 +2844,8 @@ objects:
         and enforcement mechanisms.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.36
       translations:
         fr:
           name: "Conformit\xE9 aux politiques, r\xE8gles et normes de s\xE9curit\xE9\
@@ -2791,6 +2865,8 @@ objects:
         version control, and accessibility.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.5.37
       translations:
         fr:
           name: "Proc\xE9dures d'exploitation document\xE9es"
@@ -2822,6 +2898,8 @@ objects:
         to reduce security risks.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.6.1
       translations:
         fr:
           name: "S\xE9lection des candidats"
@@ -2841,6 +2919,8 @@ objects:
         confidentiality, compliance with policies, and consequences for breaches.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.6.2
       translations:
         fr:
           name: Termes et conditions du contrat de travail
@@ -2860,6 +2940,8 @@ objects:
         sessions, e-learning programs, and simulated phishing exercises.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.6.3
       translations:
         fr:
           name: "Sensibilisation, enseignement et formation en s\xE9curit\xE9 de l'information"
@@ -2879,6 +2961,8 @@ objects:
         procedures, and consistent enforcement to maintain accountability.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.6.4
       translations:
         fr:
           name: "Proc\xE9dure disciplinaire"
@@ -2899,6 +2983,8 @@ objects:
         exit interviews.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.6.5
       translations:
         fr:
           name: "Responsabilit\xE9s apr\xE8s la fin ou le changement d'emploi"
@@ -2920,6 +3006,8 @@ objects:
         in case of violations.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.6.6
       translations:
         fr:
           name: "Accords de confidentialit\xE9 ou de non-divulgation"
@@ -2939,6 +3027,8 @@ objects:
         mandatory use of VPNs, and policies for handling sensitive data remotely.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.6.7
       translations:
         fr:
           name: "Travail \xE0 distance"
@@ -2958,6 +3048,8 @@ objects:
         and follow-up procedures to investigate and address reported events.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.6.8
       translations:
         fr:
           name: "D\xE9claration des \xE9v\xE9nements de s\xE9curit\xE9 de l'information"
@@ -2990,6 +3082,8 @@ objects:
         enter.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.1
       translations:
         fr:
           name: "P\xE9rim\xE8tres de s\xE9curit\xE9 physique"
@@ -3009,6 +3103,8 @@ objects:
         and visitor logs.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.2
       translations:
         fr:
           name: "Les entr\xE9es physiques"
@@ -3027,6 +3123,8 @@ objects:
         areas, and surveillance systems.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.3
       translations:
         fr:
           name: "S\xE9curisation des bureaux, des salles et des installations"
@@ -3045,6 +3143,8 @@ objects:
         and real-time alerts.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.4
       translations:
         fr:
           name: "Surveillance de la s\xE9curit\xE9 physique"
@@ -3063,6 +3163,8 @@ objects:
         and flood prevention barriers.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.5
       translations:
         fr:
           name: Protection contre les menaces physiques et environnementales
@@ -3081,6 +3183,8 @@ objects:
         activity monitoring.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.6
       translations:
         fr:
           name: "Travail dans les zones s\xE9curis\xE9es"
@@ -3100,6 +3204,8 @@ objects:
         sensitive documents away and auto-locking screens when not in use.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.7
       translations:
         fr:
           name: "Bureau propre et \xE9cran vide"
@@ -3119,6 +3225,8 @@ objects:
         locked cabinets, and restricted access areas.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.8
       translations:
         fr:
           name: "Emplacement et protection du mat\xE9riel"
@@ -3138,6 +3246,8 @@ objects:
         transport, and access tracking.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.9
       translations:
         fr:
           name: "S\xE9curit\xE9 des actifs hors des locaux"
@@ -3155,6 +3265,8 @@ objects:
         or tampering. Measures include secure storage, encryption, and access restrictions.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.10
       translations:
         fr:
           name: Supports de stockage
@@ -3173,6 +3285,8 @@ objects:
         redundant systems and physical security.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.11
       translations:
         fr:
           name: Services supports
@@ -3191,6 +3305,8 @@ objects:
         and secure routing.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.12
       translations:
         fr:
           name: "S\xE9curit\xE9 du c\xE2blage"
@@ -3209,6 +3325,8 @@ objects:
         secure maintenance practices, and authorized personnel access.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.13
       translations:
         fr:
           name: "Maintenance du mat\xE9riel"
@@ -3228,6 +3346,8 @@ objects:
         destruction, and certified disposal processes.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.7.14
       translations:
         fr:
           name: "\xC9limination ou recyclage s\xE9curis\xE9(e) du mat\xE9riel"
@@ -3259,6 +3379,8 @@ objects:
         endpoint detection, encryption, and secure configurations to minimize risks.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.1
       translations:
         fr:
           name: Terminaux finaux des utilisateurs
@@ -3278,6 +3400,8 @@ objects:
         include role-based access controls, periodic reviews, and strict account management.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.2
       translations:
         fr:
           name: "Droits d'acc\xE8s privil\xE9gi\xE9s"
@@ -3297,6 +3421,8 @@ objects:
         permissions, and regular access reviews.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.3
       translations:
         fr:
           name: "Restriction d'acc\xE8s aux informations"
@@ -3315,6 +3441,8 @@ objects:
         repositories, and restricted developer access.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.4
       translations:
         fr:
           name: "Acc\xE8s aux codes source"
@@ -3333,6 +3461,8 @@ objects:
         access.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.5
       translations:
         fr:
           name: "Authentification s\xE9curis\xE9e"
@@ -3351,6 +3481,8 @@ objects:
         usage and planning for future needs.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.6
       translations:
         fr:
           name: Dimensionnement
@@ -3368,6 +3500,8 @@ objects:
         tools, and regular updates to protect systems from malware and malicious attacks.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.7
       translations:
         fr:
           name: Protection contre les programmes malveillants (malware)
@@ -3386,6 +3520,8 @@ objects:
         and patch management.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.8
       translations:
         fr:
           name: "Gestion des vuln\xE9rabilit\xE9s techniques"
@@ -3403,6 +3539,8 @@ objects:
         to maintain security settings and prevent unauthorized changes.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.9
       translations:
         fr:
           name: Gestion des configurations
@@ -3419,6 +3557,8 @@ objects:
         when no longer required to prevent unauthorized recovery or exposure.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.10
       translations:
         fr:
           name: Suppression des informations
@@ -3437,6 +3577,8 @@ objects:
         users.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.11
       translations:
         fr:
           name: "Masquage des donn\xE9es"
@@ -3454,6 +3596,8 @@ objects:
         of sensitive data through email, removable media, or other channels.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.12
       translations:
         fr:
           name: "Pr\xE9vention de la fuite de donn\xE9es"
@@ -3470,6 +3614,8 @@ objects:
         and securely to ensure its availability in case of incidents or disasters.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.13
       translations:
         fr:
           name: Sauvegarde des informations
@@ -3487,6 +3633,8 @@ objects:
         to maintain availability and operations during system failures or emergencies.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.14
       translations:
         fr:
           name: Redondance des moyens de traitement de l'information
@@ -3504,12 +3652,14 @@ objects:
         monitoring, incident detection, and forensic investigations.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.15
       translations:
         fr:
           name: Journalisation
           description: "Cette mesure de s\xE9curit\xE9 permet la journalisation des\
             \ activit\xE9s au sein des syst\xE8mes pour soutenir la surveillance,\
-            \ la d\xE9tection des incidents et les enqu\xEAtes m\xE9dico-l\xE9gales."
+            \ la d\xE9tection des incidents et les analyses forensiques."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
       assessable: true
       depth: 3
@@ -3520,6 +3670,8 @@ objects:
         to detect, respond to, and mitigate security threats.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.16
       translations:
         fr:
           name: "Activit\xE9s de surveillance"
@@ -3536,6 +3688,8 @@ objects:
         accurate and consistent timestamps for logs and other critical processes.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.17
       translations:
         fr:
           name: Synchronisation des horloges
@@ -3552,6 +3706,8 @@ objects:
         programs to prevent misuse and unauthorized actions.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.18
       translations:
         fr:
           name: "Utilisation de programmes utilitaires \xE0 privil\xE8ges"
@@ -3568,6 +3724,8 @@ objects:
         is managed securely to prevent vulnerabilities or unauthorized changes.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.19
       translations:
         fr:
           name: "Installation de logiciels sur des syst\xE8mes op\xE9rationnels"
@@ -3586,6 +3744,8 @@ objects:
         and attacks.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.20
       translations:
         fr:
           name: "S\xE9curit\xE9 des r\xE9seaux"
@@ -3603,6 +3763,8 @@ objects:
         confidentiality, integrity, and availability during use.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.21
       translations:
         fr:
           name: "S\xE9curit\xE9 des services r\xE9seau"
@@ -3619,6 +3781,8 @@ objects:
         of threats and minimize the impact of potential breaches.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.22
       translations:
         fr:
           name: "Cloisonnement des r\xE9seaux"
@@ -3635,6 +3799,8 @@ objects:
         harmful content from being accessed over the internet.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.23
       translations:
         fr:
           name: 'Filtrage web '
@@ -3651,6 +3817,8 @@ objects:
         data confidentiality, integrity, and authenticity.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.24
       translations:
         fr:
           name: Utilisation de la cryptographie
@@ -3667,6 +3835,8 @@ objects:
         life cycle to ensure systems and applications are built securely.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.25
       translations:
         fr:
           name: "Cycle de vie de d\xE9veloppement s\xE9curis\xE9"
@@ -3684,6 +3854,8 @@ objects:
         to safeguard against vulnerabilities.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.26
       translations:
         fr:
           name: "Exigences de s\xE9curit\xE9 des applications"
@@ -3700,6 +3872,8 @@ objects:
         the development of system architectures.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.27
       translations:
         fr:
           name: "Principes d'ing\xE9nierie et d'architecture des syst\xE8mes s\xE9\
@@ -3717,6 +3891,8 @@ objects:
         in developed software.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.28
       translations:
         fr:
           name: "Codage s\xE9curis\xE9"
@@ -3733,6 +3909,8 @@ objects:
         and acceptance phases to identify weaknesses.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.29
       translations:
         fr:
           name: "Tests de s\xE9curit\xE9 dans le d\xE9veloppement et l'acceptation"
@@ -3749,6 +3927,8 @@ objects:
         development is outsourced to third-party vendors.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.30
       translations:
         fr:
           name: "D\xE9veloppement externalis\xE9 "
@@ -3765,6 +3945,8 @@ objects:
         are segregated to prevent unintended interactions and unauthorized access.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.31
       translations:
         fr:
           name: "S\xE9paration des environnements de d\xE9veloppement, de test et\
@@ -3783,6 +3965,8 @@ objects:
         minimize risks and maintain operational stability.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.32
       translations:
         fr:
           name: Gestion des changements
@@ -3799,6 +3983,8 @@ objects:
         or confidential information during testing processes.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.33
       translations:
         fr:
           name: Informations de test
@@ -3817,6 +4003,8 @@ objects:
         agreements to maintain system security and integrity.
       implementation_groups:
       - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a.8.34
       translations:
         fr:
           name: "Protection des syst\xE8mes d'information pendant les tests d'audit"

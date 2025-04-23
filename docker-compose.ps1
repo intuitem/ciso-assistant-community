@@ -8,16 +8,16 @@ if (Test-Path "db/ciso-assistant.sqlite3") {
 }
 
 Write-Output "Starting CISO Assistant services..."
-docker compose -f ./docker-compose-default.yml pull
+docker compose pull
 
 Write-Output "Initializing the database. This can take a minute, please wait.."
-docker compose -f ./docker-compose-default.yml up -d
+docker compose up -d
 
 Write-Output "Waiting for CISO Assistant backend to be ready..."
 do {
     $backendReady = $false
     try {
-        $result = docker compose -f ./docker-compose-default.yml exec -T backend curl -f http://localhost:8000/api/build 2>$null
+        $result = docker compose exec -T backend curl -f http://localhost:8000/api/build 2>$null
         if ($LASTEXITCODE -eq 0) {
             $backendReady = $true
         }
@@ -30,7 +30,7 @@ do {
 
 Write-Output "`nBackend is ready!"
 Write-Output "Creating superuser..."
-docker compose -f ./docker-compose-default.yml exec backend poetry run python manage.py createsuperuser
+docker compose exec backend poetry run python manage.py createsuperuser
 
 Write-Output "`nInitialization complete!"
 Write-Output "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)"

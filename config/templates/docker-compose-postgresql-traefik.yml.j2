@@ -52,8 +52,8 @@ services:
       test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 60s
+      retries: 20
+      start_period: 100s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`{{ fqdn }}`) && PathPrefix(`/api`)"
@@ -84,7 +84,7 @@ services:
       {% if need_mailer %}
       - EMAIL_HOST={{ email.host }}
       - EMAIL_PORT={{ email.port }}
-      - EMAIL_USE_TLS={{ email.use_tls }}
+      {% if email.use_tls %}- EMAIL_USE_TLS={{ email.use_tls }}{% endif %}
       - EMAIL_HOST_USER={{ email.user }}
       - EMAIL_HOST_PASSWORD={{ email.password }}
       - DEFAULT_FROM_EMAIL={{ email.from_email }}

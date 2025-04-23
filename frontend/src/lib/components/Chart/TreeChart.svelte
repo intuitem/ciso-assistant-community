@@ -23,27 +23,29 @@
 				trigger: 'item',
 				triggerOn: 'mousemove'
 			},
+			color: ['#625FFF'],
 			title: { text: title },
 			series: [
 				{
 					type: 'tree',
-
+					roam: true,
+					orient: 'vertical',
 					data: [tree],
-					symbol: 'emptyCircle',
-					symbolSize: 10,
-
+					symbol: 'square',
+					symbolSize: 30,
+					initialTreeDepth: 1,
 					label: {
 						position: 'left',
 						verticalAlign: 'middle',
 						align: 'right',
-						fontSize: 10
+						fontSize: 13
 					},
 
 					leaves: {
 						label: {
 							position: 'right',
 							verticalAlign: 'middle',
-							align: 'left'
+							align: 'right'
 						}
 					},
 

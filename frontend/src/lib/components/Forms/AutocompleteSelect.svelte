@@ -2,14 +2,16 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { beforeUpdate, onMount } from 'svelte';
-	import { formFieldProxy } from 'sveltekit-superforms';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
+	import * as m from '$paraglide/messages.js';
+	import { toCamelCase } from '$lib/utils/locales';
 
 	interface Option {
 		label: string;
-		value: string;
+		value: string | number;
 		suggested?: boolean;
 	}
 
@@ -18,10 +20,13 @@
 	export let fieldContext: FieldContext = 'form-input';
 
 	export let label: string | undefined = undefined;
+	export let baseClass = '';
 	export let field: string;
+	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
 
-	export let form;
+	export let form: SuperForm<Record<string, unknown>, any>;
+	export let resetForm = false;
 	export let multiple = false;
 	export let nullable = false;
 	export let mandatory = false;
@@ -96,13 +101,13 @@
 	};
 	export let cachedValue: any[] | undefined = undefined;
 
-	const { value, errors, constraints } = formFieldProxy(form, field);
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	let selected: (typeof options)[] = [];
 	let selectedValues: (string | undefined)[] = [];
 	let isInternalUpdate = false;
 	let optionsLoaded = Boolean(options.length);
-	let initialValue = $value; // Store initial value
+	const initialValue = resetForm ? undefined : $value; // Store initial value
 	const default_value = nullable ? null : selectedValues[0];
 
 	const multiSelectOptions = {
@@ -229,6 +234,15 @@
 	});
 
 	function handleSelectChange() {
+		if (allowUserOptions && selectedValues.length > 0) {
+			for (const val of selectedValues) {
+				if (!options.some((opt) => opt.value === val)) {
+					const newOption: Option = { label: val, value: val };
+					options = [...options, newOption];
+				}
+			}
+		}
+
 		dispatch('change', $value);
 		dispatch('cache', selected);
 	}
@@ -285,7 +299,7 @@
 	});
 </script>
 
-<div {hidden}>
+<div class={baseClass} {hidden}>
 	{#if label !== undefined}
 		{#if $constraints?.required || mandatory}
 			<label class="text-sm font-semibold" for={field}
@@ -327,7 +341,7 @@
 				<span class="text-indigo-600">{option.label}</span>
 				<span class="text-sm text-gray-500"> (suggested)</span>
 			{:else if translateOptions && option.label}
-				{safeTranslate(option.label)}
+				{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
 			{:else}
 				{option.label || option}
 			{/if}

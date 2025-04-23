@@ -23,8 +23,8 @@ services:
       test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 60s
+      retries: 20
+      start_period: 100s
 
   huey:
     container_name: huey
@@ -42,7 +42,7 @@ services:
       {% if need_mailer %}
       - EMAIL_HOST={{ email.host }}
       - EMAIL_PORT={{ email.port }}
-      - EMAIL_USE_TLS={{ email.use_tls }}
+      {% if email.use_tls %}- EMAIL_USE_TLS={{ email.use_tls }}{% endif %}
       - EMAIL_HOST_USER={{ email.user }}
       - EMAIL_HOST_PASSWORD={{ email.password }}
       - DEFAULT_FROM_EMAIL={{ email.from_email }}
@@ -78,7 +78,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
     ports:
-      - {{ port }}:{{ port }}
+      - {{ port }}:{{ port }}{% if can_do_tls and port != 443 %}
+      - 443:443{% endif %}
     volumes:
       - ./caddy_data:/data{% if not can_do_tls and use_custom_cert %}
       - {{ cert_config.cert_path }}:/etc/caddy/cert.pem:ro

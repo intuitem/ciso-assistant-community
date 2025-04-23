@@ -5,8 +5,8 @@
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
+	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
 	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
@@ -37,7 +37,8 @@
 
 	const riskMatricesTable: TableSource = {
 		head: { name: 'name', description: 'description' },
-		body: tableSourceMapper(riskMatrices, ['name', 'description'])
+		body: tableSourceMapper(riskMatrices, ['name', 'description']),
+		meta: { count: riskMatrices.length }
 	};
 
 	const referenceControlsTable: TableSource = {
@@ -54,12 +55,14 @@
 			'description',
 			'category',
 			'csf_function'
-		])
+		]),
+		meta: { count: referenceControls.length }
 	};
 
 	const threatsTable: TableSource = {
 		head: { ref_id: 'ref', name: 'name', description: 'description' },
-		body: tableSourceMapper(threats, ['ref_id', 'name', 'description'])
+		body: tableSourceMapper(threats, ['ref_id', 'name', 'description']),
+		meta: { count: threats.length }
 	};
 
 	function riskMatricesPreview(riskMatrices: []) {
@@ -96,7 +99,7 @@
 				<p class="text-md leading-5 text-gray-700">
 					<strong>{m.publicationDate()}</strong>: {formatDateOrDateTime(
 						data.library.publication_date,
-						languageTag()
+						getLocale()
 					)}
 				</p>
 			{/if}
@@ -146,7 +149,15 @@
 			icon="fa-solid fa-gears"
 			header="{referenceControls.length} {m.referenceControls()}"
 		>
-			<ModelTable source={referenceControlsTable} displayActions={false} interactive={false} />
+			<ModelTable
+				source={referenceControlsTable}
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+				interactive={false}
+			/>
 		</Dropdown>
 	{/if}
 
@@ -156,7 +167,15 @@
 			icon="fa-solid fa-biohazard"
 			header="{threats.length} {m.threats()}"
 		>
-			<ModelTable source={threatsTable} displayActions={false} interactive={false} />
+			<ModelTable
+				source={threatsTable}
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+				interactive={false}
+			/>
 		</Dropdown>
 	{/if}
 

@@ -7,7 +7,7 @@
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
@@ -111,22 +111,13 @@
 	multiple
 	{form}
 	optionsEndpoint="assets"
+	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
 	optionsLabelField="auto"
 	optionsSelf={object}
 	field="parent_assets"
 	cacheLock={cacheLocks['parent_assets']}
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="security-exceptions"
-	optionsExtraFields={[['folder', 'str']]}
-	field="security_exceptions"
-	cacheLock={cacheLocks['security_exceptions']}
-	bind:cachedValue={formDataCache['security_exceptions']}
-	label={m.securityExceptions()}
 />
 <TextField
 	{form}

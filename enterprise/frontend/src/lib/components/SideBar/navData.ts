@@ -16,6 +16,18 @@ export const navData = {
 					]
 				},
 				{
+					name: 'domainAnalytics',
+					fa_icon: 'fa-solid fa-folder-tree',
+					href: '/domain-analytics',
+					permissions: [
+						'view_perimeter',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_assessment',
+						'view_riskassessment'
+					]
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -155,6 +167,16 @@ export const navData = {
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
 					permissions: ['view_riskassessment', 'view_assessment']
+				},
+				{
+					name: 'incidents',
+					fa_icon: 'fa-solid fa-bug',
+					href: '/incidents'
+				},
+				{
+					name: 'tasks',
+					fa_icon: 'fa-solid fa-note-sticky',
+					href: '/task-templates'
 				}
 			]
 		},
@@ -182,6 +204,11 @@ export const navData = {
 					name: 'securityExceptions',
 					fa_icon: 'fa-solid fa-circle-exclamation',
 					href: '/security-exceptions'
+				},
+				{
+					name: 'followUp',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/findings-assessments'
 				}
 			]
 		},
@@ -230,6 +257,12 @@ export const navData = {
 					name: 'evidences',
 					fa_icon: 'fa-solid fa-receipt',
 					href: '/evidences'
+				},
+				{
+					name: 'recap',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/recap',
+					permissions: ['view_complianceassessment']
 				}
 			]
 		},
@@ -237,6 +270,17 @@ export const navData = {
 		{
 			name: 'thirdPartyCategory',
 			items: [
+				{
+					name: 'tprmOverview',
+					fa_icon: 'fa-solid fa-gauge',
+					href: '/analytics/tprm',
+					permissions: [
+						'view_complianceassessment',
+						'view_entity',
+						'view_solution',
+						'view_entityassessment'
+					]
+				},
 				{
 					name: 'entities',
 					fa_icon: 'fa-solid fa-building',
@@ -256,6 +300,35 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
+				}
+			]
+		},
+		{
+			name: 'privacy',
+			items: [
+				{
+					name: 'overview',
+					fa_icon: 'fa-solid fa-gauge',
+					href: '/analytics/gdpr',
+					permissions: ['view_processing', 'view_purpose']
+				},
+				{
+					name: 'processingsRegister',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/processings',
+					permissions: ['view_processing']
+				},
+				{
+					name: 'personalData',
+					fa_icon: 'fa-solid fa-users-viewfinder',
+					href: '/personal-data',
+					permissions: ['view_personaldata']
+				},
+				{
+					name: 'purposes',
+					fa_icon: 'fa-solid fa-diamond',
+					href: '/purposes',
+					permissions: ['view_purpose']
 				}
 			]
 		},

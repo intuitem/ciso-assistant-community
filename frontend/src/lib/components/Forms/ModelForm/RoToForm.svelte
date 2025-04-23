@@ -4,7 +4,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import { page } from '$app/stores';
 
@@ -101,7 +101,7 @@
 		{form}
 		options={model.selectOptions['activity']}
 		field="activity"
-		label={m.activity()}
+		label={m.ro_activity()}
 		cacheLock={cacheLocks['activity']}
 		bind:cachedValue={formDataCache['activity']}
 		helpText={m.activityHelpText()}

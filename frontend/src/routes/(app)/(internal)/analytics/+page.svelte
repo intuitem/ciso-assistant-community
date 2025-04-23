@@ -11,8 +11,8 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
-	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
+	import { m } from '$paraglide/messages';
+	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
 	import type { PageData } from './$types';
@@ -40,16 +40,8 @@
 			eta: 'eta',
 			state: 'state'
 		},
-		body: tableSourceMapper(data.measures, [
-			'name',
-			'category',
-			'csf_function',
-			'folder',
-			'ranking_score',
-			'eta',
-			'state'
-		]),
-		meta: data.measures
+		body: [],
+		meta: []
 	};
 
 	const appliedControlWatchlistTable: TableSource = {
@@ -62,16 +54,8 @@
 			expiry_date: 'expiryDate',
 			state: 'state'
 		},
-		body: tableSourceMapper(data.measures_to_review, [
-			'name',
-			'category',
-			'csf_function',
-			'folder',
-			'eta',
-			'expiry_date',
-			'state'
-		]),
-		meta: data.measures_to_review
+		body: [],
+		meta: []
 	};
 
 	const riskAcceptanceWatchlistTable: TableSource = {
@@ -81,13 +65,8 @@
 			expiry_date: 'expiryDate',
 			state: 'state'
 		},
-		body: tableSourceMapper(data.acceptances_to_review, [
-			'name',
-			'risk_scenarios',
-			'expiry_date',
-			'state'
-		]),
-		meta: data.acceptances_to_review
+		body: [],
+		meta: []
 	};
 
 	let tabSet = $page.url.searchParams.get('tab')
@@ -111,9 +90,6 @@
 	>
 	<Tab bind:group={tabSet} on:click={() => handleTabChange(3)} name="compliance" value={3}
 		>{m.compliance()}</Tab
-	>
-	<Tab bind:group={tabSet} on:click={() => handleTabChange(4)} name="composer" value={4}
-		>{m.composer()}</Tab
 	>
 	<svelte:fragment slot="panel">
 		<div class="px-4 pb-4 space-y-8">
@@ -180,7 +156,7 @@
 						<Card
 							count={metrics.controls.p1}
 							label={m.sumpageP1()}
-							href="/applied-controls/?priority=p1"
+							href="/applied-controls/?priority=1&status=to_do&status=deprecated&status=on_hold&status=in_progress&status=--"
 							icon="fa-solid fa-shield-halved"
 							section={m.sumpageSectionControls()}
 							emphasis={true}
@@ -189,7 +165,9 @@
 						<Card
 							count={metrics.controls.eta_missed}
 							label={m.sumpageEtaMissed()}
-							href="/applied-controls/?status=on_hold"
+							href="/applied-controls/?status=to_do&status=deprecated&status=in_progress&status=--&status=on_hold&eta__lte={new Date()
+								.toISOString()
+								.split('T')[0]}"
 							icon="fa-solid fa-shield-halved"
 							section={m.sumpageSectionControls()}
 							emphasis={true}
@@ -531,26 +509,6 @@
 					><a href="/recap" class="hover:text-purple-500">{m.sectionMoved()}</a></span
 				>
 				<div class="flex flex-col space-y-2"></div>
-			{:else if tabSet === 4}
-				<div id="title" class="text-lg font-black">{m.composer()}</div>
-				<select id="composer_select" hidden>
-					{#each risk_assessments as risk_assessment}
-						<option value={risk_assessment.id}>{risk_assessment.name}</option>
-					{/each}
-				</select>
-				<div>
-					{m.composerDescription()}:
-					<ul class="list-disc px-4 py-2 mx-4 my-2">
-						<li>
-							{m.composerDescription1()}
-						</li>
-						<li>
-							{m.composerDescription2()}
-						</li>
-					</ul>
-				</div>
-
-				<ComposerSelect composerForm={data.composerForm} />
 			{/if}
 		</div>
 	</svelte:fragment>

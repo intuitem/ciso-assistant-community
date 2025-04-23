@@ -30,7 +30,7 @@
 	import type { Node } from './types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -40,6 +40,7 @@
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	$: tree = data.tree;
 
@@ -47,12 +48,40 @@
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: model.name,
+		domain: data.compliance_assessment.folder.id
+	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
-	const canEditRequirementAssessment: boolean = Object.hasOwn(
-		user.permissions,
-		`change_${requirementAssessmentModel.name}`
-	);
+	const canEditRequirementAssessment: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: requirementAssessmentModel.name,
+		domain: data.compliance_assessment.folder.id
+	});
+
+	const has_threats = data.threats.total_unique_threats > 0;
+
+	let threatDialogOpen = false;
+	let dialogElement;
+
+	function openThreatsDialog() {
+		threatDialogOpen = true;
+		// Need to use the next tick to ensure the dialog is in the DOM
+		setTimeout(() => {
+			if (dialogElement) dialogElement.showModal();
+		}, 0);
+	}
+
+	function closeThreatsDialog() {
+		threatDialogOpen = false;
+		if (dialogElement) dialogElement.close();
+	}
+
+	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -259,7 +288,7 @@
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
-			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups'].includes(key) ) as [key, value]}
+			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
 						class="text-sm font-medium text-gray-800 capitalize-first"
@@ -385,6 +414,10 @@
 					{#if !$page.data.user.is_third_party}
 						<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 						<a
+							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/csv"
+							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+						>
+						<a
 							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/pdf"
 							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 						>
@@ -448,6 +481,18 @@
 						{/if}
 					</span>
 					{m.suggestControls()}
+				</button>
+			{/if}
+			{#if has_threats}
+				<button
+					class="border rounded-lg btn h-fit bg-gradient-to-r from-yellow-500 to-yellow-300 px-3 py-2"
+					on:click={openThreatsDialog}
+				>
+					<div class="flex items-center space-x-2">
+						<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
+						<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
+						<span>{m.potentialThreats()}</span>
+					</div>
 				</button>
 			{/if}
 		</div>
@@ -531,3 +576,21 @@
 		{/key}
 	</div>
 </div>
+{#if threatDialogOpen}
+	<dialog
+		bind:this={dialogElement}
+		class="card p-4 bg-white shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
+		on:close={() => (threatDialogOpen = false)}
+	>
+		<div class="flex justify-between items-center mb-4">
+			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
+			<button class="btn btn-sm variant-filled-error" on:click={closeThreatsDialog}>
+				<i class="fa-solid fa-times"></i>
+			</button>
+		</div>
+
+		<div class="threats-content">
+			<ForceCirclePacking data={data.threats.graph} name="threats_graph" height="h-[600px]" />
+		</div>
+	</dialog>
+{/if}

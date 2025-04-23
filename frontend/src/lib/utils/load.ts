@@ -41,10 +41,6 @@ export const loadDetail = async ({ event, model, id }) => {
 		const initialData = {};
 		await Promise.all(
 			model.reverseForeignKeyFields.map(async (e) => {
-				const relEndpoint = `${BASE_API_URL}/${e.endpointUrl || e.urlModel}/?${e.field}=${event.params.id}`;
-				const res = await event.fetch(relEndpoint);
-				const revData = await res.json().then((res) => res.results);
-
 				const tableFieldsRef = listViewFields[e.urlModel];
 				const tableFields = {
 					head: [...tableFieldsRef.head],
@@ -55,12 +51,14 @@ export const loadDetail = async ({ event, model, id }) => {
 					tableFields.head.splice(index, 1);
 					tableFields.body.splice(index, 1);
 				}
-				const bodyData = tableSourceMapper(revData, tableFields.body);
-
+				const headData: Record<string, string> = tableFields.body.reduce((obj, key, index) => {
+					obj[key] = index < tableFields.head.length ? tableFields.head[index] : key;
+					return obj;
+				}, {});
 				const table: TableSource = {
-					head: tableFields.head,
-					body: bodyData,
-					meta: revData
+					head: headData,
+					body: [],
+					meta: []
 				};
 
 				const info = getModelInfo(e.urlModel);
@@ -99,7 +97,7 @@ export const loadDetail = async ({ event, model, id }) => {
 				if (info.selectFields) {
 					await Promise.all(
 						info.selectFields.map(async (selectField) => {
-							const url = `${BASE_API_URL}/${e.endpointUrl || e.urlModel}/${selectField.field}/`;
+							const url = `${BASE_API_URL}/${info.endpointUrl || info.urlModel}/${selectField.field}/`;
 							const response = await event.fetch(url);
 							if (response.ok) {
 								selectOptions[selectField.field] = await response.json().then((data) =>

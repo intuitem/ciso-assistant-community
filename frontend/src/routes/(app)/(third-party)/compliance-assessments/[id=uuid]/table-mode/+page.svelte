@@ -3,14 +3,13 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import {
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import {
 		Accordion,
 		AccordionItem,
@@ -26,10 +25,10 @@
 	import type { Actions, PageData } from './$types';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { displayScoreColor } from '$lib/utils/helpers';
+	import { complianceResultColorMap } from '$lib/utils/constants';
 
 	export let data: PageData;
 	export let form: Actions;
-
 	/** Is the page used for shallow routing? */
 	export let shallow = false;
 
@@ -56,12 +55,25 @@
 		data.requirements.map((requirement) => [requirement.id, requirement])
 	);
 
+	// Initialize hide suggestion state
+	let hideSuggestionHashmap: Record<string, boolean> = {};
+	data.requirement_assessments.forEach((ra) => {
+		hideSuggestionHashmap[ra.id] = true;
+	});
+
 	$: createdEvidence = form?.createdEvidence;
 
-	function title(requirementAssessment) {
+	// Memoized title function
+	const titleMap = new Map();
+	function getTitle(requirementAssessment) {
+		if (titleMap.has(requirementAssessment.id)) {
+			return titleMap.get(requirementAssessment.id);
+		}
 		const requirement =
 			requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
-		return requirement.display_short ? requirement.display_short : (requirement.name ?? '');
+		const result = requirement.display_short ? requirement.display_short : (requirement.name ?? '');
+		titleMap.set(requirementAssessment.id, result);
+		return result;
 	}
 
 	// Function to update requirement assessments, the data argument contain fields as keys and the associated values as values.
@@ -100,10 +112,23 @@
 		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
+
+		// Update requirementAssessment.updateForm.data with the specified field and value
+		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
+			requirementAssessment.updateForm.data[field] = value;
+		}
 	}
 
+	// Memoized color function
+	const colorCache = new Map();
 	function addColor(result: string, map: Record<string, string>) {
-		return map[result];
+		const cacheKey = `${result}-${JSON.stringify(map)}`;
+		if (colorCache.has(cacheKey)) {
+			return colorCache.get(cacheKey);
+		}
+		const color = map[result];
+		colorCache.set(cacheKey, color);
+		return color;
 	}
 
 	let questionnaireMode = questionnaireOnly
@@ -138,42 +163,15 @@
 	let addedEvidence = 0;
 
 	$: if (createdEvidence && shallow) {
-		data.requirements
-			.find((requirementAssessment) => requirementAssessment.id === createdEvidence.requirements[0])
-			.evidences.push({
+		const requirement = data.requirements.find((ra) => ra.id === createdEvidence.requirements[0]);
+		if (requirement) {
+			requirement.evidences.push({
 				str: createdEvidence.name,
 				id: createdEvidence.id
 			});
-		createdEvidence = undefined;
-		addedEvidence = +1;
-	}
-
-	function modalConfirmDelete(id: string, name: string): void {
-		const modalComponent: ModalComponent = {
-			ref: DeleteConfirmModal,
-			props: {
-				_form: data.deleteForm,
-				formAction: `/evidences?/delete`,
-				id: id,
-				invalidateAll: invalidateAll,
-				debug: false,
-				URLModel: getModelInfo('evidences').urlModel
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.deleteModalTitle(),
-			body: `${m.deleteModalMessage({ name })}`
-		};
-		modalStore.trigger(modal);
-		data.requirements.forEach((requirementAssessment) => {
-			console.log(requirementAssessment.evidences);
-			requirementAssessment.evidences = requirementAssessment.evidences.filter(
-				(evidence) => evidence.id !== id
-			);
-		});
+			createdEvidence = undefined;
+			addedEvidence += 1;
+		}
 	}
 
 	const requirementAssessmentScores = Object.fromEntries(
@@ -201,6 +199,59 @@
 				});
 			}
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
+	}
+
+	function modalUpdateForm(requirementAssessment): void {
+		const modalComponent: ModalComponent = {
+			ref: UpdateModal,
+			props: {
+				form: requirementAssessment.updateForm,
+				model: requirementAssessment.updatedModel,
+				object: requirementAssessment.object,
+				formAction: '?/update&id=' + requirementAssessment.id,
+				context: 'selectEvidences'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: getTitle(requirementAssessment)
+		};
+		modalStore.trigger(modal);
+	}
+
+	function toggleSuggestion(requirementAssessmentId) {
+		hideSuggestionHashmap[requirementAssessmentId] =
+			!hideSuggestionHashmap[requirementAssessmentId];
+	}
+
+	function getClassesText(mappingInferenceResult) {
+		return complianceResultColorMap[mappingInferenceResult] === '#000000' ? 'text-white' : '';
+	}
+	// Create separate superForm instances for each requirement assessment
+	let scoreForms = {};
+	let docScoreForms = {};
+	let isScoredForms = {};
+	$: {
+		// Initialize the form instances
+		data.requirement_assessments.forEach((requirementAssessment, index) => {
+			const id = requirementAssessment.id;
+			if (!scoreForms[id]) {
+				scoreForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-score-${id}-${index}`
+				});
+			}
+			if (!docScoreForms[id]) {
+				docScoreForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-documentation-score-${id}-${index}`
+				});
+			}
+			if (!isScoredForms[id]) {
+				isScoredForms[id] = superForm(requirementAssessment.scoreForm, {
+					id: `requirement-is-scored-${id}-${index}`
+				});
+			}
+		});
 	}
 </script>
 
@@ -242,7 +293,7 @@
 				</div>
 			</div>
 		{/if}
-		{#each data.requirement_assessments as requirementAssessment}
+		{#each data.requirement_assessments as requirementAssessment, i}
 			<div class="w-2"></div>
 
 			<span class="relative flex justify-center py-4">
@@ -251,7 +302,7 @@
 				></div>
 
 				<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl z-auto">
-					{title(requirementAssessment)}
+					{getTitle(requirementAssessment)}
 				</span>
 			</span>
 			<div class="h-2"></div>
@@ -264,6 +315,102 @@
 					</div>
 				{/if}
 				{#if requirementAssessment.assessable}
+					{#if data.requirements[i].annotation || requirementAssessment.mapping_inference.result}
+						<div
+							class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto w-full"
+						>
+							<h2 class="font-semibold text-lg flex flex-row justify-between">
+								<div>
+									<i class="fa-solid fa-circle-info mr-2" />{m.additionalInformation()}
+								</div>
+								<button on:click={() => toggleSuggestion(requirementAssessment.id)}>
+									{#if !hideSuggestionHashmap[requirementAssessment.id]}
+										<i class="fa-solid fa-eye" />
+									{:else}
+										<i class="fa-solid fa-eye-slash" />
+									{/if}
+								</button>
+							</h2>
+							{#if !hideSuggestionHashmap[requirementAssessment.id]}
+								{#if data.requirements[i].annotation}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-pencil" />
+											{m.annotation()}
+										</p>
+										<p class="whitespace-pre-line py-1">
+											{data.requirements[i].annotation}
+										</p>
+									</div>
+								{/if}
+								{#if requirementAssessment.mapping_inference.result}
+									<div class="my-2">
+										<p class="font-medium">
+											<i class="fa-solid fa-link" />
+											{m.mappingInference()}
+										</p>
+										<span class="text-xs text-gray-500"
+											><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
+										>
+										<ul class="list-disc ml-4">
+											<li>
+												<p>
+													<a
+														class="anchor"
+														href="/requirement-assessments/{requirementAssessment.mapping_inference
+															.source_requirement_assessment.id}"
+													>
+														{requirementAssessment.mapping_inference.source_requirement_assessment
+															.str}
+													</a>
+												</p>
+												<p class="whitespace-pre-line py-1">
+													<span class="italic">{m.coverageColon()}</span>
+													<span class="badge h-fit">
+														{safeTranslate(
+															requirementAssessment.mapping_inference.source_requirement_assessment
+																.coverage
+														)}
+													</span>
+												</p>
+												{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
+													<p class="whitespace-pre-line py-1">
+														<span class="italic">{m.scoreSemiColon()}</span>
+														<span class="badge h-fit">
+															{safeTranslate(
+																requirementAssessment.mapping_inference
+																	.source_requirement_assessment.score
+															)}
+														</span>
+													</p>
+												{/if}
+												<p class="whitespace-pre-line py-1">
+													<span class="italic">{m.suggestionColon()}</span>
+													<span
+														class="badge {getClassesText(
+															requirementAssessment.mapping_inference.result
+														)} h-fit"
+														style="background-color: {complianceResultColorMap[
+															requirementAssessment.mapping_inference.result
+														]};"
+													>
+														{safeTranslate(requirementAssessment.mapping_inference.result)}
+													</span>
+												</p>
+												{#if requirementAssessment.mapping_inference.annotation}
+													<p class="whitespace-pre-line py-1">
+														<span class="italic">{m.annotationColon()}</span>
+														{requirementAssessment.mapping_inference.annotation}
+													</p>
+												{/if}
+											</li>
+										</ul>
+									</div>
+								{/if}
+							{/if}
+						</div>
+					{/if}
+
 					<form
 						class="flex flex-col space-y-2 items-center justify-evenly w-full"
 						id="tableModeForm-{requirementAssessment.id}"
@@ -385,9 +532,7 @@
 						<div class="flex flex-col w-full place-items-center">
 							{#if !shallow}
 								<Score
-									form={superForm(requirementAssessment.scoreForm, {
-										id: `requirement-score-${requirementAssessment.id}`
-									})}
+									form={scoreForms[requirementAssessment.id]}
 									min_score={data.compliance_assessment.min_score}
 									max_score={data.compliance_assessment.max_score}
 									scores_definition={data.compliance_assessment.scores_definition}
@@ -403,9 +548,7 @@
 								>
 									<div slot="left">
 										<Checkbox
-											form={superForm(requirementAssessment.scoreForm, {
-												id: `requirement-is-scored-${requirementAssessment.id}`
-											})}
+											form={isScoredForms[requirementAssessment.id]}
 											field="is_scored"
 											label={''}
 											helpText={m.scoringHelpText()}
@@ -421,9 +564,7 @@
 								</Score>
 								{#if data.compliance_assessment.show_documentation_score}
 									<Score
-										form={superForm(requirementAssessment.scoreForm, {
-											id: `requirement-documentation-score-${requirementAssessment.id}`
-										})}
+										form={docScoreForms[requirementAssessment.id]}
 										min_score={data.compliance_assessment.min_score}
 										max_score={data.compliance_assessment.max_score}
 										field="documentation_score"
@@ -556,22 +697,23 @@
 														type="button"
 														><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 													>
+													<button
+														class="btn variant-filled-secondary self-start"
+														type="button"
+														on:click={() => modalUpdateForm(requirementAssessment)}
+														><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
+													</button>
 												{/if}
+											</div>
+											<div class="flex flex-wrap space-x-2 items-center">
 												{#key addedEvidence}
 													{#each requirementAssessment.evidences as evidence}
-														<p class="card p-2">
-															<a class="hover:text-primary-500" href="/evidences/{evidence.id}"
+														<p class="p-2">
+															<a
+																class="text-primary-700 hover:text-primary-500"
+																href="/evidences/{evidence.id}"
 																><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
 															>
-															{#if !shallow}
-																<button
-																	class="cursor-pointer"
-																	on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
-																	type="button"
-																>
-																	<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
-																</button>
-															{/if}
 														</p>
 													{/each}
 												{/key}

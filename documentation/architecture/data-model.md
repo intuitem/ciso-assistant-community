@@ -52,6 +52,8 @@ erDiagram
     DOMAIN                ||--o{ PROJECT_OBJECT              : contains
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
+    DOMAIN                ||--o{ FINDINGS_ASSESSMENT         : contains
+    DOMAIN                ||--o{ FINDING                     : contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
     ROOT_FOLDER           ||--o{ STORED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ LOADED_LIBRARY              : contains
@@ -69,6 +71,8 @@ erDiagram
     ROOT_FOLDER_OR_DOMAIN ||--o{ VULNERABILITY               : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ COMPLIANCE_ASSESSMENT       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ INCIDENT                    : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ TIMELINE_ENTRY              : contains
 
     DOMAIN {
         string ref_id
@@ -122,6 +126,7 @@ erDiagram
     REQUIREMENT_NODE             }o--o{ REFERENCE_CONTROL     : leverages
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
+    COMPLIANCE_ASSESSMENT        }o--o{ ASSET                 : relates_to
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
@@ -142,6 +147,7 @@ erDiagram
     USER                         }o--o{ RISK_SCENARIO         : owns
     USER                         }o--o{ APPLIED_CONTROL       : owns
     USER                         }o--o{ ASSET                 : owns
+    USER                         }o--o{ INCIDENT              : owns
     ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
@@ -152,6 +158,18 @@ erDiagram
     SECURITY_EXCEPTION           }o--o{ RISK_SCENARIO         : concerns
     SECURITY_EXCEPTION           }o--o{ APPLIED_CONTROL       : concerns
     APPLIED_CONTROL              }o--o{ SECURITY_EXCEPTION    : mitigates
+    FINDINGS_ASSESSMENT          ||--o{ FINDING               : contains
+    PERIMETER                    |o--o{ FINDINGS_ASSESSMENT   : contains
+    USER                         }o--o{ FINDINGS_ASSESSMENT   : owns
+    FINDING                      }o--o{ VULNERABILITY         : relates
+    FINDING                      }o--o{ REFERENCE_CONTROL     : is_mitigated_by
+    FINDING                      }o--o{ APPLIED_CONTROL       : is_mitigated_by
+    USER                         }o--o{ FINDING               : owns
+    INCIDENT                     ||--o{ TIMELINE_ENTRY        : contains
+    INCIDENT                     }o--o{ ASSET                 : impacts
+    INCIDENT                     }o--o{ THREATS               : relates
+    INCIDENT                     }o--|| QUALIFICATION         : impacts
+
 
     FRAMEWORK {
         string  urn
@@ -201,7 +219,6 @@ erDiagram
         principal[] author
         principal[] reviewer
         string      observation
-        boolean     embedded
     }
 
     PERIMETER {
@@ -391,6 +408,46 @@ erDiagram
         int value
     }
 
+    FINDINGS_ASSESSMENT  {
+        string      ref_id
+        string      name
+        string      description
+
+        string      version
+        date        eta
+        date        due_date
+        string      status
+        principal[] author
+        principal[] reviewer
+        string      observation
+
+        string      category
+    }
+
+    FINDING {
+        string ref_id
+        string name
+        string description
+        int    severity
+        string status
+    }
+
+    INCIDENT {
+        string ref_id
+        string name
+        string description
+        int    severity
+        string status
+    }
+
+    TIMELINE_ENTRY {
+        string   entry
+        string   entry_type
+        string   observation
+        datetime timestamp
+    }
+
+
 ```
 
 ### Requirement mappings
@@ -432,7 +489,7 @@ erDiagram
 
 In all views and analytics, a filter on label shall be displayed.
 
-Note: in MVP, labels are attached only to vulnerabilities.
+Note: For now, labels are attached to the following objects: vulnerabilities, assets, findings, threats, reference controls, applied controls.
 
 ## Global fields
 
@@ -699,7 +756,7 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 
 ### Requirement Mapping set
 
-Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see <https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf>).
 
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
@@ -830,6 +887,28 @@ Only the approver shall be able to set the status to approved.
 Security exceptions are located in the governance menu.
 
 The performance of the UX shall be optimized, by avoiding to preload all possible targets for the security exception.
+
+## Incidents
+
+Significant security incidents can be traced in CISO Assistant. An incident object has the following fields:
+- ref_id/name/description
+- qualifications
+- severity (like security exceptions)
+- status: new/in progress/solved/closed/rejected
+
+Incidents can be linked to threats, assets, owners.
+
+Incidents contain a table of timeline_entry objects.
+
+Timeline_entry objects have the following fields:
+- entry (a string to describe the entry)
+- entry_type within detection/mitigation/observation/status_changed/severity_changed
+- observation
+- timestamp (we can report an event that has occured in the past)
+
+status_changed and severity_changed entries are automatically generated.
+
+Entry type cannot be updated.
 
 ## Libraries
 
@@ -1257,18 +1336,6 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - implementation_group_selector is not retained.
 - ebios-RM parameters are not retained.
 
-## Near-term evolutions
-
-We need to add in the near term the follwoing objects:
-
-- EBIOS-RM study
-- Audit campaign
-- Third-party campaign
-- Pentest follow-up
-- Incident follow-up
-
-Each of these objects will have its specific datamodel. Factoring will be done ad-hoc.
-
 ## EBIOS-RM evolution
 
 ### Mapping of essential concepts
@@ -1516,25 +1583,131 @@ erDiagram
 - It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency.  This should include evidences with their size.
 - It shall be possible to optionally export subdomains along with the domain. The import shall be flattened if the target is not a PRO version.
 
-## Asset compliance (draft)
+## Findings assessments
+
+This new type of assessments is intended to gather and manage findinds. The section is present in governance with the name "follow-up"/"Suivi".
+
+A findings assessment has the following specific fields:
+- category: --/pentest/audit/internal
+
+A finding ("constat") has the following fields:
+- ref_id/name/description
+- severity, like for vulnerabilities
+- a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
+
+A finding can have related reference controls, applied controls, vulnerabilities.
+
+## Tasks
 
 ```mermaid
 erDiagram
 
-    COMPLIANCE_INDICATOR          }o--o{ ASSET                : applies_to
-    OBSERVATION                   }o--|| ASSET                : applies_to
-    OBSERVATION                   }o--|| COMPLIANCE_INDICATOR : corresponds_to
- 
-    COMPLIANCE_INDICATOR {
-        string ref_id
-        string name
-        string description
-        json   tracker_metadata
-    }
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_TEMPLATE         : contains
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE             : contains
+TASK_TEMPLATE         |o--o{ TASK_NODE             : generates
+USER                  }o--o{ TASK_TEMPLATE         : owns
+TASK_TEMPLATE         }o--o| TASK_TEMPLATE         : is_subtask_of
+TASK_TEMPLATE         }o--o{ ASSET                 : relates_to
+TASK_TEMPLATE         }o--o{ APPLIED_CONTROL       : relates_to
+TASK_TEMPLATE         }o--o{ COMPLIANCE_ASSESSMENT : relates_to
+TASK_TEMPLATE         }o--o{ RISK_ASSESSMENT       : relates_to
+TASK_NODE             }o--o{ EVIDENCE              : contains
 
-    OBSERVATION {
-        datetime when
-        json     tracked_data
-        boolean  compliance_status
-    }
+TASK_TEMPLATE {
+    string ref_id
+    string name
+    string description
+
+    date   task_date
+    json   schedule_definition
+    bool   enabled
+}
+
+TASK_NODE {
+    date   due_date
+    enum   status "pending, in progress, completed, cancelled"
+    string observation
+}
 ```
+
+The schedule_definition contains the following fields:
+
+```json
+SCHEDULE_JSONSCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Schedule Definition",
+    "type": "object",
+    "properties": {
+        "interval": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of periods to wait before repeating (e.g., every 2 days, 3 weeks).",
+        },
+        "frequency": {
+            "type": "string",
+            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+        },
+        "days_of_week": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 7},
+            "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
+        },
+        "weeks_of_month": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 4,
+            },
+            "description": "Optional. for a given weekday, which one in the month (1 for first, -1 for last)",
+        },
+        "months_of_year": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 12},
+            "description": "Optional. Months of the year (1=January, 12=December)",
+        },
+        "start_date": {
+            "type": ["string"],
+            "format": "date",
+            "description": "Date when recurrence begins.",
+        },
+        "end_date": {
+            "type": ["string"],
+            "format": "date",
+            "description": "Date when recurrence ends.",
+        },
+        "occurrences": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "description": "Optional. Number of occurrences before recurrence stops.",
+        },
+        "overdue_behavior": {
+            "type": "string",
+            "enum": ["DELAY_NEXT", "NO_IMPACT"],
+            "default": "NO_IMPACT",
+            "description": "Optional. Behavior when tasks become overdue.",
+        },
+    },
+    "required": ["interval", "frequency", "start_date", "end_date"],
+    "additionalProperties": False,
+}
+```
+
+The task_date is copied in the start_date of the schedule for recurring tasks.
+
+The task_date is copied in the due_date of the task_node for a non-recurring task.
+
+When enabled is set to False, the schedule is suspended (for recurring task), and generated tasks are hidden (past and future).
+
+The following concepts will not be included in the MVP:
+- subtasks
+- exceptions
+- overdue_behavior (will be NO_IMPACT)
+
+### Implementation
+
+Future task_nodes are generated partially in advance at creation/update of a task_template and with a daily refresh done with huey. This shall take in account end_date, and the following limits:
+- 5 years for yearly frequency
+- 24 months for monthly frequency
+- 53 weeks for weekly frequency
+- 63 days for daily frequency

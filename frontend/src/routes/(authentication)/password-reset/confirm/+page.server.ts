@@ -1,17 +1,17 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { safeTranslate } from '$lib/utils/i18n';
 import { ResetPasswordSchema } from '$lib/utils/schemas';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import { setLanguageTag } from '$paraglide/runtime';
+import { setLocale } from '$paraglide/runtime';
 import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
 
 export const load: PageServerLoad = async (event) => {
-	setLanguageTag(event.cookies.get('ciso_lang') || DEFAULT_LANGUAGE);
+	setLocale(event.cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE);
 	const form = await superValidate(event.request, zod(ResetPasswordSchema));
 
 	return { form };

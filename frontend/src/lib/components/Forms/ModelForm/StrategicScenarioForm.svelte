@@ -1,9 +1,9 @@
 <script lang="ts">
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import TextField from '../TextArea.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -17,7 +17,7 @@
 {#if context !== 'edit'}
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="ro-to?is_selected=true&used=false"
+		optionsEndpoint="ro-to?is_selected=true"
 		optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
 		optionsLabelField="str"
 		field="ro_to_couple"

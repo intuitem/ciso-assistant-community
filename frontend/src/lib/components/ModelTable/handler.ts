@@ -26,7 +26,6 @@ export const loadTableData = async ({ state, URLModel, endpoint, fields }: LoadT
 		fields.length > 0
 			? { ...listViewFields[URLModel as urlModel], head: fields, body: fields }
 			: listViewFields[URLModel as urlModel];
-
 	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
 
 	const headData: Record<string, string> = fieldsToUse.body.reduce((obj, key, index) => {

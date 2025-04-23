@@ -5,7 +5,7 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import Checkbox from '../Checkbox.svelte';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
@@ -126,6 +126,15 @@
 		helpText={m.useDocumentationScoreHelpText()}
 		cacheLock={cacheLocks['show_documentation_score']}
 		bind:cachedValue={formDataCache['show_documentation_score']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="assets"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="assets"
+		label={m.assets()}
 	/>
 	<TextField
 		{form}

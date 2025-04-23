@@ -68,6 +68,18 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const EFFORT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/effort',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		label: 'effort',
+		multiple: true
+	}
+};
+
 const PERIMETER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -105,6 +117,18 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'applied-controls/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const TASK_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'task-nodes/status',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
@@ -435,24 +459,18 @@ export const listViewFields = {
 		body: ['name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'risk-matrices/provider' }
+			}
 		}
 	},
 	vulnerabilities: {
-		head: [
-			'ref_id',
-			'name',
-			'description',
-			'status',
-			'severity',
-			'applied_controls',
-			'folder',
-			'labels'
-		],
+		head: ['ref_id', 'name', 'status', 'severity', 'applied_controls', 'folder', 'labels'],
 		body: [
 			'ref_id',
 			'name',
-			'description',
 			'status',
 			'severity',
 			'applied_controls',
@@ -474,12 +492,16 @@ export const listViewFields = {
 		}
 	},
 	threats: {
-		head: ['ref_id', 'name', 'description', 'provider', 'domain'],
-		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
+		head: ['ref_id', 'name', 'description', 'provider', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'provider', 'folder', 'filtering_labels'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			provider: PROVIDER_FILTER
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
+			},
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-scenarios': {
@@ -526,37 +548,18 @@ export const listViewFields = {
 		}
 	},
 	'applied-controls': {
-		head: [
-			'ref_id',
-			'name',
-			'priority',
-			'status',
-			'category',
-			'csfFunction',
-			'eta',
-			'owner',
-			'domain',
-			'referenceControl'
-		],
-		body: [
-			'ref_id',
-			'name',
-			'priority',
-			'status',
-			'category',
-			'csf_function',
-			'eta',
-			'owner',
-			'folder',
-			'reference_control'
-		],
+		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'folder', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
 			owner: OWNER_FILTER,
-			priority: PRIORITY_FILTER
+			priority: PRIORITY_FILTER,
+			effort: EFFORT_FILTER,
+			filtering_labels: LABELS_FILTER,
+			eta__lte: undefined
 		}
 	},
 	policies: {
@@ -591,14 +594,36 @@ export const listViewFields = {
 		}
 	},
 	'reference-controls': {
-		head: ['ref_id', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
-		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'csfFunction',
+			'provider',
+			'domain',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'csf_function',
+			'provider',
+			'folder',
+			'filtering_labels'
+		],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			category: REFERENCE_CONTROL_CATEGORY_FILTER,
-			provider: PROVIDER_FILTER,
-			csf_function: CSF_FUNCTION_FILTER
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'reference-controls/provider' }
+			},
+			csf_function: CSF_FUNCTION_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	assets: {
@@ -653,12 +678,15 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			provider: PROVIDER_FILTER
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'frameworks/provider' }
+			}
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'reviewProgress'],
-		body: ['ref_id', 'name', 'framework', 'description', 'perimeter', 'progress'],
+		head: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'reviewProgress'],
+		body: ['ref_id', 'name', 'framework', 'assets', 'description', 'perimeter', 'progress'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -672,10 +700,11 @@ export const listViewFields = {
 		breadcrumb_link_disabled: true
 	},
 	evidences: {
-		head: ['name', 'file', 'size', 'description', 'folder'],
-		body: ['name', 'attachment', 'size', 'description', 'folder'],
+		head: ['name', 'file', 'size', 'description', 'folder', 'labels'],
+		body: ['name', 'attachment', 'size', 'description', 'folder', 'filtering_labels'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	requirements: {
@@ -712,7 +741,13 @@ export const listViewFields = {
 	},
 	'requirement-mapping-sets': {
 		head: ['sourceFramework', 'targetFramework'],
-		body: ['source_framework', 'target_framework']
+		body: ['source_framework', 'target_framework'],
+		filters: {
+			library__provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'requirement-mapping-sets/provider' }
+			}
+		}
 	},
 	entities: {
 		head: ['name', 'description', 'domain', 'ownedFolders'],
@@ -736,6 +771,34 @@ export const listViewFields = {
 	representatives: {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
+	},
+	processings: {
+		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
+		body: ['name', 'description', 'status', 'legal_basis', 'nature', 'folder']
+	},
+	purposes: {
+		head: ['name', 'description', 'processing'],
+		body: ['name', 'description', 'processing']
+	},
+	'personal-data': {
+		head: ['name', 'description', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
+		body: ['name', 'description', 'category', 'is_sensitive', 'retention', 'deletion_policy']
+	},
+	'data-subjects': {
+		head: ['name', 'description', 'category'],
+		body: ['name', 'description', 'category']
+	},
+	'data-recipients': {
+		head: ['name', 'description', 'category'],
+		body: ['name', 'description', 'category']
+	},
+	'data-contractors': {
+		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
+		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
+	},
+	'data-transfers': {
+		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
+		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
 	},
 	'ebios-rm': {
 		head: ['name', 'description'],
@@ -829,6 +892,42 @@ export const listViewFields = {
 	'security-exceptions': {
 		head: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'domain'],
 		body: ['ref_id', 'name', 'severity', 'status', 'expiration_date', 'folder']
+	},
+	'findings-assessments': {
+		head: ['ref_id', 'name', 'description', 'category', 'findings', 'perimeter'],
+		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
+	},
+	findings: {
+		head: ['ref_id', 'name', 'description', 'findings_assessment', 'severity', 'status', 'labels'],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'findings_assessment',
+			'severity',
+			'status',
+			'filtering_labels'
+		],
+		filters: { filtering_labels: LABELS_FILTER }
+	},
+	incidents: {
+		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
+		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
+	},
+	'timeline-entries': {
+		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
+		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
+	},
+	'task-templates': {
+		head: ['name', 'description', 'assigned_to', 'lastOccurrenceStatus', 'nextOccurrence'],
+		body: ['name', 'description', 'assigned_to', 'last_occurrence_status', 'next_occurrence']
+	},
+	'task-nodes': {
+		head: ['due_date', 'status', 'evidences'],
+		body: ['due_date', 'status', 'evidences'],
+		filters: {
+			status: TASK_STATUS_FILTER
+		}
 	},
 	extra: {
 		filters: {

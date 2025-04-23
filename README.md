@@ -30,49 +30,67 @@ Star the project 🌟 to get releases notification and help growing the communit
 ![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
 
-CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
+CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
-- by explicitly decoupling compliance from cybersecurity controls implementation
-- has built-in standards, security controls and threats
-- risk assessment and remediation plan follow-up
-- allows to manage a catalog for security controls and threats
-- you can bring your own framework as well using a simple syntax
-- manage audit, evidences collection and report generation
+- Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,  
+- Built as a **multi-paradigm** tool that adapts to different backgrounds, methodologies, and expectations,  
+- Explicitly **decouples** compliance from cybersecurity controls, enabling reusability across the platform,  
+- Promotes **reusability** and interlinking instead of redundant work,  
+- Developed with an **API-first** approach to support both UI interaction and external **automation**,  
+- Comes packed with a wide range of built-in standards, security controls, and threat libraries,  
+- Offers an **open format** to customize and reuse your own objects and frameworks,  
+- Includes built-in **risk assessment** and **remediation tracking** workflows,  
+- Supports custom frameworks via a simple syntax and flexible tooling,  
+- Provides rich **import/export** capabilities across various channels and formats (UI, CLI, Kafka, reports, etc.).
 
-Our vision is to provide a one stop shop for cyber security posture management and cover the layers of **GRC** (Governance, Risk and Compliance). As practitioners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
+Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.  
 
-CyberSecurity teams need to use GRC as a foundation to structure their program and implement the right tools and processes to mitigate the risks, and leave the rest to CISO Assistant 🐙
+As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.  
 
-The vision of the tool is based on these fundamental objects:
+We’re constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
 
-![](core_objects.png)
+---
 
-There are other concepts and models to provide other features. The full details are available in the [data model](documentation/architecture/data-model.md).
+## Core Concepts
 
-The decoupling concept is a pillar of the app and allows you to save a considerable amount of time:
+Here’s a snapshot of the fundamental building blocks in CISO Assistant:
 
-- reuse previous assessments,
-- assess a scope against multiple frameworks at the same time,
-- leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
-- balance controls implementation and compliance follow-up
+![Core Objects](core_objects.png)
 
-## Decoupling concept
+For full details, check the [data model documentation](documentation/architecture/data-model.md).
+
+---
+
+## Features
+
+Explore the full range of features and capabilities:
+
+![Features Overview](features.png)
+
+CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
+
+---
+
+## Decoupling Concept
+
+At the heart of CISO Assistant lies the **decoupling principle**, which enables powerful use cases and major time savings:
+
+- Reuse past assessments across scopes or frameworks,  
+- Evaluate a single scope against multiple frameworks simultaneously,  
+- Let CISO Assistant handle reporting and consistency checks so you can focus on remediation,  
+- Separate control implementation from compliance tracking.
 
 Here is an illustration of the **decoupling** principle and its advantages:
 
 https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
 
+
+
 ## System architecture
 
 ![](./documentation/system-architecture.png)
 
-## Features
 
-Here is an overview of CISO Assistant features and capabilities:
-
-![overview](features.png)
-
-CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
 
 ## Quick Start 🚀
 
@@ -84,7 +102,7 @@ Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your wo
 clone the repo:
 
 ```
-git clone https://github.com/intuitem/ciso-assistant-community.git
+git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
 ```
 
 and run the starter script
@@ -93,7 +111,7 @@ and run the starter script
 ./docker-compose.sh
 ```
 
-If you are looking for other installation options, you might want to check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
+If you are looking for other installation options for self-hosting, check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
 
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
@@ -183,6 +201,12 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
 69. OWASP's checklist for LLM governance and security 🌐
 70. Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (ANSSI) 🇫🇷
+71. CIS benchmark for Kubernetes v1.10 🌐
+72. De tekniske minimumskrav for statslige myndigheder 🇩🇰
+73. Google SAIF framework 🤖
+74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
+75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
+76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
 
 ### Community contributions
 
@@ -201,7 +225,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 <br/>
 
 > [!NOTE]
-> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> Frameworks with `*` require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 
@@ -210,12 +234,13 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - Indonesia PDP 🇮🇩
+- VCS framework from ENX
+- OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
 - NIST 800-82
 - ASD ISM 🇦🇺
 - Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
-
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
@@ -243,12 +268,12 @@ To run CISO Assistant locally in a straightforward way, you can use Docker compo
 
 0. Update docker
 
-Make sure you have a recent version of docker (>= 25.0).
+Make sure you have a recent version of docker (>= 27.0).
 
 1. Clone the repository
 
 ```sh
-git clone https://github.com/intuitem/ciso-assistant-community.git
+git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
@@ -270,21 +295,14 @@ You can then reach CISO Assistant using your web browser at [https://localhost:8
 
 For the following executions, use "docker compose up" directly.
 
-> [!TIP]
-> If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
-
-## Docker-compose on remote
-
-For docker setup on a remote server or hypervisor, checkout the [specific instructions here](https://intuitem.gitbook.io/ciso-assistant/deployment/remote-virtualization)
-
 ## Setting up CISO Assistant for development
 
 ### Requirements
 
-- Python 3.11+
+- Python 3.12+
 - pip 20.3+
 - poetry 2.0+
-- node 18+
+- node 22+
 - npm 10.2+
 - pnpm 9.0+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
@@ -471,7 +489,7 @@ These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
+To run API tests on the backend, simply type "poetry run pytest" in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 
@@ -522,6 +540,7 @@ Set DJANGO_DEBUG=False for security reason.
 - CS: Czech
 - SV: Swedish
 - ID: Indonesian
+- DA: Danish
 
 ## Contributors 🤝
 
@@ -534,6 +553,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
 - [eCharts](https://echarts.apache.org) - Charting library
+- [unovis](https://unovis.dev) - Complementary charting library
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Gitbook](https://www.gitbook.com) - Documentation platform
@@ -541,6 +561,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
 - [Docker](https://www.docker.com/) - Container Engine
 - [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
 
 ## Security
 

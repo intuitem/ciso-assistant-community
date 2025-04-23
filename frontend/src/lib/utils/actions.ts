@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
@@ -54,7 +54,7 @@ function getEndpoint({
 			? `${BASE_API_URL}/${model.endpointUrl}/`
 			: `${BASE_API_URL}/${urlModel}/`;
 	}
-	const id = event.params.id;
+	const id = event.url.searchParams.get('id') || event.params.id;
 	return model.endpointUrl
 		? `${BASE_API_URL}/${model.endpointUrl}/${id}/`
 		: `${BASE_API_URL}/${urlModel}/${id}/`;
@@ -224,7 +224,10 @@ export async function defaultDeleteFormAction({
 	if (!res.ok) {
 		const response = await res.json();
 		if (response.error) {
-			setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
+			const errorMessages = Array.isArray(response.error) ? response.error : [response.error];
+			errorMessages.forEach((error) => {
+				setFlash({ type: 'error', message: safeTranslate(error) }, event);
+			});
 			return message(deleteForm, { status: res.status });
 		}
 		if (response.non_field_errors) {

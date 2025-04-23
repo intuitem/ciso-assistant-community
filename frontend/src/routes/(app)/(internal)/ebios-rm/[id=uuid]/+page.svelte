@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
@@ -209,6 +209,13 @@
 			</div>
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
+			<div slot="action">
+				<a
+					class="text-orange-600 hover:text-purple-600 font-medium"
+					href={`${$page.url.pathname}/visual/`}
+					><i class="fa-solid fa-chart-diagram mr-2"></i>{m.visualAnalysis()}</a
+				>
+			</div>
 			<div slot="content">
 				<Card
 					count={data.data.roto_count}
