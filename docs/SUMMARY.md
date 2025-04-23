@@ -71,4 +71,5 @@
 
 ## Academy
 
+* [Overview](academy/overview.md)
 * [Third Parties Risk Management](academy/third-parties-risk-management.md)
