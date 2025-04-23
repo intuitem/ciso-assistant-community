@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "upload_attachment",
+  "type": "object",
+  "properties": {
+    "message_type": {
+      "type": "string",
+      "enum": ["upload_attachment"],
+      "description": "Identifies the message type for routing"
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "values": {
+      "type": "object",
+      "properties": {
+        "file_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "Name of the file to be uploaded"
+        },
+        "file_content": {
+          "type": "string",
+          "description": "Base64 encoded content of the file"
+        },
+        "file_s3_bucket": {
+          "type": "string",
+          "description": "S3 bucket name where the file is stored"
+        },
+        "applied_controls": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["file_content", "file_name"]
+        },
+        {
+          "required": ["file_s3_bucket", "file_name"]
+        }
+      ]
+    }
+  }
+}

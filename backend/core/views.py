@@ -1315,6 +1315,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "owner": ["exact"],
             "findings": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+            "ref_id": ["exact"],
         }
 
 
@@ -4544,10 +4545,14 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     model = RequirementAssessment
     filterset_fields = [
         "folder",
+        "folder__name",
         "evidences",
         "compliance_assessment",
         "applied_controls",
         "security_exceptions",
+        "requirement__ref_id",
+        "compliance_assessment__ref_id",
+        "compliance_assessment__assets__ref_id",
     ]
     search_fields = ["requirement__name", "requirement__description"]
 
