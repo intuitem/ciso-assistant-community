@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "ciso-assistant.labels" (dict "context" . "component" "frontend") | nindent 4 }}
+  {{- with .Values.frontend.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.frontend.replicas }}
   selector:
@@ -14,6 +18,10 @@ spec:
     metadata:
       labels:
         {{- include "ciso-assistant.labels" (dict "context" . "component" "frontend") | nindent 8 }}
+      {{- with .Values.frontend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.frontend.imagePullSecrets | default .Values.global.imagePullSecrets }}
       imagePullSecrets:

@@ -11,6 +11,7 @@
 	export let classesContainer: CssClasses = '';
 	export let label: string | undefined = undefined;
 	export let field: string;
+	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
 	export let cachedValue: string | undefined = undefined;
 	export let cacheLock: CacheLock = {
@@ -23,7 +24,7 @@
 	export let required = false;
 
 	label = label ?? field;
-	const { value, errors, constraints } = formFieldProxy(form, field);
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	// Store the display value separately from the actual form value
 	let displayValue: string;
