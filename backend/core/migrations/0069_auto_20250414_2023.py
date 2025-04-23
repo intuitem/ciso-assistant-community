@@ -65,7 +65,7 @@ def add_missing_ug_and_ra(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0067_appliedcontrol_control_impact_and_more"),
+        ("core", "0068_tasktemplate_tasknode"),
     ]
 
     operations = [
