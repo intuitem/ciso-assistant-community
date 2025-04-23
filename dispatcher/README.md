@@ -87,8 +87,8 @@ You can configure the dispatcher using environment variables, the `init-config` 
 DEBUG=True/False # Set to true to enable debug logging
 
 API_URL=https://localhost:8443 # The URL of the CISO Assistant REST API
-USER_EMAIL=user@company.org
-USER_PASSWORD=your_password
+USER_EMAIL=user@company.org # The email address of the CISO Assistant user to authenticate with
+USER_PASSWORD=your_password # The password of the CISO Assistant user to authenticate with
 AUTO_RENEW_SESSION=True/False # Set to True to enable automatic token refresh, do not set if using token-based authentication
 USER_TOKEN=your_ciso_assistant_access_token # Personal Access Token, do not set if using credentials-based authentication
 VERIFY_CERTIFICATE=True/False # Set to True to verify SSL certificates between the dispatcher and API
@@ -134,7 +134,10 @@ There are currently two modes of authentication supported by the dispatcher:
 - Token-based authentication
 - Credentials-based authentication
 
-#### Token-based authentication
+> [!IMPORTANT]
+> Whichever mode you choose, it is tied to a CISO Assistant user and will inherit their permissions.
+
+#### Token-based authentication (soon to be released)
 
 This is done using a Personal Access Token (PAT) that you can generate in CISO Assistant.
 To use token-based authentication, you need to set the `USER_TOKEN` environment variable or specify it in the configuration file or during interactive configuration definition using the `init-config` with the `-i` flag enabled.
