@@ -5,7 +5,7 @@
 </script>
 
 <div class="bg-white p-6 shadow flex overflow-x-auto">
-	<div class="w-full h-96">
+	<div class="w-full h-dvh">
 		<TreeChart title="Organisation overview" tree={data.data} name="org_tree" />
 	</div>
 </div>
