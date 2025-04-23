@@ -137,11 +137,12 @@ def init_config(y, interactive):
 
         if authentication_mode == "credentials":
             user_email = click.prompt(
-                "Enter user email", default=os.getenv("USER_EMAIL", "user@company.org")
+                "Enter the email of the CISO Assistant user account. This is the user account that will be used to authenticate the dispatcher to the CISO Assistant API.",
+                default=os.getenv("USER_EMAIL", "user@company.org"),
             )
             # Use confirmation_prompt for passwords to ensure they match.
             user_password = click.prompt(
-                "Enter user password",
+                "Enter the password of the CISO Assistant user account",
                 hide_input=True,
                 confirmation_prompt=True,
                 default=os.getenv("USER_PASSWORD", ""),
@@ -166,17 +167,6 @@ def init_config(y, interactive):
         kafka_use_auth = click.confirm(
             "Does your Kafka broker require authentication?", default=True
         )
-        kafka_sasl_mechanism = click.prompt(
-            "Which security protocol does your Kafka broker use?",
-            type=click.Choice(
-                [
-                    "PLAIN",
-                    "SCRAM-SHA-256",
-                    "SCRAM-SHA-512",
-                ]
-            ),
-            default="PLAIN",
-        )
         kafka_username = None
         kafka_password = None
         if kafka_use_auth:
@@ -187,24 +177,37 @@ def init_config(y, interactive):
                 "Enter your Kafka password",
                 hide_input=True,
             )
+        kafka_sasl_mechanism = click.prompt(
+            "Which SASL mechanism does your Kafka broker use?",
+            type=click.Choice(
+                [
+                    "PLAIN",
+                    "SCRAM-SHA-256",
+                    "SCRAM-SHA-512",
+                ]
+            ),
+            default="PLAIN",
+        )
         errors_topic = click.prompt(
             "Enter the topic name for error messages (e.g., 'errors')",
             default=os.getenv("ERRORS_TOPIC", "errors"),
         )
         s3_url = click.prompt(
-            "Enter the S3 storage URL",
+            "Enter the S3 storage URL (optional)",
             default=os.getenv("S3_URL", ""),
         )
-        s3_access_key = click.prompt(
-            "Enter your S3 access key (leave blank if you are using pre-signed URLs to authenticate requests to your S3 storage)",
-            default="",
-        )
+        s3_access_key = None
         s3_secret_key = None
-        if s3_access_key:
-            s3_secret_key = click.prompt(
-                "Enter your S3 secret key",
-                hide_input=True,
+        if s3_url:
+            s3_access_key = click.prompt(
+                "Enter your S3 access key (leave blank if you are using pre-signed URLs to authenticate requests to your S3 storage)",
+                default="",
             )
+            if s3_access_key:
+                s3_secret_key = click.prompt(
+                    "Enter your S3 secret key",
+                    hide_input=True,
+                )
         template_config = {
             "rest": {
                 "url": rest_url,
@@ -260,7 +263,7 @@ if not (creds.get("token") or (creds.get("email") and creds.get("password"))):
     )
 
 DEBUG = config.get("debug", False)
-API_URL = config.get("rest", {}).get("url", "https://localhost:8443")
+API_URL = config.get("rest", {}).get("url", "https://localhost:8443").rstrip("/")
 VERIFY_CERTIFICATE = config.get("rest", {}).get("verify_certificate", True)
 USER_EMAIL = config["credentials"].get("email", "user@company.org")
 USER_PASSWORD = config["credentials"].get("password", "")
