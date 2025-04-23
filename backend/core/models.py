@@ -6,6 +6,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from icecream import ic
 from auditlog.registry import auditlog
 
 import yaml
@@ -3177,7 +3178,7 @@ class ComplianceAssessment(Assessment):
 
         return created_assessments
 
-    def sync_to_applied_controls(self):
+    def sync_to_applied_controls(self, dry_run=True):
         """
         the logic is to get the requirement assessments that have applied controls attached
         then for each:
@@ -3191,9 +3192,17 @@ class ComplianceAssessment(Assessment):
             if one AC is in (deprecated, in_progress, on_hold), toggle to partially compliant
             if all AC is in (to_do) toggle the requirement to non_compliant
             if all the AC status in (--) toggle the requirement to not_reviewed
-
+        Note: maybe we can consider the RA status as well in addition to the result
         """
-        pass
+
+        def infere_result(applied_controls):
+            return None
+
+        projection = dict()
+        for ra in RequirementAssessment.objects.filter(compliance_assessment=self):
+            ac = AppliedControl.objects.filter(requirement_assessment=ra)
+            if ac.count() > 0:
+                projection[ra.id] = infere_result(ac)
 
     def get_global_score(self):
         requirement_assessments_scored = (
