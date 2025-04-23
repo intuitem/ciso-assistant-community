@@ -44,9 +44,9 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	import { getSidebarVisibility } from '$lib/utils/sidebar-config';
+	import { getSidebarVisibilityFromBackend } from '$lib/utils/sidebar-config';
 
-	export let sideBarVisibility = getSidebarVisibility(data?.featureflags?.feature_flags);
+	export let sideBarVisibility = getSidebarVisibilityFromBackend(data?.featureflags);
 
 	const modalStore: ModalStore = getModalStore();
 	function modalQuickStart(): void {

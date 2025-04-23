@@ -30,6 +30,10 @@
 	];
 </script>
 
-{#each featureFlagFields as { field, label }}
-	<Checkbox {form} {field} {label} />
-{/each}
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-2 gap-x-4">
+	{#each featureFlagFields as { field, label }}
+		<div class="ml-auto">
+			<Checkbox {form} {field} {label} />
+		</div>
+	{/each}
+</div>
