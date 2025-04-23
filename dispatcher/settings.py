@@ -166,19 +166,27 @@ def init_config(y, interactive):
         kafka_use_auth = click.confirm(
             "Does your Kafka broker require authentication?", default=True
         )
-        kafka_sasl_mechanism = "PLAIN"  # OAUTHBEARER will be available in the future
+        kafka_sasl_mechanism = click.prompt(
+            "Which security protocol does your Kafka broker use?",
+            type=click.Choice(
+                [
+                    "PLAIN",
+                    "SCRAM-SHA-256",
+                    "SCRAM-SHA-512",
+                ]
+            ),
+            default="PLAIN",
+        )
         kafka_username = None
         kafka_password = None
         if kafka_use_auth:
-            match kafka_sasl_mechanism:
-                case "PLAIN":
-                    kafka_username = click.prompt(
-                        "Enter your Kafka username",
-                    )
-                    kafka_password = click.prompt(
-                        "Enter your Kafka password",
-                        hide_input=True,
-                    )
+            kafka_username = click.prompt(
+                "Enter your Kafka username",
+            )
+            kafka_password = click.prompt(
+                "Enter your Kafka password",
+                hide_input=True,
+            )
         errors_topic = click.prompt(
             "Enter the topic name for error messages (e.g., 'errors')",
             default=os.getenv("ERRORS_TOPIC", "errors"),

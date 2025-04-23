@@ -11,11 +11,15 @@ def build_kafka_config(use_auth: bool = settings.KAFKA_USE_AUTH) -> dict:
     }
 
     if use_auth:
-        if settings.KAFKA_SASL_MECHANISM.upper() == "PLAIN":
+        if settings.KAFKA_SASL_MECHANISM.upper() in (
+            "PLAIN",
+            "SCRAM-SHA-256",
+            "SCRAM-SHA-512",
+        ):
             cfg.update(
                 {
                     "security_protocol": "SASL_SSL",
-                    "sasl_mechanism": "PLAIN",
+                    "sasl_mechanism": settings.KAFKA_SASL_MECHANISM.upper(),
                     "sasl_plain_username": settings.KAFKA_USERNAME,
                     "sasl_plain_password": settings.KAFKA_PASSWORD,
                     # optional SSL cert files:

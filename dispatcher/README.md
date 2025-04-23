@@ -270,7 +270,7 @@ Fields:
     "applied_controls": {
       "ref_id": "foo"
     },
-    "file_s3_bucket": "my_bucket",
+    "file_s3_bucket": "bucket",
     "file_name": "sample.jpeg"
   }
 }
