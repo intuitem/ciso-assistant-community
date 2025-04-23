@@ -308,3 +308,8 @@ The dispatcher can be used as a CLI tool or deployed as a service. To deploy it 
 Out of the box, we provide a Dockerfile and the `make_config.py` script to generate a docker compose file containing CISO Assistant and the dispatcher.
 
 The `make_config.py` script is accessible under `config/make_config.py`. Please refer to the readme file in the `config` directory for more information on how to use it.
+
+## Contributing
+
+> [!NOTE]
+> If CISO Assistant is deployed using the `runserver` command, do not forget to append `/api` to the URL. For example, `http://localhost:8000/api`.
