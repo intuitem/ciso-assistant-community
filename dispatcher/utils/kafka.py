@@ -9,7 +9,7 @@ log_message_format = (
 if settings.DEBUG:
     log_message_format += " | <magenta>{extra}</magenta>"
 
-logger.remove(0)
+logger.remove()
 logger.add(
     sys.stderr,
     format=log_message_format,

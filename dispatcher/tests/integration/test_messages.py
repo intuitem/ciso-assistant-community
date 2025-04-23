@@ -56,6 +56,7 @@ def test_api_is_running(api: DockerContainer):
     assert "No migrations to apply" in logs
     assert api.get_exposed_port(8000)
 
+
 def test_kafka_is_running(kafka: KafkaContainer):
     assert kafka.get_bootstrap_server() is not None
     assert kafka.get_exposed_port(9093), (
