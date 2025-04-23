@@ -245,7 +245,7 @@ if "rest" not in config or "url" not in config["rest"]:
     sys.exit(1)
 creds = config.get("credentials", {})
 if not (creds.get("token") or (creds.get("email") and creds.get("password"))):
-    logger.error(
+    logger.warning(
         "Missing credentials in configuration. Please set USER_EMAIL and USER_PASSWORD via environment variables or in the config file.",
     )
 
