@@ -1468,5 +1468,6 @@
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
 	"noEvents": "No events for this day",
-	"domainAnalytics": "Domain Analytics"
+	"domainAnalytics": "Domain Analytics",
+	"syncToAppliedControls": "Sync to actions"
 }

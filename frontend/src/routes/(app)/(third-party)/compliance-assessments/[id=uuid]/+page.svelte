@@ -82,6 +82,7 @@
 
 	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
+	import { synctoappliedcontrols } from '$paraglide/messages/en';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -249,6 +250,16 @@
 		modalStore.trigger(modal);
 	}
 
+	function SyncManagementForm(): void {
+		const modalComponent: ModalComponent = {};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.syncToAppliedControls()
+		};
+		modalStore.trigger(modal);
+	}
 	let createAppliedControlsLoading = false;
 
 	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
@@ -460,6 +471,11 @@
 					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
 					on:click={() => modalCreateForm()}
 					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
+				</button>
+				<button
+					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-slate-500 h-fit"
+					on:click={() => synctoappliedcontrols()}
+					><i class="fa-solid fa-arrows-rotate mr-2"></i> {m.syncToAppliedControls()}
 				</button>
 			{/if}
 			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
