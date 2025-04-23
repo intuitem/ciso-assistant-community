@@ -169,15 +169,16 @@ def init_config(y, interactive):
         kafka_sasl_mechanism = "PLAIN"  # OAUTHBEARER will be available in the future
         kafka_username = None
         kafka_password = None
-        match kafka_sasl_mechanism:
-            case "PLAIN":
-                kafka_username = click.prompt(
-                    "Enter your Kafka username",
-                )
-                kafka_password = click.prompt(
-                    "Enter your Kafka password",
-                    hide_input=True,
-                )
+        if kafka_use_auth:
+            match kafka_sasl_mechanism:
+                case "PLAIN":
+                    kafka_username = click.prompt(
+                        "Enter your Kafka username",
+                    )
+                    kafka_password = click.prompt(
+                        "Enter your Kafka password",
+                        hide_input=True,
+                    )
         errors_topic = click.prompt(
             "Enter the topic name for error messages (e.g., 'errors')",
             default=os.getenv("ERRORS_TOPIC", "errors"),
@@ -188,6 +189,7 @@ def init_config(y, interactive):
         )
         s3_access_key = click.prompt(
             "Enter your S3 access key (leave blank if you are using pre-signed URLs to authenticate requests to your S3 storage)",
+            default="",
         )
         s3_secret_key = None
         if s3_access_key:
