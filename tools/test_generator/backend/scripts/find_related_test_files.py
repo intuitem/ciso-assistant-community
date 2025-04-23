@@ -82,7 +82,7 @@ def find_test_files_for_path(file_path, workspace_dir):
     
     # Also look for test files that might import this module
     module_name = get_module_name(file_path)
-    pattern = re.compile(r'(from|import)\s+.*' + re.escape(name_without_ext))
+    pattern = re.compile(r'(from|import)\s+([\w.]+\.)?' + re.escape(name_without_ext) + r'(\s+|\.|$)')
     
     # Walk through test directories to find files that might import this module
     for root, dirs, files in os.walk(os.path.join(workspace_dir, 'backend')):

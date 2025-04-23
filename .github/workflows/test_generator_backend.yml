@@ -116,8 +116,9 @@ jobs:
             echo "===== List of all test files to be analyzed ====="
             cat all_test_files.txt
             
-            cp all_test_files.txt backend_final_test_files.txt
+            cp all_test_files.txt backend_related_test_files.txt
           else
             echo "No related test files found."
             cp backend_relevant_files.txt backend_related_test_files.txt
           fi
+        # - name: Upload test file artifacts # To use for the test generation
