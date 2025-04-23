@@ -30,7 +30,6 @@ on:
 
 jobs:
   test-generator-backend:
-    if: github.head_ref == 'feat/test-generator-ai'
     name: Generate Backend Tests
     runs-on: ubuntu-latest
     # Définir ce job comme requis pour les autres workflows
@@ -71,7 +70,7 @@ jobs:
       - name: Filter relevant files
         run: |
           echo "Filtering Python files for test generation..."
-          grep '\.py$' backend_diff_files.txt | grep -v 'tests/' | grep -v 'migrations/' > backend_relevant_files.txt || true
+          grep '\.py$' backend_diff_files.txt | grep -Ev '/tests?/' | grep -v 'migrations/' > backend_relevant_files.txt || true
           echo "Relevant files count: $(wc -l < backend_relevant_files.txt || echo 0)"
           
           if [ -s backend_relevant_files.txt ]; then
