@@ -184,8 +184,8 @@ def init_config(y, interactive):
             default=os.getenv("ERRORS_TOPIC", "errors"),
         )
         s3_url = click.prompt(
-            "Enter the S3 storage URL (e.g., http://localhost:9000)",
-            default=os.getenv("S3_URL", "http://localhost:9000"),
+            "Enter the S3 storage URL",
+            default=os.getenv("S3_URL", ""),
         )
         s3_access_key = click.prompt(
             "Enter your S3 access key (leave blank if you are using pre-signed URLs to authenticate requests to your S3 storage)",
