@@ -150,3 +150,38 @@ services:
       - "--providers.file.directory=/etc/traefik"
       - "--providers.file.watch=true"{% else %}
       - "--experimental.localPlugins.selfsigned.moduleName=traefik.tls"{% endif %}
+
+  {% if kafka_dispatcher.enabled %}
+  dispatcher:
+    container_name: dispatcher
+    image: ghcr.io/intuitem/ciso-assistant-community/dispatcher:latest
+    # build:
+    #   context: ../dispatcher
+    restart: always
+    environment:
+      - API_URL=http://backend:8000/api
+      - BOOTSTRAP_SERVERS={{ kafka_dispatcher.broker_url }}
+      - KAFKA_USE_AUTH={{ kafka_dispatcher.kafka_use_auth }}
+      {% if kafka_dispatcher.kafka_use_auth %}
+      - KAFKA_SASL_MECHANISM={{ kafka_dispatcher.kafka_sasl_mechanism }}
+      - KAFKA_USERNAME={{ kafka_dispatcher.kafka_username }}
+      - KAFKA_PASSWORD={{ kafka_dispatcher.kafka_password }}
+      {% endif %}
+      - OBSERVATION_TOPIC={{ kafka_dispatcher.observation_topic }}
+      - ERRORS_TOPIC={{ kafka_dispatcher.errors_topic }}
+      {% if kafka_dispatcher.authentication == 'credentials' %}
+      - USER_EMAIL={{ kafka_dispatcher.credentials.user_email }}
+      - USER_PASSWORD={{ kafka_dispatcher.credentials.user_password }}
+      - AUTO_RENEW_SESSION={{ kafka_dispatcher.auto_renew_session }}
+      {% elif kafka_dispatcher.authentication == 'token' %}
+      - TOKEN={{ kafka_dispatcher.token }}
+      {% endif %}
+      {% if kafka_dispatcher.s3_url %}
+      - S3_URL={{ kafka_dispatcher.s3_url }}
+      - S3_ACCESS_KEY={{ kafka_dispatcher.s3_access_key }}
+      - S3_SECRET_KEY={{ kafka_dispatcher.s3_secret_key }}
+      {% endif %}
+    depends_on:
+      backend:
+        condition: service_healthy
+  {% endif %}

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "update_applied_control",
+  "type": "object",
+  "properties": {
+    "message_type": {
+      "type": "string",
+      "enum": ["update_applied_control"],
+      "description": "Identifies the message type for routing"
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "values": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "boolean", "null"]
+      }
+    }
+  },
+  "required": ["message_type", "selector", "values"]
+}
