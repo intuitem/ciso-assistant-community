@@ -89,62 +89,27 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 
         return Response(FeatureFlagsSerializer(settings).data.get("value"))
 
+    INTERFACE_FEATURE_KEYS = [
+        "xrays",
+        "incidents",
+        "tasks",
+        "risk_acceptances",
+        "exceptions",
+        "follow_up",
+        "ebiosrm",
+        "scoring_assistant",
+        "vulnerabilities",
+        "compliance",
+        "tprm",
+        "privacy",
+        "experimental",
+    ]
+
     @action(detail=True, name="Get interface settings")
     def feature_flags(self, request):
-        xrays = {
-            "xrays": self.get_object().value.get("xrays"),
-        }
-        incidents = {
-            "incidents": self.get_object().value.get("incidents"),
-        }
-        tasks = {
-            "tasks": self.get_object().value.get("tasks"),
-        }
-        risk_acceptances = {
-            "risk_acceptances": self.get_object().value.get("risk_acceptances"),
-        }
-        exceptions = {
-            "exceptions": self.get_object().value.get("exceptions"),
-        }
-        follow_up = {
-            "follow_up": self.get_object().value.get("follow_up"),
-        }
-        ebiosrm = {
-            "ebiosrm": self.get_object().value.get("ebiosrm"),
-        }
-        scoring_assistant = {
-            "scoring_assistant": self.get_object().value.get("scoring_assistant"),
-        }
-        vulnerabilities = {
-            "vulnerabilities": self.get_object().value.get("vulnerabilities"),
-        }
-        compliance = {
-            "compliance": self.get_object().value.get("compliance"),
-        }
-        tprm = {
-            "tprm": self.get_object().value.get("tprm"),
-        }
-        privacy = {
-            "privacy": self.get_object().value.get("privacy"),
-        }
-        experimental = {
-            "experimental": self.get_object().value.get("experimental"),
-        }
-        return Response(
-            xrays,
-            incidents,
-            tasks,
-            risk_acceptances,
-            exceptions,
-            follow_up,
-            ebiosrm,
-            scoring_assistant,
-            vulnerabilities,
-            compliance,
-            tprm,
-            privacy,
-            experimental,
-        )
+        settings = self.get_object().value
+        interface_flags = {key: settings.get(key) for key in INTERFACE_FEATURE_KEYS}
+        return Response(interface_flags)
 
 
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
