@@ -68,3 +68,7 @@
 * [Internationalization](contributing/internationalization/README.md)
   * [Translating the interface](contributing/internationalization/translating-the-interface.md)
 * [Submit a library (Framework)](contributing/submit-a-library-framework.md)
+
+## Academy
+
+* [Third Parties Risk Management](academy/third-parties-risk-management.md)
