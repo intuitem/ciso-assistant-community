@@ -43,6 +43,7 @@ django-auditlog = "^3.0.0"
 xmlsec = "1.3.14"
 boto3 = "^1.38.1"
 django-storages = "^1.14.6"
+icecream = "^2.1.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"
