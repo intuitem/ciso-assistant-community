@@ -202,7 +202,7 @@ def reverse_migrations(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0068_tasktemplate_tasknode"),
+        ("core", "0069_auto_20250414_2023"),
     ]
 
     operations = [
