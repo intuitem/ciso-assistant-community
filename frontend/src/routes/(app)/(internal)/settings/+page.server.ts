@@ -45,7 +45,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	if (featureFlagModel.selectFields) {
 		for (const selectField of featureFlagModel.selectFields) {
-			const url = `${BASE_API_URL}/settings/feature-flags/${selectField.field}/`;
+			const url = `${BASE_API_URL}/settings/feature-flags/feature_flags/`;
 			const response = await fetch(url);
 			if (response.ok) {
 				selectOptions[selectField.field] = await response.json().then((data) =>

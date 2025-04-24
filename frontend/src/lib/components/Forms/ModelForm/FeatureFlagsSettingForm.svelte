@@ -10,7 +10,6 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	import { ffNav } from '$lib/components/SideBar/ffNav';
-	export let data: any = {};
 
 	// Config for feature flags
 	const featureFlagFields = [

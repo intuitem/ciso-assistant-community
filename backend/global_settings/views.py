@@ -64,19 +64,19 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
         default_settings = {
-            "xrays": False,
-            "incidents": False,
-            "tasks": False,
-            "risk_acceptances": False,
-            "exceptions": False,
-            "follow_up": False,
-            "ebiosrm": False,
-            "scoring_assistant": False,
-            "vulnerabilities": False,
-            "compliance": False,
-            "tprm": False,
-            "privacy": False,
-            "experimental": False,
+            "xrays": True,
+            "incidents": True,
+            "tasks": True,
+            "risk_acceptances": True,
+            "exceptions": True,
+            "follow_up": True,
+            "ebiosrm": True,
+            "scoring_assistant": True,
+            "vulnerabilities": True,
+            "compliance": True,
+            "tprm": True,
+            "privacy": True,
+            "experimental": True,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="feature-flags")
@@ -108,7 +108,9 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get interface settings")
     def feature_flags(self, request):
         settings = self.get_object().value
-        interface_flags = {key: settings.get(key) for key in INTERFACE_FEATURE_KEYS}
+        interface_flags = {
+            key: settings.get(key) for key in self.INTERFACE_FEATURE_KEYS
+        }
         return Response(interface_flags)
 
 

@@ -566,8 +566,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'featureFlags',
 		localNamePlural: 'featureFlags',
 		verboseName: 'Feature flag',
-		verboseNamePlural: 'Feature flags',
-		selectFields: [{ field: 'feature_flags' }]
+		verboseNamePlural: 'Feature flags'
 	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
