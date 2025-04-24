@@ -210,6 +210,7 @@ class Migration(migrations.Migration):
             model_name="requirementassessment",
             name="answer",
         ),
+        migrations.RunPython(migrate_questions, reverse_migrations),
         migrations.RemoveField(
             model_name="requirementnode",
             name="question",
@@ -219,6 +220,7 @@ class Migration(migrations.Migration):
             name="answers",
             field=models.JSONField(blank=True, null=True, verbose_name="Answers"),
         ),
+        migrations.RunPython(migrate_answers_format, reverse_migrations),
         migrations.AddField(
             model_name="requirementnode",
             name="questions",
