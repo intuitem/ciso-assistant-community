@@ -217,6 +217,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
 10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
 11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
+12. Framework Nazionale per la Cybersecurity e la Data Protection, ACN Italia 🇮🇹
 
 <br/>
 
