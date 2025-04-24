@@ -32,20 +32,20 @@ Star the project 🌟 to get releases notification and help growing the communit
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
-- Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,  
-- Built as a **multi-paradigm** tool that adapts to different backgrounds, methodologies, and expectations,  
-- Explicitly **decouples** compliance from cybersecurity controls, enabling reusability across the platform,  
-- Promotes **reusability** and interlinking instead of redundant work,  
-- Developed with an **API-first** approach to support both UI interaction and external **automation**,  
-- Comes packed with a wide range of built-in standards, security controls, and threat libraries,  
-- Offers an **open format** to customize and reuse your own objects and frameworks,  
-- Includes built-in **risk assessment** and **remediation tracking** workflows,  
-- Supports custom frameworks via a simple syntax and flexible tooling,  
+- Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,
+- Built as a **multi-paradigm** tool that adapts to different backgrounds, methodologies, and expectations,
+- Explicitly **decouples** compliance from cybersecurity controls, enabling reusability across the platform,
+- Promotes **reusability** and interlinking instead of redundant work,
+- Developed with an **API-first** approach to support both UI interaction and external **automation**,
+- Comes packed with a wide range of built-in standards, security controls, and threat libraries,
+- Offers an **open format** to customize and reuse your own objects and frameworks,
+- Includes built-in **risk assessment** and **remediation tracking** workflows,
+- Supports custom frameworks via a simple syntax and flexible tooling,
 - Provides rich **import/export** capabilities across various channels and formats (UI, CLI, Kafka, reports, etc.).
 
-Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.  
+Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.
 
-As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.  
+As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
 
 We’re constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
 
@@ -75,22 +75,18 @@ CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/),
 
 At the heart of CISO Assistant lies the **decoupling principle**, which enables powerful use cases and major time savings:
 
-- Reuse past assessments across scopes or frameworks,  
-- Evaluate a single scope against multiple frameworks simultaneously,  
-- Let CISO Assistant handle reporting and consistency checks so you can focus on remediation,  
+- Reuse past assessments across scopes or frameworks,
+- Evaluate a single scope against multiple frameworks simultaneously,
+- Let CISO Assistant handle reporting and consistency checks so you can focus on remediation,
 - Separate control implementation from compliance tracking.
 
 Here is an illustration of the **decoupling** principle and its advantages:
 
-https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
-
-
+<https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62>
 
 ## System architecture
 
 ![](./documentation/system-architecture.png)
-
-
 
 ## Quick Start 🚀
 
@@ -371,13 +367,14 @@ export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBU
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
 
 # Authentication options
-export AUTH_TOKEN_TTL=900 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
+export AUTH_TOKEN_TTL=3600 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
+export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
 ```
 
 3. Install poetry
 
-Visit the poetry website for instructions: https://python-poetry.org/docs/#installation
+Visit the poetry website for instructions: <https://python-poetry.org/docs/#installation>
 
 4. Install required dependencies.
 
