@@ -129,8 +129,43 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
-MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
-MEDIA_URL = ""
+
+USE_S3 = os.getenv("USE_S3", "False") == "True"
+
+if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv(
+        "AWS_STORAGE_BUCKET_NAME", "ciso-assistant-bucket"
+    )
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+
+    if not AWS_ACCESS_KEY_ID:
+        logger.error("AWS_ACCESS_KEY_ID must be set")
+    if not AWS_SECRET_ACCESS_KEY:
+        logger.error("AWS_SECRET_ACCESS_KEY must be set")
+    if not AWS_S3_ENDPOINT_URL:
+        logger.error("AWS_S3_ENDPOINT_URL must be set")
+    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_ENDPOINT_URL:
+        exit(1)
+
+    logger.info("AWS_STORAGE_BUCKET_NAME: %s", AWS_STORAGE_BUCKET_NAME)
+    logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+
+    AWS_S3_FILE_OVERWRITE = False
+
+else:
+    MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
+    MEDIA_URL = ""
 
 PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 
@@ -165,6 +200,7 @@ INSTALLED_APPS = [
     "allauth.mfa",
     "huey.contrib.djhuey",
     "auditlog",
+    "storages",
 ]
 
 MIDDLEWARE = [
