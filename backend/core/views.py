@@ -4472,7 +4472,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_200_OK,
         )
 
-    @action(detail=True, methods=["get"], url_path="syncToActions")
+    @action(detail=True, methods=["get", "post"], url_path="syncToActions")
     def sync_to_applied_controls(self, request, pk):
         dry_run = request.query_params.get("dry_run", True)
         if dry_run == "false":

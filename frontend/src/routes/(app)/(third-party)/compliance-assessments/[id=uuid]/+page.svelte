@@ -261,7 +261,7 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: [],
+					items: [], //feed this
 					message: m.theFollowingChangesWillBeApplied()
 				}
 			}
@@ -272,7 +272,7 @@
 			// Data
 			title: m.syncToAppliedControls(),
 			body: m.syncToAppliedControlsMessage({
-				count: data.compliance_assessment.auto_sync.changes.length
+				count: data.compliance_assessment.framework.reference_controls.length //change this
 			}),
 			response: (r: boolean) => {
 				syncingToActionsIsLoading = r;
