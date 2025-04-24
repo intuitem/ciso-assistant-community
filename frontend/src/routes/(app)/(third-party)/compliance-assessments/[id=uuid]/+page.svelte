@@ -249,14 +249,34 @@
 		};
 		modalStore.trigger(modal);
 	}
-
-	function SyncManagementForm(): void {
-		const modalComponent: ModalComponent = {};
+	let syncingToActionsIsLoading = false;
+	function modalConfirmSyncToActions(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: data.form,
+				id: id,
+				debug: false,
+				URLModel: 'compliance-assessments',
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: [],
+					message: m.theFollowingChangesWillBeApplied()
+				}
+			}
+		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.syncToAppliedControls()
+			title: m.syncToAppliedControls(),
+			body: m.syncToAppliedControlsMessage({
+				count: data.compliance_assessment.auto_sync.changes.length
+			}),
+			response: (r: boolean) => {
+				syncingToActionsIsLoading = r;
+			}
 		};
 		modalStore.trigger(modal);
 	}
@@ -472,12 +492,28 @@
 					on:click={() => modalCreateForm()}
 					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
 				</button>
-				<button
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-slate-500 h-fit"
-					on:click={() => synctoappliedcontrols()}
-					><i class="fa-solid fa-arrows-rotate mr-2"></i> {m.syncToAppliedControls()}
-				</button>
 			{/if}
+
+			<button
+				class="btn text-gray-100 bg-gradient-to-r from-sky-500 to-slate-500 h-fit whitespace-normal"
+				on:click={() => {
+					modalConfirmSyncToActions(
+						data.compliance_assessment.id,
+						data.compliance_assessment.name,
+						'?/syncToActions'
+					);
+				}}
+			>
+				<span class="mr-2">
+					{#if createAppliedControlsLoading}
+						<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+					{:else}
+						<i class="fa-solid fa-arrows-rotate mr-2"></i>
+					{/if}
+				</span>
+				{m.syncToAppliedControls()}
+			</button>
+
 			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
 					class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
