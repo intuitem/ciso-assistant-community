@@ -43,7 +43,7 @@ def resolve_import_to_filepath(import_name, base_path):
     """Try to convert an import name to an actual file path."""
     parts = import_name.split('.')
     
-    # Try various combinations of the import path to find a matching file
+    # First strategy: Try various combinations of the import path to find a matching file
     for i in range(len(parts), 0, -1):
         # Convert import path to file path
         path_parts = parts[:i]
@@ -58,6 +58,56 @@ def resolve_import_to_filepath(import_name, base_path):
         
         if os.path.exists(init_path):
             return init_path
+    
+    # Second strategy: Try looking in parent directories
+    # Start with the original base path and go up to 3 parent directories
+    current_path = base_path
+    for _ in range(3):  # Try up to 3 parent directories
+        parent_path = os.path.dirname(current_path)
+        if parent_path == current_path:  # We've reached the root directory
+            break
+        current_path = parent_path
+        
+        # Try the same resolution logic but with the parent directory
+        for i in range(len(parts), 0, -1):
+            path_parts = parts[:i]
+            file_path = os.path.join(current_path, *path_parts) + '.py'
+            
+            if os.path.exists(file_path):
+                return file_path
+                
+            # Check if it might be a package with __init__.py
+            dir_path = os.path.join(current_path, *path_parts)
+            init_path = os.path.join(dir_path, '__init__.py')
+            
+            if os.path.exists(init_path):
+                return init_path
+    
+    # Third strategy: Handle cases like 'core.models' where 'core' is a package
+    # This searches from the base directory and iterates through possible combinations
+    for i in range(len(parts)):
+        prefix_parts = parts[:i]
+        suffix_parts = parts[i:]
+        
+        if not prefix_parts:  # Skip empty prefix
+            continue
+            
+        # Try to find the prefix directory
+        prefix_dir = os.path.join(base_path, *prefix_parts)
+        
+        if os.path.isdir(prefix_dir):
+            # Now try to resolve the suffix in this directory
+            file_path = os.path.join(prefix_dir, *suffix_parts) + '.py'
+            
+            if os.path.exists(file_path):
+                return file_path
+                
+            # Check for package with __init__.py
+            dir_path = os.path.join(prefix_dir, *suffix_parts)
+            init_path = os.path.join(dir_path, '__init__.py')
+            
+            if os.path.exists(init_path):
+                return init_path
     
     # Could not resolve to a file
     return None
