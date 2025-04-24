@@ -29,6 +29,14 @@
 			end: '2025-12-31',
 			progress: 50,
 			group_id: 'warehouse'
+		},
+		{
+			id: '4',
+			name: 'More on the warehouse',
+			start: '2025-06-01',
+			end: '2026-06-01',
+			progress: 50,
+			group_id: 'warehouse'
 		}
 	];
 
@@ -37,6 +45,7 @@
 			groups: groups,
 			view_mode: 'Month',
 			date_format: 'YYYY-MM-DD',
+			language: 'en',
 			infinite_padding: false,
 			readonly_dates: true,
 			readonly_progress: true,
@@ -48,18 +57,13 @@
 	});
 </script>
 
-<main class="w-full">
+<main class="w-full h-dvh p-2">
 	<!-- Render container always; render content via JS only after mount -->
-	<div id="gantt"></div>
+	<div id="gantt" class=""></div>
 </main>
 
 <style>
 	#gantt {
-		width: 100%;
-		height: 800px;
 		margin-bottom: 20px;
-	}
-	.bar-website {
-		border: 4pt;
 	}
 </style>
