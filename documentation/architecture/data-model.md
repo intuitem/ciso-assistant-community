@@ -1560,7 +1560,6 @@ erDiagram
 ### Implementation
 
 - EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
-- There is no object for "strategic scenarios", as they result directly from attack paths and corresponding feared event (which is the title of the strategic scenario).
 - the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
 
 ## Domain import/export
@@ -1591,33 +1590,124 @@ This new type of assessments is intended to gather and manage findinds. The sect
 A findings assessment has the following specific fields:
 - category: --/pentest/audit/internal
 
-A finding ("constat" has the following fields:
+A finding ("constat") has the following fields:
 - ref_id/name/description
 - severity, like for vulnerabilities
 - a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
 
 A finding can have related reference controls, applied controls, vulnerabilities.
 
-
-## Asset compliance (draft)
+## Tasks
 
 ```mermaid
 erDiagram
 
-    COMPLIANCE_INDICATOR          }o--o{ ASSET                : applies_to
-    OBSERVATION                   }o--|| ASSET                : applies_to
-    OBSERVATION                   }o--|| COMPLIANCE_INDICATOR : corresponds_to
- 
-    COMPLIANCE_INDICATOR {
-        string ref_id
-        string name
-        string description
-        json   tracker_metadata
-    }
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_TEMPLATE         : contains
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE             : contains
+TASK_TEMPLATE         |o--o{ TASK_NODE             : generates
+USER                  }o--o{ TASK_TEMPLATE         : owns
+TASK_TEMPLATE         }o--o| TASK_TEMPLATE         : is_subtask_of
+TASK_TEMPLATE         }o--o{ ASSET                 : relates_to
+TASK_TEMPLATE         }o--o{ APPLIED_CONTROL       : relates_to
+TASK_TEMPLATE         }o--o{ COMPLIANCE_ASSESSMENT : relates_to
+TASK_TEMPLATE         }o--o{ RISK_ASSESSMENT       : relates_to
+TASK_NODE             }o--o{ EVIDENCE              : contains
 
-    OBSERVATION {
-        datetime when
-        json     tracked_data
-        boolean  compliance_status
-    }
+TASK_TEMPLATE {
+    string ref_id
+    string name
+    string description
+
+    date   task_date
+    json   schedule_definition
+    bool   enabled
+}
+
+TASK_NODE {
+    date   due_date
+    enum   status "pending, in progress, completed, cancelled"
+    string observation
+}
 ```
+
+The schedule_definition contains the following fields:
+
+```json
+SCHEDULE_JSONSCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Schedule Definition",
+    "type": "object",
+    "properties": {
+        "interval": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of periods to wait before repeating (e.g., every 2 days, 3 weeks).",
+        },
+        "frequency": {
+            "type": "string",
+            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+        },
+        "days_of_week": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 7},
+            "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
+        },
+        "weeks_of_month": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 4,
+            },
+            "description": "Optional. for a given weekday, which one in the month (1 for first, -1 for last)",
+        },
+        "months_of_year": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 12},
+            "description": "Optional. Months of the year (1=January, 12=December)",
+        },
+        "start_date": {
+            "type": ["string"],
+            "format": "date",
+            "description": "Date when recurrence begins.",
+        },
+        "end_date": {
+            "type": ["string"],
+            "format": "date",
+            "description": "Date when recurrence ends.",
+        },
+        "occurrences": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "description": "Optional. Number of occurrences before recurrence stops.",
+        },
+        "overdue_behavior": {
+            "type": "string",
+            "enum": ["DELAY_NEXT", "NO_IMPACT"],
+            "default": "NO_IMPACT",
+            "description": "Optional. Behavior when tasks become overdue.",
+        },
+    },
+    "required": ["interval", "frequency", "start_date", "end_date"],
+    "additionalProperties": False,
+}
+```
+
+The task_date is copied in the start_date of the schedule for recurring tasks.
+
+The task_date is copied in the due_date of the task_node for a non-recurring task.
+
+When enabled is set to False, the schedule is suspended (for recurring task), and generated tasks are hidden (past and future).
+
+The following concepts will not be included in the MVP:
+- subtasks
+- exceptions
+- overdue_behavior (will be NO_IMPACT)
+
+### Implementation
+
+Future task_nodes are generated partially in advance at creation/update of a task_template and with a daily refresh done with huey. This shall take in account end_date, and the following limits:
+- 5 years for yearly frequency
+- 24 months for monthly frequency
+- 53 weeks for weekly frequency
+- 63 days for daily frequency
