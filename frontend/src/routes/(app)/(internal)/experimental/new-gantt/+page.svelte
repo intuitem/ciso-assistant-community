@@ -1,130 +1,65 @@
 <script>
 	import { onMount } from 'svelte';
-	import moment from 'moment';
-	import { SvelteGantt, SvelteGanttTable, MomentSvelteGanttDateAdapter } from 'svelte-gantt/svelte';
-
-	let currentStart;
-	let currentEnd;
-	let options;
+	import Gantt from 'frappe-gantt';
 	let mounted = false;
+	let gantt;
 
-	function time(input) {
-		return moment(input, 'HH:mm');
-	}
+	let groups = [{ id: 'website', name: 'website', bar_class: 'bar-website' }];
+	let tasks = [
+		{
+			id: '1',
+			name: 'Redesign website',
+			start: '2025-01-01',
+			end: '2025-10-31',
+			progress: 80,
+			group_id: 'website'
+		},
+		{
+			id: '2',
+			name: 'Other stuff on the website',
+			start: '2025-12-01',
+			end: '2025-12-31',
+			progress: 20,
+			group_id: 'website'
+		},
+		{
+			id: '3',
+			name: 'Clean up the warehouse',
+			start: '2025-10-01',
+			end: '2025-12-31',
+			progress: 50,
+			group_id: 'warehouse'
+		}
+	];
 
-	onMount(() => {
-		currentStart = time('06:00');
-		currentEnd = time('18:00');
-
-		const data = {
-			rows: [
-				{
-					id: 1,
-					label: 'Room 1',
-					draggable: false
-				},
-				{
-					id: 2,
-					label: 'Room 2',
-					draggable: false
-				},
-				{
-					id: 3,
-					label: 'Room 3',
-					draggable: false
-				},
-				{
-					id: 4,
-					label: 'Room 4',
-					draggable: false
-				},
-				{
-					id: 5,
-					label: 'Room 5',
-					draggable: false
-				}
-			],
-			tasks: [
-				{
-					id: 3,
-					resourceId: 1,
-					label: 'simple',
-					from: time('09:30'),
-					to: time('12:00'),
-					resizable: false
-				},
-				{
-					id: 4,
-					resourceId: 2,
-					label: 'simple',
-					from: time('08:00'),
-					to: time('10:00'),
-					resizable: false
-				},
-				{
-					id: 5,
-					resourceId: 1,
-					label: 'simple',
-					from: time('13:00'),
-					to: time('14:00'),
-					resizable: false
-				},
-				{
-					id: 6,
-					resourceId: 3,
-					label: 'simple',
-					from: time('09:00'),
-					to: time('11:00'),
-					resizable: false
-				}
-			],
-			dependencies: []
-		};
-
-		options = {
-			dateAdapter: new MomentSvelteGanttDateAdapter(moment),
-			rows: data.rows,
-			tasks: data.tasks,
-			dependencies: data.dependencies,
-			timeRanges: [],
-			columnUnit: 'minute',
-			columnOffset: 30,
-			magnetOffset: 15,
-			rowHeight: 75,
-			rowPadding: 5,
-			layout: 'expand',
-			headers: [
-				{ unit: 'day', format: 'MMMM Do', sticky: true },
-				{ unit: 'hour', format: 'H:mm', sticky: true }
-			],
-			fitWidth: true,
-			minWidth: 800,
-			from: currentStart,
-			to: currentEnd,
-			tableHeaders: [{ title: 'All Rooms', property: 'label', width: 140, type: 'tree' }],
-			tableWidth: 100,
-			ganttTableModules: [SvelteGanttTable]
-		};
+	onMount(async () => {
+		gantt = new Gantt('#gantt', tasks, {
+			groups: groups,
+			view_mode: 'Month',
+			date_format: 'YYYY-MM-DD',
+			infinite_padding: false,
+			readonly_dates: true,
+			readonly_progress: true,
+			view_mode_select: true,
+			holidays: [] //this is for disabling the grayed weekend
+		});
 
 		mounted = true;
 	});
 </script>
 
 <main class="w-full">
-	{#if mounted}
-		<div>
-			<SvelteGantt {...options}></SvelteGantt>
-		</div>
-	{/if}
+	<!-- Render container always; render content via JS only after mount -->
+	<div id="gantt"></div>
 </main>
 
-<style scoped>
-	:global(.header-container) {
-		pointer-events: none;
-	}
-
-	:global(.sg-task-content) {
+<style>
+	#gantt {
 		width: 100%;
-		padding-right: 14px;
+		height: 800px;
+		margin-bottom: 20px;
+	}
+	.bar-website {
+		border: 4pt;
 	}
 </style>

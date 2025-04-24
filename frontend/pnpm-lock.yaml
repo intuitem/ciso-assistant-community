@@ -44,6 +44,9 @@ importers:
       eslint-plugin-storybook:
         specifier: ^0.10.2
         version: 0.10.2(eslint@9.16.0(jiti@1.21.6))(typescript@5.7.2)
+      frappe-gantt:
+        specifier: ^1.0.3
+        version: 1.0.3
       globals:
         specifier: ^15.13.0
         version: 15.13.0
@@ -2713,6 +2716,9 @@ packages:
 
   fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
+
+  frappe-gantt@1.0.3:
+    resolution: {integrity: sha512-NkwO2MD4JoWJ82ZruK/rQVIAEpI3nXUoo5gG+wQHV18yKXhzZsTehVfCXJ92DLl/foTtut1RVL0dqj7fo6Cfpg==}
 
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
@@ -7034,6 +7040,8 @@ snapshots:
       mime-types: 2.1.35
 
   fraction.js@4.3.7: {}
+
+  frappe-gantt@1.0.3: {}
 
   fs.realpath@1.0.0: {}
 
