@@ -13,6 +13,19 @@
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
 	export let object: any = {};
+
+	function getFilename(path) {
+		if (!path) return '';
+
+		try {
+			// If it's a URL with query parameters
+			const withoutQuery = path.split('?')[0];
+			// Get the last part after the final slash (if any)
+			return decodeURIComponent(withoutQuery.split('/').pop());
+		} catch (e) {
+			return path; // Fallback to original string if anything fails
+		}
+	}
 </script>
 
 <HiddenInput {form} field="applied_controls" />
@@ -21,7 +34,7 @@
 	{form}
 	allowPaste={true}
 	helpText={object.attachment
-		? `${m.attachmentWarningText()}: ${object.attachment}`
+		? `${m.attachmentWarningText()}: ${getFilename(object.attachment)}`
 		: m.attachmentHelpText()}
 	field="attachment"
 	label={m.attachment()}

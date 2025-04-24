@@ -346,7 +346,16 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# Add a second backup mailer
+# CISO Assistant will use filesystem storage backend bu default.
+# You can use a S3 Bucket by declaring these variables
+# The S3 bucket must be created before starting CISO Assistant
+export USE_S3=True
+export AWS_ACCESS_KEY_ID=<XXX>
+export AWS_SECRET_ACCESS_KEY=<XXX>
+export AWS_STORAGE_BUCKET_NAME=<your-bucket-name>
+export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>
+
+# Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
 export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE=<XXX>
@@ -400,13 +409,22 @@ pre-commit install
   - `create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';`
   - `grant all privileges on database ciso-assistant to ciso-assistantuser;`
 
-7. Apply migrations.
+7. If you want to setup s3 bucket:
+
+- Choose your s3 provider or try s3 feature with miniO with this command:
+  - `docker run -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=XXX" -e "MINIO_ROOT_PASSWORD=XXX" quay.io/minio/minio server /data --console-address ":9001"`
+- You can now check your bucket on http://localhost:9001
+  - Fill the login with the credentials you filled on the docker run env variables
+- Export in the backend directory all the env variables asked about S3
+  - You can see the list above in the recommanded variables
+
+8. Apply migrations.
 
 ```sh
 poetry run python manage.py migrate
 ```
 
-8. Create a Django superuser, that will be CISO Assistant administrator.
+9. Create a Django superuser, that will be CISO Assistant administrator.
 
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
@@ -414,13 +432,13 @@ poetry run python manage.py migrate
 poetry run python manage.py createsuperuser
 ```
 
-9. Run development server.
+10. Run development server.
 
 ```sh
 poetry run python manage.py runserver
 ```
 
-10. for Huey (tasks runner)
+11. for Huey (tasks runner)
 
 - prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
