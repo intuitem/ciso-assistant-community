@@ -1,0 +1,124 @@
+name: Test Generator Backend
+
+# Trigger on every push or PR to main/develop/feat/test-generator-AI
+on:
+  push:
+    branches: [main, develop, feat/test-generator-AI]
+    paths:
+      - 'backend/**'
+      - 'tools/test_generator/backend/**'
+      - '!**/*.md'
+      - '!**/*.txt'
+      - '!**/*.png'
+      - '!**/poetry.lock'
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+    paths:
+      - 'backend/**'
+      - 'tools/test_generator/backend/**'
+      - '!**/*.md'
+      - '!**/*.txt'
+      - '!**/*.png'
+      - '!**/poetry.lock'
+  workflow_dispatch:  # Allows manual triggering
+
+# Ce flag permet de s'assurer que cette action est considérée comme critique
+#concurrency:
+  #group: ${{ github.workflow }}-${{ github.ref }}
+  #cancel-in-progress: false
+
+jobs:
+  test-generator-backend:
+    name: Generate Backend Tests
+    runs-on: ubuntu-latest
+    # Définir ce job comme requis pour les autres workflows
+    #outputs:
+      #completed: ${{ steps.set-output.outputs.completed }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Get full Git history
+      
+      - name: Get Git diff
+      # This step fetches the diff between the current branch and the main branch
+        id: get_diff
+        run: |
+          echo "Fetching main branch..."
+          git fetch origin main
+          
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "Getting PR diff for backend files..."
+            git diff origin/main...HEAD -- backend/ > backend_diff.patch
+            git diff origin/main...HEAD --name-only -- backend/ > backend_diff_files.txt
+          else
+            echo "Getting push diff for backend files..."
+            git diff HEAD^..HEAD -- backend/ > backend_diff.patch
+            git diff HEAD^..HEAD --name-only -- backend/ > backend_diff_files.txt
+          fi
+          
+          echo "Diff files count: $(wc -l < backend_diff_files.txt)"
+          echo "Backend Diff Content:"
+          cat backend_diff.patch
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Filter relevant files
+        id: filter_files
+        run: |
+          echo "Filtering Python files for test generation..."
+          grep '\.py$' backend_diff_files.txt | grep -Ev '/tests?/' | grep -v 'migrations/' > backend_relevant_files.txt || true
+          echo "Relevant files count: $(wc -l < backend_relevant_files.txt || echo 0)"
+          
+          if [ -s backend_relevant_files.txt ]; then
+            echo "Files to consider for test generation:"
+            cat backend_relevant_files.txt
+          else
+            echo "No relevant backend files found for test generation."
+          fi  
+
+      - name: Find related files
+        id: find_related_files
+        run: |
+          cp tools/test_generator/backend/scripts/find_related_files.py ./find_related_files.py
+          
+          chmod +x find_related_files.py
+          
+          python find_related_files.py backend_relevant_files.txt $GITHUB_WORKSPACE
+          
+          if [ -s all_files.txt ]; then
+            echo "===== Original files with their dependancies ====="
+            cat dependencies_map.json | jq
+            
+            echo "===== List of all files to be analyzed ====="
+            cat all_files.txt
+            
+            cp all_files.txt backend_final_files.txt
+          else
+            echo "No related files found."
+            cp backend_relevant_files.txt backend_final_files.txt
+          fi
+      - name: Find related test files
+        id: find_related_test_files
+        run: |
+          cp tools/test_generator/backend/scripts/find_related_test_files.py ./find_related_test_files.py
+          
+          chmod +x find_related_test_files.py
+          
+          python find_related_test_files.py backend_relevant_files.txt $GITHUB_WORKSPACE
+          
+          if [ -s all_test_files.txt ]; then
+            echo "===== List of all test files to be analyzed ====="
+            cat all_test_files.txt
+            
+            cp all_test_files.txt backend_related_test_files.txt
+          else
+            echo "No related test files found."
+            cp backend_relevant_files.txt backend_related_test_files.txt
+          fi
+        # - name: Upload test file artifacts # To use for the test generation
