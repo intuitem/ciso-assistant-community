@@ -262,7 +262,7 @@
 			if (response.ok) {
 				return response.json();
 			} else {
-				throw new Error('Network response was not ok');
+				throw new Error('Failed to fetch requirement assessments sync data');
 			}
 		});
 		console.log(requirementAssessmentsSync);
@@ -277,8 +277,8 @@
 				bodyComponent: List,
 				bodyProps: {
 					items: [
-						Object.entries(requirementAssessmentsSync.changes).map(
-							(k) => `${k[0]}, ${safeTranslate(k[1].current)} -> ${safeTranslate(k[1].new)}`
+						Object.values(requirementAssessmentsSync.changes).map(
+							(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
 						)
 					], //feed this
 					message: m.theFollowingChangesWillBeApplied()

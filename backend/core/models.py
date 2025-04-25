@@ -3236,7 +3236,11 @@ class ComplianceAssessment(Assessment):
             ic(ac)
             new_result = infer_result(ac)
             if ra.result != new_result:
-                changes[str(ra.id)] = {"current": ra.result, "new": infer_result(ac)}
+                changes[str(ra.id)] = {
+                    "str": str(ra),
+                    "current": ra.result,
+                    "new": infer_result(ac),
+                }
                 if not dry_run:
                     ra.result = new_result
                     ra.save(update_fields=["result"])
