@@ -276,11 +276,9 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: [
-						Object.values(requirementAssessmentsSync.changes).map(
-							(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
-						)
-					], //feed this
+					items: Object.values(requirementAssessmentsSync.changes).map(
+						(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
+					), //feed this
 					message: m.theFollowingChangesWillBeApplied()
 				}
 			}
