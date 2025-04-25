@@ -250,7 +250,22 @@
 		modalStore.trigger(modal);
 	}
 	let syncingToActionsIsLoading = false;
-	function modalConfirmSyncToActions(id: string, name: string, action: string): void {
+	async function modalConfirmSyncToActions(
+		id: string,
+		name: string,
+		action: string
+	): Promise<void> {
+		const requirementAssessmentsSync = await fetch(
+			`/compliance-assessments/${$page.params.id}/sync-to-actions`,
+			{ method: 'POST' }
+		).then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error('Network response was not ok');
+			}
+		});
+		console.log(requirementAssessmentsSync);
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -261,7 +276,11 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: [], //feed this
+					items: [
+						Object.entries(requirementAssessmentsSync.changes).map(
+							(k) => `${k[0]}, ${k[1].current} -> ${k[1].new}`
+						)
+					], //feed this
 					message: m.theFollowingChangesWillBeApplied()
 				}
 			}
@@ -314,6 +333,7 @@
 	}
 
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
+	$: if (form?.message?.requirementAssessmentsSync) console.log(form);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -496,8 +516,8 @@
 
 			<button
 				class="btn text-gray-100 bg-gradient-to-r from-sky-500 to-slate-500 h-fit whitespace-normal"
-				on:click={() => {
-					modalConfirmSyncToActions(
+				on:click={async () => {
+					await modalConfirmSyncToActions(
 						data.compliance_assessment.id,
 						data.compliance_assessment.name,
 						'?/syncToActions'

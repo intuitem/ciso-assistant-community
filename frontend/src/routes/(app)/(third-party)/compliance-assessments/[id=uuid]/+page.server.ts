@@ -135,7 +135,7 @@ export const actions: Actions = {
 		const form = await superValidate(formData, zod(schema));
 
 		const response = await event.fetch(
-			`/compliance-assessments/${event.params.id}/syncToActions/`,
+			`${BASE_API_URL}/compliance-assessments/${event.params.id}/syncToActions/`,
 			{
 				method: 'POST',
 				headers: {
@@ -160,6 +160,6 @@ export const actions: Actions = {
 				event
 			);
 		}
-		return { form };
+		return { form, message: { requirementAssessmentsSync: await response.json() } };
 	}
 };
