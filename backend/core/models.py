@@ -3200,7 +3200,7 @@ class ComplianceAssessment(Assessment):
                 return RequirementAssessment.Result.NOT_ASSESSED
 
             if len(applied_controls) == 1:
-                ac_status = applied_controls.first().status
+                ac_status = applied_controls[0].status
                 if ac_status == AppliedControl.Status.ACTIVE:
                     return RequirementAssessment.Result.COMPLIANT
                 elif ac_status == AppliedControl.Status.TO_DO:
@@ -3236,7 +3236,7 @@ class ComplianceAssessment(Assessment):
             ic(ac)
             new_result = infer_result(ac)
             if ra.result != new_result:
-                changes[ra.id] = {"current": ra.result, "new": infer_result(ac)}
+                changes[str(ra.id)] = {"current": ra.result, "new": infer_result(ac)}
                 if not dry_run:
                     ra.result = new_result
                     ra.save(update_fields=["result"])
