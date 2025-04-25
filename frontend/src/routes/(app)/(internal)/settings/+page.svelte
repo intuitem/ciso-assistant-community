@@ -16,12 +16,12 @@
 	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key" /> {m.sso()}</Tab
 	>
 	<Tab bind:group={tabSet} name="featureFlags" value={2}
-		><i class="fa-solid fa-flag" /> {m.featuredFlags()}</Tab
+		><i class="fa-solid fa-flag" /> {m.featureFlags()}</Tab
 	>
 </TabGroup>
 {#if tabSet === 2}
 	<div>
-		<span class="text-gray-500">{m.configureFeaturedFlags()}</span>
+		<span class="text-gray-500">{m.configureFeatureFlags()}</span>
 		<ModelForm
 			form={data.featureFlagForm}
 			schema={featureFlagSchema}
