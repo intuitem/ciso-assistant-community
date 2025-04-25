@@ -122,6 +122,7 @@ class RepresentativeViewSet(BaseModelViewSet):
 
     model = Representative
     filterset_fields = ["entity"]
+    search_fields = ["email"]
 
 
 class SolutionViewSet(BaseModelViewSet):
