@@ -5273,7 +5273,7 @@ class TaskTemplateViewSet(BaseModelViewSet):
                 if end_date_param:
                     end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
                 else:
-                    end_date = datetime.now().date() + delta                
+                    end_date = datetime.now().date() + delta
                 # Ensure end_date is not before the calculated delta
                 if end_date < datetime.now().date() + delta:
                     end_date = datetime.now().date() + delta
