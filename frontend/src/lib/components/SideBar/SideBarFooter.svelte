@@ -27,7 +27,8 @@
 		czech: m.czech(),
 		swedish: m.swedish(),
 		indonesian: m.indonesian(),
-		danish: m.danish()
+		danish: m.danish(),
+		hungarian: m.hungarian()
 	};
 
 	const modalStore = getModalStore();
@@ -48,7 +49,8 @@
 		cs: 'Český',
 		sv: 'Svenska',
 		id: 'Bahasa Indonesia',
-		da: 'Dansk'
+		da: 'Dansk',
+		hu: 'Magyar'
 	};
 
 	let value = getLocale();
