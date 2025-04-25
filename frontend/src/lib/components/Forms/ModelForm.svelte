@@ -158,7 +158,9 @@
 				goto(getSecureRedirect(form.message.redirect));
 			}
 			if (form.valid) {
-				parent.onConfirm();
+				if (parent && typeof parent.onConfirm === 'function') {
+					parent.onConfirm();
+				}
 				createModalCache.deleteCache(model.urlModel);
 			}
 		}

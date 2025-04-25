@@ -161,7 +161,7 @@ export const actions: Actions = {
 			return fail(400, { form: null });
 		}
 
-		const schema = featureFlagSchema;
+		const schema = FeatureFlagsSchema;
 		const form = await superValidate(formData, zod(schema));
 		const endpoint = `${BASE_API_URL}/settings/feature-flags/`;
 
