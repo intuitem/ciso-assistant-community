@@ -324,7 +324,7 @@ export const GeneralSettingsSchema = z.object({
 	interface_agg_scenario_matrix: z.boolean().optional()
 });
 
-export const featureFlagSchema = z.object({
+export const FeatureFlagsSchema = z.object({
 	xrays: z.boolean().optional(),
 	incidents: z.boolean().optional(),
 	tasks: z.boolean().optional(),
@@ -720,7 +720,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
-	'feature-flags': featureFlagSchema,
+	'feature-flags': FeatureFlagsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

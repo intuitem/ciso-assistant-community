@@ -1,7 +1,7 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { SSOSettingsSchema, GeneralSettingsSchema, featureFlagSchema } from '$lib/utils/schemas';
+import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 import { m } from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -84,7 +84,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const generalSettingForm = await superValidate(generalSettings, zod(GeneralSettingsSchema), {
 		errors: false
 	});
-	const featureFlagForm = await superValidate(featureFlagSettings, zod(GeneralSettingsSchema), {
+	const featureFlagForm = await superValidate(featureFlagSettings, zod(FeatureFlagsSchema), {
 		errors: false
 	});
 
