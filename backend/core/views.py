@@ -816,7 +816,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
     ]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1326,7 +1326,7 @@ class AppliedControlViewSet(BaseModelViewSet):
 
     model = AppliedControl
     filterset_class = AppliedControlFilterSet
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1862,7 +1862,7 @@ class PolicyViewSet(AppliedControlViewSet):
         "requirement_assessments",
         "evidences",
     ]
-    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
@@ -1893,6 +1893,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "security_exceptions",
     ]
     ordering = ["ref_id"]
+    search_fields = ["name", "description", "ref_id"]
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
@@ -2255,7 +2256,14 @@ class UserGroupViewSet(BaseModelViewSet):
     ordering = ["builtin", "name"]
     ordering_fields = ["localization_dict"]
     filterset_fields = ["folder"]
-    filter_backends = [UserGroupOrderingFilter]
+    search_fields = [
+        "folder__name"
+    ]  # temporary hack, filters only by folder name, not role name
+    filter_backends = [
+        DjangoFilterBackend,
+        UserGroupOrderingFilter,
+        filters.SearchFilter,
+    ]
 
 
 class RoleViewSet(BaseModelViewSet):
@@ -3850,7 +3858,6 @@ class EvidenceViewSet(BaseModelViewSet):
         "timeline_entries",
         "filtering_labels",
     ]
-    search_fields = ["name"]
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
@@ -4991,6 +4998,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     model = SecurityException
     filterset_fields = ["requirement_assessments", "risk_scenarios"]
+    search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
@@ -5011,6 +5019,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
     ]
+    search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -5124,6 +5133,7 @@ class FindingViewSet(BaseModelViewSet):
 
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
