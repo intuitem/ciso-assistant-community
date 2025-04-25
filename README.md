@@ -557,6 +557,7 @@ Set DJANGO_DEBUG=False for security reason.
 - SV: Swedish
 - ID: Indonesian
 - DA: Danish
+- HU: Hungarian
 
 ## Contributors 🤝
 
