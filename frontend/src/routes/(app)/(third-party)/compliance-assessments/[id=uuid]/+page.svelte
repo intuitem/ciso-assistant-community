@@ -278,7 +278,7 @@
 				bodyProps: {
 					items: [
 						Object.entries(requirementAssessmentsSync.changes).map(
-							(k) => `${k[0]}, ${k[1].current} -> ${k[1].new}`
+							(k) => `${k[0]}, ${safeTranslate(k[1].current)} -> ${safeTranslate(k[1].new)}`
 						)
 					], //feed this
 					message: m.theFollowingChangesWillBeApplied()
