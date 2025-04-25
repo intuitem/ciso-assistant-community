@@ -17,30 +17,33 @@ The easiest way to update your on-prem/local instance (pro or community)
 ./update-ciso-assistant.sh
 ```
 
-## Manually
+## Detailled steps
 
-If you need to do it manually for any reasons on a local instance
+In case of issues (unsupported shell, windows, etc.) here are the steps to consider:
 
-**Backup your db file outside of the repo folder, always a good practice**
 
-```bash
-cp db/ciso-assistant.sqlite3 ../ciso-assistant-backup.sqlite3
-```
 
-**Stop the containers and delete the containers instances**
+1. backup your db:
+   1. if you're using `sqlite`, copy the file under a different name
+   2. if it's `postgresql` you can use something like `pgdump`&#x20;
 
-```bash
-docker compose down
-```
 
-**Clean up the previous docker images**
+
+2. stop and clean the containers, this won't affect your data
+
+`docker compose rm -fs`
+
+
+
+3. restart the compose and let it handle the migration&#x20;
+
+`docker compose up -d`
+
+## Edge cases
+
+**Force remove the previous docker images to get the new ones**
 
 ```bash
 docker rmi ghcr.io/intuitem/ciso-assistant-community/backend:latest ghcr.io/intuitem/ciso-assistant-community/frontend:latest 2> /dev/null
 ```
 
-**Trigger compose up to refresh the images**
-
-```bash
-docker compose up -d #remove -d if you want the logs directly in your shell
-```
