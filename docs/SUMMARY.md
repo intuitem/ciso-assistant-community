@@ -73,3 +73,4 @@
 
 * [Overview](academy/overview.md)
 * [Third Parties Risk Management](academy/third-parties-risk-management.md)
+* [Etude EBIOS RM](academy/etude-ebios-rm.md)
