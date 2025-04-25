@@ -816,7 +816,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
     ]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1315,6 +1315,7 @@ class AppliedControlFilterSet(df.FilterSet):
             "owner": ["exact"],
             "findings": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+            "ref_id": ["exact"],
         }
 
 
@@ -1325,7 +1326,7 @@ class AppliedControlViewSet(BaseModelViewSet):
 
     model = AppliedControl
     filterset_class = AppliedControlFilterSet
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1861,7 +1862,7 @@ class PolicyViewSet(AppliedControlViewSet):
         "requirement_assessments",
         "evidences",
     ]
-    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
@@ -1892,6 +1893,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "security_exceptions",
     ]
     ordering = ["ref_id"]
+    search_fields = ["name", "description", "ref_id"]
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
@@ -2254,7 +2256,14 @@ class UserGroupViewSet(BaseModelViewSet):
     ordering = ["builtin", "name"]
     ordering_fields = ["localization_dict"]
     filterset_fields = ["folder"]
-    filter_backends = [UserGroupOrderingFilter]
+    search_fields = [
+        "folder__name"
+    ]  # temporary hack, filters only by folder name, not role name
+    filter_backends = [
+        DjangoFilterBackend,
+        UserGroupOrderingFilter,
+        filters.SearchFilter,
+    ]
 
 
 class RoleViewSet(BaseModelViewSet):
@@ -2312,52 +2321,7 @@ class FolderViewSet(BaseModelViewSet):
         """
         serializer.save()
         folder = Folder.objects.get(id=serializer.data["id"])
-        if folder.content_type == Folder.ContentType.DOMAIN:
-            readers = UserGroup.objects.create(
-                name=UserGroupCodename.READER, folder=folder, builtin=True
-            )
-            approvers = UserGroup.objects.create(
-                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
-            )
-            analysts = UserGroup.objects.create(
-                name=UserGroupCodename.ANALYST, folder=folder, builtin=True
-            )
-            managers = UserGroup.objects.create(
-                name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True
-            )
-            ra1 = RoleAssignment.objects.create(
-                user_group=readers,
-                role=Role.objects.get(name=RoleCodename.READER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra1.perimeter_folders.add(folder)
-            ra2 = RoleAssignment.objects.create(
-                user_group=approvers,
-                role=Role.objects.get(name=RoleCodename.APPROVER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra2.perimeter_folders.add(folder)
-            ra3 = RoleAssignment.objects.create(
-                user_group=analysts,
-                role=Role.objects.get(name=RoleCodename.ANALYST),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra3.perimeter_folders.add(folder)
-            ra4 = RoleAssignment.objects.create(
-                user_group=managers,
-                role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra4.perimeter_folders.add(folder)
-            # Clear the cache after a new folder is created - purposely clearing everything
+        Folder.create_default_ug_and_ra(folder)
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -2832,6 +2796,7 @@ class FolderViewSet(BaseModelViewSet):
                     name=domain_name, content_type=Folder.ContentType.DOMAIN
                 )
                 link_dump_database_ids["base_folder"] = base_folder
+                Folder.create_default_ug_and_ra(base_folder)
 
                 # Check for missing libraries after folder creation
                 for library in required_libraries:
@@ -3893,7 +3858,6 @@ class EvidenceViewSet(BaseModelViewSet):
         "timeline_entries",
         "filtering_labels",
     ]
-    search_fields = ["name"]
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
@@ -4588,10 +4552,14 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     model = RequirementAssessment
     filterset_fields = [
         "folder",
+        "folder__name",
         "evidences",
         "compliance_assessment",
         "applied_controls",
         "security_exceptions",
+        "requirement__ref_id",
+        "compliance_assessment__ref_id",
+        "compliance_assessment__assets__ref_id",
     ]
     search_fields = ["requirement__name", "requirement__description"]
 
@@ -5009,6 +4977,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     model = SecurityException
     filterset_fields = ["requirement_assessments", "risk_scenarios"]
+    search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
@@ -5029,6 +4998,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
     ]
+    search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -5142,6 +5112,7 @@ class FindingViewSet(BaseModelViewSet):
 
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
