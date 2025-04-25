@@ -135,7 +135,7 @@ export const actions: Actions = {
 		const form = await superValidate(formData, zod(schema));
 
 		const response = await event.fetch(
-			`${BASE_API_URL}/compliance-assessments/${event.params.id}/syncToActions/`,
+			`${BASE_API_URL}/compliance-assessments/${event.params.id}/syncToActions/?dry_run=false`,
 			{
 				method: 'POST',
 				headers: {
