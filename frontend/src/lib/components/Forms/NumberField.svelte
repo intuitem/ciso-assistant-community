@@ -6,7 +6,9 @@
 	let _class = '';
 	export { _class as class };
 	export let label: string | undefined = undefined;
+	export let step: number = 1;
 	export let field: string;
+	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
 	export let cachedValue: string | undefined;
 	export let cacheLock: CacheLock = {
@@ -19,7 +21,7 @@
 	export let required = false;
 
 	label = label ?? field;
-	const { value, errors, constraints } = formFieldProxy(form, field);
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	$: cachedValue = $value;
 	$: if ($value === '') {
@@ -57,6 +59,7 @@
 	<div class="control">
 		<input
 			type="number"
+			{step}
 			class="{'input ' + _class} {classesTextField($errors)}"
 			data-testid="form-input-{field.replaceAll('_', '-')}"
 			name={field}

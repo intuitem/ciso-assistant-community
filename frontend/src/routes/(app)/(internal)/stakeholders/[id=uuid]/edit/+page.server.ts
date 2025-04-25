@@ -9,7 +9,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: LayoutServerLoad = async (event) => {
@@ -21,10 +21,7 @@ export const load: LayoutServerLoad = async (event) => {
 	const object = await event.fetch(`${stakeholderEndpoint}object`).then((res) => res.json());
 
 	const form = await superValidate(object, zod(schema), { errors: false });
-	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
-
-	const foreignKeys: Record<string, any> = {};
 
 	if (model.urlModel === 'risk-acceptances') {
 		const riskAcceptance = await event
@@ -44,25 +41,6 @@ export const load: LayoutServerLoad = async (event) => {
 				getSecureRedirect(event.url.searchParams.get('next')) ||
 					`/${model.urlModel}/${riskAcceptance.id}`
 			);
-		}
-	}
-
-	if (foreignKeyFields) {
-		for (const keyField of foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const keyModel = getModelInfo(keyField.urlModel);
-			let url = keyModel.endpointUrl
-				? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
-				: `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}`;
-			if (keyModel.urlModel === 'assets' && URLModel === 'feared-events') {
-				url = `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}${object.ebios_rm_study}`;
-			}
-			const response = await event.fetch(url);
-			if (response.ok) {
-				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
 		}
 	}
 
@@ -86,7 +64,7 @@ export const load: LayoutServerLoad = async (event) => {
 			}
 		}
 	}
-	model.foreignKeys = foreignKeys;
+
 	model.selectOptions = selectOptions;
 
 	const measureCreateSchema = modelSchema('applied-controls');
@@ -117,29 +95,12 @@ export const load: LayoutServerLoad = async (event) => {
 		}
 	}
 
-	const measureForeignKeys: Record<string, any> = {};
-
-	if (measureModel.foreignKeyFields) {
-		for (const keyField of measureModel.foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await event.fetch(url);
-			if (response.ok) {
-				measureForeignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
-		}
-	}
-
-	measureModel.foreignKeys = measureForeignKeys;
 	measureModel.selectOptions = measureSelectOptions;
 
 	return {
 		form,
 		model,
 		object,
-		foreignKeys,
 		selectOptions,
 		URLModel,
 		measureCreateForm,

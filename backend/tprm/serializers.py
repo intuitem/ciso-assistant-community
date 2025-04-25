@@ -53,7 +53,7 @@ class EntityImportExportSerializer(BaseModelSerializer):
 class EntityAssessmentReadSerializer(BaseModelSerializer):
     compliance_assessment = FieldsRelatedField()
     evidence = FieldsRelatedField()
-    project = FieldsRelatedField()
+    perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
     folder = FieldsRelatedField()
     solutions = FieldsRelatedField(many=True)
@@ -95,7 +95,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             audit = ComplianceAssessment.objects.create(
                 name=instance.name,
                 framework=audit_data["framework"],
-                project=instance.project,
+                perimeter=instance.perimeter,
                 selected_implementation_groups=audit_data[
                     "selected_implementation_groups"
                 ],
@@ -103,7 +103,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
             enclave = Folder.objects.create(
                 content_type=Folder.ContentType.ENCLAVE,
-                name=f"{instance.project.name}/{instance.name}",
+                name=f"{instance.perimeter.name}/{instance.name}",
                 parent_folder=instance.folder,
             )
             audit.folder = enclave
@@ -250,6 +250,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 class SolutionReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     recipient_entity = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
 
     class Meta:
         model = Solution

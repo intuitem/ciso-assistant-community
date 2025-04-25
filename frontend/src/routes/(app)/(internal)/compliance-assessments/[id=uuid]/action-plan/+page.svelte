@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 
 	export let data;
@@ -16,35 +17,23 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		cost: 'cost',
-		requirements_count: 'matchingRequirements'
+		'requirements-assessments': 'matchingRequirements'
 	};
-	const appliedControlsColums = [
-		'name',
-		'status',
-		'priority',
-		'category',
-		'csf_function',
-		'eta',
-		'expiry_date',
-		'effort',
-		'cost',
-		'requirements_count'
-	];
 
-	const AppliedControls: TableSource = {
+	const appliedControls: TableSource = {
 		head: appliedControlsHead,
-		body: tableSourceMapper(data.actionPlan, appliedControlsColums),
-		meta: data.actionPlan
+		body: [],
+		meta: []
 	};
 </script>
 
 <div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
-		{m.project()}:
+		{m.perimeter()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/projects/{data.compliance_assessment.project.id}/"
-			>{data.compliance_assessment.project.str}</a
+			href="/perimeters/{data.compliance_assessment.perimeter.id}/"
+			>{data.compliance_assessment.perimeter.str}</a
 		>
 	</p>
 	<p>/</p>
@@ -76,11 +65,23 @@
 	<div class="">
 		<ModelTable
 			URLModel="applied-controls"
-			source={AppliedControls}
+			source={appliedControls}
 			search={true}
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
-			tags={false}
+			baseEndpoint="/compliance-assessments/{$page.params.id}/action-plan"
+			fields={[
+				'name',
+				'status',
+				'priority',
+				'category',
+				'csf_function',
+				'eta',
+				'expiry_date',
+				'effort',
+				'cost',
+				'requirement_assessments'
+			]}
 		/>
 	</div>
 </div>

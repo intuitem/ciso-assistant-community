@@ -9,7 +9,7 @@ import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { zod } from 'sveltekit-superforms/adapters';
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { safeTranslate } from '$lib/utils/i18n';
@@ -23,27 +23,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const scenario = await fetch(baseEndpoint).then((res) => res.json());
 	const form = await superValidate(object, zod(schema), { errors: false });
 	const model = getModelInfo(URLModel);
-	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
 
 	const riskMatrix = await fetch(`${BASE_API_URL}/risk-matrices/${object.risk_matrix}/`)
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
-
-	const foreignKeys: Record<string, any> = {};
-
-	if (foreignKeyFields) {
-		for (const keyField of foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await fetch(url);
-			if (response.ok) {
-				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
-		}
-	}
 
 	const tables: Record<string, any> = {};
 
@@ -52,16 +36,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
 			const response = await fetch(keyEndpoint);
 			if (response.ok) {
-				const data = await response.json().then((data) => data.results);
-
-				const metaData = tableSourceMapper(data, ['id', 'status']);
-
-				const bodyData = tableSourceMapper(data, listViewFields[key].body);
-
 				const table: TableSource = {
 					head: listViewFields[key].head,
-					body: bodyData,
-					meta: metaData
+					body: [],
+					meta: []
 				};
 				tables[key] = table;
 			} else {
@@ -136,7 +114,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const measureCreateSchema = modelSchema('applied-controls');
 	const initialData = {
-		folder: scenario.project.folder.id
+		folder: scenario.perimeter.folder.id
 	};
 	const measureCreateForm = await superValidate(initialData, zod(measureCreateSchema), {
 		errors: false
@@ -162,22 +140,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		}
 	}
 
-	const measureForeignKeys: Record<string, any> = {};
-
-	if (measureModel.foreignKeyFields) {
-		for (const keyField of measureModel.foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await fetch(url);
-			if (response.ok) {
-				measureForeignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
-		}
-	}
-
-	measureModel.foreignKeys = measureForeignKeys;
 	measureModel.selectOptions = measureSelectOptions;
 
 	return {
@@ -185,7 +147,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		model,
 		scenario,
 		riskMatrix,
-		foreignKeys,
 		selectOptions,
 		URLModel,
 		probabilityChoices,
@@ -265,6 +226,6 @@ export const actions: Actions = {
 			},
 			event
 		);
-		return { form };
+		return { form, newControl: { field, appliedControl: measure.id } };
 	}
 };

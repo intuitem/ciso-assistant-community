@@ -130,17 +130,26 @@
 		}
 		return false;
 	}
+
+	function areAllChildrenHiddenRecursive(node: TreeViewNode): boolean {
+		if (!node.children || node.children.length === 0) return false;
+		return node.children.every(
+			(child) => child.contentProps.hidden || areAllChildrenHiddenRecursive(child)
+		);
+	}
 </script>
 
 {#if nodes && nodes.length > 0}
 	{#each nodes as node, i}
 		<TreeViewItem
-			class={node.contentProps.hidden === true ? 'hidden' : null}
 			bind:this={treeItems[i]}
 			bind:children={children[i]}
 			bind:group
 			bind:name
 			bind:value={node.id}
+			classProp={node.contentProps.hidden === true || areAllChildrenHiddenRecursive(node)
+				? 'hidden'
+				: ''}
 			mappingInference={hasMappingInference(node)}
 			hideLead={!node.lead}
 			hideChildren={!node.children || node.children.length === 0}

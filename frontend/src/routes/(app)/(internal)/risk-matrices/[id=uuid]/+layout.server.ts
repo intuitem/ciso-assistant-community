@@ -23,18 +23,10 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	if (model.reverseForeignKeyFields) {
 		await Promise.all(
 			model.reverseForeignKeyFields.map(async (e) => {
-				const relEndpoint = `${BASE_API_URL}/${e.urlModel}/?${e.field}=${params.id}`;
-				const res = await fetch(relEndpoint);
-				const data = await res.json().then((res) => res.results);
-
-				const metaData = tableSourceMapper(data, ['id']);
-
-				const bodyData = tableSourceMapper(data, listViewFields[e.urlModel].body);
-
 				const table: TableSource = {
 					head: listViewFields[e.urlModel].head,
-					body: bodyData,
-					meta: metaData
+					body: [],
+					meta: []
 				};
 
 				const info = getModelInfo(e.urlModel);
@@ -43,21 +35,6 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				const deleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
 				const createSchema = modelSchema(e.urlModel);
 				const createForm = await superValidate(zod(createSchema));
-
-				const foreignKeys: Record<string, any> = {};
-
-				if (info.foreignKeyFields) {
-					for (const keyField of info.foreignKeyFields) {
-						const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-						const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-						const response = await fetch(url);
-						if (response.ok) {
-							foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-						} else {
-							console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-						}
-					}
-				}
 
 				const selectOptions: Record<string, any> = {};
 
@@ -85,7 +62,6 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 					table,
 					deleteForm,
 					createForm,
-					foreignKeys,
 					selectOptions
 				};
 			})

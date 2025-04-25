@@ -100,11 +100,13 @@ jobs:
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright test tests/functional/startup.test.ts
       - name: Set current date as env variable
+        if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
-        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
+        if: ${{ !cancelled() }}
+        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |
@@ -242,9 +244,9 @@ jobs:
       - name: Set current date as env variable
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
-        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
+        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |

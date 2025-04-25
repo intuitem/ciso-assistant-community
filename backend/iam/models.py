@@ -18,6 +18,7 @@ from core.utils import (
     BUILTIN_ROLE_CODENAMES,
 )
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.utils import UserGroupCodename, RoleCodename
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
@@ -41,6 +42,8 @@ import structlog
 from django.utils import translation
 
 logger = structlog.get_logger(__name__)
+
+from auditlog.registry import auditlog
 
 
 def _get_root_folder():
@@ -158,13 +161,13 @@ class Folder(NameDescriptionMixin):
         paths = [
             ["folder"],
             ["parent_folder"],
-            ["project", "folder"],
+            ["perimeter", "folder"],
             ["entity", "folder"],
             ["provider_entity", "folder"],
             ["solution", "provider_entity", "folder"],
-            ["risk_assessment", "project", "folder"],
-            ["risk_scenario", "risk_assessment", "project", "folder"],
-            ["compliance_assessment", "project", "folder"],
+            ["risk_assessment", "perimeter", "folder"],
+            ["risk_scenario", "risk_assessment", "perimeter", "folder"],
+            ["compliance_assessment", "perimeter", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -175,6 +178,55 @@ class Folder(NameDescriptionMixin):
 
         # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
         return None
+
+    @staticmethod
+    def create_default_ug_and_ra(folder: Self):
+        if folder.content_type == Folder.ContentType.DOMAIN:
+            readers = UserGroup.objects.create(
+                name=UserGroupCodename.READER, folder=folder, builtin=True
+            )
+            approvers = UserGroup.objects.create(
+                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
+            )
+            analysts = UserGroup.objects.create(
+                name=UserGroupCodename.ANALYST, folder=folder, builtin=True
+            )
+            managers = UserGroup.objects.create(
+                name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True
+            )
+            ra1 = RoleAssignment.objects.create(
+                user_group=readers,
+                role=Role.objects.get(name=RoleCodename.READER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra1.perimeter_folders.add(folder)
+            ra2 = RoleAssignment.objects.create(
+                user_group=approvers,
+                role=Role.objects.get(name=RoleCodename.APPROVER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra2.perimeter_folders.add(folder)
+            ra3 = RoleAssignment.objects.create(
+                user_group=analysts,
+                role=Role.objects.get(name=RoleCodename.ANALYST),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra3.perimeter_folders.add(folder)
+            ra4 = RoleAssignment.objects.create(
+                user_group=managers,
+                role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra4.perimeter_folders.add(folder)
+            # Clear the cache after a new folder is created - purposely clearing everything
 
 
 class FolderMixin(models.Model):
@@ -680,83 +732,79 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Also retrieve published objects in view
         """
         class_name = object_type.__name__.lower()
-        permissions = [
-            Permission.objects.get(codename="view_" + class_name),
-            Permission.objects.get(codename="change_" + class_name),
-            Permission.objects.get(codename="delete_" + class_name),
-        ]
+        permission_view = Permission.objects.get(codename="view_" + class_name)
+        permission_change = Permission.objects.get(codename="change_" + class_name)
+        permission_delete = Permission.objects.get(codename="delete_" + class_name)
+        permissions = set([permission_view, permission_change, permission_delete])
+        result_view = set()
+        result_change = set()
+        result_delete = set()
 
-        folders_with_local_view = set()
-        permissions_per_object_id = defaultdict(set)
         ref_permission = Permission.objects.get(codename="view_folder")
-        all_objects = (
-            object_type.objects.select_related("folder")
-            if hasattr(object_type, "folder")
-            else object_type.objects.all()
-        )
-        folder_for_object = {x: Folder.get_folder(x) for x in all_objects}
-        perimeter = set()
-        perimeter.add(folder)
-        perimeter.update(folder.get_sub_folders())
-        for ra in [
-            x
-            for x in RoleAssignment.get_role_assignments(user)
-            if ref_permission in x.role.permissions.all()
-        ]:
-            ra_permissions = ra.role.permissions.all()
-            for my_folder in perimeter & set(ra.perimeter_folders.all()):
-                target_folders = (
-                    [my_folder, *my_folder.get_sub_folders()]
-                    if ra.is_recursive
-                    else [my_folder]
+        perimeter = {folder} | set(folder.get_sub_folders())
+        # Process role assignments
+        role_assignments = [
+            ra
+            for ra in RoleAssignment.get_role_assignments(user)
+            if ref_permission in ra.role.permissions.all()
+        ]
+        result_folders = defaultdict(set)
+        for ra in role_assignments:
+            ra_permissions = set(ra.role.permissions.all())
+            ra_perimeter = set(ra.perimeter_folders.all())
+            if ra.is_recursive:
+                ra_perimeter.update(
+                    *[folder.get_sub_folders() for folder in ra_perimeter]
                 )
-                for p in [p for p in permissions if p in ra_permissions]:
-                    if p == permissions[0]:
-                        folders_with_local_view.add(my_folder)
-                    for object in [
-                        x for x in all_objects if folder_for_object[x] in target_folders
-                    ]:
-                        # builtins objects cannot be edited or deleted
-                        if not (
-                            hasattr(object, "builtin")
-                            and object.builtin
-                            and p != permissions[0]
-                        ):
-                            permissions_per_object_id[object.id].add(p)
+            target_folders = perimeter & ra_perimeter
+            for p in permissions & ra_permissions:
+                for f in target_folders:
+                    result_folders[f].add(p)
+        for f in result_folders:
+            if hasattr(object_type, "folder"):
+                objects_ids = object_type.objects.filter(folder=f).values_list(
+                    "id", flat=True
+                )
+            elif hasattr(object_type, "risk_assessment"):
+                objects_ids = object_type.objects.filter(
+                    risk_assessment__folder=f
+                ).values_list("id", flat=True)
+            elif hasattr(object_type, "entity"):
+                objects_ids = object_type.objects.filter(entity__folder=f).values_list(
+                    "id", flat=True
+                )
+            elif hasattr(object_type, "provider_entity"):
+                objects_ids = object_type.objects.filter(
+                    provider_entity__folder=f
+                ).values_list("id", flat=True)
+            elif hasattr(object_type, "parent_folder"):
+                objects_ids = [f.id]
+            else:
+                raise NotImplementedError("type not supported")
+            if permission_view in result_folders[f]:
+                result_view.update(objects_ids)
+            if permission_change in result_folders[f]:
+                result_change.update(objects_ids)
+            if permission_delete in result_folders[f]:
+                result_delete.update(objects_ids)
 
-        if hasattr(object_type, "is_published"):
+        if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
+            # we assume only objects with a folder attribute are worth publishing
+            folders_with_local_view = [
+                f for f in result_folders if permission_view in result_folders[f]
+            ]
             for my_folder in folders_with_local_view:
                 if my_folder.content_type != Folder.ContentType.ENCLAVE:
-                    target_folders = []
-                    my_folder2 = my_folder
+                    my_folder2 = my_folder.parent_folder
                     while my_folder2:
-                        if my_folder2 != my_folder:
-                            target_folders.append(my_folder2)
+                        result_view.update(
+                            object_type.objects.filter(
+                                folder=my_folder2, is_published=True
+                            ).values_list("id", flat=True)
+                        )
                         my_folder2 = my_folder2.parent_folder
-                    for object in [
-                        x
-                        for x in all_objects
-                        if folder_for_object[x] in target_folders and x.is_published
-                    ]:
-                        permissions_per_object_id[object.id].add(permissions[0])
 
-        return (
-            [
-                x
-                for x in permissions_per_object_id
-                if permissions[0] in permissions_per_object_id[x]
-            ],
-            [
-                x
-                for x in permissions_per_object_id
-                if permissions[1] in permissions_per_object_id[x]
-            ],
-            [
-                x
-                for x in permissions_per_object_id
-                if permissions[2] in permissions_per_object_id[x]
-            ],
-        )
+        return (list(result_view), list(result_change), list(result_delete))
 
     def is_user_assigned(self, user) -> bool:
         """Determines if a user is assigned to the role assignment"""
@@ -794,3 +842,31 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             if ra.role == role:
                 return True
         return False
+
+    @classmethod
+    def get_permissions_per_folder(
+        cls, principal: AbstractBaseUser | AnonymousUser | UserGroup, recursive=False
+    ):
+        """
+        Get all permissions attached to a user directly or indirectly, grouped by folder.
+        If recursive is set to True, permissions from recursive role assignments are transmitted
+        to the children of its perimeter folders.
+        """
+        permissions = defaultdict(set)
+        for ra in cls.get_role_assignments(principal):
+            ra_permissions = set(
+                ra.role.permissions.all().values_list("codename", flat=True)
+            )
+            for folder in ra.perimeter_folders.all():
+                permissions[str(folder.id)] |= ra_permissions
+                if recursive and ra.is_recursive:
+                    for f in folder.get_sub_folders():
+                        permissions[str(f.id)] |= ra_permissions
+        return permissions
+
+
+auditlog.register(
+    User,
+    m2m_fields={"user_groups"},
+    exclude_fields=["created_at", "updated_at", "password"],
+)

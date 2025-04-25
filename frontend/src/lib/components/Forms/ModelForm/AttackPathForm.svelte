@@ -1,8 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import Checkbox from '../Checkbox.svelte';
 	import TextArea from '../TextArea.svelte';
@@ -12,13 +11,13 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
+	export let additionalInitialData: Record<string, any> = {};
 </script>
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['strategic_scenario']
-	})}
+	optionsEndpoint="strategic-scenarios"
+	optionsDetailedUrlParameters={[['ebios_rm_study', additionalInitialData.ebios_rm_study]]}
 	field="strategic_scenario"
 	cacheLock={cacheLocks['strategic_scenario']}
 	bind:cachedValue={formDataCache['strategic_scenario']}
@@ -28,10 +27,9 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({
-		objects: model.foreignKeys['stakeholders'],
-		label: 'str'
-	})}
+	optionsEndpoint="stakeholders"
+	optionsDetailedUrlParameters={[['ebios_rm_study', additionalInitialData.ebios_rm_study]]}
+	optionsLabelField="str"
 	field="stakeholders"
 	cacheLock={cacheLocks['stakeholders']}
 	bind:cachedValue={formDataCache['stakeholders']}

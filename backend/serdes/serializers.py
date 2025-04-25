@@ -37,6 +37,7 @@ class MetaSerializer(serializers.Serializer):
     """
 
     media_version = serializers.CharField()
+    schema_version = serializers.IntegerField()
     exported_at = serializers.CharField()
 
 
@@ -117,6 +118,7 @@ class ExportSerializer(serializers.Serializer):
 
         meta = {
             "media_version": settings.VERSION,
+            "schema_version": settings.SCHEMA_VERSION,
             "exported_at": timezone.now().isoformat(),
         }
 

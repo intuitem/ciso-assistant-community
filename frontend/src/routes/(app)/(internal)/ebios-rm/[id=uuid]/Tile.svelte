@@ -4,7 +4,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { ContextMenu } from 'bits-ui';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
@@ -53,6 +53,7 @@
 				{/if}
 			</div>
 		</div>
+		<slot name="action" />
 		<slot name="content">
 			{#if meta}
 				<div class="flex mx-auto">

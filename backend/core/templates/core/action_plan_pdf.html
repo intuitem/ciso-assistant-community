@@ -11,9 +11,9 @@
 <main class="p-2 m-2 main">
     <h1 class="flex justify-center">{% trans "Action plan" %}</h1>
     <div class="bg-white p-2 m-2 space-x-3 flex flex-row justify-center">
-        <p class="font-semibold text-lg"> {% trans "Domain" %}: {{ compliance_assessment.project.folder }}</p>
+        <p class="font-semibold text-lg"> {% trans "Domain" %}: {{ compliance_assessment.perimeter.folder }}</p>
         <p class="font-semibold text-lg">/</p>
-        <p class="font-semibold text-lg"> {% trans "Project" %}: {{ compliance_assessment.project.name }}</p>
+        <p class="font-semibold text-lg"> {% trans "Perimeter" %}: {{ compliance_assessment.perimeter.name }}</p>
         <p class="font-semibold text-lg">/</p>
         <p class="font-semibold text-lg"> {% trans "Audit" %}: {{ compliance_assessment.name }} - {{ compliance_assessment.version }}</p>
         <p class="font-semibold text-lg">/</p>
@@ -61,7 +61,14 @@
                             <td class="text-md p-2 text-center">{{ applied_control.expiry_date|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_effort_display|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.cost|default:"--" }}</td>
-                            <td class="text-md p-2 text-center">{% get_requirements_count applied_control compliance_assessment %}</td>
+                            {% get_requirements applied_control compliance_assessment as requirements  %}
+                            <td class="text-md p-2 text-center">
+                                {% for req in requirements %}
+                                    {{ req }}<br>
+                                {% empty %}
+                                    --
+                                {% endfor %}
+                            </td>
                         </tr>
                         {% empty %}
                             <tr>

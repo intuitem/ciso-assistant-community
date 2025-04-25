@@ -1,6 +1,6 @@
 import { LoginPage } from '../utils/login-page.js';
 import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
-
+import { m } from '$paraglide/messages';
 const vars = TestContent.generateTestVars();
 
 test('user usual routine actions are working correctly', async ({
@@ -11,6 +11,23 @@ test('user usual routine actions are working correctly', async ({
 	page
 }) => {
 	test.slow();
+
+	await page.waitForLoadState('networkidle');
+	const modalBackdrop = page.getByTestId('modal-backdrop');
+
+	await test.step('Dismiss any blocking modals', async () => {
+		if (await modalBackdrop.isVisible()) {
+			await modalBackdrop.press('Escape');
+			await expect(modalBackdrop).not.toBeVisible();
+		}
+
+		if (await page.locator('#driver-dummy-element').isVisible()) {
+			await page.locator('.driver-popover-close-btn').first().click();
+		}
+	});
+
+	// Attempt to close any remaining modals
+	await page.locator('body').press('Escape');
 
 	await test.step('proper redirection to the analytics page after login', async () => {
 		await analyticsPage.hasUrl();
@@ -31,20 +48,20 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the domain data are displayed in the table
 	});
 
-	await test.step('user can create a project', async () => {
-		await sideBar.click('Organization', pages.projectsPage.url);
-		await pages.projectsPage.hasUrl();
-		await pages.projectsPage.hasTitle();
+	await test.step('user can create a perimeter', async () => {
+		await sideBar.click('Organization', pages.perimetersPage.url);
+		await pages.perimetersPage.hasUrl();
+		await pages.perimetersPage.hasTitle();
 
-		await pages.projectsPage.createItem({
-			name: vars.projectName,
+		await pages.perimetersPage.createItem({
+			name: vars.perimeterName,
 			description: vars.description,
 			folder: vars.folderName,
 			ref_id: 'R.1234',
 			lc_status: 'Production'
 		});
 
-		//TODO assert that the project data are displayed in the table
+		//TODO assert that the perimeter data are displayed in the table
 	});
 
 	await test.step('user can create an asset', async () => {
@@ -117,6 +134,23 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the applied control data are displayed in the table
 	});
 
+	await test.step('user can create a security exception', async () => {
+		await sideBar.click('Governance', pages.securityExceptionsPage.url);
+		await pages.securityExceptionsPage.hasUrl();
+		await pages.securityExceptionsPage.hasTitle();
+
+		await pages.securityExceptionsPage.createItem({
+			name: vars.securityExceptionName,
+			description: vars.description,
+			ref_id: '123456',
+			status: 'Draft',
+			expiration_date: '2100-01-01',
+			folder: vars.folderName,
+			owners: [LoginPage.defaultEmail],
+			approver: LoginPage.defaultEmail
+		});
+	});
+
 	await test.step('user can create a compliance assessment', async () => {
 		await sideBar.click('Compliance', pages.complianceAssessmentsPage.url);
 		await pages.complianceAssessmentsPage.hasUrl();
@@ -125,7 +159,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.complianceAssessmentsPage.createItem({
 			name: vars.assessmentName,
 			description: vars.description,
-			project: vars.folderName + '/' + vars.projectName,
+			perimeter: vars.folderName + '/' + vars.perimeterName,
 			version: '1.4.2',
 			status: 'Done',
 			framework: vars.framework.name,
@@ -146,10 +180,6 @@ test('user usual routine actions are working correctly', async ({
 			description: vars.description,
 			attachment: vars.file,
 			folder: vars.folderName,
-			requirement_assessments: [
-				vars.requirement_assessment.name,
-				vars.requirement_assessment2.name
-			],
 			link: 'https://intuitem.com/'
 		});
 
@@ -162,7 +192,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskMatricesPage.hasTitle();
 
 		await pages.riskMatricesPage.addButton.click();
-		await pages.librariesPage.hasUrl(true, '/libraries?objectType=risk_matrix');
+		await pages.librariesPage.hasUrl(true, '/libraries?object_type=risk_matrix');
 		await pages.librariesPage.hasTitle();
 
 		await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);
@@ -180,7 +210,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskAssessmentsPage.createItem({
 			name: vars.riskAssessmentName,
 			description: vars.description,
-			project: vars.folderName + '/' + vars.projectName,
+			perimeter: vars.folderName + '/' + vars.perimeterName,
 			version: vars.riskAssessmentVersion,
 			status: 'Done',
 			risk_matrix: vars.matrix.displayName,
@@ -214,7 +244,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskScenariosPage.createItem({
 			name: vars.riskScenarioName,
 			description: vars.description,
-			risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+			risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 			threats: [`${vars.folderName}/${vars.threatName}`]
 		});
 
@@ -233,7 +263,7 @@ test('user usual routine actions are working correctly', async ({
 			folder: vars.folderName,
 			approver: LoginPage.defaultEmail,
 			risk_scenarios: [
-				`${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+				`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
 			]
 		});
 
@@ -256,7 +286,9 @@ test('user usual routine actions are working correctly', async ({
 test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
 	await foldersPage.goto();
 	await foldersPage.deleteItemButton(vars.folderName).click();
-	await foldersPage.deleteModalConfirmButton.click();
+	await expect(foldersPage.deletePromptConfirmTextField()).toBeVisible();
+	await foldersPage.deletePromptConfirmTextField().fill(m.yes());
+	await foldersPage.deletePromptConfirmButton().click();
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 
 	await usersPage.goto();

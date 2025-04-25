@@ -4,8 +4,8 @@
 	import type { PageData } from './$types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
+	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { isDark } from '$lib/utils/helpers';
@@ -14,12 +14,17 @@
 	import { goto } from '$app/navigation';
 
 	import { onMount } from 'svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 	export let data: PageData;
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
-
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: model.name,
+		domain: data.scenario.perimeter.folder.id
+	});
 	let color_map = {};
 	color_map['--'] = '#A9A9A9';
 	data.riskMatrix.risk.forEach((risk, i) => {
@@ -86,9 +91,10 @@
 			<h4 class="h4 font-semibold">{m.scope()}</h4>
 			<div class="flex flex-row justify-between">
 				<span>
-					<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-					<Anchor class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
-						>{data.scenario.project.str}</Anchor
+					<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
+					<Anchor
+						class="anchor text-sm font-semibold"
+						href="/perimeters/{data.scenario.perimeter.id}">{data.scenario.perimeter.str}</Anchor
 					>
 				</span>
 				<span>
@@ -111,7 +117,7 @@
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 					<p class="text-sm font-semibold">
-						{new Date(data.scenario.updated_at).toLocaleString(languageTag())}
+						{new Date(data.scenario.updated_at).toLocaleString(getLocale())}
 					</p>
 				</div>
 				<div>
@@ -132,37 +138,52 @@
 		</div>
 	</div>
 	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg w-2/5 max-h-96 overflow-y-scroll">
+		<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
-			<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
+			<ModelTable
+				source={data.tables['assets']}
+				hideFilters={true}
+				URLModel="assets"
+				baseEndpoint="/assets?risk_scenarios={$page.params.id}"
+			/>
 		</div>
-		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5 max-h-96 overflow-y-scroll">
+		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.threats()}</h4>
-			<ModelTable source={data.tables['threats']} hideFilters={true} URLModel="threats" />
+			<ModelTable
+				source={data.tables['threats']}
+				hideFilters={true}
+				URLModel="threats"
+				baseEndpoint="/threats?risk_scenarios={$page.params.id}"
+			/>
 		</div>
 	</div>
-	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-scroll">
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
 		<h4 class="h4 font-semibold">{m.vulnerabilities()}</h4>
 		<ModelTable
 			source={data.tables['vulnerabilities']}
 			hideFilters={true}
 			URLModel="vulnerabilities"
+			baseEndpoint="/vulnerabilities?risk_scenarios={$page.params.id}"
+		/>
+	</div>
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
+		<h4 class="h4 font-semibold">{m.securityExceptions()}</h4>
+		<ModelTable
+			source={data.tables['security-exceptions']}
+			hideFilters={true}
+			URLModel="security-exceptions"
+			baseEndpoint="/security-exceptions?risk_scenarios={$page.params.id}"
 		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
 		<div class="flex flex-col w-1/2">
 			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
-			{#if data.scenario.existing_controls}
-				<p class="text-sm font-semibold text-gray-400">{m.context()}</p>
-				<p class="mt-1 mb-2">
-					{data.scenario.existing_controls}
-				</p>
-			{/if}
 			<p class="text-sm font-semibold text-gray-400">{m.existingControls()}</p>
 			<ModelTable
 				source={data.tables['risk_scenarios_e']}
 				hideFilters={true}
 				URLModel="applied-controls"
+				baseEndpoint="/applied-controls?risk_scenarios_e={$page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
@@ -209,6 +230,7 @@
 				source={data.tables['risk_scenarios']}
 				hideFilters={true}
 				URLModel="applied-controls"
+				baseEndpoint="/applied-controls?risk_scenarios={$page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">

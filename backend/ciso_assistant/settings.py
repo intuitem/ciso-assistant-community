@@ -16,13 +16,17 @@ from datetime import timedelta
 import logging.config
 import structlog
 from django.core.management.utils import get_random_secret_key
+from . import meta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".meta")
 
+
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
 BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
+SCHEMA_VERSION = meta.SCHEMA_VERSION
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
@@ -99,6 +103,7 @@ MODULES = {}
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
 logger.info("BUILD: %s", BUILD)
+logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 
 # TODO: multiple paths are explicit, it should use path join to be more generic
 
@@ -110,6 +115,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
@@ -123,10 +129,45 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
-MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
-MEDIA_URL = ""
 
-PAGINATE_BY = os.environ.get("PAGINATE_BY", default=5000)
+USE_S3 = os.getenv("USE_S3", "False") == "True"
+
+if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv(
+        "AWS_STORAGE_BUCKET_NAME", "ciso-assistant-bucket"
+    )
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+
+    if not AWS_ACCESS_KEY_ID:
+        logger.error("AWS_ACCESS_KEY_ID must be set")
+    if not AWS_SECRET_ACCESS_KEY:
+        logger.error("AWS_SECRET_ACCESS_KEY must be set")
+    if not AWS_S3_ENDPOINT_URL:
+        logger.error("AWS_S3_ENDPOINT_URL must be set")
+    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_ENDPOINT_URL:
+        exit(1)
+
+    logger.info("AWS_STORAGE_BUCKET_NAME: %s", AWS_STORAGE_BUCKET_NAME)
+    logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+
+    AWS_S3_FILE_OVERWRITE = False
+
+else:
+    MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
+    MEDIA_URL = ""
+
+PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 
 # Application definition
 
@@ -142,6 +183,7 @@ INSTALLED_APPS = [
     "global_settings",
     "ebios_rm",
     "tprm",
+    "privacy",
     "core",
     "cal",
     "django_filters",
@@ -156,7 +198,9 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
-    # "huey.contrib.djhuey",
+    "huey.contrib.djhuey",
+    "auditlog",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -169,6 +213,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
 
@@ -183,6 +228,10 @@ AUTH_TOKEN_TTL = int(
 AUTH_TOKEN_AUTO_REFRESH = (
     os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
 )  # prevents token from expiring while user is active
+AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
+    int(os.environ.get("AUTH_TOKEN_AUTO_REFRESH_MAX_TTL", default=60 * 60 * 10)) or None
+)  # absolute timeout for auto-refresh, defaults to 10 hours. token expires after this time even if the user is active
+
 
 CISO_ASSISTANT_SUPERUSER_EMAIL = os.environ.get("CISO_ASSISTANT_SUPERUSER_EMAIL")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
@@ -191,13 +240,13 @@ EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False") == "True"
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
-EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE")
+EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False") == "True"
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 
@@ -213,7 +262,7 @@ REST_FRAMEWORK = {
         "core.permissions.RBACPermissions",
     ],
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": PAGINATE_BY,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.helpers.handle",
@@ -225,6 +274,8 @@ REST_KNOX = {
     "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
     "TOKEN_LIMIT_PER_USER": None,
     "AUTO_REFRESH": AUTH_TOKEN_AUTO_REFRESH,
+    "AUTO_REFRESH_MAX_TTL": timedelta(seconds=(AUTH_TOKEN_AUTO_REFRESH_MAX_TTL or 0))
+    or None,
     "MIN_REFRESH_INTERVAL": 60,
 }
 
@@ -318,6 +369,7 @@ LANGUAGES = [
     ("cs", "Czech"),
     ("sv", "Swedish"),
     ("id", "Indonesian"),
+    ("da", "Danish"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -346,6 +398,7 @@ if "POSTGRES_NAME" in os.environ:
             "PASSWORD": os.environ["POSTGRES_PASSWORD"],
             "HOST": os.environ["DB_HOST"],
             "PORT": os.environ.get("DB_PORT", "5432"),
+            "CONN_MAX_AGE": os.environ.get("CONN_MAX_AGE", 300),
         }
     }
 else:
@@ -377,16 +430,6 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
 }
-
-# HUEY = {
-#    "huey_class": "huey.SqliteHuey",  # Huey implementation to use.
-#    "name": "huey-ciso-assistant",  # Use db name for huey.
-#    "results": True,  # Store return values of tasks.
-#    "store_none": False,  # If a task returns None, do not save to results.
-#    "immediate": DEBUG,  # If DEBUG=True, run synchronously.
-#    "utc": True,  # Use UTC for all times internally.
-#    "filename": "db/huey.sqlite3",
-# }
 
 # SSO with allauth
 
@@ -421,3 +464,23 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
     },
 }
+
+if MAIL_DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
+
+
+## Huey settings
+HUEY_FILE_PATH = os.environ.get("HUEY_FILE_PATH", BASE_DIR / "db" / "huey.db")
+
+HUEY = {
+    "huey_class": "huey.SqliteHuey",
+    "name": "ciso_assistant",
+    "utc": True,
+    "filename": HUEY_FILE_PATH,
+    "results": True,  # would be interesting for debug
+    "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
+}
+
+AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
+AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))

@@ -4,7 +4,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import Logo from '$lib/components/Logo/Logo.svelte';
 

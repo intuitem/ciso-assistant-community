@@ -3,7 +3,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud.js';
+	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import type {
 		ModalComponent,
@@ -15,20 +15,27 @@
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
-	import { safeTranslate } from '$lib/utils/i18n.js';
-	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
+	import { canPerformAction } from '$lib/utils/access-control';
+	import { getLocale } from '$paraglide/runtime';
+	import { listViewFields } from '$lib/utils/table';
 
 	export let data;
 	const showRisks = true;
+	const useBubbles = data.useBubbles;
 	const risk_assessment = data.risk_assessment;
 
 	const modalStore: ModalStore = getModalStore();
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
-
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: model.name,
+		domain: risk_assessment.folder.id
+	});
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -108,7 +115,7 @@
 		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{risk_assessment.project.str}/{risk_assessment.name} - {risk_assessment.version}
+					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
 				</div>
 				<br />
 				<div class="text-sm">
@@ -131,11 +138,11 @@
 						</li>
 						<li>
 							<span class="font-semibold">{m.createdAt()}:</span>
-							{new Date(risk_assessment.created_at).toLocaleString(languageTag())}
+							{new Date(risk_assessment.created_at).toLocaleString(getLocale())}
 						</li>
 						<li>
 							<span class="font-semibold">{m.updatedAt()}:</span>
-							{new Date(risk_assessment.updated_at).toLocaleString(languageTag())}
+							{new Date(risk_assessment.updated_at).toLocaleString(getLocale())}
 						</li>
 					</ul>
 				</div>
@@ -244,6 +251,17 @@
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
 				search={false}
+				baseEndpoint="/risk-scenarios?risk_assessment={risk_assessment.id}"
+				folderId={data.risk_assessment.folder.id}
+				fields={[
+					'ref_id',
+					'name',
+					'threats',
+					'existing_applied_controls',
+					'current_level',
+					'applied_controls',
+					'residual_level'
+				]}
 			>
 				<button
 					slot="addButton"
@@ -264,9 +282,11 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
+					{useBubbles}
 				/>
 			</div>
 			<div class="flex-1">
@@ -274,9 +294,11 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
+					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{showRisks}
+					{useBubbles}
 				/>
 			</div>
 		</div>

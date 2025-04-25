@@ -3,6 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
+		"prepare": "svelte-kit sync",
 		"dev": "vite dev",
 		"build": "paraglide-js compile --project ./project.inlang && vite build",
 		"preview": "vite preview",
@@ -20,8 +21,8 @@
 		"build-storybook": "storybook build"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js": "1.11.2",
-		"@inlang/plugin-message-format": "2.2.0",
+		"@inlang/paraglide-js": "^2.0.6",
+		"@inlang/plugin-message-format": "^2.2.0",
 		"@playwright/test": "^1.49.1",
 		"@skeletonlabs/skeleton": "^2.10.3",
 		"@skeletonlabs/tw-plugin": "^0.4.0",
@@ -68,16 +69,15 @@
 		"tailwindcss": "^3.4.16",
 		"tslib": "^2.8.1",
 		"typescript": "^5.7.2",
-		"vite": "^5.4.11",
+		"vite": "^5.4.18",
 		"vite-plugin-tailwind-purgecss": "^0.3.5",
-		"vitest": "^1.6.0",
+		"vitest": "^1.6.1",
 		"zod": "^3.24.1"
 	},
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.12",
 		"@fortawesome/fontawesome-free": "^6.7.1",
-		"@inlang/paraglide-sveltekit": "0.11.0",
 		"@typescript-eslint/eslint-plugin": "^8.18.0",
 		"@typescript-eslint/parser": "^8.18.0",
 		"@unovis/svelte": "1.4.3-beta.0",
@@ -91,5 +91,6 @@
 		"globals": "^15.13.0",
 		"svelte-multiselect": "^10.3.0",
 		"svelte-persisted-store": "^0.11.0"
-	}
+	},
+	"packageManager": "pnpm@10.6.1+sha512.40ee09af407fa9fbb5fbfb8e1cb40fbb74c0af0c3e10e9224d7b53c7658528615b2c92450e74cfad91e3a2dcafe3ce4050d80bda71d757756d2ce2b66213e9a3"
 }

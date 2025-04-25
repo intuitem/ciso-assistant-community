@@ -11,7 +11,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from '../[id=uuid]/$types';
 
@@ -268,6 +268,8 @@
 							source={data.tables['applied-controls']}
 							hideFilters={true}
 							URLModel="applied-controls"
+							baseEndpoint="/applied-controls?requirement_assessments={$page.data
+								.requirementAssessment.id}"
 						/>
 					</div>
 				{/if}
@@ -279,7 +281,13 @@
 					<div
 						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 					>
-						<ModelTable source={data.tables['evidences']} hideFilters={true} URLModel="evidences" />
+						<ModelTable
+							source={data.tables['evidences']}
+							hideFilters={true}
+							URLModel="evidences"
+							baseEndpoint="/evidences?requirement_assessments={$page.data.requirementAssessment
+								.id}"
+						/>
 					</div>
 				{/if}
 			</svelte:fragment>

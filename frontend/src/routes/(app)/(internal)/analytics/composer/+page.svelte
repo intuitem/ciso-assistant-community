@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import type { AppliedControlStatus } from '$lib/utils/types';
 
 	// Props
@@ -124,7 +124,7 @@
 							{/if}
 						</div>
 						<button class="text-gray-700 font-semibold focus:outline-none" type="button">
-							{item.risk_assessment.project.str}/{item.risk_assessment.name}
+							{item.risk_assessment.perimeter.str}/{item.risk_assessment.name}
 						</button>
 						<div>
 							{#if item.risk_assessment.quality_check.count > 0}

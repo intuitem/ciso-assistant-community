@@ -1,0 +1,59 @@
+services:
+  backend:
+    container_name: backend
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    pull_policy: always
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=http://localhost:3000
+      - DJANGO_DEBUG=True
+      - AUTH_TOKEN_TTL=7200
+    volumes:
+      - ./db:/code/db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    ports:
+      - 8000:8000
+
+  huey:
+    container_name: huey
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    pull_policy: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=http://localhost:3000
+      - DJANGO_DEBUG=False
+      - AUTH_TOKEN_TTL=7200
+
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=http://localhost:8000/api
+      - ORIGIN=http://localhost:3000
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    pull_policy: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - 3000:3000

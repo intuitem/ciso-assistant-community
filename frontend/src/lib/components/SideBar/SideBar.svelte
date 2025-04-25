@@ -1,16 +1,29 @@
 <script lang="ts" type="module">
+	import { onMount } from 'svelte';
 	import SideBarFooter from './SideBarFooter.svelte';
 	import SideBarHeader from './SideBarHeader.svelte';
 	import SideBarNavigation from './SideBarNavigation.svelte';
 	import SideBarToggle from './SideBarToggle.svelte';
-	import { onMount } from 'svelte';
-	export let open: boolean;
-	export let firstTime = false; // this needs to come from the db ; we also need to make room for variable about the specialized guided tours
-	import { driverInstance } from '$lib/utils/stores';
-	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
+	import { writable } from 'svelte/store';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { getCookie, setCookie } from '$lib/utils/cookies';
+	import { driverInstance } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
+
+	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
+	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
+	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
+	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { driver } from 'driver.js';
+	import 'driver.js/dist/driver.css';
+	import { getFlash } from 'sveltekit-flash-message';
+	import './driver-custom.css';
+	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
+
+	export let open: boolean;
+
+	const user = $page.data?.user;
 
 	// id is not needed, just to help us with authoring
 	// this is not great, but couldn't find a way for i18n while separating the file.
@@ -54,16 +67,16 @@
 		},
 		{
 			id: 6,
-			element: '#projects',
+			element: '#perimeters',
 			popover: {
-				description: m.tourProjectsDescription()
+				description: m.tourPerimetersDescription()
 			}
 		},
 		{
 			id: 7,
 			element: '#add-button',
 			popover: {
-				description: m.tourProjectAddDescription()
+				description: m.tourPerimeterAddDescription()
 			}
 		},
 		{
@@ -173,50 +186,112 @@
 		}
 	];
 
-	function wrapStepWithTranslation(step: any) {
-		const { popover, ...rest } = step;
+	const modalStore = getModalStore();
+	const flash = getFlash(page);
 
-		if (!popover) return step;
-
-		return {
-			...rest,
-			popover: {
-				...popover,
-				title: safeTranslate(popover.title),
-				description: safeTranslate(popover.description)
+	function modalFirstLogin(): void {
+		const modalComponent: ModalComponent = {
+			ref: FirstLoginModal,
+			props: {
+				actions: [
+					{
+						label: m.showGuidedTour(),
+						action: triggerVisit,
+						classes: 'variant-filled-surface',
+						btnIcon: 'fa-wand-magic-sparkles'
+					},
+					{
+						label: m.loadDemoData(),
+						action: loadDemoDomain,
+						classes: 'variant-filled-secondary',
+						btnIcon: 'fa-file-import',
+						async: true
+					}
+				]
 			}
 		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.firstTimeLoginModalTitle(),
+			body: m.firstTimeLoginModalDescription()
+		};
+		modalStore.trigger(modal);
 	}
-	import { driver } from 'driver.js';
-	import 'driver.js/dist/driver.css';
-	import { description } from '$paraglide/messages/ro';
+
+	const loading = writable(false);
+
+	async function loadDemoDomain() {
+		$loading = true;
+		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
+		if (!response.ok) {
+			if (response.status === 500) {
+				flash.set({ type: 'error', message: m.demoDataAlreadyImported() });
+			} else {
+				flash.set({ type: 'error', message: m.errorOccuredDuringImport() });
+			}
+			console.error('Failed to load demo data');
+			$loading = false;
+			return false;
+		}
+		flash.set({ type: 'success', message: m.successfullyImportedFolder() });
+
+		await goto('/folders', {
+			crumbs: breadcrumbs,
+			label: m.domains(),
+			breadcrumbAction: 'replace'
+		});
+
+		invalidateAll();
+		$loading = false;
+		return true;
+	}
 
 	function triggerVisit() {
-		const translatedSteps = steps; //steps.map(wrapStepWithTranslation);
+		const translatedSteps = steps;
 		const driverObj = driver({
 			showProgress: true,
-			steps: translatedSteps
+			steps: translatedSteps,
+			popoverClass: 'custom-driver-theme'
 		});
 		$driverInstance = driverObj;
 		driverObj.drive();
+		return true;
 	}
+
 	onMount(() => {
-		if (firstTime) {
-			triggerVisit();
+		const showFirstLoginModal =
+			getCookie('show_first_login_modal') === 'true' && user.accessible_domains.length === 0;
+		// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
+		// Later, we will have tours for domain managers, analysts etc.
+		if (showFirstLoginModal && user.is_admin) {
+			modalFirstLogin();
 		}
+		setCookie('show_first_login_modal', 'false');
 	});
+
+	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
 </script>
 
-<aside
-	class="flex w-64 shadow transition-all duration-300 fixed h-screen overflow-visible top-0 left-0 z-20 {classesSidebarOpen(
-		open
-	)}"
->
-	<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
-		<SideBarHeader />
-		<SideBarNavigation />
-		<SideBarFooter on:triggerGT={triggerVisit} />
-	</nav>
-</aside>
-
-<SideBarToggle bind:open />
+<div data-testid="sidebar">
+	<aside
+		class="flex w-64 shadow transition-all duration-300 fixed h-screen overflow-visible top-0 left-0 z-20 {classesSidebarOpen(
+			open
+		)}"
+	>
+		<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
+			<SideBarHeader />
+			<SideBarNavigation />
+			<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
+		</nav>
+	</aside>
+	{#if $loading}
+		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-[1000]">
+			<div class="flex flex-col items-center space-y-2">
+				<LoadingSpinner></LoadingSpinner>
+			</div>
+		</div>
+	{/if}
+	<SideBarToggle bind:open />
+</div>

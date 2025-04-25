@@ -3,7 +3,7 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { safeTranslate } from '$lib/utils/i18n.js';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 
 	export let data;
 
@@ -47,10 +47,11 @@
 
 <div class="bg-white p-2 m-2 shadow rounded-lg space-x-2 flex flex-row justify-center">
 	<p class="font-semibold text-lg">
-		{m.project()}:
+		{m.perimeter()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/projects/{data.risk_assessment.project.id}/">{data.risk_assessment.project.str}</a
+			href="/perimeters/{data.risk_assessment.perimeter.id}/"
+			>{data.risk_assessment.perimeter.str}</a
 		>
 	</p>
 	<p>/</p>
@@ -91,6 +92,20 @@
 			<ModelTable
 				source={makeSourceFromAppliedControls(scenario.applied_controls)}
 				URLModel="applied-controls"
+				baseEndpoint="/applied-controls?risk_scenarios={scenario.id}"
+				fields={[
+					'name',
+					'priority',
+					'description',
+					'category',
+					'csf_function',
+					'reference_control',
+					'eta',
+					'effort',
+					'cost',
+					'link',
+					'status'
+				]}
 			/>
 		{/if}
 		{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}

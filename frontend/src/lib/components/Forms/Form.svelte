@@ -10,7 +10,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	export let data: SuperValidated<AnyZodObject>;
 	export let dataType: 'form' | 'json';
@@ -34,7 +34,7 @@
 		}
 	}
 
-	export const _form = superForm(data, {
+	export let _form = superForm(data, {
 		dataType: dataType,
 		invalidateAll: invalidateAll,
 		applyAction: applyAction,
@@ -66,8 +66,9 @@
 	{/if}
 	<slot
 		form={_form}
-		initialData={data.data}
+		initialData={data?.data}
 		data={$form}
+		formData={$form}
 		message={$message}
 		errors={$errors}
 		allErrors={$allErrors}

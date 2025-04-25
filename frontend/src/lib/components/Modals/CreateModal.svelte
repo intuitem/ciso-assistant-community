@@ -18,8 +18,10 @@
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let formAction = '?/create';
 	export let context = 'create';
+	export let additionalInitialData = {};
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
+	export let taintedMessage: string | boolean = false;
 
 	// Base Classes
 	const cBase = 'card p-4 w-fit max-w-4xl shadow-xl space-y-4';
@@ -51,6 +53,7 @@
 			{form}
 			{customNameDescription}
 			{importFolder}
+			{additionalInitialData}
 			{suggestions}
 			{parent}
 			{invalidateAll}
@@ -58,6 +61,7 @@
 			{closeModal}
 			{context}
 			{duplicate}
+			{taintedMessage}
 			caching={true}
 			action={formAction}
 			{debug}

@@ -1,34 +1,46 @@
 <script lang="ts">
+	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import {
-		CUSTOM_ACTIONS_COMPONENT,
-		FIELD_COLORED_TAG_MAP,
-		FIELD_COMPONENT_MAP
-	} from '$lib/utils/crud';
-	import { stringify } from '$lib/utils/helpers';
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { CUSTOM_ACTIONS_COMPONENT, FIELD_COMPONENT_MAP, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
-	import { tableA11y } from './actions';
+	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { browser } from '$app/environment';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import type { TableSource } from '$lib/components/ModelTable/types';
+	import { goto } from '$lib/utils/breadcrumbs';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { isDark } from '$lib/utils/helpers';
+	import { listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
-	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
-	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
-	import type { TableSource } from './types';
-	// Event Dispatcher
-	type TableEvent = {
-		selected: string[];
-	};
-	const dispatch = createEventDispatcher<TableEvent>();
+	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import {
+		popup,
+		type CssClasses,
+		type PopupSettings,
+		type SvelteEvent
+	} from '@skeletonlabs/skeleton';
+	import { DataHandler, type State } from '@vincjo/datatables/remote';
+	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { z, type AnyZodObject } from 'zod';
+	import { loadTableData } from './handler';
+	import Pagination from './Pagination.svelte';
+	import RowCount from './RowCount.svelte';
+	import RowsPerPage from './RowsPerPage.svelte';
+	import Search from './Search.svelte';
+	import Th from './Th.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 
 	// Props
-	export let source: TableSource;
+	export let source: TableSource = { head: [], body: [] };
 	export let interactive = true;
 
 	export let search = true;
@@ -36,7 +48,6 @@
 	export let rowCount = true;
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
-	export let thFiler = false;
 
 	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
@@ -53,6 +64,18 @@
 	export let regionFootCell: CssClasses = '';
 
 	export let displayActions = true;
+
+	export let identifierField = 'id';
+	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
+	export let URLModel: urlModel | undefined = undefined;
+	export let baseEndpoint: string = `/${URLModel}`;
+	export let detailQueryParameter: string | undefined = undefined;
+	export let fields: string[] = [];
+	export let canSelectObject = false;
+
+	export let hideFilters = false;
+
+	export let folderId: string = '';
 
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
@@ -77,25 +100,9 @@
 		if (['Enter', 'Space'].includes(event.code)) onRowClick(event, rowIndex);
 	}
 
-	export let identifierField = 'id';
-	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
-	export let URLModel: urlModel | undefined = undefined;
-	export let detailQueryParameter: string | undefined = undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
-	export let hideFilters = false;
-	$: hideFilters =
-		hideFilters ||
-		!Object.entries(filters).some(([key, filter]) => {
-			if (!filter.hide) return true;
-		});
-
 	const user = $page.data.user;
-
-	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
-
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import { listViewFields } from '$lib/utils/table';
 
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
@@ -103,97 +110,28 @@
 	$: classesBase = `${classProp || backgroundColor}`;
 	$: classesTable = `${element} ${text} ${color}`;
 
-	import { goto as _goto } from '$app/navigation';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { DataHandler } from '@vincjo/datatables';
-	import Pagination from './Pagination.svelte';
-	import RowCount from './RowCount.svelte';
-	import RowsPerPage from './RowsPerPage.svelte';
-	import Search from './Search.svelte';
-	import Th from './Th.svelte';
-	import ThFilter from './ThFilter.svelte';
-
-	$: data = source.body.map((item: Record<string, any>, index: number) => {
-		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
-	});
-	const columnFields = new Set(source.body.length === 0 ? [] : Object.keys(source.body[0]));
-
-	const handler = new DataHandler(data, {
-		rowsPerPage: pagination ? numberRowsPerPage : undefined
-	});
-	$: hasRows = data.length > 0;
-	const tableURLModel = source.meta?.urlmodel ?? URLModel;
-	const filters =
-		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
-			? listViewFields[tableURLModel].filters
-			: {};
-	const filteredFields = Object.keys(filters).filter(
-		(key) => columnFields.has(key) || filters[key].alwaysDisplay
+	const handler = new DataHandler(
+		source.body.map((item: Record<string, any>, index: number) => {
+			return {
+				...item,
+				meta: source.meta
+					? source.meta.results
+						? { ...source.meta.results[index] }
+						: { ...source.meta[index] }
+					: undefined
+			};
+		}),
+		{
+			rowsPerPage: pagination ? numberRowsPerPage : undefined,
+			totalRows: source.meta.count
+		}
 	);
-	const filterValues: { [key: string]: any } = {};
-	const filterProps: {
-		[key: string]: { [key: string]: any };
-	} = {};
-
-	function defaultFilterProps(rows, field: string) {
-		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
-		const options = [...new Set(rows.map(getColumn))].sort();
-		return { options };
-	}
-
-	function defaultFilterFunction(entry: any, value: any[]): boolean {
-		if (!value || value.length < 1) return true;
-		value = value.map((v) => stringify(v));
-		return value.includes(stringify(entry));
-	}
-
-	// Initialize filter values from URL search params
-	for (const field of filteredFields)
-		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
-
-	$: {
-		for (const field of filteredFields) {
-			handler.filter(
-				filterValues[field] ? filterValues[field].map((v) => v.value) : [],
-				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'getColumn')
-					? filters[field].getColumn
-					: field,
-				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'filter')
-					? filters[field].filter
-					: defaultFilterFunction
-			);
-			$page.url.searchParams.delete(field);
-			if (filterValues[field] && filterValues[field].length > 0) {
-				for (const value of filterValues[field]) {
-					$page.url.searchParams.append(field, value.value);
-				}
-			}
-		}
-		if (browser) _goto($page.url);
-	}
-
-	$: {
-		for (const key of filteredFields) {
-			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(
-				Object.values(source.meta),
-				key
-			);
-		}
-	}
 	const rows = handler.getRows();
-	const _filters = handler.getFilters();
+	let invalidateTable = false;
 
-	function getFilterCount(filters: typeof $_filters): number {
-		return Object.values(filters).reduce((acc, filter) => {
-			if (Array.isArray(filter.value) && filter.value.length > 0) {
-				return acc + 1;
-			}
-			return acc;
-		}, 0);
-	}
-
-	$: filterCount = getFilterCount($_filters);
+	handler.onChange((state: State) =>
+		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
+	);
 
 	onMount(() => {
 		if (orderBy) {
@@ -203,32 +141,85 @@
 		}
 	});
 
-	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-
-	const tagMap = FIELD_COLORED_TAG_MAP[URLModel] ?? {};
-	const taggedKeys = new Set(Object.keys(tagMap));
-
-	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
-	$: source, handler.setRows(data);
-
-	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
+	const actionsURLModel = URLModel;
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
-		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
-		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
+		(!URLModel?.includes('libraries') && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0) ||
+		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
 
-	import { isDark } from '$lib/utils/helpers';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
-	import { popup } from '@skeletonlabs/skeleton';
-	import { browser } from '$app/environment';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	const filterInitialData = $page.url.searchParams.entries();
+
+	const _form = superForm(defaults(filterInitialData, zod(z.object({}))), {
+		SPA: true,
+		validators: zod(z.object({})),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
 
 	const popupFilter: PopupSettings = {
-		event: 'focus-click',
+		event: 'click',
 		target: 'popupFilter',
-		placement: 'bottom-start',
-		closeQuery: 'li'
+		placement: 'bottom-start'
 	};
+
+	const tableURLModel = URLModel;
+	const filters =
+		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+			? listViewFields[tableURLModel].filters
+			: {};
+
+	const filteredFields = Object.keys(filters);
+	const filterValues: { [key: string]: any } = {};
+
+	// Initialize filter values from URL search params
+	for (const field of filteredFields)
+		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
+
+	$: hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
+
+	$: {
+		for (const field of filteredFields) {
+			handler.filter(
+				filterValues[field] ? filterValues[field].map((v: Record<string, any>) => v.value) : [],
+				field
+			);
+			$page.url.searchParams.delete(field);
+			if (filterValues[field] && filterValues[field].length > 0) {
+				for (const value of filterValues[field]) {
+					$page.url.searchParams.append(field, value.value);
+				}
+			}
+		}
+		if (browser || invalidateTable) {
+			handler.invalidate();
+			_goto($page.url);
+			invalidateTable = false;
+		}
+	}
+
+	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
+	$: model = URL_MODEL_MAP[URLModel];
+	$: canCreateObject = model
+		? $page.params.id
+			? canPerformAction({
+					user,
+					action: 'add',
+					model: model.name,
+					domain:
+						folderId ||
+						$page.data?.data?.folder?.id ||
+						$page.data?.data?.folder ||
+						$page.params.id ||
+						user.root_folder_id
+				})
+			: Object.hasOwn(user.permissions, `add_${model.name}`)
+		: false;
+	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
@@ -237,7 +228,7 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if filteredFields.length > 0 && hasRows && !hideFilters}
+		{#if !hideFilters}
 			<button
 				use:popup={popupFilter}
 				class="btn variant-filled-primary self-end relative"
@@ -253,16 +244,25 @@
 				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				data-popup="popupFilter"
 			>
-				{#each filteredFields as field}
-					<svelte:component
-						this={filters[field].component}
-						bind:value={filterValues[field]}
-						bind:hide={filters[field].hide}
-						{field}
-						{...filterProps[field]}
-						{...filters[field].extraProps}
-					/>
-				{/each}
+				<SuperForm {_form} validators={zod(z.object({}))} let:form>
+					{#each filteredFields as field}
+						{#if filters[field]?.component}
+							<svelte:component
+								this={filters[field].component}
+								{form}
+								{field}
+								{...filters[field].props}
+								fieldContext="filter"
+								label={safeTranslate(filters[field].props?.label)}
+								on:change={(e) => {
+									const value = e.detail;
+									filterValues[field] = value.map((v) => ({ value: v }));
+									invalidateTable = true;
+								}}
+							/>
+						{/if}
+					{/each}
+				</SuperForm>
 			</div>
 		{/if}
 		{#if search}
@@ -273,6 +273,9 @@
 		{/if}
 		<div class="flex space-x-2 items-center">
 			<slot name="optButton" />
+			{#if canSelectObject}
+				<slot name="selectButton" />
+			{/if}
 			{#if canCreateObject}
 				<slot name="addButton" />
 			{/if}
@@ -294,20 +297,10 @@
 					<th class="{regionHeadCell} select-none text-end"></th>
 				{/if}
 			</tr>
-			{#if thFiler}
-				<tr>
-					{#each Object.keys(source.head) as key}
-						<ThFilter class={regionHeadCell} {handler} filterBy={key} />
-					{/each}
-					{#if displayActions}
-						<th class="{regionHeadCell} select-none"></th>
-					{/if}
-				</tr>
-			{/if}
 		</thead>
 		<tbody class="table-body {regionBody}">
 			{#each $rows as row, rowIndex}
-				{@const meta = row.meta ? row.meta : row}
+				{@const meta = row?.meta ?? row}
 				<tr
 					on:click={(e) => {
 						onRowClick(e, rowIndex);
@@ -330,7 +323,7 @@
 												{#each value as val}
 													<li>
 														{#if val.str && val.id}
-															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${val.id}`}
+															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 															<Anchor href={itemHref} class="anchor" stopPropagation
 																>{val.str}</Anchor
 															>
@@ -373,8 +366,8 @@
 											>
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
-										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'publication_date' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
-											{formatDateOrDateTime(value, languageTag())}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
+											{formatDateOrDateTime(value, getLocale())}
 										{:else if [true, false].includes(value)}
 											<span class="ml-4">{safeTranslate(value ?? '-')}</span>
 										{:else if key === 'progress'}
@@ -391,7 +384,12 @@
 												</span>
 											</div>
 										{:else}
-											{safeTranslate(value ?? '-')}
+											<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+											{#if value?.length > 300}
+												{safeTranslate(value ?? '-').slice(0, 300)}...
+											{:else}
+												{safeTranslate(value ?? '-')}
+											{/if}
 										{/if}
 									</span>
 								{/if}
@@ -403,7 +401,7 @@
 							<slot name="actions" meta={row.meta}>
 								{#if row.meta[identifierField]}
 									{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
-									{@const actionsURLModel = source.meta.urlmodel ?? URLModel}
+									{@const actionsURLModel = URLModel}
 									<TableRowActions
 										{deleteForm}
 										{model}
@@ -427,13 +425,13 @@
 												<slot name="actionsBody" />
 											{/if}
 										</svelte:fragment>
-										<svelte:fragment slot="tail">
+										<slot slot="tail" name="tail">
 											<svelte:component
 												this={actionsComponent}
 												meta={row.meta ?? {}}
 												{actionsURLModel}
 											/>
-										</svelte:fragment>
+										</slot>
 									</TableRowActions>
 								{/if}
 							</slot>

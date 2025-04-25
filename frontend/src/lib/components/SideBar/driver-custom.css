@@ -1,0 +1,55 @@
+/* Ensure specificity by using .driver-popover as base */
+.driver-popover {
+	@apply bg-white rounded-lg shadow-lg border border-purple-200 max-w-md;
+	animation: popover-scale 0.2s ease-in-out;
+}
+
+.driver-popover .driver-popover-arrow {
+	@apply border-gray-200;
+}
+
+.driver-popover .driver-popover-title {
+	@apply text-xl font-semibold text-gray-800 px-6 pt-4 pb-2;
+}
+
+.driver-popover .driver-popover-description {
+	@apply text-base text-gray-600 px-6 py-2 leading-relaxed;
+}
+
+.driver-popover .driver-popover-close-btn {
+	@apply absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors;
+}
+
+.driver-popover .driver-popover-footer {
+	@apply flex items-center justify-between px-6 py-4 border-t border-gray-100;
+}
+
+.driver-popover .driver-popover-progress-text {
+	@apply text-sm text-gray-500;
+}
+
+.driver-popover .driver-popover-prev-btn {
+	all: unset;
+	@apply px-4 py-2 text-lg transition-colors bg-gray-200 text-gray-600 hover:bg-gray-100 rounded-tl-lg rounded-bl-lg cursor-pointer;
+}
+
+.driver-popover .driver-popover-next-btn {
+	all: unset;
+	@apply px-4 py-2 text-lg transition-colors bg-purple-700 text-white hover:bg-purple-600 rounded-tr-lg rounded-br-lg cursor-pointer;
+}
+
+.driver-popover .driver-popover-prev-btn[disabled],
+.driver-popover .driver-popover-next-btn[disabled] {
+	@apply opacity-50 cursor-not-allowed;
+}
+
+@keyframes popover-scale {
+	0% {
+		transform: scale(0.9);
+		opacity: 0;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}

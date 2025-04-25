@@ -11,7 +11,7 @@ Conventions:
     The first tab shall be named "library_content" and contain the description of the library in the other tabs
         library_urn                     | <urn>
         library_version                 | <version>
-        library_publication_date        | <date>
+        library_publication_date        | <date>   (default value: now)
         library_locale                  | <en/fr/...>
         library_ref_id                  | <ref_id>
         library_name                    | <name>
@@ -112,7 +112,7 @@ import re
 import yaml
 from pprint import pprint
 from collections import defaultdict
-
+import datetime
 
 LIBRARY_VARS = (
     "library_urn",
@@ -160,7 +160,7 @@ parser = argparse.ArgumentParser(
     description="convert an Excel file in a library for CISO Assistant",
 )
 parser.add_argument("input_file_name")
-parser.add_argument("--compat", action='store_true')
+parser.add_argument("--compat", action="store_true")
 args = parser.parse_args()
 
 ref_name = re.sub(r"\.\w+$", "", args.input_file_name).lower()
@@ -338,6 +338,78 @@ def get_color(wb, cell):
     return "#" + color
 
 
+def build_reference_control_ids_set():
+    """
+    Builds a set of all reference control IDs from the reference_controls tab.
+    This will be used to validate references to controls in the requirements tab.
+    """
+    control_ids = set()
+
+    # Find the reference_controls tab name
+    ref_control_tab = None
+    for tab_name, tab_type in library_vars_dict["tab"].items():
+        if tab_type == "reference_controls":
+            ref_control_tab = tab_name
+            break
+
+    if not ref_control_tab:
+        print(
+            "WARNING: No reference_controls tab found. Cannot validate control references."
+        )
+        return control_ids
+
+    # Process the reference_controls tab to extract all IDs
+    is_header = True
+    for row in dataframe[ref_control_tab]:
+        if is_header:
+            header = read_header(row)
+            is_header = False
+            if "ref_id" not in header:
+                print("WARNING: No ref_id column found in reference_controls tab.")
+                return control_ids
+        elif any(c.value for c in row):
+            ref_id = (
+                str(row[header["ref_id"]].value).strip()
+                if row[header["ref_id"]].value
+                else None
+            )
+            if ref_id:
+                control_ids.add(ref_id.lower())
+
+    return control_ids
+
+
+def validate_control_references(requirement_nodes, control_ids_set):
+    """
+    Validate that all referenced controls in requirements exist in the control set.
+
+    Args:
+        requirement_nodes: List of processed requirement nodes
+        control_ids_set: Set of valid reference control IDs
+    """
+    missing_controls = set()
+    for node in requirement_nodes:
+        if "reference_controls" in node:
+            for control_urn in node["reference_controls"]:
+                # Extract the ID part from the URN
+                # Format is typically like "urn:base_urn:control_id"
+                control_id = control_urn.split(":")[-1]
+
+                if control_id not in control_ids_set:
+                    missing_controls.add(control_id)
+                    print(
+                        f"WARNING: Reference control '{control_id}' referenced in requirement '{node.get('ref_id', node['urn'])}' does not exist."
+                    )
+
+    if missing_controls:
+        print(
+            f"\nFound {len(missing_controls)} missing controls: {', '.join(missing_controls)}"
+        )
+        print("Please fix these references before uploading your file.")
+    else:
+        print("All reference control references are valid.")
+
+
 def get_question(tab):
     print("processing answers")
     found_answers = {}
@@ -477,21 +549,21 @@ for tab in dataframe:
                     )
                     if skip_count:
                         counter_fix += 1
-                        ref_id_urn = f"node{counter-counter_fix}-{counter_fix}"
+                        ref_id_urn = f"node{counter - counter_fix}-{counter_fix}"
                     else:
                         ref_id_urn = (
                             ref_id.lower().replace(" ", "-")
                             if ref_id
-                            else f"node{counter-counter_fix}"
+                            else f"node{counter - counter_fix}"
                         )
                     urn = f"{root_nodes_urn}:{ref_id_urn}"
                 else:
                     if ref_id:
-                        urn = f"{root_nodes_urn}:{ref_id.lower().replace(' ', '-')}" 
+                        urn = f"{root_nodes_urn}:{ref_id.lower().replace(' ', '-')}"
                     else:
                         p = parent_for_depth[depth]
                         c = count_for_depth[depth]
-                        urn =f"{p}:{c}"
+                        urn = f"{p}:{c}" if p else f"{root_nodes_urn}:node{c}"
                         count_for_depth[depth] += 1
                 if urn in urn_unicity_checker:
                     print("URN duplicate:", urn)
@@ -679,7 +751,11 @@ for tab in dataframe:
                 score = row[header["score"]].value
                 name = row[header["name"]].value
                 description = row[header["description"]].value
-                description_doc = row[header["description_doc"]].value if "description_doc" in header else None
+                description_doc = (
+                    row[header["description_doc"]].value
+                    if "description_doc" in header
+                    else None
+                )
                 translations = get_translations(header, row)
                 current_score = {
                     "score": score,
@@ -702,7 +778,7 @@ for tab in dataframe:
                 assert "name" in header
                 assert "description" in header
             elif any([c.value for c in row]):
-                ref_id = row[header["ref_id"]].value
+                ref_id = str(row[header["ref_id"]].value).strip()
                 name = row[header["name"]].value
                 description = row[header["description"]].value
                 translations = get_translations(header, row)
@@ -837,6 +913,9 @@ has_mappings = "mappings" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
 ]
 
+lib_date = library_vars.get("library_publication_date", datetime.datetime.now())
+if type(lib_date) == datetime.datetime:
+    lib_date = lib_date.date()
 library = {
     "urn": library_vars["library_urn"],
     "locale": library_vars["library_locale"],
@@ -845,7 +924,7 @@ library = {
     "description": library_vars["library_description"],
     "copyright": library_vars["library_copyright"],
     "version": library_vars["library_version"],
-    "publication_date": library_vars["library_publication_date"].date(),
+    "publication_date": lib_date,
     "provider": library_vars["library_provider"],
     "packager": library_vars["library_packager"],
 }
@@ -914,6 +993,11 @@ if risk_matrix:
     translations = get_translations_content(library_vars, "risk_matrix")
     if translations:
         library["objects"]["risk_matrix"][0]["translations"] = translations
+
+if has_reference_controls and has_framework:
+    print("\nValidating reference control references...")
+    control_ids_set = build_reference_control_ids_set()
+    validate_control_references(requirement_nodes, control_ids_set)
 
 print("generating", output_file_name)
 with open(output_file_name, "w", encoding="utf8") as file:

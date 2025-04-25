@@ -8,7 +8,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { setFlash } from 'sveltekit-flash-message/server';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
@@ -30,36 +30,15 @@ export const load = (async ({ fetch, params }) => {
 		(res) => res.json()
 	);
 
+	const threats = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/threats_metrics/`).then(
+		(res) => res.json()
+	);
 	const initialData = { baseline: compliance_assessment.id };
 	const auditCreateForm = await superValidate(initialData, zod(ComplianceAssessmentSchema), {
 		errors: false
 	});
 
 	const auditModel = getModelInfo('compliance-assessments');
-
-	const foreignKeys: Record<string, any> = {};
-
-	if (auditModel.foreignKeyFields) {
-		for (const keyField of auditModel.foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			let url: string;
-			if (keyField.urlModel === 'frameworks') {
-				url = `${BASE_API_URL}/${keyField.urlModel}/${compliance_assessment.framework.id}/mappings/`;
-			} else {
-				url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			}
-			const response = await fetch(url);
-			if (response.ok) {
-				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
-		}
-	}
-
-	const mappingSetsEndpoint = `${BASE_API_URL}/requirement-mapping-sets/?reference_framework=${compliance_assessment.framework.id}`;
-
-	auditModel.foreignKeys = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
 
@@ -93,6 +72,7 @@ export const load = (async ({ fetch, params }) => {
 		tree,
 		compliance_assessment_donut_values,
 		global_score,
+		threats,
 		form,
 		title: compliance_assessment.name
 	};

@@ -94,6 +94,8 @@ jobs:
           echo EMAIL_HOST_USER=user@tests.com >> .env
           echo EMAIL_HOST_PASSWORD=password >> .env
           echo EMAIL_PORT=1025 >> .env
+          echo CISO_ASSISTANT_VERSION=v4.2.0 >> .env
+          echo CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD) >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -115,11 +117,13 @@ jobs:
         env:
           CI: true
       - name: Set current date as env variable
+        if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
-        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
+        if: ${{ !cancelled() }}
+        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |
@@ -202,6 +206,8 @@ jobs:
           echo EMAIL_HOST_USER=user@tests.com >> .env
           echo EMAIL_HOST_PASSWORD=password >> .env
           echo EMAIL_PORT=1025 >> .env
+          echo CISO_ASSISTANT_VERSION=v4.2.0 >> .env
+          echo CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD) >> .env
           echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
           echo LICENSE_SEATS=999 >> .env
       - name: Run migrations
@@ -221,11 +227,13 @@ jobs:
         env:
           CI: true
       - name: Set current date as env variable
+        if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
-        run: echo "BRANCH_SANITIZED=$(echo ${{ env.BRANCH_NAME }} | tr "/" "_")" >> $GITHUB_ENV
+        if: ${{ !cancelled() }}
+        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.playwright-browser }}
           path: |

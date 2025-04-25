@@ -16,7 +16,7 @@ from core.models import (
     AppliedControl,
     Evidence,
     Framework,
-    Project,
+    Perimeter,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
@@ -45,7 +45,7 @@ from core.serializers import (
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,
     EvidenceImportExportSerializer,
-    ProjectImportExportSerializer,
+    PerimeterImportExportSerializer,
     RiskAssessmentImportExportSerializer,
     RiskScenarioImportExportSerializer,
     ComplianceAssessmentImportExportSerializer,
@@ -70,66 +70,6 @@ from ebios_rm.serializers import (
 from tprm.serializers import EntityImportExportSerializer
 
 from django.db import models
-from library.serializers import LoadedLibraryImportExportSerializer
-
-from core.models import (
-    Asset,
-    AppliedControl,
-    Evidence,
-    Framework,
-    Project,
-    RiskAssessment,
-    RiskMatrix,
-    RiskScenario,
-    ComplianceAssessment,
-    RequirementAssessment,
-    Vulnerability,
-    Threat,
-    ReferenceControl,
-    LoadedLibrary,
-)
-
-from ebios_rm.models import (
-    EbiosRMStudy,
-    FearedEvent,
-    RoTo,
-    OperationalScenario,
-    Stakeholder,
-    StrategicScenario,
-    AttackPath,
-)
-
-from tprm.models import Entity
-
-from core.serializers import (
-    FolderImportExportSerializer,
-    AssetImportExportSerializer,
-    AppliedControlImportExportSerializer,
-    EvidenceImportExportSerializer,
-    ProjectImportExportSerializer,
-    RiskAssessmentImportExportSerializer,
-    RiskScenarioImportExportSerializer,
-    ComplianceAssessmentImportExportSerializer,
-    RequirementAssessmentImportExportSerializer,
-    VulnerabilityImportExportSerializer,
-    ThreatImportExportSerializer,
-    ReferenceControlImportExportSerializer,
-    FrameworkImportExportSerializer,
-    RiskMatrixImportExportSerializer,
-)
-
-from ebios_rm.serializers import (
-    EbiosRMStudyImportExportSerializer,
-    FearedEventImportExportSerializer,
-    RoToImportExportSerializer,
-    OperationalScenarioImportExportSerializer,
-    StakeholderImportExportSerializer,
-    StrategicScenarioImportExportSerializer,
-    AttackPathImportExportSerializer,
-)
-
-from tprm.serializers import EntityImportExportSerializer
-
 from library.serializers import LoadedLibraryImportExportSerializer
 
 import structlog
@@ -209,7 +149,7 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         Asset: AssetImportExportSerializer,
         AppliedControl: AppliedControlImportExportSerializer,
         Evidence: EvidenceImportExportSerializer,
-        Project: ProjectImportExportSerializer,
+        Perimeter: PerimeterImportExportSerializer,
         RiskAssessment: RiskAssessmentImportExportSerializer,
         RiskScenario: RiskScenarioImportExportSerializer,
         ComplianceAssessment: ComplianceAssessmentImportExportSerializer,
@@ -429,10 +369,10 @@ def get_domain_export_objects(domain: Folder):
         .filter(content_type=Folder.ContentType.DOMAIN)
         .distinct()
     )
-    projects = Project.objects.filter(folder__in=folders).distinct()
+    perimeters = Perimeter.objects.filter(folder__in=folders).distinct()
 
     risk_assessments = RiskAssessment.objects.filter(
-        Q(project__in=projects) | Q(folder__in=folders)
+        Q(perimeter__in=perimeters) | Q(folder__in=folders)
     ).distinct()
     risk_scenarios = RiskScenario.objects.filter(
         risk_assessment__in=risk_assessments
@@ -463,7 +403,7 @@ def get_domain_export_objects(domain: Folder):
     ).distinct()
 
     compliance_assessments = ComplianceAssessment.objects.filter(
-        Q(project__in=projects)
+        Q(perimeter__in=perimeters)
         | Q(folder__in=folders)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
     ).distinct()
@@ -522,6 +462,15 @@ def get_domain_export_objects(domain: Folder):
         | Q(reference_controls__in=reference_controls)
         | Q(risk_matrices__in=risk_matrices)
         | Q(frameworks__in=frameworks)
+        | Q(
+            pk__in=LoadedLibrary.objects.filter(
+                Q(folder__in=folders)
+                | Q(threats__in=threats)
+                | Q(reference_controls__in=reference_controls)
+                | Q(risk_matrices__in=risk_matrices)
+                | Q(frameworks__in=frameworks)
+            ).values_list("dependencies", flat=True)
+        )
     ).distinct()
 
     return {
@@ -536,7 +485,7 @@ def get_domain_export_objects(domain: Folder):
         "appliedcontrol": applied_controls,
         "entity": entities,
         "evidence": evidences,
-        "project": projects,
+        "perimeter": perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,
         "ebiosrmstudy": ebios_rm_studies,

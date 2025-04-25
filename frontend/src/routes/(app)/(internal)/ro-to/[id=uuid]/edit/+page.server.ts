@@ -5,7 +5,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad, Actions } from '../$types';
 import { defaultWriteFormAction } from '$lib/utils/actions';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'ro-to';
@@ -16,25 +16,7 @@ export const load: PageServerLoad = async (event) => {
 	const object = await objectResponse.json();
 
 	const form = await superValidate(object, zod(schema), { errors: false });
-	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
-
-	const foreignKeys: Record<string, any> = {};
-
-	if (foreignKeyFields) {
-		for (const keyField of foreignKeyFields) {
-			const queryParams = keyField.urlParams
-				? `?${keyField.urlParams}${keyField.detail ? object.ebios_rm_study : ''}`
-				: '';
-			const url = `${BASE_API_URL}/${keyField.endpointUrl || keyField.urlModel}/${queryParams}`;
-			const response = await event.fetch(url);
-			if (response.ok) {
-				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
-		}
-	}
 
 	const selectOptions: Record<string, any> = {};
 
@@ -56,9 +38,8 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 	}
-	model.foreignKeys = foreignKeys;
 	model.selectOptions = selectOptions;
-	return { form, model, object, foreignKeys, selectOptions, URLModel, title: m.edit() };
+	return { form, model, object, selectOptions, URLModel, title: m.edit() };
 };
 
 export const actions: Actions = {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 

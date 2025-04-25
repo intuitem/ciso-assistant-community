@@ -1,9 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
-from core.models import Assessment, ComplianceAssessment, Evidence
+from core.models import Assessment, ComplianceAssessment, Evidence, Asset
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
+
+from auditlog.registry import auditlog
 
 
 class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
@@ -129,8 +131,36 @@ class Solution(NameDescriptionMixin):
     ref_id = models.CharField(max_length=255, blank=True)
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
 
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name=_("Related assets"),
+        blank=True,
+        help_text=_("Assets related to the solution"),
+        related_name="solutions",
+    )
+
     fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
+
+
+common_exclude = ["created_at", "updated_at"]
+
+auditlog.register(
+    Entity,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EntityAssessment,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Representative,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Solution,
+    exclude_fields=common_exclude,
+)

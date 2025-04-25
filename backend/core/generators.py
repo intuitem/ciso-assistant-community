@@ -461,6 +461,16 @@ def gen_audit_context(id, doc, tree, lang):
             "non_compliant": "Non compliant",
             "not_applicable": "Not applicable",
             "not_assessed": "Not assessed",
+            "to_do": "To do",
+            "on_hold": "On hold",
+            "in_progress": "In progress",
+            "deprecated": "Deprecated",
+            "active": "Active",
+            "policy": "Policy",
+            "process": "Process",
+            "technical": "Technical",
+            "physical": "Physical",
+            "procedure": "Procedure",
         },
         "fr": {
             "compliant": "Conformes",
@@ -468,25 +478,43 @@ def gen_audit_context(id, doc, tree, lang):
             "non_compliant": "Non conformes",
             "not_applicable": "Non applicables",
             "not_assessed": "Non évalués",
+            "to_do": "À faire",
+            "on_hold": "En attente",
+            "in_progress": "En cours",
+            "deprecated": "Déprécié",
+            "active": "Actif",
+            "policy": "Politique",
+            "process": "Processus",
+            "technical": "Technique",
+            "physical": "Physique",
+            "procedure": "Procédure",
         },
     }
 
+    def safe_translate(lang: str, key: str) -> str:
+        if key is None or key == "--":
+            return "-"
+        return i18n_dict[lang].get(key, key)
+
     donut_data = [
-        {"category": i18n_dict[lang]["compliant"], "value": aggregated["compliant"]},
         {
-            "category": i18n_dict[lang]["partially_compliant"],
+            "category": safe_translate(lang, "compliant"),
+            "value": aggregated["compliant"],
+        },
+        {
+            "category": safe_translate(lang, "partially_compliant"),
             "value": aggregated["partially_compliant"],
         },
         {
-            "category": i18n_dict[lang]["non_compliant"],
+            "category": safe_translate(lang, "non_compliant"),
             "value": aggregated["non_compliant"],
         },
         {
-            "category": i18n_dict[lang]["not_applicable"],
+            "category": safe_translate(lang, "not_applicable"),
             "value": aggregated["not_applicable"],
         },
         {
-            "category": i18n_dict[lang]["not_assessed"],
+            "category": safe_translate(lang, "not_assessed"),
             "value": aggregated["not_assessed"],
         },
     ]
@@ -511,21 +539,45 @@ def gen_audit_context(id, doc, tree, lang):
     ac_total = applied_controls.count()
     status_cnt = applied_controls.values("status").annotate(count=Count("id"))
     ac_chart_data = [
-        {"category": item["status"], "value": item["count"]} for item in status_cnt
+        {
+            "category": safe_translate(lang, item["status"]),
+            "value": item["count"],
+        }
+        for item in status_cnt
     ]
     p1_controls = list()
+    full_controls = list()
     for ac in applied_controls.filter(priority=1):
         requirements_count = (
             RequirementAssessment.objects.filter(compliance_assessment=audit)
             .filter(applied_controls=ac.id)
             .count()
         )
+        print(f"[{ac.name}] {ac.category}: {type(ac.category)}")
         p1_controls.append(
             {
                 "name": ac.name,
-                "description": ac.description,
-                "status": ac.status,
-                "category": ac.category,
+                "description": safe_translate(lang, ac.description),  # None -> "-"
+                "status": safe_translate(lang, ac.status),
+                "category": safe_translate(lang, ac.category),
+                "coverage": requirements_count,
+            }
+        )
+
+    for ac in applied_controls.all():
+        requirements_count = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .filter(applied_controls=ac.id)
+            .count()
+        )
+        full_controls.append(
+            {
+                "name": ac.name,
+                "description": safe_translate(lang, ac.description),  # None -> "-"
+                "prio": f"P{ac.priority}" if ac.priority else "-",
+                "status": safe_translate(lang, ac.status),
+                "eta": safe_translate(lang, ac.eta),  # None -> "-"
+                "category": safe_translate(lang, ac.category),
                 "coverage": requirements_count,
             }
         )
@@ -547,7 +599,7 @@ def gen_audit_context(id, doc, tree, lang):
     res_donut = InlineImage(doc, plot_donut(donut_data), width=Cm(15))
     chart_spider = InlineImage(doc, spider_chart_buffer, width=Cm(15))
     ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
-    IGs = ", ".join(audit.get_selected_implementation_groups())
+    IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
         "audit": audit,
         "date": now().strftime("%d/%m/%Y"),
@@ -559,6 +611,7 @@ def gen_audit_context(id, doc, tree, lang):
         "drifts_per_domain": agg_drifts,
         "chart_controls": ac_chart,
         "p1_controls": p1_controls,
+        "full_controls": full_controls,
         "ac_count": ac_total,
         "igs": IGs,
         "category_scores": category_scores,

@@ -2,11 +2,10 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -38,7 +37,7 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['folder'] })}
+	optionsEndpoint="folders?content_type=DO"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
@@ -47,22 +46,22 @@
 />
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['approver'], label: 'email' })}
+	optionsEndpoint="users?is_approver=true"
+	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
+	nullable={true}
 	label={m.approver()}
 	helpText={m.approverHelpText()}
 />
 <AutocompleteSelect
 	{form}
-	options={getOptions({
-		objects: model.foreignKeys['risk_scenarios'],
-		extra_fields: [
-			['project', 'str'],
-			['risk_assessment', 'str']
-		]
-	})}
+	optionsEndpoint="risk-scenarios"
+	optionsExtraFields={[
+		['perimeter', 'str'],
+		['risk_assessment', 'str']
+	]}
 	field="risk_scenarios"
 	cacheLock={cacheLocks['risk_scenarios']}
 	bind:cachedValue={formDataCache['risk_scenarios']}

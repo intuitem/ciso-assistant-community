@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from core.models import (
     Asset,
-    Project,
+    Perimeter,
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
@@ -13,7 +13,7 @@ from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
 
-# Generic project data for tests
+# Generic perimeter data for tests
 RISK_SCENARIO_NAME = "Test scenario"
 RISK_SCENARIO_DESCRIPTION = "Test Description"
 RISK_SCENARIO_existing_controls = "Test Existing Controls"
@@ -136,7 +136,7 @@ class TestRiskScenariosUnauthenticated:
                 "description": RISK_SCENARIO_DESCRIPTION,
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
                 ),
             },
@@ -169,7 +169,7 @@ class TestRiskScenariosUnauthenticated:
                 "description": RISK_SCENARIO_DESCRIPTION,
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
                 ),
                 "threats": [Threat.objects.create(name="test", folder=folder)],
@@ -194,7 +194,7 @@ class TestRiskScenariosUnauthenticated:
                 "description": RISK_SCENARIO_DESCRIPTION,
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
-                    project=Project.objects.create(name="test", folder=folder),
+                    perimeter=Perimeter.objects.create(name="test", folder=folder),
                     risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
                 ),
                 "threats": [Threat.objects.create(name="test", folder=folder)],
@@ -212,7 +212,9 @@ class TestRiskScenariosAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="testProject", folder=test.folder),
+            perimeter=Perimeter.objects.create(
+                name="testPerimeter", folder=test.folder
+            ),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
@@ -266,7 +268,7 @@ class TestRiskScenariosAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
@@ -332,12 +334,12 @@ class TestRiskScenariosAuthenticated:
         folder = Folder.objects.create(name="test2")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=test.folder),
+            perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         risk_assessment2 = RiskAssessment.objects.create(
             name="test2",
-            project=Project.objects.create(name="test2", folder=folder),
+            perimeter=Perimeter.objects.create(name="test2", folder=folder),
             risk_matrix=RiskMatrix.objects.all()[1],
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
@@ -413,7 +415,7 @@ class TestRiskScenariosAuthenticated:
         folder = test.folder
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="testProject", folder=folder),
+            perimeter=Perimeter.objects.create(name="testPerimeter", folder=folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         threat = Threat.objects.create(name="test", folder=folder)

@@ -2,13 +2,12 @@
 	import { page } from '$app/stores';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
-	import { getOptions } from '$lib/utils/crud';
+
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
@@ -71,10 +70,19 @@
 	);
 </script>
 
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
 	field="owner"
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}
@@ -82,7 +90,7 @@
 />
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['folder'] })}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
@@ -102,7 +110,10 @@
 	hidden={data.type === 'PR'}
 	multiple
 	{form}
-	options={getOptions({ objects: model.foreignKeys['parent_assets'], self: object })}
+	optionsEndpoint="assets"
+	optionsDetailedUrlParameters={[['exclude_childrens', object.id]]}
+	optionsLabelField="auto"
+	optionsSelf={object}
 	field="parent_assets"
 	cacheLock={cacheLocks['parent_assets']}
 	bind:cachedValue={formDataCache['parent_assets']}
@@ -175,7 +186,8 @@
 	multiple
 	{form}
 	createFromSelection={true}
-	options={getOptions({ objects: model.foreignKeys['filtering_labels'], label: 'label' })}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
@@ -189,7 +201,6 @@
 		cacheLock={cacheLocks['ebios_rm_studies']}
 		bind:cachedValue={formDataCache['ebios_rm_studies']}
 		label={m.ebiosRmStudies()}
-		options={getOptions({ objects: model.foreignKeys['ebios_rm_studies'] })}
 		hidden
 	/>
 {/if}

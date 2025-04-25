@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
+	import { setContext, onDestroy } from 'svelte';
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 
 	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
-	import ProjectForm from './ModelForm/ProjectForm.svelte';
+	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
@@ -26,22 +26,35 @@
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
+	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
+	import PurposeForm from './ModelForm/PurposeForm.svelte';
+	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
+	import DataSubjectForm from './ModelForm/DataSubjectForm.svelte';
+	import DataRecipientForm from './ModelForm/DataRecipientForm.svelte';
+	import DataContractorForm from './ModelForm/DataContractorForm.svelte';
+	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
 	import StakeholderForm from './ModelForm/StakeholderForm.svelte';
 	import AttackPathForm from './ModelForm/AttackPathForm.svelte';
+	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
+	import FindingForm from './ModelForm/FindingForm.svelte';
+	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
+	import IncidentForm from './ModelForm/IncidentForm.svelte';
+	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
+	import TaskTemplateForm from './ModelForm/TaskTemplateForm.svelte';
+	import TaskNodeForm from './ModelForm/TaskNodeForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
-	import { getOptions } from '$lib/utils/crud';
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import { superForm, type SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
@@ -49,9 +62,11 @@
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
 	import { goto } from '$lib/utils/breadcrumbs';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
+	export let taintedMessage: string | boolean = m.taintedFormMessage();
 	export let model: ModelInfo;
 	export let context = 'default';
 	export let caching: boolean = false;
@@ -62,6 +77,7 @@
 	export let duplicate = false;
 	export let importFolder = false;
 	export let customNameDescription = false;
+	export let additionalInitialData = {};
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -111,16 +127,58 @@
 		}
 	}
 
+	let missingConstraints: string[] = [];
+	// Context function to update missing constraints
+	function updateMissingConstraint(field: string, isMissing: boolean) {
+		if (isMissing && !missingConstraints.includes(field)) {
+			missingConstraints = [...missingConstraints, field];
+		} else if (!isMissing) {
+			missingConstraints = missingConstraints.filter((f) => f !== field);
+		}
+	}
+	setContext('updateMissingConstraint', updateMissingConstraint);
+
 	onDestroy(() => {
+		missingConstraints = [];
 		createModalCache.garbageCollect();
+	});
+
+	const _form = superForm(form, {
+		dataType: shape?.attachment ? 'form' : 'json',
+		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
+		invalidateAll,
+		applyAction: $$props.applyAction ?? true,
+		resetForm: $$props.resetForm ?? false,
+		validators: zod(schema),
+		taintedMessage,
+		validationMethod: 'auto',
+		onUpdated: async ({ form }) => {
+			if (form.message?.redirect) {
+				goto(getSecureRedirect(form.message.redirect));
+			}
+			if (form.valid) {
+				parent.onConfirm();
+				createModalCache.deleteCache(model.urlModel);
+			}
+		}
 	});
 </script>
 
+{#if missingConstraints.length > 0}
+	<div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+		{m.missingMandatoyObjects1({ model: safeTranslate(model.localName) })}:
+		{#each missingConstraints as key}
+			<li class="font-bold">{safeTranslate(key)}</li>
+		{/each}
+		{m.missingMandatoyObjects2()}
+	</div>
+{/if}
 <SuperForm
 	class="flex flex-col space-y-3"
 	dataType={shape.attachment ? 'form' : 'json'}
 	enctype={shape.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded'}
 	data={form}
+	{_form}
 	{invalidateAll}
 	let:form
 	let:data
@@ -135,12 +193,10 @@
 	{#if shape.reference_control && !duplicate}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({
-				objects: model.foreignKeys['reference_control'],
-				extra_fields: [['folder', 'str']],
-				suggestions: suggestions['reference_control'],
-				label: 'auto' // convention for automatic label calculation
-			})}
+			optionsEndpoint="reference-controls"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsLabelField="auto"
+			optionsSuggestions={suggestions['reference_control']}
 			field="reference_control"
 			cacheLock={cacheLocks['reference_control']}
 			bind:cachedValue={formDataCache['reference_control']}
@@ -187,10 +243,10 @@
 			data-focusindex="1"
 		/>
 	{/if}
-	{#if URLModel === 'projects'}
-		<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-	{:else if URLModel === 'folders'}
-		<FolderForm {form} {model} {cacheLocks} {formDataCache} {initialData} {importFolder} />
+	{#if URLModel === 'perimeters'}
+		<PerimeterForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+	{:else if URLModel === 'folders' || URLModel === 'folders-import'}
+		<FolderForm {form} {importFolder} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 	{:else if URLModel === 'risk-assessments'}
 		<RiskAssessmentForm
 			{form}
@@ -246,7 +302,7 @@
 	{:else if URLModel === 'assets'}
 		<AssetsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {data} />
 	{:else if URLModel === 'requirement-assessments'}
-		<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} />
+		<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'entities'}
 		<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'entity-assessments'}
@@ -265,6 +321,20 @@
 		<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
+	{:else if URLModel === 'processings'}
+		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'purposes'}
+		<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'personal-data'}
+		<PersonalDataForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-subjects'}
+		<DataSubjectForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-recipients'}
+		<DataRecipientForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-contractors'}
+		<DataContractorForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'data-transfers'}
+		<DataTransferForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'ebios-rm'}
 		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'feared-events'}
@@ -276,9 +346,37 @@
 	{:else if URLModel === 'strategic-scenarios'}
 		<StrategicScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
 	{:else if URLModel === 'attack-paths'}
-		<AttackPathForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+		<AttackPathForm
+			{form}
+			{model}
+			{cacheLocks}
+			{formDataCache}
+			{initialData}
+			{additionalInitialData}
+		/>
 	{:else if URLModel === 'operational-scenarios'}
 		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'security-exceptions'}
+		<SecurityExceptionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'findings'}
+		<FindingForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'findings-assessments'}
+		<FindingsAssessmentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'incidents'}
+		<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'timeline-entries'}
+		<TimelineEntryForm
+			{form}
+			{model}
+			{cacheLocks}
+			{formDataCache}
+			initialData={model.initialData}
+			{context}
+		/>
+	{:else if URLModel === 'task-templates'}
+		<TaskTemplateForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} />
+	{:else if URLModel === 'task-nodes'}
+		<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
@@ -294,10 +392,7 @@
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit"
-				on:click={(event) => {
-					createModalCache.deleteCache(model.urlModel);
-				}}>{m.save()}</button
+				type="submit">{m.save()}</button
 			>
 		{:else}
 			{#if cancelButton}

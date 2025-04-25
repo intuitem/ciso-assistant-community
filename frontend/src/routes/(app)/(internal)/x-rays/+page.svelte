@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	export let data: PageData;
@@ -23,7 +23,7 @@
 		return result;
 	};
 
-	const projects = Object.entries(data.data).map(([key, value]) => {
+	const perimeters = Object.entries(data.data).map(([key, value]) => {
 		return {
 			id: key,
 			tabSet: 0,
@@ -41,55 +41,57 @@
 </script>
 
 <div class="card bg-white p-6 shadow flex flex-col space-y-4">
-	{#if projects.length == 0}
+	{#if perimeters.length == 0}
 		<span class="text-2xl">{m.xRaysEmptyMessage()}</span>
 	{/if}
-	{#each projects as project, index}
-		{@const compliance_assessments = Object.values(project.compliance_assessments.objects)}
-		{@const risk_assessments = Object.values(project.risk_assessments.objects)}
+	{#each perimeters as perimeter, index}
+		{@const compliance_assessments = Object.values(perimeter.compliance_assessments.objects)}
+		{@const risk_assessments = Object.values(perimeter.risk_assessments.objects)}
 		<div>
 			<span class="text-2xl">&#128161;</span>
 			<Anchor
 				class="text-2xl font-bold mb-1 hover:underline text-blue-600"
-				href="/projects/{project.project.id}"
+				href="/perimeters/{perimeter.perimeter.id}"
 			>
-				{project.project.folder.str}/{project.project.name}
+				{perimeter.perimeter.folder.str}/{perimeter.perimeter.name}
 			</Anchor>
 			<TabGroup>
-				<Tab bind:group={project.tabSet} name="compliance_assessments_tab" value={0}
+				<Tab bind:group={perimeter.tabSet} name="compliance_assessments_tab" value={0}
 					>{m.complianceAssessments()}
-					{#if project.compliance_assessments.errors.length > 0}
+					{#if perimeter.compliance_assessments.errors.length > 0}
 						<span class="badge variant-soft-error"
-							>{project.compliance_assessments.errors.length}</span
+							>{perimeter.compliance_assessments.errors.length}</span
 						>
 					{/if}
-					{#if project.compliance_assessments.warnings.length > 0}
+					{#if perimeter.compliance_assessments.warnings.length > 0}
 						<span class="badge variant-soft-warning"
-							>{project.compliance_assessments.warnings.length}</span
+							>{perimeter.compliance_assessments.warnings.length}</span
 						>
 					{/if}
-					{#if project.compliance_assessments.info.length > 0}
+					{#if perimeter.compliance_assessments.info.length > 0}
 						<span class="badge variant-soft-secondary"
-							>{project.compliance_assessments.info.length}</span
+							>{perimeter.compliance_assessments.info.length}</span
 						>
 					{/if}
 				</Tab>
-				<Tab bind:group={project.tabSet} name="risk_assessments_tab" value={1}
+				<Tab bind:group={perimeter.tabSet} name="risk_assessments_tab" value={1}
 					>{m.riskAssessments()}
-					{#if project.risk_assessments.errors.length > 0}
-						<span class="badge variant-soft-error">{project.risk_assessments.errors.length}</span>
+					{#if perimeter.risk_assessments.errors.length > 0}
+						<span class="badge variant-soft-error">{perimeter.risk_assessments.errors.length}</span>
 					{/if}
-					{#if project.risk_assessments.warnings.length > 0}
+					{#if perimeter.risk_assessments.warnings.length > 0}
 						<span class="badge variant-soft-warning"
-							>{project.risk_assessments.warnings.length}</span
+							>{perimeter.risk_assessments.warnings.length}</span
 						>
 					{/if}
-					{#if project.risk_assessments.info.length > 0}
-						<span class="badge variant-soft-secondary">{project.risk_assessments.info.length}</span>
+					{#if perimeter.risk_assessments.info.length > 0}
+						<span class="badge variant-soft-secondary"
+							>{perimeter.risk_assessments.info.length}</span
+						>
 					{/if}
 				</Tab>
 				<svelte:fragment slot="panel">
-					{#if project.tabSet === 0}
+					{#if perimeter.tabSet === 0}
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each compliance_assessments as compliance_assessment, index}
 								<li class="h4 font-semibold mb-1">
@@ -182,7 +184,7 @@
 							{/each}
 						</ul>
 					{/if}
-					{#if project.tabSet === 1}
+					{#if perimeter.tabSet === 1}
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each risk_assessments as risk_assessment, index}
 								<li class="h4 font-semibold mb-1">
@@ -275,7 +277,7 @@
 				</svelte:fragment>
 			</TabGroup>
 		</div>
-		{#if index != projects.length - 1}
+		{#if index != perimeters.length - 1}
 			<hr />
 		{/if}
 	{/each}

@@ -2,7 +2,7 @@
 	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 
 	export let meta: any;
@@ -51,7 +51,7 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.id}?/load"
+				action="/stored-libraries/{library.id}?/load"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
@@ -101,7 +101,7 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.id}?/update"
+				action="/loaded-libraries/{library.id}?/update"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;

@@ -2,11 +2,12 @@ import { nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import type { Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
@@ -48,11 +49,24 @@ export const load = (async ({ fetch, params }) => {
 				},
 				zod(scoreSchema)
 			);
+			const updateSchema = modelSchema('requirement-assessments');
+			const updatedModel: ModelInfo = getModelInfo('requirement-assessments');
+			const object = {
+				...requirementAssessment,
+				folder: requirementAssessment.folder.id,
+				requirement: requirementAssessment.requirement.id,
+				compliance_assessment: requirementAssessment.compliance_assessment.id,
+				evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
+			};
+			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
 				...requirementAssessment,
 				evidenceCreateForm,
 				observationBuffer,
-				scoreForm
+				scoreForm,
+				updateForm,
+				updatedModel,
+				object
 			};
 		})
 	);
@@ -72,16 +86,12 @@ export const load = (async ({ fetch, params }) => {
 		return requirement;
 	});
 
-	const schema = z.object({ id: z.string().uuid() });
-	const deleteForm = await superValidate(zod(schema));
-
 	return {
 		URLModel,
 		compliance_assessment,
 		requirement_assessments,
 		requirements,
 		evidenceModel,
-		deleteForm,
 		title: m.tableMode()
 	};
 }) satisfies PageServerLoad;
@@ -103,5 +113,8 @@ export const actions: Actions = {
 	},
 	createEvidence: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
+	},
+	update: async (event) => {
+		return nestedWriteFormAction({ event, action: 'edit' });
 	}
 };

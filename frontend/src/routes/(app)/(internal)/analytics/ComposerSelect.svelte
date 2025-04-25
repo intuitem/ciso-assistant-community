@@ -4,7 +4,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import { composerSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -14,11 +14,13 @@
 	let options: { label: string; value: string }[];
 
 	onMount(async () => {
-		const riskAssessments = await fetch('/risk-assessments').then((res) => res.json());
+		const riskAssessments = await fetch('/risk-assessments')
+			.then((res) => res.json())
+			.then((res) => res.results);
 		options = getOptions({
 			objects: riskAssessments,
 			label: 'str',
-			extra_fields: [['project', 'str']]
+			extra_fields: [['perimeter', 'str']]
 		});
 	});
 </script>

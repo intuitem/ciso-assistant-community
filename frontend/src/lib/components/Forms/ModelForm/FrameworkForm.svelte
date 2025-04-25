@@ -3,7 +3,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
@@ -13,7 +13,7 @@
 <TextField
 	{form}
 	field="ref_id"
-	label={m.ref()}
+	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />

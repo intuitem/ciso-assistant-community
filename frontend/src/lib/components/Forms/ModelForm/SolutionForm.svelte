@@ -1,10 +1,9 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import Score from '../Score.svelte';
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -15,7 +14,7 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['provider_entity'] })}
+	optionsEndpoint="entities"
 	field="provider_entity"
 	cacheLock={cacheLocks['provider_entity']}
 	bind:cachedValue={formDataCache['provider_entity']}
@@ -25,7 +24,7 @@
 <TextField
 	{form}
 	field="ref_id"
-	label={m.ref()}
+	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
@@ -37,4 +36,15 @@
 	fullDonut
 	min_score={1}
 	max_score={4}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
+	field="assets"
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
 />

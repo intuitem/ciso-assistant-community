@@ -2,7 +2,7 @@
 	import { goto, preloadData, pushState } from '$app/navigation';
 	import { page } from '$app/stores';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
 	import AuditTableMode from '../../../(third-party)/compliance-assessments/[id=uuid]/table-mode/+page.svelte';
 	import type { Actions, PageData } from './$types';

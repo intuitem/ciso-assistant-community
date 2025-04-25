@@ -1,12 +1,8 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
-	import { checkConstraints } from '$lib/utils/crud';
-	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
@@ -148,26 +144,7 @@
 			// Data
 			title: safeTranslate('add-' + data.riskModel.localName)
 		};
-		if (
-			checkConstraints(data.createRiskAnalysisForm.constraints, data.riskModel.foreignKeys).length >
-			0
-		) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.riskModel.localName).toLowerCase(),
-				value: checkConstraints(data.createRiskAnalysisForm.constraints, data.riskModel.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
-	}
-
-	$: if (form && form.redirect) {
-		goto(getSecureRedirect(form.redirect));
 	}
 </script>
 
@@ -232,6 +209,13 @@
 			</div>
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
+			<div slot="action">
+				<a
+					class="text-orange-600 hover:text-purple-600 font-medium"
+					href={`${$page.url.pathname}/visual/`}
+					><i class="fa-solid fa-chart-diagram mr-2"></i>{m.visualAnalysis()}</a
+				>
+			</div>
 			<div slot="content">
 				<Card
 					count={data.data.roto_count}

@@ -1,13 +1,13 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
+import { message, setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { getSecureRedirect } from './helpers';
@@ -54,7 +54,7 @@ function getEndpoint({
 			? `${BASE_API_URL}/${model.endpointUrl}/`
 			: `${BASE_API_URL}/${urlModel}/`;
 	}
-	const id = event.params.id;
+	const id = event.url.searchParams.get('id') || event.params.id;
 	return model.endpointUrl
 		? `${BASE_API_URL}/${model.endpointUrl}/${id}/`
 		: `${BASE_API_URL}/${urlModel}/${id}/`;
@@ -76,16 +76,16 @@ export async function handleErrorResponse({
 	}
 	if (res.warning) {
 		setFlash({ type: 'warning', message: safeTranslate(res.warning) }, event);
-		return { form };
+		return message(form, { warning: res.warning });
 	}
 	if (res.error) {
 		setFlash({ type: 'error', message: safeTranslate(res.error) }, event);
-		return { form };
+		return message(form, { error: res.error });
 	}
 	Object.entries(res).forEach(([key, value]) => {
 		setError(form, key, safeTranslate(value));
 	});
-	return fail(400, { form });
+	return message(form, { status: response.status });
 }
 
 export async function defaultWriteFormAction({
@@ -111,7 +111,7 @@ export async function defaultWriteFormAction({
 
 	if (!form.valid) {
 		console.error(form.errors);
-		return fail(400, { form: form });
+		return message(form, { status: 400 });
 	}
 
 	const endpoint = getEndpoint({ action, urlModel, event });
@@ -149,7 +149,8 @@ export async function defaultWriteFormAction({
 				body: file
 			};
 			const fileUploadRes = await event.fetch(fileUploadEndpoint, fileUploadRequestInitOptions);
-			if (!fileUploadRes.ok) return handleErrorResponse({ event, response: fileUploadRes, form });
+			if (!fileUploadRes.ok)
+				return await handleErrorResponse({ event, response: fileUploadRes, form });
 		}
 	}
 
@@ -167,9 +168,9 @@ export async function defaultWriteFormAction({
 	if (next && doRedirect) redirect(302, next);
 
 	if (redirectToWrittenObject) {
-		return { form, redirect: `/${urlModel}/${writtenObject.id}` };
+		return message(form, { redirect: `/${urlModel}/${writtenObject.id}` });
 	}
-	return { form };
+	return message(form, { object: writtenObject });
 }
 
 export async function nestedWriteFormAction({
@@ -213,38 +214,38 @@ export async function defaultDeleteFormAction({
 
 	if (!deleteForm.valid) {
 		console.error(deleteForm.errors);
-		return fail(400, { form: deleteForm });
+		return message(deleteForm, { status: 400 });
 	}
 
-	if (formData.has('delete')) {
-		const requestInitOptions: RequestInit = {
-			method: 'DELETE'
-		};
-		const res = await event.fetch(endpoint, requestInitOptions);
-		if (!res.ok) {
-			const response = await res.json();
-			if (response.error) {
-				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
-				return fail(403, { form: deleteForm });
-			}
-			if (response.non_field_errors) {
-				setError(deleteForm, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: deleteForm });
+	const requestInitOptions: RequestInit = {
+		method: 'DELETE'
+	};
+	const res = await event.fetch(endpoint, requestInitOptions);
+	if (!res.ok) {
+		const response = await res.json();
+		if (response.error) {
+			const errorMessages = Array.isArray(response.error) ? response.error : [response.error];
+			errorMessages.forEach((error) => {
+				setFlash({ type: 'error', message: safeTranslate(error) }, event);
+			});
+			return message(deleteForm, { status: res.status });
 		}
-		const model: string = urlParamModelVerboseName(urlModel!);
-		setFlash(
-			{
-				type: 'success',
-				message: m.successfullyDeletedObject({
-					object: safeTranslate(model).toLowerCase()
-				})
-			},
-			event
-		);
+		if (response.non_field_errors) {
+			setError(deleteForm, 'non_field_errors', response.non_field_errors);
+		}
+		return message(deleteForm, { status: res.status });
 	}
+	setFlash(
+		{
+			type: 'success',
+			message: m.successfullyDeletedObject({
+				object: safeTranslate(model.localName).toLowerCase()
+			})
+		},
+		event
+	);
 
-	return { deleteForm };
+	return message(deleteForm, { status: res.status });
 }
 
 export async function nestedDeleteFormAction({ event }: { event: RequestEvent }) {

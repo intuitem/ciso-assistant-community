@@ -1,16 +1,12 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { driverInstance } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
-	import * as m from '$paraglide/messages';
-	import { checkConstraints } from '$lib/utils/crud';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { goto } from '$app/navigation';
-	import { driverInstance } from '$lib/utils/stores';
 
 	import { onMount } from 'svelte';
 
@@ -34,18 +30,6 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
-				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 
@@ -54,8 +38,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.model['folderImportForm'],
-				model: data.model,
-				customNameDescription: true,
+				model: data.model['folderImportModel'],
 				importFolder: true,
 				formAction: '?/importFolder',
 				enctype: 'multipart/form-data',
@@ -68,18 +51,6 @@
 			// Data
 			title: safeTranslate('importFolder')
 		};
-		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
-				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 
@@ -125,10 +96,6 @@
 			window.removeEventListener('keydown', handleKeyDown);
 		};
 	});
-
-	$: if (form && form.redirect) {
-		goto(getSecureRedirect(form.redirect));
-	}
 </script>
 
 {#if data.table}
@@ -147,10 +114,10 @@
 								on:click={handleClickForGT}
 								><i class="fa-solid fa-file-circle-plus"></i>
 							</button>
-							{#if URLModel === 'applied-controls'}
+							{#if ['applied-controls', 'assets'].includes(URLModel)}
 								<a
 									href="{URLModel}/export/"
-									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 									title={m.exportButton()}
 									data-testid="export-button"><i class="fa-solid fa-download mr-2" /></a
 								>
@@ -165,7 +132,7 @@
 							{/if}
 							{#if URLModel === 'folders'}
 								<button
-									class="inline-block border-e p-3 btn-mini bg-sky-400 text-white w-12 focus:relative"
+									class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
 									data-testid="import-button"
 									title={safeTranslate('importFolder')}
 									on:click={modalFolderImportForm}
@@ -180,7 +147,7 @@
 							{/if}
 						{:else if URLModel === 'risk-matrices'}
 							<a
-								href="/libraries?objectType=risk_matrix"
+								href="/libraries?object_type=risk_matrix"
 								on:click={handleClickForGT}
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
@@ -189,7 +156,7 @@
 							>
 						{:else if URLModel === 'frameworks'}
 							<a
-								href="/libraries"
+								href="/libraries?object_type=framework"
 								on:click={handleClickForGT}
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
@@ -198,7 +165,7 @@
 							>
 						{:else if URLModel === 'requirement-mapping-sets'}
 							<a
-								href="/libraries?objectType=requirement_mapping_set"
+								href="/libraries?object_type=requirement_mapping_set"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"

@@ -4,7 +4,7 @@ from core.models import (
     StoredLibrary,
     Framework,
     ComplianceAssessment,
-    Project,
+    Perimeter,
     RequirementAssessment,
 )
 from iam.models import Folder
@@ -25,7 +25,9 @@ def enisa_5g_scm_framework_fixture():
 
 @pytest.mark.django_db
 class TestRequirementAssessment:
-    @pytest.mark.usefixtures("domain_project_fixture", "enisa_5g_scm_framework_fixture")
+    @pytest.mark.usefixtures(
+        "domain_perimeter_fixture", "enisa_5g_scm_framework_fixture"
+    )
     def test_create_applied_controls_from_suggestions(self):
         enisa_5g_scm = Framework.objects.first()
         compliance_assessment = ComplianceAssessment.objects.create(
@@ -34,7 +36,7 @@ class TestRequirementAssessment:
             folder=Folder.objects.filter(
                 content_type=Folder.ContentType.DOMAIN
             ).first(),
-            project=Project.objects.first(),
+            perimeter=Perimeter.objects.first(),
         )
 
         requirement_assessments: list[RequirementAssessment] = (

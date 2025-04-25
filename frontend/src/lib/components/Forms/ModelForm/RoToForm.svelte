@@ -4,10 +4,8 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
-	import * as m from '$paraglide/messages.js';
-	import { getOptions } from '$lib/utils/crud';
+	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
-	import NumberField from '../NumberField.svelte';
 	import { page } from '$app/stores';
 
 	export let form: SuperValidated<any>;
@@ -33,7 +31,6 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['ebios_rm_study'] })}
 	field="ebios_rm_study"
 	cacheLock={cacheLocks['ebios_rm_study']}
 	bind:cachedValue={formDataCache['ebios_rm_study']}
@@ -104,7 +101,7 @@
 		{form}
 		options={model.selectOptions['activity']}
 		field="activity"
-		label={m.activity()}
+		label={m.ro_activity()}
 		cacheLock={cacheLocks['activity']}
 		bind:cachedValue={formDataCache['activity']}
 		helpText={m.activityHelpText()}
@@ -131,11 +128,10 @@
 	<AutocompleteSelect
 		multiple
 		{form}
-		options={getOptions({
-			objects: model.foreignKeys['feared_events'],
-			extra_fields: [['folder', 'str']],
-			label: 'auto'
-		})}
+		optionsEndpoint="feared-events?is_selected=true"
+		optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
 		field="feared_events"
 		label={m.fearedEvents()}
 		helpText={m.roToFearedEventHelpText()}

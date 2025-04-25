@@ -3,7 +3,7 @@ import { getModelInfo } from '$lib/utils/crud';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import { safeTranslate } from '$lib/utils/i18n';
 import { UserEditSchema } from '$lib/utils/schemas';
-import * as m from '$paraglide/messages';
+import { m } from '$paraglide/messages';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
@@ -18,23 +18,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 	const schema = UserEditSchema;
 	const form = await superValidate(object, zod(schema));
-
-	const foreignKeys: Record<string, any> = {};
-
-	if (model.foreignKeyFields) {
-		for (const keyField of model.foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await fetch(url);
-			if (response.ok) {
-				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
-		}
-	}
-
-	model.foreignKeys = foreignKeys;
 
 	return { form, model, object, title: m.edit() };
 };

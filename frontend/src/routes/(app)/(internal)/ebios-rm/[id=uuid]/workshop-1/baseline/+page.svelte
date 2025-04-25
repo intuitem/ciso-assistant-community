@@ -5,10 +5,10 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
-	import { checkConstraints } from '$lib/utils/crud';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
+	import { page } from '$app/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -30,25 +30,6 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		if (
-			checkConstraints(
-				data.createForm.constraints,
-				Object.fromEntries(
-					Object.entries(data.model.foreignKeys).filter(([key]) => key !== 'risk_matrix')
-				)
-			).length > 0
-		) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
-				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
 
@@ -59,7 +40,6 @@
 				form: data.updateForm,
 				model: data.updatedModel,
 				object: data.object,
-				foreignKeys: data.updatedModel.foreignKeys,
 				context: 'selectAudit'
 			}
 		};
@@ -69,35 +49,33 @@
 			// Data
 			title: m.selectAudit()
 		};
-		if (
-			checkConstraints(
-				data.updateForm.constraints,
-				Object.fromEntries(
-					Object.entries(data.updatedModel.foreignKeys).filter(([key]) => key !== 'risk_matrix')
-				)
-			).length > 0
-		) {
-			modalComponent = {
-				ref: MissingConstraintsModal
-			};
-			modal = {
-				type: 'component',
-				component: modalComponent,
-				title: m.warning(),
-				body: safeTranslate('add-' + data.updatedModel.localName).toLowerCase(),
-				value: checkConstraints(data.updateForm.constraints, data.updatedModel.foreignKeys)
-			};
-		}
 		modalStore.trigger(modal);
 	}
+
+	const user = $page.data.user;
+	const canEditObject: boolean = canPerformAction({
+		user,
+		action: 'change',
+		model: data.model.name,
+		domain:
+			data.model.name === 'folder'
+				? data.data.id
+				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
+	});
 </script>
 
-<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
-	<div slot="optButton">
+<ModelTable
+	source={data.table}
+	deleteForm={data.deleteForm}
+	{URLModel}
+	canSelectObject={canEditObject}
+	baseEndpoint="/compliance-assessments?ebios_rm_studies={data.data.id}"
+>
+	<div slot="selectButton">
 		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 			<button
 				class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
-				data-testid="opt-button"
+				data-testid="select-button"
 				title={m.selectAudit()}
 				on:click={modalUpdateForm}
 				><i class="fa-solid fa-hand-pointer"></i>

@@ -7,7 +7,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 	import { displayOnlyAssessableNodes } from './store';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
@@ -19,6 +19,7 @@
 	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
+	export let selectedStatus: string[];
 	export let resultCounts: Record<string, number> | undefined;
 	export let assessable: boolean;
 	export let max_score: number;
@@ -155,14 +156,14 @@
 				</div>
 				<div>
 					{#if hasAssessableChildren}
-						{#each Object.entries(complianceStatusColorMap) as status}
-							{#if resultCounts[status[0]]}
+						{#each Object.entries(complianceStatusColorMap) as [status, color]}
+							{#if resultCounts[status] && selectedStatus.includes(status)}
 								<span
 									class="badge mr-1"
-									style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
+									style="background-color: {color + '44'}; color: {darkenColor(color, 0.3)}"
 								>
-									{resultCounts[status[0]]}
-									{safeTranslate(status[0])}
+									{resultCounts[status]}
+									{safeTranslate(status)}
 								</span>
 							{/if}
 						{/each}

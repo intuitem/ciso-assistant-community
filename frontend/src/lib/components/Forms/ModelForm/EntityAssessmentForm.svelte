@@ -5,10 +5,11 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Score from '../Score.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
+	import { m } from '$paraglide/messages';
+
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -20,12 +21,13 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['project'] })}
-	field="project"
-	cacheLock={cacheLocks['project']}
-	bind:cachedValue={formDataCache['project']}
-	label={m.project()}
-	hidden={initialData.project}
+	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
+	field="perimeter"
+	cacheLock={cacheLocks['perimeter']}
+	bind:cachedValue={formDataCache['perimeter']}
+	label={m.perimeter()}
+	hidden={initialData.perimeter}
 />
 {#if !data.compliance_assessment}
 	<Checkbox
@@ -39,7 +41,7 @@
 		disabled={!data.create_audit}
 		mandatory
 		hidden={!data.create_audit}
-		options={getOptions({ objects: model.foreignKeys['framework'] })}
+		optionsEndpoint="frameworks"
 		field="framework"
 		cacheLock={cacheLocks['framework']}
 		bind:cachedValue={formDataCache['framework']}
@@ -72,7 +74,7 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['entity'] })}
+	optionsEndpoint="entities"
 	field="entity"
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}
@@ -82,7 +84,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['solutions'] })}
+	optionsEndpoint="solutions"
 	field="solutions"
 	cacheLock={cacheLocks['solutions']}
 	bind:cachedValue={formDataCache['solutions']}
@@ -97,38 +99,6 @@
 	min_score={1}
 	max_score={4}
 />
-<Select
-	{form}
-	options={model.selectOptions['status']}
-	field="status"
-	label={m.status()}
-	cacheLock={cacheLocks['status']}
-	bind:cachedValue={formDataCache['status']}
-/>
-<TextField
-	{form}
-	field="version"
-	label={m.version()}
-	cacheLock={cacheLocks['version']}
-	bind:cachedValue={formDataCache['version']}
-/>
-<TextField
-	{form}
-	field="reference_link"
-	label={m.referenceLink()}
-	helpText={m.linkHelpText()}
-	cacheLock={cacheLocks['reference_link']}
-	bind:cachedValue={formDataCache['reference_link']}
-/>
-<TextField
-	type="date"
-	{form}
-	field="eta"
-	label={m.eta()}
-	helpText={m.etaHelpText()}
-	cacheLock={cacheLocks['eta']}
-	bind:cachedValue={formDataCache['eta']}
-/>
 <TextField
 	type="date"
 	{form}
@@ -141,52 +111,13 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
-	field="authors"
-	cacheLock={cacheLocks['authors']}
-	bind:cachedValue={formDataCache['authors']}
-	label={m.authors()}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	options={getOptions({ objects: model.foreignKeys['representatives'], label: 'email' })}
+	optionsEndpoint="users?is_third_party=true"
+	optionsLabelField="email"
 	field="representatives"
 	helpText={m.entityAssessmentRepresentativesHelpText()}
 	cacheLock={cacheLocks['representatives']}
 	bind:cachedValue={formDataCache['representatives']}
 	label={m.representatives()}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
-	field="reviewers"
-	cacheLock={cacheLocks['reviewers']}
-	bind:cachedValue={formDataCache['reviewers']}
-	label={m.reviewers()}
-/>
-<AutocompleteSelect
-	{form}
-	options={getOptions({ objects: model.foreignKeys['compliance_assessment'] })}
-	field="compliance_assessment"
-	cacheLock={cacheLocks['compliance_assessment']}
-	bind:cachedValue={formDataCache['compliance_assessment']}
-	label={m.complianceAssessment()}
-	disabled={data.create_audit}
-	hidden={data.create_audit}
-/>
-<AutocompleteSelect
-	{form}
-	options={getOptions({
-		objects: model.foreignKeys['evidence'],
-		extra_fields: [['folder', 'str']]
-	})}
-	field="evidence"
-	cacheLock={cacheLocks['evidence']}
-	bind:cachedValue={formDataCache['evidence']}
-	label={m.evidence()}
-	helpText={m.entityAssessmentEvidenceHelpText()}
 />
 <Select
 	{form}
@@ -196,10 +127,85 @@
 	cacheLock={cacheLocks['conclusion']}
 	bind:cachedValue={formDataCache['conclusion']}
 />
-<TextArea
-	{form}
-	field="observation"
-	label={m.observation()}
-	cacheLock={cacheLocks['observation']}
-	bind:cachedValue={formDataCache['observation']}
-/>
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="eta"
+		label={m.eta()}
+		helpText={m.etaHelpText()}
+		cacheLock={cacheLocks['eta']}
+		bind:cachedValue={formDataCache['eta']}
+	/>
+	<TextField
+		{form}
+		field="version"
+		label={m.version()}
+		cacheLock={cacheLocks['version']}
+		bind:cachedValue={formDataCache['version']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="users?is_third_party=false"
+		optionsLabelField="email"
+		field="authors"
+		cacheLock={cacheLocks['authors']}
+		bind:cachedValue={formDataCache['authors']}
+		label={m.authors()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="users?is_third_party=false"
+		optionsLabelField="email"
+		field="reviewers"
+		cacheLock={cacheLocks['reviewers']}
+		bind:cachedValue={formDataCache['reviewers']}
+		label={m.reviewers()}
+	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="compliance-assessments"
+		optionsExtraFields={[['folder', 'str']]}
+		field="compliance_assessment"
+		cacheLock={cacheLocks['compliance_assessment']}
+		bind:cachedValue={formDataCache['compliance_assessment']}
+		label={m.complianceAssessment()}
+		disabled={data.create_audit}
+		hidden={data.create_audit}
+	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
+		field="evidence"
+		cacheLock={cacheLocks['evidence']}
+		bind:cachedValue={formDataCache['evidence']}
+		label={m.evidence()}
+		helpText={m.entityAssessmentEvidenceHelpText()}
+	/>
+	<TextArea
+		{form}
+		field="observation"
+		label={m.observation()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+	<TextField
+		{form}
+		field="reference_link"
+		label={m.referenceLink()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['reference_link']}
+		bind:cachedValue={formDataCache['reference_link']}
+	/>
+</Dropdown>

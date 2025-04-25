@@ -1,0 +1,83 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=True
+      - POSTGRES_NAME=ciso_assistant
+      - POSTGRES_USER=ciso_assistant
+      - POSTGRES_PASSWORD=ciso_assistant
+      - DB_HOST=postgres
+    volumes:
+      - ./db:/code/db
+
+  huey:
+    container_name: huey
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=False
+      - POSTGRES_NAME=ciso_assistant
+      - POSTGRES_USER=ciso_assistant
+      - POSTGRES_PASSWORD=ciso_assistant
+      - DB_HOST=postgres
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: ciso_assistant
+      POSTGRES_USER: ciso_assistant
+      POSTGRES_PASSWORD: ciso_assistant
+    volumes:
+      - ./db/pg:/var/lib/postgresql/data
+
+  caddy:
+    container_name: caddy
+    image: caddy:2.8.4
+    restart: unless-stopped
+    ports:
+      - 8443:8443
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - https://localhost:8443
+      - --to
+      - frontend:3000
+    volumes:
+      - ./db:/data

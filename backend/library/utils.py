@@ -419,7 +419,7 @@ class RiskMatrixImporter:
             urn=self.risk_matrix_data["urn"].lower(),
             provider=library_object.provider,
             ref_id=self.risk_matrix_data.get("ref_id"),
-            json_definition=json.dumps(matrix_data),
+            json_definition=matrix_data,
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -538,7 +538,7 @@ class LibraryImporter:
                 ", ".join(missing_fields)
             )"""
 
-        library_objects = json.loads(self._library.content)
+        library_objects = self._library.content
 
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
@@ -646,7 +646,6 @@ class LibraryImporter:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
-            print(reference_control)
             reference_control.import_reference_control(library_object)
 
         for risk_matrix in self._risk_matrices:

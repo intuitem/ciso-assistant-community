@@ -6,24 +6,29 @@
 	export let data;
 	export let names;
 	export let uuids;
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
+
+	function truncateString(maxLength: number) {
+		return (name) => (name.length > maxLength ? name.substring(0, maxLength) + '...' : name);
+	}
 
 	const chart_id = `stacked_div`;
+
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 		const rawData = data;
 		const auditTotals = rawData.map((audit) => audit.reduce((sum, val) => sum + val, 0));
-		const uuidMap = uuids;
 		chart.on('click', function (params) {
-			if (uuidMap[params.name]) {
-				window.open(`/compliance-assessments/${uuidMap[params.name]}`, '_blank');
-				//window.location.href = `/compliance-assessments/${uuidMap[params.name]}`;
+			const index = params.dataIndex;
+			if (index !== undefined && uuids && uuids[index]) {
+				window.open(`/compliance-assessments/${uuids[index]}`, '_blank');
 			}
 		});
+
 		const grid = {
 			left: 150,
-			right: 50,
+			right: 10,
 			top: 50,
 			bottom: 50
 		};
@@ -75,7 +80,6 @@
 
 		var option = {
 			color: ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
-			//color: ['#D2D5DB', '#FDE048', '#F87171', '#86EFAC', '#000'],
 			legend: {
 				selectedMode: false,
 				formatter: (name) => getSeriesLabel(name)
@@ -87,7 +91,8 @@
 			},
 			yAxis: {
 				type: 'category',
-				data: names,
+				name: '',
+				data: names.map(truncateString(20)),
 				axisTick: {
 					show: false
 				},
@@ -95,7 +100,18 @@
 					show: false
 				}
 			},
-			series
+			series,
+			tooltip: {
+				trigger: 'axis',
+				axisPointer: {
+					type: 'shadow'
+				},
+				formatter: (params) => {
+					// Find the index of the hovered item and show full name
+					const index = params[0].dataIndex;
+					return names[index];
+				}
+			}
 		};
 
 		chart.setOption(option);

@@ -1,30 +1,33 @@
-import { BASE_API_URL, URN_REGEX } from '$lib/utils/constants';
+import { BASE_API_URL } from '$lib/utils/constants';
 
+import { nestedDeleteFormAction } from '$lib/utils/actions';
+import { safeTranslate } from '$lib/utils/i18n';
 import { LibraryUploadSchema } from '$lib/utils/schemas';
+import { listViewFields } from '$lib/utils/table';
+import { m } from '$paraglide/messages';
+import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate } from 'sveltekit-superforms';
-import type { PageServerLoad } from './$types';
-import { z } from 'zod';
+import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { tableSourceMapper } from '@skeletonlabs/skeleton';
-import { listViewFields } from '$lib/utils/table';
-import type { Library } from '$lib/utils/types';
-import * as m from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
-import { nestedDeleteFormAction } from '$lib/utils/actions';
+import { z } from 'zod';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
-	const stored_libraries_endpoint = `${BASE_API_URL}/stored-libraries/`;
-	const loaded_libaries_endpoint = `${BASE_API_URL}/loaded-libraries/`;
+	const storedLibrariesEndpoint = `${BASE_API_URL}/stored-libraries/`;
+	const loadedLibrariesEndpoint = `${BASE_API_URL}/loaded-libraries/`;
+	const updatableLibrariesEndpoint = `${loadedLibrariesEndpoint}available-updates/`;
 
-	const [stored_libraries_res, loaded_libaries_res] = await Promise.all([
-		fetch(stored_libraries_endpoint),
-		fetch(loaded_libaries_endpoint)
-	]);
+	const [storedLibrariesResponse, loadedLibrariesResponse, updatableLibrariesResponse] =
+		await Promise.all([
+			fetch(storedLibrariesEndpoint),
+			fetch(loadedLibrariesEndpoint),
+			fetch(updatableLibrariesEndpoint)
+		]);
 
-	const storedLibraries = await stored_libraries_res.json().then((res) => res.results);
-	const loadedLibraries = await loaded_libaries_res.json().then((res) => res.results);
+	const storedLibraries = await storedLibrariesResponse.json();
+	const loadedLibraries = await loadedLibrariesResponse.json();
+	const updatableLibraries = await updatableLibrariesResponse.json();
 
 	const prepareRow = (row: Record<string, any>) => {
 		row.overview = [
@@ -36,8 +39,8 @@ export const load = (async ({ fetch }) => {
 			row.reference_count && row.reference_count > 0 ? false : true;
 	};
 
-	storedLibraries.forEach(prepareRow);
-	loadedLibraries.forEach(prepareRow);
+	storedLibraries.results.forEach(prepareRow);
+	loadedLibraries.results.forEach(prepareRow);
 
 	type libraryURLModel = 'stored-libraries' | 'loaded-libraries';
 
@@ -48,32 +51,29 @@ export const load = (async ({ fetch }) => {
 		}, {});
 	};
 
-	const makeBodyData = (libraries: Library[], URLModel: libraryURLModel) =>
-		tableSourceMapper(libraries, listViewFields[URLModel].body);
-
-	const makeLibrariesTable = (libraries: Library[], URLModel: libraryURLModel) => {
-		return {
-			head: makeHeadData(URLModel),
-			body: makeBodyData(libraries, URLModel),
-			meta: { urlmodel: URLModel, ...libraries }
-		};
-	};
-
 	const storedLibrariesTable = {
 		head: makeHeadData('stored-libraries'),
 		meta: { urlmodel: 'stored-libraries', ...storedLibraries },
-		body: tableSourceMapper(storedLibraries, listViewFields['stored-libraries'].body)
+		body: tableSourceMapper(storedLibraries.results, listViewFields['stored-libraries'].body)
 	};
 
-	const loadedLibrariesTable = makeLibrariesTable(loadedLibraries, 'loaded-libraries');
+	const loadedLibrariesTable = {
+		head: makeHeadData('loaded-libraries'),
+		meta: { urlmodel: 'loaded-libraries', ...loadedLibraries },
+		body: tableSourceMapper(loadedLibraries.results, listViewFields['loaded-libraries'].body)
+	};
 
 	const schema = z.object({ id: z.string() });
 	const deleteForm = await superValidate(zod(schema));
 
-	return { storedLibrariesTable, loadedLibrariesTable, deleteForm, title: m.libraries() };
+	return {
+		storedLibrariesTable,
+		loadedLibrariesTable,
+		updatableLibraries,
+		deleteForm,
+		title: m.libraries()
+	};
 }) satisfies PageServerLoad;
-
-// ----------------------------------------------------------- //
 
 export const actions: Actions = {
 	upload: async (event) => {

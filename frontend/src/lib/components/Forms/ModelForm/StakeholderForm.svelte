@@ -1,10 +1,9 @@
 <script lang="ts">
-	import type { SuperForm, SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
-	import * as m from '$paraglide/messages.js';
-	import { getModelInfo, getOptions } from '$lib/utils/crud';
+	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroupInput from '../RadioGroupInput.svelte';
@@ -99,7 +98,7 @@
 				/>
 				<AutocompleteSelect
 					{form}
-					options={getOptions({ objects: model.foreignKeys['entity'] })}
+					optionsEndpoint="entities"
 					field="entity"
 					cacheLock={cacheLocks['entity']}
 					bind:cachedValue={formDataCache['entity']}
@@ -227,10 +226,8 @@
 				<AutocompleteSelect
 					multiple
 					{form}
-					options={getOptions({
-						objects: model.foreignKeys['applied_controls'],
-						extra_fields: [['folder', 'str']]
-					})}
+					optionsEndpoint="applied-controls"
+					optionsExtraFields={[['folder', 'str']]}
 					field="applied_controls"
 					label={m.appliedControls()}
 				/>

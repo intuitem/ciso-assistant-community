@@ -2,6 +2,7 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { persisted } from 'svelte-persisted-store';
 import type { TreeViewNode } from '@skeletonlabs/skeleton';
+import type { Driver } from 'driver.js';
 
 export const showNotification = writable(
 	(browser && localStorage.getItem('showNotification')) || 'false'
@@ -16,6 +17,10 @@ export const clientSideToast = writable(undefined);
 const requirementAssessmentsList: string[] = [];
 
 export const hideSuggestions = persisted('hideSuggestions', requirementAssessmentsList, {
+	storage: 'session'
+});
+
+export const showAllEvents = persisted('showAllEvents', true, {
 	storage: 'session'
 });
 
@@ -50,7 +55,5 @@ export const createModalCache = {
 	},
 	data: {}
 };
-
-import type { Driver } from 'driver.js';
 
 export const driverInstance = writable<Driver | null>(null);

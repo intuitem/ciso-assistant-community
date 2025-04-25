@@ -24,7 +24,6 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getOptions } from '$lib/utils/crud';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import {
 		ProgressRadial,
@@ -38,13 +37,14 @@
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
+	import { m } from '$paraglide/messages';
 
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import { superForm } from 'sveltekit-superforms';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -66,6 +66,7 @@
 				formAction: '?/createAppliedControl',
 				model: data.measureModel,
 				debug: false,
+				invalidateAll: false,
 				suggestions: { reference_control: reference_controls }
 			}
 		};
@@ -93,6 +94,25 @@
 			component: modalComponent,
 			// Data
 			title: safeTranslate('add-' + data.evidenceModel.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalSecurityExceptionCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.securityExceptionCreateForm,
+				formAction: '?/createSecurityException',
+				model: data.securityExceptionModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + data.securityExceptionModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -131,6 +151,16 @@
 		modalStore.trigger(modal);
 	}
 
+	const requirementAssessmentForm = superForm(data.form, {
+		dataType: 'json',
+		invalidateAll: true,
+		applyAction: true,
+		resetForm: false,
+		validators: zod(schema),
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
+
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 
 	$: mappingInference = {
@@ -162,6 +192,47 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
 
 	let tabSet = $page.data.user.is_third_party ? 1 : 0;
+
+	// Refresh AutompleteSelect to assign created applied control/evidence
+	let refreshKey = false;
+
+	$: formStore = requirementAssessmentForm.form;
+
+	$: if (form?.newControls) {
+		refreshKey = !refreshKey;
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				applied_controls: [...current.applied_controls, ...form?.newControls]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
+	}
+
+	$: if (form?.newEvidence) {
+		refreshKey = !refreshKey;
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				evidences: [...current.evidences, form?.newEvidence]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
+	}
+
+	$: if (form?.newSecurityException) {
+		refreshKey = !refreshKey;
+		requirementAssessmentForm.form.update(
+			(current: Record<string, any>) => ({
+				...current,
+				security_exceptions: [...current.security_exceptions, form?.newSecurityException]
+			}),
+			{ taint: false }
+		);
+		console.debug('formStore', $formStore);
+	}
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
@@ -318,11 +389,10 @@
 	<div class="mt-4">
 		<SuperForm
 			class="flex flex-col"
+			_form={requirementAssessmentForm}
 			data={data.form}
-			dataType="json"
 			let:form
 			let:data
-			validators={zod(schema)}
 			action="?/updateRequirementAssessment"
 			{...$$restProps}
 		>
@@ -333,7 +403,10 @@
 							>{m.appliedControls()}
 						</Tab>
 					{/if}
-					<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
+					<Tab bind:group={tabSet} name="evidences_tab" value={1}>{m.evidences()}</Tab>
+					<Tab bind:group={tabSet} name="security_exceptions_tab" value={2}
+						>{m.securityExceptions()}</Tab
+					>
 					<svelte:fragment slot="panel">
 						{#if tabSet === 0 && !$page.data.user.is_third_party}
 							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
@@ -377,16 +450,21 @@
 										type="button"><i class="fa-solid fa-plus mr-2" />{m.addAppliedControl()}</button
 									>
 								</span>
-								<AutocompleteSelect
-									multiple
-									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['applied_controls'],
-										extra_fields: [['folder', 'str']]
-									})}
-									field="applied_controls"
-								/>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="applied-controls"
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', $page.data.requirementAssessment.folder.id]
+										]}
+										optionsExtraFields={[['folder', 'str']]}
+										field="applied_controls"
+									/>
+								{/key}
 								<ModelTable
+									baseEndpoint="/applied-controls?requirement_assessments={$page.data
+										.requirementAssessment.id}"
 									source={$page.data.tables['applied-controls']}
 									hideFilters={true}
 									URLModel="applied-controls"
@@ -408,19 +486,54 @@
 										type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 									>
 								</span>
-								<AutocompleteSelect
-									multiple
-									{form}
-									options={getOptions({
-										objects: $page.data.model.foreignKeys['evidences'],
-										extra_fields: [['folder', 'str']]
-									})}
-									field="evidences"
-								/>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="evidences"
+										optionsExtraFields={[['folder', 'str']]}
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', $page.data.requirementAssessment.folder.id]
+										]}
+										field="evidences"
+									/>
+								{/key}
 								<ModelTable
 									source={$page.data.tables['evidences']}
 									hideFilters={true}
 									URLModel="evidences"
+									baseEndpoint="/evidences?requirement_assessments={$page.data.requirementAssessment
+										.id}"
+								/>
+							</div>
+						{/if}
+						{#if tabSet === 2 && !$page.data.user.is_third_party}
+							<div
+								class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+							>
+								<span class="flex flex-row justify-end items-center">
+									<button
+										class="btn variant-filled-primary self-end"
+										on:click={modalSecurityExceptionCreateForm}
+										type="button"
+										><i class="fa-solid fa-plus mr-2" />{m.addSecurityException()}</button
+									>
+								</span>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="security-exceptions"
+										optionsExtraFields={[['folder', 'str']]}
+										field="security_exceptions"
+									/>
+								{/key}
+								<ModelTable
+									source={$page.data.tables['security-exceptions']}
+									hideFilters={true}
+									URLModel="security-exceptions"
+									baseEndpoint="/security-exceptions?requirement_assessments={$page.data
+										.requirementAssessment.id}"
 								/>
 							</div>
 						{/if}

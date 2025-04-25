@@ -27,7 +27,7 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
 
 class EbiosRMStudyReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
-    project = FieldsRelatedField(["id", "folder"])
+    perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     reference_entity = FieldsRelatedField()
     risk_matrix = FieldsRelatedField()
