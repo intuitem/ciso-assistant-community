@@ -1,0 +1,307 @@
+urn: urn:intuitem:risk:library:owasp-mas-threats
+locale: en
+ref_id: owasp-mas-threats
+name: OWASP GenAI Security Project - Multi-Agentic System Threat Modelling Guide
+description: "This guide builds on the OWASP Agentic AI \u2013 Threats and Mitigations\
+  \ publication, our master agentic threat taxonomy, by applying its threat taxonomy\
+  \ to real-world multi-agent systems (MAS). These systems, characterized by multiple\
+  \ autonomous agents coordinating to achieve shared or distributed goals, introduce\n\
+  additional complexity and new attack surfaces.\nhttps://genai.owasp.org/resource/multi-agentic-system-threat-modeling-guide-v1-0/"
+copyright: OWASP - Creative Commons Attribution-ShareAlike 4.0
+version: 1
+publication_date: 2025-04-24
+provider: OWASP
+packager: intuitem
+objects:
+  threats:
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t1
+    ref_id: T1
+    name: 'Memory Poisoning '
+    description: "Memory Poisoning involves exploiting an AI's memory systems, both\
+      \ short and long-term, to introduce malicious or false data and exploit the\
+      \ agent\u2019s context. This can lead to altered decision-making and unauthorized\
+      \ operations. "
+    annotation: 'Implement memory content validation, session isolation, robust authentication
+      mechanisms for memory access, anomaly detection systems, and regular memory
+      sanitization routines. Require AIgenerated memory snapshots for forensic analysis
+      and rollback if anomalies are detected. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t2
+    ref_id: T2
+    name: 'Tool Misuse '
+    description: Tool Misuse occurs when attackers manipulate AI agents to abuse their
+      integrated tools through deceptive prompts or commands, operating within authorized
+      permissions. This includes Agent Hijacking, where an AI agent ingests adversarial
+      manipulated data and subsequently executes unintended actions, potentially triggering
+      malicious tool interactions. For more information on Agent Hijacking see  https://www.nist.gov/news-events/news/2025/01/technical-blog-strengthening-ai-agent-hijacking-evaluations
+    annotation: 'Enforce strict tool access verification, monitor tool usage patterns,
+      validate agent instructions, and set clear operational boundaries to detect
+      and prevent misuse. Implement execution logs that track AI tool calls for anomaly
+      detection and post-incident review. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t3
+    ref_id: T3
+    name: Privilege Compromise
+    description: 'Privilege Compromise arises when attackers exploit weaknesses in
+      permission management to perform unauthorized actions. This often involves dynamic
+      role inheritance or misconfigurations.   '
+    annotation: 'Implement granular permission controls, dynamic access validation,
+      robust monitoring of role changes, and thorough auditing of elevated privilege
+      operations. Prevent cross-agent privilege delegation unless explicitly authorized
+      through predefined workflows.  '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t4
+    ref_id: T4
+    name: 'Resource Overload '
+    description: 'Resource Overload targets the computational, memory, and service
+      capacities of AI systems to degrade performance or cause failures, exploiting
+      their resource-intensive nature.   '
+    annotation: 'Deploy resource management controls, implement adaptive scaling mechanisms,
+      establish quotas, and monitor system load in real-time to detect and mitigate
+      overload attempts. Implement AI ratelimiting policies to restrict high-frequency
+      task requests per agent session. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t5
+    ref_id: T5
+    name: Cascading Hallucination Attacks
+    description: 'These attacks exploit an AI''s tendency to generate contextually
+      plausible but false information, which can propagate through systems and disrupt
+      decision-making. This can also lead to destructive reasoning affecting tools
+      invocation. '
+    annotation: 'Establish robust output validation mechanisms, implement behavioral
+      constraints, deploy multisource validation, and ensure ongoing system corrections
+      through feedback loops. Require secondary validation of AI-generated knowledge
+      before it is used in critical decision-making processes. This will face the
+      same constraints of scaling AI as discussed in Overwhelming Human In the Loop
+      and would require similar approaches. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t6
+    ref_id: T6
+    name: 'Intent Breaking & Goal Manipulation '
+    description: This threat exploits vulnerabilities in an AI agent's planning and
+      goal-setting capabilities, allowing attackers to manipulate or redirect the
+      agent's objectives and reasoning. One common approach is Agent Hijacking mentioned
+      in Tool Misuse.
+    annotation: 'Implement planning validation frameworks, boundary management for
+      reflection processes, and dynamic protection mechanisms for goal alignment.
+      Deploy AI behavioral auditing by having another model check the agent and flag
+      significant goal deviations that could indicate manipulation. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t7
+    ref_id: T7
+    name: 'Misaligned & Deceptive Behaviors '
+    description: 'AI agents executing harmful or disallowed actions by exploiting
+      reasoning and deceptive responses to meet their objectives.   '
+    annotation: 'Train models to recognize and refuse harmful tasks, enforce policy
+      restrictions, require human confirmations for high-risk actions, implement logging
+      and monitoring. Utilize deception detection strategies such as behavioral consistency
+      analysis, truthfulness verification models, and adversarial red teaming to assess
+      inconsistencies between AI outputs and expected reasoning pathways.  '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t8
+    ref_id: T8
+    name: 'Repudiation & Untraceability '
+    description: 'Occurs when actions performed by AI agents cannot be traced back
+      or accounted for due to insufficient logging or transparency in decision-making
+      processes.   '
+    annotation: 'Implement comprehensive logging, cryptographic verification, enriched
+      metadata, and real-time monitoring to ensure accountability and traceability.
+      Require AI-generated logs to be cryptographically signed and immutable for regulatory
+      compliance. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t9
+    ref_id: T9
+    name: 'Identity Spoofing & Impersonation '
+    description: Attackers exploit authentication mechanisms to impersonate AI agents
+      or human users, enabling them to execute unauthorized actions under false identities.
+    annotation: 'Develop comprehensive identity validation frameworks, enforce trust
+      boundaries, and deploy continuous monitoring to detect impersonation attempts.
+      Use behavioral profiling, involving a second model, to detect deviations in
+      AI agent activity that may indicate identity spoofing. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t10
+    ref_id: T10
+    name: 'Overwhelming Human in the Loop  '
+    description: 'This threat targets systems with human oversight and decision validation,
+      aiming to exploit human cognitive limitations or compromise interaction frameworks.   '
+    annotation: 'Develop advanced human-AI interaction frameworks, and adaptive trust
+      mechanisms. These are dynamic AI governance models that employ dynamic intervention
+      thresholds to adjust the level of human oversight and automation based on risk,
+      confidence, and context. Apply hierarchical AI-human collaboration where low-risk
+      decisions are automated, and human intervention is prioritized for high-risk
+      anomalies. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t11
+    ref_id: T11
+    name: 'Unexpected RCE and Code Attacks '
+    description: 'Attackers exploit AI-generated execution environments to inject
+      malicious code, trigger unintended system behaviors, or execute unauthorized
+      scripts. '
+    annotation: 'Restrict AI code generation permissions, sandbox execution, and monitor
+      AI-generated scripts. Implement execution control policies that flag AIgenerated
+      code with elevated privileges for manual review. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t12
+    ref_id: T12
+    name: 'Agent Communication Poisoning '
+    description: 'Attackers manipulate communication channels between AI agents to
+      spread false information, disrupt workflows, or influence decision-making.   '
+    annotation: 'Deploy cryptographic message authentication, enforce communication
+      validation policies, and monitor inter-agent interactions for anomalies. Require
+      multi-agent consensus verification for mission-critical decision-making processes. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t13
+    ref_id: T13
+    name: 'Rogue Agents in Multi-Agent Systems '
+    description: 'Malicious or compromised AI agents operate outside normal monitoring
+      boundaries, executing unauthorized actions or exfiltrating data.   '
+    annotation: 'Restrict AI agent autonomy using policy constraints and continuous
+      behavioral monitoring. While cryptographic attestation mechanisms for LLMs do
+      not yet exist, agent integrity can be maintained via controlled hosting environments,
+      regular AI red teaming, and input/output monitoring for deviations '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t14
+    ref_id: T14
+    name: 'Human Attacks on Multi-Agent Systems '
+    description: 'Adversaries exploit inter-agent delegation, trust relationships,
+      and workflow dependencies to escalate privileges or manipulate AI-driven operations.   '
+    annotation: 'Restrict agent delegation mechanisms, enforce interagent authentication,
+      and deploy behavioral monitoring to detect manipulation attempts. Enforce multi-agent
+      task segmentation to prevent attackers from escalating privileges across interconnected
+      agents. '
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t15
+    ref_id: T15
+    name: 'Human Manipulation '
+    description: 'In scenarios where AI agents engage in direct interaction with human
+      users, the trust relationship reduces user skepticism, increasing reliance on
+      the agent''s responses and autonomy. This implicit trust and direct human/agent
+      interaction create risks, as attackers can coerce agents to manipulate users,
+      spread misinformation, and take covert actions. '
+    annotation: "Monitor agent behavior to ensure it aligns with its defined role\
+      \ and expected actions. Restrict tool access to minimize the attack surface,\
+      \ limit the agent\u2019s ability to print links, implement validation mechanisms\
+      \ to detect and filter manipulated responses using guardrails, moderation APIs,\
+      \ or another model "
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t16
+    ref_id: T16
+    name: Model Inconsistency Leading to Variable Approvals
+    description: Foundation model exhibits non-deterministic behaviour, leading to
+      inconsistent processing.
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t17
+    ref_id: T17
+    name: Semantic Drift in Expense Policy Embeddings
+    description: Outdated embeddings in the vector database cause the agent to apply
+      incorrect policies
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t18
+    ref_id: T18
+    name: RAG Input Manipulation Leading to Policy Bypass
+    description: Attacker crafts inputs to exploit RAG and bypass policy checks
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t19
+    ref_id: T19
+    name: Unintended Workflow Execution
+    description: Agent executes workflow steps incorrectly or skips validation.
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t20
+    ref_id: T20
+    name: Framework Vulnerability to code injection
+    description: Agent Framework has security bug
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t21
+    ref_id: T21
+    name: "Inconsistency Workflow\u2019s State"
+    description: Inconsistent\ unsynchronized views of the workflow's state \ shareable
+      objects (e.g., shared memory or graph objects) among agents can lead to conflicting
+      actions or result in a denial of service.
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t22
+    ref_id: T22
+    name: Service Account Exposure
+    description: Agent's service account credentials are accidentally exposed.
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t23
+    ref_id: T23
+    name: Selective Log Manipulation
+    description: Attacker selectively modifies logs to remove evidence of specific
+      actions
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t24
+    ref_id: T24
+    name: Dynamic Policy Enforcement Failure
+    description: Flaw in the dynamic policy engine causes incorrect policy application
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t25
+    ref_id: T25
+    name: Workflow Disruption via Dependency Exploitation
+    description: Attacker disrupts the workflow by attacking a system the RPA agent
+      depends on
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t26
+    ref_id: T26
+    name: Model Instability
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t27
+    ref_id: T27
+    name: Vector Database Poisoning with Malicious Smart Contract Data
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t28
+    ref_id: T28
+    name: RAG Data Exfiltration
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t29
+    ref_id: T29
+    name: Plugin Vulnerability Leading to Agent Compromise
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t30
+    ref_id: T30
+    name: Insecure Inter-Agent Communication Protocol
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t31
+    ref_id: T31
+    name: Insufficient Isolation Between Agent Actions
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t32
+    ref_id: T32
+    name: Runaway Agent on Solana
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t33
+    ref_id: T33
+    name: Blockchain Reorganization Attack (Indirect)
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t34
+    ref_id: T34
+    name: Wallet Key Compromise
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t35
+    ref_id: T35
+    name: Manipulation of Proof of Sampling (PoSP)
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t36
+    ref_id: T36
+    name: Smart Contract Vulnerability Leading to Agent Impersonation
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t37
+    ref_id: T37
+    name: Cross-Chain Bridge Attack (Indirect)
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t38
+    ref_id: T38
+    name: Emergent Collusion on Blockchain
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t39
+    ref_id: T39
+    name: Unintended Resource Consumption via MCP
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t40
+    ref_id: T40
+    name: MCP Client Impersonation
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t41
+    ref_id: T41
+    name: Schema Mismatch Leading to Errors
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t42
+    ref_id: T42
+    name: Cross-Client Interference via Shared Server
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t43
+    ref_id: T43
+    name: Network Exposure of MCP Server
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t44
+    ref_id: T44
+    name: Insufficient Logging in MCP Server/Client
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t45
+    ref_id: T45
+    name: Insufficient Isolation of MCP Server Permissions
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t46
+    ref_id: T46
+    name: Data Residency/Compliance Violation via MCP Server
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t47
+    ref_id: T47
+    name: Rogue MCP Server in Ecosystem
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t48
+    ref_id: T48
+    name: MCP Message Replay Attacks
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t49
+    ref_id: T49
+    name: Protocol Version Downgrade
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t50
+    ref_id: T50
+    name: Request Parameter Tampering
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t51
+    ref_id: T51
+    name: MCP Response Poisoning
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t52
+    ref_id: T52
+    name: Side-Channel Information Leakage
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t53
+    ref_id: T53
+    name: MCP Capability Enumeration
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t54
+    ref_id: T54
+    name: MCP Server Proxy / Man-in-the-Middle
+  - urn: urn:intuitem:risk:threat:owasp-mas-threats:t55
+    ref_id: T55
+    name: MCP Permission Escalation via Chained Requests
