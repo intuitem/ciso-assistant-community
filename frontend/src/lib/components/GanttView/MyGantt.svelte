@@ -8,8 +8,7 @@
 
 	let gantt;
 
-	onMount(async () => {
-		// Set viewMode to 'Week' before rendering
+	onMount(() => {
 		gantt = new Gantt('#gantt', tasks, {
 			view_mode: 'Month',
 			date_format: 'YYYY-MM-DD',
@@ -18,15 +17,27 @@
 			readonly_dates: true,
 			readonly_progress: true,
 			view_mode_select: true,
-			popup_on: 'hover',
-			holidays: [] //this is for disabling the grayed weekend
+			popup_on: 'click',
+			holidays: [], //this is to remove the grayed weekends
+			popup: ({ task, set_details, add_action }) => {
+				set_details(`
+          <p class="text-black text-sm">${task.name}</p>
+          <p>${task.description}</p>
+					<p><span class="text-black">Start:</span> ${task.start}</p>
+					<p><span class="text-black">End:</span> ${task.end}</p>
+					<p>Progress: ${task.progress || 0}%</p>
+				`);
+
+				add_action(
+					`<a href="/applied-controls/${task.id}" target="_blank" style="color:blue;">🔗 View Details</a>`
+				);
+			}
 		});
 
 		mounted = true;
-
-		// this is a compensation for the Today button issue in weekly view
+		// this is a compensation for the issue with Today in Weekly view
 		setTimeout(() => {
-			gantt.change_view_mode('Week', true); // Change the view in the Gantt object
+			gantt.change_view_mode('Week', true);
 			gantt.scroll_current();
 		}, 300);
 	});
