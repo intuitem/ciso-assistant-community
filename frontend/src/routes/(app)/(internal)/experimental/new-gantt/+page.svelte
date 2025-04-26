@@ -4,7 +4,8 @@
 	import MyGantt from '$lib/components/GanttView/MyGantt.svelte';
 	const tasks = data.data;
 	import { m } from '$paraglide/messages';
-	const lang = 'en';
+	import { getLocale } from '$paraglide/runtime';
+	const lang = getLocale();
 </script>
 
 <main class="w-full p-2 items-center justify-center">
