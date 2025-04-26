@@ -1371,7 +1371,7 @@
 	"findings_count": "Nombre de constats",
 	"addFinding": "Ajouter un constat",
 	"addFindingsAssessment": "Ajouter un suivi",
-	"followUp": "Suivi",
+	"followUp": "Suivi des constats",
 	"pentest": "Test d'intrusion",
 	"audit": "Audit",
 	"selfIdentified": "Auto-identifié",
