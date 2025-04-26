@@ -19,10 +19,10 @@
 		tags={['analysis', 'assets']}
 	/>
 	<Article
-		title="Ecosystem radar"
-		desc="Visualize the stakeholders radar"
-		link="experimental/ecosystem"
-		tags={['analysis', 'tprm']}
+		title="Gantt chart v2"
+		desc="with progress and multi-zoom"
+		link="experimental/new-gantt"
+		tags={['analysis', 'gantt']}
 	/>
 	<Article
 		title="Data Import Wizard"
