@@ -218,6 +218,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
 11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
 12. Framework Nazionale per la Cybersecurity e la Data Protection, ACN Italia 🇮🇹
+13. PSSIE du Bénin, ANSSI Bénin 🇧🇯
 
 <br/>
 
