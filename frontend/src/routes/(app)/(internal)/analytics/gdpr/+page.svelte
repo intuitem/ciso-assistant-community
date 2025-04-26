@@ -7,7 +7,6 @@
 	export let data: PageData;
 </script>
 
-{@debug data}
 <div class="grid grid-cols-12">
 	<div class="grid grid-cols-4 bg-slate-100 p-4 gap-4 col-span-12">
 		<Card
