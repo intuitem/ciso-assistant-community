@@ -160,7 +160,8 @@
 				edges: data.links,
 				lineStyle: {
 					curveness: 0.2,
-					color: 'source'
+					color: 'source',
+					width: 1.5
 				}
 			}
 		]

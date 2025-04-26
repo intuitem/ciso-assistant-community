@@ -121,10 +121,10 @@ def ebios_rm_visual_analysis(study):
     nodes_idx = dict()
     N = 0
     categories = [
+        {"name": "Asset"},
+        {"name": "Feared Event"},
         {"name": "Risk Origin"},
         {"name": "Target Objective"},
-        {"name": "Feared Event"},
-        {"name": "Asset"},
         {"name": "Ecosystem entity"},
         {"name": "Strategic scenario"},
         {"name": "Attack Path"},
@@ -136,7 +136,7 @@ def ebios_rm_visual_analysis(study):
     stakeholders = Stakeholder.objects.filter(ebios_rm_study=study).distinct()
     for a in assets:
         nodes.append(
-            {"name": a.name, "category": 3, "symbol": "diamond", "symbolSize": 45}
+            {"name": a.name, "category": 0, "symbol": "diamond", "symbolSize": 40}
         )
         nodes_idx[f"{a.id}-AS"] = N
         N += 1
@@ -144,7 +144,7 @@ def ebios_rm_visual_analysis(study):
         nodes.append(
             {
                 "name": wrap_text(f"({fe.get_gravity_display()['name']}) {fe.name}"),
-                "category": 2,
+                "category": 1,
             }
         )
         nodes_idx[f"{fe.id}-FE"] = N
@@ -153,8 +153,8 @@ def ebios_rm_visual_analysis(study):
         nodes.append(
             {
                 "name": ro_to.risk_origin,
-                "category": 0,
-                "symbolSize": 30,
+                "category": 2,
+                "symbolSize": 25,
             }
         )
         nodes_idx[f"{ro_to.id}-RO"] = N
@@ -162,7 +162,7 @@ def ebios_rm_visual_analysis(study):
         nodes.append(
             {
                 "name": wrap_text(ro_to.target_objective),
-                "category": 1,
+                "category": 3,
             }
         )
         nodes_idx[f"{ro_to.id}-TO"] = N
@@ -172,6 +172,7 @@ def ebios_rm_visual_analysis(study):
                 "source": nodes_idx[f"{ro_to.id}-RO"],
                 "target": nodes_idx[f"{ro_to.id}-TO"],
                 "value": "aims",
+                "lineStyle": {"type": "dotted"},
             }
         )
         entry = {
@@ -205,12 +206,14 @@ def ebios_rm_visual_analysis(study):
         N += 1
     strategic_scenarios = StrategicScenario.objects.filter(
         ebios_rm_study=study
-    )  # prefetch_related here
+    ).prefetch_related("attack_paths__stakeholders")
     for ss in strategic_scenarios:
         nodes.append(
             {
                 "name": f"{ss.name}",
+                "symbol": "roundRect",
                 "category": 5,
+                "symbolSize": 25,
             }
         )
         nodes_idx[f"{ss.id}-SS"] = N
@@ -247,10 +250,13 @@ def ebios_rm_visual_analysis(study):
                     {
                         "source": nodes_idx[f"{ap.id}-AP"],
                         "target": nodes_idx[f"{sh.id}-SH"],
+                        "lineStyle": {"type": "dashed"},
                         "value": "involves",
                     }
                 )
-    operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
+    operational_scenarios = OperationalScenario.objects.filter(
+        ebios_rm_study=study
+    ).prefetch_related("threats", "attack_path")
     for os in operational_scenarios:
         nodes.append(
             {
@@ -269,7 +275,7 @@ def ebios_rm_visual_analysis(study):
         )
         for ua in os.threats.all().distinct():
             if nodes_idx.get(f"{ua.id}-UA") is None:
-                nodes.append({"name": ua.name, "category": 8})
+                nodes.append({"name": ua.name, "category": 8, "symbol": "triangle"})
                 nodes_idx[f"{ua.id}-UA"] = N
                 N += 1
             links.append(
