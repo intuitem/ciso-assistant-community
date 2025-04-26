@@ -864,7 +864,7 @@ export const listViewFields = {
 			'risk_origin',
 			'target_objective',
 			'stakeholders',
-			'attackPath'
+			'description'
 		],
 		body: [
 			'is_selected',
