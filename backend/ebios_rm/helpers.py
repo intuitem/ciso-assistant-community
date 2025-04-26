@@ -2,7 +2,14 @@ from django.db.models.query import QuerySet
 import math
 import random
 from global_settings.models import GlobalSettings
-from .models import EbiosRMStudy, FearedEvent, RoTo
+from .models import (
+    AttackPath,
+    EbiosRMStudy,
+    FearedEvent,
+    RoTo,
+    Stakeholder,
+    StrategicScenario,
+)
 from core.models import Asset
 
 import textwrap
@@ -117,15 +124,26 @@ def ebios_rm_visual_analysis(study):
         {"name": "Target Objective"},
         {"name": "Feared Event"},
         {"name": "Asset"},
+        {"name": "Ecosystem entity"},
+        {"name": "Strategic scenario"},
+        {"name": "Attack Path"},
     ]
     feared_events = FearedEvent.objects.filter(ebios_rm_study=study).distinct()
     assets = study.assets.all()
+    stakeholders = Stakeholder.objects.filter(ebios_rm_study=study).distinct()
     for a in assets:
-        nodes.append({"name": a.name, "category": 3})
+        nodes.append(
+            {"name": a.name, "category": 3, "symbol": "diamond", "symbolSize": 45}
+        )
         nodes_idx[f"{a.id}-AS"] = N
         N += 1
     for fe in feared_events:
-        nodes.append({"name": wrap_text(fe.name), "category": 2})
+        nodes.append(
+            {
+                "name": wrap_text(f"({fe.get_gravity_display()['name']}) {fe.name}"),
+                "category": 2,
+            }
+        )
         nodes_idx[f"{fe.id}-FE"] = N
         N += 1
     for ro_to in rotos:
@@ -133,6 +151,7 @@ def ebios_rm_visual_analysis(study):
             {
                 "name": ro_to.risk_origin,
                 "category": 0,
+                "symbolSize": 30,
             }
         )
         nodes_idx[f"{ro_to.id}-RO"] = N
@@ -177,6 +196,56 @@ def ebios_rm_visual_analysis(study):
                     }
                 )
         tree.append(entry)
+    for stakeholder in stakeholders:
+        nodes.append({"name": str(stakeholder), "category": 4, "symbol": "square"})
+        nodes_idx[f"{stakeholder.id}-SH"] = N
+        N += 1
+    strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
+    for ss in strategic_scenarios:
+        nodes.append(
+            {
+                "name": f"{ss.name}",
+                "category": 5,
+            }
+        )
+        nodes_idx[f"{ss.id}-SS"] = N
+        N += 1
+
+        # link to ss.ro_to_couple
+        links.append(
+            {
+                "source": nodes_idx[f"{ss.id}-SS"],
+                "target": nodes_idx[f"{ss.ro_to_couple.id}-RO"],
+                "value": "via",
+            }
+        )
+        for ap in AttackPath.objects.filter(strategic_scenario=ss):
+            nodes.append(
+                {
+                    "name": ap.name,
+                    "category": 6,
+                }
+            )
+            nodes_idx[f"{ap.id}-AP"] = N
+            N += 1
+
+            links.append(
+                {
+                    "source": nodes_idx[f"{ap.id}-AP"],
+                    "target": nodes_idx[f"{ss.id}-SS"],
+                    "value": "used in",
+                }
+            )
+
+            for sh in ap.stakeholders.all():
+                links.append(
+                    {
+                        "source": nodes_idx[f"{ap.id}-AP"],
+                        "target": nodes_idx[f"{sh.id}-SH"],
+                        "value": "involves",
+                    }
+                )
+
     return {
         "tree": tree,
         "graph": {"nodes": nodes, "links": links, "categories": categories},
