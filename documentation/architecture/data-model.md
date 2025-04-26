@@ -1711,3 +1711,42 @@ Future task_nodes are generated partially in advance at creation/update of a tas
 - 24 months for monthly frequency
 - 53 weeks for weekly frequency
 - 63 days for daily frequency
+
+## Business Impact Assessment (BIA)
+
+The BIA allows defining the impact of unavailability for each primary asset. This is done in the form of "time to impact" for each level of impact except the lowest impact.
+
+It is also possible to perform BIA on support assets. A value deduced from the BIA of the supported primary assets is displayed to assist with consistency.
+
+BIA is a new type of assessment. Impact levels are defined in a reference risk matrix, as is done for risk scenearios.
+
+```mermaid
+erDiagram
+
+DOMAIN                     ||--o{ BUSINESS_IMPACT_ASSESSMENT : contains
+BUSINESS_IMPACT_ASSESSMENT }o--|| RISK_MATRIX                : applies
+BUSINESS_IMPACT_ASSESSMENT ||--o{ BIA_VALUE                  : contains
+BIA_VALUE                  }o--|| ASSET                      : concerns
+
+BUSINESS_IMPACT_ASSESSMENT {
+    string      ref_id
+    string      name
+    string      description
+
+    string      version
+    date        eta
+    date        due_date
+    string      status
+    principal[] author
+    principal[] reviewer
+    string      observation
+}
+
+BIA_VALUE {
+    int       impact
+    timedelta duration
+    string    strength_of_knowledge
+    string    justification
+}
+
+```
