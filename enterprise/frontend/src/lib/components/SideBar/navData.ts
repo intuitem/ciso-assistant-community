@@ -16,6 +16,18 @@ export const navData = {
 					]
 				},
 				{
+					name: 'domainAnalytics',
+					fa_icon: 'fa-solid fa-folder-tree',
+					href: '/domain-analytics',
+					permissions: [
+						'view_perimeter',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_assessment',
+						'view_riskassessment'
+					]
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
