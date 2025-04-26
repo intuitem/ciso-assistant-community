@@ -1602,6 +1602,43 @@ class AppliedControlViewSet(BaseModelViewSet):
         return Response(data)
 
     @action(detail=False, methods=["get"])
+    def get_gantt_data(self, request):
+        def format_date(input):
+            return datetime.strftime(input, "%Y-%m-%d")
+
+        entries = []
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+
+        applied_controls = AppliedControl.objects.filter(
+            id__in=viewable_controls_ids
+        ).select_related("folder")
+
+        for ac in applied_controls:
+            if ac.eta:
+                endDate = format_date(ac.eta)
+                startDate = format_date(ac.start_date) if ac.start_date else endDate
+                if ac.start_date:
+                    startDate = format_date(ac.start_date)
+                else:
+                    startDate = format_date(ac.eta - timedelta(days=1))
+                entries.append(
+                    {
+                        "id": ac.id,
+                        "start": startDate,
+                        "end": endDate,
+                        "name": ac.name,
+                        "progress": ac.progress_field,
+                        "description": ac.description
+                        if ac.description
+                        else "(no description)",
+                        "domain": ac.folder.name,
+                    }
+                )
+        return Response(entries)
+
+    @action(detail=False, methods=["get"])
     def get_timeline_info(self, request):
         entries = []
         COLORS_PALETTE = [
