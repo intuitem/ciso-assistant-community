@@ -213,7 +213,9 @@
 				<a
 					class="text-orange-600 hover:text-purple-600 font-medium"
 					href={`${$page.url.pathname}/visual/`}
-					><i class="fa-solid fa-chart-diagram mr-2"></i>{m.visualAnalysis()}</a
+					><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded">New</span><i
+						class="fa-solid fa-chart-diagram mr-2"
+					></i><span class="font-semibold">{m.visualAnalysis()}</span></a
 				>
 			</div>
 			<div slot="content">
