@@ -19,12 +19,6 @@
 		tags={['analysis', 'assets']}
 	/>
 	<Article
-		title="Gantt chart v2"
-		desc="with progress and multi-zoom"
-		link="experimental/new-gantt"
-		tags={['analysis', 'gantt']}
-	/>
-	<Article
 		title="Data Import Wizard"
 		desc="Manage data import for various object"
 		link="experimental/data-wizard"
