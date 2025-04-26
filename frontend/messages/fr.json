@@ -600,7 +600,7 @@
 	"riskScenarioResidualLoweredWithoutMeasures": "Le niveau de risque résiduel a baissé sans aucune mesure additionnelle",
 	"riskScenarioAcceptedNoAcceptance": "Risque accepté, mais aucune acceptation de risque n'est attachée",
 	"appliedControlNoETA": "N'a pas d'ETA",
-	"appliedControlETAInPast": "L’ETA appartient désormais au passé. Pensez à mettre à jour son statut ou la date",
+	"appliedControlETAInPast": "L’ETA est dépassé. Pensez à mettre à jour le statut ou la date",
 	"appliedControlNoEffort": "N'a pas d'effort estimé. Cela vous aidera pour la priorisation",
 	"appliedControlNoCost": "N'a pas de coût estimé. Cela vous aidera pour la priorisation",
 	"appliedControlNoLink": "La mesure appliquée n’a pas de lien externe attaché. Cela vous aidera pour le suivi",
