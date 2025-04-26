@@ -4,7 +4,7 @@ ref_id: PSSIE-BENIN
 name: "PSSIE du B\xE9nin "
 description: "Politique de s\xE9curit\xE9 des syst\xE8mes d'information de l'Etat\
   \ b\xE9ninois. https://asin.bj/doc/44/download "
-copyright: copyright mentions
+copyright: "\xA9 ASIN/ANSSI"
 version: 2
 publication_date: 2025-04-27
 provider: ASIN BENIN
@@ -51,6 +51,7 @@ objects:
         \ et moyens requis, il est recommand\xE9 de rattacher le RSSI \xE0 un responsable\
         \ de niveau direction. L'entit\xE9 peut au besoin recourir aux services d'un\
         \ FSSNQ pour jouer le r\xF4le de RSSI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:org-02
@@ -68,6 +69,7 @@ objects:
         sentatif possible, il est recommand\xE9 qu'il soit \xE9largi aux fonctions\
         \ de direction en charge des ressources humaines, des ressources financi\xE8\
         res, des services g\xE9n\xE9raux et des services juridiques."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:org-03
@@ -86,6 +88,7 @@ objects:
         \ de d\xE9finir et de maintenir une matrice des fonctions incompatibles et\
         \ une proc\xE9dure de contr\xF4le compensatoire des activit\xE9s des administrateurs\
         \ lorsqu'il est impossible de s\xE9parer certaines t\xE2ches."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:org-04
@@ -99,6 +102,7 @@ objects:
         \ une charte administrateur indiquant les responsabilit\xE9s et les limites\
         \ de la fonction \xAB administrateur \xBB en mati\xE8re de s\xE9curit\xE9\
         \ SI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:org-05
@@ -112,6 +116,7 @@ objects:
         \ national. Elle fournit \xE0 l'ANSSI les coordonn\xE9es du RSSI en vue des\
         \ \xE9changes d'informations autour de la s\xE9curit\xE9 (veille, incidents\
         \ de s\xE9curit\xE9, aspects li\xE9s au contr\xF4le, ...)."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:org-06
@@ -126,6 +131,7 @@ objects:
         \ services sp\xE9cialis\xE9s en veille s\xE9curit\xE9, les cabinets de conseils,\
         \ les \xE9diteurs de solutions de s\xE9curit\xE9, les associations\nprofessionnels,\
         \ ..."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.2
@@ -154,6 +160,7 @@ objects:
         der \xE0 des v\xE9rifications portant sur le casier judiciaire, les contr\xF4\
         les de r\xE9f\xE9rence, l'authenticit\xE9 des dipl\xF4mes et certifications\
         \ professionnelles, les r\xE9seaux sociaux, ..."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:rh-02
@@ -172,6 +179,7 @@ objects:
         \ les dispositions applicables en mati\xE8re de s\xE9curit\xE9 du SI (PSSI\
         \ sp\xE9cifique, respect des textes r\xE8glementaires applicables, sanctions\
         \ en cas de violation des r\xE8gles de s\xE9curit\xE9,....)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:rh-03
@@ -184,6 +192,7 @@ objects:
         \ au sein de la structure d'accueil de l'entit\xE9 doit pr\xE9voir une \xE9\
         tape de formation aux outils de travail, aux proc\xE9dures et pratiques de\
         \ s\xE9curit\xE9 en vigueur."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:rh-04
@@ -198,6 +207,7 @@ objects:
         lior\xE9e dont le contenu sera adapt\xE9 au profil des utilisateurs (utilisateurs\
         \ s\xE9dentaires,\nitin\xE9rants, administrateurs, fournisseurs, ..). Ces\
         \ formations doivent faire l'objet d'\xE9valuation des acquis par les utilisateurs."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:rh-05
@@ -215,6 +225,7 @@ objects:
         \ et des d\xE9parts prescrivent les d\xE9lais de retrait des acc\xE8s et des\
         \ actifs suivant la nature du mouvement (changement d'entit\xE9, d\xE9part\
         \ \xE0 l'initiative de l'employ\xE9, \xE0 l'initiative de l'employeur, ...)."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:rh-06
@@ -227,6 +238,7 @@ objects:
         \ en cas de violation de la politique de s\xE9curit\xE9 du syst\xE8me d'information\
         \ en vigueur. Les utilisateurs sont inform\xE9s de ces sanctions de mani\xE8\
         re formelle."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.3
@@ -253,6 +265,7 @@ objects:
         \ r\xE9seaux, locaux informatiques...) sous sa responsabilit\xE9, en s'appuyant\
         \ sur un outillage adapt\xE9. Cet inventaire doit \xEAtre certifi\xE9 sur\
         \ une base annuelle \xE0 minima."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:act-02
@@ -264,6 +277,7 @@ objects:
       description: "R\xE8gle : \nA chaque actif SI identifi\xE9, l'entit\xE9 doit\
         \ s'assurer qu'un responsable est d\xE9sign\xE9 pour en assurer la s\xE9curit\xE9\
         ."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:act-03
@@ -277,6 +291,7 @@ objects:
         . L'entit\xE9 doit r\xE9diger et diffuser une charte d'utilisation des syst\xE8\
         mes d'information \xE0 tous les utilisateurs des actifs du SI. L'entit\xE9\
         \ doit s'assurer que les termes de ladite charte sont compris par les utilisateurs."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.3:2
@@ -300,6 +315,7 @@ objects:
         \ de l'entit\xE9.\nRecommandation :\nIl convient de s'appuyer sur le cadre\
         \ de classification des SI de l'ANSSI au cas o\xF9 l'entit\xE9 se trouve \xEA\
         tre un op\xE9rateur d'infrastructure d'information critique."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:act-05
@@ -312,6 +328,7 @@ objects:
         \ des actifs SI mat\xE9riels stockant des donn\xE9es sensibles ou vitales\
         \ afin d'attirer l'attention des utilisateurs sur la sensibilit\xE9 desdits\
         \ actifs."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.3:3
@@ -329,6 +346,7 @@ objects:
       description: "R\xE8gle : \nL'entit\xE9 d\xE9finit des proc\xE9dures encadrant\
         \ le cycle de vie s\xE9curis\xE9 des actifs SI depuis leur acquisition jusqu'\xE0\
         \ leur mise au rebut en passant par leur utilisation et leur maintenance."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.3:4
@@ -347,6 +365,7 @@ objects:
       description: "R\xE8gle :\nLes supports num\xE9riques stockant des donn\xE9es\
         \ sensibles doivent \xEAtre chiffr\xE9s.\nRecommandation :\nIl est recommand\xE9\
         \ de recourir aux outils de chiffrements agr\xE9\xE9s par l'ANSSI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:act-08
@@ -359,6 +378,7 @@ objects:
         dure permettant de g\xE9rer les mouvements de supports stockant des donn\xE9\
         es. Cette proc\xE9dure doit garantir la tra\xE7abilit\xE9 du mouvement des\
         \ supports et leur protection durant le transit."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:act-09
@@ -374,6 +394,7 @@ objects:
         es qui y sont stock\xE9es sont d\xE9truites de mani\xE8re s\xE9curis\xE9e.\
         \ Une proc\xE9dure d'effacement s\xE9curis\xE9e des donn\xE9es doit \xEAtre\
         \ mise en place."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.4
@@ -399,6 +420,7 @@ objects:
         d'habilitation, la normalisation des identifiants, la gestion des autorisations,\
         \ les conditions d'acc\xE8s au SI, d\xE9lais de validit\xE9 des comptes, des\
         \ sessions, \u2026"
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cal-02
@@ -411,6 +433,7 @@ objects:
         , permanent ou temporaire, acc\xE9dant au syst\xE8me d'information doit \xEA\
         tre reconnu par une identit\xE9 unique et norm\xE9e. L'utilisation par plusieurs\
         \ personnes d'un m\xEAme identifiant individuel est strictement interdite."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cal-03
@@ -424,6 +447,7 @@ objects:
         \ \xE9quipements de communication, param\xE8tres techniques ou de s\xE9curit\xE9\
         ) doivent \xEAtre distincts des identifiants \xAB utilisateurs \xBB attribu\xE9\
         s au personnel assurant l'administration desdits syst\xE8mes."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cal-04
@@ -439,6 +463,7 @@ objects:
         \ apr\xE8s oubli ou perte, ...) doit en garantir la confidentialit\xE9 (v\xE9\
         rification syst\xE9matique de l'identit\xE9 du demandeur et du destinataire\
         \ \xE0 partir d'\xE9l\xE9ments personnels, fiables et pr\xE9cis)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cal-05
@@ -452,6 +477,7 @@ objects:
         \ \xEAtre plac\xE9s sous s\xE9questre dans un endroit s\xE9curis\xE9 \xE0\
         \ l'instar d'un coffre-fort. L'entit\xE9 d\xE9finira une proc\xE9dure de gestion\
         \ des acc\xE8s de ces identifiants."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cal-06
@@ -467,6 +493,7 @@ objects:
         \ des identifiants\nredondants, suppression ou blocage imm\xE9diat des droits\
         \ d'acc\xE8s des utilisateurs qui ont chang\xE9 de r\xF4le ou de fonction\
         \ ou qui ont quitt\xE9 l'entit\xE9."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cal-07
@@ -482,6 +509,7 @@ objects:
         \ cha\xEEne de validation de la demande, octroi, engagement de l'utilisateur,\
         \ mise en service des droits d'acc\xE8s, revue p\xE9riodique de l'utilisation\
         \ des droits, suspension, \u2026"
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cal-08
@@ -494,6 +522,7 @@ objects:
         \ sein de ses syst\xE8mes d'information une politique de gestion des mots\
         \ de passe utilisateur (complexit\xE9, dur\xE9e de vie minimale et maximale\
         \ des mots de passe, ant\xE9riorit\xE9 des mots de passe,...)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.5
@@ -521,6 +550,7 @@ objects:
         s dans des locaux s\xFBrs. Ces locaux doivent \xEAtre prot\xE9g\xE9s contre\
         \ l'acc\xE8s de personnes non autoris\xE9es et donc a fortiori aux personnes\
         \ \xE9trang\xE8res."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-02
@@ -534,6 +564,7 @@ objects:
         \ d'acc\xE8s physiques permanents. L'entit\xE9 d\xE9finira \xE0 cet effet\
         \ une proc\xE9dure de gestion des habilitations physiques encadrant l'octroi,\
         \ la revue et la suspension desdites habilitations."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-03
@@ -550,6 +581,7 @@ objects:
         menter un syst\xE8me de contr\xF4le d'acc\xE8s individualis\xE9 aux locaux\
         \ sensibles permettant de garantir la pr\xE9cision de la tra\xE7abilit\xE9\
         \ des acc\xE8s (date, heure, ...)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-04
@@ -562,6 +594,7 @@ objects:
         \ d'encadrement des visites aux locaux abritant les actifs SI (identification\
         \ du visiteur, contr\xF4le d'identit\xE9, tra\xE7abilit\xE9 de l'acc\xE8s,\
         \ ...)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-05
@@ -573,6 +606,7 @@ objects:
       description: "R\xE8gle : \nTout acc\xE8s r\xE9seau install\xE9 dans une zone\
         \ d'accueil du public (ou \xE0 usage public) doit \xEAtre filtr\xE9 ou isol\xE9\
         \ du r\xE9seau informatique priv\xE9 de l'entit\xE9."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-06
@@ -585,6 +619,7 @@ objects:
         \ des cl\xE9s est autoris\xE9 pour l'acc\xE8s aux locaux abritant les actifs\
         \ SI. Une proc\xE9dure devra \xEAtre formalis\xE9e pour la protection et l'utilisation\
         \ s\xE9curis\xE9e des cl\xE9s d'acc\xE8s aux locaux abritant les actifs SI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-07
@@ -596,6 +631,7 @@ objects:
       description: "R\xE8gle : \nL'entit\xE9 doit r\xE9diger et afficher dans tous\
         \ les locaux abritant les actifs SI des consignes de s\xE9curit\xE9 destin\xE9\
         es au personnel qui exploite ces locaux."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.5:2
@@ -617,6 +653,7 @@ objects:
         \ d'eau (par des m\xE9canismes de contr\xF4les et de d\xE9tection tels que\
         \ verrous, alarmes) et munies des servitudes n\xE9cessaires (alimentation\
         \ convenablement secourue, climatisation)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-09
@@ -628,6 +665,7 @@ objects:
       description: "R\xE8gle : \nL'ensemble des mat\xE9riels sensibles doit \xEAtre\
         \ prot\xE9g\xE9 contre les coupures de courant par un onduleur ou un groupe\
         \ \xE9lectrog\xE8ne."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-10
@@ -641,6 +679,7 @@ objects:
         \ L'entit\xE9 doit documenter le plan de c\xE2blage du r\xE9seau informatique\
         \ et s'assurer que le c\xE2blage r\xE9seau est \xE0 l'abri des endommagements\
         \ (travaux de voirie, ...)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-11
@@ -653,6 +692,7 @@ objects:
         \ doit \xEAtre conclu avec un d\xE9lai d'intervention ou de remplacement garanti,\
         \ compatible avec les besoins de disponibilit\xE9 et d'int\xE9grit\xE9 de\
         \ ces actifs."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:phy-12
@@ -666,6 +706,7 @@ objects:
         \ sign\xE9e par les responsables habilit\xE9s. L'entit\xE9 encadre cette mesure\
         \ par une proc\xE9dure formelle garantissant la tra\xE7abilit\xE9 des sorties\
         \ de mat\xE9riel."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.6
@@ -692,6 +733,7 @@ objects:
         es au SI.\nRecommandation :\nIl est recommand\xE9 de conserver les sch\xE9\
         mas d'architecture et les fichiers de configuration dans des r\xE9pertoires\
         \ s\xE9curis\xE9s."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:resx-02
@@ -706,6 +748,7 @@ objects:
         s en fonction des besoins m\xE9tiers et en diff\xE9rentes zones r\xE9seaux\
         \ (zone de confiance dont la s\xE9curit\xE9 est r\xE9put\xE9e ad\xE9quate,\
         \ zone d'administration, zone utilisateur, ...)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:resx-03
@@ -718,6 +761,7 @@ objects:
         \ r\xE9seau \xE0 une autre, doit \xEAtre contr\xF4l\xE9 et analys\xE9 afin\
         \ de prot\xE9ger les ressources h\xE9berg\xE9es contre les tentatives d'attaque\
         \ et les codes malveillants."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:resx-04
@@ -732,6 +776,7 @@ objects:
         \ matrices de flux d\xFBment valid\xE9es. Les flux doivent \xEAtre r\xE9guli\xE8\
         rement revus dans le cadre d'une proc\xE9dure formelle \xE9tablie par l'entit\xE9\
         ."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:resx-05
@@ -744,6 +789,7 @@ objects:
         \ de communication et filtrage doivent \xEAtre durcies notamment par rapport\
         \ aux versions natives des fournisseurs par le changement des mots de passe\
         \ et certificats, et la fermeture des services et des ports non n\xE9cessaires."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:resx-06
@@ -757,6 +803,7 @@ objects:
         \ l'entit\xE9. Des mesures d'authentification fortes par l'usage de protocoles\
         \ s\xE9curis\xE9s pour ce type de connexions sont n\xE9cessaires lors d'\xE9\
         changes sensibles."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:resx-07
@@ -771,6 +818,7 @@ objects:
         \ r\xE9seau sans fil du reste du r\xE9seau : une passerelle ma\xEEtris\xE9\
         e doit \xEAtre mise en place permettant de tracer les acc\xE8s et de restreindre\
         \ les \xE9changes aux seuls flux n\xE9cessaires."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:resx-08
@@ -786,6 +834,7 @@ objects:
         \ \xEAtre d\xE9finie (proxy, antivirus, ...). Les interconnexions entre administrations,\
         \ syst\xE8mes et autres structures de l'Etat doivent se faire via le bus d'interop\xE9\
         rabilit\xE9 X-ROAD.bj."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:resx-09
@@ -797,6 +846,7 @@ objects:
       description: "R\xE8gle : \nSeuls les \xE9quipements ma\xEEtris\xE9s (configur\xE9\
         s par l'entit\xE9 ou respectant sa politique de s\xE9curit\xE9) peuvent \xEA\
         tre connect\xE9s au SI de l'entit\xE9."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.7
@@ -820,6 +870,7 @@ objects:
       description: "R\xE8gle : \nLe processus d'attribution des postes de travail\
         \ doit \xEAtre formalis\xE9 et contr\xF4l\xE9. Ce processus devra prendre\
         \ en compte la demande, l'affectation et une d\xE9charge de l'utilisateur."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-02
@@ -835,6 +886,7 @@ objects:
         \ r\xE9guli\xE8rement r\xE9alis\xE9 sur les postes de travail en utilisant\
         \ les outils de gestion de parc afin de v\xE9rifier qu'un utilisateur n'ait\
         \ pas de permissions auxquelles il n'aurait pas droit."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-03
@@ -852,6 +904,7 @@ objects:
         \ param\xE8tres de s\xE9curit\xE9 du poste de travail.\nRecommandation :\n\
         L'entit\xE9 peut centraliser la gestion des\nparametres de s\xE9curit\xE9\
         \ et faire recours aux guides de durcissement pr\xE9conis\xE9s par l'ANSSI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-04
@@ -864,6 +917,7 @@ objects:
         \ \xEAtre install\xE9s sur les postes de travail de l'entit\xE9. L'entit\xE9\
         \ doit veiller \xE0 ce que tout composant logiciel ou mat\xE9riel \xE0 installer\
         \ fasse l'objet d'une acquisition de licences d'utilisation s'il y est soumis."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-05
@@ -877,6 +931,7 @@ objects:
         \ :\nIl est recommand\xE9 de r\xE9aliser le partage de fichiers entre les\
         \ utilisateurs par l'interm\xE9diaire des espaces partag\xE9s mis \xE0 disposition\
         \ par les administrateurs."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-06
@@ -889,6 +944,7 @@ objects:
         \ stock\xE9es en local sur le poste de travail, des moyens de synchronisation\
         \ ou de sauvegarde doivent \xEAtre fournis aux utilisateurs. Les disques de\
         \ stockage en local doivent \xEAtre chiffr\xE9s avec des outils de confiance."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-07
@@ -900,6 +956,7 @@ objects:
       description: "R\xE8gle : \nL'entit\xE9 d\xE9finit une proc\xE9dure concernant\
         \ le traitement \xE0 appliquer aux informations ayant \xE9t\xE9 stock\xE9\
         es ou manipul\xE9es sur les postes r\xE9affect\xE9s."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-08
@@ -912,6 +969,7 @@ objects:
         \ des appareils mobiles personnels dans le cadre d'activit\xE9s professionnelles.\
         \ Ces appareils doivent \xEAtre soumis aux r\xE8gles de s\xE9curit\xE9 \xE9\
         dict\xE9es au sein de l'entit\xE9."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-09
@@ -924,6 +982,7 @@ objects:
         \ doivent \xEAtre syst\xE9matiquement chiffr\xE9es de sorte que les donn\xE9\
         es soient illisibles ou inaccessibles tant que le syst\xE8me d'exploitation\
         \ n'est pas d\xE9marr\xE9."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.8
@@ -947,6 +1006,7 @@ objects:
         \ travail nomades doit \xEAtre limit\xE9 au strict n\xE9cessaire. Les informations\
         \ sensibles doivent \xEAtre obligatoirement chiffr\xE9es par un moyen de chiffrement\
         \ agr\xE9\xE9 par l'ANSSI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:itin-02
@@ -959,6 +1019,7 @@ objects:
         \ donn\xE9es sensibles, un filtre de confidentialit\xE9 doit \xEAtre fourni\
         \ et \xEAtre positionn\xE9 sur l'\xE9cran d\xE8s lors que le poste est utilis\xE9\
         \ en dehors de l'entit\xE9."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:itin-03
@@ -969,6 +1030,7 @@ objects:
       name: Pare-feu local
       description: "R\xE8gle : \nUn pare-feu local conforme aux recommandations de\
         \ l'ANSSI doit \xEAtre install\xE9 sur les postes nomades."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:itin-04
@@ -979,6 +1041,7 @@ objects:
       name: Protection physique
       description: "R\xE8gle : \nUn c\xE2ble physique de s\xE9curit\xE9 doit \xEA\
         tre fourni avec chaque poste portable."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:itin-05
@@ -990,6 +1053,7 @@ objects:
       description: "R\xE8gle : \nL'entit\xE9 doit d\xE9finir une proc\xE9dure de r\xE9\
         action d'urgence en cas d'incident de vol ou de perte des \xE9quipements itin\xE9\
         rants."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.9
@@ -1017,6 +1081,7 @@ objects:
         \ des actifs SI, les sauvegardes des fichiers de configuration, les mises\
         \ \xE0 jour et application des correctifs de s\xE9curit\xE9, l'exploitation\
         \ des locaux techniques."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-02
@@ -1028,6 +1093,7 @@ objects:
       description: "R\xE8gle : \nL'acc\xE8s aux outils et interfaces d'administration\
         \ doit \xEAtre strictement limit\xE9 aux personnes habilit\xE9es, selon une\
         \ proc\xE9dure formelle d'autorisation d'acc\xE8s."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-03
@@ -1039,6 +1105,7 @@ objects:
       description: "R\xE8gle : \nLes actions d'administration \xE0 distance sur les\
         \ composants locaux du SI doivent s'appuyer sur des protocoles d'administration\
         \ s\xE9curis\xE9s."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-04
@@ -1051,6 +1118,7 @@ objects:
         \ \xEAtre configur\xE9s et mis \xE0 jour selon des proc\xE9dures formalis\xE9\
         es (tests de non-r\xE9gression, compatibilit\xE9 avec les logiciels m\xE9\
         tiers, etc.)."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-05
@@ -1064,6 +1132,7 @@ objects:
         \ temps de r\xE9ponse, ...) doivent \xEAtre r\xE9alis\xE9es dans le but de\
         \ mener les actions de redimensionnement am\xE9liorant la disponibilit\xE9\
         \ du SI."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-06
@@ -1079,6 +1148,7 @@ objects:
         \ doit \xEAtre install\xE9e sur chaque composant du Sl (postes de travail,\
         \ portables, serveurs, passerelles, ...).\nRecommandation :\nIl est recommand\xE9\
         \ l'utilisation de solutions centralis\xE9es pour la gestion antivirale."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-07
@@ -1091,6 +1161,7 @@ objects:
         \ place par l'entit\xE9 est le seul autoris\xE9 dans le cadre des activit\xE9\
         s professionnelles. L'utilisation des courriels personnels (Gmail, Yahoo,\
         \ Hotmail...) est interdite."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-08
@@ -1107,6 +1178,7 @@ objects:
         \ mis en place par l'entit\xE9 est le seul autoris\xE9 dans le cadre des activit\xE9\
         s professionnelles. L'utilisation des courriels personnels (Gmail, Yahoo,\
         \ Hotmail...) est interdite."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-09
@@ -1121,6 +1193,7 @@ objects:
         \ requis pour chaque syst\xE8me est d\xE9termin\xE9 par le biais d'une appr\xE9\
         ciation du risque. Par ailleurs, toutes les activit\xE9s de surveillance devront\
         \ \xEAtre r\xE9alis\xE9es dans le respect des exigences l\xE9gales applicables."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-10
@@ -1132,6 +1205,7 @@ objects:
       description: "Regle :\nLes serveurs et \xE9quipements r\xE9seaux doivent \xE9\
         tre synchronis\xE9s sur la m\xEAme base de temps.\nRecommandation :\nIl est\
         \ recommand\xE9 d'utiliser le service TSA de la PKI nationale."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-11
@@ -1147,6 +1221,7 @@ objects:
         L'entit\xE9 peut recourir aux services des Fournisseurs de Services de S\xE9\
         curit\xE9 Num\xE9rique Qualifi\xE9s (FSSNQ) dont la liste est publi\xE9e par\
         \ l'ANSSI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:exp-12
@@ -1161,6 +1236,7 @@ objects:
         \ \xEAtre pos\xE9es \xE0 des endroits cl\xE9s du syst\xE8me d'information\
         \ de l'entit\xE9 et les \xE9v\xE9nements y relatifs remont\xE9s \xE0 un centre\
         \ d'expertise."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.10
@@ -1192,6 +1268,7 @@ objects:
         mes d'information de l'entit\xE9 et de modifier les Framework de gestion de\
         \ projet pour int\xE9grer les exigences de s\xE9curit\xE9 \xE0 toutes les\
         \ \xE9tapes d'un projet."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:adm-02
@@ -1203,6 +1280,7 @@ objects:
       description: "R\xE8gle : \nLes cahiers de charges en vue de l'acquisition, du\
         \ d\xE9veloppement ou de la maintenance des SI devront indiquer syst\xE9matiquement\
         \ les exigences en mati\xE8re de s\xE9curit\xE9 pour le SI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:adm-03
@@ -1216,6 +1294,7 @@ objects:
         \ mesures et dans le cas contraire, une analyse des risques est conduite pour\
         \ d\xE9finir les mesures associ\xE9es avant d'acheter ou de rejeter le produit\
         \ concern\xE9."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:adm-04
@@ -1230,6 +1309,7 @@ objects:
         Recommandation :\nIl est vivement recommand\xE9 de faire recours aux standards\
         \ internationaux de d\xE9veloppements s\xE9curis\xE9s comme OWASP, guide de\
         \ l'ANSSI, ..."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:adm-05
@@ -1244,6 +1324,7 @@ objects:
         \ activit\xE9 m\xE9tier en production, et que la p\xE9rennit\xE9 du fournisseur\
         \ n'est pas garantie, celui-ci doit soit fournir le code source sous licence,\
         \ soit le placer sous s\xE9questre chez un tiers."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:adm-06
@@ -1260,6 +1341,7 @@ objects:
         \ :\nL'entit\xE9 peut faire appel \xE0 des jeux d'exercice de tests d'intrusion,\
         \ d'audit de configuration,\nd'architecture, de revue de code source,... ou\
         \ faire effectuer la recette s\xE9curit\xE9 par un FSSNQ."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:adm-07
@@ -1276,6 +1358,7 @@ objects:
         \ de test une fois les tests achev\xE9s.\nRecommandation:\nIl est recommand\xE9\
         \ de proc\xE9der si techniquement faisable \xE0 l'anonymisation des donn\xE9\
         es r\xE9elles dans les environnements de test."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:adm-08
@@ -1287,6 +1370,7 @@ objects:
       description: "R\xE8gle : \nLes entit\xE9s doivent se r\xE9f\xE9rer \xE0 l'APDP\
         \ dans le cadre de toute activit\xE9 n\xE9cessitant la collecte et le traitement\
         \ des donn\xE9es \xE0 caract\xE8re personnel."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.11
@@ -1314,6 +1398,7 @@ objects:
         \ \xEAtre utilis\xE9s.\nRecommandation:\nLes syst\xE8mes d'authentification\
         \ de la PKI nationale ou du Portail National des Services\nPublics (PNSP)\
         \ peuvent \xEAtre utilis\xE9s."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:esv-02
@@ -1324,6 +1409,7 @@ objects:
       name: Filtrage applicatif
       description: "R\xE8gle : \nL'entit\xE9 qui met en \u0153uvre une plateforme\
         \ de e-services doit faire usage d'une solution tierce de filtrage applicatif."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.12
@@ -1347,6 +1433,7 @@ objects:
         \ auxquels l'application Web pourrait \xEAtre confront\xE9e, que ce soit sur\
         \ les biens (infrastructures informatiques, donn\xE9es, etc.) ou sur les fonctions\
         \ importantes fournies par cette application."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:saw-02
@@ -1362,6 +1449,7 @@ objects:
         \ :\n- Gestion des entr\xE9es et sorties\n- Gestion des sessions\n- Authentification\n\
         - Contr\xF4le d'acc\xE8s\n- Gestion des erreurs\n- Connexions aux syst\xE8\
         mes externes\n- Journalisation\n- Chiffrement"
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:saw-03
@@ -1378,6 +1466,7 @@ objects:
         gier l'utilisation de r\xE9f\xE9rentiels (frameworks) recommand\xE9s par l'ANSSI\
         \ ou l'ASSI ;\n- Eviter au maximum l'utilisation de plugins externes ;\n-\
         \ Toujours utiliser la derni\xE8re version des outils de d\xE9veloppement."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:saw-04
@@ -1391,6 +1480,7 @@ objects:
         \ de ce protocole, il doit \xEAtre appliqu\xE9 \xE0 toutes les pages d'authentification\
         \ ainsi que toutes les pages une fois que l'utilisateur est authentifi\xE9\
         ."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:saw-05
@@ -1405,6 +1495,7 @@ objects:
         \ site et la date d'expiration du certificat doit \xEAtre encore valide. En\
         \ fonction du type d'usage, un certificat de validation de domaine de validation\
         \ d'organisation ou de validation \xE9tendue peut \xEAtre requis."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:saw-06
@@ -1415,6 +1506,7 @@ objects:
       name: Pages d'erreur
       description: "R\xE8gle : \nToutes les pages d'erreurs doivent \xEAtre personnalis\xE9\
         es de fa\xE7on \xE0 ne divulguer aucune information qui puisse aider un hacker."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:saw-07
@@ -1428,6 +1520,7 @@ objects:
         sactiv\xE9s, comptes par d\xE9faut bannis, contr\xF4le d'acc\xE8s aux r\xE9\
         pertoires, durcissement des syst\xE8mes d'exploitation, mises \xE0 jour r\xE9\
         guli\xE8res des syst\xE8mes d'exploitation...)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.13
@@ -1458,6 +1551,7 @@ objects:
         \ recommand\xE9 de s'inspirer des politiques de certifications types pour\
         \ l'\xE9laboration des politiques de certification des fonctions de s\xE9\
         curit\xE9."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:cry-02
@@ -1474,6 +1568,7 @@ objects:
         lev\xE9 c'est-\xE0-dire emp\xEAchant toute usurpation d'identit\xE9.\nRecommandation\
         \ :\nIl est recommand\xE9 de s'inspirer des politiques de s\xE9curit\xE9 des\
         \ certificats \xE9lectroniques disponibles."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cry-03
@@ -1488,6 +1583,7 @@ objects:
         s\n- Distribution s\xE9curis\xE9e des cl\xE9s\n- Activation des cl\xE9s\n\
         - Changement des cl\xE9s\n- Recouvrement d'une cl\xE9 (en cas de perte, ...)\n\
         - Destruction des cl\xE9s"
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.14
@@ -1513,6 +1609,7 @@ objects:
         \ doit faire l'objet d'une signature syst\xE9matique d'un accord de non-divulgation\
         \ lorsque des informations de l'entit\xE9 sont susceptibles d'\xEAtre communiqu\xE9\
         es au tiers."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:frn-02
@@ -1530,6 +1627,7 @@ objects:
         \ du tiers, la prise en compte de la PSSI sp\xE9cifique, les proc\xE9dures\
         \ d'\xE9changes des donn\xE9es, l'auditabilit\xE9, la r\xE9versibilit\xE9\
         , la confidentialit\xE9, ..."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:frn-03
@@ -1543,6 +1641,7 @@ objects:
         \ la disposition du RSSI pour les besoins de contr\xF4le de conformit\xE9\
         \ avec la PSSI sp\xE9cifique. Ces derniers doivent disposer des acc\xE8s sp\xE9\
         cifiques sur la base des proc\xE9dures en place au sein de l'entit\xE9."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:frn-04
@@ -1555,6 +1654,7 @@ objects:
         rer avec le syst\xE8me d'information de l'entit\xE9 ou l'un des composants\
         \ de ce dernier signe une charte de s\xE9curit\xE9 dite \xAB Charte Prestataire\xBB\
         \ qui l'engage individuellement vis-\xE0-vis de l'entit\xE9."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:frn-05
@@ -1569,6 +1669,7 @@ objects:
         . Les points \xE0 surveiller incluent \xE0 minima : usage des acc\xE8s physiques\
         \ et logiques octroy\xE9s, respect des consignes de s\xE9curit\xE9, niveaux\
         \ de service, coop\xE9ration du tiers en mati\xE8re de s\xE9curit\xE9,..."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:frn-06
@@ -1582,6 +1683,7 @@ objects:
         \ de la relation. Les droits d'acc\xE8s des intervenants tiers aux SI de l'entit\xE9\
         \ doivent \xEAtre retir\xE9s dans les plus brefs d\xE9lais apr\xE8s la cessation\
         \ des activit\xE9s li\xE9es \xE0 la prestation."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.15
@@ -1602,11 +1704,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.15:1
       ref_id: SCC-01
       name: Externalisation dans le cloud
-      description: "R\xE8gle : \nTous les actifs SI confi\xE9s au tiers dans le cadre\
-        \ des prestations r\xE9alis\xE9es doivent \xEAtre restitu\xE9s \xE0 la cessation\
-        \ de la relation. Les droits d'acc\xE8s des intervenants tiers aux SI de l'entit\xE9\
-        \ doivent \xEAtre retir\xE9s dans les plus brefs d\xE9lais apr\xE8s la cessation\
-        \ des activit\xE9s li\xE9es \xE0 la prestation."
+      description: "R\xE8gle : \nLes processus m\xE9tiers et les services \xE0 externaliser\
+        \ dans une infrastructure cloud doivent \xEAtre identifi\xE9s. Pour chaque\
+        \ processus ou service identifi\xE9, une analyse de risques doit \xEAtre conduite\
+        \ pour \xE9valuer l'impact li\xE9 \xE0 la perte de confidentialit\xE9, d'int\xE9\
+        grit\xE9 et de disponibilit\xE9 des informations impliqu\xE9es. Cette analyse\
+        \ est conduite en liaison avec l'ASSI et l'ANSSI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:scc-02
@@ -1617,6 +1721,7 @@ objects:
       name: "S\xE9lection d'un fournisseur cloud national"
       description: "R\xE8gle : \nL'entit\xE9 doit donner priorit\xE9 aux Datacenters\
         \ se trouvant sur le territoire national pour ses besoins d'externalisation."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:scc-03
@@ -1634,6 +1739,7 @@ objects:
         es \xE0 caract\xE8re personnel ...).\nRecommandation :\nIl est recommand\xE9\
         \ de proc\xE9der \xE0 une \xE9valuation du fournisseur au moyen d'un questionnaire\
         \ de s\xE9curit\xE9 permettant d'examiner la posture s\xE9curit\xE9 du fournisseur."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:scc-04
@@ -1651,6 +1757,7 @@ objects:
         \ destruction des donn\xE9es de l'entit\xE9,\n- La coop\xE9ration notamment\
         \ en mati\xE8re d'audit de s\xE9curit\xE9 et d'investigation\n- La conformit\xE9\
         \ avec la PSSI sp\xE9cifique de l'entit\xE9"
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:scc-05
@@ -1666,6 +1773,7 @@ objects:
         \ devra prendre en compte la r\xE9versibilit\xE9 et l'obligation de destruction\
         \ sous contr\xF4le des donn\xE9es, applicables lors de l'extinction du contrat\
         \ de services Cloud."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.16
@@ -1691,6 +1799,7 @@ objects:
         s \xE0 la s\xE9curit\xE9 du SI doit \xEAtre formalis\xE9e et connue des utilisateurs\
         \ et administrateurs informatiques. La proc\xE9dure devra pr\xE9voir la remont\xE9\
         e d'incidents significatifs \xE0 l'ANSSI."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:inc-02
@@ -1704,6 +1813,7 @@ objects:
         \ diff\xE9rents types d'incidents de s\xE9curit\xE9 (malveillances, d\xE9\
         nis de service, infections virales, intrusion, vol/perte d'\xE9quipements,\
         \ perte de donn\xE9es, etc.)."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:inc-03
@@ -1717,6 +1827,7 @@ objects:
         \ une base de donn\xE9es permettant un enrichissement progressif ainsi qu'un\
         \ acc\xE8s s\xE9lectif facile pour effectuer le traitement et le suivi des\
         \ divers incidents futurs."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:inc-04
@@ -1732,6 +1843,7 @@ objects:
         \ peut recourir au bjCSIRT (Equipe gouvernementale de r\xE9ponse aux incidents\
         \ de s\xE9curit\xE9 informatique) afin de porter une assistance technique\
         \ dans le cadre d'une investigation num\xE9rique."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.17
@@ -1757,6 +1869,7 @@ objects:
         \ des mesures de s\xE9curit\xE9 afin de faire face aux \xE9v\xE8nements pouvant\
         \ causer leur arr\xEAt (panne, sinistre, pand\xE9mie, d\xE9ni de service,\
         \ ...). Ce plan doit \xEAtre test\xE9 au moins une fois par an."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cont-02
@@ -1770,6 +1883,7 @@ objects:
         \ d'information doivent \xEAtre int\xE9gr\xE9s aux composants d'infrastructure\
         \ \xE9ligibles au plan de continuit\xE9 ou de reprise d'activit\xE9 informatique\
         \ de l'entit\xE9."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:cont-03
@@ -1780,6 +1894,7 @@ objects:
       name: Redondance
       description: "R\xE8gle : \nLes architectures SI doivent \xEAtre d\xE9pourvues\
         \ de SPOF (Single Point Of Failure) par des m\xE9canismes de redondance."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:cont-04
@@ -1792,6 +1907,7 @@ objects:
         \ SI doit inclure la planification annuelle de tests afin de s'assurer que\
         \ chacun des dispositifs de s\xE9curit\xE9 identifi\xE9s critiques est correctement\
         \ couvert par ce plan."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.18
@@ -1822,6 +1938,7 @@ objects:
         \ la planification annuelle de tests afin de s'assurer que chacun des dispositifs\
         \ de s\xE9curit\xE9 identifi\xE9s critiques est correctement couvert par ce\
         \ plan."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:conf-02
@@ -1833,6 +1950,7 @@ objects:
       description: "R\xE8gle : \nLes entit\xE9s doivent se r\xE9f\xE9rer \xE0 l'APDP\
         \ dans le cadre de toute activit\xE9 n\xE9cessitant la collecte et le traitement\
         \ des donn\xE9es \xE0 caract\xE8re personnel."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:conf-03
@@ -1844,6 +1962,7 @@ objects:
       description: "R\xE8gle : \nL'entit\xE9 doit se conformer aux dispositions du\
         \ code du num\xE9rique se rapportant \xE0 la cryptologie et aux recommandations\
         \ de la Commission Cryptologie."
+      annotation: Normal
       implementation_groups:
       - N
     - urn: urn:intuitem:risk:req_node:pssie-benin:4.18:2
@@ -1864,6 +1983,7 @@ objects:
         \ entit\xE9 conduit des actions locales d'\xE9valuation de la conformit\xE9\
         \ \xE0 la PSSIE et contribue \xE0 la consolidation, dans un bilan annuel,\
         \ de l'\xE9tat d'avancement de sa mise en \u0153uvre."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:conf-05
@@ -1875,6 +1995,7 @@ objects:
       description: "R\xE8gle : \nDes audits de s\xE9curit\xE9 approfondis du SI doivent\
         \ \xEAtre r\xE9alis\xE9s dans le cadre d'un programme de tests de s\xE9curit\xE9\
         . Ces audits doivent \xEAtre confi\xE9s \xE0 des FSSNQ."
+      annotation: Critique
       implementation_groups:
       - C
     - urn: urn:intuitem:risk:req_node:pssie-benin:conf-06
@@ -1891,5 +2012,6 @@ objects:
         es, les outils de tests, les engagements de bonne conduite des auditeurs,\
         \ les acc\xE8s \xE0 accorder, la restitution/destruction des donn\xE9es collect\xE9\
         es par les auditeurs, ..."
+      annotation: Critique
       implementation_groups:
       - C
