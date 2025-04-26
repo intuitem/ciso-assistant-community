@@ -4,7 +4,17 @@
 	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	pageTitle.set('Visual Analysis');
-	const color = ['#e63946', '#ea7ccc', '#fac858', '#91cc75', '#13B8A6', '#fc8452', '#ff006e'];
+	const color = [
+		'#e63946',
+		'#ea7ccc',
+		'#fac858',
+		'#91cc75',
+		'#13B8A6',
+		'#fc8452',
+		'#ff006e',
+		'#3a86ff',
+		'#f07167'
+	];
 	const zoom = 1.5;
 </script>
 

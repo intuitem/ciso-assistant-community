@@ -6,6 +6,7 @@ from .models import (
     AttackPath,
     EbiosRMStudy,
     FearedEvent,
+    OperationalScenario,
     RoTo,
     Stakeholder,
     StrategicScenario,
@@ -127,6 +128,8 @@ def ebios_rm_visual_analysis(study):
         {"name": "Ecosystem entity"},
         {"name": "Strategic scenario"},
         {"name": "Attack Path"},
+        {"name": "Operational scenario"},
+        {"name": "Techniques/Unitary actions"},
     ]
     feared_events = FearedEvent.objects.filter(ebios_rm_study=study).distinct()
     assets = study.assets.all()
@@ -200,7 +203,9 @@ def ebios_rm_visual_analysis(study):
         nodes.append({"name": str(stakeholder), "category": 4, "symbol": "square"})
         nodes_idx[f"{stakeholder.id}-SH"] = N
         N += 1
-    strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
+    strategic_scenarios = StrategicScenario.objects.filter(
+        ebios_rm_study=study
+    )  # prefetch_related here
     for ss in strategic_scenarios:
         nodes.append(
             {
@@ -216,7 +221,7 @@ def ebios_rm_visual_analysis(study):
             {
                 "source": nodes_idx[f"{ss.id}-SS"],
                 "target": nodes_idx[f"{ss.ro_to_couple.id}-RO"],
-                "value": "via",
+                "value": "through",
             }
         )
         for ap in AttackPath.objects.filter(strategic_scenario=ss):
@@ -245,6 +250,35 @@ def ebios_rm_visual_analysis(study):
                         "value": "involves",
                     }
                 )
+    operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
+    for os in operational_scenarios:
+        nodes.append(
+            {
+                "name": f"{wrap_text(os.operating_modes_description)}",
+                "category": 7,
+            }
+        )
+        nodes_idx[f"{os.id}-OS"] = N
+        N += 1
+        links.append(
+            {
+                "source": nodes_idx[f"{os.id}-OS"],
+                "target": nodes_idx[f"{os.attack_path.id}-AP"],
+                "value": "involves",
+            }
+        )
+        for ua in os.threats.all().distinct():
+            if nodes_idx.get(f"{ua.id}-UA") is None:
+                nodes.append({"name": ua.name, "category": 8})
+                nodes_idx[f"{ua.id}-UA"] = N
+                N += 1
+            links.append(
+                {
+                    "source": nodes_idx[f"{os.id}-OS"],
+                    "target": nodes_idx[f"{ua.id}-UA"],
+                    "value": "exploits",
+                }
+            )
 
     return {
         "tree": tree,
