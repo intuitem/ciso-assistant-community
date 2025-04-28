@@ -14,7 +14,6 @@
 	import { m } from '$paraglide/messages';
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
 
 	export let data: PageData;
