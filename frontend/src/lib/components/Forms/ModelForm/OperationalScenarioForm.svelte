@@ -67,7 +67,7 @@
 		field="threats"
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}
-		label={m.threats()}
+		label={m.elementaryActionsTechniques()}
 		helpText={m.operationalScenarioThreatsHelpText()}
 	/>
 	{#if context !== 'edit'}

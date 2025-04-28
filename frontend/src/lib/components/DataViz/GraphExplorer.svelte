@@ -11,6 +11,7 @@
 	export let initLayout = 'circular';
 	export let edgeLength = 50;
 	export let name = 'graph';
+	export let zoom = 1;
 	export let color = [
 		'#5470c6',
 		'#91cc75',
@@ -109,6 +110,7 @@
 				layout: layout,
 				symbolSize: 20,
 				animation: false,
+				zoom: zoom,
 				animationDurationUpdate: 1500,
 				animationEasingUpdate: 'quinticInOut',
 				edgeSymbol: ['circle', 'arrow'],
@@ -158,7 +160,8 @@
 				edges: data.links,
 				lineStyle: {
 					curveness: 0.2,
-					color: 'source'
+					color: 'source',
+					width: 1.5
 				}
 			}
 		]

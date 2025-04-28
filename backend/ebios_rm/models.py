@@ -486,7 +486,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def __str__(self):
-        return f"{self.entity.name}-{self.get_category_display()}"
+        return f"{self.entity.name} ({self.get_category_display()})"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder

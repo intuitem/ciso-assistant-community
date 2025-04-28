@@ -12,10 +12,10 @@
 
 	import { m } from '$paraglide/messages';
 
-	export let data: SuperValidated<AnyZodObject>;
-	export let dataType: 'form' | 'json';
+	export let data: SuperValidated<AnyZodObject> = {};
+	export let dataType: 'form' | 'json' = 'form';
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
-	export let validators: AnyZodObject;
+	export let validators: AnyZodObject = {};
 	export let applyAction = true;
 	export let resetForm = false;
 	export let onSubmit = (submit_data: any) => {};
