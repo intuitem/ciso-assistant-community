@@ -2,12 +2,13 @@ import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { activateTOTPSchema } from './mfa/utils/schemas';
-import { setError, superValidate } from 'sveltekit-superforms';
+import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
 import { z } from 'zod';
+import { AuthTokenCreateSchema } from '$lib/utils/schemas';
 
 export const load: PageServerLoad = async (event) => {
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
@@ -40,14 +41,13 @@ export const load: PageServerLoad = async (event) => {
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
 
 	const personalAccessTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
-	const personalAccessTokensResponse = await event
-		.fetch(personalAccessTokensEndpoint)
-		.then((res) => res.json());
+	const personalAccessTokensResponse = await event.fetch(personalAccessTokensEndpoint);
 	if (!personalAccessTokensResponse.ok) {
 		console.error('Could not get personal access tokens', personalAccessTokensResponse);
 		fail(personalAccessTokensResponse.status, { error: 'Could not get personal access tokens' });
 	}
-	const personalAccessTokens = await personalAccessTokensResponse.json();
+	const personalAccessTokens = await personalAccessTokensResponse.json().then((res) => res.results);
+	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
 
 	return {
 		authenticators,
@@ -55,6 +55,7 @@ export const load: PageServerLoad = async (event) => {
 		activateTOTPForm,
 		recoveryCodes,
 		personalAccessTokens,
+		personalAccessTokenCreateForm,
 		title: m.settings()
 	};
 };
@@ -138,5 +139,32 @@ export const actions: Actions = {
 		}
 
 		return { recoveryCodes: response.data };
+	},
+	createPAT: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(formData, zod(AuthTokenCreateSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const endpoint = `${BASE_API_URL}/iam/auth-tokens/`;
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		};
+
+		console.debug('requestInitOptions', requestInitOptions);
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) {
+			console.error('Could not create PAT');
+			return fail(response.status, { form });
+		}
+
+		const data = await response.json();
+
+		console.debug('Created PAT', data);
+		return message(form, { status: response.status, data });
 	}
 };

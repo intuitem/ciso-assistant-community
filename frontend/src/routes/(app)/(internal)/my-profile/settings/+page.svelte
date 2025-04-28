@@ -14,6 +14,8 @@
 	import { m } from '$paraglide/messages';
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import CreatePatModal from './pat/components/CreatePATModal.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -69,6 +71,22 @@
 			body: m.listRecoveryCodesHelpText()
 		};
 		modalStore.trigger(recoveryCodesModal);
+	}
+
+	function modalPATCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreatePatModal,
+			props: {
+				_form: data.personalAccessTokenCreateForm
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.generateNewPersonalAccessToken()
+		};
+		modalStore.trigger(modal);
 	}
 
 	let tabSet = 0;
@@ -129,6 +147,47 @@
 										on:click={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
 									>
 								{/if}
+							</div>
+						</div>
+					</dd>
+				</div>
+			</dl>
+			<dl class="-my-3 divide-y divide-surface-100 text-sm">
+				<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+					<dt class="font-medium">{m.personalAccessTokens()}</dt>
+					<dd class="text-surface-900 sm:col-span-2">
+						<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
+							<div class="flex flex-col space-y-2">
+								<span class="flex flex-row justify-between text-xl">
+									<i class="fa-solid fa-key"></i>
+									{#if hasTOTP}
+										<i class="fa-solid fa-circle-check text-success-500-400-token"></i>
+									{/if}
+								</span>
+								<span class="flex flex-row space-x-2">
+									<h6 class="h6 text-token">{m.personalAccessTokens()}</h6>
+								</span>
+								<p class="text-sm text-surface-800 max-w-[50ch]">
+									{m.personalAccessTokensDescription()}
+								</p>
+							</div>
+							<div class="flex flex-col gap-2">
+								<ul>
+									{#each data.personalAccessTokens as pat}
+										<li class="flex flex-row justify-between card p-4 bg-inherit">
+											<p>
+												{pat.name} - created: {new Date(pat.created).toLocaleDateString()} - expires:
+												{new Date(pat.expiry).toLocaleDateString()}
+											</p>
+											<i class="fa-solid fa-trash"></i>
+										</li>
+									{/each}
+								</ul>
+								<button
+									class="btn variant-ringed-surface w-fit"
+									on:click={(_) => modalPATCreateForm()}
+									>{m.generateNewPersonalAccessToken()}</button
+								>
 							</div>
 						</div>
 					</dd>

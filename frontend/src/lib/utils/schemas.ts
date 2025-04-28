@@ -685,6 +685,7 @@ export const TaskNodeSchema = z.object({
 });
 
 export const AuthTokenCreateSchema = z.object({
+	name: z.string(),
 	expiry: z.string().optional()
 });
 
