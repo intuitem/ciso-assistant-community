@@ -76,7 +76,7 @@
 		const modalComponent: ModalComponent = {
 			ref: CreatePatModal,
 			props: {
-				_form: data.personalAccessTokenCreateForm
+				form: data.personalAccessTokenCreateForm
 			}
 		};
 		const modal: ModalSettings = {
