@@ -270,12 +270,14 @@ REST_KNOX = {
     "SECURE_HASH_ALGORITHM": "hashlib.sha512",
     "AUTH_TOKEN_CHARACTER_LENGTH": 64,
     "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
-    "TOKEN_LIMIT_PER_USER": None,
+    "TOKEN_LIMIT_PER_USER": 5,
     "AUTO_REFRESH": AUTH_TOKEN_AUTO_REFRESH,
     "AUTO_REFRESH_MAX_TTL": timedelta(seconds=(AUTH_TOKEN_AUTO_REFRESH_MAX_TTL or 0))
     or None,
     "MIN_REFRESH_INTERVAL": 60,
 }
+
+KNOX_TOKEN_MODEL = "knox.AuthToken"
 
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
