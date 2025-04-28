@@ -12,6 +12,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
+from knox.models import AuthToken
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
     BUILTIN_ROLE_CODENAMES,
@@ -870,7 +871,7 @@ class PersonalAccessToken(models.Model):
     """
 
     name = models.CharField(max_length=255)
-    auth_token = models.ForeignKey(settings.KNOX_TOKEN_MODEL, on_delete=models.CASCADE)
+    auth_token = models.ForeignKey(AuthToken, on_delete=models.CASCADE)
 
     @property
     def created(self):
