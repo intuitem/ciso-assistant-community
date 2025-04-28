@@ -1474,5 +1474,12 @@
 	"domainAnalytics": "Domain Analytics",
 	"personalAccessTokens": "Personal Access Tokens",
 	"personalAccessTokensDescription": "Tokens you have generated that can be used to access the CISO Assistant API.",
-	"generateNewPersonalAccessToken": "Generate new token"
+	"generateNewPersonalAccessToken": "Generate new token",
+	"personalAccessTokenCreateDescription": "Personal Access Tokens (PATs) can be used instead of a possword to authenticate to the API. They are useful for automating tasks or integrating with other systems.",
+	"personalAccessTokenCreateWarning": "Warning: PATs are sensitive information. Treat them like passwords. If you lose a PAT, you will need to generate a new one.",
+	"personalAccessTokenOnlyDisplayedOnce": "The token will only be displayed once. Make sure to copy it and store it securely.",
+	"expiresOn": "Expires on {date}",
+	"personalAccessTokenExpiryHelpText": "Number of days after which the token will expire",
+	"expiry": "Expiry",
+	"successfullyDeletedPersonalAccessToken": "Successfully deleted personal access token"
 }
