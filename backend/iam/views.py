@@ -1,4 +1,6 @@
 from base64 import urlsafe_b64decode
+from knox.models import AuthToken
+from rest_framework.decorators import action
 
 import structlog
 from allauth.account.models import EmailAddress
@@ -9,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import ensure_csrf_cookie
 from knox.auth import TokenAuthentication
 from knox.views import LoginView as KnoxLoginView
-from rest_framework import permissions, serializers, status, views
+from rest_framework import permissions, serializers, status, views, viewsets
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -23,6 +25,8 @@ from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 from .models import Folder, Role, RoleAssignment
 from .serializers import (
+    AuthTokenCreateSerializer,
+    AuthTokenReadSerializer,
     ChangePasswordSerializer,
     LoginSerializer,
     ResetPasswordConfirmSerializer,
@@ -58,6 +62,44 @@ class LogoutView(views.APIView):
         except Exception as e:
             logger.error("logout failed", user=request.user, error=e)
         return Response({"message": "Logged out successfully."}, status=HTTP_200_OK)
+
+
+class AuthTokenCreateView(KnoxLoginView):
+    def post(self, request, format=None):
+        serializer = AuthTokenCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return super(AuthTokenCreateView, self).post(request, format=None)
+
+
+class AuthTokenViewSet(viewsets.ModelViewSet):
+    def get_serializer_class(self, **kwargs):
+        if self.action == "list":
+            return AuthTokenReadSerializer
+        elif self.action == "create":
+            return AuthTokenCreateSerializer
+
+    def get_queryset(self):
+        return self.request.user.auth_token_set.all()
+
+    def create(self, request, *args, **kwargs):
+        return AuthTokenCreateView.as_view()(request=request._request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            token = AuthToken.objects.get(digest=kwargs["pk"])
+            if token.user != request.user:
+                return Response(
+                    {"error": "You do not have permission to delete this token."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            token.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.error("Error deleting token", error=e)
+            return Response(
+                {"error": "Token not found or already deleted."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class CurrentUserView(views.APIView):

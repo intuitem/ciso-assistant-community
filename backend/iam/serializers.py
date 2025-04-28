@@ -1,7 +1,11 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.contrib.auth import authenticate
+from knox.models import AuthToken
 from rest_framework import serializers
 from .models import User
 from django.contrib.auth import password_validation
+from core.serializer_fields import FieldsRelatedField
 
 
 class LoginSerializer(serializers.Serializer):
@@ -110,3 +114,39 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
                 {"confirm_new_password": "The two password fields didn't match."}
             )
         return data
+
+
+class AuthTokenReadSerializer(serializers.ModelSerializer):
+    """
+    Serializer for AuthToken model.
+    """
+
+    user = FieldsRelatedField(["email", "id"])
+
+    class Meta:
+        model = AuthToken
+        fields = ["user", "created", "expiry", "digest"]
+
+
+class AuthTokenCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating AuthToken.
+    """
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        auth_token = AuthToken.objects.create(user=user, **validated_data)
+        return auth_token
+
+    def validate_expiry(self, expiry):
+        if expiry is not None:
+            if expiry <= timezone.now():
+                raise serializers.ValidationError("Expiry must be in the future.")
+            if timedelta(days=366) < expiry - timezone.now():
+                raise serializers.ValidationError(
+                    "Expiry must be less than a year away."
+                )
+
+    class Meta:
+        model = AuthToken
+        fields = ["created", "expiry"]
