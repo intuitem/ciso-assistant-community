@@ -1,4 +1,4 @@
-import { ALLAUTH_API_URL } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { activateTOTPSchema } from './mfa/utils/schemas';
@@ -39,7 +39,15 @@ export const load: PageServerLoad = async (event) => {
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
 
-	return { authenticators, totp, activateTOTPForm, recoveryCodes, title: m.settings() };
+	const authTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
+	const authTokensResponse = await event.fetch(authTokensEndpoint).then((res) => res.json());
+	if (!authTokensResponse.ok) {
+		console.error('Could not get auth tokens', authTokensResponse);
+		fail(authTokensResponse.status, { error: 'Could not get auth tokens' });
+	}
+	const authTokens = await authTokensResponse.json();
+
+	return { authenticators, totp, activateTOTPForm, recoveryCodes, authTokens, title: m.settings() };
 };
 
 export const actions: Actions = {
