@@ -7,6 +7,8 @@
 	import type { ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 
+	import { copy } from '@svelte-put/copy';
+
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { AuthTokenCreateSchema } from '$lib/utils/schemas';
@@ -40,7 +42,7 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	// Base Classes
-	const cBase = 'card p-4 w-fit shadow-xl space-y-4';
+	const cBase = 'card p-4 w-fit shadow-xl space-y-4 max-w-[80ch]';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
@@ -53,7 +55,7 @@
 		<article class="flex flex-row space-x-8">
 			<div class="flex flex-col space-y-4 items-center">
 				<div class="flex flex-col space-y-4 items-center self-center">
-					<p class="text-surface-900">{m.enterCodeGeneratedByApp()}</p>
+					<p class="text-surface-900">{m.personalAccessTokenCreateDescription()}</p>
 					<SuperForm
 						dataType="json"
 						action={formAction}
@@ -68,8 +70,8 @@
 							<NumberField
 								{form}
 								field="expiry"
-								label={m.expiryDate()}
-								helpText={m.etaHelpText()}
+								label={m.expiry()}
+								helpText={m.personalAccessTokenExpiryHelpText()}
 							/>
 							<footer class="modal-footer {parent.regionFooter}">
 								<button
@@ -79,9 +81,20 @@
 								>
 							</footer>
 						{:else}
-							<div class="card p-4 variant-ghost-warning">
-								Copy token, will only be shown once! {$page?.form?.form?.message?.data?.token}
+							<div class="card p-4 variant-ghost-secondary flex flex-row items-center">
+								<i
+									class="fa-solid fa-bell mr-2 text-secondary-800"
+								/>{m.personalAccessTokenOnlyDisplayedOnce()}
 							</div>
+							<span class="flex flex-row gap-2 variant-ghost-surface items-center card pl-2">
+								<pre>{$page?.form?.form?.message?.data?.token}</pre>
+								<button
+									type="button"
+									class="btn px-2 py-1 {parent.buttonNeutral} rounded-l-none"
+									use:copy={{ text: $page?.form?.form?.message?.data?.token }}
+									><i class="fa-solid fa-copy mr-2"></i>{m.copy()}</button
+								></span
+							>
 							<footer class="modal-footer {parent.regionFooter}">
 								<button
 									class="btn variant-filled-primary w-full"
