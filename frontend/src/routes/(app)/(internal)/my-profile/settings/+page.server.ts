@@ -46,7 +46,7 @@ export const load: PageServerLoad = async (event) => {
 		console.error('Could not get personal access tokens', personalAccessTokensResponse);
 		fail(personalAccessTokensResponse.status, { error: 'Could not get personal access tokens' });
 	}
-	const personalAccessTokens = await personalAccessTokensResponse.json().then((res) => res.results);
+	const personalAccessTokens = await personalAccessTokensResponse.json();
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
 
 	return {
