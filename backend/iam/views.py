@@ -1,6 +1,7 @@
 from base64 import urlsafe_b64decode
 from datetime import timedelta
 from django.utils import timezone
+from knox import crypto
 from knox.models import AuthToken
 
 import structlog
@@ -58,6 +59,13 @@ class LogoutView(views.APIView):
     def post(self, request) -> Response:
         try:
             logger.info("logout request", user=request.user)
+            try:
+                access_token = request.META.get("HTTP_AUTHORIZATION").split(" ")[1]
+                digest = crypto.hash_token(access_token)
+                auth_token = AuthToken.objects.get(digest=digest)
+                auth_token.delete()
+            except Exception as e:
+                logger.error("Error deleting token", user=request.user, error=e)
             logout(request)
             logger.info("logout successful", user=request.user)
         except Exception as e:
