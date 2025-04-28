@@ -72,6 +72,11 @@ export class Page {
 		return new pageClass(this._self, endpoint);
 	}
 
+	/** Waits until the page is loaded. */
+	async waitUntilLoaded() {
+		await this._self.waitForLoadState('load');
+	}
+
 	/**
 	 * Close a modal by clicking outside of it.
 	 * This method specifically clicks at coordinates (1, 1) which is supposed to outside of the modal.
