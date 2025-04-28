@@ -65,7 +65,7 @@ class LogoutView(views.APIView):
         return Response({"message": "Logged out successfully."}, status=HTTP_200_OK)
 
 
-class AuthTokenViewSet(views.APIView):
+class AuthTokenListViewSet(views.APIView):
     def get_queryset(self):
         return PersonalAccessToken.objects.filter(auth_token__user=self.request.user)
 
@@ -125,6 +125,18 @@ class AuthTokenViewSet(views.APIView):
         pat = PersonalAccessToken.objects.create(auth_token=instance, name=name)
         return self.get_post_response(request, token, pat.name, pat.auth_token)
 
+    def get(self, request, *args, **kwargs):
+        """
+        Get all personal access tokens for the user.
+        """
+        queryset = self.get_queryset()
+        serializer = PersonalAccessTokenReadSerializer(
+            queryset, many=True, context=self.get_context()
+        )
+        return Response(serializer.data)
+
+
+class AuthTokenDetailViewSet(views.APIView):
     def delete(self, request, *args, **kwargs):
         try:
             token = AuthToken.objects.get(digest=kwargs["pk"])
@@ -141,16 +153,6 @@ class AuthTokenViewSet(views.APIView):
                 {"error": "Token not found or already deleted."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-
-    def get(self, request, *args, **kwargs):
-        """
-        Get all personal access tokens for the user.
-        """
-        queryset = self.get_queryset()
-        serializer = PersonalAccessTokenReadSerializer(
-            queryset, many=True, context=self.get_context()
-        )
-        return Response(serializer.data)
 
 
 class CurrentUserView(views.APIView):
