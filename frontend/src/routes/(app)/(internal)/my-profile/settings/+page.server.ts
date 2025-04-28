@@ -48,6 +48,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 	const personalAccessTokens = await personalAccessTokensResponse.json();
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
+	const personalAccessTokenDeleteForm = await superValidate(zod(z.object({ id: z.string() })));
 
 	return {
 		authenticators,
@@ -56,6 +57,7 @@ export const load: PageServerLoad = async (event) => {
 		recoveryCodes,
 		personalAccessTokens,
 		personalAccessTokenCreateForm,
+		personalAccessTokenDeleteForm,
 		title: m.settings()
 	};
 };
@@ -166,5 +168,31 @@ export const actions: Actions = {
 
 		console.debug('Created PAT', data);
 		return message(form, { status: response.status, data });
+	},
+	deletePAT: async (event) => {
+		console.debug('deletePAT 1');
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(formData, zod(z.object({ id: z.string() })));
+		if (!form.valid) return fail(400, { form });
+
+		const endpoint = `${BASE_API_URL}/iam/auth-tokens/${form.data.id}/`;
+		const requestInitOptions: RequestInit = {
+			method: 'DELETE'
+		};
+
+		console.debug('requestInitOptions', requestInitOptions);
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) {
+			console.error('Could not delete PAT');
+			return fail(response.status, { form });
+		}
+
+		console.debug('Deleted PAT');
+		setFlash({ type: 'success', message: m.successfullyDeletedPersonalAccessToken() }, event);
+		return message(form, { status: response.status });
 	}
 };

@@ -15,6 +15,9 @@
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
+	import { z } from 'zod';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { defaults } from 'sveltekit-superforms';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -84,6 +87,27 @@
 			component: modalComponent,
 			// Data
 			title: m.generateNewPersonalAccessToken()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalConfirmPATDelete(id: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: defaults({ id }, zod(z.object({ id: z.string() }))),
+				schema: zod(z.object({ id: z.string() })),
+				id: id,
+				debug: false,
+				formAction: '?/deletePAT'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: m.personalAccessTokenDeleteConfirm()
 		};
 		modalStore.trigger(modal);
 	}
@@ -166,19 +190,32 @@
 								<span class="flex flex-row space-x-2">
 									<h6 class="h6 text-token">{m.personalAccessTokens()}</h6>
 								</span>
-								<p class="text-sm text-surface-800 max-w-[50ch]">
+								<p class="text-sm text-surface-800 max-w-[65ch]">
 									{m.personalAccessTokensDescription()}
 								</p>
+								<div class="card p-4 variant-ghost-warning max-w-[65ch]">
+									<i class="fa-solid fa-warning mr-2 text-warning-900" />
+									{m.personalAccessTokenCreateWarning()}
+								</div>
 							</div>
 							<div class="flex flex-col gap-2">
-								<ul>
+								<ul class="max-h-72 overflow-y-scroll">
 									{#each data.personalAccessTokens as pat}
 										<li class="flex flex-row justify-between card p-4 bg-inherit">
-											<p>
-												{pat.name} - created: {new Date(pat.created).toLocaleDateString()} - expires:
-												{new Date(pat.expiry).toLocaleDateString()}
-											</p>
-											<i class="fa-solid fa-trash"></i>
+											<span class="grid grid-rows-1 grid-cols-2 w-full">
+												<p>
+													{pat.name}
+												</p>
+												<p>{m.expiresOn({ date: new Date(pat.expiry).toLocaleDateString() })}</p>
+											</span>
+											<button
+												on:click={(_) => {
+													modalConfirmPATDelete(pat.digest);
+												}}
+												on:keydown={() => modalConfirmPATDelete(pat.digest)}
+												class="cursor-pointer hover:text-primary-500"
+												data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
+											>
 										</li>
 									{/each}
 								</ul>
