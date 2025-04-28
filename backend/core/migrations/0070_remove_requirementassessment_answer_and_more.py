@@ -60,7 +60,7 @@ def migrate_questions(apps, schema_editor):
     For each instance of Requirementnode, read the old "question" field,
     convert it, and store the result in the new "questions" field.
     """
-    Requirementnode = apps.get_model("core", "Requirementnode")
+    Requirementnode = apps.get_model("core", "RequirementNode")
     batch_size = 1000
     nodes_to_update = []
 
@@ -102,8 +102,8 @@ def migrate_answers_format(apps, schema_editor):
     Uses batch processing and more efficient data structures.
     Handles text and date type questions which don't have choices.
     """
-    RequirementAssessment = apps.get_model("core", "Requirementassessment")
-    RequirementNode = apps.get_model("core", "Requirementnode")
+    RequirementAssessment = apps.get_model("core", "RequirementAssessment")
+    RequirementNode = apps.get_model("core", "RequirementNode")
 
     # Build a complete mapping of node URNs to their question types and choices
     node_questions_map = {}
@@ -206,9 +206,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="requirementassessment",
-            name="answer",
+        migrations.AddField(
+            model_name="requirementnode",
+            name="questions",
+            field=models.JSONField(blank=True, null=True, verbose_name="Questions"),
         ),
         migrations.RunPython(migrate_questions, reverse_migrations),
         migrations.RemoveField(
@@ -221,9 +222,8 @@ class Migration(migrations.Migration):
             field=models.JSONField(blank=True, null=True, verbose_name="Answers"),
         ),
         migrations.RunPython(migrate_answers_format, reverse_migrations),
-        migrations.AddField(
-            model_name="requirementnode",
-            name="questions",
-            field=models.JSONField(blank=True, null=True, verbose_name="Questions"),
+        migrations.RemoveField(
+            model_name="requirementassessment",
+            name="answer",
         ),
     ]
