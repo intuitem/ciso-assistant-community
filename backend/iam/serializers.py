@@ -140,23 +140,14 @@ class PersonalAccessTokenCreateSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         expiry = timedelta(days=validated_data.pop("expiry", 30))
         logger.info("Creating personal access token for user", user=user, expiry=expiry)
-        auth_token = AuthToken.objects.create(
+        token_object, token_string = AuthToken.objects.create(
             user=user,
             expiry=expiry,
         )
         pat = PersonalAccessToken.objects.create(
-            auth_token=auth_token[0], **validated_data
+            auth_token=token_object, **validated_data
         )
-        return pat
-
-    def validate_expiry(self, expiry):
-        if expiry is not None:
-            if expiry <= timezone.now():
-                raise serializers.ValidationError("Expiry must be in the future.")
-            if timedelta(days=366) < expiry - timezone.now():
-                raise serializers.ValidationError(
-                    "Expiry must be less than a year away."
-                )
+        return pat, token_string
 
     class Meta:
         model = PersonalAccessToken

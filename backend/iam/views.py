@@ -1,4 +1,6 @@
 from base64 import urlsafe_b64decode
+from datetime import timedelta
+from django.utils import timezone
 from knox.models import AuthToken
 
 import structlog
@@ -8,8 +10,8 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import ensure_csrf_cookie
-from knox.auth import TokenAuthentication
-from knox.views import LoginView as KnoxLoginView
+from knox.auth import TokenAuthentication, get_token_model, knox_settings
+from knox.views import DateTimeField, LoginView as KnoxLoginView, user_logged_in
 from rest_framework import permissions, serializers, status, views, viewsets
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
@@ -63,17 +65,67 @@ class LogoutView(views.APIView):
         return Response({"message": "Logged out successfully."}, status=HTTP_200_OK)
 
 
-class AuthTokenViewSet(viewsets.ModelViewSet):
-    def get_serializer_class(self, **kwargs):
-        if self.action == "list":
-            return PersonalAccessTokenReadSerializer
-        elif self.action == "create":
-            return PersonalAccessTokenCreateSerializer
-
+class AuthTokenViewSet(views.APIView):
     def get_queryset(self):
         return PersonalAccessToken.objects.filter(auth_token__user=self.request.user)
 
-    def destroy(self, request, *args, **kwargs):
+    def get_context(self):
+        return {"request": self.request, "format": self.format_kwarg, "view": self}
+
+    def get_token_ttl(self):
+        return knox_settings.TOKEN_TTL
+
+    def get_token_prefix(self):
+        return knox_settings.TOKEN_PREFIX
+
+    def get_token_limit_per_user(self):
+        return knox_settings.TOKEN_LIMIT_PER_USER
+
+    def get_user_serializer_class(self):
+        return knox_settings.USER_SERIALIZER
+
+    def get_expiry_datetime_format(self):
+        return knox_settings.EXPIRY_DATETIME_FORMAT
+
+    def format_expiry_datetime(self, expiry):
+        datetime_format = self.get_expiry_datetime_format()
+        return DateTimeField(format=datetime_format).to_representation(expiry)
+
+    def create_token(self, expiry):
+        token_prefix = self.get_token_prefix()
+        return get_token_model().objects.create(
+            user=self.request.user, expiry=expiry, prefix=token_prefix
+        )
+
+    def get_post_response_data(self, request, token, name, instance):
+        data = {
+            "name": name,
+            "expiry": self.format_expiry_datetime(instance.expiry),
+            "token": token,
+        }
+        return data
+
+    def get_post_response(self, request, token, name, instance):
+        data = self.get_post_response_data(request, token, name, instance)
+        return Response(data)
+
+    def post(self, request, format=None):
+        token_limit_per_user = self.get_token_limit_per_user()
+        name = request.data.get("name")
+        expiry = request.data.get("expiry", "30")
+        if token_limit_per_user is not None:
+            now = timezone.now()
+            token = request.user.auth_token_set.filter(expiry__gt=now)
+            if token.count() >= token_limit_per_user:
+                return Response(
+                    {"error": "Maximum amount of tokens allowed per user exceeded."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        instance, token = self.create_token(timedelta(days=int(expiry)))
+        pat = PersonalAccessToken.objects.create(auth_token=instance, name=name)
+        return self.get_post_response(request, token, pat.name, pat.auth_token)
+
+    def delete(self, request, *args, **kwargs):
         try:
             token = AuthToken.objects.get(digest=kwargs["pk"])
             if token.user != request.user:
@@ -89,6 +141,16 @@ class AuthTokenViewSet(viewsets.ModelViewSet):
                 {"error": "Token not found or already deleted."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+    def get(self, request, *args, **kwargs):
+        """
+        Get all personal access tokens for the user.
+        """
+        queryset = self.get_queryset()
+        serializer = PersonalAccessTokenReadSerializer(
+            queryset, many=True, context=self.get_context()
+        )
+        return Response(serializer.data)
 
 
 class CurrentUserView(views.APIView):
