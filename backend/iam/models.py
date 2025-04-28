@@ -12,7 +12,6 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
-from ciso_assistant import settings
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
     BUILTIN_ROLE_CODENAMES,
@@ -37,9 +36,9 @@ from ciso_assistant.settings import (
     EMAIL_USE_TLS,
     EMAIL_USE_TLS_RESCUE,
 )
+from django.conf import settings
 
 import structlog
-from django.utils import translation
 
 logger = structlog.get_logger(__name__)
 
@@ -863,6 +862,30 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     for f in folder.get_sub_folders():
                         permissions[str(f.id)] |= ra_permissions
         return permissions
+
+
+class PersonalAccessToken(models.Model):
+    """
+    Personal Access Token model.
+    """
+
+    name = models.CharField(max_length=255)
+    auth_token = models.ForeignKey(settings.KNOX_TOKEN_MODEL, on_delete=models.CASCADE)
+
+    @property
+    def created(self):
+        return self.auth_token.created
+
+    @property
+    def expiry(self):
+        return self.auth_token.expiry
+
+    @property
+    def digest(self):
+        return self.auth_token.digest
+
+    def __str__(self):
+        return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
 
 
 auditlog.register(

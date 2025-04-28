@@ -39,15 +39,24 @@ export const load: PageServerLoad = async (event) => {
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
 
-	const authTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
-	const authTokensResponse = await event.fetch(authTokensEndpoint).then((res) => res.json());
-	if (!authTokensResponse.ok) {
-		console.error('Could not get auth tokens', authTokensResponse);
-		fail(authTokensResponse.status, { error: 'Could not get auth tokens' });
+	const personalAccessTokensEndpoint = `${BASE_API_URL}/iam/auth-tokens/`;
+	const personalAccessTokensResponse = await event
+		.fetch(personalAccessTokensEndpoint)
+		.then((res) => res.json());
+	if (!personalAccessTokensResponse.ok) {
+		console.error('Could not get personal access tokens', personalAccessTokensResponse);
+		fail(personalAccessTokensResponse.status, { error: 'Could not get personal access tokens' });
 	}
-	const authTokens = await authTokensResponse.json();
+	const personalAccessTokens = await personalAccessTokensResponse.json();
 
-	return { authenticators, totp, activateTOTPForm, recoveryCodes, authTokens, title: m.settings() };
+	return {
+		authenticators,
+		totp,
+		activateTOTPForm,
+		recoveryCodes,
+		personalAccessTokens,
+		title: m.settings()
+	};
 };
 
 export const actions: Actions = {

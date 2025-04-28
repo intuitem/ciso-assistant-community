@@ -3,9 +3,12 @@ from django.utils import timezone
 from django.contrib.auth import authenticate
 from knox.models import AuthToken
 from rest_framework import serializers
-from .models import User
+from .models import PersonalAccessToken, User
 from django.contrib.auth import password_validation
 from core.serializer_fields import FieldsRelatedField
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class LoginSerializer(serializers.Serializer):
@@ -116,27 +119,35 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
         return data
 
 
-class AuthTokenReadSerializer(serializers.ModelSerializer):
+class PersonalAccessTokenReadSerializer(serializers.ModelSerializer):
     """
-    Serializer for AuthToken model.
+    Serializer for PersonalAccessToken model.
     """
 
     user = FieldsRelatedField(["email", "id"])
 
     class Meta:
-        model = AuthToken
-        fields = ["user", "created", "expiry", "digest"]
+        model = PersonalAccessToken
+        fields = ["name", "user", "created", "expiry", "digest"]
 
 
-class AuthTokenCreateSerializer(serializers.ModelSerializer):
+class PersonalAccessTokenCreateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating AuthToken.
+    Serializer for creating PersonalAccessToken.
     """
 
     def create(self, validated_data):
         user = self.context["request"].user
-        auth_token = AuthToken.objects.create(user=user, **validated_data)
-        return auth_token
+        expiry = timedelta(days=validated_data.pop("expiry", 30))
+        logger.info("Creating personal access token for user", user=user, expiry=expiry)
+        auth_token = AuthToken.objects.create(
+            user=user,
+            expiry=expiry,
+        )
+        pat = PersonalAccessToken.objects.create(
+            auth_token=auth_token[0], **validated_data
+        )
+        return pat
 
     def validate_expiry(self, expiry):
         if expiry is not None:
@@ -148,5 +159,5 @@ class AuthTokenCreateSerializer(serializers.ModelSerializer):
                 )
 
     class Meta:
-        model = AuthToken
-        fields = ["created", "expiry"]
+        model = PersonalAccessToken
+        fields = ["name", "created", "expiry"]
