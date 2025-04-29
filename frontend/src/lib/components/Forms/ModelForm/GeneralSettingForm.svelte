@@ -104,4 +104,23 @@
 			/>
 		</svelte:fragment>
 	</AccordionItem>
+	<AccordionItem>
+		<svelte:fragment slot="summary"
+			><i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}</svelte:fragment
+		>
+		<svelte:fragment slot="content">
+			<Checkbox
+				{form}
+				field="risk_matrix_swap_axes"
+				label={m.settingsRiskMatrixSwapAxes()}
+				helpText={m.settingsRiskMatrixSwapAxesHelpText()}
+			/>
+			<Checkbox
+				{form}
+				field="risk_matrix_flip_vertical"
+				label={m.settingsRiskMatrixFlipVertical()}
+				helpText={m.settingsRiskMatrixFlipVerticalHelpText()}
+			/>
+		</svelte:fragment>
+	</AccordionItem>
 </Accordion>
