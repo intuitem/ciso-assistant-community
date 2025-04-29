@@ -1496,6 +1496,12 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     name = serializers.SerializerMethodField()
     assigned_to = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
+    is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
+    applied_controls = FieldsRelatedField(many=True)
+    compliance_assessments = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
+    risk_assessments = FieldsRelatedField(many=True)
+    
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""
