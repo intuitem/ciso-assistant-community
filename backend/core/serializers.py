@@ -1413,47 +1413,49 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     assigned_to = FieldsRelatedField(many=True)
+
     next_occurrence = serializers.DateField(read_only=True)
     last_occurrence_status = serializers.CharField(read_only=True)
 
-    observation = serializers.SerializerMethodField(read_only=True)
-    evidences = serializers.SerializerMethodField(read_only=True)
+    # Expose task_node fields directly
+    status = serializers.SerializerMethodField()
+    observation = serializers.SerializerMethodField()
+    evidences = serializers.SerializerMethodField()
 
     class Meta:
         model = TaskTemplate
         exclude = ["schedule"]
 
+    def get_task_node(self, obj):
+        """
+        Helper to fetch the related TaskNode for non-recurrent templates.
+        """
+        if obj.is_recurrent:
+            return None
+        return TaskNode.objects.filter(task_template=obj).order_by("due_date").first()
+
+    def get_status(self, obj):
+        task_node = self.get_task_node(obj)
+        return task_node.status if task_node else None
+
     def get_observation(self, obj):
-        """
-        Return the observation of the associated task node if the template is not recurrent.
-        """
-        if not obj.is_recurrent:
-            try:
-                task = TaskNode.objects.get(task_template=obj)
-                return task.observation
-            except TaskNode.DoesNotExist:
-                return None
-        return None
+        task_node = self.get_task_node(obj)
+        return task_node.observation if task_node else ""
 
     def get_evidences(self, obj):
-        """
-        Return the evidences of the associated task node if the template is not recurrent.
-        """
-        if not obj.is_recurrent:
-            try:
-                task = TaskNode.objects.get(task_template=obj)
-                # Return evidence IDs only - you can modify this to return more details if needed
-                return [{"id": e.id, "str": e.name} for e in task.evidences.all()]
-            except TaskNode.DoesNotExist:
-                return []
+        task_node = self.get_task_node(obj)
+        if task_node:
+            return [{"id": e.id, "str": e.name} for e in task_node.evidences.all()]
         return []
 
 
 class TaskTemplateWriteSerializer(BaseModelSerializer):
-    status = serializers.CharField(default="pending")
-    observation = serializers.CharField(allow_null=True, required=False)
+    status = serializers.CharField(required=False)
+    observation = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
     evidences = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Evidence.objects.all(), required=False
+        queryset=Evidence.objects.all(), many=True, required=False
     )
 
     class Meta:
@@ -1462,36 +1464,86 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        try:
-            task = (
+        if not instance.is_recurrent:
+            task_node = (
                 TaskNode.objects.filter(task_template=instance)
                 .order_by("due_date")
                 .first()
             )
-            data["status"] = task.status
-            data["observation"] = task.observation
-            data["evidences"] = [e.id for e in task.evidences.all()]
-        except TaskNode.DoesNotExist:
-            data["status"] = None
-            data["observation"] = None
-            data["evidences"] = []
-
+            if task_node:
+                data["status"] = task_node.status
+                data["observation"] = task_node.observation
+                data["evidences"] = [e.id for e in task_node.evidences.all()]
+            else:
+                data["status"] = None
+                data["observation"] = ""
+                data["evidences"] = []
         return data
 
-    def save(self):
-        task_template = super().save()
-        if not task_template.is_recurrent:
-            TaskNode.objects.filter(task_template=task_template).delete()
-            task = TaskNode.objects.create(
+    def create(self, validated_data):
+        tasknode_data = self._extract_tasknode_fields(validated_data)
+        instance = super().create(validated_data)
+        self._sync_task_node(instance, tasknode_data, False, False)
+        return instance
+
+    def update(self, instance, validated_data):
+        was_recurrent = instance.is_recurrent  # Store the previous state
+        tasknode_data = self._extract_tasknode_fields(validated_data)
+        instance = super().update(instance, validated_data)
+        now_recurrent = instance.is_recurrent
+        self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+        return instance
+
+    def _extract_tasknode_fields(self, validated_data):
+        """
+        Separate the TaskNode-specific fields from validated_data.
+        """
+        return {
+            "status": validated_data.pop("status", None),
+            "observation": validated_data.pop("observation", None),
+            "evidences": validated_data.pop("evidences", []),
+        }
+
+    def _sync_task_node(
+        self, task_template, tasknode_data, was_recurrent, now_recurrent
+    ):
+        """
+        Synchronize or create the TaskNode linked to a non-recurrent TaskTemplate.
+        """
+        if now_recurrent:
+            return  # Only sync for non-recurrent templates
+
+        task_nodes = TaskNode.objects.filter(task_template=task_template)
+        if was_recurrent:
+            # Was recurrent, now non-recurrent: must clean
+            task_nodes.delete()
+            task_node = TaskNode.objects.create(
                 task_template=task_template,
                 due_date=task_template.task_date,
                 folder=task_template.folder,
-                status=self.validated_data.get("status"),
-                observation=self.validated_data.get("observation"),
             )
-            task.evidences.set(self.validated_data.get("evidences", []))
-        return task_template
+        else:
+            # Was already non-recurrent: reuse if possible
+            if task_nodes.count() == 1:
+                task_node = task_nodes.first()
+            else:
+                task_nodes.delete()
+                task_node = TaskNode.objects.create(
+                    task_template=task_template,
+                    due_date=task_template.task_date,
+                    folder=task_template.folder,
+                )
+
+        task_node.to_delete = False
+        if tasknode_data.get("status") is not None:
+            task_node.status = tasknode_data["status"]
+        if tasknode_data.get("observation") is not None:
+            task_node.observation = tasknode_data["observation"]
+        task_node.save()
+
+        evidences = tasknode_data.get("evidences")
+        if evidences is not None:
+            task_node.evidences.set(evidences)
 
 
 class TaskNodeReadSerializer(BaseModelSerializer):

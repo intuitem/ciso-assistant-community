@@ -202,6 +202,7 @@
 		options={model.selectOptions['status']}
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
+		disableDoubleDash={true}
 	/>
 	<TextArea
 		{form}
