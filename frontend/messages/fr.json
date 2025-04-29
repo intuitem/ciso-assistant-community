@@ -1471,5 +1471,16 @@
 	"associatedTaskNodes": "Révision des instances",
 	"showAllEvents": "Afficher tous les événements",
 	"noEvents": "Aucun événement pour ce jour",
-	"domainAnalytics": "Analytiques par domaine"
+	"domainAnalytics": "Analytiques par domaine",
+	"personalAccessTokens": "Jetons d'accès personnels",
+	"personalAccessTokensDescription": "Jetons que vous avez générés pouvant être utilisés pour accéder à l'API CISO Assistant.",
+	"generateNewPersonalAccessToken": "Générer un nouveau jeton",
+	"personalAccessTokenCreateDescription": "Les jetons d'accès personnels (PAT) peuvent être utilisés à la place d'un mot de passe pour s'authentifier auprès de l'API. Ils sont utiles pour automatiser des tâches ou pour l'intégration avec d'autres systèmes.",
+	"personalAccessTokenCreateWarning": "Avertissement : Les PAT sont des informations sensibles. Traitez-les comme des mots de passe. Si vous perdez un PAT, vous devrez en générer un nouveau.",
+	"personalAccessTokenOnlyDisplayedOnce": "Le jeton ne sera affiché qu'une seule fois. Assurez-vous de le copier et de le conserver en lieu sûr.",
+	"expiresOn": "Expire le {date}",
+	"personalAccessTokenExpiryHelpText": "Nombre de jours après lequel le jeton expirera",
+	"expiry": "Expiration",
+	"successfullyDeletedPersonalAccessToken": "Jeton d'accès personnel supprimé avec succès",
+	"personalAccessTokenDeleteConfirm": "Êtes-vous sûr de vouloir supprimer ce jeton d'accès personnel ? Toute application ou script utilisant ce jeton ne pourra plus accéder à l'API CISO Assistant. Cette action est irréversible."
 }
