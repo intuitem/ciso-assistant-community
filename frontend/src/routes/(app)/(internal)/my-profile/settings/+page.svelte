@@ -12,12 +12,13 @@
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { defaults } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
-	import { z } from 'zod';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { defaults } from 'sveltekit-superforms';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -206,7 +207,11 @@
 												<p>
 													{pat.name}
 												</p>
-												<p>{m.expiresOn({ date: new Date(pat.expiry).toLocaleDateString() })}</p>
+												<p>
+													{m.expiresOn({
+														date: new Date(pat.expiry).toLocaleDateString(getLocale())
+													})}
+												</p>
 											</span>
 											<button
 												on:click={(_) => {
