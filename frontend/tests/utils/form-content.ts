@@ -98,7 +98,7 @@ export class FormContent {
 				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
 					await field.locator.click();
 
-					if (this.name === "New User") {
+					if (this.name === 'New User') {
 						// This condition fixes some weird bug in the way the functional tests interact with the svelte-multiselect, it's like the multi-select has some extra unattended initialization time.
 						// This fix is not clean, but it doesn't introduce a that much overhead in the overall functional tests suite.
 						// This bug is meant to dissapear someday as we will surely abandon the external svelte-multiselect component or refactor this test.
