@@ -1,12 +1,13 @@
 from datetime import timedelta
-from django.utils import timezone
-from django.contrib.auth import authenticate
+
+import structlog
+from django.contrib.auth import authenticate, password_validation
 from knox.models import AuthToken
 from rest_framework import serializers
-from .models import PersonalAccessToken, User
-from django.contrib.auth import password_validation
+
 from core.serializer_fields import FieldsRelatedField
-import structlog
+
+from .models import PersonalAccessToken, User
 
 logger = structlog.get_logger(__name__)
 
