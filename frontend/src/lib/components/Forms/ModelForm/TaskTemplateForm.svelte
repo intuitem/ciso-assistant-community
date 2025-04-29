@@ -176,6 +176,31 @@
 			bind:cachedValue={formDataCache['end_date']}
 		/>
 	</Dropdown>
+{:else}
+	<Select
+		{form}
+		field="status"
+		label={m.status()}
+		options={model.selectOptions['status']}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
+	<TextArea
+		{form}
+		field="observation"
+		label={m.observation()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="evidences"
+		label={m.evidences()}
+	/>
 {/if}
 <AutocompleteSelect
 	{form}
@@ -227,9 +252,9 @@
 		optionsEndpoint="risk-assessments"
 		optionsExtraFields={[['perimeter', 'str']]}
 		optionsLabelField="str"
-		field="risk_assessment"
-		cacheLock={cacheLocks['risk_assessment']}
-		bind:cachedValue={formDataCache['risk_assessment']}
+		field="risk_assessments"
+		cacheLock={cacheLocks['risk_assessments']}
+		bind:cachedValue={formDataCache['risk_assessments']}
 		label={m.riskAssessments()}
 	/>
 </Dropdown>
