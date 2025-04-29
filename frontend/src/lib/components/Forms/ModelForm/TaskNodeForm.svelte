@@ -21,6 +21,7 @@
 	helpText={m.dueDateHelpText()}
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
+	disabled
 />
 <Select
 	{form}
