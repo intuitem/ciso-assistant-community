@@ -136,6 +136,10 @@ class PersonalAccessTokenCreateSerializer(serializers.ModelSerializer):
     Serializer for creating PersonalAccessToken.
     """
 
+    expiry = serializers.IntegerField(
+        write_only=True, required=False, min_value=1, max_value=365
+    )
+
     def create(self, validated_data):
         user = self.context["request"].user
         expiry = timedelta(days=validated_data.pop("expiry", 30))
@@ -152,3 +156,4 @@ class PersonalAccessTokenCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonalAccessToken
         fields = ["name", "created", "expiry"]
+        read_only_fields = ["created"]
