@@ -31,7 +31,9 @@
 			...tasks.map((task: Record<string, string>) => ({
 				label: `TA: ${task.name}`,
 				date: new Date(task.due_date),
-				link: !task.is_recurrent ? `/task-templates/${task.task_template.id}` : `/task-nodes/${task.id}`,
+				link: !task.is_recurrent
+					? `/task-templates/${task.task_template.id}`
+					: `/task-nodes/${task.id}`,
 				users: task.assigned_to,
 				color: 'primary'
 			}))

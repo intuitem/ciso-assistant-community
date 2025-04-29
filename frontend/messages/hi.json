@@ -881,5 +881,6 @@
 	"associatedFindings": "संबद्ध खोजें",
 	"findings_count": "खोजों की संख्या",
 	"addFinding": "खोज जोड़ें",
-	"youCanSetPasswordHere": "आप यहाँ अपना पासवर्ड सेट कर सकते हैं"
+	"youCanSetPasswordHere": "आप यहाँ अपना पासवर्ड सेट कर सकते हैं",
+	"taskScheduleWarning": "नए अनुसूची का हिस्सा न होने वाले किसी भी कार्य को स्थायी रूप से हटा दिया जाएगा।"
 }

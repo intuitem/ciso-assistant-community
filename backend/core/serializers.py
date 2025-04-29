@@ -1415,14 +1415,14 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     next_occurrence = serializers.DateField(read_only=True)
     last_occurrence_status = serializers.CharField(read_only=True)
-    
+
     observation = serializers.SerializerMethodField(read_only=True)
     evidences = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = TaskTemplate
         exclude = ["schedule"]
-    
+
     def get_observation(self, obj):
         """
         Return the observation of the associated task node if the template is not recurrent.
@@ -1434,7 +1434,7 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
             except TaskNode.DoesNotExist:
                 return None
         return None
-    
+
     def get_evidences(self, obj):
         """
         Return the evidences of the associated task node if the template is not recurrent.
@@ -1443,38 +1443,42 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
             try:
                 task = TaskNode.objects.get(task_template=obj)
                 # Return evidence IDs only - you can modify this to return more details if needed
-                return [{'id': e.id, 'str': e.name} for e in task.evidences.all()]
+                return [{"id": e.id, "str": e.name} for e in task.evidences.all()]
             except TaskNode.DoesNotExist:
                 return []
         return []
 
 
 class TaskTemplateWriteSerializer(BaseModelSerializer):
-    status = serializers.CharField(default='pending')
+    status = serializers.CharField(default="pending")
     observation = serializers.CharField(allow_null=True, required=False)
     evidences = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Evidence.objects.all(), required=False
     )
-    
+
     class Meta:
         model = TaskTemplate
         fields = "__all__"
-    
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
         try:
-            task = TaskNode.objects.filter(task_template=instance).order_by('due_date').first()
-            data['status'] = task.status
-            data['observation'] = task.observation
-            data['evidences'] = [e.id for e in task.evidences.all()]
+            task = (
+                TaskNode.objects.filter(task_template=instance)
+                .order_by("due_date")
+                .first()
+            )
+            data["status"] = task.status
+            data["observation"] = task.observation
+            data["evidences"] = [e.id for e in task.evidences.all()]
         except TaskNode.DoesNotExist:
-            data['status'] = None
-            data['observation'] = None
-            data['evidences'] = []
+            data["status"] = None
+            data["observation"] = None
+            data["evidences"] = []
 
         return data
-    
+
     def save(self):
         task_template = super().save()
         if not task_template.is_recurrent:
@@ -1501,7 +1505,6 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     compliance_assessments = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
-    
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""

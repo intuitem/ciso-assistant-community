@@ -5,4 +5,8 @@
 	export let data: PageData;
 </script>
 
-<DetailView {data} displayModelTable={data.data.is_recurrent} exclude={data.data.is_recurrent ? ['observation', 'evidences'] : [] } />
+<DetailView
+	{data}
+	displayModelTable={data.data.is_recurrent}
+	exclude={data.data.is_recurrent ? ['observation', 'evidences'] : []}
+/>
