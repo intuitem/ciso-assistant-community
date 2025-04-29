@@ -1,19 +1,20 @@
 from base64 import urlsafe_b64decode
 from datetime import timedelta
-from django.utils import timezone
-from knox import crypto
-from knox.models import AuthToken
 
 import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import ensure_csrf_cookie
+from knox import crypto
 from knox.auth import TokenAuthentication, get_token_model, knox_settings
-from knox.views import DateTimeField, LoginView as KnoxLoginView, user_logged_in
-from rest_framework import permissions, serializers, status, views, viewsets
+from knox.models import AuthToken
+from knox.views import DateTimeField
+from knox.views import LoginView as KnoxLoginView
+from rest_framework import permissions, serializers, status, views
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -27,10 +28,9 @@ from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 from .models import Folder, PersonalAccessToken, Role, RoleAssignment
 from .serializers import (
-    PersonalAccessTokenCreateSerializer,
-    PersonalAccessTokenReadSerializer,
     ChangePasswordSerializer,
     LoginSerializer,
+    PersonalAccessTokenReadSerializer,
     ResetPasswordConfirmSerializer,
     SetPasswordSerializer,
 )
@@ -80,17 +80,11 @@ class AuthTokenListViewSet(views.APIView):
     def get_context(self):
         return {"request": self.request, "format": self.format_kwarg, "view": self}
 
-    def get_token_ttl(self):
-        return knox_settings.TOKEN_TTL
-
     def get_token_prefix(self):
         return knox_settings.TOKEN_PREFIX
 
     def get_token_limit_per_user(self):
         return knox_settings.TOKEN_LIMIT_PER_USER
-
-    def get_user_serializer_class(self):
-        return knox_settings.USER_SERIALIZER
 
     def get_expiry_datetime_format(self):
         return knox_settings.EXPIRY_DATETIME_FORMAT

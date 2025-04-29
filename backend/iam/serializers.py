@@ -1,8 +1,5 @@
-from datetime import timedelta
-
 import structlog
 from django.contrib.auth import authenticate, password_validation
-from knox.models import AuthToken
 from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
@@ -130,31 +127,3 @@ class PersonalAccessTokenReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonalAccessToken
         fields = ["name", "user", "created", "expiry", "digest"]
-
-
-class PersonalAccessTokenCreateSerializer(serializers.ModelSerializer):
-    """
-    Serializer for creating PersonalAccessToken.
-    """
-
-    expiry = serializers.IntegerField(
-        write_only=True, required=False, min_value=1, max_value=365
-    )
-
-    def create(self, validated_data):
-        user = self.context["request"].user
-        expiry = timedelta(days=validated_data.pop("expiry", 30))
-        logger.info("Creating personal access token for user", user=user, expiry=expiry)
-        token_object, token_string = AuthToken.objects.create(
-            user=user,
-            expiry=expiry,
-        )
-        pat = PersonalAccessToken.objects.create(
-            auth_token=token_object, **validated_data
-        )
-        return pat, token_string
-
-    class Meta:
-        model = PersonalAccessToken
-        fields = ["name", "created", "expiry"]
-        read_only_fields = ["created"]
