@@ -1471,5 +1471,10 @@
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
 	"noEvents": "No events for this day",
-	"domainAnalytics": "Domain Analytics"
+	"domainAnalytics": "Domain Analytics",
+	"settingsRiskMatrixSwapAxes": "Swap axes",
+	"settingsRiskMatrixSwapAxesHelpText": "This will swap the probability and impact axes. If turned on, Impact will be the ordinate and Probability the abscissa of the matrices.",
+	"settingsRiskMatrixFlipVertical": "Flip vertically",
+	"settingsRiskMatrixFlipVerticalHelpText": "If this is turned on, the origin of the risk matrices will be located on the top-left.",
+	"settingsRiskMatrix": "Risk matrix settings"
 }
