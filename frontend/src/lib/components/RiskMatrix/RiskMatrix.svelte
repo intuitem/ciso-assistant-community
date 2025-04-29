@@ -6,6 +6,7 @@
 	import type { ComponentType } from 'svelte';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { isDark } from '$lib/utils/helpers';
+	import { page } from '$app/stores';
 
 	// --- Props ---
 	export let riskMatrix;
@@ -17,8 +18,10 @@
 	export let dataItemComponent: ComponentType | undefined = undefined;
 
 	// Axis configuration props
-	export let swapAxes: boolean = false; // Probability on X, Impact on Y if true
-	export let flipVertical: boolean = false; // Origin top-left for Y-axis if true
+	export let swapAxes: boolean = $page.data.settings.risk_matrix_swap_axes ?? false; // Probability on X, Impact on Y if true
+	export let flipVertical: boolean = $page.data.settings.risk_matrix_flip_vertical ?? false; // Origin top-left for Y-axis if true
+
+	$: console.log($page.data.settings);
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
 	const grid = parsedRiskMatrix.grid;
