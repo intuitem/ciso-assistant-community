@@ -4269,14 +4269,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         task_nodes = TaskNode.objects.filter(
             task_template=self, due_date__lte=today
         ).order_by("-due_date")
-        if self.is_recurrent:
-            return task_nodes[0].status if task_nodes.exists() else None
-        else:
-            return (
-                TaskNode.objects.get(task_template=self).status
-                if TaskNode.objects.filter(task_template=self).exists()
-                else None
-            )
+        return task_nodes[0].status if task_nodes.exists() else None
 
     class Meta:
         verbose_name = "Task template"
