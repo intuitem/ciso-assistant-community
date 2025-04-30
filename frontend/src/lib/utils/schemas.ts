@@ -323,7 +323,8 @@ export const GeneralSettingsSchema = z.object({
 	notifications_enable_mailing: z.boolean().optional(),
 	interface_agg_scenario_matrix: z.boolean().optional(),
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
-	risk_matrix_flip_vertical: z.boolean().default(false).optional()
+	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
+	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional()
 });
 
 export const SSOSettingsSchema = z.object({

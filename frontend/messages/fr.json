@@ -1471,5 +1471,9 @@
 	"associatedTaskNodes": "Révision des instances",
 	"showAllEvents": "Afficher tous les événements",
 	"noEvents": "Aucun événement pour ce jour",
-	"domainAnalytics": "Analytiques par domaine"
+	"domainAnalytics": "Analytiques par domaine",
+	"impactISO": "Conséquence",
+	"impactEBIOS": "Gravité",
+	"probabilityISO": "Vraisemblance",
+	"probabilityEBIOS": "Vraisemblance"
 }
