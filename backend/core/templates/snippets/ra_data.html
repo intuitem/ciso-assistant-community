@@ -87,21 +87,13 @@
             {# Current Risk Matrix #}
             <div class="mb-8 shadow rounded-lg p-6">
                 <h3 class="font-bold text-lg mb-4">{% trans "Current" %}</h3>
-                {% if pdf %}
-                    {% include template_name with enriched_data=ri_clusters.current %}
-                {% else %}
-                    {% include template_name with data=ri_clusters.current %}
-                {% endif %}
+                {% include template_name with enriched_data=ri_clusters.current %}
             </div>
 
             {# Residual Risk Matrix #}
             <div class="shadow rounded-lg p-6">
                 <h3 class="font-bold text-lg mb-4">{% trans "Residual" %}</h3>
-                {% if pdf %}
-                    {% include template_name with enriched_data=ri_clusters.residual %}
-                {% else %}
-                    {% include template_name with data=ri_clusters.residual %}
-                {% endif %}
+                {% include template_name with enriched_data=ri_clusters.residual %}
             </div>
         {% endwith %}
     </div>
