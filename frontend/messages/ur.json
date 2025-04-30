@@ -880,5 +880,6 @@
 	"associatedFindings": "وابستہ نتائج",
 	"findings_count": "نتائج کی تعداد",
 	"addFinding": "نتیجہ شامل کریں۔",
-	"youCanSetPasswordHere": "آپ یہاں اپنا پاس ورڈ سیٹ کر سکتے ہیں"
+	"youCanSetPasswordHere": "آپ یہاں اپنا پاس ورڈ سیٹ کر سکتے ہیں",
+	"taskScheduleWarning": "نئی شیڈول کا حصہ نہ ہونے والے کسی بھی کام کو مستقل طور پر حذف کر دیا جائے گا۔"
 }

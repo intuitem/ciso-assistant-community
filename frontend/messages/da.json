@@ -1196,5 +1196,6 @@
 	"requirementsProgressionSemiColon": "Kravfremskridt:",
 	"noRequirementFound": "Ingen kravvurdering fundet",
 	"noAuditForTheFramework": "Der er ingen revision for dette rammeværk",
-	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom"
+	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom",
+	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet"
 }

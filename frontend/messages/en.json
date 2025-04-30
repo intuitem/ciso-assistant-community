@@ -1471,5 +1471,6 @@
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
 	"noEvents": "No events for this day",
-	"domainAnalytics": "Domain Analytics"
+	"domainAnalytics": "Domain Analytics",
+	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted"
 }
