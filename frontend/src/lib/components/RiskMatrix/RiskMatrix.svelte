@@ -117,11 +117,45 @@
 	</div>
 
 	<div class="flex flex-col w-full">
+		{#if flipVertical}
+			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
+				{xAxisLabel}
+			</div>
+		{/if}
 		<div
 			class="{wrapperClass} grid gap-1 w-full"
 			style="grid-template-columns: auto repeat({xAxisHeaders.length}, minmax(0, 1fr)); grid-template-rows: repeat({yAxisHeaders.length}, minmax(0, 1fr)) auto;"
 			data-testid="risk-matrix"
 		>
+			{#if flipVertical}
+				<div />
+
+				{#each xAxisHeaders as xHeader, j}
+					<div
+						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+							xHeader.hexcolor
+						)}"
+						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+						data-testid="x-axis-header-{j}"
+					>
+						<div
+							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+							data-popup={'popup-' + matrixName + '-x-' + j}
+						>
+							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
+							<div class="arrow bg-black" />
+						</div>
+						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+						{#if xHeader.description}
+							<i
+								class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
+								use:popup={popupHoverX[j]}
+							></i>
+						{/if}
+					</div>
+				{/each}
+			{/if}
 			{#each finalMatrix as row, i}
 				{@const yHeader = yAxisHeaders[finalMatrix.length - 1 - i]}
 				<div
@@ -161,35 +195,41 @@
 				{/each}
 			{/each}
 
-			<div />
+			{#if !flipVertical}
+				<div />
 
-			{#each xAxisHeaders as xHeader, j}
-				<div
-					class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
-						xHeader.hexcolor
-					)}"
-					style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
-					data-testid="x-axis-header-{j}"
-				>
+				{#each xAxisHeaders as xHeader, j}
 					<div
-						class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
-						style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
-						data-popup={'popup-' + matrixName + '-x-' + j}
+						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+							xHeader.hexcolor
+						)}"
+						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+						data-testid="x-axis-header-{j}"
 					>
-						<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
-						<div class="arrow bg-black" />
+						<div
+							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+							data-popup={'popup-' + matrixName + '-x-' + j}
+						>
+							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
+							<div class="arrow bg-black" />
+						</div>
+						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+						{#if xHeader.description}
+							<i
+								class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
+								use:popup={popupHoverX[j]}
+							></i>
+						{/if}
 					</div>
-					<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
-					{#if xHeader.description}
-						<i
-							class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
-							use:popup={popupHoverX[j]}
-						></i>
-					{/if}
-				</div>
-			{/each}
+				{/each}
+			{/if}
 		</div>
-		<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">{xAxisLabel}</div>
+		{#if !flipVertical}
+			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
+				{xAxisLabel}
+			</div>
+		{/if}
 	</div>
 </div>
 
