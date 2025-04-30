@@ -906,5 +906,6 @@
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "Znacznik czasu nie może być w przyszłości",
 	"youCanSetPasswordHere": "Możesz ustawić swoje hasło tutaj.",
-	"filterby": "Filtruj według"
+	"filterby": "Filtruj według",
+	"taskScheduleWarning": "Wszystkie zadania, które nie będą częścią nowego harmonogramu, zostaną trwale usunięte"
 }

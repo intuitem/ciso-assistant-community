@@ -880,5 +880,6 @@
 	"associatedFindings": "الملاحظات المرتبطة",
 	"findings_count": "عدد الملاحظات",
 	"addFinding": "إضافة ملاحظة",
-	"youCanSetPasswordHere": "يمكنك تعيين كلمة المرور هنا"
+	"youCanSetPasswordHere": "يمكنك تعيين كلمة المرور هنا",
+	"taskScheduleWarning": "سيتم حذف جميع المهام التي لا تكون جزءًا من الجدول الزمني الجديد بشكل دائم"
 }
