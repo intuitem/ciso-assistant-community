@@ -3184,15 +3184,11 @@ class ComplianceAssessment(Assessment):
         then for each:
         if one applied control attached:
             if the AC status is active, toggle requirement assessment to compliant
-            if the AC status is in (deprecated, in_progress, on_hold), toggle requirement assessment to partially compliant
-            if the AC status is in (to_do), toggle the requirement assessment to non_compliant
-            if the AC status is in (--), toggle the requirement assessment to not_assessed
-        if two more applied controls are attached:
+            if the AC status is in any other status, toggle the requirement assessment to non_compliant
+        if two or more applied controls are attached:
             if all AC are active, toggle to compliant
-            if one AC is in (deprecated, in_progress, on_hold), toggle to partially compliant
-            if all AC is in (to_do) toggle the requirement to non_compliant
-            if all the AC status in (--) toggle the requirement to not_assessed
-        Note: maybe we can consider the RA status as well in addition to the result
+            if at least one AC is active, toggle to partially compliant
+            else toggle to non_compliant
         """
 
         def infer_result(applied_controls):
@@ -3203,28 +3199,17 @@ class ComplianceAssessment(Assessment):
                 ac_status = applied_controls[0].status
                 if ac_status == AppliedControl.Status.ACTIVE:
                     return RequirementAssessment.Result.COMPLIANT
-                elif ac_status == AppliedControl.Status.TO_DO:
-                    return RequirementAssessment.Result.NON_COMPLIANT
-                elif ac_status == AppliedControl.Status.UNDEFINED:
-                    return RequirementAssessment.Result.NOT_ASSESSED
                 else:
-                    return RequirementAssessment.Result.PARTIALLY_COMPLIANT
+                    return RequirementAssessment.Result.NON_COMPLIANT
 
             statuses = [ac.status for ac in applied_controls]
 
-            # If all are the same status, apply the same logic as for a single control and pass one
-            if all(status == statuses[0] for status in statuses):
-                return infer_result([applied_controls[0]])
-
             if all(status == AppliedControl.Status.ACTIVE for status in statuses):
                 return RequirementAssessment.Result.COMPLIANT
-            elif all(status == AppliedControl.Status.TO_DO for status in statuses):
-                return RequirementAssessment.Result.NON_COMPLIANT
-            elif all(status == AppliedControl.Status.UNDEFINED for status in statuses):
-                return RequirementAssessment.Result.NOT_ASSESSED
-            else:
-                # Mixed statuses or has any DEPRECATED, IN_PROGRESS, ON_HOLD
+            elif AppliedControl.Status.ACTIVE in statuses:
                 return RequirementAssessment.Result.PARTIALLY_COMPLIANT
+            else:
+                return RequirementAssessment.Result.NON_COMPLIANT
 
         changes = dict()
         requirement_assessments_with_ac = RequirementAssessment.objects.filter(
