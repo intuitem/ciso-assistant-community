@@ -174,7 +174,7 @@
 					<ul class="space-y-2">
 						{#each selectedDayItems as item}
 							<li
-								class="p-3 bg-primary-50 rounded-md hover:bg-primary-100 transition duration-200 border-l-2
+								class="p-3 rounded-md transition duration-200 border-l-2
 								{item.color === 'primary'
 									? 'hover:bg-primary-200 text-primary-700 bg-primary-50 border-l-primary-500'
 									: ''}

@@ -905,5 +905,6 @@
 	"cannotDeleteAutoTimeline": "As entradas automáticas da linha do tempo não podem ser excluídas",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "O carimbo de data/hora não pode estar no futuro",
-	"youCanSetPasswordHere": "Você pode definir sua senha aqui."
+	"youCanSetPasswordHere": "Você pode definir sua senha aqui.",
+	"taskScheduleWarning": "Qualquer tarefa que não faça parte do novo cronograma será excluída permanentemente"
 }
