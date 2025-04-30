@@ -95,7 +95,7 @@
 </script>
 
 <div class="flex flex-row items-center">
-	<div class="flex font-semibold text-xl -rotate-90 whitespace-nowrap origin-bottom-left ml-5 mr-1">
+	<div class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto">
 		{yAxisLabel}
 	</div>
 
