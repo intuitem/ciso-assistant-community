@@ -5315,10 +5315,9 @@ class TaskTemplateViewSet(BaseModelViewSet):
         with transaction.atomic():
             # Soft-delete all existing TaskNode instances associated with this TaskTemplate
             TaskNode.objects.filter(task_template=task_template).update(to_delete=True)
-
             # Determine the end date based on the frequency
+            start_date = task_template.task_date
             if task_template.is_recurrent:
-                start_date = task_template.task_date
                 if task_template.schedule["frequency"] == "DAILY":
                     delta = rd.relativedelta(months=2)
                 elif task_template.schedule["frequency"] == "WEEKLY":
@@ -5333,25 +5332,18 @@ class TaskTemplateViewSet(BaseModelViewSet):
                     end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
                 else:
                     end_date = datetime.now().date() + delta
-
                 # Ensure end_date is not before the calculated delta
                 if end_date < datetime.now().date() + delta:
                     end_date = datetime.now().date() + delta
-
-                # Generate the task nodes
-                self.task_calendar(
-                    task_templates=TaskTemplate.objects.filter(id=task_template.id),
-                    start=start_date,
-                    end=end_date,
-                )
-
             else:
-                TaskNode.objects.create(
-                    due_date=task_template.task_date,
-                    status="pending",
-                    task_template=task_template,
-                    folder=task_template.folder,
-                )
+                end_date = start_date
+            # Generate the task nodes
+            self.task_calendar(
+                task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                start=start_date,
+                end=end_date,
+            )
+
             # garbage-collect
             TaskNode.objects.filter(to_delete=True).delete()
 
