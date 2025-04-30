@@ -1535,6 +1535,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 )
 
         task_node.to_delete = False
+        task_node.due_date = task_template.task_date
         if tasknode_data.get("status") is not None:
             task_node.status = tasknode_data["status"]
         if tasknode_data.get("observation") is not None:
