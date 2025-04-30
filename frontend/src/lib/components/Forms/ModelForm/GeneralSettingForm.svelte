@@ -140,8 +140,8 @@
 						label={m.settingsRiskMatrixLabels()}
 						field="risk_matrix_labels"
 						options={[
-							{ label: 'ISO', value: 'ISO' },
-							{ label: 'EBIOS', value: 'EBIOS' }
+							{ label: m.iso27001(), value: 'ISO' },
+							{ label: m.ebiosRM(), value: 'EBIOS' }
 						]}
 					/>
 				</div>

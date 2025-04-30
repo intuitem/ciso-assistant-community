@@ -1481,5 +1481,6 @@
 	"impactISO": "Impact",
 	"impactEBIOS": "Severity",
 	"probabilityISO": "Likelihood",
-	"probabilityEBIOS": "Likelihood"
+	"probabilityEBIOS": "Likelihood",
+	"iso27001": "ISO 27001"
 }
