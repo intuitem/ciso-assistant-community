@@ -299,7 +299,7 @@
 	}
 	let createAppliedControlsLoading = false;
 
-	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+	function modalConfirmCreateSuggestedControls(id: string, action: string): void {
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -523,7 +523,7 @@
 				}}
 			>
 				<span class="mr-2">
-					{#if createAppliedControlsLoading}
+					{#if syncingToActionsIsLoading}
 						<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
 					{:else}
 						<i class="fa-solid fa-arrows-rotate mr-2"></i>
