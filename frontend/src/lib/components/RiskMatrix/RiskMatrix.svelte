@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { buildRiskMatrix } from './utils';
 	import Cell from './Cell.svelte';
+	import { buildRiskMatrix, reverseCols, reverseRows, transpose } from './utils';
 
-	import * as m from '../../../paraglide/messages';
-	import type { ComponentType } from 'svelte';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
-	import { isDark } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
+	import { isDark } from '$lib/utils/helpers';
+	import { m } from '$paraglide/messages';
+	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import type { ComponentType } from 'svelte';
 
 	// --- Props ---
 	export let riskMatrix;
@@ -37,23 +37,6 @@
 	let finalData: typeof data | undefined;
 	let popupHoverY: PopupSettings[] = [];
 	let popupHoverX: PopupSettings[] = [];
-
-	function transpose<T>(matrix: T[][]): T[][] {
-		if (!matrix || matrix.length === 0 || matrix[0].length === 0) {
-			return [];
-		}
-		return reverseCols(
-			reverseRows(matrix.map((_, colIndex) => matrix.map((row) => row[colIndex])))
-		);
-	}
-
-	function reverseRows<T>(matrix: T[][]): T[][] {
-		return matrix.slice().reverse();
-	}
-
-	function reverseCols<T>(matrix: T[][]): T[][] {
-		return matrix.map((row) => row.slice().reverse());
-	}
 
 	$: {
 		// Determine axis labels and headers based on swapAxes
