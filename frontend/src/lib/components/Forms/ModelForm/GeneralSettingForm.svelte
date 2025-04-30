@@ -6,10 +6,20 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import RadioGroupInput from '../RadioGroupInput.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 	export let form: SuperForm<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
+
+	$: risk_matrix_vertical_flip = formDataCache['risk_matrix_flip_vertical'] ?? false;
+	$: xAxis = formDataCache['risk_matrix_swap_axes'] ? 'impact' : 'probability';
+	$: yAxis = formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact';
+	$: xAxisLabel = safeTranslate(`${xAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`);
+	$: yAxisLabel = safeTranslate(`${yAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`);
+
+	const formStore = form.form;
 </script>
 
 <Accordion regionControl="font-bold">
@@ -104,23 +114,71 @@
 			/>
 		</svelte:fragment>
 	</AccordionItem>
-	<AccordionItem>
+	<AccordionItem open>
 		<svelte:fragment slot="summary"
 			><i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}</svelte:fragment
 		>
 		<svelte:fragment slot="content">
-			<Checkbox
-				{form}
-				field="risk_matrix_swap_axes"
-				label={m.settingsRiskMatrixSwapAxes()}
-				helpText={m.settingsRiskMatrixSwapAxesHelpText()}
-			/>
-			<Checkbox
-				{form}
-				field="risk_matrix_flip_vertical"
-				label={m.settingsRiskMatrixFlipVertical()}
-				helpText={m.settingsRiskMatrixFlipVerticalHelpText()}
-			/>
+			<div class="flex flex-row gap-4">
+				<div class="flex flex-col flex-1">
+					<Checkbox
+						{form}
+						field="risk_matrix_swap_axes"
+						label={m.settingsRiskMatrixSwapAxes()}
+						helpText={m.settingsRiskMatrixSwapAxesHelpText()}
+						bind:cachedValue={formDataCache['risk_matrix_swap_axes']}
+					/>
+					<Checkbox
+						{form}
+						field="risk_matrix_flip_vertical"
+						label={m.settingsRiskMatrixFlipVertical()}
+						helpText={m.settingsRiskMatrixFlipVerticalHelpText()}
+						bind:cachedValue={formDataCache['risk_matrix_flip_vertical']}
+					/>
+					<RadioGroupInput
+						{form}
+						label={m.settingsRiskMatrixLabels()}
+						field="risk_matrix_labels"
+						options={[
+							{ label: 'ISO', value: 'ISO' },
+							{ label: 'EBIOS', value: 'EBIOS' }
+						]}
+					/>
+				</div>
+				<div class="flex-1">
+					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
+						<div
+							class="absolute {risk_matrix_vertical_flip
+								? 'top'
+								: 'bottom'}-8 left-8 w-2 h-2 bg-black rounded-full"
+						></div>
+
+						<div
+							class="absolute {risk_matrix_vertical_flip
+								? 'top'
+								: 'bottom'}-8 left-8 w-4/5 h-0.5 bg-black"
+						></div>
+
+						<div
+							class="absolute {risk_matrix_vertical_flip
+								? 'top'
+								: 'bottom'}-2 left-1/2 transform -translate-x-1/2 text-center"
+						>
+							<span class="font-medium">{xAxisLabel}</span>
+						</div>
+
+						<div
+							class="absolute {risk_matrix_vertical_flip
+								? 'top'
+								: 'bottom'}-8 left-8 w-0.5 h-4/5 bg-black"
+						></div>
+
+						<div class="absolute top-1/2 left-0 transform -translate-y-1/2 -rotate-90">
+							<span class="font-medium">{yAxisLabel}</span>
+						</div>
+					</div>
+				</div>
+			</div>
 		</svelte:fragment>
 	</AccordionItem>
 </Accordion>
