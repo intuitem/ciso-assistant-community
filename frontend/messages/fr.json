@@ -1471,5 +1471,6 @@
 	"associatedTaskNodes": "Révision des instances",
 	"showAllEvents": "Afficher tous les événements",
 	"noEvents": "Aucun événement pour ce jour",
-	"domainAnalytics": "Analytiques par domaine"
+	"domainAnalytics": "Analytiques par domaine",
+	"taskScheduleWarning": "Toutes les tâches qui ne font pas partie du nouveau programme seront supprimées de manière permanente"
 }
