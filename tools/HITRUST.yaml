@@ -1,0 +1,29 @@
+framework: "HITRUST CSF"
+version: "9.6.0"
+controls:
+  - id: "01.a"
+    title: "Information Security Policy"
+    description: >
+      An information security policy shall be approved by management, published, and communicated to employees and relevant third parties.
+    domain: "Information Security Policies"
+    implementation_requirements:
+      - requirement_id: "01.a.1"
+        description: "The organization shall establish and document an information security policy."
+        status: "in_progress"
+        responsible_party: "CISO"
+        evidence: "policy_documents/information_security_policy.pdf"
+        last_reviewed: "2025-01-15"
+      - requirement_id: "01.a.2"
+        description: "Policy must be reviewed at least annually and updated as needed."
+        status: "not_started"
+        responsible_party: "GRC Team"
+        evidence: ""
+        last_reviewed: ""
+    mappings:
+      iso_27001: "A.5.1.1"
+      nist_800_53: "PL-1"
+      hipaa: "164.308(a)(1)(i)"
+    tags:
+      - "policy"
+      - "annual-review"
+      - "compliance"
