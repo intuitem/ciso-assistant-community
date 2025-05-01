@@ -1476,5 +1476,6 @@
 	"theFollowingChangesWillBeApplied": "Les changements suivants seront appliqués :",
 	"syncToAppliedControlsMessage": "Cette opération permettra de synchroniser votre niveau de conformité sur le statut des mesures associées. Cette opération ne pourrait pas être annulée.",
 	"syncToAppliedControlsSuccess": "La synchronisation a été réalisée avec succès",
-	"syncToAppliedControlsError": "Erreur lors de la synchronisation"
+	"syncToAppliedControlsError": "Erreur lors de la synchronisation",
+	"taskScheduleWarning": "Toutes les tâches qui ne font pas partie du nouveau programme seront supprimées de manière permanente"
 }

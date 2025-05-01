@@ -913,5 +913,6 @@
 	"cannotDeleteAutoTimeline": "Automatikus idővonal-bejegyzések nem törölhetők",
 	"author": "Szerző",
 	"timestampCannotBeInTheFuture": "Az időbélyeg nem lehet a jövőben",
-	"youCanSetPAsswordHere": "Itt állíthatja be a jelszavát."
+	"youCanSetPAsswordHere": "Itt állíthatja be a jelszavát.",
+	"taskScheduleWarning": "A nem az új ütemezés részét képező feladatok véglegesen törlődnek"
 }
