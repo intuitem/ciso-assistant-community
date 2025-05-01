@@ -128,7 +128,7 @@ ws.title = "library_content"
 ws.append(
     ["library_urn", f"urn:{packager.lower()}:risk:library:nzism-v{major_version}"]
 )
-ws.append(["library_version", 1])
+ws.append(["library_version", 2])
 ws.append(["library_locale", "en"])
 ws.append(["library_ref_id", f"NSIZM-v{major_version}"])
 ws.append(["library_name", f"NZISM v{major_version}"])
