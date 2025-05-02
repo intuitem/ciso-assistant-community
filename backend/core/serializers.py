@@ -1241,7 +1241,14 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
 class FindingWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Finding
-        exclude = ["created_at", "updated_at"]
+        exclude = ["created_at", "updated_at", "folder"]
+
+    def create(self, validated_data):
+        findings_assessment = validated_data.get("findings_assessment")
+        if findings_assessment:
+            validated_data["folder"] = findings_assessment.folder
+
+        return super().create(validated_data)
 
 
 class FindingReadSerializer(FindingWriteSerializer):
@@ -1251,6 +1258,9 @@ class FindingReadSerializer(FindingWriteSerializer):
     reference_controls = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
+    perimeter = FieldsRelatedField(
+        source="findings_assessment.perimeter", fields=["id", "name", "folder"]
+    )
     folder = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
 
