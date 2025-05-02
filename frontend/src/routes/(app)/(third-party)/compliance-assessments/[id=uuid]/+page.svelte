@@ -80,9 +80,7 @@
 		if (dialogElement) dialogElement.close();
 	}
 
-	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
-	import { synctoappliedcontrols } from '$paraglide/messages/en';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -299,7 +297,7 @@
 	}
 	let createAppliedControlsLoading = false;
 
-	function modalConfirmCreateSuggestedControls(id: string, action: string): void {
+	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -330,7 +328,10 @@
 		modalStore.trigger(modal);
 	}
 
-	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
+	$: if (syncingToActionsIsLoading === true && (form || form?.error))
+		syncingToActionsIsLoading = false;
+	$: if (createAppliedControlsLoading === true && (form || form?.error))
+		createAppliedControlsLoading = false;
 	$: if (form?.message?.requirementAssessmentsSync) console.log(form);
 </script>
 
