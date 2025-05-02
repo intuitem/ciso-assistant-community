@@ -1473,14 +1473,14 @@
 	"noEvents": "No events for this day",
 	"domainAnalytics": "Domain Analytics",
 	"settingsRiskMatrixSwapAxes": "Swap axes",
-	"settingsRiskMatrixSwapAxesHelpText": "This will swap the probability and impact axes. If turned on, Impact will be the ordinate and Probability the abscissa of the matrices.",
+	"settingsRiskMatrixSwapAxesHelpText": "Swaps the axes for probability and impact. When enabled, impact will be displayed on the vertical axis (ordinate), and probability on the horizontal axis (abscissa).",
 	"settingsRiskMatrixFlipVertical": "Flip vertically",
-	"settingsRiskMatrixFlipVerticalHelpText": "If this is turned on, the origin of the risk matrices will be located on the top-left.",
+	"settingsRiskMatrixFlipVerticalHelpText": "When enabled, the origin of the matrix will be in the top-left corner, with the Y axis increasing downward.",
 	"settingsRiskMatrixLabels": "Labels",
 	"settingsRiskMatrix": "Risk matrix settings",
 	"impactISO": "Impact",
 	"impactEBIOS": "Severity",
 	"probabilityISO": "Likelihood",
 	"probabilityEBIOS": "Likelihood",
-	"iso27001": "ISO 27001"
+	"iso27005": "ISO 27005"
 }

@@ -7,6 +7,7 @@
 	import { m } from '$paraglide/messages';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import type { ComponentType } from 'svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	// --- Props ---
 	export let riskMatrix;
@@ -20,6 +21,7 @@
 	// Axis configuration props
 	export let swapAxes: boolean = $page.data.settings.risk_matrix_swap_axes ?? false; // Probability on X, Impact on Y if true
 	export let flipVertical: boolean = $page.data.settings.risk_matrix_flip_vertical ?? false; // Origin top-left for Y-axis if true
+	export let labelStandard: string = $page.data.settings.risk_matrix_labels ?? 'ISO';
 
 	$: console.log($page.data.settings);
 
@@ -39,9 +41,15 @@
 	let popupHoverX: PopupSettings[] = [];
 
 	$: {
-		// Determine axis labels and headers based on swapAxes
-		yAxisLabel = swapAxes ? m.impact() : m.probability();
-		xAxisLabel = swapAxes ? m.probability() : m.impact();
+		// Determine base axis types
+		const yAxisType = swapAxes ? 'impact' : 'probability';
+		const xAxisType = swapAxes ? 'probability' : 'impact';
+
+		// Generate the full translation keys with the standard
+		yAxisLabel = safeTranslate(`${yAxisType}${labelStandard}`);
+		xAxisLabel = safeTranslate(`${xAxisType}${labelStandard}`);
+
+		// Headers assignment remains the same
 		yAxisHeaders = swapAxes ? originalImpacts : originalProbabilities;
 		xAxisHeaders = swapAxes ? originalProbabilities : originalImpacts;
 
