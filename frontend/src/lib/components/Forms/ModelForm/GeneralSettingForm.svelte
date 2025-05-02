@@ -20,6 +20,8 @@
 	$: yAxisLabel = safeTranslate(`${yAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`);
 
 	const formStore = form.form;
+	$: horizontalAxisPos = flipVertically ? 'top-8' : 'bottom-8';
+	$: horizontalLabelPos = flipVertically ? 'top-2' : 'bottom-2';
 </script>
 
 <Accordion regionControl="font-bold">
@@ -100,29 +102,24 @@
 				</div>
 				<div class="flex-1">
 					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
-						<div
-							class="absolute {flipVertically
-								? 'top'
-								: 'bottom'}-8 left-8 w-2 h-2 bg-black rounded-full"
-						></div>
+						<!-- Point d’origine -->
+						<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
 
-						<div
-							class="absolute {flipVertically ? 'top' : 'bottom'}-8 left-8 w-4/5 h-0.5 bg-black"
-						></div>
+						<!-- Axe horizontal -->
+						<div class={`absolute ${horizontalAxisPos} left-8 w-4/5 h-0.5 bg-black`}></div>
 
+						<!-- Label axe horizontal -->
 						<div
-							class="absolute {flipVertically
-								? 'top'
-								: 'bottom'}-2 left-1/2 transform -translate-x-1/2 text-center"
+							class={`absolute ${horizontalLabelPos} left-1/2 transform -translate-x-1/2 text-center`}
 						>
 							<span class="font-medium">{xAxisLabel}</span>
 						</div>
 
-						<div
-							class="absolute {flipVertically ? 'top' : 'bottom'}-8 left-8 w-0.5 h-4/5 bg-black"
-						></div>
+						<!-- Axe vertical -->
+						<div class={`absolute ${horizontalAxisPos} left-8 w-0.5 h-4/5 bg-black`}></div>
 
-						<div class="absolute top-1/2 left-0 transform -translate-y-1/2 -rotate-90">
+						<!-- Label axe vertical -->
+						<div class="absolute top-1/2 left-4 transform -translate-y-1/2 -rotate-90 origin-left">
 							<span class="font-medium">{yAxisLabel}</span>
 						</div>
 					</div>
