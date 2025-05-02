@@ -1482,5 +1482,6 @@
 	"impactEBIOS": "Severity",
 	"probabilityISO": "Likelihood",
 	"probabilityEBIOS": "Likelihood",
-	"iso27005": "ISO 27005"
+	"iso27005": "ISO 27005",
+	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted"
 }

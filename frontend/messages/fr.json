@@ -1482,5 +1482,6 @@
 	"impactEBIOS": "Gravité",
 	"probabilityISO": "Vraisemblance",
 	"probabilityEBIOS": "Vraisemblance",
-	"iso27005": "ISO 27005"
+	"iso27005": "ISO 27005",
+	"taskScheduleWarning": "Toutes les tâches qui ne font pas partie du nouveau programme seront supprimées de manière permanente"
 }
