@@ -495,26 +495,26 @@
 				<Anchor
 					breadcrumbAction="push"
 					href={`${$page.url.pathname}/flash-mode`}
-					class="btn text-gray-100 bg-gradient-to-r from-indigo-600 to-violet-600 h-fit"
+					class="btn text-gray-100 bg-gradient-to-r from-indigo-500 to-violet-500 h-fit"
 					><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</Anchor
 				>
 			{/if}
 			<Anchor
 				breadcrumbAction="push"
 				href={`${$page.url.pathname}/table-mode`}
-				class="btn text-gray-100 bg-gradient-to-r from-blue-600 to-cyan-600 h-fit"
+				class="btn text-gray-100 bg-gradient-to-r from-blue-500 to-sky-500 h-fit"
 				><i class="fa-solid fa-table-list mr-2" /> {m.tableMode()}</Anchor
 			>
 			{#if !$page.data.user.is_third_party}
 				<button
-					class="btn text-gray-100 bg-gradient-to-r from-emerald-600 to-teal-600 h-fit"
+					class="btn text-gray-100 bg-gradient-to-r from-teal-500 to-emerald-500 h-fit"
 					on:click={() => modalCreateForm()}
 					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
 				</button>
 			{/if}
 
 			<button
-				class="btn text-gray-100 bg-gradient-to-r from-blue-600 to-indigo-600 h-fit"
+				class="btn text-gray-100 bg-gradient-to-r from-cyan-500 to-blue-500 h-fit"
 				on:click={async () => {
 					await modalConfirmSyncToActions(
 						data.compliance_assessment.id,
@@ -535,7 +535,7 @@
 
 			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
-					class="btn text-gray-100 bg-gradient-to-r from-purple-600 to-fuchsia-600 h-fit"
+					class="btn text-gray-100 bg-gradient-to-r from-purple-500 to-fuchsia-500 h-fit"
 					on:click={() => {
 						modalConfirmCreateSuggestedControls(
 							data.compliance_assessment.id,
