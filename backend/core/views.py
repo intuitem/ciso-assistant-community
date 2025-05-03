@@ -4526,6 +4526,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="syncToActions",
+    )
+    def sync_to_applied_controls(self, request, pk):
+        dry_run = request.query_params.get("dry_run", True)
+        if dry_run == "false":
+            dry_run = False
+        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_requirementassessment"),
+            folder=compliance_assessment.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        changes = compliance_assessment.sync_to_applied_controls(dry_run=dry_run)
+        return Response({"changes": changes})
+
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
         try:
