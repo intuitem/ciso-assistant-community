@@ -1246,7 +1246,7 @@ class FindingWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         findings_assessment = validated_data.get("findings_assessment")
         if not findings_assessment:
-            raise ValidationError({"findings_assessment": "mandatory"})
+            raise serializers.ValidationError({"findings_assessment": "mandatory"})
         validated_data["folder"] = findings_assessment.folder
 
         return super().create(validated_data)
