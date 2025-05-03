@@ -3215,20 +3215,20 @@ class ComplianceAssessment(Assessment):
         requirement_assessments_with_ac = RequirementAssessment.objects.filter(
             compliance_assessment=self, applied_controls__isnull=False
         ).distinct()
-
-        for ra in requirement_assessments_with_ac:
-            ac = AppliedControl.objects.filter(requirement_assessments=ra)
-            ic(ac)
-            new_result = infer_result(ac)
-            if ra.result != new_result:
-                changes[str(ra.id)] = {
-                    "str": str(ra),
-                    "current": ra.result,
-                    "new": infer_result(ac),
-                }
-                if not dry_run:
-                    ra.result = new_result
-                    ra.save(update_fields=["result"])
+        with transaction.atomic():
+            for ra in requirement_assessments_with_ac:
+                ac = AppliedControl.objects.filter(requirement_assessments=ra)
+                ic(ac)
+                new_result = infer_result(ac)
+                if ra.result != new_result:
+                    changes[str(ra.id)] = {
+                        "str": str(ra),
+                        "current": ra.result,
+                        "new": new_result,
+                    }
+                    if not dry_run:
+                        ra.result = new_result
+                        ra.save(update_fields=["result"])
 
         ic(changes)
 
