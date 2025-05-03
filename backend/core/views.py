@@ -1107,11 +1107,21 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             context = RiskScenario.objects.filter(
                 risk_assessment=risk_assessment
             ).order_by("ref_id")
+            general_settings = GlobalSettings.objects.filter(name="general").first()
+            swap_axes = general_settings.value.get("risk_matrix_swap_axes", False)
+            flip_vertical = general_settings.value.get(
+                "risk_matrix_flip_vertical", False
+            )
+            matrix_settings = {
+                "swap_axes": "_swapaxes" if swap_axes else "",
+                "flip_vertical": "_vflip" if flip_vertical else "",
+            }
             data = {
                 "context": context,
                 "risk_assessment": risk_assessment,
                 "ri_clusters": build_scenario_clusters(risk_assessment),
                 "risk_matrix": risk_assessment.risk_matrix,
+                "settings": matrix_settings,
             }
             html = render_to_string("core/ra_pdf.html", data)
             pdf_file = HTML(string=html).write_pdf()
