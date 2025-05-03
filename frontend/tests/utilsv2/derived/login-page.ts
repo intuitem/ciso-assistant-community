@@ -16,6 +16,13 @@ export class LoginPage extends Page {
 	async doLoginP(email: string, password: string) {
 		const usernameInput = this._self.getByTestId('form-input-username');
 		const passwordInput = this._self.getByTestId('form-input-password');
+		if (
+			(await usernameInput.inputValue()) !== email ||
+			(await passwordInput.inputValue()) !== password
+		) {
+			await usernameInput.fill(email);
+			await passwordInput.fill(password);
+		}
 		const loginButton = this._self.getByTestId('login-btn');
 		await usernameInput.fill(email);
 		await passwordInput.fill(password);
