@@ -10,6 +10,9 @@ GENERAL_SETTINGS_KEYS = [
     "ebios_radar_red_zone_radius",
     "interface_agg_scenario_matrix",
     "notifications_enable_mailing",
+    "risk_matrix_swap_axes",
+    "risk_matrix_flip_vertical",
+    "risk_matrix_labels",
 ]
 
 
