@@ -1,4 +1,6 @@
 name: API Tests
+permissions:
+  contents: read
 
 on:
   pull_request:

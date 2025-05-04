@@ -1,4 +1,6 @@
 name: Unit tests on CISO Assistant frontend
+permissions:
+  contents: read
 
 on:
   push:
