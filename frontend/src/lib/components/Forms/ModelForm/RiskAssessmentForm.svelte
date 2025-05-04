@@ -3,10 +3,10 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
+	import TimeFrameSelector from '../TimeFrameSelector.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
 	export let duplicate: boolean = false;
@@ -25,7 +25,6 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="perimeters"
@@ -63,6 +62,17 @@
 		label={m.riskMatrix()}
 		helpText={m.riskAssessmentMatrixHelpText()}
 		hidden={initialData.risk_matrix}
+	/>
+	<!-- New TimeFrameSelector component -->
+	<TimeFrameSelector
+		{form}
+		field="time_frames"
+		cacheLock={cacheLocks['time_frames']}
+		bind:cachedValue={formDataCache['time_frames']}
+		label={m.timeFrames ? m.timeFrames() : 'Impact Escalation Points'}
+		helpText={m.timeFramesHelpText
+			? m.timeFramesHelpText()
+			: 'Add one or more time frames for this assessment'}
 	/>
 	<AutocompleteSelect
 		{form}

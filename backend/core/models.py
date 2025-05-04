@@ -3028,6 +3028,10 @@ class RiskScenario(NameDescriptionMixin):
         self.risk_assessment.upsert_daily_metrics()
 
 
+class BusinessImpactAnalysis(Assessment):
+    pass
+
+
 class ComplianceAssessment(Assessment):
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
