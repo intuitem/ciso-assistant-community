@@ -536,7 +536,7 @@ class LibraryUpdater:
             for requirement_node_urn in deleted_requirement_node_urns:
                 requirement_node = RequirementNode.objects.filter(
                     urn=requirement_node_urn
-                ).first() # locale is not used, so if there are more than one requirement node with this URN only the first fetched requirement node will be deleted.
+                ).first()  # locale is not used, so if there are more than one requirement node with this URN only the first fetched requirement node will be deleted.
                 if requirement_node is not None:
                     requirement_node.delete()
 
@@ -562,7 +562,9 @@ class LibraryUpdater:
                 for rn in RequirementNode.objects.filter(framework=new_framework)
             }
             existing_assessments = defaultdict(list)
-            for ra in RequirementAssessment.objects.filter(requirement__framework=new_framework):
+            for ra in RequirementAssessment.objects.filter(
+                requirement__framework=new_framework
+            ):
                 existing_assessments[ra.requirement.urn.lower()].append(ra)
 
             assessments_to_create = []
@@ -576,7 +578,9 @@ class LibraryUpdater:
                 question_type = question["question_type"] if question else None
 
                 requirement_node_dict = {
-                    k: v for k, v in requirement_node.items() if k not in ["urn", "depth", "reference_controls", "threats"]
+                    k: v
+                    for k, v in requirement_node.items()
+                    if k not in ["urn", "depth", "reference_controls", "threats"]
                 }
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
@@ -599,7 +603,9 @@ class LibraryUpdater:
                                 compliance_assessment=ca,
                                 requirement=new_requirement_node,
                                 folder=ca.perimeter.folder,
-                                answer=transform_question_to_answer(question) if question else {},
+                                answer=transform_question_to_answer(question)
+                                if question
+                                else {},
                             )
                         )
 
@@ -626,23 +632,36 @@ class LibraryUpdater:
                         raise NotImplementedError(f"Unsupported type '{question_type}'")
 
                 for threat_urn in requirement_node.get("threats", []):
-                    threat = objects_tracked.get(threat_urn) or Threat.objects.filter(urn=threat_urn).first()
+                    threat = (
+                        objects_tracked.get(threat_urn)
+                        or Threat.objects.filter(urn=threat_urn).first()
+                    )
                     if threat:
                         new_requirement_node.threats.add(threat)
 
                 for rc_urn in requirement_node.get("reference_controls", []):
-                    rc = objects_tracked.get(rc_urn) or ReferenceControl.objects.filter(urn=rc_urn.lower()).first()
+                    rc = (
+                        objects_tracked.get(rc_urn)
+                        or ReferenceControl.objects.filter(urn=rc_urn.lower()).first()
+                    )
                     if rc:
                         new_requirement_node.reference_controls.add(rc)
 
             if requirement_nodes_to_update:
-                RequirementNode.objects.bulk_update(requirement_nodes_to_update, ["name", "description", "order_id", "question"])
+                RequirementNode.objects.bulk_update(
+                    requirement_nodes_to_update,
+                    ["name", "description", "order_id", "question"],
+                )
 
             if assessments_to_update:
-                RequirementAssessment.objects.bulk_update(assessments_to_update, ["answer"], batch_size=100)
+                RequirementAssessment.objects.bulk_update(
+                    assessments_to_update, ["answer"], batch_size=100
+                )
 
             if assessments_to_create:
-                RequirementAssessment.objects.bulk_create(assessments_to_create, batch_size=100)
+                RequirementAssessment.objects.bulk_create(
+                    assessments_to_create, batch_size=100
+                )
 
         if self.new_matrices is not None:
             for matrix in self.new_matrices:
@@ -663,6 +682,7 @@ class LibraryUpdater:
                         "library": self.old_library,
                     },
                 )
+
 
 class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
