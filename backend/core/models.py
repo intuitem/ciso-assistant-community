@@ -571,6 +571,7 @@ class LibraryUpdater:
             assessments_to_update = []
             requirement_nodes_to_update = []
             order_id = 0
+            all_fields_to_update = set()
 
             for requirement_node in requirement_nodes:
                 urn = requirement_node["urn"].lower()
@@ -584,6 +585,7 @@ class LibraryUpdater:
                 }
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
+                all_fields_to_update.update(requirement_node_dict.keys())
 
                 if urn in existing_requirements:
                     new_requirement_node = existing_requirements[urn]
@@ -610,8 +612,6 @@ class LibraryUpdater:
                         )
 
                 for ra in existing_assessments.get(urn, []):
-                    ra.name = new_requirement_node.name
-                    ra.description = new_requirement_node.description
                     if not question:
                         assessments_to_update.append(ra)
                         continue
@@ -648,6 +648,12 @@ class LibraryUpdater:
                         new_requirement_node.reference_controls.add(rc)
 
             if requirement_nodes_to_update:
+                fields_to_update = sorted(all_fields_to_update.union({"order_id"}))
+                RequirementNode.objects.bulk_update(
+                    requirement_nodes_to_update,
+                    fields_to_update,
+                    batch_size=200,
+                )
                 RequirementNode.objects.bulk_update(
                     requirement_nodes_to_update,
                     ["name", "description", "order_id", "question"],
