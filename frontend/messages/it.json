@@ -1287,5 +1287,7 @@
 	"disseminationOrOtherwiseMakingAvailable": "Diffusione o messa a disposizione",
 	"alignmentOrCombination": "Allineamento o combinazione",
 	"restriction": "Restrizione",
-	"erasureOrDestruction": "Cancellazione o distruzione"
+	"erasureOrDestruction": "Cancellazione o distruzione",
+	"failedToContactProvider": "Impossibile contattare il fornitore",
+	"userIsNotSSO": "Il login SSO è attualmente disabilitato per il tuo account"
 }

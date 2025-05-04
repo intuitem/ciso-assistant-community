@@ -905,5 +905,7 @@
 	"cannotDeleteAutoTimeline": "Intrările cronologiei automate nu pot fi șterse",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "Marcă de timp nu poate fi în viitor",
-	"youCanSetPAsswordHere": "Puteți seta parola dvs. aici."
+	"youCanSetPAsswordHere": "Puteți seta parola dvs. aici.",
+	"failedToContactProvider": "Eșec la contactarea furnizorului",
+	"userIsNotSSO": "Autentificarea SSO este momentan dezactivată pentru contul dumneavoastră"
 }

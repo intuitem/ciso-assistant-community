@@ -913,5 +913,7 @@
 	"cannotDeleteAutoTimeline": "No se pueden eliminar las entradas de cronología automáticas",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "La marca de tiempo no puede ser en el futuro",
-	"youCanSetPAsswordHere": "Puede establecer su contraseña aquí."
+	"youCanSetPAsswordHere": "Puede establecer su contraseña aquí.",
+	"failedToContactProvider": "Error al contactar con el proveedor",
+	"userIsNotSSO": "El inicio de sesión SSO está actualmente deshabilitado para su cuenta"
 }

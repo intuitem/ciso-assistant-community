@@ -11,6 +11,7 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let shape: any = {};
+	export let context: string;
 </script>
 
 <TextField
@@ -52,9 +53,12 @@
 	<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 {/if}
 
-<Checkbox {form} field="is_local" label="is Local" helpText="" />
-
-<Checkbox {form} field="is_sso" label="is SSO" helpText="" />
+{#if context !== "create"}
+	<!-- ADD helpText attributes to 2 <Checkbox> before pushing (only EN+FR) -->
+	<!-- Translate "is_local"/"is Local" and "is_sso"/"is SSO" to better translations (only EN+FR is enough) -->
+	<Checkbox {form} field="is_local" label="is Local" />
+	<Checkbox {form} field="is_sso" label="is SSO" />
+{/if}
 
 <span class="text-gray-500 pt-5">
 	⚠️ {m.createdUserWillHaveNoRights()}

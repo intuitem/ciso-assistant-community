@@ -880,5 +880,7 @@
 	"associatedFindings": "وابستہ نتائج",
 	"findings_count": "نتائج کی تعداد",
 	"addFinding": "نتیجہ شامل کریں۔",
-	"youCanSetPAsswordHere": "آپ یہاں اپنا پاس ورڈ سیٹ کر سکتے ہیں"
+	"youCanSetPAsswordHere": "آپ یہاں اپنا پاس ورڈ سیٹ کر سکتے ہیں",
+	"failedToContactProvider": "فراہم کنندہ سے رابطہ کرنے میں ناکامی",
+	"userIsNotSSO": "آپ کے اکاؤنٹ کے لیے SSO لاگ ان فی الحال غیر فعال ہے"
 }

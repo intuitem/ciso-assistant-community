@@ -903,5 +903,7 @@
 	"statusChanged": "Status ändrad",
 	"cannotDeleteAutoTimeline": "Automatiska tidslinje kan inte raderas",
 	"author": "Författare",
-	"timestampCannotBeInTheFuture": "Tidsstämpeln kan inte vara i framtiden"
+	"timestampCannotBeInTheFuture": "Tidsstämpeln kan inte vara i framtiden",
+	"failedToContactProvider": "Misslyckades att kontakta leverantören",
+	"userIsNotSSO": "SSO-inloggning är för närvarande inaktiverad för ditt konto"
 }

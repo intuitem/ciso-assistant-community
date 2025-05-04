@@ -398,6 +398,13 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
+        if self.created_at is None : # If the user doesn't exist in the database yet.
+            from global_settings.models import GlobalSettings
+            sso_settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+            if sso_settings.value.get("is_enabled") :
+                self.is_local = False
+                self.is_sso = True
+
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True

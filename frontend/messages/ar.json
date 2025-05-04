@@ -880,5 +880,7 @@
 	"associatedFindings": "الملاحظات المرتبطة",
 	"findings_count": "عدد الملاحظات",
 	"addFinding": "إضافة ملاحظة",
-	"youCanSetPAsswordHere": "يمكنك تعيين كلمة المرور هنا"
+	"youCanSetPAsswordHere": "يمكنك تعيين كلمة المرور هنا",
+	"failedToContactProvider": "فشل في الاتصال بمزود الخدمة",
+	"userIsNotSSO": "تسجيل الدخول باستخدام SSO معطل حاليًا لحسابك"
 }

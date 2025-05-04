@@ -1196,5 +1196,7 @@
 	"requirementsProgressionSemiColon": "Kravfremskridt:",
 	"noRequirementFound": "Ingen kravvurdering fundet",
 	"noAuditForTheFramework": "Der er ingen revision for dette rammeværk",
-	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom"
+	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom",
+	"failedToContactProvider": "Fejl ved kontakt til udbyderen",
+	"userIsNotSSO": "SSO-login er i øjeblikket deaktiveret for din konto"
 }

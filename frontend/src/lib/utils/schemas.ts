@@ -270,9 +270,7 @@ export const UserEditSchema = z.object({
 });
 
 export const UserCreateSchema = z.object({
-	email: z.string().email(),
-	is_local: z.boolean().default(false),
-	is_sso: z.boolean().default(false)
+	email: z.string().email()
 });
 
 export const ChangePasswordSchema = z.object({

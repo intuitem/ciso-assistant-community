@@ -1097,5 +1097,7 @@
 	"selectEvidence": "Pilih bukti",
 	"timestampCannotBeInTheFuture": "Timestamp tidak boleh di masa depan",
 	"youCanSetPAsswordHere": "Anda dapat mengatur kata sandi di sini.",
-	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali."
+	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali.",
+	"failedToContactProvider": "Gagal menghubungi penyedia",
+	"userIsNotSSO": "Login SSO saat ini dinonaktifkan untuk akun Anda"
 }

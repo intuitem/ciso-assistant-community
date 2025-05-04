@@ -42,7 +42,9 @@ class AuthError(AllauthAuthError):
     SIGNUP_CLOSED = "signupClosed"
     PERMISSION_DENIED = "permissionDenied"
     FAILED_SSO = "failedSSO"
+    FAILED_TO_CONTACT_PROVIDER = "failedToContactProvider"
     USER_DOES_NOT_EXIST = "UserDoesNotExist"
+    USER_IS_NOT_SSO = "userIsNotSSO"
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -69,7 +71,7 @@ class FinishACSView(SAMLViewMixin, View):
             provider = self.get_provider(organization_slug)
         except:
             logger.error("Could not get provider")
-            return render_authentication_error(request, None)
+            return render_authentication_error(request, None, error=AuthError.FAILED_TO_CONTACT_PROVIDER)
         acs_session = LoginSession(request, "saml_acs_session", "saml-acs-session")
         acs_request = None
         acs_request_data = acs_session.store.get("request")
@@ -149,6 +151,9 @@ class FinishACSView(SAMLViewMixin, View):
             emails = [x for xs in emails for x in xs]  # flatten
             emails.append(auth.get_nameid())  # default behavior
             user = User.objects.get(email__in=emails)
+            if not user.is_sso:
+                raise NotImplementedError("SSO login is currently disabled for your account.")
+
             idp_first_names = auth.get_attribute(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
             )
@@ -178,6 +183,9 @@ class FinishACSView(SAMLViewMixin, View):
         except ValidationError as e:
             error = e.code
             logger.error("Validation error", exc_info=e)
+        except NotImplementedError as e:
+            error = AuthError.USER_IS_NOT_SSO
+            logger.error("SSO not permitted error", exc_info=e)
         except Exception as e:
             error = AuthError.FAILED_SSO
             logger.error("SSO failed", exc_info=e)

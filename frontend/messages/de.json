@@ -913,5 +913,7 @@
 	"cannotDeleteAutoTimeline": "Automatische Zeitleisten-Einträge können nicht gelöscht werden",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "Der Zeitstempel darf nicht in der Zukunft liegen",
-	"youCanSetPAsswordHere": "Sie können hier Ihr Passwort festlegen."
+	"youCanSetPAsswordHere": "Sie können hier Ihr Passwort festlegen.",
+	"failedToContactProvider": "Verbindung zum Anbieter fehlgeschlagen",
+	"userIsNotSSO": "SSO-Login ist derzeit für Ihr Konto deaktiviert"
 }

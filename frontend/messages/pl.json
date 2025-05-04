@@ -906,5 +906,7 @@
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "Znacznik czasu nie może być w przyszłości",
 	"youCanSetPAsswordHere": "Możesz ustawić swoje hasło tutaj.",
-	"filterby": "Filtruj według"
+	"filterby": "Filtruj według",
+	"failedToContactProvider": "Nie udało się skontaktować z dostawcą",
+	"userIsNotSSO": "Logowanie SSO jest obecnie wyłączone dla twojego konta"
 }
