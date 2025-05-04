@@ -219,6 +219,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
 12. Framework Nazionale per la Cybersecurity e la Data Protection, ACN Italia 🇮🇹
 13. PSSIE du Bénin, ANSSI Bénin 🇧🇯
+14. IGI 1300 - Liste des exigences pour la mise en oeuvre d'un SI classifié (ANSSI) 🇫🇷
 
 <br/>
 
