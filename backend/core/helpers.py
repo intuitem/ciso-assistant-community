@@ -927,7 +927,7 @@ def get_metrics(user: User, folder_id):
     viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
     controls_count = viewable_controls.count()
     progress_avg = math.ceil(
-        mean([x.progress for x in viewable_compliance_assessments] or [0])
+        mean([x.get_progress() for x in viewable_compliance_assessments] or [0])
     )
     missed_eta_count = (
         viewable_controls.filter(

@@ -100,7 +100,9 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             entry.update({"completion": completion})
 
             review_progress = (
-                ea.compliance_assessment.progress if ea.compliance_assessment else 0
+                ea.compliance_assessment.get_progress()
+                if ea.compliance_assessment
+                else 0
             )
             entry.update({"review_progress": review_progress})
             assessments_data.append(entry)
