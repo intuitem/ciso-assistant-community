@@ -41,6 +41,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
+from collections import defaultdict
 
 logger = get_logger(__name__)
 
@@ -535,7 +536,7 @@ class LibraryUpdater:
             for requirement_node_urn in deleted_requirement_node_urns:
                 requirement_node = RequirementNode.objects.filter(
                     urn=requirement_node_urn
-                ).first()  # locale is not used, so if there are more than one requirement node with this URN only the first fetched requirement node will be deleted.
+                ).first() # locale is not used, so if there are more than one requirement node with this URN only the first fetched requirement node will be deleted.
                 if requirement_node is not None:
                     requirement_node.delete()
 
@@ -556,115 +557,101 @@ class LibraryUpdater:
                 *ComplianceAssessment.objects.filter(framework=new_framework)
             ]
 
+            existing_requirements = {
+                rn.urn.lower(): rn
+                for rn in RequirementNode.objects.filter(framework=new_framework)
+            }
+            existing_assessments = defaultdict(list)
+            for ra in RequirementAssessment.objects.filter(requirement__framework=new_framework):
+                existing_assessments[ra.requirement.urn.lower()].append(ra)
+
+            assessments_to_create = []
+            assessments_to_update = []
+            requirement_nodes_to_update = []
             order_id = 0
+
             for requirement_node in requirement_nodes:
-                requirement_node_dict = {**requirement_node}
-                for key in ["depth", "reference_controls", "threats"]:
-                    requirement_node_dict.pop(key, None)
+                urn = requirement_node["urn"].lower()
+                question = requirement_node.get("question")
+                question_type = question["question_type"] if question else None
+
+                requirement_node_dict = {
+                    k: v for k, v in requirement_node.items() if k not in ["urn", "depth", "reference_controls", "threats"]
+                }
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
 
-                (
-                    new_requirement_node,
-                    created,
-                ) = RequirementNode.objects.update_or_create(
-                    urn=requirement_node["urn"].lower(),
-                    defaults=requirement_node_dict,
-                    create_defaults={
+                if urn in existing_requirements:
+                    new_requirement_node = existing_requirements[urn]
+                    for key, value in requirement_node_dict.items():
+                        setattr(new_requirement_node, key, value)
+                    requirement_nodes_to_update.append(new_requirement_node)
+                else:
+                    new_requirement_node = RequirementNode.objects.create(
+                        urn=urn,
+                        framework=new_framework,
                         **referential_object_dict,
                         **requirement_node_dict,
-                        "framework": new_framework,
-                    },
-                )
-
-                if created:
-                    for compliance_assessment in compliance_assessments:
-                        ra = RequirementAssessment.objects.create(
-                            compliance_assessment=compliance_assessment,
-                            requirement=new_requirement_node,
-                            folder=compliance_assessment.perimeter.folder,
-                            answer=transform_question_to_answer(
-                                new_requirement_node.question
-                            )
-                            if new_requirement_node.question
-                            else {},
-                        )
-                else:
-                    question = requirement_node.get("question")
-                    question_type = question["question_type"] if question else None
-
-                    for ra in RequirementAssessment.objects.filter(
-                        requirement=new_requirement_node
-                    ):
-                        ra.name = new_requirement_node.name
-                        ra.description = new_requirement_node.description
-                        if not question:
-                            ra.save()
-                            continue
-
-                        answers = ra.answer["questions"]
-                        if any(answer["type"] != question_type for answer in answers):
-                            ra.answer = transform_question_to_answer(
-                                new_requirement_node.question
-                            )
-                            ra.save()
-                            continue
-
-                        if question_type == "unique_choice":
-                            for answer in answers:
-                                if answer["answer"] not in question["question_choices"]:
-                                    answer["answer"] = ""
-
-                        elif question_type not in ["text", "date"]:
-                            raise NotImplementedError(
-                                f"The question type '{question_type}' hasn't been implemented !"
-                            )
-
-                        ra.answer = {"questions": answers}
-                        ra.save()
-
-                for threat_urn in requirement_node_dict.get("threats", []):
-                    thread_to_add = objects_tracked.get(threat_urn)
-                    if thread_to_add is None:  # I am not 100% this condition is usefull
-                        thread_to_add = Threat.objects.filter(
-                            urn=threat_urn
-                        ).first()  # No locale support
-                    if thread_to_add is not None:
-                        new_requirement_node.threats.add(thread_to_add)
-
-                for reference_control_urn in requirement_node.get(
-                    "reference_controls", []
-                ):
-                    reference_control_to_add = objects_tracked.get(
-                        reference_control_urn
                     )
-                    if (
-                        reference_control_to_add is None
-                    ):  # I am not 100% this condition is useful
-                        reference_control_to_add = ReferenceControl.objects.filter(
-                            urn=reference_control_urn.lower()
-                        ).first()  # No locale support
-
-                    if reference_control_to_add is not None:
-                        new_requirement_node.reference_controls.add(
-                            reference_control_to_add
+                    for ca in compliance_assessments:
+                        assessments_to_create.append(
+                            RequirementAssessment(
+                                compliance_assessment=ca,
+                                requirement=new_requirement_node,
+                                folder=ca.perimeter.folder,
+                                answer=transform_question_to_answer(question) if question else {},
+                            )
                         )
+
+                for ra in existing_assessments.get(urn, []):
+                    ra.name = new_requirement_node.name
+                    ra.description = new_requirement_node.description
+                    if not question:
+                        assessments_to_update.append(ra)
+                        continue
+
+                    answers = ra.answer.get("questions", [])
+                    if any(a["type"] != question_type for a in answers):
+                        ra.answer = transform_question_to_answer(question)
+                        assessments_to_update.append(ra)
+                        continue
+
+                    if question_type == "unique_choice":
+                        for answer in answers:
+                            if answer["answer"] not in question["question_choices"]:
+                                answer["answer"] = ""
+                        ra.answer = {"questions": answers}
+                        assessments_to_update.append(ra)
+                    elif question_type not in ["text", "date"]:
+                        raise NotImplementedError(f"Unsupported type '{question_type}'")
+
+                for threat_urn in requirement_node.get("threats", []):
+                    threat = objects_tracked.get(threat_urn) or Threat.objects.filter(urn=threat_urn).first()
+                    if threat:
+                        new_requirement_node.threats.add(threat)
+
+                for rc_urn in requirement_node.get("reference_controls", []):
+                    rc = objects_tracked.get(rc_urn) or ReferenceControl.objects.filter(urn=rc_urn.lower()).first()
+                    if rc:
+                        new_requirement_node.reference_controls.add(rc)
+
+            if requirement_nodes_to_update:
+                RequirementNode.objects.bulk_update(requirement_nodes_to_update, ["name", "description", "order_id", "question"])
+
+            if assessments_to_update:
+                RequirementAssessment.objects.bulk_update(assessments_to_update, ["answer"], batch_size=100)
+
+            if assessments_to_create:
+                RequirementAssessment.objects.bulk_create(assessments_to_create, batch_size=100)
 
         if self.new_matrices is not None:
             for matrix in self.new_matrices:
-                json_definition_keys = {
-                    "grid",
-                    "probability",
-                    "impact",
-                    "risk",
-                }  # Store this as a constant somewhere (as a static attribute of the class)
+                json_definition_keys = {"grid", "probability", "impact", "risk"}
                 other_keys = set(matrix.keys()) - json_definition_keys
                 matrix_dict = {key: matrix[key] for key in other_keys}
                 matrix_dict["json_definition"] = {}
                 for key in json_definition_keys:
-                    if (
-                        key in matrix
-                    ):  # If all keys are mandatory this condition is useless
+                    if key in matrix:
                         matrix_dict["json_definition"][key] = matrix[key]
 
                 RiskMatrix.objects.update_or_create(
@@ -676,7 +663,6 @@ class LibraryUpdater:
                         "library": self.old_library,
                     },
                 )
-
 
 class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
