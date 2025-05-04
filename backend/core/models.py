@@ -654,10 +654,6 @@ class LibraryUpdater:
                     fields_to_update,
                     batch_size=200,
                 )
-                RequirementNode.objects.bulk_update(
-                    requirement_nodes_to_update,
-                    ["name", "description", "order_id", "question"],
-                )
 
             if assessments_to_update:
                 RequirementAssessment.objects.bulk_update(
