@@ -435,6 +435,7 @@ class LibraryUpdater:
                 return err_msg
 
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
+    @transaction.atomic
     def update_library(self) -> Union[str, None]:
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
@@ -453,20 +454,19 @@ class LibraryUpdater:
             try:
                 new_dependency = LoadedLibrary.objects.filter(
                     urn=new_dependency_urn
-                ).first()  # The locale is not handled by this code
-            except:
+                ).first()
+                if new_dependency is None:
+                    return "dependencyNotFound"
+                new_dependencies.append(new_dependency)
+            except Exception:
                 return "dependencyNotFound"
-            new_dependencies.append(new_dependency)
+
         for key, value in [
             ("name", self.new_library.name),
             ("version", self.new_library.version),
             ("provider", self.new_library.provider),
-            (
-                "packager",
-                self.new_library.packager,
-            ),  # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
+            ("packager", self.new_library.packager),
             ("publication_date", self.new_library.publication_date),
-            # Should we even update the ref_id ?
             ("ref_id", self.new_library.ref_id),
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
@@ -488,8 +488,9 @@ class LibraryUpdater:
         }
 
         for threat in self.threats:
+            normalized_urn = threat["urn"].lower()
             Threat.objects.update_or_create(
-                urn=threat["urn"].lower(),
+                urn=normalized_urn,
                 defaults=threat,
                 create_defaults={
                     **referential_object_dict,
@@ -499,8 +500,9 @@ class LibraryUpdater:
             )
 
         for reference_control in self.reference_controls:
+            normalized_urn = reference_control["urn"].lower()
             ReferenceControl.objects.update_or_create(
-                urn=reference_control["urn"].lower(),
+                urn=normalized_urn,
                 defaults=reference_control,
                 create_defaults={
                     **referential_object_dict,
@@ -513,8 +515,9 @@ class LibraryUpdater:
             framework_dict = {**self.new_framework}
             del framework_dict["requirement_nodes"]
 
+            normalized_framework_urn = self.new_framework["urn"].lower()
             new_framework, _ = Framework.objects.update_or_create(
-                urn=self.new_framework["urn"],
+                urn=normalized_framework_urn,
                 defaults=framework_dict,
                 create_defaults={
                     **referential_object_dict,
@@ -524,7 +527,8 @@ class LibraryUpdater:
             )
 
             requirement_node_urns = set(
-                rc.urn for rc in RequirementNode.objects.filter(framework=new_framework)
+                rc.urn.lower()
+                for rc in RequirementNode.objects.filter(framework=new_framework)
             )
             new_requirement_node_urns = set(
                 rc["urn"].lower() for rc in self.new_framework["requirement_nodes"]
@@ -536,7 +540,7 @@ class LibraryUpdater:
             for requirement_node_urn in deleted_requirement_node_urns:
                 requirement_node = RequirementNode.objects.filter(
                     urn=requirement_node_urn
-                ).first()  # locale is not used, so if there are more than one requirement node with this URN only the first fetched requirement node will be deleted.
+                ).first()
                 if requirement_node is not None:
                     requirement_node.delete()
 
@@ -548,10 +552,10 @@ class LibraryUpdater:
             objects_tracked = {}
 
             for threat in Threat.objects.filter(library__in=involved_libraries):
-                objects_tracked[threat.urn] = threat
+                objects_tracked[threat.urn.lower()] = threat
 
             for rc in ReferenceControl.objects.filter(library__in=involved_libraries):
-                objects_tracked[rc.urn] = rc
+                objects_tracked[rc.urn.lower()] = rc
 
             compliance_assessments = [
                 *ComplianceAssessment.objects.filter(framework=new_framework)
@@ -632,23 +636,33 @@ class LibraryUpdater:
                         raise NotImplementedError(f"Unsupported type '{question_type}'")
 
                 for threat_urn in requirement_node.get("threats", []):
+                    normalized_threat_urn = threat_urn.lower()
                     threat = (
-                        objects_tracked.get(threat_urn)
-                        or Threat.objects.filter(urn=threat_urn).first()
+                        objects_tracked.get(normalized_threat_urn)
+                        or Threat.objects.filter(urn=normalized_threat_urn).first()
                     )
                     if threat:
                         new_requirement_node.threats.add(threat)
 
                 for rc_urn in requirement_node.get("reference_controls", []):
+                    normalized_rc_urn = rc_urn.lower()
                     rc = (
-                        objects_tracked.get(rc_urn)
-                        or ReferenceControl.objects.filter(urn=rc_urn.lower()).first()
+                        objects_tracked.get(normalized_rc_urn)
+                        or ReferenceControl.objects.filter(
+                            urn=normalized_rc_urn
+                        ).first()
                     )
                     if rc:
                         new_requirement_node.reference_controls.add(rc)
 
+            # Fix for the dual bulk_update issue - consolidate into one update
             if requirement_nodes_to_update:
-                fields_to_update = sorted(all_fields_to_update.union({"order_id"}))
+                # Ensure all needed fields are included
+                fields_to_update = sorted(
+                    all_fields_to_update.union(
+                        {"name", "description", "order_id", "question"}
+                    )
+                )
                 RequirementNode.objects.bulk_update(
                     requirement_nodes_to_update,
                     fields_to_update,
@@ -667,6 +681,7 @@ class LibraryUpdater:
 
         if self.new_matrices is not None:
             for matrix in self.new_matrices:
+                normalized_urn = matrix["urn"].lower()
                 json_definition_keys = {"grid", "probability", "impact", "risk"}
                 other_keys = set(matrix.keys()) - json_definition_keys
                 matrix_dict = {key: matrix[key] for key in other_keys}
@@ -676,7 +691,7 @@ class LibraryUpdater:
                         matrix_dict["json_definition"][key] = matrix[key]
 
                 RiskMatrix.objects.update_or_create(
-                    urn=matrix["urn"].lower(),
+                    urn=normalized_urn,
                     defaults=matrix_dict,
                     create_defaults={
                         **referential_object_dict,
