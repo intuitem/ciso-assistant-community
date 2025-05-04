@@ -1,4 +1,7 @@
 name: Build/Push Canary Images - CE
+permissions:
+  contents: read
+  packages: write
 on:
   push:
     tags:
@@ -9,9 +12,6 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
