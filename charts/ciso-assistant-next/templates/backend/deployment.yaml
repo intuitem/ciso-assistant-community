@@ -252,6 +252,15 @@ spec:
                 name: {{ include "ciso-assistant.fullname" . }}-backend
                 key: email-primary-password
           {{- end }}
+          # Add extra environment variables dynamically
+          {{- range .Values.backend.extraEnv }}
+            - name: {{ .name }}
+          {{- if .valueFrom }}
+            valueFrom: {{- toYaml .valueFrom | nindent 14 }}
+          {{- else }}
+          value: {{ .value | quote }}
+        {{- end }}
+      {{- end }}
         volumeMounts:
         - name: tmp-data
           mountPath: /tmp
