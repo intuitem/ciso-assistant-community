@@ -435,6 +435,7 @@ class LibraryUpdater:
                 return err_msg
 
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
+    @transaction.atomic
     def update_library(self) -> Union[str, None]:
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
