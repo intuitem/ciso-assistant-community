@@ -580,6 +580,19 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_tasknode",
     "change_tasknode",
     "delete_tasknode",
+    # resilience,
+    "add_businessimpactanalysis",
+    "view_businessimpactanalysis",
+    "change_businessimpactanalysis",
+    "delete_businessimpactanalysis",
+    "add_escalationthreshold",
+    "view_escalationthreshold",
+    "change_escalationthreshold",
+    "delete_escalationthreshold",
+    "add_assetassessment",
+    "view_assetassessment",
+    "change_assetassessment",
+    "delete_assetassessment",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
