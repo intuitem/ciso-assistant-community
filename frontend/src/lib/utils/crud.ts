@@ -639,6 +639,40 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Qualification',
 		verboseNamePlural: 'Qualifications'
 	},
+	'business-impact-analysis': {
+		endpointUrl: 'resilience/business-impact-analysis',
+		name: 'businessimpactanalysis',
+		localName: 'businessimpactanalysis',
+		localNamePlural: 'businessimpactanalysis',
+		verboseName: 'businessimpactanalysis',
+		verboseNamePlural: 'businessimpactanalysis',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
+		],
+		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }]
+	},
+	'asset-assessments': {
+		endpointUrl: 'resilience/asset-assessments',
+		name: 'assetassessment',
+		localName: 'assetAssessment',
+		localNamePlural: 'assetAssessments',
+		verboseName: 'assetassessment',
+		verboseNamePlural: 'assetassessments',
+		foreignKeyFields: [
+			{ field: 'asset', urlModel: 'assets' },
+			{
+				field: 'bia',
+				urlModel: 'business-impact-analysis',
+				endpointUrl: 'business-impact-analysis'
+			}
+		]
+	},
 	processings: {
 		endpointUrl: 'privacy/processings',
 		name: 'processing',

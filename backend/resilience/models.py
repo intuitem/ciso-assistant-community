@@ -19,10 +19,13 @@ class BusinessImpactAnalysis(Assessment):
 
 class AssetAssessment(AbstractBaseModel):
     asset = OneToOneField(Asset, on_delete=models.CASCADE)
-    dependencies = ManyToManyField(Asset, related_name="dependencies")
-    associated_controls = ManyToManyField(AppliedControl)
+    dependencies = ManyToManyField(Asset, related_name="dependencies", blank=True)
+    associated_controls = ManyToManyField(AppliedControl, blank=True)
 
     bia = ForeignKey(BusinessImpactAnalysis, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return str(self.asset)
 
 
 class EscalationThreshold(AbstractBaseModel):

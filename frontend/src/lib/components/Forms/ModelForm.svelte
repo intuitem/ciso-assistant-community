@@ -45,6 +45,8 @@
 	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 	import TaskTemplateForm from './ModelForm/TaskTemplateForm.svelte';
 	import TaskNodeForm from './ModelForm/TaskNodeForm.svelte';
+	import BusinessImpactAnalysisForm from './ModelForm/BusinessImpactAnalysisForm.svelte';
+	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -321,6 +323,10 @@
 		<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
+	{:else if URLModel === 'business-impact-analysis'}
+		<BusinessImpactAnalysisForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'asset-assessments'}
+		<AssetAssessmentForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'processings'}
 		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'purposes'}

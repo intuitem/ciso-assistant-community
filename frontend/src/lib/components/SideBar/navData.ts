@@ -189,6 +189,12 @@ export const navData = {
 					href: '/risk-scenarios'
 				},
 				{
+					name: 'businessImpactAnalysis',
+					fa_icon: 'fa-solid fa-arrows-to-eye',
+					href: '/business-impact-analysis',
+					permissions: ['view_riskmatrix']
+				},
+				{
 					name: 'scoringAssistant',
 					fa_icon: 'fa-solid fa-star-half-stroke',
 					href: '/scoring-assistant',
@@ -302,6 +308,12 @@ export const navData = {
 					name: 'settings',
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
+					permissions: ['change_globalsettings']
+				},
+				{
+					name: 'dataWizard',
+					fa_icon: 'fa-solid fa-hat-wizard',
+					href: '/experimental/data-wizard',
 					permissions: ['change_globalsettings']
 				},
 				{

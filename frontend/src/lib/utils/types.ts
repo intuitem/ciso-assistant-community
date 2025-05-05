@@ -75,6 +75,7 @@ export const URL_MODEL = [
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
+	// privacy,
 	'processings',
 	'purposes',
 	'personal-data',
@@ -82,10 +83,16 @@ export const URL_MODEL = [
 	'data-recipients',
 	'data-contractors',
 	'data-transfers',
+	// incidents,
 	'incidents',
 	'timeline-entries',
+	// tasks,
 	'task-templates',
-	'task-nodes'
+	'task-nodes',
+	// resilience,
+	'business-impact-analysis',
+	'escalation-thresholds',
+	'asset-assessments'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

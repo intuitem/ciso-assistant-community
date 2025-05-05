@@ -1,4 +1,4 @@
-from core.serializers import BaseModelSerializer
+from core.serializers import BaseModelSerializer, AssessmentReadSerializer
 from core.serializer_fields import FieldsRelatedField
 from .models import (
     BusinessImpactAnalysis,
@@ -6,11 +6,18 @@ from .models import (
     AssetAssessment,
 )
 
+from rest_framework import serializers
 
-class BusinessImpactAnalysisReadSerializer(BaseModelSerializer):
+
+class BusinessImpactAnalysisReadSerializer(AssessmentReadSerializer):
     class Meta:
         model = BusinessImpactAnalysis
-        fields = "__all__"
+        exclude = []
+
+    str = serializers.CharField(source="__str__")
+    perimeter = FieldsRelatedField(["id", "folder"])
+    folder = FieldsRelatedField()
+    risk_matrix = FieldsRelatedField()
 
 
 class BusinessImpactAnalysisWriteSerializer(BaseModelSerializer):
@@ -20,9 +27,13 @@ class BusinessImpactAnalysisWriteSerializer(BaseModelSerializer):
 
 
 class AssetAssessmentReadSerializer(BaseModelSerializer):
+    bia = FieldsRelatedField()
+    asset = FieldsRelatedField()
+    folder = FieldsRelatedField()
+
     class Meta:
         model = AssetAssessment
-        fields = "__all__"
+        exclude = []
 
 
 class AssetAssessmentWriteSerializer(BaseModelSerializer):

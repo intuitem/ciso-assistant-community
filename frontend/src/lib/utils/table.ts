@@ -772,6 +772,14 @@ export const listViewFields = {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
 	},
+	'business-impact-analysis': {
+		head: ['name'],
+		body: ['name']
+	},
+	'asset-assessments': {
+		head: ['asset', 'bia'],
+		body: ['asset', 'bia']
+	},
 	processings: {
 		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
 		body: ['name', 'description', 'status', 'legal_basis', 'nature', 'folder']
