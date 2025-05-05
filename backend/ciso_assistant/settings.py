@@ -201,6 +201,7 @@ INSTALLED_APPS = [
     "huey.contrib.djhuey",
     "auditlog",
     "storages",
+    "resilience",
 ]
 
 MIDDLEWARE = [
