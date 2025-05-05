@@ -28,6 +28,8 @@ class BusinessImpactAnalysisWriteSerializer(BaseModelSerializer):
 
 class AssetAssessmentReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
+    label = serializers.CharField(source="__str__")
+    name = serializers.CharField(source="__str__")
 
     bia = FieldsRelatedField()
     asset = FieldsRelatedField()

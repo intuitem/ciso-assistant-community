@@ -33,7 +33,7 @@
 	cacheLock={cacheLocks['asset_assessment']}
 	bind:cachedValue={formDataCache['asset_assessment']}
 	label={m.assetAssessment()}
-	hidden={initialData.asset_assessment}
+	hidden={true}
 />
 <TextArea
 	{form}
