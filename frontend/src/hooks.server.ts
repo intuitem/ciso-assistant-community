@@ -97,7 +97,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 			console.error('Error fetching feature flags', e);
 			event.locals.featureflags = {};
 		}
-		console.log('Feature flags', event.locals.featureflags);
 	}
 
 	return await resolve(event);
