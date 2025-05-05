@@ -9,6 +9,8 @@ from django.db.models import (
     OneToOneField,
 )
 
+from iam.models import User, FolderMixin
+
 
 class BusinessImpactAnalysis(Assessment):
     risk_matrix = models.ForeignKey(
@@ -17,7 +19,7 @@ class BusinessImpactAnalysis(Assessment):
     )
 
 
-class AssetAssessment(AbstractBaseModel):
+class AssetAssessment(AbstractBaseModel, FolderMixin):
     asset = OneToOneField(Asset, on_delete=models.CASCADE)
     dependencies = ManyToManyField(Asset, related_name="dependencies", blank=True)
     associated_controls = ManyToManyField(AppliedControl, blank=True)
@@ -28,7 +30,7 @@ class AssetAssessment(AbstractBaseModel):
         return str(self.asset)
 
 
-class EscalationThreshold(AbstractBaseModel):
+class EscalationThreshold(AbstractBaseModel, FolderMixin):
     TIME_UNIT_CHOICES = (("m", "Minutes"), ("H", "Hours"), ("d", "Days"))
     QUANT_IMPACT_UNIT = (
         ("people", "People"),
