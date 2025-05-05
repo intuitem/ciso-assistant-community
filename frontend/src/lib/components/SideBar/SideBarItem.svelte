@@ -4,7 +4,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let item: any; // TODO: type this
-	export let sideBarVisibility;
+	export let sideBarVisibleItems;
 
 	$: classesActive = (href: string) =>
 		href === $page.url.pathname
@@ -14,7 +14,7 @@
 
 {#each item as item}
 	<!-- undefined and true must be shown -->
-	{#if sideBarVisibility[item.name] !== false}
+	{#if sideBarVisibleItems[item.name] !== false}
 		<Anchor
 			href={item.href}
 			breadcrumbAction="replace"

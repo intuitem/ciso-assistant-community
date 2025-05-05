@@ -8,7 +8,7 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { driverInstance } from '$lib/utils/stores';
 
-	export let sideBarVisibility;
+	export let sideBarVisibleItems;
 
 	const user = $page.data.user;
 
@@ -67,7 +67,7 @@
 					<svelte:fragment slot="content"><SideBarItem item={item.items} /></svelte:fragment>
 				</AccordionItem>
 			{:else} -->
-			{#if sideBarVisibility[item.name] !== false}
+			{#if sideBarVisibleItems[item.name] !== false}
 				<AccordionItem
 					id={item.name.toLowerCase().replace(' ', '-')}
 					on:click={() => lastAccordionItemOpened(item.name)}
@@ -76,7 +76,7 @@
 				>
 					<svelte:fragment slot="summary"><SideBarCategory {item} /></svelte:fragment>
 					<svelte:fragment slot="content"
-						><SideBarItem item={item.items} {sideBarVisibility} /></svelte:fragment
+						><SideBarItem item={item.items} {sideBarVisibleItems} /></svelte:fragment
 					>
 				</AccordionItem>
 			{/if}

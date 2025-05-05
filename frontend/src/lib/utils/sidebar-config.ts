@@ -30,7 +30,7 @@ type SidebarFrontendVisibility = {
 	Experimental: boolean;
 };
 
-export function getSidebarVisibilityFromBackend(
+export function getSidebarVisibleItems(
 	featureFlags: Partial<SidebarBackendKeys>
 ): SidebarFrontendVisibility {
 	return {
