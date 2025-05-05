@@ -14,11 +14,26 @@
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
+	export let context = '';
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
 
 	const { value: is_recurrent } = formFieldProxy(form, 'is_recurrent');
 	const { value: frequency } = formFieldProxy(form, 'schedule.frequency');
+	const { tainted: taskDateTainted } = formFieldProxy(form, 'task_date');
+	const { tainted: scheduleTainted } = formFieldProxy(form, 'schedule');
+
+	function scheduleTaintedHandler(data) {
+		if (Array.isArray(data)) {
+			return data.some((item) => scheduleTaintedHandler(item));
+		} else if (data !== null && typeof data === 'object') {
+			return Object.values(data).some((value) => scheduleTaintedHandler(value));
+		} else {
+			return data === true || $taskDateTainted === true;
+		}
+	}
+
+	$: isScheduleTainted = scheduleTaintedHandler($scheduleTainted);
 </script>
 
 <AutocompleteSelect
@@ -175,7 +190,36 @@
 			cacheLock={cacheLocks['end_date']}
 			bind:cachedValue={formDataCache['end_date']}
 		/>
+		{#if context == 'edit' && isScheduleTainted}<span class="text-orange-500 italic text-sm"
+				><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.taskScheduleWarning()}</span
+			>{/if}
 	</Dropdown>
+{:else}
+	<Select
+		{form}
+		field="status"
+		label={m.status()}
+		options={model.selectOptions['status']}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+		disableDoubleDash={true}
+	/>
+	<TextArea
+		{form}
+		field="observation"
+		label={m.observation()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="evidences"
+		label={m.evidences()}
+	/>
 {/if}
 <AutocompleteSelect
 	{form}
@@ -227,9 +271,9 @@
 		optionsEndpoint="risk-assessments"
 		optionsExtraFields={[['perimeter', 'str']]}
 		optionsLabelField="str"
-		field="risk_assessment"
-		cacheLock={cacheLocks['risk_assessment']}
-		bind:cachedValue={formDataCache['risk_assessment']}
+		field="risk_assessments"
+		cacheLock={cacheLocks['risk_assessments']}
+		bind:cachedValue={formDataCache['risk_assessments']}
 		label={m.riskAssessments()}
 	/>
 </Dropdown>

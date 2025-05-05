@@ -864,7 +864,7 @@ export const listViewFields = {
 			'risk_origin',
 			'target_objective',
 			'stakeholders',
-			'attackPath'
+			'description'
 		],
 		body: [
 			'is_selected',
@@ -919,8 +919,22 @@ export const listViewFields = {
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	'task-templates': {
-		head: ['name', 'description', 'assigned_to', 'lastOccurrenceStatus', 'nextOccurrence'],
-		body: ['name', 'description', 'assigned_to', 'last_occurrence_status', 'next_occurrence']
+		head: [
+			'name',
+			'description',
+			'is_recurrent',
+			'assigned_to',
+			'lastOccurrenceStatus',
+			'nextOccurrence'
+		],
+		body: [
+			'name',
+			'description',
+			'is_recurrent',
+			'assigned_to',
+			'last_occurrence_status',
+			'next_occurrence'
+		]
 	},
 	'task-nodes': {
 		head: ['due_date', 'status', 'evidences'],

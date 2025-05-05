@@ -6,6 +6,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from icecream import ic
 from auditlog.registry import auditlog
 
 import yaml
@@ -3177,6 +3178,63 @@ class ComplianceAssessment(Assessment):
 
         return created_assessments
 
+    def sync_to_applied_controls(self, dry_run=True):
+        """
+        the logic is to get the requirement assessments that have applied controls attached
+        then for each:
+        if one applied control attached:
+            if the AC status is active, toggle requirement assessment to compliant
+            if the AC status is in any other status, toggle the requirement assessment to non_compliant
+        if two or more applied controls are attached:
+            if all AC are active, toggle to compliant
+            if at least one AC is active, toggle to partially compliant
+            else toggle to non_compliant
+        """
+
+        def infer_result(applied_controls):
+            if not applied_controls:
+                return RequirementAssessment.Result.NOT_ASSESSED
+
+            if len(applied_controls) == 1:
+                ac_status = applied_controls[0].status
+                if ac_status == AppliedControl.Status.ACTIVE:
+                    return RequirementAssessment.Result.COMPLIANT
+                else:
+                    return RequirementAssessment.Result.NON_COMPLIANT
+
+            statuses = [ac.status for ac in applied_controls]
+
+            if all(status == AppliedControl.Status.ACTIVE for status in statuses):
+                return RequirementAssessment.Result.COMPLIANT
+            elif AppliedControl.Status.ACTIVE in statuses:
+                return RequirementAssessment.Result.PARTIALLY_COMPLIANT
+            else:
+                return RequirementAssessment.Result.NON_COMPLIANT
+
+        changes = dict()
+        requirement_assessments_with_ac = RequirementAssessment.objects.filter(
+            compliance_assessment=self, applied_controls__isnull=False
+        ).distinct()
+        with transaction.atomic():
+            for ra in requirement_assessments_with_ac:
+                ac = AppliedControl.objects.filter(requirement_assessments=ra)
+                ic(ac)
+                new_result = infer_result(ac)
+                if ra.result != new_result:
+                    changes[str(ra.id)] = {
+                        "str": str(ra),
+                        "current": ra.result,
+                        "new": new_result,
+                    }
+                    if not dry_run:
+                        ra.result = new_result
+                        ra.save(update_fields=["result"])
+
+        ic(changes)
+
+        if dry_run:
+            return changes
+
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
@@ -4269,14 +4327,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         task_nodes = TaskNode.objects.filter(
             task_template=self, due_date__lte=today
         ).order_by("-due_date")
-        if self.is_recurrent:
-            return task_nodes[1].status if task_nodes.exists() else None
-        else:
-            return (
-                TaskNode.objects.get(task_template=self).status
-                if TaskNode.objects.filter(task_template=self).exists()
-                else None
-            )
+        return task_nodes[0].status if task_nodes.exists() else None
 
     class Meta:
         verbose_name = "Task template"
@@ -4332,6 +4383,22 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     @property
     def assigned_to(self):
         return self.task_template.assigned_to
+
+    @property
+    def assets(self):
+        return self.task_template.assets.all()
+
+    @property
+    def applied_controls(self):
+        return self.task_template.applied_controls.all()
+
+    @property
+    def compliance_assessments(self):
+        return self.task_template.compliance_assessments.all()
+
+    @property
+    def risk_assessments(self):
+        return self.task_template.risk_assessments.all()
 
     class Meta:
         verbose_name = "Task node"
