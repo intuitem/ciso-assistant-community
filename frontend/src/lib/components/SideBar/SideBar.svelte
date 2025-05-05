@@ -22,7 +22,7 @@
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
 	export let open: boolean;
-	export let sideBarVisibleItems;
+	export let sideBarVisibleItems: Record<string, boolean>;
 
 	const user = $page.data?.user;
 

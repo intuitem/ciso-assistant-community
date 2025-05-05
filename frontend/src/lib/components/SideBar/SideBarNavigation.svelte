@@ -8,7 +8,7 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { driverInstance } from '$lib/utils/stores';
 
-	export let sideBarVisibleItems;
+	export let sideBarVisibleItems: Record<string, boolean>;
 
 	const user = $page.data.user;
 
@@ -67,7 +67,7 @@
 					<svelte:fragment slot="content"><SideBarItem item={item.items} /></svelte:fragment>
 				</AccordionItem>
 			{:else} -->
-			{#if sideBarVisibleItems[item.name] !== false}
+			{#if sideBarVisibleItems && sideBarVisibleItems[item.name] !== false}
 				<AccordionItem
 					id={item.name.toLowerCase().replace(' ', '-')}
 					on:click={() => lastAccordionItemOpened(item.name)}

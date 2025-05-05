@@ -3,8 +3,8 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let item: any; // TODO: type this
-	export let sideBarVisibleItems;
+	export let item: { name: string; href: string; fa_icon: string }[] = [];
+	export let sideBarVisibleItems: Record<string, boolean>;
 
 	$: classesActive = (href: string) =>
 		href === $page.url.pathname

@@ -14,7 +14,7 @@ type SidebarBackendKeys = {
 	experimental: boolean;
 };
 
-type SidebarFrontendVisibility = {
+type SidebarFrontendKeys = {
 	xRays: boolean;
 	incidents: boolean;
 	tasks: boolean;
@@ -27,12 +27,12 @@ type SidebarFrontendVisibility = {
 	compliance: boolean;
 	thirdPartyCategory: boolean;
 	privacy: boolean;
-	Experimental: boolean;
+	experimental: boolean;
 };
 
 export function getSidebarVisibleItems(
 	featureFlags: Partial<SidebarBackendKeys>
-): SidebarFrontendVisibility {
+): SidebarFrontendKeys {
 	return {
 		xRays: featureFlags.xrays ?? false,
 		incidents: featureFlags.incidents ?? false,
@@ -46,6 +46,6 @@ export function getSidebarVisibleItems(
 		compliance: featureFlags.compliance ?? false,
 		thirdPartyCategory: featureFlags.tprm ?? false,
 		privacy: featureFlags.privacy ?? false,
-		Experimental: featureFlags.experimental ?? false
+		experimental: featureFlags.experimental ?? false
 	};
 }
