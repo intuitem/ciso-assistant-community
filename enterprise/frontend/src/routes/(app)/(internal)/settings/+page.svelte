@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { SSOSettingsSchema, GeneralSettingsSchema, featureFlagSchema } from '$lib/utils/schemas';
+	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import ClientSettings from './client-settings/+page.svelte';
@@ -65,7 +65,7 @@
 		<span class="text-gray-500">{m.configureFeatureFlags()}</span>
 		<ModelForm
 			form={data.featureFlagForm}
-			schema={featureFlagSchema}
+			schema={FeatureFlagsSchema}
 			model={data.featureFlagModel}
 			cancelButton={false}
 			action="?/featureFlags"
