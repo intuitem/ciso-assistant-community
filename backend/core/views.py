@@ -1107,11 +1107,21 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             context = RiskScenario.objects.filter(
                 risk_assessment=risk_assessment
             ).order_by("ref_id")
+            general_settings = GlobalSettings.objects.filter(name="general").first()
+            swap_axes = general_settings.value.get("risk_matrix_swap_axes", False)
+            flip_vertical = general_settings.value.get(
+                "risk_matrix_flip_vertical", False
+            )
+            matrix_settings = {
+                "swap_axes": "_swapaxes" if swap_axes else "",
+                "flip_vertical": "_vflip" if flip_vertical else "",
+            }
             data = {
                 "context": context,
                 "risk_assessment": risk_assessment,
                 "ri_clusters": build_scenario_clusters(risk_assessment),
                 "risk_matrix": risk_assessment.risk_matrix,
+                "settings": matrix_settings,
             }
             html = render_to_string("core/ra_pdf.html", data)
             pdf_file = HTML(string=html).write_pdf()
@@ -4516,6 +4526,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="syncToActions",
+    )
+    def sync_to_applied_controls(self, request, pk):
+        dry_run = request.query_params.get("dry_run", True)
+        if dry_run == "false":
+            dry_run = False
+        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_requirementassessment"),
+            folder=compliance_assessment.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        changes = compliance_assessment.sync_to_applied_controls(dry_run=dry_run)
+        return Response({"changes": changes})
+
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
         try:
@@ -5291,40 +5322,43 @@ class TaskTemplateViewSet(BaseModelViewSet):
         return tasks_list
 
     def _sync_task_nodes(self, task_template: TaskTemplate):
-        with transaction.atomic():
-            # Soft-delete all existing TaskNode instances associated with this TaskTemplate
-            TaskNode.objects.filter(task_template=task_template).update(to_delete=True)
-            # Determine the end date based on the frequency
-            start_date = task_template.task_date
-            if task_template.is_recurrent:
-                if task_template.schedule["frequency"] == "DAILY":
-                    delta = rd.relativedelta(months=2)
-                elif task_template.schedule["frequency"] == "WEEKLY":
-                    delta = rd.relativedelta(months=4)
-                elif task_template.schedule["frequency"] == "MONTHLY":
-                    delta = rd.relativedelta(years=1)
-                elif task_template.schedule["frequency"] == "YEARLY":
-                    delta = rd.relativedelta(years=5)
+        if task_template.is_recurrent:
+            with transaction.atomic():
+                # Soft-delete all existing TaskNode instances associated with this TaskTemplate
+                TaskNode.objects.filter(task_template=task_template).update(
+                    to_delete=True
+                )
+                # Determine the end date based on the frequency
+                start_date = task_template.task_date
+                if task_template.is_recurrent:
+                    if task_template.schedule["frequency"] == "DAILY":
+                        delta = rd.relativedelta(months=2)
+                    elif task_template.schedule["frequency"] == "WEEKLY":
+                        delta = rd.relativedelta(months=4)
+                    elif task_template.schedule["frequency"] == "MONTHLY":
+                        delta = rd.relativedelta(years=1)
+                    elif task_template.schedule["frequency"] == "YEARLY":
+                        delta = rd.relativedelta(years=5)
 
-                end_date_param = task_template.schedule.get("end_date")
-                if end_date_param:
-                    end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
+                    end_date_param = task_template.schedule.get("end_date")
+                    if end_date_param:
+                        end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
+                    else:
+                        end_date = datetime.now().date() + delta
+                    # Ensure end_date is not before the calculated delta
+                    if end_date < datetime.now().date() + delta:
+                        end_date = datetime.now().date() + delta
                 else:
-                    end_date = datetime.now().date() + delta
-                # Ensure end_date is not before the calculated delta
-                if end_date < datetime.now().date() + delta:
-                    end_date = datetime.now().date() + delta
-            else:
-                end_date = start_date
-            # Generate the task nodes
-            self.task_calendar(
-                task_templates=TaskTemplate.objects.filter(id=task_template.id),
-                start=start_date,
-                end=end_date,
-            )
+                    end_date = start_date
+                # Generate the task nodes
+                self.task_calendar(
+                    task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                    start=start_date,
+                    end=end_date,
+                )
 
-            # garbage-collect
-            TaskNode.objects.filter(to_delete=True).delete()
+                # garbage-collect
+                TaskNode.objects.filter(to_delete=True).delete()
 
     @action(
         detail=False,
@@ -5365,10 +5399,15 @@ class TaskTemplateViewSet(BaseModelViewSet):
         )  # Synchronize task nodes when fetching a task template
         return Response(serializer_class(super().get_object()).data)
 
+    @action(detail=False, name="Get Task Node status choices")
+    def status(srlf, request):
+        return Response(dict(TaskNode.TASK_STATUS_CHOICES))
+
 
 class TaskNodeViewSet(BaseModelViewSet):
     model = TaskNode
     filterset_fields = ["status", "task_template"]
+    ordering = ["due_date"]
 
     @action(detail=False, name="Get Task Node status choices")
     def status(srlf, request):
