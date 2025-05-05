@@ -32,16 +32,15 @@ class AssetAssessment(AbstractBaseModel, FolderMixin):
 
 
 class EscalationThreshold(AbstractBaseModel, FolderMixin):
-    TIME_UNIT_CHOICES = (("m", "Minutes"), ("H", "Hours"), ("d", "Days"))
     QUANT_IMPACT_UNIT = (
         ("people", "People"),
         ("currency", "Currency"),
         ("records", "Records"),
         ("man_hours", "Man-hours"),
-        ("generic", "Generic"),
+        ("data_gb", "Data (GB)"),
+        ("gu", "Generic Unit"),
     )
-    point_in_time = IntegerField()
-    time_unit = CharField(max_length=2, choices=TIME_UNIT_CHOICES, default="H")
+    point_in_time = IntegerField()  # seconds and manage the display and units on front
     quali_impact_level = IntegerField(default=-1)  # based on the matrix
     quanti_impact_number = FloatField(default=0)
     quanti_impact_unit = CharField(
