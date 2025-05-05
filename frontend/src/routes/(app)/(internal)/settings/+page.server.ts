@@ -14,8 +14,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) =>
 		res.json()
 	);
-	const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/object/`).then(
-		(res) => res.json()
+	const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`).then((res) =>
+		res.json()
 	);
 
 	const selectOptions: Record<string, any> = {};
@@ -167,9 +167,7 @@ export const actions: Actions = {
 
 		const requestInitOptions: RequestInit = {
 			method: 'PUT',
-			body: JSON.stringify({
-				value: form.data
-			})
+			body: JSON.stringify(form.data)
 		};
 
 		const response = await event.fetch(endpoint, requestInitOptions);
