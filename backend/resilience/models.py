@@ -30,6 +30,9 @@ class AssetAssessment(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         return str(self.asset)
 
+    class Meta:
+        unique_together = ["bia", "asset"]
+
 
 class EscalationThreshold(AbstractBaseModel, FolderMixin):
     QUANT_IMPACT_UNIT = (
@@ -49,3 +52,6 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     rationale = TextField(null=True, blank=True)
 
     asset_assessment = ForeignKey(AssetAssessment, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ["asset_assessment", "point_in_time"]
