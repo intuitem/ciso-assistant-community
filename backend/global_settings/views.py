@@ -56,62 +56,10 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj = self.model.objects.get(name="feature-flags")
+        obj, _ = self.model.objects.get_or_create(name="feature-flags")
         obj.is_published = True  # we could do that at creation, but it's ok here
         self.check_object_permissions(self.request, obj)
         return obj
-
-    @action(detail=True, name="Get write data")
-    def object(self, request, pk=None):
-        default_settings = {
-            "xrays": True,
-            "incidents": True,
-            "tasks": True,
-            "risk_acceptances": True,
-            "exceptions": True,
-            "follow_up": True,
-            "ebiosrm": True,
-            "scoring_assistant": True,
-            "vulnerabilities": True,
-            "compliance": True,
-            "tprm": True,
-            "privacy": True,
-            "experimental": True,
-        }
-
-        settings, created = GlobalSettings.objects.get_or_create(name="feature-flags")
-
-        if created or not all(key in settings.value for key in default_settings):
-            existing_value = settings.value or {}
-            updated_value = {**default_settings, **existing_value}
-            settings.value = updated_value
-            settings.save()
-
-        return Response(FeatureFlagsSerializer(settings).data.get("value"))
-
-    INTERFACE_FEATURE_KEYS = [
-        "xrays",
-        "incidents",
-        "tasks",
-        "risk_acceptances",
-        "exceptions",
-        "follow_up",
-        "ebiosrm",
-        "scoring_assistant",
-        "vulnerabilities",
-        "compliance",
-        "tprm",
-        "privacy",
-        "experimental",
-    ]
-
-    @action(detail=True, name="Get interface settings")
-    def feature_flags(self, request):
-        settings = self.get_object().value
-        interface_flags = {
-            key: settings.get(key) for key in self.INTERFACE_FEATURE_KEYS
-        }
-        return Response(interface_flags)
 
 
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
