@@ -17,7 +17,9 @@ router.register(
     r"asset-assessments", AssetAssessmentViewSet, basename="asset-assessments"
 )
 router.register(
-    r"esclation-thresholds", EscalationThresholdViewSet, basename="esclation-thresholds"
+    r"escalation-thresholds",
+    EscalationThresholdViewSet,
+    basename="escalation-thresholds",
 )
 
 urlpatterns = [

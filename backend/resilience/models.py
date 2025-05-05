@@ -7,6 +7,7 @@ from django.db.models import (
     IntegerField,
     ManyToManyField,
     OneToOneField,
+    TextField,
 )
 
 from iam.models import User, FolderMixin
@@ -20,7 +21,7 @@ class BusinessImpactAnalysis(Assessment):
 
 
 class AssetAssessment(AbstractBaseModel, FolderMixin):
-    asset = OneToOneField(Asset, on_delete=models.CASCADE)
+    asset = ForeignKey(Asset, on_delete=models.CASCADE)
     dependencies = ManyToManyField(Asset, related_name="dependencies", blank=True)
     associated_controls = ManyToManyField(AppliedControl, blank=True)
 
@@ -39,13 +40,13 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
         ("man_hours", "Man-hours"),
         ("generic", "Generic"),
     )
-    point_in_time = IntegerField(default=0)
+    point_in_time = IntegerField()
     time_unit = CharField(max_length=2, choices=TIME_UNIT_CHOICES, default="H")
     quali_impact_level = IntegerField(default=-1)  # based on the matrix
     quanti_impact_number = FloatField(default=0)
     quanti_impact_unit = CharField(
         max_length=20, choices=QUANT_IMPACT_UNIT, default="currency"
     )
-    rationale = CharField(max_length=250)
+    rationale = TextField(null=True, blank=True)
 
     asset_assessment = ForeignKey(AssetAssessment, on_delete=models.CASCADE)

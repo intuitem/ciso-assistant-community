@@ -655,13 +655,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
 		selectFields: [{ field: 'status' }],
-		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }],
-		detailViewFields: [
-			{ field: 'name' },
-			{ field: 'folder' },
-			{ field: 'due_date' },
-			{ field: 'status' }
-		]
+		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }]
 	},
 	'asset-assessments': {
 		endpointUrl: 'resilience/asset-assessments',
@@ -670,12 +664,28 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assetAssessments',
 		verboseName: 'assetassessment',
 		verboseNamePlural: 'assetassessments',
+		reverseForeignKeyFields: [{ field: 'asset_assessment', urlModel: 'escalation-thresholds' }],
 		foreignKeyFields: [
 			{ field: 'asset', urlModel: 'assets' },
 			{
 				field: 'bia',
 				urlModel: 'business-impact-analysis',
 				endpointUrl: 'business-impact-analysis'
+			}
+		]
+	},
+	'escalation-thresholds': {
+		endpointUrl: 'resilience/escalation-thresholds',
+		name: 'escalationthreshold',
+		localName: 'escalationThreshold',
+		localNamePlural: 'escalationThresholds',
+		verboseName: 'escalationthreshold',
+		verboseNamePlural: 'escalationthresholds',
+		foreignKeyFields: [
+			{
+				field: 'asset_assessment',
+				urlModel: 'asset-assessments',
+				endpointUrl: 'asset-assessments'
 			}
 		]
 	},

@@ -1,6 +1,7 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
+import { number } from 'echarts/core';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -455,8 +456,20 @@ export const AssetAssessmentSchema = z.object({
 	dependencies: z.array(z.string().optional()).optional()
 });
 
+// point_in_time = IntegerField(default=0)
+// time_unit = CharField(max_length=2, choices=TIME_UNIT_CHOICES, default="H")
+// quali_impact_level = IntegerField(default=-1)  # based on the matrix
+// quanti_impact_number = FloatField(default=0)
+// quanti_impact_unit = CharField(
+//     max_length=20, choices=QUANT_IMPACT_UNIT, default="currency"
+// )
+// rationale = CharField(max_length=250)
+//
+// asset_assessment = ForeignKey(AssetAssessment, on_delete=models.CASCADE)
 export const EscalationThresholdSchema = z.object({
-	asset_assessment: z.string()
+	asset_assessment: z.string(),
+	point_in_time: z.number(),
+	rationale: z.string().optional()
 });
 export const processingSchema = z.object({
 	...NameDescriptionMixin,

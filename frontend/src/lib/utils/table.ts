@@ -780,6 +780,10 @@ export const listViewFields = {
 		head: ['asset', 'bia'],
 		body: ['asset', 'bia']
 	},
+	'escalation-thresholds': {
+		head: ['pointInTime', 'assetAssessment'],
+		body: ['point_in_time', 'asset_assessment']
+	},
 	processings: {
 		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
 		body: ['name', 'description', 'status', 'legal_basis', 'nature', 'folder']

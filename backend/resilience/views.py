@@ -45,7 +45,9 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet):
 
 class AssetAssessmentViewSet(BaseModelViewSet):
     model = AssetAssessment
+    filterset_fields = ["bia"]
 
 
 class EscalationThresholdViewSet(BaseModelViewSet):
     model = EscalationThreshold
+    filterset_fields = ["asset_assessment"]

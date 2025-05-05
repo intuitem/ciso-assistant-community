@@ -27,9 +27,14 @@ class BusinessImpactAnalysisWriteSerializer(BaseModelSerializer):
 
 
 class AssetAssessmentReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+
     bia = FieldsRelatedField()
     asset = FieldsRelatedField()
     folder = FieldsRelatedField()
+
+    dependencies = FieldsRelatedField(many=True)
+    associated_controls = FieldsRelatedField(many=True)
 
     class Meta:
         model = AssetAssessment
@@ -43,9 +48,12 @@ class AssetAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class EscalationThresholdReadSerializer(BaseModelSerializer):
+    asset_assessment = FieldsRelatedField()
+    folder = FieldsRelatedField()
+
     class Meta:
         model = EscalationThreshold
-        fields = "__all__"
+        exclude = []
 
 
 class EscalationThresholdWriteSerializer(BaseModelSerializer):

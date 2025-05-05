@@ -47,6 +47,7 @@
 	import TaskNodeForm from './ModelForm/TaskNodeForm.svelte';
 	import BusinessImpactAnalysisForm from './ModelForm/BusinessImpactAnalysisForm.svelte';
 	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
+	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -327,6 +328,8 @@
 		<BusinessImpactAnalysisForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'asset-assessments'}
 		<AssetAssessmentForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'escalation-thresholds'}
+		<EscalationThresholdForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'processings'}
 		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'purposes'}
