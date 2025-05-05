@@ -51,3 +51,22 @@ class AssetAssessmentViewSet(BaseModelViewSet):
 class EscalationThresholdViewSet(BaseModelViewSet):
     model = EscalationThreshold
     filterset_fields = ["asset_assessment"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get quantification units")
+    def quant_unit(self, request):
+        return Response(dict(EscalationThreshold.QUANT_IMPACT_UNIT))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=True, name="Get impact choices")
+    def quali_impact_level(self, request, pk):
+        escalation_threshold: EscalationThreshold = self.get_object()
+        undefined = dict([(-1, "--")])
+        _choices = dict(
+            zip(
+                list(range(0, 64)),
+                [x["name"] for x in escalation_threshold.parsed_matrix["impact"]],
+            )
+        )
+        choices = undefined | _choices
+        return Response(choices)

@@ -456,19 +456,12 @@ export const AssetAssessmentSchema = z.object({
 	dependencies: z.array(z.string().optional()).optional()
 });
 
-// point_in_time = IntegerField(default=0)
-// time_unit = CharField(max_length=2, choices=TIME_UNIT_CHOICES, default="H")
-// quali_impact_level = IntegerField(default=-1)  # based on the matrix
-// quanti_impact_number = FloatField(default=0)
-// quanti_impact_unit = CharField(
-//     max_length=20, choices=QUANT_IMPACT_UNIT, default="currency"
-// )
-// rationale = CharField(max_length=250)
-//
-// asset_assessment = ForeignKey(AssetAssessment, on_delete=models.CASCADE)
 export const EscalationThresholdSchema = z.object({
 	asset_assessment: z.string(),
 	point_in_time: z.number(),
+	quanti_impact_unit: z.string().optional().default('currency'),
+	quali_impact_level: z.number().optional().default(-1),
+	quanti_impact_number: z.number().optional(),
 	rationale: z.string().optional()
 });
 export const processingSchema = z.object({

@@ -42,3 +42,28 @@
 	cacheLock={cacheLocks['rationale']}
 	bind:cachedValue={formDataCache['rationale']}
 />
+<NumberField
+	{form}
+	field="quanti_impact_number"
+	label={'quanti_impact_number'}
+	cacheLock={cacheLocks['quanti_impact_number']}
+	bind:cachedValue={formDataCache['quanti_impact_number']}
+/>
+<Select
+	{form}
+	options={model.selectOptions['quant_unit']}
+	field="quanti_impact_unit"
+	hide
+	label={m.quantUnit()}
+	cacheLock={cacheLocks['quant_unit']}
+	bind:cachedValue={formDataCache['quant_unit']}
+/>
+
+<Select
+	{form}
+	options={model.selectOptions['quali_impact_level']}
+	field="quali_impact_level"
+	label={m.impact()}
+	cacheLock={cacheLocks['quali_impact_level']}
+	bind:cachedValue={formDataCache['quali_impact_level']}
+/>

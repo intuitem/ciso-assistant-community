@@ -777,12 +777,12 @@ export const listViewFields = {
 		body: ['name']
 	},
 	'asset-assessments': {
-		head: ['asset', 'bia'],
-		body: ['asset', 'bia']
+		head: ['asset', 'bia', 'dependencies'],
+		body: ['asset', 'bia', 'dependencies']
 	},
 	'escalation-thresholds': {
-		head: ['pointInTime', 'assetAssessment'],
-		body: ['point_in_time', 'asset_assessment']
+		head: ['pointInTime', 'assetAssessment', 'qualiImpact'],
+		body: ['point_in_time', 'asset_assessment', 'quali_impact_level']
 	},
 	processings: {
 		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],

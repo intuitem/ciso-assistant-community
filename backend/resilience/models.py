@@ -55,3 +55,32 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
 
     class Meta:
         unique_together = ["asset_assessment", "point_in_time"]
+
+    @property
+    def risk_matrix(self):
+        return self.asset_assessment.bia.risk_matrix
+
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
+    @staticmethod
+    def format_impact(impact: int, parsed_matrix: dict):
+        if impact < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+                "hexcolor": "#f9fafb",
+            }
+        risk_matrix = parsed_matrix
+        if not risk_matrix["impact"][impact].get("hexcolor"):
+            risk_matrix["impact"][impact]["hexcolor"] = "#f9fafb"
+        return {
+            **risk_matrix["impact"][impact],
+            "value": impact,
+        }
+
+    def get_impact_display(self):
+        return self.format_impact(self.quali_impact_level, self.parsed_matrix)

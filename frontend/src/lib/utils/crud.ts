@@ -681,6 +681,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'escalationThresholds',
 		verboseName: 'escalationthreshold',
 		verboseNamePlural: 'escalationthresholds',
+		selectFields: [
+			{ field: 'quant_unit' },
+			{ field: 'quali_impact_level', valueType: 'number', detail: true }
+		],
 		foreignKeyFields: [
 			{
 				field: 'asset_assessment',
