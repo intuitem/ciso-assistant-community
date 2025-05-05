@@ -29,7 +29,9 @@
 	];
 </script>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-2 gap-x-4">
+<div
+	class="mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-y-2 gap-x-4"
+>
 	{#each featureFlagFields as { field, label }}
 		<div class="ml-auto">
 			<Checkbox {form} {field} {label} />

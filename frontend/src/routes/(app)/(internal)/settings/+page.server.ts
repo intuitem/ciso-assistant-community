@@ -154,7 +154,7 @@ export const actions: Actions = {
 
 		return { form };
 	},
-	featureflags: async (event) => {
+	featureFlags: async (event) => {
 		const formData = await event.request.formData();
 
 		if (!formData) {

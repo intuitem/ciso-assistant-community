@@ -19,15 +19,15 @@
 		><i class="fa-solid fa-flag" /> {m.featureFlags()}</Tab
 	>
 </TabGroup>
-{#if tabSet === 2}
+{#if tabSet === 0}
 	<div>
-		<span class="text-gray-500">{m.configureFeatureFlags()}</span>
+		<span class="text-gray-500">{m.generalSettingsDescription()}</span>
 		<ModelForm
-			form={data.featureFlagForm}
-			schema={FeatureFlagsSchema}
-			model={data.featureFlagModel}
+			form={data.generalSettingForm}
+			schema={GeneralSettingsSchema}
+			model={data.generalSettingModel}
 			cancelButton={false}
-			action="?/featureflags"
+			action="?/general"
 		/>
 	</div>
 {:else if tabSet === 1}
@@ -41,15 +41,15 @@
 			action="?/sso"
 		/>
 	</div>
-{:else if tabSet === 0}
+{:else if tabSet === 2}
 	<div>
-		<span class="text-gray-500">{m.generalSettingsDescription()}</span>
+		<span class="text-gray-500">{m.configureFeatureFlags()}</span>
 		<ModelForm
-			form={data.generalSettingForm}
-			schema={GeneralSettingsSchema}
-			model={data.generalSettingModel}
+			form={data.featureFlagForm}
+			schema={FeatureFlagsSchema}
+			model={data.featureFlagModel}
 			cancelButton={false}
-			action="?/general"
+			action="?/featureFlags"
 		/>
 	</div>
 {/if}

@@ -68,7 +68,7 @@
 			schema={featureFlagSchema}
 			model={data.featureFlagModel}
 			cancelButton={false}
-			action="?/featureflags"
+			action="?/featureFlags"
 		/>
 	</div>
 {:else if tabSet === 3}
