@@ -329,7 +329,7 @@
 	{:else if URLModel === 'asset-assessments'}
 		<AssetAssessmentForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'escalation-thresholds'}
-		<EscalationThresholdForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		<EscalationThresholdForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'processings'}
 		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'purposes'}

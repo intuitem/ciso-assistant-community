@@ -19,6 +19,10 @@ class BusinessImpactAnalysis(Assessment):
         on_delete=models.PROTECT,
     )
 
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
 
 class AssetAssessment(AbstractBaseModel, FolderMixin):
     asset = ForeignKey(Asset, on_delete=models.CASCADE)

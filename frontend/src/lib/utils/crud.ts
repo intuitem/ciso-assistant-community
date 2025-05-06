@@ -112,6 +112,8 @@ interface SelectField {
 	field: string;
 	detail?: boolean;
 	valueType?: 'string' | 'number';
+	endpointUrl?: string;
+	formNestedField?: string;
 }
 
 export interface ModelMapEntry {
@@ -683,7 +685,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'escalationthresholds',
 		selectFields: [
 			{ field: 'quant_unit' },
-			{ field: 'quali_impact', valueType: 'number', detail: true }
+			{
+				field: 'quali_impact',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'asset-assessments',
+				formNestedField: 'asset_assessment'
+			} //this is for edit only
 		],
 		foreignKeyFields: [
 			{
