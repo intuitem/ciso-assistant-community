@@ -60,6 +60,16 @@ class AssetAssessmentViewSet(BaseModelViewSet):
         choices = undefined | _choices
         return Response(choices)
 
+    @action(detail=True, name="Get the asset assessment details")
+    def summary(self, request, pk):
+        aa = self.get_object()
+        thresholds = EscalationThreshold.objects.filter(asset_assessment=aa)
+        res = [
+            {"pit": et.get_human_pit, "impact": et.get_impact_display}
+            for et in thresholds
+        ]
+        return Response(res)
+
 
 class EscalationThresholdViewSet(BaseModelViewSet):
     model = EscalationThreshold

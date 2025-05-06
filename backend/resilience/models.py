@@ -103,5 +103,6 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
             "value": impact,
         }
 
+    @property
     def get_impact_display(self):
         return self.format_impact(self.quali_impact, self.parsed_matrix)
