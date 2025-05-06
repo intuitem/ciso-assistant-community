@@ -689,7 +689,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'quali_impact',
 				valueType: 'number',
 				detail: true,
-				endpointUrl: 'asset-assessments',
+				endpointUrl: 'resilience/asset-assessments',
 				formNestedField: 'asset_assessment'
 			} //this is for edit only
 		],
