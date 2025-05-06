@@ -644,8 +644,8 @@ export const URL_MODEL_MAP: ModelMap = {
 	'business-impact-analysis': {
 		endpointUrl: 'resilience/business-impact-analysis',
 		name: 'businessimpactanalysis',
-		localName: 'businessimpactanalysis',
-		localNamePlural: 'businessimpactanalysis',
+		localName: 'businessImpactAnalysis',
+		localNamePlural: 'businessImpactAnalysis',
 		verboseName: 'businessimpactanalysis',
 		verboseNamePlural: 'businessimpactanalysis',
 		foreignKeyFields: [

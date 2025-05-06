@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Duration from '../Duration.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
@@ -19,12 +20,13 @@
 	// export let updated_fields: Set<string> = new Set();
 </script>
 
-<NumberField
+<Duration
 	{form}
 	field="point_in_time"
 	label={m.pointInTime()}
 	cacheLock={cacheLocks['point_in_time']}
 	bind:cachedValue={formDataCache['point_in_time']}
+	enabledUnits={['days', 'hours', 'minutes']}
 />
 <AutocompleteSelect
 	{form}
@@ -33,32 +35,8 @@
 	cacheLock={cacheLocks['asset_assessment']}
 	bind:cachedValue={formDataCache['asset_assessment']}
 	label={m.assetAssessment()}
-	hidden={true}
+	hidden={initialData.asset_assessment}
 />
-<TextArea
-	{form}
-	field="justification"
-	label={m.justification()}
-	cacheLock={cacheLocks['justification']}
-	bind:cachedValue={formDataCache['justification']}
-/>
-<NumberField
-	{form}
-	field="quanti_impact"
-	label={'quanti_impact'}
-	cacheLock={cacheLocks['quanti_impact']}
-	bind:cachedValue={formDataCache['quanti_impact']}
-/>
-<Select
-	{form}
-	options={model.selectOptions['quant_unit']}
-	field="quanti_impact_unit"
-	hide
-	label={m.quantUnit()}
-	cacheLock={cacheLocks['quant_unit']}
-	bind:cachedValue={formDataCache['quant_unit']}
-/>
-
 <Select
 	{form}
 	options={model.selectOptions['quali_impact']}
@@ -66,4 +44,11 @@
 	label={m.impact()}
 	cacheLock={cacheLocks['quali_impact']}
 	bind:cachedValue={formDataCache['quali_impact']}
+/>
+<TextArea
+	{form}
+	field="justification"
+	label={m.justification()}
+	cacheLock={cacheLocks['justification']}
+	bind:cachedValue={formDataCache['justification']}
 />

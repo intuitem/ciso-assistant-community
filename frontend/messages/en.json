@@ -376,6 +376,7 @@
 	"dataWizard": "Data Wizard",
 	"bia": "BIA",
 	"businessImpactAnalysis": "Business Impact Analysis",
+	"addBusinessImpactAnalysis": "Start a BIA",
 	"escalationThreshold": "Escalation Threshold",
 	"assetAssessment": "Asset Assessment",
 	"assetAssessments": "BIA assessments",

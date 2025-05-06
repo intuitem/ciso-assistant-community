@@ -18,14 +18,6 @@
 	// export let updated_fields: Set<string> = new Set();
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="perimeters"
@@ -43,63 +35,52 @@
 	cacheLock={cacheLocks['version']}
 	bind:cachedValue={formDataCache['version']}
 />
-{#if !duplicate}
-	<Select
-		{form}
-		options={model.selectOptions['status']}
-		field="status"
-		hide
-		label={m.status()}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
-	/>
-	<AutocompleteSelect
-		{form}
-		disabled={object.id}
-		optionsEndpoint="risk-matrices"
-		field="risk_matrix"
-		cacheLock={cacheLocks['risk_matrix']}
-		bind:cachedValue={formDataCache['risk_matrix']}
-		label={m.riskMatrix()}
-		helpText={m.riskAssessmentMatrixHelpText()}
-		hidden={initialData.risk_matrix}
-	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
-		field="authors"
-		cacheLock={cacheLocks['authors']}
-		bind:cachedValue={formDataCache['authors']}
-		label={m.authors()}
-	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
-		field="reviewers"
-		cacheLock={cacheLocks['reviewers']}
-		bind:cachedValue={formDataCache['reviewers']}
-		label={m.reviewers()}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="eta"
-		label={m.eta()}
-		helpText={m.etaHelpText()}
-		cacheLock={cacheLocks['eta']}
-		bind:cachedValue={formDataCache['eta']}
-	/>
-	<TextField
-		type="date"
-		{form}
-		field="due_date"
-		label={m.dueDate()}
-		helpText={m.dueDateHelpText()}
-		cacheLock={cacheLocks['due_date']}
-		bind:cachedValue={formDataCache['due_date']}
-	/>
-{/if}
+<Select
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	hide
+	label={m.status()}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+/>
+<AutocompleteSelect
+	{form}
+	disabled={object.id}
+	optionsEndpoint="risk-matrices"
+	field="risk_matrix"
+	cacheLock={cacheLocks['risk_matrix']}
+	bind:cachedValue={formDataCache['risk_matrix']}
+	label={m.riskMatrix()}
+	helpText={m.riskAssessmentMatrixHelpText()}
+	hidden={initialData.risk_matrix}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="authors"
+	cacheLock={cacheLocks['authors']}
+	bind:cachedValue={formDataCache['authors']}
+	label={m.authors()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="reviewers"
+	cacheLock={cacheLocks['reviewers']}
+	bind:cachedValue={formDataCache['reviewers']}
+	label={m.reviewers()}
+/>
+<TextField
+	type="date"
+	{form}
+	field="due_date"
+	label={m.dueDate()}
+	helpText={m.dueDateHelpText()}
+	cacheLock={cacheLocks['due_date']}
+	bind:cachedValue={formDataCache['due_date']}
+/>

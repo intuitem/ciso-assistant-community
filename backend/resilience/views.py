@@ -39,6 +39,7 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet):
 class AssetAssessmentViewSet(BaseModelViewSet):
     model = AssetAssessment
     filterset_fields = ["bia"]
+    ordering = ["asset"]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
@@ -63,6 +64,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
 class EscalationThresholdViewSet(BaseModelViewSet):
     model = EscalationThreshold
     filterset_fields = ["asset_assessment", "quali_impact"]
+    ordering = ["point_in_time"]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
