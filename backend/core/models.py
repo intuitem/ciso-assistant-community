@@ -435,7 +435,6 @@ class LibraryUpdater:
                 return err_msg
 
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
-    @transaction.atomic
     def update_library(self) -> Union[str, None]:
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
@@ -451,15 +450,12 @@ class LibraryUpdater:
 
         new_dependencies = []
         for new_dependency_urn in new_dependencies_urn:
-            try:
-                new_dependency = LoadedLibrary.objects.filter(
-                    urn=new_dependency_urn
-                ).first()
-                if new_dependency is None:
-                    return "dependencyNotFound"
-                new_dependencies.append(new_dependency)
-            except Exception:
+            new_dependency = LoadedLibrary.objects.filter(
+                urn=new_dependency_urn
+            ).first()
+            if new_dependency is None:
                 return "dependencyNotFound"
+            new_dependencies.append(new_dependency)
 
         for key, value in [
             ("name", self.new_library.name),
