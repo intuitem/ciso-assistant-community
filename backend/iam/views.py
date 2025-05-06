@@ -125,7 +125,15 @@ class AuthTokenListViewSet(views.APIView):
     def post(self, request, format=None):
         token_limit_per_user = self.get_token_limit_per_user()
         name = request.data.get("name")
-        expiry = request.data.get("expiry", "30")
+        try:
+            expiry_days = int(request.data.get("expiry", 30))
+            if expiry_days <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return Response(
+                {"error": "Expiry must be a positive integer (days)."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if token_limit_per_user is not None:
             now = timezone.now()
             token = request.user.auth_token_set.filter(expiry__gt=now)
@@ -134,7 +142,7 @@ class AuthTokenListViewSet(views.APIView):
                     {"error": "Maximum amount of tokens allowed per user exceeded."},
                     status=status.HTTP_403_FORBIDDEN,
                 )
-        instance, token = self.create_token(timedelta(days=int(expiry)))
+        instance, token = self.create_token(timedelta(days=int(expiry_days)))
         pat = PersonalAccessToken.objects.create(auth_token=instance, name=name)
         return self.get_post_response(request, token, pat.name, pat.auth_token)
 
