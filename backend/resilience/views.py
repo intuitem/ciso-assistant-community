@@ -61,7 +61,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
         return Response(choices)
 
     @action(detail=True, name="Get the asset assessment details")
-    def summary(self, request, pk):
+    def metrics(self, request, pk):
         aa = self.get_object()
         thresholds = EscalationThreshold.objects.filter(asset_assessment=aa)
         res = [
