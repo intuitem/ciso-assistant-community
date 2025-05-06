@@ -26,6 +26,18 @@
 	bind:cachedValue={formDataCache['asset']}
 	label={m.asset()}
 	hidden={initialData.asset}
+	helpText="Scoped asset"
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="assets"
+	optionsExtraFields={[['folder', 'str']]}
+	field="dependencies"
+	cacheLock={cacheLocks['dependencies']}
+	bind:cachedValue={formDataCache['dependencies']}
+	label={m.dependencies()}
+	helpText="Other assets affecting the availability"
 />
 <AutocompleteSelect
 	{form}
@@ -45,14 +57,5 @@
 	cacheLock={cacheLocks['associated_controls']}
 	bind:cachedValue={formDataCache['associated_controls']}
 	label={m.associatedControls()}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="assets"
-	optionsExtraFields={[['folder', 'str']]}
-	field="dependencies"
-	cacheLock={cacheLocks['dependencies']}
-	bind:cachedValue={formDataCache['dependencies']}
-	label={m.dependencies()}
+	helpText="Actions or procedures related to resilience management"
 />

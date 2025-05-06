@@ -199,6 +199,7 @@ INSTALLED_APPS = [
     "allauth.mfa",
     "huey.contrib.djhuey",
     "auditlog",
+    "resilience",
 ]
 
 MIDDLEWARE = [

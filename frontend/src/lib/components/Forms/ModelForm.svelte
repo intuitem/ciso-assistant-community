@@ -325,7 +325,17 @@
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
 	{:else if URLModel === 'business-impact-analysis'}
-		<BusinessImpactAnalysisForm {form} {model} {cacheLocks} {formDataCache} {context} />
+		<BusinessImpactAnalysisForm
+			{form}
+			{model}
+			{duplicate}
+			{cacheLocks}
+			{formDataCache}
+			{initialData}
+			{object}
+			{context}
+			{updated_fields}
+		/>
 	{:else if URLModel === 'asset-assessments'}
 		<AssetAssessmentForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'escalation-thresholds'}
