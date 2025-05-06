@@ -6,7 +6,7 @@ from rest_framework import filters
 from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
-
+from core.serializers import RiskMatrixReadSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -50,7 +50,12 @@ class AssetAssessmentViewSet(BaseModelViewSet):
 
 class EscalationThresholdViewSet(BaseModelViewSet):
     model = EscalationThreshold
-    filterset_fields = ["asset_assessment"]
+    filterset_fields = ["asset_assessment", "quali_impact"]
+
+    @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
+    def risk_matrix(self, request, pk=None):
+        et = self.get_object()
+        return Response(RiskMatrixReadSerializer(et.risk_matrix).data)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get quantification units")
@@ -59,8 +64,8 @@ class EscalationThresholdViewSet(BaseModelViewSet):
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get impact choices")
-    def quali_impact_level(self, request, pk):
-        escalation_threshold: EscalationThreshold = self.get_object()
+    def quali_impact(self, request, pk):
+        escalation_threshold = self.get_object()
         undefined = dict([(-1, "--")])
         _choices = dict(
             zip(

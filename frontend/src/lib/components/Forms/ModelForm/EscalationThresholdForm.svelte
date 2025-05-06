@@ -37,17 +37,17 @@
 />
 <TextArea
 	{form}
-	field="rationale"
-	label={m.rationale()}
-	cacheLock={cacheLocks['rationale']}
-	bind:cachedValue={formDataCache['rationale']}
+	field="justification"
+	label={m.justification()}
+	cacheLock={cacheLocks['justification']}
+	bind:cachedValue={formDataCache['justification']}
 />
 <NumberField
 	{form}
-	field="quanti_impact_number"
-	label={'quanti_impact_number'}
-	cacheLock={cacheLocks['quanti_impact_number']}
-	bind:cachedValue={formDataCache['quanti_impact_number']}
+	field="quanti_impact"
+	label={'quanti_impact'}
+	cacheLock={cacheLocks['quanti_impact']}
+	bind:cachedValue={formDataCache['quanti_impact']}
 />
 <Select
 	{form}
@@ -61,9 +61,9 @@
 
 <Select
 	{form}
-	options={model.selectOptions['quali_impact_level']}
-	field="quali_impact_level"
+	options={model.selectOptions['quali_impact']}
+	field="quali_impact"
 	label={m.impact()}
-	cacheLock={cacheLocks['quali_impact_level']}
-	bind:cachedValue={formDataCache['quali_impact_level']}
+	cacheLock={cacheLocks['quali_impact']}
+	bind:cachedValue={formDataCache['quali_impact']}
 />

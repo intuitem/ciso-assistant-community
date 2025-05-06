@@ -460,9 +460,9 @@ export const EscalationThresholdSchema = z.object({
 	asset_assessment: z.string(),
 	point_in_time: z.number(),
 	quanti_impact_unit: z.string().optional().default('currency'),
-	quali_impact_level: z.number().optional().default(-1),
-	quanti_impact_number: z.number().optional(),
-	rationale: z.string().optional()
+	quali_impact: z.number().optional().default(-1),
+	quanti_impact: z.number().optional(),
+	justification: z.string().optional()
 });
 export const processingSchema = z.object({
 	...NameDescriptionMixin,

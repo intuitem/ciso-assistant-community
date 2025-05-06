@@ -683,7 +683,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'escalationthresholds',
 		selectFields: [
 			{ field: 'quant_unit' },
-			{ field: 'quali_impact_level', valueType: 'number', detail: true }
+			{ field: 'quali_impact', valueType: 'number', detail: true }
 		],
 		foreignKeyFields: [
 			{
