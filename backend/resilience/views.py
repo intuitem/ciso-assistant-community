@@ -1,3 +1,4 @@
+from os import name
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -44,6 +45,12 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet):
             for aa in asset_assessments
         ]
         return Response(res)
+
+    @action(detail=True, name="Build qualitative table", url_path="build-table")
+    def impact_table(self, request, pk):
+        bia = self.get_object()
+        table = bia.build_table()
+        return Response(table)
 
 
 class AssetAssessmentViewSet(BaseModelViewSet):

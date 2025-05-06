@@ -9,7 +9,7 @@ from django.db.models import (
     OneToOneField,
     TextField,
 )
-
+from icecream import ic
 from iam.models import User, FolderMixin
 
 
@@ -22,6 +22,40 @@ class BusinessImpactAnalysis(Assessment):
     @property
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
+
+    def build_table(self):
+        table = []
+        xAxis = set()
+        xAxis.add(0)
+        asset_assessments = AssetAssessment.objects.filter(bia=self).prefetch_related()
+        for aa in asset_assessments:
+            thresholds = EscalationThreshold.objects.filter(
+                asset_assessment=aa
+            ).order_by("point_in_time")
+            for th in thresholds:
+                xAxis.add(th.point_in_time)
+            table.append(
+                {
+                    "asset": aa.asset.name,
+                    "data": {
+                        th.point_in_time: th.get_impact_compact_display
+                        for th in thresholds
+                    },
+                }
+            )
+
+        xAxis = sorted(xAxis)  # Add padding to ensure all entries have the same columns
+        for entry in table:
+            for point in xAxis:
+                if point not in entry["data"]:
+                    entry["data"][point] = {
+                        "value": -1,
+                        "name": "--",
+                        "hexcolor": "#f9fafb",
+                    }
+        ic(xAxis)
+        ic(table)
+        return table
 
 
 class AssetAssessment(AbstractBaseModel, FolderMixin):
@@ -40,16 +74,6 @@ class AssetAssessment(AbstractBaseModel, FolderMixin):
             {"pit": et.get_human_pit, "impact": et.get_impact_display}
             for et in thresholds
         ]
-        xAxis = []
-        yAxis = []
-        for et in thresholds:
-            xAxis.append(et.get_human_pit)
-            yAxis.append(
-                {
-                    "value": int(et.get_impact_display.get("value")) + 1,
-                    "itemStyle": {"color": et.get_impact_display.get("hexcolor")},
-                }
-            )
         return res
 
     class Meta:
@@ -124,3 +148,8 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     @property
     def get_impact_display(self):
         return self.format_impact(self.quali_impact, self.parsed_matrix)
+
+    @property
+    def get_impact_compact_display(self):
+        raw = self.get_impact_display
+        return {"value": raw["value"], "name": raw["name"], "hexcolor": raw["hexcolor"]}
