@@ -60,12 +60,23 @@ class LogoutView(views.APIView):
         try:
             logger.info("logout request", user=request.user)
             try:
-                access_token = request.META.get("HTTP_AUTHORIZATION").split(" ")[1]
-                digest = crypto.hash_token(access_token)
-                auth_token = AuthToken.objects.get(digest=digest)
-                auth_token.delete()
+                auth_header = request.META.get("HTTP_AUTHORIZATION")
+                if auth_header and " " in auth_header:
+                    access_token = auth_header.split(" ")[1]
+                    digest = crypto.hash_token(access_token)
+                    auth_token = AuthToken.objects.get(digest=digest)
+                    auth_token.delete()
+                else:
+                    logger.warning(
+                        "No valid authorization header found during logout",
+                        user=request.user,
+                    )
             except Exception as e:
-                logger.error("Error deleting token", user=request.user, error=e)
+                logger.error(
+                    "Error deleting token during logout",
+                    user=request.user,
+                    error=str(e),
+                )
             logout(request)
             logger.info("logout successful", user=request.user)
         except Exception as e:
