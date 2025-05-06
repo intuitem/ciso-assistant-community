@@ -1482,5 +1482,22 @@
 	"personalAccessTokenExpiryHelpText": "Nombre de jours après lequel le jeton expirera",
 	"expiry": "Expiration",
 	"successfullyDeletedPersonalAccessToken": "Jeton d'accès personnel supprimé avec succès",
-	"personalAccessTokenDeleteConfirm": "Êtes-vous sûr de vouloir supprimer ce jeton d'accès personnel ? Toute application ou script utilisant ce jeton ne pourra plus accéder à l'API CISO Assistant. Cette action est irréversible."
+	"personalAccessTokenDeleteConfirm": "Êtes-vous sûr de vouloir supprimer ce jeton d'accès personnel ? Toute application ou script utilisant ce jeton ne pourra plus accéder à l'API CISO Assistant. Cette action est irréversible.",
+	"syncToAppliedControls": "S'aligner aux actions",
+	"theFollowingChangesWillBeApplied": "Les changements suivants seront appliqués :",
+	"syncToAppliedControlsMessage": "Cette opération permettra de synchroniser votre niveau de conformité sur le statut des mesures associées. Cette opération ne pourrait pas être annulée.",
+	"syncToAppliedControlsSuccess": "La synchronisation a été réalisée avec succès",
+	"syncToAppliedControlsError": "Erreur lors de la synchronisation",
+	"settingsRiskMatrixSwapAxes": "Inverser les axes",
+	"settingsRiskMatrixSwapAxesHelpText": "Cette option inverse les axes de vraisemblance et d’impact. Si elle est activée, l’impact sera affiché sur l’axe vertical (ordonnées) et la vraisemblance sur l’axe horizontal (abscisses).",
+	"settingsRiskMatrixFlipVertical": "Inverser verticalement",
+	"settingsRiskMatrixFlipVerticalHelpText": "Si cette option est activée, l’origine se trouvera en haut à gauche et l’axe Y sera orienté vers le bas.",
+	"settingsRiskMatrixLabels": "Libellés",
+	"settingsRiskMatrix": "Paramètres de la matrice",
+	"impactISO": "Conséquence",
+	"impactEBIOS": "Gravité",
+	"probabilityISO": "Vraisemblance",
+	"probabilityEBIOS": "Vraisemblance",
+	"iso27005": "ISO 27005",
+	"taskScheduleWarning": "Toutes les tâches qui ne font pas partie du nouveau programme seront supprimées de manière permanente"
 }

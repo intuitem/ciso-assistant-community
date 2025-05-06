@@ -909,5 +909,6 @@
 	"cannotDeleteAutoTimeline": "Automatische tijdlijninvoer kan niet worden verwijderd",
 	"author": "Auteur",
 	"timestampCannotBeInTheFuture": "Tijdstempel kan niet in de toekomst liggen",
-	"youCanSetPasswordHere": "Je kunt hier je wachtwoord instellen."
+	"youCanSetPasswordHere": "Je kunt hier je wachtwoord instellen.",
+	"taskScheduleWarning": "Alle taken die niet deel uitmaken van het nieuwe schema zullen permanent worden verwijderd"
 }

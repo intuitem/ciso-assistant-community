@@ -1097,5 +1097,6 @@
 	"selectEvidence": "Pilih bukti",
 	"timestampCannotBeInTheFuture": "Timestamp tidak boleh di masa depan",
 	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini.",
-	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali."
+	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali.",
+	"taskScheduleWarning": "Apa pun tugas yang tidak menjadi bagian dari jadwal baru akan dihapus secara permanen"
 }

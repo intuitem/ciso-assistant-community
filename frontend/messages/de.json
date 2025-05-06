@@ -913,5 +913,6 @@
 	"cannotDeleteAutoTimeline": "Automatische Zeitleisten-Einträge können nicht gelöscht werden",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "Der Zeitstempel darf nicht in der Zukunft liegen",
-	"youCanSetPasswordHere": "Sie können hier Ihr Passwort festlegen."
+	"youCanSetPasswordHere": "Sie können hier Ihr Passwort festlegen.",
+	"taskScheduleWarning": "Alle Aufgaben, die nicht Teil des neuen Zeitplans sind, werden dauerhaft gelöscht"
 }

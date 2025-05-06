@@ -1482,5 +1482,22 @@
 	"personalAccessTokenExpiryHelpText": "Number of days after which the token will expire",
 	"expiry": "Expiry",
 	"successfullyDeletedPersonalAccessToken": "Successfully deleted personal access token",
-	"personalAccessTokenDeleteConfirm": "Are you sure you want to delete this personal access token? Any applications or scripts using this token will no longer be able to access the CISO Assistant API. This action cannot be undone."
+	"personalAccessTokenDeleteConfirm": "Are you sure you want to delete this personal access token? Any applications or scripts using this token will no longer be able to access the CISO Assistant API. This action cannot be undone.",
+	"syncToAppliedControls": "Sync to actions",
+	"theFollowingChangesWillBeApplied": "The following changes will be applied:",
+	"syncToAppliedControlsMessage": "This audit requirements assessments will be synced to the status of the associated applied controls. Pleas note that this cannot be undone.",
+	"syncToAppliedControlsSuccess": "Audit's requirements assessments synced to the associated applied controls",
+	"syncToAppliedControlsError": "Failed to sync your audit",
+	"settingsRiskMatrixSwapAxes": "Swap axes",
+	"settingsRiskMatrixSwapAxesHelpText": "Swaps the axes for probability and impact. When enabled, impact will be displayed on the vertical axis (ordinate), and probability on the horizontal axis (abscissa).",
+	"settingsRiskMatrixFlipVertical": "Flip vertically",
+	"settingsRiskMatrixFlipVerticalHelpText": "When enabled, the origin of the matrix will be in the top-left corner, with the Y axis increasing downward.",
+	"settingsRiskMatrixLabels": "Labels",
+	"settingsRiskMatrix": "Risk matrix settings",
+	"impactISO": "Impact",
+	"impactEBIOS": "Severity",
+	"probabilityISO": "Likelihood",
+	"probabilityEBIOS": "Likelihood",
+	"iso27005": "ISO 27005",
+	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted"
 }

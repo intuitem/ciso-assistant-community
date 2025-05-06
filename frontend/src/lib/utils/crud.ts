@@ -971,6 +971,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'taskTemplates',
 		verboseName: 'Task template',
 		verboseNamePlural: 'Task templates',
+		selectFields: [{ field: 'status' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'assigned_to', urlModel: 'users' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
+			{ field: 'risk_assessments', urlModel: 'risk-assessments' }
+		],
 		reverseForeignKeyFields: [
 			{ field: 'task_template', urlModel: 'task-nodes', disableAddDeleteButtons: true }
 		]
