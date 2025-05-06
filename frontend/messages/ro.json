@@ -909,5 +909,6 @@
 	"cannotDeleteAutoTimeline": "Intrările cronologiei automate nu pot fi șterse",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "Marcă de timp nu poate fi în viitor",
-	"youCanSetPasswordHere": "Puteți seta parola dvs. aici."
+	"youCanSetPasswordHere": "Puteți seta parola dvs. aici.",
+	"taskScheduleWarning": "Orice sarcini care nu fac parte din noul program vor fi șterse definitiv"
 }

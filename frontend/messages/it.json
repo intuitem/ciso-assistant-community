@@ -1291,5 +1291,6 @@
 	"disseminationOrOtherwiseMakingAvailable": "Diffusione o messa a disposizione",
 	"alignmentOrCombination": "Allineamento o combinazione",
 	"restriction": "Restrizione",
-	"erasureOrDestruction": "Cancellazione o distruzione"
+	"erasureOrDestruction": "Cancellazione o distruzione",
+	"taskScheduleWarning": "Qualsiasi attività che non fa parte del nuovo programma verrà eliminata in modo permanente"
 }

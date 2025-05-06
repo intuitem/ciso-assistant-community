@@ -23,3 +23,18 @@ export function buildRiskMatrix(grid: number[][], levels: Level[]): RiskMatrix {
 		)
 		.reverse();
 }
+
+export function reverseRows<T>(matrix: T[][]): T[][] {
+	return matrix.slice().reverse();
+}
+
+export function reverseCols<T>(matrix: T[][]): T[][] {
+	return matrix.map((row) => row.slice().reverse());
+}
+
+export function transpose<T>(matrix: T[][]): T[][] {
+	if (!matrix || matrix.length === 0 || matrix[0].length === 0) {
+		return [];
+	}
+	return reverseCols(reverseRows(matrix.map((_, colIndex) => matrix.map((row) => row[colIndex]))));
+}

@@ -71,7 +71,7 @@
 	export let context = 'default';
 	export let caching: boolean = false;
 	export let closeModal = false;
-	export let parent: any;
+	export let parent: any = {};
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
 	export let duplicate = false;

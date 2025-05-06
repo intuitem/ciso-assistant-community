@@ -321,7 +321,10 @@ export const GeneralSettingsSchema = z.object({
 	ebios_radar_yellow_zone_radius: z.number(),
 	ebios_radar_red_zone_radius: z.number(),
 	notifications_enable_mailing: z.boolean().optional(),
-	interface_agg_scenario_matrix: z.boolean().optional()
+	interface_agg_scenario_matrix: z.boolean().optional(),
+	risk_matrix_swap_axes: z.boolean().default(false).optional(),
+	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
+	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -661,6 +664,8 @@ export const TaskTemplateSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
 	schedule: z
 		.object({
 			interval: z.number().min(1).positive().optional(),

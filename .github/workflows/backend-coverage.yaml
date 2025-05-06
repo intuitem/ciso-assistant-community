@@ -1,4 +1,6 @@
 name: Backend code coverage
+permissions:
+  contents: read
 
 on:
   pull_request:
