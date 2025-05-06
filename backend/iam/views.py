@@ -160,11 +160,26 @@ class AuthTokenDetailViewSet(views.APIView):
                 )
             token.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            logger.error("Error deleting token", error=e)
+        except AuthToken.DoesNotExist:
+            logger.info(
+                "Attempt to delete non-existent token",
+                digest=kwargs["pk"],
+                user=request.user.id,
+            )
             return Response(
                 {"error": "Token not found or already deleted."},
                 status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            logger.error(
+                "Error deleting token",
+                error=str(e),
+                digest=kwargs["pk"],
+                user=request.user.id,
+            )
+            return Response(
+                {"error": "Failed to delete token due to an internal error."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
