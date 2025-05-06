@@ -28,23 +28,53 @@ class BusinessImpactAnalysis(Assessment):
         xAxis = set()
         xAxis.add(0)
         asset_assessments = AssetAssessment.objects.filter(bia=self).prefetch_related()
+
+        # First pass: collect all threshold points
         for aa in asset_assessments:
             thresholds = EscalationThreshold.objects.filter(
                 asset_assessment=aa
             ).order_by("point_in_time")
             for th in thresholds:
                 xAxis.add(th.point_in_time)
-            table.append(
-                {
-                    "asset": aa.asset.name,
-                    "data": {
-                        th.point_in_time: th.get_impact_compact_display
-                        for th in thresholds
-                    },
-                }
+
+        # Sort the x-axis values
+        xAxis = sorted(xAxis)
+
+        # Second pass: build the table with proper padding
+        for aa in asset_assessments:
+            thresholds = list(
+                EscalationThreshold.objects.filter(asset_assessment=aa).order_by(
+                    "point_in_time"
+                )
             )
 
-        xAxis = sorted(xAxis)  # Add padding to ensure all entries have the same columns
+            data_dict = {}
+
+            # Default for time 0 if no threshold exists
+            if not thresholds or thresholds[0].point_in_time > 0:
+                data_dict[0] = {"value": -1, "name": "--", "hexcolor": "#f9fafb"}
+
+            # For each threshold, extend its impact to the next threshold
+            for i, threshold in enumerate(thresholds):
+                current_impact = threshold.get_impact_compact_display
+                current_time = threshold.point_in_time
+
+                # Find the next time point for this asset
+                next_time = None
+                if i < len(thresholds) - 1:
+                    next_time = thresholds[i + 1].point_in_time
+
+                # Apply the current impact to all points between current and next
+                for point in xAxis:
+                    if point == current_time or (
+                        point > current_time
+                        and (next_time is None or point < next_time)
+                    ):
+                        data_dict[point] = current_impact
+
+            # Add entry to table
+            table.append({"asset": aa.asset.name, "data": data_dict})
+
         for entry in table:
             for point in xAxis:
                 if point not in entry["data"]:
@@ -53,6 +83,7 @@ class BusinessImpactAnalysis(Assessment):
                         "name": "--",
                         "hexcolor": "#f9fafb",
                     }
+
         ic(xAxis)
         ic(table)
         return table

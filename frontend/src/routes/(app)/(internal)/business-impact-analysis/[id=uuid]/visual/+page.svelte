@@ -4,8 +4,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 	pageTitle.set('Visual Analysis');
 
-	// Extract the x-axis values from the first entry's data
-	// Assuming data structure from build_table method
+	// Extract the x-axis values
 	const xAxisPoints =
 		data.data.length > 0
 			? Object.keys(data.data[0].data)
@@ -13,7 +12,6 @@
 					.sort((a, b) => a - b)
 			: [];
 
-	// Helper function to convert seconds to human-readable format
 	function formatTimePoint(seconds: number) {
 		if (seconds === 0) return '0';
 
@@ -28,6 +26,16 @@
 
 		return parts.join(' ');
 	}
+
+	// Helper to determine if a cell represents an impact change
+	function isImpactChange(entry, currentIndex) {
+		if (currentIndex === 0) return true;
+
+		const currentPoint = xAxisPoints[currentIndex];
+		const previousPoint = xAxisPoints[currentIndex - 1];
+
+		return entry.data[currentPoint].value !== entry.data[previousPoint].value;
+	}
 </script>
 
 <div class="bg-white shadow flex overflow-x-auto">
@@ -36,9 +44,9 @@
 			<thead>
 				<tr class="bg-gray-100">
 					<th class="px-4 py-2 text-left font-medium text-gray-600">Asset</th>
-					{#each xAxisPoints as point}
+					{#each xAxisPoints as point, i}
 						<th class="px-4 py-2 text-center font-medium text-gray-600">
-							{formatTimePoint(point)}
+							T{i}
 						</th>
 					{/each}
 				</tr>
@@ -47,24 +55,73 @@
 				{#each data.data as entry}
 					<tr class="border-t border-gray-200">
 						<td class="px-4 py-2 font-medium">{entry.asset}</td>
-						{#each xAxisPoints as point}
-							{#if entry.data[point]}
-								<td
-									class="px-4 py-2 text-center"
-									style="background-color: {entry.data[point].hexcolor || '#f9fafb'}"
-								>
+						{#each xAxisPoints as point, i}
+							<td
+								class="px-4 py-2 text-center"
+								style="background-color: {entry.data[point].hexcolor || '#f9fafb'};
+								       {!isImpactChange(entry, i) ? 'border-left: none;' : ''}"
+							>
+								{#if isImpactChange(entry, i)}
 									<div class="font-medium">{entry.data[point].name || '--'}</div>
-									<div class="text-xs text-gray-500">
-										{entry.data[point].value >= 0 ? entry.data[point].value : '--'}
-									</div>
-								</td>
-							{:else}
-								<td class="px-4 py-2 text-center bg-gray-50">--</td>
-							{/if}
+								{/if}
+							</td>
 						{/each}
 					</tr>
 				{/each}
 			</tbody>
+			<tfoot>
+				<tr class="bg-gray-50 border-t-2 border-gray-200">
+					<td class="px-4 py-2 font-medium text-gray-600">Time</td>
+					{#each xAxisPoints as point}
+						<td class="px-4 py-2 text-center text-sm text-gray-600">
+							{formatTimePoint(point)}
+						</td>
+					{/each}
+				</tr>
+			</tfoot>
 		</table>
 	</div>
 </div>
+
+<style>
+	table {
+		border-collapse: separate;
+		border-spacing: 0;
+		width: 100%;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		border-radius: 6px;
+	}
+
+	th,
+	td {
+		border-right: 1px solid rgba(0, 0, 0, 0.05);
+	}
+
+	th:last-child,
+	td:last-child {
+		border-right: none;
+	}
+
+	/* Add visual cues for impact transitions */
+	td[style*='border-left: none'] {
+		position: relative;
+	}
+
+	td[style*='border-left: none']::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 1px;
+		background: rgba(0, 0, 0, 0.05);
+		opacity: 0.3;
+	}
+
+	/* Footer styling */
+	tfoot td {
+		font-size: 0.85rem;
+		padding-top: 0.75rem;
+		padding-bottom: 0.75rem;
+	}
+</style>
