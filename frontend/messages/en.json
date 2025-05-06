@@ -1488,5 +1488,9 @@
 	"probabilityISO": "Likelihood",
 	"probabilityEBIOS": "Likelihood",
 	"iso27005": "ISO 27005",
-	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted"
+	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted",
+	"create": "Create",
+	"update": "Update",
+	"delete": "Delete",
+	"iam|User": "IAM User"
 }
