@@ -34,6 +34,24 @@ class AssetAssessment(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         return str(self.asset)
 
+    def metrics(self):
+        thresholds = EscalationThreshold.objects.filter(asset_assessment=self)
+        res = [
+            {"pit": et.get_human_pit, "impact": et.get_impact_display}
+            for et in thresholds
+        ]
+        xAxis = []
+        yAxis = []
+        for et in thresholds:
+            xAxis.append(et.get_human_pit)
+            yAxis.append(
+                {
+                    "value": int(et.get_impact_display.get("value")) + 1,
+                    "itemStyle": {"color": et.get_impact_display.get("hexcolor")},
+                }
+            )
+        return res
+
     class Meta:
         unique_together = ["bia", "asset"]
 

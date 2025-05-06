@@ -35,6 +35,16 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(BusinessImpactAnalysis.Status.choices))
 
+    @action(detail=True, name="Get the asset assessment details")
+    def metrics(self, request, pk):
+        bia = self.get_object()
+        asset_assessments = AssetAssessment.objects.filter(bia=bia)
+        res = [
+            {"asset": aa.asset.name, "metrics": aa.metrics()}
+            for aa in asset_assessments
+        ]
+        return Response(res)
+
 
 class AssetAssessmentViewSet(BaseModelViewSet):
     model = AssetAssessment
@@ -62,12 +72,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get the asset assessment details")
     def metrics(self, request, pk):
-        aa = self.get_object()
-        thresholds = EscalationThreshold.objects.filter(asset_assessment=aa)
-        res = [
-            {"pit": et.get_human_pit, "impact": et.get_impact_display}
-            for et in thresholds
-        ]
+        res = self.get_object().metrics()
         return Response(res)
 
 
