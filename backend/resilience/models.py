@@ -68,6 +68,23 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
+    @property
+    def get_human_pit(self):
+        seconds = self.point_in_time
+        days, seconds = divmod(seconds, 86400)  # 24 * 3600
+        hours, seconds = divmod(seconds, 3600)
+        minutes, _ = divmod(seconds, 60)
+
+        parts = []
+        if days:
+            parts.append(f"{days} {'Day' if days == 1 else 'Days'}")
+        if hours:
+            parts.append(f"{hours} {'Hour' if hours == 1 else 'Hours'}")
+        if minutes:
+            parts.append(f"{minutes} {'Minute' if minutes == 1 else 'Minutes'}")
+
+        return ", ".join(parts) or "0 Minutes"
+
     @staticmethod
     def format_impact(impact: int, parsed_matrix: dict):
         if impact < 0:

@@ -53,6 +53,7 @@ class EscalationThresholdReadSerializer(BaseModelSerializer):
     asset_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
 
+    get_human_pit = serializers.CharField()
     quali_impact = serializers.JSONField(source="get_impact_display")
 
     class Meta:
