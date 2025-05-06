@@ -16,7 +16,9 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, filters
+
+from django_filters.rest_framework import DjangoFilterBackend
 
 from django.conf import settings
 
@@ -315,5 +317,20 @@ def get_build(request):
 class LogEntryViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    ordering = ["-timestamp"]
+    ordering_fields = "__all__"
+    search_fields = [
+        "content_type__model",
+        "action",
+        "actor__email",
+        "actor__first_name",
+        "actor__last_name",
+    ]
+    filterset_fields = ["action", "actor", "content_type__model"]
     serializer_class = LogEntrySerializer
     queryset = LogEntry.objects.all()

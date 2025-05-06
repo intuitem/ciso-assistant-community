@@ -102,6 +102,11 @@ class LogEntrySerializer(serializers.ModelSerializer):
     """
 
     actor = FieldsRelatedField()
+    action = serializers.CharField(source="get_action_display")
+    content_type = serializers.SerializerMethodField(method_name="get_content_type")
+
+    def get_content_type(self, obj):
+        return obj.content_type.name
 
     class Meta:
         model = LogEntry
