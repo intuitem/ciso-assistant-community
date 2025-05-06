@@ -84,7 +84,7 @@ class LogoutView(views.APIView):
         return Response({"message": "Logged out successfully."}, status=HTTP_200_OK)
 
 
-class AuthTokenListViewSet(views.APIView):
+class PersonalAccessTokenViewSet(views.APIView):
     def get_queryset(self):
         return PersonalAccessToken.objects.filter(auth_token__user=self.request.user)
 
@@ -157,7 +157,7 @@ class AuthTokenListViewSet(views.APIView):
         return Response(serializer.data)
 
 
-class AuthTokenDetailViewSet(views.APIView):
+class AuthTokenDetailView(views.APIView):
     def delete(self, request, *args, **kwargs):
         try:
             token = AuthToken.objects.get(digest=kwargs["pk"])

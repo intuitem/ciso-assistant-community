@@ -2,8 +2,8 @@ import knox.views as knox_views
 from django.urls import include, path
 
 from .views import (
-    AuthTokenDetailViewSet,
-    AuthTokenListViewSet,
+    AuthTokenDetailView,
+    PersonalAccessTokenViewSet,
     ChangePasswordView,
     CurrentUserView,
     LoginView,
@@ -32,10 +32,10 @@ urlpatterns = [
         SessionTokenView.as_view(),
         name="session-token",
     ),
-    path("auth-tokens/", AuthTokenListViewSet.as_view(), name="auth-tokens"),
+    path("auth-tokens/", PersonalAccessTokenViewSet.as_view(), name="auth-tokens"),
     path(
         "auth-tokens/<str:pk>/",
-        AuthTokenDetailViewSet.as_view(),
+        AuthTokenDetailView.as_view(),
         name="auth-token-detail",
     ),
 ]
