@@ -270,8 +270,7 @@ class UserManager(BaseUserManager):
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
             folder=_get_root_folder(),
-            is_sso=extra_fields.get("is_sso", False),
-            is_local=extra_fields.get("is_local", True),
+            force_local_login=extra_fields.get("force_local_login", False),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
@@ -346,11 +345,10 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
-    is_local = models.BooleanField(
-        default=True,
-        help_text=_("True if the account has local credentials"),
+    force_local_login = models.BooleanField(
+        default=False,
+        help_text=_("If True force the user to log in using the normal login form even with SSO enabled."),
     )
-    is_sso = models.BooleanField(default=False)
     is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
@@ -398,18 +396,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
-        if self.created_at is None : # If the user doesn't exist in the database yet.
-            from global_settings.models import GlobalSettings
-            sso_settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
-            if sso_settings.value.get("is_enabled") :
-                self.is_local = False
-                self.is_sso = True
-
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if not self.is_local:
-            self.set_unusable_password()
+        if self.is_sso:
+            pass # self.set_unusable_password() # SHOULD WE USE THIS ?
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
 
@@ -553,6 +544,17 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             any(perm.startswith(prefix) for prefix in editor_prefixes)
             for perm in permissions
         )
+
+    @property
+    def is_sso(self) -> bool:
+        """
+        Indicates whether the user can log in using SSO (Single Sign-On).
+        If a user can log in using SSO, they are not allowed to log in by any other method.
+        """
+        from global_settings.models import GlobalSettings
+        sso_settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+
+        return sso_settings.value.get("force_sso", False) or (sso_settings.value.get("is_enabled", False) and not self.force_local_login)
 
     @classmethod
     def get_editors(cls) -> List[Self]:

@@ -53,11 +53,10 @@
 	<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 {/if}
 
-{#if context !== "create"}
+{#if context !== 'create'}
 	<!-- ADD helpText attributes to 2 <Checkbox> before pushing (only EN+FR) -->
-	<!-- Translate "is_local"/"is Local" and "is_sso"/"is SSO" to better translations (only EN+FR is enough) -->
-	<Checkbox {form} field="is_local" label="is Local" />
-	<Checkbox {form} field="is_sso" label="is SSO" />
+	<!-- Translate "force_local_login"/"is Local" to a better translations (only EN+FR is enough) -->
+	<Checkbox {form} field="force_local_login" label="is Local" />
 {/if}
 
 <span class="text-gray-500 pt-5">

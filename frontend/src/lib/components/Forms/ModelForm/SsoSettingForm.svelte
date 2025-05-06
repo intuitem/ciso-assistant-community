@@ -17,7 +17,7 @@
 <Accordion>
 	<Checkbox {form} field="is_enabled" label={m.enableSSO()} />
 	<!-- Incomplete Translation -->
-	<Checkbox {form} field="force_sso" label={"Force SSO login"} disabled={!data.is_enabled} />
+	<Checkbox {form} field="force_sso" label={'Force SSO login'} disabled={!data.is_enabled} />
 	<AutocompleteSelect
 		{form}
 		hidden={model.selectOptions['provider'].length < 2}

@@ -8,8 +8,7 @@ export interface User {
 	first_name: string;
 	last_name: string;
 	is_active: boolean;
-	is_local: boolean;
-	is_sso: boolean;
+	force_local_login: boolean;
 	date_joined: string;
 	user_groups: Record<string, any>[];
 	roles: Record<string, any>[];

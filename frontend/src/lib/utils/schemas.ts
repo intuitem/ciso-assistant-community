@@ -264,8 +264,7 @@ export const UserEditSchema = z.object({
 	first_name: z.string().optional(),
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
-	is_local: z.boolean().optional(),
-	is_sso: z.boolean().optional(),
+	force_local_login: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
@@ -331,6 +330,7 @@ export const GeneralSettingsSchema = z.object({
 
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().optional(),
+	force_sso: z.boolean().optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string(),

@@ -128,7 +128,7 @@ class PasswordResetView(views.APIView):
         email = request.data["email"]  # type: ignore
         associated_user = User.objects.filter(email=email).first()
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
-            if associated_user is not None and associated_user.is_local:
+            if associated_user is not None and not associated_user.is_sso:
                 try:
                     associated_user.mailing(
                         email_template_name="registration/password_reset_email.html",
@@ -178,7 +178,7 @@ class ResetPasswordConfirmView(views.APIView):
         token = serializer.validated_data.get("token")
         new_password = serializer.validated_data.get("new_password")
         user = self.get_user(uidb64)
-        if user is not None or not user.is_local:
+        if user is not None and not user.is_sso: # Only non-SSO user can reset their password.
             if self.token_generator.check_token(user, token):
                 user.set_password(new_password)
                 user.save()
