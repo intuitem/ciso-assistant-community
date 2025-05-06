@@ -16,6 +16,7 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import mixins, viewsets
 
 from django.conf import settings
 
@@ -33,7 +34,9 @@ from pathlib import Path
 import humanize
 
 from .models import ClientSettings
-from .serializers import ClientSettingsReadSerializer
+from .serializers import ClientSettingsReadSerializer, LogEntrySerializer
+
+from auditlog.models import LogEntry
 
 logger = structlog.get_logger(__name__)
 
@@ -290,7 +293,7 @@ def get_build(request):
         total, used, free = disk_info
         disk_response = {
             "Disk space": f"{humanize.naturalsize(total)}",
-            "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
+            "Used": f"{humanize.naturalsize(used)} ({int((used / total) * 100)} %)",
         }
     else:
         disk_response = {
@@ -307,3 +310,10 @@ def get_build(request):
             **disk_response,
         }
     )
+
+
+class LogEntryViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    serializer_class = LogEntrySerializer
+    queryset = LogEntry.objects.all()

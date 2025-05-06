@@ -580,6 +580,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_tasknode",
     "change_tasknode",
     "delete_tasknode",
+    "view_logentry",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

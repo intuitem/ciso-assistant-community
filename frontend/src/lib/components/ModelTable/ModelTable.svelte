@@ -68,6 +68,7 @@
 	export let identifierField = 'id';
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
+	export let _model = URLModel ? URL_MODEL_MAP[URLModel] : undefined;
 	export let baseEndpoint: string = `/${URLModel}`;
 	export let detailQueryParameter: string | undefined = undefined;
 	export let fields: string[] = [];
@@ -123,7 +124,7 @@
 		}),
 		{
 			rowsPerPage: pagination ? numberRowsPerPage : undefined,
-			totalRows: source.meta.count
+			totalRows: source?.meta?.count
 		}
 	);
 	const rows = handler.getRows();
@@ -169,7 +170,9 @@
 
 	const tableURLModel = URLModel;
 	const filters =
-		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+		tableURLModel &&
+		listViewFields[tableURLModel] &&
+		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
 			: {};
 
@@ -203,7 +206,7 @@
 	}
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-	$: model = URL_MODEL_MAP[URLModel];
+	$: model = _model ?? URL_MODEL_MAP[URLModel];
 	$: canCreateObject = model
 		? $page.params.id
 			? canPerformAction({
@@ -323,7 +326,7 @@
 												{#each value as val}
 													<li>
 														{#if val.str && val.id}
-															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 															<Anchor href={itemHref} class="anchor" stopPropagation
 																>{val.str}</Anchor
 															>
@@ -342,7 +345,7 @@
 											</ul>
 										{:else if value && value.str}
 											{#if value.id}
-												{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+												{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
 												{#if key === 'ro_to_couple'}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 														>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
