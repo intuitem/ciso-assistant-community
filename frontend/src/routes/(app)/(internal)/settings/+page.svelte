@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { SSOSettingsSchema, GeneralSettingsSchema } from '$lib/utils/schemas';
+	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 
@@ -15,8 +15,22 @@
 	>
 	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key" /> {m.sso()}</Tab
 	>
+	<Tab bind:group={tabSet} name="featureFlags" value={2}
+		><i class="fa-solid fa-flag" /> {m.featureFlags()}</Tab
+	>
 </TabGroup>
-{#if tabSet === 1}
+{#if tabSet === 0}
+	<div>
+		<span class="text-gray-500">{m.generalSettingsDescription()}</span>
+		<ModelForm
+			form={data.generalSettingForm}
+			schema={GeneralSettingsSchema}
+			model={data.generalSettingModel}
+			cancelButton={false}
+			action="?/general"
+		/>
+	</div>
+{:else if tabSet === 1}
 	<div>
 		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
 		<ModelForm
@@ -27,15 +41,15 @@
 			action="?/sso"
 		/>
 	</div>
-{:else if tabSet === 0}
+{:else if tabSet === 2}
 	<div>
-		<span class="text-gray-500">{m.generalSettingsDescription()}</span>
+		<span class="text-gray-500">{m.configureFeatureFlags()}</span>
 		<ModelForm
-			form={data.generalSettingForm}
-			schema={GeneralSettingsSchema}
-			model={data.generalSettingModel}
+			form={data.featureFlagForm}
+			schema={FeatureFlagsSchema}
+			model={data.featureFlagModel}
 			cancelButton={false}
-			action="?/general"
+			action="?/featureFlags"
 		/>
 	</div>
 {/if}
