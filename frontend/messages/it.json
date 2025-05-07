@@ -1289,5 +1289,10 @@
 	"restriction": "Restrizione",
 	"erasureOrDestruction": "Cancellazione o distruzione",
 	"failedToContactProvider": "Impossibile contattare il fornitore",
-	"userIsNotSSO": "Il login SSO è attualmente disabilitato per il tuo account"
+	"userIsNotSSO": "Il login SSO è attualmente disabilitato per il tuo account",
+	"enableSSOHelpText": "Abilita SSO, l'utilizzo di questo parametro cancellerà le password per tutti gli utenti senza login locale forzato.",
+	"forceLocalLogin": "Forza il login locale",
+	"forceLocalLoginHelpText": "Forza l'utente a utilizzare il login locale (questo parametro viene ignorato se il SSO è disattivato o forzato).",
+	"forceSSOLogin": "Forza il login SSO",
+	"forceSSOLoginHelpText": "Forza tutti gli utenti ad accedere utilizzando il SSO, l'utilizzo di questo parametro cancellerà le password per tutti gli utenti."
 }

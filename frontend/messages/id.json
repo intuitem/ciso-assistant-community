@@ -1099,5 +1099,10 @@
 	"youCanSetPAsswordHere": "Anda dapat mengatur kata sandi di sini.",
 	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali.",
 	"failedToContactProvider": "Gagal menghubungi penyedia",
-	"userIsNotSSO": "Login SSO saat ini dinonaktifkan untuk akun Anda"
+	"userIsNotSSO": "Login SSO saat ini dinonaktifkan untuk akun Anda",
+	"enableSSOHelpText": "Aktifkan SSO, menggunakan parameter ini akan menghapus kata sandi untuk semua pengguna tanpa login lokal yang dipaksakan.",
+	"forceLocalLogin": "Paksa login lokal",
+	"forceLocalLoginHelpText": "Paksa pengguna untuk menggunakan login lokal (parameter ini diabaikan jika SSO dinonaktifkan atau dipaksakan).",
+	"forceSSOLogin": "Paksa login SSO",
+	"forceSSOLoginHelpText": "Paksa semua pengguna untuk masuk menggunakan SSO, menggunakan parameter ini akan menghapus kata sandi untuk semua pengguna."
 }

@@ -911,5 +911,10 @@
 	"timestampCannotBeInTheFuture": "Tijdstempel kan niet in de toekomst liggen",
 	"youCanSetPAsswordHere": "Je kunt hier je wachtwoord instellen.",
 	"failedToContactProvider": "Mislukt om provider te bereiken",
-	"userIsNotSSO": "SSO-login is momenteel uitgeschakeld voor je account"
+	"userIsNotSSO": "SSO-login is momenteel uitgeschakeld voor je account",
+	"enableSSOHelpText": "Schakel SSO in, het gebruik van deze parameter wist de wachtwoorden van alle gebruikers zonder verplichte lokale login.",
+	"forceLocalLogin": "Forceer lokale login",
+	"forceLocalLoginHelpText": "Forceer de gebruiker om lokale login te gebruiken (deze parameter wordt genegeerd als SSO is uitgeschakeld of verplicht is).",
+	"forceSSOLogin": "Forceer SSO-login",
+	"forceSSOLoginHelpText": "Forceer alle gebruikers om in te loggen met SSO, het gebruik van deze parameter wist de wachtwoorden van alle gebruikers."
 }

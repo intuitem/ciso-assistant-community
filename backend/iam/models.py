@@ -400,7 +400,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             # avoid deactivation of superuser
             self.is_active = True
         if self.is_sso:
-            pass # self.set_unusable_password() # SHOULD WE USE THIS ?
+            self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
 

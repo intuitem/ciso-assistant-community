@@ -908,5 +908,10 @@
 	"youCanSetPAsswordHere": "Możesz ustawić swoje hasło tutaj.",
 	"filterby": "Filtruj według",
 	"failedToContactProvider": "Nie udało się skontaktować z dostawcą",
-	"userIsNotSSO": "Logowanie SSO jest obecnie wyłączone dla twojego konta"
+	"userIsNotSSO": "Logowanie SSO jest obecnie wyłączone dla twojego konta",
+	"enableSSOHelpText": "Włącz SSO, użycie tego parametru spowoduje usunięcie haseł dla wszystkich użytkowników bez wymuszonego lokalnego logowania.",
+	"forceLocalLogin": "Wymuś lokalne logowanie",
+	"forceLocalLoginHelpText": "Wymuś na użytkowniku korzystanie z lokalnego logowania (ten parametr jest ignorowany, jeśli SSO jest wyłączone lub wymuszone).",
+	"forceSSOLogin": "Wymuś logowanie SSO",
+	"forceSSOLoginHelpText": "Wymuś na wszystkich użytkownikach logowanie za pomocą SSO, użycie tego parametru spowoduje usunięcie haseł dla wszystkich użytkowników."
 }

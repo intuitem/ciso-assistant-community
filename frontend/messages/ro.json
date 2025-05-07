@@ -907,5 +907,10 @@
 	"timestampCannotBeInTheFuture": "Marcă de timp nu poate fi în viitor",
 	"youCanSetPAsswordHere": "Puteți seta parola dvs. aici.",
 	"failedToContactProvider": "Eșec la contactarea furnizorului",
-	"userIsNotSSO": "Autentificarea SSO este momentan dezactivată pentru contul dumneavoastră"
+	"userIsNotSSO": "Autentificarea SSO este momentan dezactivată pentru contul dumneavoastră",
+	"enableSSOHelpText": "Activează SSO, utilizarea acestui parametru va șterge parolele pentru toți utilizatorii fără autentificare locală forțată.",
+	"forceLocalLogin": "Forțează autentificarea locală",
+	"forceLocalLoginHelpText": "Forțează utilizatorul să folosească autentificarea locală (acest parametru este ignorat dacă SSO este dezactivat sau forțat).",
+	"forceSSOLogin": "Forțează autentificarea SSO",
+	"forceSSOLoginHelpText": "Forțează toți utilizatorii să se autentifice folosind SSO, utilizarea acestui parametru va șterge parolele pentru toți utilizatorii."
 }

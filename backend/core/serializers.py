@@ -713,6 +713,8 @@ class UserReadSerializer(BaseModelSerializer):
 
 
 class UserWriteSerializer(BaseModelSerializer):
+    is_sso = serializers.BooleanField(required=False)
+
     class Meta:
         model = User
         fields = [
@@ -725,6 +727,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "user_groups",
             "force_local_login",
             "is_third_party",
+            "is_sso",
         ]
 
     def validate_email(self, email):

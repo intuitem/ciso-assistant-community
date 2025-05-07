@@ -1198,5 +1198,10 @@
 	"noAuditForTheFramework": "Der er ingen revision for dette rammeværk",
 	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom",
 	"failedToContactProvider": "Fejl ved kontakt til udbyderen",
-	"userIsNotSSO": "SSO-login er i øjeblikket deaktiveret for din konto"
+	"userIsNotSSO": "SSO-login er i øjeblikket deaktiveret for din konto",
+	"enableSSOHelpText": "Aktivér SSO, brug af denne parameter vil slette adgangskoder for alle brugere uden tvungen lokal login.",
+	"forceLocalLogin": "Tving lokal login",
+	"forceLocalLoginHelpText": "Tving brugeren til at bruge lokal login (denne parameter ignoreres, hvis SSO er deaktiveret eller tvunget).",
+	"forceSSOLogin": "Tving SSO-login",
+	"forceSSOLoginHelpText": "Tving alle brugere til at logge ind med SSO, brug af denne parameter vil slette adgangskoder for alle brugere."
 }

@@ -1422,5 +1422,10 @@
 	"impactHelpText": "Estimation of the control's impact",
 	"selectAsset": "Select an asset",
 	"failedToContactProvider": "Failed to contact provider",
-	"userIsNotSSO": "SSO login is currently disabled for your account"
+	"userIsNotSSO": "SSO login is currently disabled for your account",
+	"enableSSOHelpText": "Enable SSO, using this parameter will erase passwords for all users without forced local login",
+	"forceLocalLogin": "Force local login",
+	"forceLocalLoginHelpText": "Force the user to use local login (this parameter is ignored if the SSO is disabled or if the SSO is forced)",
+	"forceSSOLogin": "Force SSO login",
+	"forceSSOLoginHelpText": "Force all users to log in using SSO, using this parameter will erase passwords for all users"
 }

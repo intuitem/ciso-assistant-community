@@ -905,5 +905,10 @@
 	"author": "Författare",
 	"timestampCannotBeInTheFuture": "Tidsstämpeln kan inte vara i framtiden",
 	"failedToContactProvider": "Misslyckades att kontakta leverantören",
-	"userIsNotSSO": "SSO-inloggning är för närvarande inaktiverad för ditt konto"
+	"userIsNotSSO": "SSO-inloggning är för närvarande inaktiverad för ditt konto",
+	"enableSSOHelpText": "Aktivera SSO, att använda denna parameter kommer att radera lösenord för alla användare utan tvingad lokal inloggning.",
+	"forceLocalLogin": "Tvinga lokal inloggning",
+	"forceLocalLoginHelpText": "Tvinga användaren att använda lokal inloggning (denna parameter ignoreras om SSO är inaktiverat eller tvingat).",
+	"forceSSOLogin": "Tvinga SSO-inloggning",
+	"forceSSOLoginHelpText": "Tvinga alla användare att logga in med SSO, att använda denna parameter kommer att radera lösenord för alla användare."
 }

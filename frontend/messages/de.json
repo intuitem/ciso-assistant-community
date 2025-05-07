@@ -915,5 +915,10 @@
 	"timestampCannotBeInTheFuture": "Der Zeitstempel darf nicht in der Zukunft liegen",
 	"youCanSetPAsswordHere": "Sie können hier Ihr Passwort festlegen.",
 	"failedToContactProvider": "Verbindung zum Anbieter fehlgeschlagen",
-	"userIsNotSSO": "SSO-Login ist derzeit für Ihr Konto deaktiviert"
+	"userIsNotSSO": "SSO-Login ist derzeit für Ihr Konto deaktiviert",
+	"enableSSOHelpText": "Aktiviere SSO, die Verwendung dieses Parameters löscht Passwörter für alle Benutzer ohne erzwungenes lokales Login.",
+	"forceLocalLogin": "Erzwinge lokales Login",
+	"forceLocalLoginHelpText": "Erzwinge den Benutzer, das lokale Login zu verwenden (dieser Parameter wird ignoriert, wenn SSO deaktiviert oder erzwungen ist).",
+	"forceSSOLogin": "Erzwinge SSO-Login",
+	"forceSSOLoginHelpText": "Erzwinge alle Benutzer, sich mit SSO anzumelden, die Verwendung dieses Parameters löscht Passwörter für alle Benutzer."
 }

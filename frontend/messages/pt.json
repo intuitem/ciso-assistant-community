@@ -907,5 +907,10 @@
 	"timestampCannotBeInTheFuture": "O carimbo de data/hora não pode estar no futuro",
 	"youCanSetPAsswordHere": "Você pode definir sua senha aqui.",
 	"failedToContactProvider": "Falha ao contactar o provedor",
-	"userIsNotSSO": "O login SSO está atualmente desativado para sua conta"
+	"userIsNotSSO": "O login SSO está atualmente desativado para sua conta",
+	"enableSSOHelpText": "Ative o SSO, usar este parâmetro apagará as senhas de todos os usuários sem login local forçado.",
+	"forceLocalLogin": "Force o login local",
+	"forceLocalLoginHelpText": "Force o usuário a usar o login local (este parâmetro é ignorado se o SSO estiver desativado ou forçado).",
+	"forceSSOLogin": "Force o login SSO",
+	"forceSSOLoginHelpText": "Force todos os usuários a fazer login usando SSO, usar este parâmetro apagará as senhas de todos os usuários."
 }

@@ -898,5 +898,10 @@
 	"timestampCannotBeInTheFuture": "Časové razítko nemůže být v budoucnosti",
 	"youCanSetPAsswordHere": "Zde si můžete nastavit heslo.",
 	"failedToContactProvider": "Nepodařilo se kontaktovat poskytovatele",
-	"userIsNotSSO": "Přihlášení pomocí SSO je aktuálně pro váš účet zakázáno"
+	"userIsNotSSO": "Přihlášení pomocí SSO je aktuálně pro váš účet zakázáno",
+	"enableSSOHelpText": "Povol SSO, použití tohoto parametru vymaže hesla všech uživatelů bez vynuceného místního přihlášení.",
+	"forceLocalLogin": "Vynucuj místní přihlášení",
+	"forceLocalLoginHelpText": "Vynucuj uživatele k použití místního přihlášení (tento parametr je ignorován, pokud je SSO zakázáno nebo vynuceno).",
+	"forceSSOLogin": "Vynucuj přihlášení pomocí SSO",
+	"forceSSOLoginHelpText": "Vynucuj všem uživatelům přihlášení pomocí SSO, použití tohoto parametru vymaže hesla všech uživatelů."
 }

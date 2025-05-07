@@ -1422,5 +1422,10 @@
 	"impactHelpText": "Estimation de l'impact de la mesure",
 	"selectAsset": "Sélectionner un actif",
 	"failedToContactProvider": "Échec de la connexion au fournisseur",
-	"userIsNotSSO": "La connexion SSO est actuellement désactivée pour votre compte"
+	"userIsNotSSO": "La connexion SSO est actuellement désactivée pour votre compte",
+	"enableSSOHelpText": "Active le SSO, l'utilisation de ce paramètre effacera les mots de passe de tous les utilisateurs sans connexion locale forcée.",
+	"forceLocalLogin": "Force la connexion locale",
+	"forceLocalLoginHelpText": "Force l'utilisateur à utiliser la connexion locale (ce paramètre est ignoré si le SSO est désactivé ou forcé).",
+	"forceSSOLogin": "Force la connexion SSO",
+	"forceSSOLoginHelpText": "Force tous les utilisateurs à se connecter en utilisant le SSO, l'utilisation de ce paramètre effacera les mots de passe de tous les utilisateurs."
 }
