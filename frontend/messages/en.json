@@ -1513,4 +1513,7 @@
 	"iso27005": "ISO 27005",
 	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted",
 	"addBusinessImpactAnalysis": "Start a BIA"
+	"delete": "Delete",
+	"changeStatus": "Change status",
+	"errorUpdatungObject": "An error occurred while updating the {object} object."
 }
