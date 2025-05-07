@@ -609,7 +609,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             sso_settings = GlobalSettings.objects.get(
                 name=GlobalSettings.Names.SSO
             ).value
-        except:
+        except User.DoesNotExist:
             sso_settings = {}
 
         return sso_settings.get("is_enabled", False) and (
