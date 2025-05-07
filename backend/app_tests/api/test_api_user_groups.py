@@ -16,6 +16,6 @@ class TestUserGroups:
             User.objects.get(email=TEST_USER_EMAIL)
         )
         for perm in GROUPS_PERMISSIONS[test.user_group]["perms"]:
-            assert (
-                perm in user_permissions.keys()
-            ), f"Permission {perm} not found in user permissions (group: {test.user_group})"
+            assert perm in user_permissions.keys(), (
+                f"Permission {perm} not found in user permissions (group: {test.user_group})"
+            )

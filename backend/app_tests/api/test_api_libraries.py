@@ -69,9 +69,9 @@ class TestLibrariesAuthenticated:
         lib_detail_response = lib_detail_response["framework"]
 
         # Asserts that the library is not already loaded
-        assert (
-            Framework.objects.all().count() == 0
-        ), "libraries are already loaded in the database"
+        assert Framework.objects.all().count() == 0, (
+            "libraries are already loaded in the database"
+        )
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Frameworks",
@@ -114,9 +114,9 @@ class TestLibrariesAuthenticated:
         """test to delete frameworks with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
-        assert (
-            Framework.objects.all().count() == 1
-        ), "Frameworks are not correctly imported in the database"
+        assert Framework.objects.all().count() == 1, (
+            "Frameworks are not correctly imported in the database"
+        )
 
         EndpointTestsQueries.Auth.delete_object(
             test.client,
@@ -140,9 +140,9 @@ class TestLibrariesAuthenticated:
         lib_detail_response = lib_detail_response["risk_matrix"][0]
 
         # Asserts that the library is not already loaded
-        assert (
-            RiskMatrix.objects.all().count() == 0
-        ), "libraries are already loaded in the database"
+        assert RiskMatrix.objects.all().count() == 0, (
+            "libraries are already loaded in the database"
+        )
         EndpointTestsQueries.Auth.get_object(
             test.client, "Risk matrices", user_group=test.user_group
         )
