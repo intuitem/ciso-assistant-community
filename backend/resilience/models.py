@@ -16,8 +16,9 @@ from django.db.models import (
     ManyToManyField,
     TextField,
 )
-from icecream import ic
-from iam.models import User, FolderMixin
+from iam.models import FolderMixin
+from django.db.models import Count, Q
+from django.utils.functional import cached_property
 
 
 class BusinessImpactAnalysis(Assessment):
@@ -26,19 +27,21 @@ class BusinessImpactAnalysis(Assessment):
         on_delete=models.PROTECT,
     )
 
-    @property
+    @cached_property
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
     def metrics(self):
-        asset_assessments = AssetAssessment.objects.filter(bia=self)
-        total_assets = asset_assessments.count()
-
-        documented_count = asset_assessments.filter(recovery_documented=True).count()
-        tested_count = asset_assessments.filter(recovery_tested=True).count()
-        objectives_met_count = asset_assessments.filter(
-            recovery_targets_met=True
-        ).count()
+        qs = AssetAssessment.objects.filter(bia=self).aggregate(
+            total=Count("id"),
+            documented=Count("id", filter=Q(recovery_documented=True)),
+            tested=Count("id", filter=Q(recovery_tested=True)),
+            objectives=Count("id", filter=Q(recovery_targets_met=True)),
+        )
+        total_assets = qs["total"]
+        documented_count = qs["documented"]
+        tested_count = qs["tested"]
+        objectives_met_count = qs["objectives"]
 
         doc_percentage = (
             round((documented_count / total_assets) * 100) if total_assets else 0
@@ -64,7 +67,13 @@ class BusinessImpactAnalysis(Assessment):
         table = list()
         xAxis = set()
         xAxis.add(0)
-        asset_assessments = AssetAssessment.objects.filter(bia=self).prefetch_related()
+        asset_assessments = AssetAssessment.objects.filter(bia=self).prefetch_related(
+            models.Prefetch(
+                "escalationthreshold_set",
+                queryset=EscalationThreshold.objects.order_by("point_in_time"),
+                to_attr="prefetched_thresholds",
+            )
+        )
 
         # First pass: collect all threshold points
         for aa in asset_assessments:
@@ -177,7 +186,7 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     def risk_matrix(self):
         return self.asset_assessment.bia.risk_matrix
 
-    @property
+    @cached_property
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
