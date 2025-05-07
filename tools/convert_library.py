@@ -32,21 +32,22 @@ Conventions:
         risk_matrix_ref_id              | <ref_id>
         risk_matrix_name                | <name>
         risk_matrix_description         | <description>
-        mapping_urn                     | <urn>
-        mapping_ref_id                  | <ref_id>
-        mapping_name                    | <name>
-        mapping_description             | <description>
-        mapping_source_framework_urn    | <urn>
-        mapping_target_framework_urn    | <urn>
-        mapping_source_node_base_urn    | <urn>
-        mapping_target_node_base_urn    | <urn>
+        mapping_urn                     | <urn> (deprecated)
+        mapping_ref_id                  | <ref_id> (deprecated)
+        mapping_name                    | <name> (deprecated)
+        mapping_description             | <description> (deprecated)
+        mapping_source_framework_urn    | <urn>    (deprecated)
+        mapping_target_framework_urn    | <urn>    (deprecated)
+        mapping_source_node_base_urn    | <urn>    (deprecated)
+        mapping_target_node_base_urn    | <urn>    (deprecated)
         tab                             | <tab_name> | requirements
         tab                             | <tab_name> | threats            | <base_urn>
         tab                             | <tab_name> | reference_controls | <base_urn>
         tab                             | <tab_name> | scores
         tab                             | <tab_name> | implementation_groups
         tab                             | <tab_name> | risk_matrix
-        tab                             | <tab_name> | mappings
+        tab                             | <tab_name> | mappings (deprecated)
+        tab                             | <tab_name> | mappings | urn | ref_id | name | description | source_framework_urn | target_framework_urn | source_node_base_urn | target_node_base_urn
         tab                             | <tab_name> | answers
 
         variables can also have a translation in the form "variable[locale]"
@@ -104,6 +105,8 @@ Conventions:
             - question_choices(*)
     A library has a single locale, which is the reference language. Translations are given in columns with header like "name[fr]"
     Dependencies are given as a comma or blank separated list of urns.
+
+    The mappings form is deprecated and replaced by mapping_set. This allows adding several mappings in a single library.
 """
 
 import openpyxl
@@ -178,8 +181,9 @@ scores_definition = []
 implementation_groups_definition = []
 questions = []
 risk_matrix = {}
-requirement_mappings = []
-
+requirement_mappings = [] # deprecated
+requirement_mapping_sets = []
+deprecated_mapping_mode = False
 
 def error(message):
     print("Error:", message)
@@ -444,13 +448,73 @@ def get_question(tab):
     return found_answers
 
 
-################################################################
 def build_ids_set(tab_name):
     output = set()
     raw = dataframe[tab_name]["A"]
     output = {cell.value for cell in raw if cell.value is not None}
     return output
 
+
+def get_requirement_mapping_set(tab, source_prefix: str, target_prefix: str):
+    is_header = True
+    requirement_mapping_set = []
+    for row in tab:
+        if is_header:
+            header = read_header(row)
+            is_header = False
+            assert "source_node_id" in header
+            assert "target_node_id" in header
+            assert "relationship" in header
+        elif any([c.value for c in row]):
+            # check if source_node_id and target_node_id exist in the supported values
+            src_ids_set = build_ids_set("source")
+            tgt_ids_set = build_ids_set("target")
+            src_node_id = row[header["source_node_id"]].value
+            tgt_node_id = row[header["target_node_id"]].value
+            if src_node_id not in src_ids_set:
+                print(
+                    f"WARNING: this source node id: {src_node_id} is not recognized. Fix it and try again before uploading your file."
+                )
+
+            if tgt_node_id not in tgt_ids_set:
+                print(
+                    f"WARNING: this target node id: {tgt_node_id} is not recognized. Fix it and try again before uploading your file."
+                )
+            source_requirement_urn = source_prefix + ":" + src_node_id
+            target_requirement_urn = target_prefix + ":" + tgt_node_id
+            relationship = row[header["relationship"]].value
+            rationale = (
+                row[header["rationale"]].value if "rationale" in header else None
+            )
+            stregth_of_relationship = (
+                row[header["stregth_of_relationship"]].value
+                if "stregth_of_relationship" in header
+                else None
+            )
+            requirement_mapping_set.append(
+                {
+                    "source_requirement_urn": source_requirement_urn,
+                    "target_requirement_urn": target_requirement_urn,
+                    "relationship": relationship,
+                    "rationale": rationale,
+                    "stregth_of_relationship": stregth_of_relationship,
+                }
+            )
+    res = {
+        "urn": library_vars["mapping_urn"],
+        "ref_id": library_vars["mapping_ref_id"],
+        "name": library_vars["mapping_name"],
+        "description": library_vars["mapping_description"],
+        "source_framework_urn": library_vars["mapping_source_framework_urn"],
+        "target_framework_urn": library_vars["mapping_target_framework_urn"],
+    }
+    translations = get_translations_content(library_vars, "mapping")
+    if translations:
+        res["translations"] = translations
+    res["requirement_mappings"] = requirement_mapping_set
+    return res
+
+################################################################
 
 for tab in dataframe:
     print("parsing tab", tab.title)
@@ -474,6 +538,7 @@ for tab in dataframe:
                     library_vars_dict[v1][str(v2)] = v3
                     library_vars_dict_reverse[v1][str(v3)] = v2
                     library_vars_dict_arg[v1][v2] = v4
+        deprecated_mapping_mode = "mapping_source_framework_urn" in library_vars
     elif title not in library_vars_dict["tab"]:
         print(f"Ignored tab: {title}")
     elif library_vars_dict["tab"][title] == "requirements":
@@ -853,51 +918,14 @@ for tab in dataframe:
             risk_matrix[t].sort(key=lambda c: c["id"])
     elif library_vars_dict["tab"][title] == "mappings":
         print("processing mappings")
-        is_header = True
-        source_prefix = library_vars["mapping_source_node_base_urn"]
-        target_prefix = library_vars["mapping_target_node_base_urn"]
-        for row in tab:
-            if is_header:
-                header = read_header(row)
-                is_header = False
-                assert "source_node_id" in header
-                assert "target_node_id" in header
-                assert "relationship" in header
-            elif any([c.value for c in row]):
-                # check if source_node_id and target_node_id exist in the supported values
-                src_ids_set = build_ids_set("source")
-                tgt_ids_set = build_ids_set("target")
-                src_node_id = row[header["source_node_id"]].value
-                tgt_node_id = row[header["target_node_id"]].value
-                if src_node_id not in src_ids_set:
-                    print(
-                        f"WARNING: this source node id: {src_node_id} is not recognized. Fix it and try again before uploading your file."
-                    )
-
-                if tgt_node_id not in tgt_ids_set:
-                    print(
-                        f"WARNING: this target node id: {tgt_node_id} is not recognized. Fix it and try again before uploading your file."
-                    )
-                source_requirement_urn = source_prefix + ":" + src_node_id
-                target_requirement_urn = target_prefix + ":" + tgt_node_id
-                relationship = row[header["relationship"]].value
-                rationale = (
-                    row[header["rationale"]].value if "rationale" in header else None
-                )
-                stregth_of_relationship = (
-                    row[header["stregth_of_relationship"]].value
-                    if "stregth_of_relationship" in header
-                    else None
-                )
-                requirement_mappings.append(
-                    {
-                        "source_requirement_urn": source_requirement_urn,
-                        "target_requirement_urn": target_requirement_urn,
-                        "relationship": relationship,
-                        "rationale": rationale,
-                        "stregth_of_relationship": stregth_of_relationship,
-                    }
-                )
+        if deprecated_mapping_mode:
+            source_prefix = library_vars["mapping_source_node_base_urn"]
+            target_prefix = library_vars["mapping_target_node_base_urn"]
+            requirement_mappings = get_requirement_mapping_set(tab, source_prefix, target_prefix)
+        else:
+            source_prefix = library_vars["mapping_source_node_base_urn"]
+            target_prefix = library_vars["mapping_target_node_base_urn"]
+            requirement_mapping_sets.append(get_requirement_mapping_set(tab, source_prefix, target_prefix))
 
 has_framework = "requirements" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
