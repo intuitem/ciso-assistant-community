@@ -36,15 +36,10 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(BusinessImpactAnalysis.Status.choices))
 
-    @action(detail=True, name="Get the asset assessment details")
+    @action(detail=True, name="Get the BIA metrics")
     def metrics(self, request, pk):
         bia = self.get_object()
-        asset_assessments = AssetAssessment.objects.filter(bia=bia)
-        res = [
-            {"asset": aa.asset.name, "metrics": aa.metrics()}
-            for aa in asset_assessments
-        ]
-        return Response(res)
+        return Response(bia.metrics())
 
     @action(detail=True, name="Build qualitative table", url_path="build-table")
     def impact_table(self, request, pk):

@@ -14,7 +14,6 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     ManyToManyField,
-    OneToOneField,
     TextField,
 )
 from icecream import ic
@@ -31,8 +30,38 @@ class BusinessImpactAnalysis(Assessment):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
+    def metrics(self):
+        asset_assessments = AssetAssessment.objects.filter(bia=self)
+        total_assets = asset_assessments.count()
+
+        documented_count = asset_assessments.filter(recovery_documented=True).count()
+        tested_count = asset_assessments.filter(recovery_tested=True).count()
+        objectives_met_count = asset_assessments.filter(
+            recovery_targets_met=True
+        ).count()
+
+        doc_percentage = (
+            round((documented_count / total_assets) * 100) if total_assets else 0
+        )
+        test_percentage = (
+            round((tested_count / total_assets) * 100) if total_assets else 0
+        )
+        obj_percentage = (
+            round((objectives_met_count / total_assets) * 100) if total_assets else 0
+        )
+
+        progress = {
+            "progress": {
+                "documentation": doc_percentage,
+                "tests": test_percentage,
+                "objectives": obj_percentage,
+            }
+        }
+
+        return progress
+
     def build_table(self):
-        table = []
+        table = list()
         xAxis = set()
         xAxis.add(0)
         asset_assessments = AssetAssessment.objects.filter(bia=self).prefetch_related()
@@ -45,7 +74,7 @@ class BusinessImpactAnalysis(Assessment):
             for th in thresholds:
                 xAxis.add(th.point_in_time)
 
-        # Sort the x-axis values
+        # Sort the x-axis values for consistent timeline
         xAxis = sorted(xAxis)
 
         # Second pass: build the table with proper padding
@@ -92,8 +121,6 @@ class BusinessImpactAnalysis(Assessment):
                         "hexcolor": "#f9fafb",
                     }
 
-        ic(xAxis)
-        ic(table)
         return table
 
 

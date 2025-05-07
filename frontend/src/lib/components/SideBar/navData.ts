@@ -68,11 +68,22 @@ export const navData = {
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
-				},
+				}
+			]
+		},
+		{
+			name: 'assetsManagement',
+			items: [
 				{
 					name: 'assets',
 					fa_icon: 'fa-solid fa-gem',
 					href: '/assets'
+				},
+				{
+					name: 'businessImpactAnalysis',
+					fa_icon: 'fa-solid fa-arrows-to-eye',
+					href: '/business-impact-analysis',
+					permissions: ['view_riskmatrix']
 				}
 			]
 		},
@@ -187,12 +198,6 @@ export const navData = {
 					name: 'riskScenarios',
 					fa_icon: 'fa-solid fa-clone',
 					href: '/risk-scenarios'
-				},
-				{
-					name: 'businessImpactAnalysis',
-					fa_icon: 'fa-solid fa-arrows-to-eye',
-					href: '/business-impact-analysis',
-					permissions: ['view_riskmatrix']
 				},
 				{
 					name: 'scoringAssistant',

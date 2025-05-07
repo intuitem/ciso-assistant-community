@@ -777,8 +777,24 @@ export const listViewFields = {
 		body: ['name', 'perimeter', 'status']
 	},
 	'asset-assessments': {
-		head: ['asset', 'bia', 'dependencies', 'associated_controls'],
-		body: ['asset', 'bia', 'dependencies', 'associated_controls']
+		head: [
+			'asset',
+			'bia',
+			'dependencies',
+			'associatedControls',
+			'recoveryDocumented',
+			'recoveryTested',
+			'recoveryTargetsMet'
+		],
+		body: [
+			'asset',
+			'bia',
+			'dependencies',
+			'associated_controls',
+			'recovery_documented',
+			'recovery_tested',
+			'recovery_targets_met'
+		]
 	},
 	'escalation-thresholds': {
 		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'justification'],
