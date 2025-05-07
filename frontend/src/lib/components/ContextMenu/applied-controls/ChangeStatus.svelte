@@ -15,9 +15,6 @@
 	});
 
 	async function changeStatus(newStatus: string) {
-		// Logic to change the status of the applied control
-		console.log('Changing status to:', newStatus);
-		// You can add your API call here to update the status
 		const endpoint = `/applied-controls/${row?.meta?.id}/status`;
 		const requestInit = {
 			method: 'PATCH',
