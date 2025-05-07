@@ -33,13 +33,16 @@
 				throw new Error('Network response was not ok');
 			}
 			const data = await response.json();
-			console.log('Status changed successfully:', data);
 			flash.set({
 				type: 'success',
 				message: m.successfullyUpdatedObject({ object: m.appliedControl().toLowerCase() })
 			});
 			handler.invalidate();
 		} catch (error) {
+			flash.set({
+				type: 'error',
+				message: m.errorUpdatingObject({ object: m.appliedControl().toLowerCase() })
+			});
 			console.error('Error changing status:', error);
 		}
 	}
