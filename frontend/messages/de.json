@@ -920,5 +920,7 @@
 	"forceLocalLogin": "Erzwinge lokales Login",
 	"forceLocalLoginHelpText": "Erzwinge den Benutzer, das lokale Login zu verwenden (dieser Parameter wird ignoriert, wenn SSO deaktiviert oder erzwungen ist).",
 	"forceSSOLogin": "Erzwinge SSO-Login",
-	"forceSSOLoginHelpText": "Erzwinge alle Benutzer, sich mit SSO anzumelden, die Verwendung dieses Parameters löscht Passwörter für alle Benutzer."
+	"forceSSOLoginHelpText": "Erzwinge alle Benutzer, sich mit SSO anzumelden, die Verwendung dieses Parameters löscht Passwörter für alle Benutzer.",
+	"youCanSetPasswordHere": "Sie können hier Ihr Passwort festlegen.",
+	"taskScheduleWarning": "Alle Aufgaben, die nicht Teil des neuen Zeitplans sind, werden dauerhaft gelöscht"
 }

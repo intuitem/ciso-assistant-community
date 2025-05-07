@@ -910,5 +910,6 @@
 	"forceLocalLogin": "Tvinga lokal inloggning",
 	"forceLocalLoginHelpText": "Tvinga användaren att använda lokal inloggning (denna parameter ignoreras om SSO är inaktiverat eller tvingat).",
 	"forceSSOLogin": "Tvinga SSO-inloggning",
-	"forceSSOLoginHelpText": "Tvinga alla användare att logga in med SSO, att använda denna parameter kommer att radera lösenord för alla användare."
+	"forceSSOLoginHelpText": "Tvinga alla användare att logga in med SSO, att använda denna parameter kommer att radera lösenord för alla användare.",
+	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent"
 }

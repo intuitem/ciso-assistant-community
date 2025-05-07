@@ -1203,5 +1203,6 @@
 	"forceLocalLogin": "Tving lokal login",
 	"forceLocalLoginHelpText": "Tving brugeren til at bruge lokal login (denne parameter ignoreres, hvis SSO er deaktiveret eller tvunget).",
 	"forceSSOLogin": "Tving SSO-login",
-	"forceSSOLoginHelpText": "Tving alle brugere til at logge ind med SSO, brug af denne parameter vil slette adgangskoder for alle brugere."
+	"forceSSOLoginHelpText": "Tving alle brugere til at logge ind med SSO, brug af denne parameter vil slette adgangskoder for alle brugere.",
+	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet"
 }

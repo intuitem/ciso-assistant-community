@@ -8,9 +8,9 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
-from django.db.models import F, Count, Avg, Q, ExpressionWrapper, FloatField
+from dateutil import relativedelta
+from django.db.models import F, Count, Q, ExpressionWrapper, FloatField
 from collections import defaultdict
-from django_filters.filterset import filterset_factory
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -91,7 +91,10 @@ from core.utils import (
     RoleCodename,
     UserGroupCodename,
     compare_schema_versions,
+    _generate_occurrences,
+    _create_task_dict,
 )
+from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -441,7 +444,8 @@ class ThreatViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
-        return Response({"results": threats_count_per_name(request.user)})
+        folder_id = request.query_params.get("folder", None)
+        return Response({"results": threats_count_per_name(request.user, folder_id)})
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -812,7 +816,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
     ]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1103,11 +1107,21 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             context = RiskScenario.objects.filter(
                 risk_assessment=risk_assessment
             ).order_by("ref_id")
+            general_settings = GlobalSettings.objects.filter(name="general").first()
+            swap_axes = general_settings.value.get("risk_matrix_swap_axes", False)
+            flip_vertical = general_settings.value.get(
+                "risk_matrix_flip_vertical", False
+            )
+            matrix_settings = {
+                "swap_axes": "_swapaxes" if swap_axes else "",
+                "flip_vertical": "_vflip" if flip_vertical else "",
+            }
             data = {
                 "context": context,
                 "risk_assessment": risk_assessment,
                 "ri_clusters": build_scenario_clusters(risk_assessment),
                 "risk_matrix": risk_assessment.risk_matrix,
+                "settings": matrix_settings,
             }
             html = render_to_string("core/ra_pdf.html", data)
             pdf_file = HTML(string=html).write_pdf()
@@ -1310,7 +1324,8 @@ class AppliedControlFilterSet(df.FilterSet):
             "security_exceptions": ["exact"],
             "owner": ["exact"],
             "findings": ["exact"],
-            "eta": ["exact", "lte", "gte", "lt", "gt"],
+            "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+            "ref_id": ["exact"],
         }
 
 
@@ -1321,7 +1336,7 @@ class AppliedControlViewSet(BaseModelViewSet):
 
     model = AppliedControl
     filterset_class = AppliedControlFilterSet
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -1597,6 +1612,43 @@ class AppliedControlViewSet(BaseModelViewSet):
         return Response(data)
 
     @action(detail=False, methods=["get"])
+    def get_gantt_data(self, request):
+        def format_date(input):
+            return datetime.strftime(input, "%Y-%m-%d")
+
+        entries = []
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+
+        applied_controls = AppliedControl.objects.filter(
+            id__in=viewable_controls_ids
+        ).select_related("folder")
+
+        for ac in applied_controls:
+            if ac.eta:
+                endDate = format_date(ac.eta)
+                startDate = format_date(ac.start_date) if ac.start_date else endDate
+                if ac.start_date:
+                    startDate = format_date(ac.start_date)
+                else:
+                    startDate = format_date(ac.eta - timedelta(days=1))
+                entries.append(
+                    {
+                        "id": ac.id,
+                        "start": startDate,
+                        "end": endDate,
+                        "name": ac.name,
+                        "progress": ac.progress_field,
+                        "description": ac.description
+                        if ac.description
+                        else "(no description)",
+                        "domain": ac.folder.name,
+                    }
+                )
+        return Response(entries)
+
+    @action(detail=False, methods=["get"])
     def get_timeline_info(self, request):
         entries = []
         COLORS_PALETTE = [
@@ -1795,7 +1847,30 @@ class AppliedControlViewSet(BaseModelViewSet):
 
 
 class ComplianceAssessmentActionPlanList(generics.ListAPIView):
-    filterset_fields = ["reference_control"]
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "category": ["exact"],
+        "csf_function": ["exact"],
+        "priority": ["exact"],
+        "reference_control": ["exact"],
+        "effort": ["exact"],
+        "control_impact": ["exact"],
+        "cost": ["exact"],
+        "filtering_labels": ["exact"],
+        "risk_scenarios": ["exact"],
+        "risk_scenarios_e": ["exact"],
+        "requirement_assessments": ["exact"],
+        "evidences": ["exact"],
+        "assets": ["exact"],
+        "stakeholders": ["exact"],
+        "progress_field": ["exact"],
+        "security_exceptions": ["exact"],
+        "owner": ["exact"],
+        "findings": ["exact"],
+        "eta": ["exact", "lte", "gte", "lt", "gt"],
+    }
+
     serializer_class = ComplianceAssessmentActionPlanSerializer
     filter_backends = [
         DjangoFilterBackend,
@@ -1834,7 +1909,7 @@ class PolicyViewSet(AppliedControlViewSet):
         "requirement_assessments",
         "evidences",
     ]
-    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
@@ -1865,6 +1940,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "security_exceptions",
     ]
     ordering = ["ref_id"]
+    search_fields = ["name", "description", "ref_id"]
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get(
@@ -1940,7 +2016,10 @@ class RiskScenarioViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get risk count per level")
     def count_per_level(self, request):
-        return Response({"results": risks_count_per_level(request.user)})
+        folder_id = request.query_params.get("folder", None)
+        return Response(
+            {"results": risks_count_per_level(request.user, None, folder_id)}
+        )
 
     @action(detail=False, name="Get risk scenarios count per status")
     def per_status(self, request):
@@ -1983,7 +2062,13 @@ class RiskAcceptanceFilterSet(df.FilterSet):
 
     class Meta:
         model = RiskAcceptance
-        fields = ["folder", "state", "approver", "risk_scenarios", "to_review"]
+        fields = {
+            "folder": ["exact"],
+            "state": ["exact"],
+            "approver": ["exact"],
+            "risk_scenarios": ["exact"],
+            "expiry_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+        }
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
@@ -2189,6 +2274,27 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+class UserGroupOrderingFilter(filters.OrderingFilter):
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+
+        # Replace 'localization_dict' with 'folder'
+        mapped_ordering = []
+        for field in ordering:
+            if field.lstrip("-") == "localization_dict":
+                is_desc = field.startswith("-")
+                mapped_field = "folder"
+                if is_desc:
+                    mapped_field = "-" + mapped_field
+                mapped_ordering.append(mapped_field)
+            else:
+                mapped_ordering.append(field)
+
+        return mapped_ordering
+
+
 class UserGroupViewSet(BaseModelViewSet):
     """
     API endpoint that allows user groups to be viewed or edited
@@ -2196,7 +2302,16 @@ class UserGroupViewSet(BaseModelViewSet):
 
     model = UserGroup
     ordering = ["builtin", "name"]
+    ordering_fields = ["localization_dict"]
     filterset_fields = ["folder"]
+    search_fields = [
+        "folder__name"
+    ]  # temporary hack, filters only by folder name, not role name
+    filter_backends = [
+        DjangoFilterBackend,
+        UserGroupOrderingFilter,
+        filters.SearchFilter,
+    ]
 
 
 class RoleViewSet(BaseModelViewSet):
@@ -2254,52 +2369,7 @@ class FolderViewSet(BaseModelViewSet):
         """
         serializer.save()
         folder = Folder.objects.get(id=serializer.data["id"])
-        if folder.content_type == Folder.ContentType.DOMAIN:
-            readers = UserGroup.objects.create(
-                name=UserGroupCodename.READER, folder=folder, builtin=True
-            )
-            approvers = UserGroup.objects.create(
-                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
-            )
-            analysts = UserGroup.objects.create(
-                name=UserGroupCodename.ANALYST, folder=folder, builtin=True
-            )
-            managers = UserGroup.objects.create(
-                name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True
-            )
-            ra1 = RoleAssignment.objects.create(
-                user_group=readers,
-                role=Role.objects.get(name=RoleCodename.READER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra1.perimeter_folders.add(folder)
-            ra2 = RoleAssignment.objects.create(
-                user_group=approvers,
-                role=Role.objects.get(name=RoleCodename.APPROVER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra2.perimeter_folders.add(folder)
-            ra3 = RoleAssignment.objects.create(
-                user_group=analysts,
-                role=Role.objects.get(name=RoleCodename.ANALYST),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra3.perimeter_folders.add(folder)
-            ra4 = RoleAssignment.objects.create(
-                user_group=managers,
-                role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra4.perimeter_folders.add(folder)
-            # Clear the cache after a new folder is created - purposely clearing everything
+        Folder.create_default_ug_and_ra(folder)
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -2312,8 +2382,12 @@ class FolderViewSet(BaseModelViewSet):
         """
         Returns the tree of domains and perimeters
         """
-        tree = {"name": "Global", "children": []}
+        # Get include_perimeters parameter from query params, default to True if not provided
+        include_perimeters = request.query_params.get(
+            "include_perimeters", "True"
+        ).lower() in ["true", "1", "yes"]
 
+        tree = {"name": "Global", "children": []}
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
@@ -2325,10 +2399,18 @@ class FolderViewSet(BaseModelViewSet):
             .filter(id__in=viewable_objects, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
-            entry = {"name": folder.name, "children": get_folder_content(folder)}
+            entry = {
+                "name": folder.name,
+                "symbol": "roundRect",
+                "uuid": folder.id,
+            }
+            folder_content = get_folder_content(
+                folder, include_perimeters=include_perimeters
+            )
+            if len(folder_content) > 0:
+                entry.update({"children": folder_content})
             folders_list.append(entry)
         tree.update({"children": folders_list})
-
         return Response(tree)
 
     @action(detail=False, methods=["get"])
@@ -2762,6 +2844,7 @@ class FolderViewSet(BaseModelViewSet):
                     name=domain_name, content_type=Folder.ContentType.DOMAIN
                 )
                 link_dump_database_ids["base_folder"] = base_folder
+                Folder.create_default_ug_and_ra(base_folder)
 
                 # Check for missing libraries after folder creation
                 for library in required_libraries:
@@ -3368,7 +3451,8 @@ def get_metrics_view(request):
     """
     API endpoint that returns the counters
     """
-    return Response({"results": get_metrics(request.user)})
+    folder_id = request.query_params.get("folder", None)
+    return Response({"results": get_metrics(request.user, folder_id)})
 
 
 # TODO: Add all the proper docstrings for the following list of functions
@@ -3822,7 +3906,6 @@ class EvidenceViewSet(BaseModelViewSet):
         "timeline_entries",
         "filtering_labels",
     ]
-    search_fields = ["name"]
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
@@ -3934,6 +4017,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "assets",
     ]
     search_fields = ["name", "description", "ref_id"]
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        ordering = request.query_params.get("ordering", "")
+        ordering_fields = [field.strip() for field in ordering.split(",") if field]
+
+        if any(field.lstrip("-") == "progress" for field in ordering_fields):
+            reverse = ordering_fields[0].startswith("-")  # use only first 'progress'
+            results = sorted(
+                response.data["results"],  # assumes paginated response
+                key=lambda x: x.get("progress", 0),
+                reverse=reverse,
+            )
+            response.data["results"] = results
+
+        return response
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -4427,6 +4527,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="syncToActions",
+    )
+    def sync_to_applied_controls(self, request, pk):
+        dry_run = request.query_params.get("dry_run", True)
+        if dry_run == "false":
+            dry_run = False
+        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_requirementassessment"),
+            folder=compliance_assessment.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        changes = compliance_assessment.sync_to_applied_controls(dry_run=dry_run)
+        return Response({"changes": changes})
+
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
         try:
@@ -4460,6 +4581,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         self.check_object_permissions(request, compliance_assessment)
 
         threat_metrics = compliance_assessment.get_threats_metrics()
+        print(threat_metrics)
         if threat_metrics.get("total_unique_threats") == 0:
             return Response(threat_metrics, status=status.HTTP_200_OK)
         children = []
@@ -4474,7 +4596,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 }
             )
         tree = {"name": "Threats", "children": children}
-        threat_metrics.update({"tree": tree})
+        nodes = []
+        for th in threat_metrics["threats"]:
+            nodes.append(
+                {
+                    "name": th["name"],
+                    "value": len(th["requirement_assessments"]),
+                    "items": [
+                        f"{ra['requirement_name']} ({ra['result']})"
+                        for ra in th["requirement_assessments"]
+                    ],
+                }
+            )
+        threat_metrics.update({"tree": tree, "graph": {"nodes": nodes}})
 
         return Response(threat_metrics, status=status.HTTP_200_OK)
 
@@ -4487,10 +4621,14 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     model = RequirementAssessment
     filterset_fields = [
         "folder",
+        "folder__name",
         "evidences",
         "compliance_assessment",
         "applied_controls",
         "security_exceptions",
+        "requirement__ref_id",
+        "compliance_assessment__ref_id",
+        "compliance_assessment__assets__ref_id",
     ]
     search_fields = ["requirement__name", "requirement__description"]
 
@@ -4908,6 +5046,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     model = SecurityException
     filterset_fields = ["requirement_assessments", "risk_scenarios"]
+    search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
@@ -4928,6 +5067,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
     ]
+    search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -5041,6 +5181,7 @@ class FindingViewSet(BaseModelViewSet):
 
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
+    search_fields = ["name", "description", "ref_id"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5101,3 +5242,179 @@ class TimelineEntryViewSet(BaseModelViewSet):
         ]:
             raise ValidationError({"error": "cannotDeleteAutoTimelineEntry"})
         return super().perform_destroy(instance)
+
+
+class TaskTemplateViewSet(BaseModelViewSet):
+    model = TaskTemplate
+
+    def task_calendar(self, task_templates, start=None, end=None):
+        """Generate calendar of tasks for the given templates."""
+        tasks_list = []
+        for template in task_templates:
+            if not template.is_recurrent:
+                tasks_list.append(_create_task_dict(template, template.task_date))
+                continue
+
+            start_date_param = start or template.task_date or datetime.now().date()
+            end_date_param = end or template.schedule.get("end_date")
+
+            if not end_date_param:
+                start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
+                end_date_param = (start_date + rd.relativedelta(months=1)).strftime(
+                    "%Y-%m-%d"
+                )
+
+            try:
+                start_date = datetime.strptime(str(start_date_param), "%Y-%m-%d").date()
+                end_date = datetime.strptime(str(end_date_param), "%Y-%m-%d").date()
+            except ValueError:
+                return {"error": "Invalid date format. Use YYYY-MM-DD"}
+
+            tasks = _generate_occurrences(template, start_date, end_date)
+            tasks_list.extend(tasks)
+
+        processed_tasks_identifiers = set()  # Track tasks we've already processed
+
+        # Sort tasks by due date
+        sorted_tasks = sorted(tasks_list, key=lambda x: x["due_date"])
+
+        # Process all past tasks and next 10 upcoming tasks
+        current_date = datetime.now().date()
+
+        # First separate past and future tasks
+        past_tasks = [task for task in sorted_tasks if task["due_date"] <= current_date]
+        next_tasks = [task for task in sorted_tasks if task["due_date"] > current_date]
+
+        # Combined list of tasks to process (past and next 10)
+        tasks_to_process = past_tasks + next_tasks
+
+        # Directly modify tasks in the original tasks_list
+        for i in range(len(tasks_list)):
+            task = tasks_list[i]
+            task_date = task["due_date"]
+            task_template_id = task["task_template"]
+
+            # Create a unique identifier for this task to avoid duplication
+            task_identifier = (task_template_id, task_date)
+
+            # Skip if we've already processed this task
+            if task_identifier in processed_tasks_identifiers:
+                continue
+
+            # Check if this task should be processed (is in past or next 10)
+            if task in tasks_to_process:
+                processed_tasks_identifiers.add(task_identifier)
+
+                # Get or create the TaskNode
+                task_template = TaskTemplate.objects.get(id=task_template_id)
+                task_node, created = TaskNode.objects.get_or_create(
+                    task_template=task_template,
+                    due_date=task_date,
+                    defaults={
+                        "status": "pending",
+                        "folder": task_template.folder,
+                    },
+                )
+                task_node.to_delete = False
+                task_node.save(update_fields=["to_delete"])
+                # Replace the task dictionary with the actual TaskNode in the original list
+                tasks_list[i] = TaskNodeReadSerializer(task_node).data
+
+        return tasks_list
+
+    def _sync_task_nodes(self, task_template: TaskTemplate):
+        if task_template.is_recurrent:
+            with transaction.atomic():
+                # Soft-delete all existing TaskNode instances associated with this TaskTemplate
+                TaskNode.objects.filter(task_template=task_template).update(
+                    to_delete=True
+                )
+                # Determine the end date based on the frequency
+                start_date = task_template.task_date
+                if task_template.is_recurrent:
+                    if task_template.schedule["frequency"] == "DAILY":
+                        delta = rd.relativedelta(months=2)
+                    elif task_template.schedule["frequency"] == "WEEKLY":
+                        delta = rd.relativedelta(months=4)
+                    elif task_template.schedule["frequency"] == "MONTHLY":
+                        delta = rd.relativedelta(years=1)
+                    elif task_template.schedule["frequency"] == "YEARLY":
+                        delta = rd.relativedelta(years=5)
+
+                    end_date_param = task_template.schedule.get("end_date")
+                    if end_date_param:
+                        end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
+                    else:
+                        end_date = datetime.now().date() + delta
+                    # Ensure end_date is not before the calculated delta
+                    if end_date < datetime.now().date() + delta:
+                        end_date = datetime.now().date() + delta
+                else:
+                    end_date = start_date
+                # Generate the task nodes
+                self.task_calendar(
+                    task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                    start=start_date,
+                    end=end_date,
+                )
+
+                # garbage-collect
+                TaskNode.objects.filter(to_delete=True).delete()
+
+    @action(
+        detail=False,
+        name="Get tasks for the calendar",
+        url_path="calendar/(?P<start>.+)/(?P<end>.+)",
+    )
+    def calendar(
+        self,
+        request,
+        start=None,
+        end=None,
+    ):
+        if start is None:
+            start = timezone.now().date()
+        if end is None:
+            end = timezone.now().date() + relativedelta.relativedelta(months=1)
+        return Response(
+            self.task_calendar(
+                task_templates=TaskTemplate.objects.filter(enabled=True),
+                start=start,
+                end=end,
+            )
+        )
+
+    def perform_update(self, serializer):
+        task_template = serializer.save()
+        self._sync_task_nodes(task_template)
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        self._sync_task_nodes(serializer.instance)
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk):
+        serializer_class = self.get_serializer_class(action="update")
+        self._sync_task_nodes(
+            self.get_object()
+        )  # Synchronize task nodes when fetching a task template
+        return Response(serializer_class(super().get_object()).data)
+
+    @action(detail=False, name="Get Task Node status choices")
+    def status(srlf, request):
+        return Response(dict(TaskNode.TASK_STATUS_CHOICES))
+
+
+class TaskNodeViewSet(BaseModelViewSet):
+    model = TaskNode
+    filterset_fields = ["status", "task_template"]
+    ordering = ["due_date"]
+
+    @action(detail=False, name="Get Task Node status choices")
+    def status(srlf, request):
+        return Response(dict(TaskNode.TASK_STATUS_CHOICES))
+
+    def perform_create(self, serializer):
+        instance: TaskNode = serializer.save()
+        instance.save()
+        return super().perform_create(serializer)

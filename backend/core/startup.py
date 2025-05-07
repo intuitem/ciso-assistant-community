@@ -52,6 +52,8 @@ READER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "view_incident",
     "view_timelineentry",
+    "view_tasknode",
+    "view_tasktemplate",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -93,6 +95,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "view_incident",
     "view_timelineentry",
+    "view_tasknode",
+    "view_tasktemplate",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -220,6 +224,14 @@ ANALYST_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # tasks
+    "add_tasktemplate",
+    "view_tasktemplate",
+    "change_tasktemplate",
+    "delete_tasktemplate",
+    "view_tasknode",
+    "change_tasknode",
+    "delete_tasknode",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -355,6 +367,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # tasks
+    "add_tasktemplate",
+    "view_tasktemplate",
+    "change_tasktemplate",
+    "delete_tasktemplate",
+    "view_tasknode",
+    "change_tasknode",
+    "delete_tasknode",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -552,6 +572,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # tasks,
+    "add_tasktemplate",
+    "view_tasktemplate",
+    "change_tasktemplate",
+    "delete_tasktemplate",
+    "view_tasknode",
+    "change_tasknode",
+    "delete_tasknode",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -578,6 +606,7 @@ def startup(sender: AppConfig, **kwargs):
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
+    from global_settings.models import GlobalSettings
 
     print("startup handler: initialize database")
 
@@ -727,6 +756,36 @@ def startup(sender: AppConfig, **kwargs):
     )
     for u in User.objects.filter(is_superuser=True):
         u.user_groups.add(administrators)
+
+    # reset global setings in case of an issue
+    default_settings = {
+        "security_objective_scale": "1-4",
+        "ebios_radar_max": 6,
+        "ebios_radar_green_zone_radius": 0.2,
+        "ebios_radar_yellow_zone_radius": 0.9,
+        "ebios_radar_red_zone_radius": 2.5,
+        "notifications_enable_mailing": False,
+        "interface_agg_scenario_matrix": False,
+    }
+    try:
+        settings, _ = GlobalSettings.objects.get_or_create(name="general")
+        current_value = settings.value or {}
+
+        ebios_radar_max = current_value.get("ebios_radar_max")
+
+        if ebios_radar_max is None or ebios_radar_max == 0:
+            # This cannot be None or 0, revert to default values
+            logger.warning(
+                "ebios radar settings are invalid (None or 0). Reverting to default settings."
+            )
+            updated_value = {**current_value, **default_settings}
+            settings.value = updated_value
+            settings.save()
+            logger.info(
+                "Global settings have been reset to defaults due to invalid ebios_radar_max."
+            )
+    except Exception as e:
+        logger.error(f"Failed to reset global settings: {e}")
 
 
 class CoreConfig(AppConfig):

@@ -1104,5 +1104,7 @@
 	"forceLocalLogin": "Paksa login lokal",
 	"forceLocalLoginHelpText": "Paksa pengguna untuk menggunakan login lokal (parameter ini diabaikan jika SSO dinonaktifkan atau dipaksakan).",
 	"forceSSOLogin": "Paksa login SSO",
-	"forceSSOLoginHelpText": "Paksa semua pengguna untuk masuk menggunakan SSO, menggunakan parameter ini akan menghapus kata sandi untuk semua pengguna."
+	"forceSSOLoginHelpText": "Paksa semua pengguna untuk masuk menggunakan SSO, menggunakan parameter ini akan menghapus kata sandi untuk semua pengguna.",
+	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini.",
+	"taskScheduleWarning": "Apa pun tugas yang tidak menjadi bagian dari jadwal baru akan dihapus secara permanen"
 }

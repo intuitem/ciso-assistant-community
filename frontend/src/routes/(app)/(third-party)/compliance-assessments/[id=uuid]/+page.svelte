@@ -80,7 +80,7 @@
 		if (dialogElement) dialogElement.close();
 	}
 
-	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -247,7 +247,54 @@
 		};
 		modalStore.trigger(modal);
 	}
-
+	let syncingToActionsIsLoading = false;
+	async function modalConfirmSyncToActions(
+		id: string,
+		name: string,
+		action: string
+	): Promise<void> {
+		const requirementAssessmentsSync = await fetch(
+			`/compliance-assessments/${$page.params.id}/sync-to-actions`,
+			{ method: 'POST' }
+		).then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error('Failed to fetch requirement assessments sync data');
+			}
+		});
+		console.log(requirementAssessmentsSync);
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: data.form,
+				id: id,
+				debug: false,
+				URLModel: 'compliance-assessments',
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: Object.values(requirementAssessmentsSync.changes).map(
+						(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
+					), //feed this
+					message: m.theFollowingChangesWillBeApplied()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.syncToAppliedControls(),
+			body: m.syncToAppliedControlsMessage({
+				count: data.compliance_assessment.framework.reference_controls.length //change this
+			}),
+			response: (r: boolean) => {
+				syncingToActionsIsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
+	}
 	let createAppliedControlsLoading = false;
 
 	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
@@ -281,7 +328,11 @@
 		modalStore.trigger(modal);
 	}
 
-	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
+	$: if (syncingToActionsIsLoading === true && (form || form?.error))
+		syncingToActionsIsLoading = false;
+	$: if (createAppliedControlsLoading === true && (form || form?.error))
+		createAppliedControlsLoading = false;
+	$: if (form?.message?.requirementAssessmentsSync) console.log(form);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -439,31 +490,52 @@
 					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
 				>
 			{/if}
-			<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
+			<span class="pt-4 text-sm">{m.powerUps()}</span>
 			{#if !$page.data.user.is_third_party}
 				<Anchor
 					breadcrumbAction="push"
 					href={`${$page.url.pathname}/flash-mode`}
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
+					class="btn text-gray-100 bg-gradient-to-r from-indigo-500 to-violet-500 h-fit"
 					><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</Anchor
 				>
 			{/if}
 			<Anchor
 				breadcrumbAction="push"
 				href={`${$page.url.pathname}/table-mode`}
-				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-yellow-500 h-fit"
+				class="btn text-gray-100 bg-gradient-to-r from-blue-500 to-sky-500 h-fit"
 				><i class="fa-solid fa-table-list mr-2" /> {m.tableMode()}</Anchor
 			>
 			{#if !$page.data.user.is_third_party}
 				<button
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
+					class="btn text-gray-100 bg-gradient-to-r from-teal-500 to-emerald-500 h-fit"
 					on:click={() => modalCreateForm()}
 					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
 				</button>
 			{/if}
+
+			<button
+				class="btn text-gray-100 bg-gradient-to-r from-cyan-500 to-blue-500 h-fit"
+				on:click={async () => {
+					await modalConfirmSyncToActions(
+						data.compliance_assessment.id,
+						data.compliance_assessment.name,
+						'?/syncToActions'
+					);
+				}}
+			>
+				<span class="mr-2">
+					{#if syncingToActionsIsLoading}
+						<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+					{:else}
+						<i class="fa-solid fa-arrows-rotate mr-2"></i>
+					{/if}
+				</span>
+				{m.syncToAppliedControls()}
+			</button>
+
 			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
-					class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+					class="btn text-gray-100 bg-gradient-to-r from-purple-500 to-fuchsia-500 h-fit"
 					on:click={() => {
 						modalConfirmCreateSuggestedControls(
 							data.compliance_assessment.id,
@@ -476,7 +548,7 @@
 						{#if createAppliedControlsLoading}
 							<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
 						{:else}
-							<i class="fa-solid fa-fire-extinguisher" />
+							<i class="fa-solid fa-wand-magic-sparkles"></i>
 						{/if}
 					</span>
 					{m.suggestControls()}
@@ -484,7 +556,7 @@
 			{/if}
 			{#if has_threats}
 				<button
-					class="border rounded-lg btn h-fit bg-gradient-to-r from-yellow-500 to-yellow-300 px-3 py-2"
+					class="btn text-gray-100 bg-gradient-to-r from-amber-500 to-orange-500 h-fit"
 					on:click={openThreatsDialog}
 				>
 					<div class="flex items-center space-x-2">
@@ -589,7 +661,7 @@
 		</div>
 
 		<div class="threats-content">
-			<TreeChart tree={data.threats.tree} name="threats_tree" height="h-[600px]" />
+			<ForceCirclePacking data={data.threats.graph} name="threats_graph" height="h-[600px]" />
 		</div>
 	</dialog>
 {/if}

@@ -912,5 +912,7 @@
 	"forceLocalLogin": "Forțează autentificarea locală",
 	"forceLocalLoginHelpText": "Forțează utilizatorul să folosească autentificarea locală (acest parametru este ignorat dacă SSO este dezactivat sau forțat).",
 	"forceSSOLogin": "Forțează autentificarea SSO",
-	"forceSSOLoginHelpText": "Forțează toți utilizatorii să se autentifice folosind SSO, utilizarea acestui parametru va șterge parolele pentru toți utilizatorii."
+	"forceSSOLoginHelpText": "Forțează toți utilizatorii să se autentifice folosind SSO, utilizarea acestui parametru va șterge parolele pentru toți utilizatorii.",
+	"youCanSetPasswordHere": "Puteți seta parola dvs. aici.",
+	"taskScheduleWarning": "Orice sarcini care nu fac parte din noul program vor fi șterse definitiv"
 }

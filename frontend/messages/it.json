@@ -1294,5 +1294,6 @@
 	"forceLocalLogin": "Forza il login locale",
 	"forceLocalLoginHelpText": "Forza l'utente a utilizzare il login locale (questo parametro viene ignorato se il SSO è disattivato o forzato).",
 	"forceSSOLogin": "Forza il login SSO",
-	"forceSSOLoginHelpText": "Forza tutti gli utenti ad accedere utilizzando il SSO, l'utilizzo di questo parametro cancellerà le password per tutti gli utenti."
+	"forceSSOLoginHelpText": "Forza tutti gli utenti ad accedere utilizzando il SSO, l'utilizzo di questo parametro cancellerà le password per tutti gli utenti.",
+	"taskScheduleWarning": "Qualsiasi attività che non fa parte del nuovo programma verrà eliminata in modo permanente"
 }

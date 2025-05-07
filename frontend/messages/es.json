@@ -920,5 +920,7 @@
 	"forceLocalLogin": "Fuerza el inicio de sesión local",
 	"forceLocalLoginHelpText": "Fuerza al usuario a usar el inicio de sesión local (este parámetro se ignora si el SSO está deshabilitado o forzado).",
 	"forceSSOLogin": "Fuerza el inicio de sesión SSO",
-	"forceSSOLoginHelpText": "Fuerza a todos los usuarios a iniciar sesión usando SSO, usar este parámetro borrará las contraseñas de todos los usuarios."
+	"forceSSOLoginHelpText": "Fuerza a todos los usuarios a iniciar sesión usando SSO, usar este parámetro borrará las contraseñas de todos los usuarios.",
+	"youCanSetPasswordHere": "Puede establecer su contraseña aquí.",
+	"taskScheduleWarning": "Si alguna tarea se encuentra fuera de la nueva programación, se eliminará permanentemente"
 }

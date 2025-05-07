@@ -1,149 +1,257 @@
 <script lang="ts">
-	import { buildRiskMatrix } from './utils';
 	import Cell from './Cell.svelte';
+	import { buildRiskMatrix, reverseCols, reverseRows, transpose } from './utils';
 
-	import * as m from '../../../paraglide/messages';
-	import type { ComponentType } from 'svelte';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { page } from '$app/stores';
 	import { isDark } from '$lib/utils/helpers';
+	import { m } from '$paraglide/messages';
+	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import type { ComponentType } from 'svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
+	// --- Props ---
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
-	export let matrixName; // used to differentiate bubbles tooltip names
+	export let matrixName: string; // used to differentiate bubbles tooltip names
+	export let showRisks = false;
+	export let useBubbles = false;
+	export let data: Array<Array<any>> | undefined = undefined; // Ensure data is typed correctly
+	export let dataItemComponent: ComponentType | undefined = undefined;
+
+	// Axis configuration props
+	export let swapAxes: boolean = $page.data.settings.risk_matrix_swap_axes ?? false; // Probability on X, Impact on Y if true
+	export let flipVertical: boolean = $page.data.settings.risk_matrix_flip_vertical ?? false; // Origin top-left for Y-axis if true
+	export let labelStandard: string = $page.data.settings.risk_matrix_labels ?? 'ISO';
+
+	$: console.log($page.data.settings);
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
 	const grid = parsedRiskMatrix.grid;
 	const risk = parsedRiskMatrix.risk;
-	export let showRisks = false;
-	export let useBubbles = false;
+	const originalProbabilities = parsedRiskMatrix.probability;
+	const originalImpacts = parsedRiskMatrix.impact;
 
-	const displayedRiskMatrix = buildRiskMatrix(grid, risk);
-	export let data: Array<any> | undefined = undefined;
-	export let dataItemComponent: ComponentType | undefined = undefined;
-	// reverse data array to display it in the right order
-	let displayedData: typeof data;
-	if (data) {
-		displayedData = data.some((e) => e.length > 0) ? data.slice().reverse() : undefined;
-	}
-	let popupHover: PopupSettings[][] = [];
-	popupHover[0] = [];
-	for (let i = 0; i < parsedRiskMatrix.impact.length; i++) {
-		popupHover[0].push({
+	let yAxisLabel: string;
+	let xAxisLabel: string;
+	let yAxisHeaders: typeof originalProbabilities | typeof originalImpacts;
+	let xAxisHeaders: typeof originalImpacts | typeof originalProbabilities;
+	let finalMatrix: ReturnType<typeof buildRiskMatrix>;
+	let finalData: typeof data | undefined;
+	let popupHoverY: PopupSettings[] = [];
+	let popupHoverX: PopupSettings[] = [];
+
+	$: {
+		// Determine base axis types
+		const yAxisType = swapAxes ? 'impact' : 'probability';
+		const xAxisType = swapAxes ? 'probability' : 'impact';
+
+		// Generate the full translation keys with the standard
+		yAxisLabel = safeTranslate(`${yAxisType}${labelStandard}`);
+		xAxisLabel = safeTranslate(`${xAxisType}${labelStandard}`);
+
+		// Headers assignment remains the same
+		yAxisHeaders = swapAxes ? originalImpacts : originalProbabilities;
+		xAxisHeaders = swapAxes ? originalProbabilities : originalImpacts;
+
+		// Build the initial matrix (always built as prob (Y) vs impact (X))
+		let baseMatrix = buildRiskMatrix(grid, risk);
+		let baseData = data
+			? data.some((row) => row && row.length > 0)
+				? data
+				: undefined
+			: undefined;
+
+		// Swap axes if needed
+		if (swapAxes) {
+			baseMatrix = transpose(baseMatrix);
+			if (baseData) {
+				baseData = transpose(baseData);
+			}
+		}
+
+		// Flip vertically if needed
+		if (flipVertical) {
+			yAxisHeaders = yAxisHeaders.slice().reverse();
+			baseMatrix = reverseRows(baseMatrix);
+			if (baseData) {
+				baseData = reverseRows(baseData);
+			}
+		}
+
+		// Assign final derived values
+		finalMatrix = baseMatrix;
+		finalData = baseData ? (swapAxes ? reverseCols(baseData) : reverseRows(baseData)) : []; // Ensure data is in the correct orientation
+
+		// Recalculate popup settings based on final headers
+		popupHoverY = yAxisHeaders.map((_, i) => ({
 			event: 'hover',
-			target: 'popup' + 'impact' + i,
-			placement: 'bottom'
-		});
-	}
-	popupHover[1] = [];
-	for (let i = 0; i < parsedRiskMatrix.probability.length; i++) {
-		popupHover[1].push({
+			target: `popup-${matrixName}-y-${i}`,
+			placement: swapAxes ? 'right' : 'bottom' // Adjust placement based on orientation
+		}));
+
+		popupHoverX = xAxisHeaders.map((_, i) => ({
 			event: 'hover',
-			target: 'popup' + 'probability' + i,
+			target: `popup-${matrixName}-x-${i}`,
 			placement: 'bottom'
-		});
+		}));
 	}
 
-	$: classesCellText = (backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+	$: classesCellText = (backgroundHexColor: string | undefined | null): string => {
+		if (!backgroundHexColor) return '';
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-black';
 	};
 </script>
 
 <div class="flex flex-row items-center">
-	<div class="flex font-semibold text-xl -rotate-90">{m.probability()}</div>
-	<div
-		class="{wrapperClass} grid gap-1 w-full"
-		style="grid-template-columns: repeat({displayedRiskMatrix[0].length + 1}, minmax(0, 1fr));"
-		data-testid="risk-matrix"
-	>
-		{#each displayedRiskMatrix as row, i}
-			{@const reverseIndex = displayedRiskMatrix.length - i - 1}
-			{@const probability = parsedRiskMatrix.probability[reverseIndex]}
-			<div
-				class="flex flex-col items-center h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center {classesCellText(
-					probability.hexcolor ?? '#FFFFFF'
-				)}"
-				style="background: {probability.hexcolor}"
-				data-testid="probability-row-header"
-			>
-				<div
-					class="card bg-black text-gray-200 p-4 z-20"
-					style="color: {probability.hexcolor}"
-					data-popup={'popup' + 'probability' + i}
-				>
-					<p data-testid="probability-description" class="font-semibold">
-						{probability.description}
-					</p>
-					<div class="arrow bg-black" />
-				</div>
-				<span class="font-semibold p-1" data-testid="probability-name">{probability.name}</span>
-				{#if probability.description}
-					<i class="fa-solid fa-circle-info [&>*]:pointer-events-none" use:popup={popupHover[1][i]}
-					></i>
-				{/if}
+	<div class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto">
+		{yAxisLabel}
+	</div>
+
+	<div class="flex flex-col w-full">
+		{#if flipVertical}
+			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
+				{xAxisLabel}
 			</div>
-			{#each row as cell, j}
-				{#if displayedData}
+		{/if}
+		<div
+			class="{wrapperClass} grid gap-1 w-full"
+			style="grid-template-columns: auto repeat({xAxisHeaders.length}, minmax(0, 1fr)); grid-template-rows: repeat({yAxisHeaders.length}, minmax(0, 1fr)) auto;"
+			data-testid="risk-matrix"
+		>
+			{#if flipVertical}
+				<div />
+
+				{#each xAxisHeaders as xHeader, j}
+					<div
+						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+							xHeader.hexcolor
+						)}"
+						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+						data-testid="x-axis-header-{j}"
+					>
+						<div
+							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+							data-popup={'popup-' + matrixName + '-x-' + j}
+						>
+							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
+							<div class="arrow bg-black" />
+						</div>
+						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+						{#if xHeader.description}
+							<i
+								class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
+								use:popup={popupHoverX[j]}
+							></i>
+						{/if}
+					</div>
+				{/each}
+			{/if}
+			{#each finalMatrix as row, i}
+				{@const yHeader = yAxisHeaders[finalMatrix.length - 1 - i]}
+				<div
+					class="flex flex-col items-center min-h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center p-1 {classesCellText(
+						yHeader.hexcolor
+					)}"
+					style="background: {yHeader.hexcolor ?? '#FFFFFF'}"
+					data-testid="y-axis-header-{i}"
+				>
+					<div
+						class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+						style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
+						data-popup={'popup-' + matrixName + '-y-' + i}
+					>
+						<p data-testid="y-header-description" class="font-semibold">
+							{yHeader.description}
+						</p>
+						<div class="arrow bg-black" />
+					</div>
+					<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
+					{#if yHeader.description}
+						<i
+							class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
+							use:popup={popupHoverY[i]}
+						></i>
+					{/if}
+				</div>
+
+				{#each row as cell, j}
 					<Cell
 						{cell}
-						cellData={displayedData[i][j]}
+						cellData={finalData ? finalData[i]?.[j] : undefined}
 						popupTarget={`popupdata-${matrixName}-${i}-${j}`}
 						{dataItemComponent}
 						{useBubbles}
 					/>
-				{:else}
-					<Cell {cell} {dataItemComponent} />
-				{/if}
+				{/each}
 			{/each}
-		{/each}
-		<div />
-		{#each parsedRiskMatrix.impact as impact, key}
-			<div
-				class="flex flex-col items-center justify-center bg-gray-200 h-20 border-dotted border-black border-2 text-center {classesCellText(
-					impact.hexcolor ?? '#FFFFFF'
-				)}"
-				style="background: {impact.hexcolor}"
-				data-testid="impact-col-header"
-			>
-				<div
-					class="card bg-black text-gray-200 p-4 z-20"
-					style="color: {impact.hexcolor}"
-					data-popup={'popup' + 'impact' + key}
-				>
-					<p data-testid="impact-description" class="font-semibold">{impact.description}</p>
-					<div class="arrow bg-black" />
-				</div>
-				<span class="font-semibold p-1" data-testid="impact-name">{impact.name}</span>
-				{#if impact.description}
-					<i
-						class="fa-solid fa-circle-info [&>*]:pointer-events-none"
-						use:popup={popupHover[0][key]}
-					></i>
-				{/if}
+
+			{#if !flipVertical}
+				<div />
+
+				{#each xAxisHeaders as xHeader, j}
+					<div
+						class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+							xHeader.hexcolor
+						)}"
+						style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+						data-testid="x-axis-header-{j}"
+					>
+						<div
+							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+							data-popup={'popup-' + matrixName + '-x-' + j}
+						>
+							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
+							<div class="arrow bg-black" />
+						</div>
+						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+						{#if xHeader.description}
+							<i
+								class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
+								use:popup={popupHoverX[j]}
+							></i>
+						{/if}
+					</div>
+				{/each}
+			{/if}
+		</div>
+		{#if !flipVertical}
+			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
+				{xAxisLabel}
 			</div>
-		{/each}
+		{/if}
 	</div>
 </div>
-<div class="flex font-semibold text-xl items-center justify-center p-2 pl-60">{m.impact()}</div>
+
 {#if showRisks}
-	<div class="w-full flex flex-col justify-start">
+	<div class="w-full flex flex-col justify-start mt-4">
 		<h3 class="flex font-semibold p-2 m-2 text-md">{m.riskLevels()}</h3>
 		<div class="flex justify-start mx-2">
-			<table class="w-3/4 border-separate">
-				{#each parsedRiskMatrix.risk as risk}
-					<tr class="col">
-						<td
-							class="w-16 text-center border-4 border-white p-2 font-semibold whitespace-nowrap {classesCellText(
-								risk.hexcolor
-							)}"
-							style="background-color: {risk.hexcolor}"
-						>
-							{risk.name}
-						</td>
-						<td class="col italic">
-							{risk.description}
-						</td>
+			<table class="w-auto border-separate" style="border-spacing: 0 4px;">
+				<thead>
+					<tr>
+						<th class="text-left pb-2 px-2 font-semibold">{m.level()}</th>
+						<th class="text-left pb-2 px-2 font-semibold">{m.description()}</th>
 					</tr>
-				{/each}
+				</thead>
+				<tbody>
+					{#each parsedRiskMatrix.risk as riskItem}
+						<tr class="col">
+							<td
+								class="w-auto text-center border-4 border-white p-2 font-semibold whitespace-nowrap rounded-l {classesCellText(
+									riskItem.hexcolor
+								)}"
+								style="background-color: {riskItem.hexcolor}"
+							>
+								{riskItem.name}
+							</td>
+							<td class="col italic pl-3 border-t-4 border-b-4 border-r-4 border-white rounded-r">
+								{riskItem.description}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
 			</table>
 		</div>
 	</div>

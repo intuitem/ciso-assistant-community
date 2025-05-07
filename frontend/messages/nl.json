@@ -916,5 +916,7 @@
 	"forceLocalLogin": "Forceer lokale login",
 	"forceLocalLoginHelpText": "Forceer de gebruiker om lokale login te gebruiken (deze parameter wordt genegeerd als SSO is uitgeschakeld of verplicht is).",
 	"forceSSOLogin": "Forceer SSO-login",
-	"forceSSOLoginHelpText": "Forceer alle gebruikers om in te loggen met SSO, het gebruik van deze parameter wist de wachtwoorden van alle gebruikers."
+	"forceSSOLoginHelpText": "Forceer alle gebruikers om in te loggen met SSO, het gebruik van deze parameter wist de wachtwoorden van alle gebruikers.",
+	"youCanSetPasswordHere": "Je kunt hier je wachtwoord instellen.",
+	"taskScheduleWarning": "Alle taken die niet deel uitmaken van het nieuwe schema zullen permanent worden verwijderd"
 }
