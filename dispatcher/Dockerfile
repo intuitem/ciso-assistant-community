@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /code
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y && rm -rf /var/lib/apt/lists/* \
   libyaml-cpp-dev
 
 RUN apt-get install -y --no-install-recommends curl ca-certificates
