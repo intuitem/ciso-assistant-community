@@ -561,6 +561,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'General settings',
 		selectFields: [{ field: 'security_objective_scale' }]
 	},
+	'feature-flags': {
+		name: 'featureFlags',
+		localName: 'featureFlags',
+		localNamePlural: 'featureFlags',
+		verboseName: 'Feature flag',
+		verboseNamePlural: 'Feature flags'
+	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
 		localName: 'requirementMappingSet',
