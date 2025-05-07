@@ -58,42 +58,38 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     BooleanField, mapping directly to keys within the 'value' dictionary.
     """
 
-    xrays = serializers.BooleanField(
-        source="value.xrays", required=False, default=False
-    )
+    xrays = serializers.BooleanField(source="value.xrays", required=False, default=True)
     incidents = serializers.BooleanField(
-        source="value.incidents", required=False, default=False
+        source="value.incidents", required=False, default=True
     )
-    tasks = serializers.BooleanField(
-        source="value.tasks", required=False, default=False
-    )
+    tasks = serializers.BooleanField(source="value.tasks", required=False, default=True)
     risk_acceptances = serializers.BooleanField(
-        source="value.risk_acceptances", required=False, default=False
+        source="value.risk_acceptances", required=False, default=True
     )
     exceptions = serializers.BooleanField(
-        source="value.exceptions", required=False, default=False
+        source="value.exceptions", required=False, default=True
     )
     follow_up = serializers.BooleanField(
-        source="value.follow_up", required=False, default=False
+        source="value.follow_up", required=False, default=True
     )
     ebiosrm = serializers.BooleanField(
-        source="value.ebiosrm", required=False, default=False
+        source="value.ebiosrm", required=False, default=True
     )
     scoring_assistant = serializers.BooleanField(
-        source="value.scoring_assistant", required=False, default=False
+        source="value.scoring_assistant", required=False, default=True
     )
     vulnerabilities = serializers.BooleanField(
-        source="value.vulnerabilities", required=False, default=False
+        source="value.vulnerabilities", required=False, default=True
     )
     compliance = serializers.BooleanField(
-        source="value.compliance", required=False, default=False
+        source="value.compliance", required=False, default=True
     )
-    tprm = serializers.BooleanField(source="value.tprm", required=False, default=False)
+    tprm = serializers.BooleanField(source="value.tprm", required=False, default=True)
     privacy = serializers.BooleanField(
-        source="value.privacy", required=False, default=False
+        source="value.privacy", required=False, default=True
     )
     experimental = serializers.BooleanField(
-        source="value.experimental", required=False, default=False
+        source="value.experimental", required=False, default=True
     )
 
     class Meta:
