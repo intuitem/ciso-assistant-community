@@ -223,6 +223,27 @@
 				})
 			: Object.hasOwn(user.permissions, `add_${model.name}`)
 		: false;
+	$: contextMenuCanEditObject =
+		(model
+			? $page.params.id
+				? canPerformAction({
+						user,
+						action: 'change',
+						model: model.name,
+						domain:
+							model.name === 'folder'
+								? contextMenuOpenRow?.meta.id
+								: (contextMenuOpenRow?.meta.folder?.id ??
+									contextMenuOpenRow?.meta.folder ??
+									user.root_folder_id)
+					})
+				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn);
+
+	$: contextMenuDisplayEdit =
+		contextMenuCanEditObject &&
+		URLModel &&
+		!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel);
 	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
 
 	$: classesHexBackgroundText = (backgroundHexColor: string) => {
@@ -450,34 +471,41 @@
 					</ContextMenu.Trigger>
 				{/each}
 			</tbody>
-			<ContextMenu.Content
-				class="z-50 w-full max-w-[229px] outline-none card bg-white px-1 py-1.5 shadow-md cursor-default"
-			>
-				{#if Object.hasOwn(contextMenuActions, URLModel)}
-					{#each contextMenuActions[URLModel] as action}
-						<svelte:component this={action.component} row={contextMenuOpenRow} {handler} {action} />
-					{/each}
-					<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
-				{/if}
-				{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
-					<ContextMenu.Item
-						class="flex h-10 select-none items-center rounded-sm py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-surface-50"
-					>
-						<Anchor
-							href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`}
-							class="flex items-cente w-full h-full cursor-default outline-none !ring-0 !ring-transparent"
-							>{m.edit()}</Anchor
+			{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
+				<ContextMenu.Content
+					class="z-50 w-full max-w-[229px] outline-none card bg-white px-1 py-1.5 shadow-md cursor-default"
+				>
+					{#if Object.hasOwn(contextMenuActions, URLModel)}
+						{#each contextMenuActions[URLModel] as action}
+							<svelte:component
+								this={action.component}
+								row={contextMenuOpenRow}
+								{handler}
+								{action}
+							/>
+						{/each}
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+					{/if}
+					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
+						<ContextMenu.Item
+							class="flex h-10 select-none items-center rounded-sm py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-surface-50"
 						>
-					</ContextMenu.Item>
-				{/if}
-				<!-- {#if !preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] })} -->
-				<!-- 	<ContextMenu.Item -->
-				<!-- 		class="flex h-10 select-none items-center rounded-sm py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-surface-50" -->
-				<!-- 	> -->
-				<!-- 		<div class="flex items-center w-full h-full">{m.delete()}</div> -->
-				<!-- 	</ContextMenu.Item> -->
-				<!-- {/if} -->
-			</ContextMenu.Content>
+							<Anchor
+								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`}
+								class="flex items-cente w-full h-full cursor-default outline-none !ring-0 !ring-transparent"
+								>{m.edit()}</Anchor
+							>
+						</ContextMenu.Item>
+					{/if}
+					<!-- {#if !preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] })} -->
+					<!-- 	<ContextMenu.Item -->
+					<!-- 		class="flex h-10 select-none items-center rounded-sm py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-surface-50" -->
+					<!-- 	> -->
+					<!-- 		<div class="flex items-center w-full h-full">{m.delete()}</div> -->
+					<!-- 	</ContextMenu.Item> -->
+					<!-- {/if} -->
+				</ContextMenu.Content>
+			{/if}
 		</ContextMenu.Root>
 		{#if source.foot}
 			<tfoot class="table-foot {regionFoot}">
