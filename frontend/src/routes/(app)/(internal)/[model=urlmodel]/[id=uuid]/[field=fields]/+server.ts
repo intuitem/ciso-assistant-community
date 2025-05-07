@@ -9,7 +9,10 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 
 	const body = await request.json();
 
-	const res = await fetch(endpoint, { method: 'PATCH', body: JSON.stringify(body) });
+	const payload: Record<string, any> = {};
+	payload[params.field] = body[params.field];
+
+	const res = await fetch(endpoint, { method: 'PATCH', body: JSON.stringify(payload) });
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.json());
 	}
