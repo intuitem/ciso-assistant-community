@@ -4,12 +4,12 @@ ref_id: risk-matrix-6x6-detailed
 name: 6x6 detailed
 description: 6x6 detailed example
 copyright: domaine public
-version: 1
+version: 2
 publication_date: 2024-12-17
 provider: intuitem
 packager: intuitem
 objects:
-  risk_matrix:
+  risk_matrices:
   - urn: urn:intuitem:risk:matrix:6x6-detailed
     ref_id: risk-matrix-6x6-detailed
     name: 6x6 detailed

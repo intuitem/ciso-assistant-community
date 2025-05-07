@@ -461,6 +461,11 @@ class LibraryImporter:
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
     ]
+    NON_DEPRECATED_OBJECT_FIELDS = [
+        field
+        for field in OBJECT_FIELDS
+        if field not in ["risk_matrix", "requirement_mapping_set"]
+    ]
 
     def __init__(self, library: StoredLibrary):
         self._library = library

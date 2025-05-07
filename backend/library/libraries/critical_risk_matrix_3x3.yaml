@@ -3,12 +3,12 @@ locale: en
 ref_id: critical_3x3
 name: Critical risk matrix 3x3
 description: Critical risk matrix 3x3
-version: 1
+version: 2
 publication_date: 2024-03-02
 provider: intuitem
 packager: intuitem
 objects:
-  risk_matrix:
+  risk_matrices:
     - urn: urn:intuitem:risk:matrix:critical_risk_matrix_3x3
       ref_id: critical_3x3
       name: critical 3x3

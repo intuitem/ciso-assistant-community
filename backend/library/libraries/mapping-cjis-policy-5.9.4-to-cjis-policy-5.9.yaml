@@ -5,7 +5,7 @@ name: CJIS-POLICY-5.9.4 -> CJIS-POLICY-5.9.5
 description: Mapping from Criminal Justice Information Services (CJIS) Security Policy
   to Criminal Justice Information Services (CJIS) Security Policy 5.9.5
 copyright: intuitem
-version: 1
+version: 2
 publication_date: 2024-08-01
 provider: intuitem
 packager: intuitem
@@ -13,8 +13,8 @@ dependencies:
 - urn:intuitem:risk:library:cjis-policy-5.9.4
 - urn:intuitem:risk:library:cjis-policy-5.9
 objects:
-  requirement_mapping_set:
-    urn: urn:intuitem:risk:req_mapping_set:cjis-policy-5.9.4
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:cjis-policy-5.9.4
     ref_id: mapping-cjis-policy-5.9.4-to-cjis-policy-5.9
     name: CJIS-POLICY-5.9.4 -> CJIS-POLICY-5.9.5
     description: Mapping from Criminal Justice Information Services (CJIS) Security
