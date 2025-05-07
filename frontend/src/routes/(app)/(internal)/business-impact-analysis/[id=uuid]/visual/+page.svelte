@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	export let data: PageData;
 	import { pageTitle } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
 	pageTitle.set('Visual Analysis');
 
 	// Extract the x-axis values
@@ -43,7 +44,7 @@
 		<table class="min-w-full border-collapse">
 			<thead>
 				<tr class="bg-gray-100">
-					<th class="px-4 py-2 text-left font-medium text-gray-600">Asset</th>
+					<th class="px-4 py-2 text-left font-medium text-gray-600">{m.asset()}</th>
 					{#each xAxisPoints as point, i}
 						<th class="px-4 py-2 text-center font-medium text-gray-600">
 							T{i}
@@ -71,7 +72,7 @@
 			</tbody>
 			<tfoot>
 				<tr class="bg-gray-50 border-t-2 border-gray-200">
-					<td class="px-4 py-2 font-medium text-gray-600">Time</td>
+					<td class="px-4 py-2 font-medium text-gray-600 capitalize">{m.time()}</td>
 					{#each xAxisPoints as point}
 						<td class="px-4 py-2 text-center text-sm text-gray-600">
 							{formatTimePoint(point)}
