@@ -1096,8 +1096,8 @@
 	"addFinding": "Tambahkan temuan",
 	"selectEvidence": "Pilih bukti",
 	"timestampCannotBeInTheFuture": "Timestamp tidak boleh di masa depan",
-	"youCanSetPAsswordHere": "Anda dapat mengatur kata sandi di sini.",
 	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali.",
+	"taskScheduleWarning": "Apa pun tugas yang tidak menjadi bagian dari jadwal baru akan dihapus secara permanen",
 	"failedToContactProvider": "Gagal menghubungi penyedia",
 	"userIsNotSSO": "Login SSO saat ini dinonaktifkan untuk akun Anda",
 	"enableSSOHelpText": "Aktifkan SSO, menggunakan parameter ini akan menghapus kata sandi untuk semua pengguna tanpa login lokal yang dipaksakan.",
@@ -1105,6 +1105,5 @@
 	"forceLocalLoginHelpText": "Paksa pengguna untuk menggunakan login lokal (parameter ini diabaikan jika SSO dinonaktifkan atau dipaksakan).",
 	"forceSSOLogin": "Paksa login SSO",
 	"forceSSOLoginHelpText": "Paksa semua pengguna untuk masuk menggunakan SSO, menggunakan parameter ini akan menghapus kata sandi untuk semua pengguna.",
-	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini.",
-	"taskScheduleWarning": "Apa pun tugas yang tidak menjadi bagian dari jadwal baru akan dihapus secara permanen"
+	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini."
 }

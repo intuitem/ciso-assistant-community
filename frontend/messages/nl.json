@@ -909,7 +909,6 @@
 	"cannotDeleteAutoTimeline": "Automatische tijdlijninvoer kan niet worden verwijderd",
 	"author": "Auteur",
 	"timestampCannotBeInTheFuture": "Tijdstempel kan niet in de toekomst liggen",
-	"youCanSetPAsswordHere": "Je kunt hier je wachtwoord instellen.",
 	"failedToContactProvider": "Mislukt om provider te bereiken",
 	"userIsNotSSO": "SSO-login is momenteel uitgeschakeld voor je account",
 	"enableSSOHelpText": "Schakel SSO in, het gebruik van deze parameter wist de wachtwoorden van alle gebruikers zonder verplichte lokale login.",

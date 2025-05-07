@@ -905,7 +905,6 @@
 	"cannotDeleteAutoTimeline": "As entradas automáticas da linha do tempo não podem ser excluídas",
 	"author": "Autor",
 	"timestampCannotBeInTheFuture": "O carimbo de data/hora não pode estar no futuro",
-	"youCanSetPAsswordHere": "Você pode definir sua senha aqui.",
 	"failedToContactProvider": "Falha ao contactar o provedor",
 	"userIsNotSSO": "O login SSO está atualmente desativado para sua conta",
 	"enableSSOHelpText": "Ative o SSO, usar este parâmetro apagará as senhas de todos os usuários sem login local forçado.",
