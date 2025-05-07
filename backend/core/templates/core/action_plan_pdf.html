@@ -54,7 +54,7 @@
                         {% for applied_control in applied_controls %}
                         <tr>
                             <td class="text-md p-2 text-center">{{ applied_control.name }}</td>
-                            <td class="text-md p-2 text-center">{{ applied_control.description|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.description|default:"--"|linebreaksbr }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_category_display|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_csf_function_display|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.eta|default:"--" }}</td>

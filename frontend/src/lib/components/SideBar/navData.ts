@@ -328,7 +328,7 @@ export const navData = {
 					permissions: ['backup']
 				},
 				{
-					name: 'Experimental',
+					name: 'experimental',
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
 					permissions: ['change_globalsettings']
