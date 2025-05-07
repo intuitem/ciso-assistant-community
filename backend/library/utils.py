@@ -174,7 +174,6 @@ class RequirementMappingSetImporter:
                 requirement_mapping_error := requirement_mapping_importer.is_valid()
             ) is not None:
                 import_errors.append((index, requirement_mapping_error))
-            requirement_mapping_importers.append(requirement_mapping_importer)
 
         self._requirement_mappings = requirement_mapping_importers
 
