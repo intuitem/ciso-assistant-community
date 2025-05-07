@@ -83,6 +83,20 @@ export const handle: Handle = async ({ event, resolve }) => {
 			}
 		});
 		event.locals.settings = await generalSettings.json();
+
+		const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
+			credentials: 'include',
+			headers: {
+				'content-type': 'application/json',
+				Authorization: `Token ${event.cookies.get('token')}`
+			}
+		});
+		try {
+			event.locals.featureflags = await featureFlagSettings.json();
+		} catch (e) {
+			console.error('Error fetching feature flags', e);
+			event.locals.featureflags = {};
+		}
 	}
 
 	return await resolve(event);
