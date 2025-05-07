@@ -6,7 +6,6 @@
 	import { m } from '$paraglide/messages';
 </script>
 
-{@debug data}
 <DetailView {data}>
 	<div slot="widgets" class="h-full flex flex-col space-y-4">
 		<div class="card p-4 bg-gray-50 shadow-sm flex-grow">

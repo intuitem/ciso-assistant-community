@@ -1,6 +1,14 @@
 from django.db import models
-from core.models import AppliedControl, Asset, Assessment, RiskMatrix, AbstractBaseModel
+from core.models import (
+    AppliedControl,
+    Asset,
+    Assessment,
+    Evidence,
+    RiskMatrix,
+    AbstractBaseModel,
+)
 from django.db.models import (
+    BooleanField,
     CharField,
     FloatField,
     ForeignKey,
@@ -93,6 +101,11 @@ class AssetAssessment(AbstractBaseModel, FolderMixin):
     asset = ForeignKey(Asset, on_delete=models.CASCADE)
     dependencies = ManyToManyField(Asset, related_name="dependencies", blank=True)
     associated_controls = ManyToManyField(AppliedControl, blank=True)
+    recovery_documented = BooleanField(default=False)
+    recovery_tested = BooleanField(default=False)
+    recovery_targets_met = BooleanField(default=False)
+    evidences = ManyToManyField(Evidence, blank=True)
+    observation = TextField(null=True, blank=True)
 
     bia = ForeignKey(BusinessImpactAnalysis, on_delete=models.CASCADE)
 

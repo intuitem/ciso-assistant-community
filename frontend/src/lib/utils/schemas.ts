@@ -1,7 +1,7 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
-import { number } from 'echarts/core';
+import type { evidences } from '$paraglide/messages/hi';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -453,7 +453,12 @@ export const AssetAssessmentSchema = z.object({
 	bia: z.string(),
 	asset: z.string(),
 	associated_controls: z.array(z.string().optional()).optional(),
-	dependencies: z.array(z.string().optional()).optional()
+	dependencies: z.array(z.string().optional()).optional(),
+	recovery_documented: z.boolean().default(false),
+	recovery_tested: z.boolean().default(false),
+	recovery_targets_met: z.boolean().default(false),
+	evidences: z.array(z.string().optional()).optional(),
+	observation: z.string().optional()
 });
 
 export const EscalationThresholdSchema = z.object({
