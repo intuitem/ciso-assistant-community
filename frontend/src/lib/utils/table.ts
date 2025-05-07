@@ -2,6 +2,8 @@ import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte'
 import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 
+import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+
 interface ListViewFilterConfig {
 	component: ComponentType;
 	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
@@ -959,3 +961,5 @@ export type FilterKeys = {
 		? keyof F
 		: never;
 }[keyof typeof listViewFields];
+
+export const contextMenuActions = { 'applied-controls': [{ component: ChangeStatus, props: {} }] };
