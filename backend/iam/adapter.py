@@ -47,7 +47,9 @@ class AccountAdapter(DefaultAccountAdapter):
             serializer.is_valid(raise_exception=True)
             user = serializer.validated_data["user"]
             if user.is_sso:
-                raise NotImplementedError("SSO Users are not allowed to use local login.")
+                raise NotImplementedError(
+                    "SSO Users are not allowed to use local login."
+                )
 
             return user
         except Exception:

@@ -71,7 +71,9 @@ class FinishACSView(SAMLViewMixin, View):
             provider = self.get_provider(organization_slug)
         except:
             logger.error("Could not get provider")
-            return render_authentication_error(request, None, error=AuthError.FAILED_TO_CONTACT_PROVIDER)
+            return render_authentication_error(
+                request, None, error=AuthError.FAILED_TO_CONTACT_PROVIDER
+            )
         acs_session = LoginSession(request, "saml_acs_session", "saml-acs-session")
         acs_request = None
         acs_request_data = acs_session.store.get("request")
@@ -152,7 +154,9 @@ class FinishACSView(SAMLViewMixin, View):
             emails.append(auth.get_nameid())  # default behavior
             user = User.objects.get(email__in=emails)
             if not user.is_sso:
-                raise NotImplementedError("SSO login is currently disabled for your account.")
+                raise NotImplementedError(
+                    "SSO login is currently disabled for your account."
+                )
 
             idp_first_names = auth.get_attribute(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"

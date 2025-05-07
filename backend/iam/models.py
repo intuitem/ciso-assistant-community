@@ -397,7 +397,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     preferences = models.JSONField(default=dict)
     force_local_login = models.BooleanField(
         default=False,
-        help_text=_("If True force the user to log in using the normal login form even with SSO enabled."),
+        help_text=_(
+            "If True force the user to log in using the normal login form even with SSO enabled."
+        ),
     )
     is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
@@ -602,9 +604,12 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         If a user can log in using SSO, they are not allowed to log in by any other method.
         """
         from global_settings.models import GlobalSettings
+
         sso_settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
-        return sso_settings.value.get("force_sso", False) or (sso_settings.value.get("is_enabled", False) and not self.force_local_login)
+        return sso_settings.value.get("force_sso", False) or (
+            sso_settings.value.get("is_enabled", False) and not self.force_local_login
+        )
 
     @classmethod
     def get_editors(cls) -> List[Self]:

@@ -916,8 +916,8 @@
 	"youCanSetPAsswordHere": "Itt állíthatja be a jelszavát.",
 	"taskScheduleWarning": "A nem az új ütemezés részét képező feladatok véglegesen törlődnek",
 	"enableSSOHelpText": "SSO کو فعال کریں، اس پیرامیٹر کے استعمال سے ان تمام صارفین کے پاس ورڈز مٹ جائیں گے جن پر مقامی لاگ ان لازمی نہیں ہے۔",
-  "forceLocalLogin": "مقامی لاگ ان کو لازمی بنائیں",
-  "forceLocalLoginHelpText": "صارف کو مقامی لاگ ان استعمال کرنے پر مجبور کریں (اگر SSO غیر فعال ہے یا SSO کو لازمی بنایا گیا ہے تو یہ پیرامیٹر نظرانداز کیا جائے گا)",
-  "forceSSOLogin": "SSO لاگ ان کو لازمی بنائیں",
-  "forceSSOLoginHelpText": "تمام صارفین کو SSO کے ذریعے لاگ ان کرنے پر مجبور کریں، اس پیرامیٹر کے استعمال سے تمام صارفین کے پاس ورڈز مٹ جائیں گے"
+	"forceLocalLogin": "مقامی لاگ ان کو لازمی بنائیں",
+	"forceLocalLoginHelpText": "صارف کو مقامی لاگ ان استعمال کرنے پر مجبور کریں (اگر SSO غیر فعال ہے یا SSO کو لازمی بنایا گیا ہے تو یہ پیرامیٹر نظرانداز کیا جائے گا)",
+	"forceSSOLogin": "SSO لاگ ان کو لازمی بنائیں",
+	"forceSSOLoginHelpText": "تمام صارفین کو SSO کے ذریعے لاگ ان کرنے پر مجبور کریں، اس پیرامیٹر کے استعمال سے تمام صارفین کے پاس ورڈز مٹ جائیں گے"
 }

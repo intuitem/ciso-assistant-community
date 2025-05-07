@@ -178,7 +178,9 @@ class ResetPasswordConfirmView(views.APIView):
         token = serializer.validated_data.get("token")
         new_password = serializer.validated_data.get("new_password")
         user = self.get_user(uidb64)
-        if user is not None and not user.is_sso: # Only non-SSO user can reset their password.
+        if (
+            user is not None and not user.is_sso
+        ):  # Only non-SSO user can reset their password.
             if self.token_generator.check_token(user, token):
                 user.set_password(new_password)
                 user.save()

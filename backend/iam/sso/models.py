@@ -74,10 +74,7 @@ class SSOSettings(GlobalSettings):
         verbose_name=_("is enabled"),
         default=False,
     )
-    force_sso = models.BooleanField(
-      verbose_name=_("Force SSO Login"),
-      default=False
-    )
+    force_sso = models.BooleanField(verbose_name=_("Force SSO Login"), default=False)
 
     provider = models.CharField(
         verbose_name=_("provider"),

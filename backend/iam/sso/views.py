@@ -65,8 +65,8 @@ class SSOSettingsViewSet(BaseModelViewSet):
         is_enabled = serializer.validated_data["is_enabled"]
         force_sso = serializer.validated_data["force_sso"]
 
-        if (not was_enabled and is_enabled) or (not was_force_sso and force_sso) :
-            for user in User.objects.all() :
+        if (not was_enabled and is_enabled) or (not was_force_sso and force_sso):
+            for user in User.objects.all():
                 if user.is_sso:
                     # Set unusable password for each SSO user when switching is_enabled or force_sso from False to True.
                     user.set_unusable_password()
