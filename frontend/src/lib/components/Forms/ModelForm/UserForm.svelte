@@ -60,7 +60,7 @@
 		{form}
 		field="force_local_login"
 		label={m.forceLocalLogin()}
-		helpText={m.forceLocalLoginHelpYext()}
+		helpText={m.forceLocalLoginHelpText()}
 	/>
 {/if}
 
