@@ -4,9 +4,13 @@
 	import { ContextMenu } from 'bits-ui';
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import { getFlash } from 'sveltekit-flash-message';
+	import { page } from '$app/stores';
 
 	export let row: any;
 	export let handler: DataHandler;
+
+	const flash = getFlash(page);
 
 	let options: { label: string; value: string }[] = [];
 
@@ -30,6 +34,10 @@
 			}
 			const data = await response.json();
 			console.log('Status changed successfully:', data);
+			flash.set({
+				type: 'success',
+				message: m.successfullyUpdatedObject({ object: m.appliedControl().toLowerCase() })
+			});
 			handler.invalidate();
 		} catch (error) {
 			console.error('Error changing status:', error);
