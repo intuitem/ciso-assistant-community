@@ -22,6 +22,7 @@
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
 	export let open: boolean;
+	export let sideBarVisibleItems: Record<string, boolean>;
 
 	const user = $page.data?.user;
 
@@ -282,7 +283,7 @@
 	>
 		<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
 			<SideBarHeader />
-			<SideBarNavigation />
+			<SideBarNavigation {sideBarVisibleItems} />
 			<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
 		</nav>
 	</aside>
