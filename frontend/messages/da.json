@@ -274,7 +274,6 @@
 	"cancel": "Annuller",
 	"save": "Gem",
 	"assetsImpactedByTheRiskScenario": "Aktiver påvirket af risikoscenariet",
-	"ecistingMeasures": "Eksisterende kontroller",
 	"theExistingAppliedControlsToManageThisRisk": "De eksisterende kontroller til at håndtere denne risiko",
 	"currentRiskLevelGivenCurrentMeasures": "Nuværende risikoniveau givet de nuværende foranstaltninger",
 	"riskLevelWhenAllExtraMeasuresDone": "Risikoniveau når alle ekstra tiltag er gennemført",
@@ -1199,10 +1198,10 @@
 	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom",
 	"failedToContactProvider": "Fejl ved kontakt til udbyderen",
 	"userIsNotSSO": "SSO-login er i øjeblikket deaktiveret for din konto",
-	"enableSSOHelpText": "Aktivér SSO, brug af denne parameter vil slette adgangskoder for alle brugere uden tvungen lokal login.",
+	"enableSSOHelpText": "Aktivér SSO for alle brugere undtagen dem med tvunget lokal login-flag.",
 	"forceLocalLogin": "Tving lokal login",
-	"forceLocalLoginHelpText": "Tving brugeren til at bruge lokal login (denne parameter ignoreres, hvis SSO er deaktiveret eller tvunget).",
+	"forceLocalLoginHelpText": "Tving brugeren til at anvende lokal login.",
 	"forceSSOLogin": "Tving SSO-login",
-	"forceSSOLoginHelpText": "Tving alle brugere til at logge ind med SSO, brug af denne parameter vil slette adgangskoder for alle brugere.",
+	"forceSSOLoginHelpText": "Tving alle brugere til at logge ind med SSO og slet gemte adgangskoder (gælder ikke for brugere med tvungen lokal login-flag).",
 	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet"
 }

@@ -13,7 +13,7 @@
 	<ModelForm form={data.form} schema={UserEditSchema} model={data.model} />
 </div>
 
-{#if !data.object.is_sso}
+{#if data.object.is_local}
 	<div class="card bg-white shadow p-4 mt-2">
 		<p class="text-gray-500 text-sm">
 			{m.setTemporaryPassword1()}

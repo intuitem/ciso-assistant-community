@@ -274,7 +274,6 @@
 	"cancel": "Batalkan",
 	"save": "Simpan",
 	"assetsImpactedByTheRiskScenario": "Aset yang terpengaruh oleh skenario risiko",
-	"ecistingMeasures": "Kontrol yang ada",
 	"theExistingAppliedControlsToManageThisRisk": "Kontrol yang diterapkan yang ada untuk mengelola risiko ini",
 	"currentRiskLevelGivenCurrentMeasures": "Tingkat risiko saat ini berdasarkan kontrol yang diterapkan",
 	"riskLevelWhenAllExtraMeasuresDone": "Tingkat risiko ketika semua kontrol tambahan selesai",
@@ -1100,10 +1099,10 @@
 	"taskScheduleWarning": "Apa pun tugas yang tidak menjadi bagian dari jadwal baru akan dihapus secara permanen",
 	"failedToContactProvider": "Gagal menghubungi penyedia",
 	"userIsNotSSO": "Login SSO saat ini dinonaktifkan untuk akun Anda",
-	"enableSSOHelpText": "Aktifkan SSO, menggunakan parameter ini akan menghapus kata sandi untuk semua pengguna tanpa login lokal yang dipaksakan.",
+	"enableSSOHelpText": "Aktifkan SSO untuk semua pengguna kecuali yang memiliki bendera login lokal paksa.",
 	"forceLocalLogin": "Paksa login lokal",
-	"forceLocalLoginHelpText": "Paksa pengguna untuk menggunakan login lokal (parameter ini diabaikan jika SSO dinonaktifkan atau dipaksakan).",
+	"forceLocalLoginHelpText": "Paksa pengguna untuk menggunakan login lokal.",
 	"forceSSOLogin": "Paksa login SSO",
-	"forceSSOLoginHelpText": "Paksa semua pengguna untuk masuk menggunakan SSO, menggunakan parameter ini akan menghapus kata sandi untuk semua pengguna.",
+	"forceSSOLoginHelpText": "Paksa login SSO dan hapus kata sandi yang tersimpan (tidak berlaku untuk pengguna dengan tanda login lokal paksa).",
 	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini."
 }

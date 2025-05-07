@@ -274,7 +274,6 @@
 	"cancel": "Cancelar",
 	"save": "Guardar",
 	"assetsImpactedByTheRiskScenario": "Activos afectados por el escenario de riesgo",
-	"ecistingMeasures": "Controles existentes",
 	"theExistingAppliedControlsToManageThisRisk": "Los controles aplicados existentes para gestionar este riesgo",
 	"currentRiskLevelGivenCurrentMeasures": "El nivel de riesgo actual dado los controles aplicados actuales",
 	"riskLevelWhenAllExtraMeasuresDone": "El nivel de riesgo cuando se realicen todas las medidas adicionales",
@@ -915,11 +914,11 @@
 	"timestampCannotBeInTheFuture": "La marca de tiempo no puede ser en el futuro",
 	"failedToContactProvider": "Error al contactar con el proveedor",
 	"userIsNotSSO": "El inicio de sesión SSO está actualmente deshabilitado para su cuenta",
-	"enableSSOHelpText": "Habilita SSO, usar este parámetro borrará las contraseñas de todos los usuarios sin inicio de sesión local forzado.",
+	"enableSSOHelpText": "Habilitar SSO para todos los usuarios excepto aquellos con la bandera de inicio de sesión local forzado.",
 	"forceLocalLogin": "Fuerza el inicio de sesión local",
-	"forceLocalLoginHelpText": "Fuerza al usuario a usar el inicio de sesión local (este parámetro se ignora si el SSO está deshabilitado o forzado).",
+	"forceLocalLoginHelpText": "Fuerza al usuario a usar el inicio de sesión local.",
 	"forceSSOLogin": "Fuerza el inicio de sesión SSO",
-	"forceSSOLoginHelpText": "Fuerza a todos los usuarios a iniciar sesión usando SSO, usar este parámetro borrará las contraseñas de todos los usuarios.",
+	"forceSSOLoginHelpText": "Forzar inicio de sesión con SSO y eliminar contraseñas guardadas (no se aplica a los usuarios con la marca de inicio de sesión local forzado).",
 	"youCanSetPasswordHere": "Puede establecer su contraseña aquí.",
 	"taskScheduleWarning": "Si alguna tarea se encuentra fuera de la nueva programación, se eliminará permanentemente"
 }

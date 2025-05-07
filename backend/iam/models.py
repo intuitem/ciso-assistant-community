@@ -451,7 +451,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if self.is_sso:
+        if not self.is_local:
             self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
@@ -598,10 +598,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         )
 
     @property
-    def is_sso(self) -> bool:
+    def is_local(self) -> bool:
         """
-        Indicates whether the user can log in using SSO (Single Sign-On).
-        If a user can log in using SSO, they are not allowed to log in by any other method.
+        Indicates whether the user can log in using a local password
         """
         from global_settings.models import GlobalSettings
 
@@ -612,9 +611,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         except GlobalSettings.DoesNotExist:
             sso_settings = {}
 
-        return sso_settings.get("is_enabled", False) and (
-            sso_settings.get("force_sso", False) or not self.force_local_login
-        )
+        return self.is_active and (self.force_local_login or not sso_settings.get("is_enabled", False) or not sso_settings.get("force_sso", False))
 
     @classmethod
     def get_editors(cls) -> List[Self]:

@@ -153,7 +153,7 @@ class FinishACSView(SAMLViewMixin, View):
             emails = [x for xs in emails for x in xs]  # flatten
             emails.append(auth.get_nameid())  # default behavior
             user = User.objects.get(email__in=emails)
-            if not user.is_sso:
+            if user.force_local_login:
                 raise NotImplementedError(
                     "SSO login is currently disabled for your account."
                 )

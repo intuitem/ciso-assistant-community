@@ -1121,23 +1121,16 @@ Names of built-in objects can be internationalized.
 
 ## SSO
 
-A user can be authenticated either locally or with SSO. A user is can connect using only one of these methods, not both.
-
-The user.is_sso property indicates whether a user is an SSO user or a local user.
-If the SSOSetting force_sso is True or user.is_sso is True for all users.
-If SSO is enabled and the SSOSetting force_sso is False then user.is_sso is equal to the opposite of user.force_local_login.
-
-The force_local_login boolean attribute is used to allow a user to connect locally while enabling the SSO, this attribute is only effective when SSO is enabled and force_sso is disabled.
-
-When a user transitions from a is_sso=False state to is_sso=True its password is deactivated and deleted (set_unusable_password method in Dango).
-
-A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user can use SSO. A boolean is_local indicates if the user can use local password. Both fields can be set/reset by the admin.
-
-A user can only reset their password if user.is_sso=False.
-
 Global SSO settings for the instance are defined in a dedicated object SSO_SETTINGS.
 
+A user can be authenticated either locally or with SSO.
 
+When SSO is activated, all users can use SSO, except if they have the force_local_login flag set.
+
+When the force_sso global flag is set, all users without force_local_login:
+- have their password disabled, 
+- cannot ask for a password reset,
+- cannot have their password changed by an administrator.
 
 ## TPRM evolution
 
