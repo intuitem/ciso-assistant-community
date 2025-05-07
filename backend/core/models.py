@@ -391,7 +391,10 @@ class LibraryUpdater:
         if self.dependencies is None:
             self.dependencies = []
         self.new_framework = new_library_content.get("framework")
-        self.new_matrices = new_library_content.get("risk_matrix")
+        # Meaning the risk_matrix field will be ignored if a risk_matrices field is defined during an update.
+        self.new_matrices = new_library_content.get(
+            "risk_matrices"
+        ) or new_library_content.get("risk_matrix")
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.new_objects = {obj["urn"].lower(): obj for obj in self.threats}
