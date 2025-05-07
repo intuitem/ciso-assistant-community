@@ -605,10 +605,15 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """
         from global_settings.models import GlobalSettings
 
-        sso_settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+        try:
+            sso_settings = GlobalSettings.objects.get(
+                name=GlobalSettings.Names.SSO
+            ).value
+        except:
+            sso_settings = {}
 
-        return sso_settings.value.get("force_sso", False) or (
-            sso_settings.value.get("is_enabled", False) and not self.force_local_login
+        return sso_settings.get("is_enabled", False) and (
+            sso_settings.get("force_sso", False) or not self.force_local_login
         )
 
     @classmethod
