@@ -20,11 +20,6 @@ def convert_question_to_questions(node_urn, old_data):
     question_type = old_data.get("question_type")
     choices_texts = old_data.get("question_choices") or []
 
-    # Pre-build choices map for efficiency
-    choices_maps = {}
-    for idx, choice_text in enumerate(choices_texts):
-        choices_maps[idx] = {"urn": f"choice:{idx + 1}", "value": choice_text}
-
     new_questions = {}
     for q in old_data.get("questions") or []:
         urn = q.get("urn")
