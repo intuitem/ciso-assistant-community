@@ -61,7 +61,7 @@ def migrate_questions(apps, schema_editor):
 
     try:
         # Process nodes in batches for better performance
-        for instance in Requirementnode.objects.iterator():
+        for instance in Requirementnode.objects.iterator(chunk_size=batch_size):
             old_questions = getattr(instance, "question", None)
             if old_questions:
                 try:
