@@ -65,7 +65,7 @@ test('user usual routine actions are working correctly', async ({
 	});
 
 	await test.step('user can create an asset', async () => {
-		await sideBar.click('Organization', pages.assetsPage.url);
+		await sideBar.click('Assets management', pages.assetsPage.url);
 		await pages.assetsPage.hasUrl();
 		await pages.assetsPage.hasTitle();
 
