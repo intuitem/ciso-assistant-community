@@ -611,7 +611,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         except GlobalSettings.DoesNotExist:
             sso_settings = {}
 
-        return self.is_active and (self.force_local_login or not sso_settings.get("is_enabled", False) or not sso_settings.get("force_sso", False))
+        return self.is_active and (
+            self.force_local_login
+            or not sso_settings.get("is_enabled", False)
+            or not sso_settings.get("force_sso", False)
+        )
 
     @classmethod
     def get_editors(cls) -> List[Self]:
