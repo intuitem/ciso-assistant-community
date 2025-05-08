@@ -906,11 +906,11 @@
 	"timestampCannotBeInTheFuture": "Marcă de timp nu poate fi în viitor",
 	"failedToContactProvider": "Eșec la contactarea furnizorului",
 	"userIsNotSSO": "Autentificarea SSO este momentan dezactivată pentru contul dumneavoastră",
-    "enableSSOHelpText": "Activează SSO pentru toți utilizatorii.",
-    "keepLocalLogin": "Păstrează autentificarea locală",
-    "keepLocalLoginHelpText": "Păstrează autentificarea locală a utilizatorului.",
-    "forceSSOLogin": "Forțează autentificarea SSO",
-    "forceSSOLoginHelpText": "Forțează autentificarea SSO și resetează parolele salvate pentru toți utilizatorii. Utilizatorii cu opțiunea \"păstrează autentificarea locală\" activată sunt omisi pentru a avea un acces de rezervă. ⚠️ Asigură-te că ai un acces de rezervă sau că SSO-ul tău este deja funcțional înainte de a activa această opțiune.",
+	"enableSSOHelpText": "Activează SSO pentru toți utilizatorii.",
+	"keepLocalLogin": "Păstrează autentificarea locală",
+	"keepLocalLoginHelpText": "Păstrează autentificarea locală a utilizatorului.",
+	"forceSSOLogin": "Forțează autentificarea SSO",
+	"forceSSOLoginHelpText": "Forțează autentificarea SSO și resetează parolele salvate pentru toți utilizatorii. Utilizatorii cu opțiunea \"păstrează autentificarea locală\" activată sunt omisi pentru a avea un acces de rezervă. ⚠️ Asigură-te că ai un acces de rezervă sau că SSO-ul tău este deja funcțional înainte de a activa această opțiune.",
 	"youCanSetPasswordHere": "Puteți seta parola dvs. aici.",
 	"taskScheduleWarning": "Orice sarcini care nu fac parte din noul program vor fi șterse definitiv"
 }

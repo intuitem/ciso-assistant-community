@@ -905,10 +905,10 @@
 	"timestampCannotBeInTheFuture": "Tidsstämpeln kan inte vara i framtiden",
 	"failedToContactProvider": "Misslyckades att kontakta leverantören",
 	"userIsNotSSO": "SSO-inloggning är för närvarande inaktiverad för ditt konto",
-    "enableSSOHelpText": "Aktivera SSO för alla användare.",
-    "keepLocalLogin": "Behåll lokal inloggning",
-    "keepLocalLoginHelpText": "Behåll användarens lokala inloggning.",
-    "forceSSOLogin": "Tvinga SSO-inloggning",
-    "forceSSOLoginHelpText": "Tvinga SSO-inloggning och återställ sparade lösenord för alla användare. Användare med flaggan \"behåll lokal inloggning\" aktiverad hoppas över för att ha en reservåtkomst. ⚠️ Se till att du har en reservåtkomst eller att din SSO redan är funktionell innan du aktiverar detta alternativ.",
+	"enableSSOHelpText": "Aktivera SSO för alla användare.",
+	"keepLocalLogin": "Behåll lokal inloggning",
+	"keepLocalLoginHelpText": "Behåll användarens lokala inloggning.",
+	"forceSSOLogin": "Tvinga SSO-inloggning",
+	"forceSSOLoginHelpText": "Tvinga SSO-inloggning och återställ sparade lösenord för alla användare. Användare med flaggan \"behåll lokal inloggning\" aktiverad hoppas över för att ha en reservåtkomst. ⚠️ Se till att du har en reservåtkomst eller att din SSO redan är funktionell innan du aktiverar detta alternativ.",
 	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent"
 }

@@ -915,11 +915,11 @@
 	"youCanSetPasswordHere": "Sie können hier Ihr Passwort festlegen.",
 	"failedToContactProvider": "Verbindung zum Anbieter fehlgeschlagen",
 	"userIsNotSSO": "SSO-Login ist derzeit für Ihr Konto deaktiviert",
-    "enableSSOHelpText": "SSO für alle Benutzer aktivieren.",
-    "keepLocalLogin": "Lokale Anmeldung beibehalten",
-    "keepLocalLoginHelpText": "Die lokale Anmeldung des Benutzers beibehalten.",
-    "forceSSOLogin": "SSO-Anmeldung erzwingen",
-    "forceSSOLoginHelpText": "SSO-Anmeldung erzwingen und gespeicherte Passwörter für alle Benutzer zurücksetzen. Benutzer mit aktiviertem \"Lokale Anmeldung beibehalten\"-Flag werden übersprungen, um einen Fallback-Zugang zu ermöglichen. ⚠️ Stellen Sie sicher, dass Sie einen Fallback-Zugang haben oder Ihr SSO bereits funktioniert, bevor Sie diese Option aktivieren.",
+	"enableSSOHelpText": "SSO für alle Benutzer aktivieren.",
+	"keepLocalLogin": "Lokale Anmeldung beibehalten",
+	"keepLocalLoginHelpText": "Die lokale Anmeldung des Benutzers beibehalten.",
+	"forceSSOLogin": "SSO-Anmeldung erzwingen",
+	"forceSSOLoginHelpText": "SSO-Anmeldung erzwingen und gespeicherte Passwörter für alle Benutzer zurücksetzen. Benutzer mit aktiviertem \"Lokale Anmeldung beibehalten\"-Flag werden übersprungen, um einen Fallback-Zugang zu ermöglichen. ⚠️ Stellen Sie sicher, dass Sie einen Fallback-Zugang haben oder Ihr SSO bereits funktioniert, bevor Sie diese Option aktivieren.",
 	"youCanSetPasswordHere": "Sie können hier Ihr Passwort festlegen.",
 	"taskScheduleWarning": "Alle Aufgaben, die nicht Teil des neuen Zeitplans sind, werden dauerhaft gelöscht"
 }
