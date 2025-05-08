@@ -112,8 +112,7 @@ export const navData = {
 				{
 					name: 'businessImpactAnalysis',
 					fa_icon: 'fa-solid fa-arrows-to-eye',
-					href: '/business-impact-analysis',
-					permissions: ['view_businessimpactanalysis']
+					href: '/business-impact-analysis'
 				}
 			]
 		},
