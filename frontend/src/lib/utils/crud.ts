@@ -4,7 +4,6 @@ import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.
 import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
-import { BASE_API_URL } from './constants';
 import { type urlModel } from './types';
 
 type GetOptionsParams = {
@@ -560,6 +559,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'General settings',
 		verboseNamePlural: 'General settings',
 		selectFields: [{ field: 'security_objective_scale' }]
+	},
+	'feature-flags': {
+		name: 'featureFlags',
+		localName: 'featureFlags',
+		localNamePlural: 'featureFlags',
+		verboseName: 'Feature flag',
+		verboseNamePlural: 'Feature flags'
 	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',

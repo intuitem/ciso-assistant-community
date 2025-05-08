@@ -1470,6 +1470,10 @@
 	"selectAsset": "Select an asset",
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
+	"featureFlags": "Feature flags",
+	"configureFeatureFlags": "Configure feature flags to enable or disable specific features in the application.",
+	"allow_all": "Allow all",
+	"featureFlagSettingsUpdated": "Feature flag settings updated. Please refresh the page to apply the changes.",
 	"noEvents": "No events for this day",
 	"domainAnalytics": "Domain Analytics",
 	"syncToAppliedControls": "Sync to actions",
@@ -1488,5 +1492,8 @@
 	"probabilityISO": "Likelihood",
 	"probabilityEBIOS": "Likelihood",
 	"iso27005": "ISO 27005",
-	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted"
+	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted",
+	"delete": "Delete",
+	"changeStatus": "Change status",
+	"errorUpdatungObject": "An error occurred while updating the {object} object."
 }
