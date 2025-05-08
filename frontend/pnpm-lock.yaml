@@ -26,6 +26,9 @@ importers:
       '@unovis/ts':
         specifier: 1.4.3-beta.0
         version: 1.4.3-beta.0
+      bits-ui:
+        specifier: ^0.22.0
+        version: 0.22.0(svelte@4.2.19)
       cmdk-sv:
         specifier: ^0.0.18
         version: 0.0.18(svelte@4.2.19)
@@ -1950,6 +1953,11 @@ packages:
     resolution: {integrity: sha512-XFZ7/bK7j/K+5iktxX/ZpmoFHjYjpPzP5EOO/4bWiaFg5TG1iMcfjDhlBTQnJxD6BoVoHuqeZPHZvaTgF4Iv3Q==}
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.118
+
+  bits-ui@0.22.0:
+    resolution: {integrity: sha512-r7Fw1HNgA4YxZBRcozl7oP0bheQ8EHh+kfMBZJgyFISix8t4p/nqDcHLmBgIiJ3T5XjYnJRorYDjIWaCfhb5fw==}
+    peerDependencies:
+      svelte: ^4.0.0 || ^5.0.0
 
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
@@ -6034,6 +6042,13 @@ snapshots:
   binary-extensions@2.3.0: {}
 
   bits-ui@0.21.16(svelte@4.2.19):
+    dependencies:
+      '@internationalized/date': 3.6.0
+      '@melt-ui/svelte': 0.76.2(svelte@4.2.19)
+      nanoid: 5.0.9
+      svelte: 4.2.19
+
+  bits-ui@0.22.0(svelte@4.2.19):
     dependencies:
       '@internationalized/date': 3.6.0
       '@melt-ui/svelte': 0.76.2(svelte@4.2.19)
