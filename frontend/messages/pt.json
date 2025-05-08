@@ -907,11 +907,11 @@
 	"timestampCannotBeInTheFuture": "O carimbo de data/hora não pode estar no futuro",
 	"failedToContactProvider": "Falha ao contactar o provedor",
 	"userIsNotSSO": "O login SSO está atualmente desativado para sua conta",
-	"enableSSOHelpText": "Ativar SSO para todos os usuários, exceto aqueles com a opção de login local forçado.",
-	"forceLocalLogin": "Force o login local",
-	"forceLocalLoginHelpText": "Force o usuário a usar o login local.",
-	"forceSSOLogin": "Force o login SSO",
-	"forceSSOLoginHelpText": "Forçar login via SSO e apagar senhas salvas (não se aplica a usuários com a opção de login local forçado).",
+    "enableSSOHelpText": "Ativar SSO para todos os utilizadores.",
+    "keepLocalLogin": "Manter login local",
+    "keepLocalLoginHelpText": "Manter o login local do utilizador.",
+    "forceSSOLogin": "Forçar login SSO",
+    "forceSSOLoginHelpText": "Forçar o login SSO e redefinir as palavras-passe guardadas para todos os utilizadores. Os utilizadores com a opção \"manter login local\" ativada são ignorados para ter um acesso alternativo. ⚠️ Certifique-se de que tem um acesso alternativo ou que o seu SSO já está funcional antes de ativar esta opção.",
 	"youCanSetPasswordHere": "Você pode definir sua senha aqui.",
 	"taskScheduleWarning": "Qualquer tarefa que não faça parte do novo cronograma será excluída permanentemente"
 }

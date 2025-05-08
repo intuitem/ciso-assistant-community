@@ -320,7 +320,7 @@ class UserManager(BaseUserManager):
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
             folder=_get_root_folder(),
-            force_local_login=extra_fields.get("force_local_login", False),
+            keep_local_login=extra_fields.get("keep_local_login", False),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         if password:
@@ -376,7 +376,7 @@ class UserManager(BaseUserManager):
             password=password,
             mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
-            force_local_login=True,
+            keep_local_login=True,
             **extra_fields,
         )
         return superuser
@@ -399,10 +399,10 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
-    force_local_login = models.BooleanField(
+    keep_local_login = models.BooleanField(
         default=False,
         help_text=_(
-            "If True force the user to log in using the normal login form even with SSO enabled."
+            "If True allow the user to log in using the normal login form even with SSO enabled."
         ),
     )
     is_third_party = models.BooleanField(default=False)
@@ -616,7 +616,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             sso_settings = {}
 
         return self.is_active and (
-            self.force_local_login
+            self.keep_local_login
             or not sso_settings.get("is_enabled", False)
             or not sso_settings.get("force_sso", False)
         )

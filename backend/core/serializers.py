@@ -707,7 +707,7 @@ class UserReadSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
-            "force_local_login",
+            "keep_local_login",
             "is_third_party",
         ]
 
@@ -725,7 +725,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
-            "force_local_login",
+            "keep_local_login",
             "is_third_party",
             "is_local",
         ]

@@ -1289,10 +1289,10 @@
 	"erasureOrDestruction": "Cancellazione o distruzione",
 	"failedToContactProvider": "Impossibile contattare il fornitore",
 	"userIsNotSSO": "Il login SSO è attualmente disabilitato per il tuo account",
-	"enableSSOHelpText": "Abilita SSO per tutti gli utenti tranne quelli con il flag di accesso locale forzato.",
-	"forceLocalLogin": "Forza il login locale",
-	"forceLocalLoginHelpText": "Forza l'utente a utilizzare il login locale.",
-	"forceSSOLogin": "Forza il login SSO",
-	"forceSSOLoginHelpText": "Forza l’accesso SSO ed elimina le password salvate (non si applica agli utenti con il flag di accesso locale forzato).",
+    "enableSSOHelpText": "Abilita SSO per tutti gli utenti.",
+    "keepLocalLogin": "Mantieni accesso locale",
+    "keepLocalLoginHelpText": "Mantieni l'accesso locale dell'utente.",
+    "forceSSOLogin": "Forza accesso SSO",
+    "forceSSOLoginHelpText": "Forza l'accesso SSO e reimposta le password salvate per tutti gli utenti. Gli utenti con l'opzione \"mantieni accesso locale\" attivata vengono ignorati per avere un accesso di fallback. ⚠️ Assicurati di avere un accesso di fallback o che il tuo SSO sia già funzionante prima di abilitare questa opzione.",
 	"taskScheduleWarning": "Qualsiasi attività che non fa parte del nuovo programma verrà eliminata in modo permanente"
 }

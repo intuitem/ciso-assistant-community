@@ -1099,10 +1099,10 @@
 	"taskScheduleWarning": "Apa pun tugas yang tidak menjadi bagian dari jadwal baru akan dihapus secara permanen",
 	"failedToContactProvider": "Gagal menghubungi penyedia",
 	"userIsNotSSO": "Login SSO saat ini dinonaktifkan untuk akun Anda",
-	"enableSSOHelpText": "Aktifkan SSO untuk semua pengguna kecuali yang memiliki bendera login lokal paksa.",
-	"forceLocalLogin": "Paksa login lokal",
-	"forceLocalLoginHelpText": "Paksa pengguna untuk menggunakan login lokal.",
-	"forceSSOLogin": "Paksa login SSO",
-	"forceSSOLoginHelpText": "Paksa login SSO dan hapus kata sandi yang tersimpan (tidak berlaku untuk pengguna dengan tanda login lokal paksa).",
+    "enableSSOHelpText": "Aktifkan SSO untuk semua pengguna.",
+    "keepLocalLogin": "Pertahankan login lokal",
+    "keepLocalLoginHelpText": "Pertahankan login lokal pengguna.",
+    "forceSSOLogin": "Paksa login SSO",
+    "forceSSOLoginHelpText": "Paksa login SSO dan atur ulang kata sandi yang disimpan untuk semua pengguna. Pengguna dengan flag \"pertahankan login lokal\" akan dilewati untuk memiliki akses cadangan. ⚠️ Pastikan Anda memiliki akses cadangan atau SSO Anda sudah berfungsi sebelum mengaktifkan opsi ini.",
 	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini."
 }

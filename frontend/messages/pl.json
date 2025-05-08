@@ -908,10 +908,10 @@
 	"taskScheduleWarning": "Wszystkie zadania, które nie będą częścią nowego harmonogramu, zostaną trwale usunięte",
 	"failedToContactProvider": "Nie udało się skontaktować z dostawcą",
 	"userIsNotSSO": "Logowanie SSO jest obecnie wyłączone dla twojego konta",
-	"enableSSOHelpText": "Włącz SSO dla wszystkich użytkowników, z wyjątkiem tych z wymuszonym logowaniem lokalnym.",
-	"forceLocalLogin": "Wymuś lokalne logowanie",
-	"forceLocalLoginHelpText": "Wymuś na użytkowniku korzystanie z lokalnego logowania.",
-	"forceSSOLogin": "Wymuś logowanie SSO",
-	"forceSSOLoginHelpText": "Wymuś logowanie przez SSO i usuń zapisane hasła (nie dotyczy użytkowników z wymuszonym logowaniem lokalnym).",
+    "enableSSOHelpText": "Włącz SSO dla wszystkich użytkowników.",
+    "keepLocalLogin": "Zachowaj lokalne logowanie",
+    "keepLocalLoginHelpText": "Zachowaj lokalne logowanie użytkownika.",
+    "forceSSOLogin": "Wymuś logowanie SSO",
+    "forceSSOLoginHelpText": "Wymuś logowanie SSO i zresetuj zapisane hasła dla wszystkich użytkowników. Użytkownicy z włączoną opcją \"zachowaj lokalne logowanie\" są pomijani, aby zapewnić dostęp awaryjny. ⚠️ Upewnij się, że masz dostęp awaryjny lub że SSO już działa przed włączeniem tej opcji.",
 	"youCanSetPasswordHere": "Możesz ustawić swoje hasło tutaj."
 }

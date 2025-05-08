@@ -656,8 +656,8 @@ export const listViewFields = {
 		}
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'force_local_login', 'is_third_party'],
-		body: ['email', 'first_name', 'last_name', 'force_local_login', 'is_third_party']
+		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'keep_local_login', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],

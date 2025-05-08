@@ -2226,7 +2226,7 @@ class UserFilter(df.FilterSet):
             "first_name",
             "last_name",
             "is_active",
-            "force_local_login",
+            "keep_local_login",
             "is_approver",
             "is_third_party",
         ]

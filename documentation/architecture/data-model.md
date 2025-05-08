@@ -22,7 +22,7 @@ erDiagram
 
     USER {
         string  email
-        boolean force_local_login
+        boolean keep_local_login
     }
 
     USER_GROUP {
@@ -1125,9 +1125,9 @@ Global SSO settings for the instance are defined in a dedicated object SSO_SETTI
 
 A user can be authenticated either locally or with SSO.
 
-When SSO is activated, all users can use SSO, except if they have the force_local_login flag set.
+When SSO is activated, all users can use SSO.
 
-When the force_sso global flag is set, all users without force_local_login:
+When the force_sso global flag is set, all users without keep_local_login:
 - have their password disabled, 
 - cannot ask for a password reset,
 - cannot have their password changed by an administrator.

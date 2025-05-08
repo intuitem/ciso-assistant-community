@@ -153,11 +153,6 @@ class FinishACSView(SAMLViewMixin, View):
             emails = [x for xs in emails for x in xs]  # flatten
             emails.append(auth.get_nameid())  # default behavior
             user = User.objects.get(email__in=emails)
-            if user.force_local_login:
-                raise NotImplementedError(
-                    "SSO login is currently disabled for your account."
-                )
-
             idp_first_names = auth.get_attribute(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
             )

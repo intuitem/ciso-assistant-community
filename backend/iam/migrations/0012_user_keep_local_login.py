@@ -11,10 +11,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="user",
-            name="force_local_login",
+            name="keep_local_login",
             field=models.BooleanField(
                 default=False,
-                help_text="If True force the user to log in using the normal login form even with SSO enabled.",
+                help_text="If True keep the user able to log in using the normal login form even with SSO enabled.",
             ),
         ),
         migrations.RemoveField(

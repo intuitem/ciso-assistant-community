@@ -54,13 +54,11 @@
 {/if}
 
 {#if context !== 'create'}
-	<!-- ADD helpText attributes to 2 <Checkbox> before pushing (only EN+FR) -->
-	<!-- Translate "force_local_login"/"is Local" to a better translations (only EN+FR is enough) -->
 	<Checkbox
 		{form}
-		field="force_local_login"
-		label={m.forceLocalLogin()}
-		helpText={m.forceLocalLoginHelpText()}
+		field="keep_local_login"
+		label={m.keepLocalLogin()}
+		helpText={m.keepLocalLoginHelpText()}
 	/>
 {/if}
 

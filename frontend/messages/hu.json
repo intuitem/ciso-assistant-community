@@ -914,9 +914,9 @@
 	"timestampCannotBeInTheFuture": "Az időbélyeg nem lehet a jövőben",
 	"youCanSetPasswordHere": "Itt állíthatja be a jelszavát.",
 	"taskScheduleWarning": "A nem az új ütemezés részét képező feladatok véglegesen törlődnek",
-	"enableSSOHelpText": "Engedélyezze az SSO-t minden felhasználó számára, kivéve azokat, akiknél be van állítva a helyi bejelentkezés kényszerítése jelző",
-	"forceLocalLogin": "Kényszerítse a felhasználót a helyi bejelentkezés használatára",
-	"forceLocalLoginHelpText": "Kényszerítse a felhasználót a helyi bejelentkezés használatára.",
-	"forceSSOLogin": "Kényszerítse az SSO-bejelentkezést",
-	"forceSSOLoginHelpText": "Kényszerítse az SSO-bejelentkezést, és törölje a mentett jelszavakat (nem vonatkozik a helyi bejelentkezésre kényszerített felhasználókra)."
+    "enableSSOHelpText": "Engedélyezze az SSO-t minden felhasználó számára.",
+    "keepLocalLogin": "Helyi bejelentkezés megtartása",
+    "keepLocalLoginHelpText": "A felhasználó helyi bejelentkezésének megtartása.",
+    "forceSSOLogin": "SSO bejelentkezés kényszerítése",
+    "forceSSOLoginHelpText": "Kényszerítse az SSO bejelentkezést, és állítsa vissza a mentett jelszavakat minden felhasználó számára. Azok a felhasználók, akiknél a \"helyi bejelentkezés megtartása\" jelölőnégyzet be van állítva, kihagyásra kerülnek, hogy legyen tartalék hozzáférésük. ⚠️ Győződjön meg róla, hogy rendelkezik tartalék hozzáféréssel, vagy hogy az SSO már működik, mielőtt engedélyezi ezt az opciót."
 }

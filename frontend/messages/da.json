@@ -1198,10 +1198,10 @@
 	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom",
 	"failedToContactProvider": "Fejl ved kontakt til udbyderen",
 	"userIsNotSSO": "SSO-login er i øjeblikket deaktiveret for din konto",
-	"enableSSOHelpText": "Aktivér SSO for alle brugere undtagen dem med tvunget lokal login-flag.",
-	"forceLocalLogin": "Tving lokal login",
-	"forceLocalLoginHelpText": "Tving brugeren til at anvende lokal login.",
-	"forceSSOLogin": "Tving SSO-login",
-	"forceSSOLoginHelpText": "Tving alle brugere til at logge ind med SSO og slet gemte adgangskoder (gælder ikke for brugere med tvungen lokal login-flag).",
+    "enableSSOHelpText": "Aktivér SSO for alle brugere.",
+    "keepLocalLogin": "Behold lokal login",
+    "keepLocalLoginHelpText": "Behold brugerens lokale login.",
+    "forceSSOLogin": "Gennemtving SSO-login",
+    "forceSSOLoginHelpText": "Gennemtving SSO-login og nulstil gemte adgangskoder for alle brugere. Brugere med flaget \"behold lokal login\" aktiveret springes over for at have en fallback-adgang. ⚠️ Sørg for, at du har en fallback-adgang, eller at din SSO allerede fungerer, før du aktiverer denne indstilling.",
 	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet"
 }

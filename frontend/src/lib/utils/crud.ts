@@ -1145,7 +1145,7 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	users: {
 		email: {
 			keys: {
-				force_local_login: {
+				keep_local_login: {
 					true: { text: 'Local', cssClasses: 'badge bg-violet-200' }
 				},
 				is_third_party: {

@@ -65,7 +65,7 @@ class SSOSettingsViewSet(BaseModelViewSet):
 
         if is_enabled and force_sso:
             for user in User.objects.all():
-                if not user.force_local_login:
+                if not user.keep_local_login:
                     user.set_unusable_password()
 
         return Response(serializer.data)

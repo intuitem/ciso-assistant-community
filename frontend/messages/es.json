@@ -914,11 +914,11 @@
 	"timestampCannotBeInTheFuture": "La marca de tiempo no puede ser en el futuro",
 	"failedToContactProvider": "Error al contactar con el proveedor",
 	"userIsNotSSO": "El inicio de sesión SSO está actualmente deshabilitado para su cuenta",
-	"enableSSOHelpText": "Habilitar SSO para todos los usuarios excepto aquellos con la bandera de inicio de sesión local forzado.",
-	"forceLocalLogin": "Fuerza el inicio de sesión local",
-	"forceLocalLoginHelpText": "Fuerza al usuario a usar el inicio de sesión local.",
-	"forceSSOLogin": "Fuerza el inicio de sesión SSO",
-	"forceSSOLoginHelpText": "Forzar inicio de sesión con SSO y eliminar contraseñas guardadas (no se aplica a los usuarios con la marca de inicio de sesión local forzado).",
+    "enableSSOHelpText": "Habilitar SSO para todos los usuarios.",
+    "keepLocalLogin": "Mantener inicio de sesión local",
+    "keepLocalLoginHelpText": "Mantener el inicio de sesión local del usuario.",
+    "forceSSOLogin": "Forzar inicio de sesión SSO",
+    "forceSSOLoginHelpText": "Forzar el inicio de sesión SSO y restablecer las contraseñas guardadas para todos los usuarios. Los usuarios con la opción \"mantener inicio de sesión local\" activada se omiten para tener un acceso de respaldo. ⚠️ Asegúrese de tener un acceso de respaldo o que su SSO ya esté funcional antes de habilitar esta opción.",
 	"youCanSetPasswordHere": "Puede establecer su contraseña aquí.",
 	"taskScheduleWarning": "Si alguna tarea se encuentra fuera de la nueva programación, se eliminará permanentemente"
 }
