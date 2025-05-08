@@ -67,7 +67,7 @@ You can go back and update the docker-compose.yml according to your needs or res
 
 
 
-You can choose Traefik instead of Caddy using the config builder.
+You can choose Traefik or BunkerWeb instead of Caddy using the config builder. Please note that BunkerWeb deployment is still experimental at the moment.
 
 
 
