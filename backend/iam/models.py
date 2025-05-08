@@ -323,7 +323,10 @@ class UserManager(BaseUserManager):
             force_local_login=extra_fields.get("force_local_login", False),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
-        user.password = make_password(password if password else str(uuid.uuid4()))
+        if password:
+            user.password = make_password(password)
+        else:
+            user.set_unusable_password()
         user.save(using=self._db)
         if initial_group:
             initial_group.user_set.add(user)

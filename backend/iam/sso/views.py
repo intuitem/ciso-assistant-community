@@ -60,8 +60,8 @@ class SSOSettingsViewSet(BaseModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        is_enabled = serializer.validated_data["is_enabled"]
-        force_sso = serializer.validated_data["force_sso"]
+        is_enabled = serializer.validated_data.get("is_enabled", False)
+        force_sso = serializer.validated_data.get("force_sso", False)
 
         if is_enabled and force_sso:
             for user in User.objects.all():
