@@ -112,7 +112,12 @@ export const navData = {
 				{
 					name: 'businessImpactAnalysis',
 					fa_icon: 'fa-solid fa-arrows-to-eye',
-					href: '/business-impact-analysis'
+					href: '/business-impact-analysis',
+					permissions: [
+						'view_businessimpactanalysis',
+						'view_assetassessment',
+						'view_escalationthreshold'
+					]
 				}
 			]
 		},

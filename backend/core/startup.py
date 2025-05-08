@@ -54,6 +54,9 @@ READER_PERMISSIONS_LIST = [
     "view_timelineentry",
     "view_tasknode",
     "view_tasktemplate",
+    "view_businessimpactanalysis",
+    "view_assetassessment",
+    "view_escalationthreshold",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -97,6 +100,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_timelineentry",
     "view_tasknode",
     "view_tasktemplate",
+    "view_businessimpactanalysis",
+    "view_assetassessment",
+    "view_escalationthreshold",
 ]
 
 ANALYST_PERMISSIONS_LIST = [

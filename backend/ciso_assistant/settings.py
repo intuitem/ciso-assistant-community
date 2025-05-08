@@ -184,6 +184,7 @@ INSTALLED_APPS = [
     "ebios_rm",
     "tprm",
     "privacy",
+    "resilience",
     "core",
     "cal",
     "django_filters",
@@ -201,7 +202,6 @@ INSTALLED_APPS = [
     "huey.contrib.djhuey",
     "auditlog",
     "storages",
-    "resilience",
 ]
 
 MIDDLEWARE = [
