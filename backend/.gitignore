@@ -19,3 +19,4 @@ db/pg_password.txt
 pytest-report.html
 enterprise/
 *.log
+*.bak
