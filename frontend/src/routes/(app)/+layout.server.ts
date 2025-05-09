@@ -23,5 +23,5 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 		}
 	}
 	setLocale(cookies.get('PARAGLIDE_LOCALE') || DEFAULT_LANGUAGE);
-	return { user: locals.user, settings: locals.settings };
+	return { user: locals.user, settings: locals.settings, featureflags: locals.featureflags };
 }) satisfies LayoutServerLoad;

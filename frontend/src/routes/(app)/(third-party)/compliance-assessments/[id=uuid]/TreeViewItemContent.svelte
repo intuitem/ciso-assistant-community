@@ -124,9 +124,9 @@
 										{#if description}
 											<p>{description}</p>
 										{/if}
-									{:else if node.question && node.question.questions && node.question.questions[0]}
-										<!-- This only displays the first question -->
-										{node.question.questions[0].text}
+									{:else if Object.keys(node.questions).length > 0}
+										<!-- This displays the first question's text -->
+										{Object.entries(node.questions)[0][1].text}
 									{/if}
 								</Anchor>
 							{:else}
@@ -168,18 +168,18 @@
 							{/if}
 						{/each}
 					{/if}
-					{#if node.question && node.question.questions}
-						{#if node.question.questions.length > 1}
+					{#if node.questions}
+						{#if Object.keys(node.questions).length > 1}
 							<span
 								class="badge"
 								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{node.question.questions.length} {m.questionPlural()}</span
+								>{Object.keys(node.questions).length} {m.questionPlural()}</span
 							>
 						{:else}
 							<span
 								class="badge"
 								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{node.question.questions.length} {m.questionSingular()}</span
+								>{Object.keys(node.questions).length} {m.questionSingular()}</span
 							>
 						{/if}
 					{/if}

@@ -243,7 +243,7 @@ export const FilteringLabelSchema = z.object({
 });
 
 export const RequirementAssessmentSchema = z.object({
-	answer: jsonSchema,
+	answers: jsonSchema,
 	status: z.string(),
 	result: z.string(),
 	is_scored: z.boolean().optional(),
@@ -325,6 +325,22 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional()
+});
+
+export const FeatureFlagsSchema = z.object({
+	xrays: z.boolean().optional(),
+	incidents: z.boolean().optional(),
+	tasks: z.boolean().optional(),
+	risk_acceptances: z.boolean().optional(),
+	exceptions: z.boolean().optional(),
+	follow_up: z.boolean().optional(),
+	scoring_assistant: z.boolean().optional(),
+	vulnerabilities: z.boolean().optional(),
+	compliance: z.boolean().optional(),
+	tprm: z.boolean().optional(),
+	ebiosrm: z.boolean().optional(),
+	privacy: z.boolean().optional(),
+	experimental: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -709,6 +725,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
+	'feature-flags': FeatureFlagsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

@@ -360,7 +360,7 @@ export const navData = {
 					permissions: ['view_riskscenario'] // TODO: change this to view_logentry
 				},
 				{
-					name: 'Experimental',
+					name: 'experimental',
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
 					permissions: ['change_globalsettings']
