@@ -87,7 +87,7 @@ for tab in dataframe:
                         a = output_table[i][6]
                         b = pretify_content(question)
                         c = b if a == "" else a + "\n" + b
-                        output_table[i] = output_table[i][0:6] + (c,)
+                        output_table[i] = output_table[i][0:6] + (c,) + ("A1",)
     else:
         print(f"Ignored tab: {title}")
 
@@ -111,6 +111,7 @@ ws.append(["framework_name", "CCM Controls v4"])
 ws.append(["framework_description", "CCM Controls v4"])
 ws.append(["tab", "controls", "requirements"])
 ws.append(["tab", "implementation_groups", "implementation_groups"])
+ws.append(["tab", "answers", "answers"])
 
 ws1 = wb_output.create_sheet("controls")
 ws1.append(
@@ -121,7 +122,8 @@ ws1.append(
         "name",
         "description",
         "implementation_groups",
-        "annotation",
+        "questions",
+        "answer"
     ]
 )
 for row in output_table:
@@ -136,5 +138,14 @@ ws2.append(
     ]
 )
 ws2.append(["full", "systematic ", "systematic assessment of a cloud implementation"])
+ws3 = wb_output.create_sheet("answers")
+ws3.append(["id", "question_type", "question_choices"])
+ws3.append(
+    [
+        "A1",
+        "unique_choice",
+        "Yes\nNo\nNA",
+    ]
+)
 print("generate ", output_file_name)
 wb_output.save(output_file_name)
