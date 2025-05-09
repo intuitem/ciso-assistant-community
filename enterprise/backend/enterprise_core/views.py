@@ -4,6 +4,7 @@ from django.utils.formats import date_format
 import magic
 import structlog
 from core.views import BaseModelViewSet
+from core.permissions import IsAdministrator
 from django.conf import settings
 from iam.models import User
 from rest_framework import status
@@ -332,5 +333,7 @@ class LogEntryViewSet(
         "actor__last_name",
     ]
     filterset_fields = ["action", "actor", "content_type__model"]
+
+    permission_classes = (IsAdministrator,)
     serializer_class = LogEntrySerializer
     queryset = LogEntry.objects.all()
