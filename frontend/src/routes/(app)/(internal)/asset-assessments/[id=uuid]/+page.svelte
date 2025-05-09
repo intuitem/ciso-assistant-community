@@ -28,7 +28,7 @@
 					{/each}
 				</div>
 			</div>
-			<div class="font-serif font-bold mt-4 mb-2">
+			<div class="font-serif font-bold mt-6 mb-2">
 				<i class="fa-solid fa-chart-line mr-2"></i>{m.impactOverTime()}
 			</div>
 			<LineHeatmap data={data.aaMetrics} />
