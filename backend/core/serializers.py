@@ -1067,6 +1067,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "associated_reference_controls",
                 "associated_threats",
                 "parent_requirement",
+                "questions",
             ]
 
     name = serializers.CharField(source="__str__")
@@ -1156,7 +1157,7 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "requirement",
             "selected",
             "mapping_inference",
-            "answer",
+            "answers",
             "evidences",
             "applied_controls",
         ]

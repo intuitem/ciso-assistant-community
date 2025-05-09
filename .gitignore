@@ -17,5 +17,4 @@ caddy_data/
 **/.meta
 charts/custom-values.yaml
 **/charts/*/charts
-*.bak
 charts/ciso-assistant-next/custom.yaml
