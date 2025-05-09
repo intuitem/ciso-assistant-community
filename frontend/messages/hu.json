@@ -920,5 +920,5 @@
 	"keepLocalLoginHelpText": "Amikor a globális 'Kényszerített SSO' engedélyezve van, ez lehetővé teszi a felhasználó számára, hogy megkerülje azt, és szükség esetén helyileg kezelt jelszóval jelentkezzen be.",
 	"forceSSOLogin": "SSO bejelentkezés kényszerítése",
 	"forceSSOLoginHelpText": "Kötelezővé teszi az SSO-t minden felhasználó számára, és visszaállítja az összes mentett jelszót. Azok a felhasználók, akiknél a 'Kizárás a kényszerített SSO-ból' engedélyezve van, megőrzik a jelszó alapú tartalék hozzáférést.",
-	"forceSSOLoginHelpText2": "⚠️ Győződjön meg róla, hogy az SSO működik, vagy hogy van tartalék fiókja, mielőtt engedélyezi ezt az opciót.",
+	"forceSSOLoginHelpText2": "⚠️ Győződjön meg róla, hogy az SSO működik, vagy hogy van tartalék fiókja, mielőtt engedélyezi ezt az opciót."
 }
