@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             name="keep_local_login",
             field=models.BooleanField(
                 default=False,
-                help_text="If True allow the user to log in using the normal login form even with SSO enabled.",
+                help_text="If True allow the user to log in using the normal login form even with SSO forced.",
             ),
         ),
         migrations.RemoveField(

@@ -407,7 +407,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     keep_local_login = models.BooleanField(
         default=False,
         help_text=_(
-            "If True allow the user to log in using the normal login form even with SSO enabled."
+            "If True allow the user to log in using the normal login form even with SSO forced."
         ),
     )
     is_third_party = models.BooleanField(default=False)
