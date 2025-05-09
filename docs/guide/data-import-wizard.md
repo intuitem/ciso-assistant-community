@@ -190,6 +190,20 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 
 
+### Users
+
+
+
+**Supported fields**
+
+
+
+* email
+* first\_name
+* last\_name
+
+{% file src="../.gitbook/assets/sample005.xlsx" %}
+
 
 
 
