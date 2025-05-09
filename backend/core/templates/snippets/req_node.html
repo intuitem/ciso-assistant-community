@@ -35,17 +35,23 @@
           {{ node.assessments.requirement.get_description_translated }}
         </div>
       {% endif %} 
-      {% if node.assessments.answer %} 
-        {% for question in node.assessments.answer.questions %}
-          <div class="text-left w-full">
-            <p class="font-semibold">{{ question.text }}</p>
-            {% if question.answer %}
-              <span style="color: indigo">{{ question.answer }}</span>
-            {% else %}
-              <span style="color: gray"> {% trans "No answer" %}</span>
-            {% endif %}
-          </div>
-        {% endfor %} 
+      {% if node.assessments.answers %}
+        <div class="text-left w-full">
+          {% for key, value in node.assessments.answers.items %}
+                {% with question=node.assessments.requirement.questions|get_item:key %}
+                  <p class="font-semibold">{{ question.text }}</p>
+                  {% with answer=question|get_answers:value %}
+                    {% if answer|is_string %}
+                      <span style="color: indigo">{{ answer }}</span>
+                    {% elif answer|is_list %}
+                      <span style="color: indigo">{{ answer|join:", " }}</span>
+                    {% else %}
+                      <span style="color: gray"> {% trans "No answer" %}</span>
+                    {% endif %}
+                  {% endwith %}
+                {% endwith %}
+          {% endfor %}
+        </div>
       {% endif %} 
       {% if node.assessments.observation %}
           <div class="text-left w-full">

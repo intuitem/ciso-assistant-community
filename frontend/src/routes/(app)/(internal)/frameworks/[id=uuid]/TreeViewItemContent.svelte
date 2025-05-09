@@ -56,9 +56,9 @@
 				{#if description}
 					<p>{description}</p>
 				{/if}
-			{:else if node.question && node.question.questions && node.question.questions[0]}
-				<!-- This only displays the first question -->
-				{node.question.questions[0].text}
+			{:else if Object.keys(node.questions).length > 0}
+				<!-- This displays the first question's text -->
+				{Object.entries(node.questions)[0][1].text}
 			{/if}
 		</p>
 	</span>
