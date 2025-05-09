@@ -1500,5 +1500,6 @@
 	"update": "Update",
 	"delete": "Delete",
 	"changeStatus": "Change status",
-	"errorUpdatungObject": "An error occurred while updating the {object} object."
+	"errorUpdatungObject": "An error occurred while updating the {object} object.",
+	"logEntryRepr": "{timestamp} - {actor} - {action} - {object}"
 }
