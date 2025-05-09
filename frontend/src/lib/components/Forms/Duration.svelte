@@ -100,6 +100,7 @@
 					<label class="text-sm" for={field}>{safeTranslate(timeUnit.unit)}</label>
 					<input
 						type="number"
+						min="0"
 						class="{'input ' + _class} {classesTextField($errors)}"
 						data-testid="form-input-{field.replaceAll('_', '-')}"
 						name={field}
