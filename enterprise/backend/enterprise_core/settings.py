@@ -183,6 +183,7 @@ INSTALLED_APPS = [
     "tprm",
     "ebios_rm",
     "privacy",
+    "resilience",
     "core",
     "cal",
     "django_filters",

@@ -20,6 +20,9 @@
 	export let disabled = false;
 	export let required = false;
 
+	// NEW: Allow customization of which time units to display
+	export let enabledUnits: string[] = ['hours', 'minutes', 'seconds'];
+
 	label = label ?? field;
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
@@ -30,13 +33,20 @@
 		value: number;
 	}
 
-	const _timeUnits: TimeUnit[] = [
+	// Define all possible time units
+	const allTimeUnits: TimeUnit[] = [
 		{ unit: 'days', secondsMultiplier: 86400, enabled: false, value: 0 },
-		{ unit: 'hours', secondsMultiplier: 3600, enabled: true, value: 0 },
-		{ unit: 'minutes', secondsMultiplier: 60, enabled: true, value: 0 },
-		{ unit: 'seconds', secondsMultiplier: 1, enabled: true, value: 0 },
+		{ unit: 'hours', secondsMultiplier: 3600, enabled: false, value: 0 },
+		{ unit: 'minutes', secondsMultiplier: 60, enabled: false, value: 0 },
+		{ unit: 'seconds', secondsMultiplier: 1, enabled: false, value: 0 },
 		{ unit: 'milliseconds', secondsMultiplier: 0.001, enabled: false, value: 0 }
 	];
+
+	// Enable only the units specified in the enabledUnits prop
+	const _timeUnits = allTimeUnits.map((unit) => ({
+		...unit,
+		enabled: enabledUnits.includes(unit.unit)
+	}));
 
 	function setInitialTimeUnitValues(value: number, units: TimeUnit[]): TimeUnit[] {
 		let remainingValue = value;
@@ -90,6 +100,7 @@
 					<label class="text-sm" for={field}>{safeTranslate(timeUnit.unit)}</label>
 					<input
 						type="number"
+						min="0"
 						class="{'input ' + _class} {classesTextField($errors)}"
 						data-testid="form-input-{field.replaceAll('_', '-')}"
 						name={field}
