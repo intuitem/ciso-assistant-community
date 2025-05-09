@@ -687,7 +687,7 @@ class LibraryUpdater:
                 # Ensure all needed fields are included
                 fields_to_update = sorted(
                     all_fields_to_update.union(
-                        {"name", "description", "order_id", "question"}
+                        {"name", "description", "order_id", "questions"}
                     )
                 )
                 RequirementNode.objects.bulk_update(
@@ -698,7 +698,7 @@ class LibraryUpdater:
 
             if assessments_to_update:
                 RequirementAssessment.objects.bulk_update(
-                    assessments_to_update, ["answer"], batch_size=100
+                    assessments_to_update, ["answers"], batch_size=100
                 )
 
             if assessments_to_create:
@@ -3834,7 +3834,7 @@ class ComplianceAssessment(Assessment):
             include_non_assessable=False
         )
         for ra in requirement_assessments:
-            if ra.requirement.question:
+            if ra.requirement.questions:
                 return True
         return False
 
