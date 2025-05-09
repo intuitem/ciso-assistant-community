@@ -30,24 +30,18 @@
 
 <p>
 
-{% trans "You have been granted access to CISO Assistant. To get started, use the button below to define your password:" %}
+{% trans "You have been granted access to CISO Assistant. To get started, connect to the following button and use SSO login." %}
 
 </p>
 
 <p>
-<a href="{{ root_url }}/first-connexion?uidb64={{ uid }}&token={{ token }}" role="button" data-testid="set-password-btn"> {% trans "Set my password" %}</a>
+<a href="{{ root_url }}" role="button" data-testid="redirect-btn"> {% trans "Connect to CISO Assistant" %}</a>
 </p>
 
 <p>{% trans "An issue with the link? copy and paste the following in your browser" %}:</p>
 
 <p>
-    {{ root_url }}/first-connexion?uidb64={{ uid }}&token={{ token }}
-</p>
-
-<p>
-
-{% trans "This link can only be used once. In case of an issue, you can access your instance" %} <a href="{{root_url}}"><b>{% trans "here" %}</b></a>  {% trans "and request a password reset"%}.
-
+    {{ root_url }}
 </p>
 
 <p>

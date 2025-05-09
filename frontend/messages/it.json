@@ -1293,6 +1293,7 @@
 	"keepLocalLogin": "Mantieni accesso locale",
 	"keepLocalLoginHelpText": "Mantieni l'accesso locale dell'utente.",
 	"forceSSOLogin": "Forza accesso SSO",
-	"forceSSOLoginHelpText": "Forza l'accesso SSO e reimposta le password salvate per tutti gli utenti. Gli utenti con l'opzione \"mantieni accesso locale\" attivata vengono ignorati per avere un accesso di fallback. ⚠️ Assicurati di avere un accesso di fallback o che il tuo SSO sia già funzionante prima di abilitare questa opzione.",
+	"forceSSOLoginHelpText": "Forza l'accesso SSO e reimposta le password salvate per tutti gli utenti. Gli utenti con l'opzione \"mantieni accesso locale\" attivata vengono ignorati per avere un accesso di fallback.",
+	"forceSSOLoginHelpText2": "⚠️ Assicurati di avere un accesso di fallback o che il tuo SSO sia già funzionante prima di abilitare questa opzione.",
 	"taskScheduleWarning": "Qualsiasi attività che non fa parte del nuovo programma verrà eliminata in modo permanente"
 }

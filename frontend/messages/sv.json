@@ -909,6 +909,7 @@
 	"keepLocalLogin": "Behåll lokal inloggning",
 	"keepLocalLoginHelpText": "Behåll användarens lokala inloggning.",
 	"forceSSOLogin": "Tvinga SSO-inloggning",
-	"forceSSOLoginHelpText": "Tvinga SSO-inloggning och återställ sparade lösenord för alla användare. Användare med flaggan \"behåll lokal inloggning\" aktiverad hoppas över för att ha en reservåtkomst. ⚠️ Se till att du har en reservåtkomst eller att din SSO redan är funktionell innan du aktiverar detta alternativ.",
+	"forceSSOLoginHelpText": "Tvinga SSO-inloggning och återställ sparade lösenord för alla användare. Användare med flaggan \"behåll lokal inloggning\" aktiverad hoppas över för att ha en reservåtkomst.",
+	"forceSSOLoginHelpText2": "⚠️ Se till att du har en reservåtkomst eller att din SSO redan är funktionell innan du aktiverar detta alternativ.",
 	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent"
 }

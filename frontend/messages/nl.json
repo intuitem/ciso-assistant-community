@@ -914,7 +914,8 @@
 	"keepLocalLogin": "Lokale login behouden",
 	"keepLocalLoginHelpText": "Behoud de lokale login van de gebruiker.",
 	"forceSSOLogin": "SSO-login afdwingen",
-	"forceSSOLoginHelpText": "SSO-login afdwingen en opgeslagen wachtwoorden voor alle gebruikers resetten. Gebruikers met de optie \"lokale login behouden\" ingeschakeld worden overgeslagen om een back-up toegang te hebben. ⚠️ Zorg ervoor dat u een back-up toegang heeft of dat uw SSO al functioneel is voordat u deze optie inschakelt.",
+	"forceSSOLoginHelpText": "SSO-login afdwingen en opgeslagen wachtwoorden voor alle gebruikers resetten. Gebruikers met de optie \"lokale login behouden\" ingeschakeld worden overgeslagen om een back-up toegang te hebben.",
+	"forceSSOLoginHelpText2": "⚠️ Zorg ervoor dat u een back-up toegang heeft of dat uw SSO al functioneel is voordat u deze optie inschakelt.",
 	"youCanSetPasswordHere": "Je kunt hier je wachtwoord instellen.",
 	"taskScheduleWarning": "Alle taken die niet deel uitmaken van het nieuwe schema zullen permanent worden verwijderd"
 }

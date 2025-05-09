@@ -902,7 +902,8 @@
 	"keepLocalLogin": "Zachovat místní přihlášení",
 	"keepLocalLoginHelpText": "Zachovat místní přihlášení uživatele.",
 	"forceSSOLogin": "Vynutit SSO přihlášení",
-	"forceSSOLoginHelpText": "Vynutit SSO přihlášení a resetovat uložená hesla pro všechny uživatele. Uživatelé s aktivovanou volbou \"zachovat místní přihlášení\" jsou přeskočeni pro zajištění záložního přístupu. ⚠️ Před povolením této možnosti se ujistěte, že máte záložní přístup nebo že vaše SSO již funguje.",
+	"forceSSOLoginHelpText": "Vynutit SSO přihlášení a resetovat uložená hesla pro všechny uživatele. Uživatelé s aktivovanou volbou \"zachovat místní přihlášení\" jsou přeskočeni pro zajištění záložního přístupu.",
+	"forceSSOLoginHelpText2": "⚠️ Před povolením této možnosti se ujistěte, že máte záložní přístup nebo že vaše SSO již funguje.",
 	"youCanSetPasswordHere": "Zde si můžete nastavit heslo.",
 	"taskScheduleWarning": "Jakékoli úlohy, které nejsou součástí nového rozvrhu, budou trvale smazány"
 }

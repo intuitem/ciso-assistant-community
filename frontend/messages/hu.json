@@ -918,5 +918,6 @@
 	"keepLocalLogin": "Helyi bejelentkezés megtartása",
 	"keepLocalLoginHelpText": "A felhasználó helyi bejelentkezésének megtartása.",
 	"forceSSOLogin": "SSO bejelentkezés kényszerítése",
-	"forceSSOLoginHelpText": "Kényszerítse az SSO bejelentkezést, és állítsa vissza a mentett jelszavakat minden felhasználó számára. Azok a felhasználók, akiknél a \"helyi bejelentkezés megtartása\" jelölőnégyzet be van állítva, kihagyásra kerülnek, hogy legyen tartalék hozzáférésük. ⚠️ Győződjön meg róla, hogy rendelkezik tartalék hozzáféréssel, vagy hogy az SSO már működik, mielőtt engedélyezi ezt az opciót."
+	"forceSSOLoginHelpText": "Kényszerítse az SSO bejelentkezést, és állítsa vissza a mentett jelszavakat minden felhasználó számára. Azok a felhasználók, akiknél a \"helyi bejelentkezés megtartása\" jelölőnégyzet be van állítva, kihagyásra kerülnek, hogy legyen tartalék hozzáférésük.",
+	"forceSSOLoginHelpText2": "⚠️ Győződjön meg róla, hogy rendelkezik tartalék hozzáféréssel, vagy hogy az SSO már működik, mielőtt engedélyezi ezt az opciót."
 }

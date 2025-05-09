@@ -910,7 +910,8 @@
 	"keepLocalLogin": "Păstrează autentificarea locală",
 	"keepLocalLoginHelpText": "Păstrează autentificarea locală a utilizatorului.",
 	"forceSSOLogin": "Forțează autentificarea SSO",
-	"forceSSOLoginHelpText": "Forțează autentificarea SSO și resetează parolele salvate pentru toți utilizatorii. Utilizatorii cu opțiunea \"păstrează autentificarea locală\" activată sunt omisi pentru a avea un acces de rezervă. ⚠️ Asigură-te că ai un acces de rezervă sau că SSO-ul tău este deja funcțional înainte de a activa această opțiune.",
+	"forceSSOLoginHelpText": "Forțează autentificarea SSO și resetează parolele salvate pentru toți utilizatorii. Utilizatorii cu opțiunea \"păstrează autentificarea locală\" activată sunt omisi pentru a avea un acces de rezervă.",
+	"forceSSOLoginHelpText2": "⚠️ Asigură-te că ai un acces de rezervă sau că SSO-ul tău este deja funcțional înainte de a activa această opțiune.",
 	"youCanSetPasswordHere": "Puteți seta parola dvs. aici.",
 	"taskScheduleWarning": "Orice sarcini care nu fac parte din noul program vor fi șterse definitiv"
 }

@@ -1103,6 +1103,7 @@
 	"keepLocalLogin": "Pertahankan login lokal",
 	"keepLocalLoginHelpText": "Pertahankan login lokal pengguna.",
 	"forceSSOLogin": "Paksa login SSO",
-	"forceSSOLoginHelpText": "Paksa login SSO dan atur ulang kata sandi yang disimpan untuk semua pengguna. Pengguna dengan flag \"pertahankan login lokal\" akan dilewati untuk memiliki akses cadangan. ⚠️ Pastikan Anda memiliki akses cadangan atau SSO Anda sudah berfungsi sebelum mengaktifkan opsi ini.",
+	"forceSSOLoginHelpText": "Paksa login SSO dan atur ulang kata sandi yang disimpan untuk semua pengguna. Pengguna dengan flag \"pertahankan login lokal\" akan dilewati untuk memiliki akses cadangan.",
+	"forceSSOLoginHelpText2": "⚠️ Pastikan Anda memiliki akses cadangan atau SSO Anda sudah berfungsi sebelum mengaktifkan opsi ini.",
 	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini."
 }

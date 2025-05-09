@@ -911,7 +911,8 @@
 	"keepLocalLogin": "Manter login local",
 	"keepLocalLoginHelpText": "Manter o login local do utilizador.",
 	"forceSSOLogin": "Forçar login SSO",
-	"forceSSOLoginHelpText": "Forçar o login SSO e redefinir as palavras-passe guardadas para todos os utilizadores. Os utilizadores com a opção \"manter login local\" ativada são ignorados para ter um acesso alternativo. ⚠️ Certifique-se de que tem um acesso alternativo ou que o seu SSO já está funcional antes de ativar esta opção.",
+	"forceSSOLoginHelpText": "Forçar o login SSO e redefinir as palavras-passe guardadas para todos os utilizadores. Os utilizadores com a opção \"manter login local\" ativada são ignorados para ter um acesso alternativo.",
+	"forceSSOLoginHelpText2": "⚠️ Certifique-se de que tem um acesso alternativo ou que o seu SSO já está funcional antes de ativar esta opção.",
 	"youCanSetPasswordHere": "Você pode definir sua senha aqui.",
 	"taskScheduleWarning": "Qualquer tarefa que não faça parte do novo cronograma será excluída permanentemente"
 }

@@ -918,7 +918,8 @@
 	"keepLocalLogin": "Mantener inicio de sesión local",
 	"keepLocalLoginHelpText": "Mantener el inicio de sesión local del usuario.",
 	"forceSSOLogin": "Forzar inicio de sesión SSO",
-	"forceSSOLoginHelpText": "Forzar el inicio de sesión SSO y restablecer las contraseñas guardadas para todos los usuarios. Los usuarios con la opción \"mantener inicio de sesión local\" activada se omiten para tener un acceso de respaldo. ⚠️ Asegúrese de tener un acceso de respaldo o que su SSO ya esté funcional antes de habilitar esta opción.",
+	"forceSSOLoginHelpText": "Forzar el inicio de sesión SSO y restablecer las contraseñas guardadas para todos los usuarios. Los usuarios con la opción \"mantener inicio de sesión local\" activada se omiten para tener un acceso de respaldo.",
+	"forceSSOLoginHelpText2": "⚠️ Asegúrese de tener un acceso de respaldo o que su SSO ya esté funcional antes de habilitar esta opción.",
 	"youCanSetPasswordHere": "Puede establecer su contraseña aquí.",
 	"taskScheduleWarning": "Si alguna tarea se encuentra fuera de la nueva programación, se eliminará permanentemente"
 }

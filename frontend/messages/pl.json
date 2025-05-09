@@ -912,6 +912,7 @@
 	"keepLocalLogin": "Zachowaj lokalne logowanie",
 	"keepLocalLoginHelpText": "Zachowaj lokalne logowanie użytkownika.",
 	"forceSSOLogin": "Wymuś logowanie SSO",
-	"forceSSOLoginHelpText": "Wymuś logowanie SSO i zresetuj zapisane hasła dla wszystkich użytkowników. Użytkownicy z włączoną opcją \"zachowaj lokalne logowanie\" są pomijani, aby zapewnić dostęp awaryjny. ⚠️ Upewnij się, że masz dostęp awaryjny lub że SSO już działa przed włączeniem tej opcji.",
+	"forceSSOLoginHelpText": "Wymuś logowanie SSO i zresetuj zapisane hasła dla wszystkich użytkowników. Użytkownicy z włączoną opcją \"zachowaj lokalne logowanie\" są pomijani, aby zapewnić dostęp awaryjny.",
+	"forceSSOLoginHelpText2": "⚠️ Upewnij się, że masz dostęp awaryjny lub że SSO już działa przed włączeniem tej opcji.",
 	"youCanSetPasswordHere": "Możesz ustawić swoje hasło tutaj."
 }
