@@ -6,7 +6,7 @@
 	import { getLocale } from '$paraglide/runtime';
 	import { m } from '$paraglide/messages';
 	import AuditCard from './AuditCard.svelte';
-	import ActivityTracker from './ActivityTracker.svelte';
+	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	const eta_span_class = { true: 'bg-orange-400 text-white' };

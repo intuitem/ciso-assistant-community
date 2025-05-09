@@ -774,6 +774,34 @@ export const listViewFields = {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
 	},
+	'business-impact-analysis': {
+		head: ['name', 'perimeter', 'status'],
+		body: ['name', 'perimeter', 'status']
+	},
+	'asset-assessments': {
+		head: [
+			'asset',
+			'bia',
+			'dependencies',
+			'associatedControls',
+			'recoveryDocumented',
+			'recoveryTested',
+			'recoveryTargetsMet'
+		],
+		body: [
+			'asset',
+			'bia',
+			'dependencies',
+			'associated_controls',
+			'recovery_documented',
+			'recovery_tested',
+			'recovery_targets_met'
+		]
+	},
+	'escalation-thresholds': {
+		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'justification'],
+		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'justification']
+	},
 	processings: {
 		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
 		body: ['name', 'description', 'status', 'legal_basis', 'nature', 'folder']
