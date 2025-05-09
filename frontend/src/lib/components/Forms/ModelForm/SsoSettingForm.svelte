@@ -15,7 +15,18 @@
 </script>
 
 <Accordion>
-	<Checkbox {form} field="is_enabled" label={m.enableSSO()} />
+	<Checkbox {form} field="is_enabled" label={m.enableSSO()} helpText={m.enableSSOHelpText()} />
+	<!-- Incomplete Translation -->
+	<Checkbox
+		{form}
+		field="force_sso"
+		label={m.forceSSOLogin()}
+		helpText={m.forceSSOLoginHelpText()}
+		disabled={!data.is_enabled}
+	/>
+	<span class="text-orange-500 italic text-sm"
+		><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.forceSSOLoginHelpText2()}</span
+	>
 	<AutocompleteSelect
 		{form}
 		hidden={model.selectOptions['provider'].length < 2}

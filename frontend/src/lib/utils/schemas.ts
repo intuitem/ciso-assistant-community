@@ -265,10 +265,14 @@ export const UserEditSchema = z.object({
 	first_name: z.string().optional(),
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
+	keep_local_login: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
-export const UserCreateSchema = z.object({ email: z.string().email() });
+export const UserCreateSchema = z.object({
+	email: z.string().email()
+});
+
 export const ChangePasswordSchema = z.object({
 	old_password: z.string(),
 	new_password: z.string(),
@@ -346,6 +350,7 @@ export const FeatureFlagsSchema = z.object({
 
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().optional(),
+	force_sso: z.boolean().optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string(),

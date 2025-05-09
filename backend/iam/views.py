@@ -85,6 +85,7 @@ class CurrentUserView(views.APIView):
             "permissions": request.user.permissions,
             "is_third_party": request.user.is_third_party,
             "is_admin": request.user.is_admin(),
+            "is_local": request.user.is_local,
             "accessible_domains": [str(f) for f in accessible_domains],
             "domain_permissions": RoleAssignment.get_permissions_per_folder(
                 principal=request.user, recursive=True
@@ -126,10 +127,9 @@ class PasswordResetView(views.APIView):
     @method_decorator(ensure_csrf_cookie)
     def post(self, request):
         email = request.data["email"]  # type: ignore
-        associated_users = User.objects.filter(email=email)
+        associated_user = User.objects.filter(email=email).first()
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
-            if associated_users and associated_users.exists():
-                associated_user = associated_users[0]
+            if associated_user is not None and associated_user.is_local:
                 try:
                     associated_user.mailing(
                         email_template_name="registration/password_reset_email.html",
@@ -179,7 +179,9 @@ class ResetPasswordConfirmView(views.APIView):
         token = serializer.validated_data.get("token")
         new_password = serializer.validated_data.get("new_password")
         user = self.get_user(uidb64)
-        if user is not None:
+        if (
+            user is not None and user.is_local
+        ):  # Only local user can reset their password.
             if self.token_generator.check_token(user, token):
                 user.set_password(new_password)
                 user.save()
