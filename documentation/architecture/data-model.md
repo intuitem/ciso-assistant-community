@@ -22,7 +22,7 @@ erDiagram
 
     USER {
         string  email
-        boolean is_sso
+        boolean keep_local_login
     }
 
     USER_GROUP {
@@ -1121,9 +1121,16 @@ Names of built-in objects can be internationalized.
 
 ## SSO
 
-A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
+Global SSO settings for the instance are defined in a dedicated object SSO_SETTINGS.
 
-SSO Settings are defined in a dedicated object SSO_SETTINGS.
+A user can be authenticated either locally or with SSO.
+
+When SSO is activated, all users can use SSO.
+
+When the force_sso global flag is set, all users without keep_local_login:
+- have their password disabled, 
+- cannot ask for a password reset,
+- cannot have their password changed by an administrator.
 
 ## TPRM evolution
 

@@ -1206,8 +1206,8 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	users: {
 		email: {
 			keys: {
-				is_sso: {
-					true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
+				keep_local_login: {
+					true: { text: 'Local', cssClasses: 'badge bg-violet-200' }
 				},
 				is_third_party: {
 					true: { text: 'Third party', cssClasses: 'badge bg-stone-200' }

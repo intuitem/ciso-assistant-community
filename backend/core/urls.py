@@ -96,6 +96,7 @@ for route in ROUTES:
         basename=ROUTES[route].get("basename"),
     )
 
+
 urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
