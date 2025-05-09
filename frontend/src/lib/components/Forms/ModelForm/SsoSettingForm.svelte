@@ -22,6 +22,7 @@
 		field="force_sso"
 		label={m.forceSSOLogin()}
 		helpText={m.forceSSOLoginHelpText()}
+		helpText2={m.forceSSOLoginHelpText2()}
 		disabled={!data.is_enabled}
 	/>
 	<AutocompleteSelect

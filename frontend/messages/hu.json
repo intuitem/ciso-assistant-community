@@ -914,10 +914,11 @@
 	"timestampCannotBeInTheFuture": "Az időbélyeg nem lehet a jövőben",
 	"youCanSetPasswordHere": "Itt állíthatja be a jelszavát.",
 	"taskScheduleWarning": "A nem az új ütemezés részét képező feladatok véglegesen törlődnek",
-	"enableSSOHelpText": "Engedélyezze az SSO-t minden felhasználó számára.",
-	"keepLocalLogin": "Helyi bejelentkezés megtartása",
-	"keepLocalLoginHelpText": "A felhasználó helyi bejelentkezésének megtartása.",
+	"userIsNotSSO": "Az SSO bejelentkezés jelenleg le van tiltva a fiókjához.",
+	"enableSSOHelpText": "Engedélyezze az SSO-t bejelentkezési lehetőségként minden felhasználó számára.",
+	"keepLocalLogin": "Kizárás a kényszerített SSO-ból",
+	"keepLocalLoginHelpText": "Amikor a globális 'Kényszerített SSO' engedélyezve van, ez lehetővé teszi a felhasználó számára, hogy megkerülje azt, és szükség esetén helyileg kezelt jelszóval jelentkezzen be.",
 	"forceSSOLogin": "SSO bejelentkezés kényszerítése",
-	"forceSSOLoginHelpText": "Kényszerítse az SSO bejelentkezést, és állítsa vissza a mentett jelszavakat minden felhasználó számára. Azok a felhasználók, akiknél a \"helyi bejelentkezés megtartása\" jelölőnégyzet be van állítva, kihagyásra kerülnek, hogy legyen tartalék hozzáférésük.",
-	"forceSSOLoginHelpText2": "⚠️ Győződjön meg róla, hogy rendelkezik tartalék hozzáféréssel, vagy hogy az SSO már működik, mielőtt engedélyezi ezt az opciót."
+	"forceSSOLoginHelpText": "Kötelezővé teszi az SSO-t minden felhasználó számára, és visszaállítja az összes mentett jelszót. Azok a felhasználók, akiknél a 'Kizárás a kényszerített SSO-ból' engedélyezve van, megőrzik a jelszó alapú tartalék hozzáférést.",
+	"forceSSOLoginHelpText2": "⚠️ Győződjön meg róla, hogy az SSO működik, vagy hogy van tartalék fiókja, mielőtt engedélyezi ezt az opciót.",
 }

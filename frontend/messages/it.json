@@ -1288,12 +1288,12 @@
 	"restriction": "Restrizione",
 	"erasureOrDestruction": "Cancellazione o distruzione",
 	"failedToContactProvider": "Impossibile contattare il fornitore",
-	"userIsNotSSO": "Il login SSO è attualmente disabilitato per il tuo account",
-	"enableSSOHelpText": "Abilita SSO per tutti gli utenti.",
-	"keepLocalLogin": "Mantieni accesso locale",
-	"keepLocalLoginHelpText": "Mantieni l'accesso locale dell'utente.",
+	"userIsNotSSO": "L'accesso SSO è attualmente disabilitato per il tuo account.",
+	"enableSSOHelpText": "Abilita SSO come opzione di accesso per tutti gli utenti.",
+	"keepLocalLogin": "Escludi dal SSO forzato",
+	"keepLocalLoginHelpText": "Quando il 'SSO forzato' globale è abilitato, ciò consente all'utente di bypassarlo e accedere utilizzando una password gestita localmente, se necessario.",
 	"forceSSOLogin": "Forza accesso SSO",
-	"forceSSOLoginHelpText": "Forza l'accesso SSO e reimposta le password salvate per tutti gli utenti. Gli utenti con l'opzione \"mantieni accesso locale\" attivata vengono ignorati per avere un accesso di fallback.",
-	"forceSSOLoginHelpText2": "⚠️ Assicurati di avere un accesso di fallback o che il tuo SSO sia già funzionante prima di abilitare questa opzione.",
+	"forceSSOLoginHelpText": "Richiedi SSO per tutti gli utenti e reimposta eventuali password salvate. Gli utenti con 'Escludi dal SSO forzato' abilitato manterranno l'accesso di fallback basato su password.",
+	"forceSSOLoginHelpText2": "⚠️ Assicurati che il tuo SSO sia funzionante o che tu abbia un account di fallback prima di abilitare questa opzione.",
 	"taskScheduleWarning": "Qualsiasi attività che non fa parte del nuovo programma verrà eliminata in modo permanente"
 }

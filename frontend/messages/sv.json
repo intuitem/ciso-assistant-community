@@ -904,12 +904,12 @@
 	"author": "Författare",
 	"timestampCannotBeInTheFuture": "Tidsstämpeln kan inte vara i framtiden",
 	"failedToContactProvider": "Misslyckades att kontakta leverantören",
-	"userIsNotSSO": "SSO-inloggning är för närvarande inaktiverad för ditt konto",
-	"enableSSOHelpText": "Aktivera SSO för alla användare.",
-	"keepLocalLogin": "Behåll lokal inloggning",
-	"keepLocalLoginHelpText": "Behåll användarens lokala inloggning.",
+	"userIsNotSSO": "SSO-inloggning är för närvarande inaktiverad för ditt konto.",
+	"enableSSOHelpText": "Aktivera SSO som ett inloggningsalternativ för alla användare.",
+	"keepLocalLogin": "Undanta från tvingad SSO",
+	"keepLocalLoginHelpText": "När global 'Tvingad SSO' är aktiverad tillåter detta användaren att kringgå det och logga in med ett lokalt hanterat lösenord om det behövs.",
 	"forceSSOLogin": "Tvinga SSO-inloggning",
-	"forceSSOLoginHelpText": "Tvinga SSO-inloggning och återställ sparade lösenord för alla användare. Användare med flaggan \"behåll lokal inloggning\" aktiverad hoppas över för att ha en reservåtkomst.",
-	"forceSSOLoginHelpText2": "⚠️ Se till att du har en reservåtkomst eller att din SSO redan är funktionell innan du aktiverar detta alternativ.",
+	"forceSSOLoginHelpText": "Kräv SSO för alla användare och återställ alla sparade lösenord. Användare med 'Undanta från tvingad SSO' aktiverat behåller lösenordsbaserad reservåtkomst.",
+	"forceSSOLoginHelpText2": "⚠️ Se till att din SSO fungerar eller att du har ett reservkonto innan du aktiverar detta alternativ.",
 	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent"
 }

@@ -7,6 +7,7 @@
 	export let field: string;
 	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
+	export let helpText2: string | undefined = undefined;
 	// The cachedValue isn't used in the ModelForm because we don't need it yet
 	export let cachedValue: boolean | undefined = undefined;
 	export let form: SuperForm<Record<string, boolean | undefined>>;
@@ -85,5 +86,8 @@
 	{/if}
 	{#if helpText}
 		<p class="text-sm text-gray-500">{helpText}</p>
+	{/if}
+	{#if helpText2}
+		<p class="text-sm text-gray-500">{helpText2}</p>
 	{/if}
 </div>

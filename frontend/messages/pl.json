@@ -907,12 +907,12 @@
 	"filterby": "Filtruj według",
 	"taskScheduleWarning": "Wszystkie zadania, które nie będą częścią nowego harmonogramu, zostaną trwale usunięte",
 	"failedToContactProvider": "Nie udało się skontaktować z dostawcą",
-	"userIsNotSSO": "Logowanie SSO jest obecnie wyłączone dla twojego konta",
-	"enableSSOHelpText": "Włącz SSO dla wszystkich użytkowników.",
-	"keepLocalLogin": "Zachowaj lokalne logowanie",
-	"keepLocalLoginHelpText": "Zachowaj lokalne logowanie użytkownika.",
+	"userIsNotSSO": "Logowanie SSO jest obecnie wyłączone dla Twojego konta.",
+	"enableSSOHelpText": "Włącz SSO jako opcję logowania dla wszystkich użytkowników.",
+	"keepLocalLogin": "Wyklucz z wymuszonego SSO",
+	"keepLocalLoginHelpText": "Gdy globalne 'Wymuszone SSO' jest włączone, pozwala to użytkownikowi je ominąć i zalogować się za pomocą lokalnie zarządzanego hasła, jeśli to konieczne.",
 	"forceSSOLogin": "Wymuś logowanie SSO",
-	"forceSSOLoginHelpText": "Wymuś logowanie SSO i zresetuj zapisane hasła dla wszystkich użytkowników. Użytkownicy z włączoną opcją \"zachowaj lokalne logowanie\" są pomijani, aby zapewnić dostęp awaryjny.",
-	"forceSSOLoginHelpText2": "⚠️ Upewnij się, że masz dostęp awaryjny lub że SSO już działa przed włączeniem tej opcji.",
+	"forceSSOLoginHelpText": "Wymagaj SSO dla wszystkich użytkowników i zresetuj zapisane hasła. Użytkownicy z włączoną opcją 'Wyklucz z wymuszonego SSO' zachowają dostęp awaryjny oparty na haśle.",
+	"forceSSOLoginHelpText2": "⚠️ Upewnij się, że Twoje SSO działa lub że masz konto awaryjne przed włączeniem tej opcji.",
 	"youCanSetPasswordHere": "Możesz ustawić swoje hasło tutaj."
 }
