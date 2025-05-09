@@ -627,16 +627,13 @@ class LibraryUpdater:
                         elif type == "unique_choice":
                             # If the answer does not match a valid choice, reset it to None
                             valid_choices = {
-                                choice["urn"]
-                                for choice in question.get("choices", [])
+                                choice["urn"] for choice in question.get("choices", [])
                             }
                             if isinstance(answer_val, list):
                                 answers[urn] = None
                             else:
                                 answers[urn] = (
-                                    answer_val
-                                    if answer_val in valid_choices
-                                    else None
+                                    answer_val if answer_val in valid_choices else None
                                 )
 
                         elif type == "text":
