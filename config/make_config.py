@@ -62,7 +62,7 @@ def get_config():
 
     # Proxy selection
     config["proxy"] = questionary.select(
-        "Choose a proxy", choices=["caddy", "traefik"], default="caddy"
+        "Choose a proxy", choices=["caddy", "traefik", "bunkerweb"], default="caddy"
     ).ask()
 
     # Email configuration
@@ -194,7 +194,7 @@ def generate_compose_file(config):
             "[yellow]Expected template name format: docker-compose-local-<db>-<proxy>.yml.j2[/yellow]"
         )
         print("[yellow]Where <db> is one of: sqlite, postgresql[/yellow]")
-        print("[yellow]And <proxy> is one of: caddy, traefik[/yellow]")
+        print("[yellow]And <proxy> is one of: caddy, traefik, bunkerweb[/yellow]")
         raise e
 
     # Render template with configuration
@@ -250,6 +250,8 @@ def main():
         print("2. Ensure your certificate files are in place:")
         print(f"   - Certificate: {config['cert_config']['cert_path']}")
         print(f"   - Private key: {config['cert_config']['key_path']}")
+        if config["proxy"] == "bunkerweb":
+            print(f"   - You will need to adjust the ownership of the files to the user running the BunkerWeb container: chown 101:101 {config['cert_config']['cert_path']} {config['cert_config']['key_path']}")
     if config["db"] == "postgresql":
         print("3. Make sure PostgreSQL passwords are properly set")
     if config["need_mailer"]:
