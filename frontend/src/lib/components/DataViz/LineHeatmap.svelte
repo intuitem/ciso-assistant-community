@@ -1,12 +1,13 @@
 <script lang="ts">
-	export let data;
+	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	export let data;
 </script>
 
 <div class="flex w-full border">
 	{#if !data || data.length === 0}
 		<div class="p-4 text-center w-full text-gray-500">
-			{safeTranslate('noDataAvailable')}
+			{m.noDataAvailable()}
 		</div>
 	{:else}
 		{#each data as entry}

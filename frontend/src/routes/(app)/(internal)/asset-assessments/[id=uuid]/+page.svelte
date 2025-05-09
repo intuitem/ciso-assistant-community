@@ -11,15 +11,15 @@
 		<div class="card p-4 bg-gray-50 shadow-sm flex-grow">
 			<div class="grid grid-cols-2">
 				<div class="w-1/2">
-					<div class="font-serif font-bold mb-2">
-						<i class="fa-solid fa-bullseye mr-2"></i>{m.disasterRecoveryObjectives()}
+					<div class="font-serif font-bold mb-2 capitalize">
+						<i class="fa-solid fa-bullseye mr-2"></i>{m.recoveryIndicators()}
 					</div>
 					{#each data.asset.disaster_recovery_objectives as objective}
 						<div class="uppercase">{objective.str}</div>
 					{/each}
 				</div>
 				<div class="w-1/2">
-					<div class="font-serif font-bold mb-2">
+					<div class="font-serif font-bold mb-2 capitalize">
 						<i class="fa-solid fa-shield-halved mr-2"></i>
 						{m.securityObjectives()}
 					</div>
@@ -29,7 +29,7 @@
 				</div>
 			</div>
 			<div class="font-serif font-bold mt-4 mb-2">
-				<i class="fa-solid fa-chart-line mr-2"></i>Impact over time
+				<i class="fa-solid fa-chart-line mr-2"></i>{m.impactOverTime()}
 			</div>
 			<LineHeatmap data={data.aaMetrics} />
 		</div>

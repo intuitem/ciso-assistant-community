@@ -150,7 +150,9 @@ class AssetAssessment(AbstractBaseModel, FolderMixin):
         return str(self.asset)
 
     def metrics(self):
-        thresholds = EscalationThreshold.objects.filter(asset_assessment=self)
+        thresholds = EscalationThreshold.objects.filter(asset_assessment=self).order_by(
+            "point_in_time"
+        )
         res = [
             {"pit": et.get_human_pit, "impact": et.get_impact_display}
             for et in thresholds

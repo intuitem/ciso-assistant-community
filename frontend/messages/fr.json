@@ -1503,13 +1503,14 @@
 	"quantUnit": "Unité",
 	"rationale": "Justification",
 	"escalationThresholds": "Seuils BIA",
-	"associatedEscalationThresholds": "Pas",
-	"addEscalationThreshold": "Rajouter un pas",
+	"associatedEscalationThresholds": "Seuils",
+	"addEscalationThreshold": "Rajouter un seuil",
 	"recoveryDocumented": "Restauration documentée",
 	"recoveryTested": "Restauration testée",
 	"recoveryTargetsMet": "Objectifs de restauration atteints",
 	"impactOverTime": "Impact dans le temps",
 	"recoveryInsights": "Métriques de restauration",
+	"recoveryIndicators": "Indicateurs de restauration",
 	"assetsManagement": "Gestion des actifs",
 	"time": "temps"
 }
