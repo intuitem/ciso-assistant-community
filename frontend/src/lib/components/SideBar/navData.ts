@@ -68,11 +68,6 @@ export const navData = {
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
-				},
-				{
-					name: 'assets',
-					fa_icon: 'fa-solid fa-gem',
-					href: '/assets'
 				}
 			]
 		},
@@ -103,6 +98,26 @@ export const navData = {
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
+				}
+			]
+		},
+		{
+			name: 'assetsManagement',
+			items: [
+				{
+					name: 'assets',
+					fa_icon: 'fa-solid fa-gem',
+					href: '/assets'
+				},
+				{
+					name: 'businessImpactAnalysis',
+					fa_icon: 'fa-solid fa-arrows-to-eye',
+					href: '/business-impact-analysis',
+					permissions: [
+						'view_businessimpactanalysis',
+						'view_assetassessment',
+						'view_escalationthreshold'
+					]
 				}
 			]
 		},
@@ -302,6 +317,12 @@ export const navData = {
 					name: 'settings',
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
+					permissions: ['change_globalsettings']
+				},
+				{
+					name: 'dataWizard',
+					fa_icon: 'fa-solid fa-hat-wizard',
+					href: '/experimental/data-wizard',
 					permissions: ['change_globalsettings']
 				},
 				{

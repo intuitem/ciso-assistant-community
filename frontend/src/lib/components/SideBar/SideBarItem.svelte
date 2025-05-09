@@ -23,7 +23,11 @@
 			)}"
 			data-testid={'accordion-item-' + item.href.substring(1)}
 		>
-			<span class="px-4 flex items-center w-full space-x-2 text-xs" id={item.name}>
+			<span
+				class="px-4 flex items-center w-full space-x-2 text-xs"
+				id={item.name}
+				title={safeTranslate(item.name)}
+			>
 				<i class="{item.fa_icon} w-1/12" />
 				<span class="text-sm tracking-wide truncate">{safeTranslate(item.name)}</span>
 			</span>

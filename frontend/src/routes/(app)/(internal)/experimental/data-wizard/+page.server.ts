@@ -9,7 +9,7 @@ export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/folders/get_accessible_objects/`;
 	const res = await fetch(endpoint);
 	const data = await res.json();
-	return { data: data, title: 'Data import wizard' };
+	return { data: data, title: m.dataWizard() };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
