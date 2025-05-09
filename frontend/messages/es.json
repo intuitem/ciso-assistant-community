@@ -923,7 +923,7 @@
 	"keepLocalLoginHelpText": "Cuando el 'SSO forzado' global está habilitado, esto permite al usuario omitirlo e iniciar sesión usando una contraseña gestionada localmente si es necesario.",
 	"forceSSOLogin": "Forzar inicio de sesión SSO",
 	"forceSSOLoginHelpText": "Requerir SSO para todos los usuarios y restablecer cualquier contraseña guardada. Los usuarios con 'Excluir del SSO forzado' habilitado conservarán el acceso de respaldo basado en contraseña.",
-	"forceSSOLoginHelpText2": "⚠️ Asegúrese de que su SSO funcione o que tenga una cuenta de respaldo antes de habilitar esta opción.",
+	"forceSSOLoginHelpText2": "Asegúrese de que su SSO funcione o que tenga una cuenta de respaldo antes de habilitar esta opción.",
 	"youCanSetPasswordHere": "Puede establecer su contraseña aquí.",
 	"taskScheduleWarning": "Si alguna tarea se encuentra fuera de la nueva programación, se eliminará permanentemente"
 }

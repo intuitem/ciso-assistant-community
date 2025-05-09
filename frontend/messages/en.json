@@ -1476,7 +1476,7 @@
 	"keepLocalLoginHelpText": "When global 'Force SSO' is enabled, this allows the user to bypass it and log in using a locally managed password if needed.",
 	"forceSSOLogin": "Force SSO login",
 	"forceSSOLoginHelpText": "Require SSO for all users and reset any saved passwords. Users with 'Exclude from forced SSO' enabled will retain password-based fallback access.",
-	"forceSSOLoginHelpText2": "⚠️ Ensure your SSO is functional or that you have a fallback account before enabling this option.",
+	"forceSSOLoginHelpText2": "Ensure your SSO is functional or that you have a fallback account before enabling this option.",
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
 	"featureFlags": "Feature flags",

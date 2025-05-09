@@ -913,6 +913,6 @@
 	"keepLocalLoginHelpText": "Gdy globalne 'Wymuszone SSO' jest włączone, pozwala to użytkownikowi je ominąć i zalogować się za pomocą lokalnie zarządzanego hasła, jeśli to konieczne.",
 	"forceSSOLogin": "Wymuś logowanie SSO",
 	"forceSSOLoginHelpText": "Wymagaj SSO dla wszystkich użytkowników i zresetuj zapisane hasła. Użytkownicy z włączoną opcją 'Wyklucz z wymuszonego SSO' zachowają dostęp awaryjny oparty na haśle.",
-	"forceSSOLoginHelpText2": "⚠️ Upewnij się, że Twoje SSO działa lub że masz konto awaryjne przed włączeniem tej opcji.",
+	"forceSSOLoginHelpText2": "Upewnij się, że Twoje SSO działa lub że masz konto awaryjne przed włączeniem tej opcji.",
 	"youCanSetPasswordHere": "Możesz ustawić swoje hasło tutaj."
 }

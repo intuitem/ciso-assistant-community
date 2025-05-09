@@ -1203,6 +1203,6 @@
 	"keepLocalLoginHelpText": "Når global 'Tvungen SSO' er aktiveret, tillader dette brugeren at omgå det og logge ind med en lokalt administreret adgangskode, hvis nødvendigt.",
 	"forceSSOLogin": "Tving SSO-login",
 	"forceSSOLoginHelpText": "Kræv SSO for alle brugere og nulstil alle gemte adgangskoder. Brugere med 'Udeluk fra tvungen SSO' aktiveret vil bevare adgang med adgangskode som en fallback.",
-	"forceSSOLoginHelpText2": "⚠️ Sørg for, at din SSO fungerer, eller at du har en fallback-konto, før du aktiverer denne mulighed.",
+	"forceSSOLoginHelpText2": "Sørg for, at din SSO fungerer, eller at du har en fallback-konto, før du aktiverer denne mulighed.",
 	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet"
 }

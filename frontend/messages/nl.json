@@ -919,7 +919,7 @@
 	"keepLocalLoginHelpText": "Wanneer de globale 'Geforceerde SSO' is ingeschakeld, stelt dit de gebruiker in staat om het te omzeilen en in te loggen met een lokaal beheerd wachtwoord indien nodig.",
 	"forceSSOLogin": "SSO-login afdwingen",
 	"forceSSOLoginHelpText": "SSO vereisen voor alle gebruikers en opgeslagen wachtwoorden resetten. Gebruikers met 'Uitsluiten van geforceerde SSO' ingeschakeld behouden toegang via wachtwoord als back-up.",
-	"forceSSOLoginHelpText2": "⚠️ Zorg ervoor dat uw SSO functioneel is of dat u een back-upaccount heeft voordat u deze optie inschakelt.",
+	"forceSSOLoginHelpText2": "Zorg ervoor dat uw SSO functioneel is of dat u een back-upaccount heeft voordat u deze optie inschakelt.",
 	"youCanSetPasswordHere": "Je kunt hier je wachtwoord instellen.",
 	"taskScheduleWarning": "Alle taken die niet deel uitmaken van het nieuwe schema zullen permanent worden verwijderd"
 }

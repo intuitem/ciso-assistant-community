@@ -22,9 +22,11 @@
 		field="force_sso"
 		label={m.forceSSOLogin()}
 		helpText={m.forceSSOLoginHelpText()}
-		helpText2={m.forceSSOLoginHelpText2()}
 		disabled={!data.is_enabled}
 	/>
+	<span class="text-orange-500 italic text-sm"
+		><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.forceSSOLoginHelpText2()}</span
+	>
 	<AutocompleteSelect
 		{form}
 		hidden={model.selectOptions['provider'].length < 2}

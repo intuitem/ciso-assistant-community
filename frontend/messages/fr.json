@@ -1471,7 +1471,7 @@
 	"keepLocalLoginHelpText": "Lorsque le 'SSO forcé' global est activé, cela permet à l'utilisateur de le contourner et de se connecter en utilisant un mot de passe géré localement si nécessaire.",
 	"forceSSOLogin": "Forcer la connexion SSO",
 	"forceSSOLoginHelpText": "Exiger le SSO pour tous les utilisateurs et réinitialiser tous les mots de passe enregistrés. Les utilisateurs avec 'Exclure du SSO forcé' activé conserveront un accès de secours basé sur un mot de passe.",
-	"forceSSOLoginHelpText2": "⚠️ Assurez-vous que votre SSO fonctionne ou que vous disposez d'un compte de secours avant d'activer cette option.",
+	"forceSSOLoginHelpText2": "Assurez-vous que votre SSO fonctionne ou que vous disposez d'un compte de secours avant d'activer cette option.",
 	"lastOccurrenceStatus": "Statut de la dernière occurrence",
 	"nextOccurrence": "Prochaine occurrence",
 	"taskTemplate": "Tâche",

@@ -907,7 +907,7 @@
 	"keepLocalLoginHelpText": "Když je globální 'Vynucené SSO' povoleno, toto umožňuje uživateli jej obejít a přihlásit se pomocí lokálně spravovaného hesla, pokud je to potřeba.",
 	"forceSSOLogin": "Vynutit přihlášení SSO",
 	"forceSSOLoginHelpText": "Vyžadovat SSO pro všechny uživatele a resetovat všechna uložená hesla. Uživatelé s povolenou možností 'Vyloučit z vynuceného SSO' si zachovají přístup pomocí hesla jako záložní možnost.",
-	"forceSSOLoginHelpText2": "⚠️ Ujistěte se, že vaše SSO funguje nebo že máte záložní účet před povolením této možnosti.",
+	"forceSSOLoginHelpText2": "Ujistěte se, že vaše SSO funguje nebo že máte záložní účet před povolením této možnosti.",
 	"youCanSetPasswordHere": "Zde si můžete nastavit heslo.",
 	"taskScheduleWarning": "Jakékoli úlohy, které nejsou součástí nového rozvrhu, budou trvale smazány"
 }

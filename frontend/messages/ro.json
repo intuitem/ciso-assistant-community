@@ -915,7 +915,7 @@
 	"keepLocalLoginHelpText": "Când 'SSO forțat' global este activat, acest lucru permite utilizatorului să îl ocolească și să se autentifice folosind o parolă gestionată local, dacă este necesar.",
 	"forceSSOLogin": "Forțați autentificarea SSO",
 	"forceSSOLoginHelpText": "Solicitați SSO pentru toți utilizatorii și resetați parolele salvate. Utilizatorii cu 'Excludeți din SSO forțat' activat vor păstra accesul de rezervă bazat pe parolă.",
-	"forceSSOLoginHelpText2": "⚠️ Asigurați-vă că SSO-ul dvs. funcționează sau că aveți un cont de rezervă înainte de a activa această opțiune.",
+	"forceSSOLoginHelpText2": "Asigurați-vă că SSO-ul dvs. funcționează sau că aveți un cont de rezervă înainte de a activa această opțiune.",
 	"youCanSetPasswordHere": "Puteți seta parola dvs. aici.",
 	"taskScheduleWarning": "Orice sarcini care nu fac parte din noul program vor fi șterse definitiv"
 }
