@@ -59,42 +59,20 @@ def match_urn(urn_string):
         return None
 
 
-def transform_question_to_answer(json_data):
+def transform_questions_to_answers(questions):
     """
-    Used during Requirement Assessment creation to create a questionnaire base on
-    the Requirement Node question JSON field
+    Used during Requirement Assessment creation to prepare the answers from the questions
 
     Args:
-        json_data (json): JSON describing a questionnaire from a Requirement Node
+        questions (json): the questions from the requirement
 
     Returns:
-        json: JSON formatted for the frontend to display a form
+        json: the answers formatted as a json
     """
-    question_type = json_data.get("question_type", "")
-    question_choices = json_data.get("question_choices", [])
-    questions = json_data.get("questions", [])
-
-    form_fields = []
-
-    for question in questions:
-        field = {}
-        field["urn"] = question.get("urn", "")
-        field["text"] = question.get("text", "")
-
-        if question_type == "unique_choice":
-            field["type"] = "unique_choice"
-            field["options"] = question_choices
-        elif question_type == "date":
-            field["type"] = "date"
-        else:
-            field["type"] = "text"
-
-        field["answer"] = ""
-
-        form_fields.append(field)
-
-    form_json = {"questions": form_fields}
-    return form_json
+    answers = {}
+    for question_urn, question in questions.items():
+        answers[question_urn] = [] if question["type"] == "multiple_choice" else None
+    return answers
 
 
 ########################### Referential objects #########################
@@ -575,8 +553,7 @@ class LibraryUpdater:
 
             for requirement_node in requirement_nodes:
                 urn = requirement_node["urn"].lower()
-                question = requirement_node.get("question")
-                question_type = question["question_type"] if question else None
+                questions = requirement_node.get("questions")
 
                 requirement_node_dict = {
                     k: v
@@ -605,31 +582,88 @@ class LibraryUpdater:
                                 compliance_assessment=ca,
                                 requirement=new_requirement_node,
                                 folder=ca.perimeter.folder,
-                                answer=transform_question_to_answer(question)
-                                if question
+                                answers=transform_questions_to_answers(questions)
+                                if questions
                                 else {},
                             )
                         )
 
                 for ra in existing_assessments.get(urn, []):
-                    if not question:
+                    if not questions:
                         assessments_to_update.append(ra)
                         continue
 
-                    answers = ra.answer.get("questions", [])
-                    if any(a["type"] != question_type for a in answers):
-                        ra.answer = transform_question_to_answer(question)
-                        assessments_to_update.append(ra)
-                        continue
+                    answers = ra.answers
 
-                    if question_type == "unique_choice":
-                        for answer in answers:
-                            if answer["answer"] not in question["question_choices"]:
-                                answer["answer"] = ""
-                        ra.answer = {"questions": answers}
-                        assessments_to_update.append(ra)
-                    elif question_type not in ["text", "date"]:
-                        raise NotImplementedError(f"Unsupported type '{question_type}'")
+                    # Remove answers corresponding to questions that have been removed
+                    for urn in list(answers.keys()):
+                        if urn not in questions:
+                            del answers[urn]
+                    # Add answers corresponding to questions that have been updated/added
+                    for urn, question in questions.items():
+                        # If the question is not present in answers, initialize it
+                        if urn not in answers:
+                            answers[urn] = None
+                            continue
+
+                        answer_val = answers[urn]
+                        type = question.get("type")
+
+                        if type == "multiple_choice":
+                            # Keep only the choices that exist in the question
+                            if isinstance(answer_val, list):
+                                valid_choices = {
+                                    choice["urn"]
+                                    for choice in question.get("choices", [])
+                                }
+                                answers[urn] = [
+                                    choice
+                                    for choice in answer_val
+                                    if choice in valid_choices
+                                ]
+                            else:
+                                answers[urn] = []
+
+                        elif type == "unique_choice":
+                            # If the answer does not match a valid choice, reset it to None
+                            valid_choices = {
+                                choice["urn"]
+                                for choice in question.get("choices", [])
+                            }
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val
+                                    if answer_val in valid_choices
+                                    else None
+                                )
+
+                        elif type == "text":
+                            # For a text question, simply check that it is a string
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val
+                                    if isinstance(answer_val, str)
+                                    and answer_val.split(":")[0] != "urn"
+                                    else None
+                                )
+
+                        elif type == "date":
+                            # For a date question, check the expected format (e.g., "YYYY-MM-DD")
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                try:
+                                    datetime.strptime(answer_val, "%Y-%m-%d")
+                                    answers[urn] = answer_val
+                                except Exception:
+                                    answers[urn] = None
+
+                    ra.answers = answers
+                    assessments_to_update.append(ra)
 
                 for threat_urn in requirement_node.get("threats", []):
                     normalized_threat_urn = threat_urn.lower()
@@ -1118,7 +1152,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
-    question = models.JSONField(blank=True, null=True, verbose_name=_("Question"))
+    questions = models.JSONField(blank=True, null=True, verbose_name=_("Questions"))
 
     @property
     def associated_reference_controls(self):
@@ -3134,8 +3168,8 @@ class ComplianceAssessment(Assessment):
                 compliance_assessment=self,
                 requirement=requirement,
                 folder_id=self.folder.id,  # Use foreign key directly
-                answer=transform_question_to_answer(requirement.question)
-                if requirement.question
+                answers=transform_questions_to_answers(requirement.questions)
+                if requirement.questions
                 else {},
             )
             for requirement in requirements
@@ -3785,13 +3819,12 @@ class ComplianceAssessment(Assessment):
         answered_questions_count = 0
         for ra in requirement_assessments:
             # if it has question set it should count
-            if ra.requirement.question:
-                answers = ra.answer.get("questions")
+            if ra.requirement.questions:
+                total_questions_count += len(ra.requirement.questions)
+                answers = ra.answers
                 if answers:
-                    total_questions_count += len(answers)
-                    answered_questions_count += sum(
-                        1 for ans in answers if ans.get("answer") != ""
-                    )
+                    for answer in answers.values():
+                        answered_questions_count += 1 if answer else 0
 
         if total_questions_count > 0:
             return int((answered_questions_count / total_questions_count) * 100)
@@ -3877,10 +3910,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         default=dict,
         verbose_name=_("Mapping inference"),
     )
-    answer = models.JSONField(
+    answers = models.JSONField(
         blank=True,
         null=True,
-        verbose_name=_("Answer"),
+        verbose_name=_("Answers"),
     )
     security_exceptions = models.ManyToManyField(
         SecurityException,
