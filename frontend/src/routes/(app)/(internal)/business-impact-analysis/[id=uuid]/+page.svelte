@@ -7,6 +7,7 @@
 	import { page } from '$app/stores';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 </script>
+
 <DetailView {data}>
 	<div slot="actions" class="flex flex-col space-y-2">
 		<Anchor
