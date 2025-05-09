@@ -48,6 +48,14 @@ class AssetAssessmentWriteSerializer(BaseModelSerializer):
         model = AssetAssessment
         fields = "__all__"
 
+    def create(self, validated_data):
+        bia = validated_data.get("bia")
+        if not bia:
+            raise serializers.ValidationError({"bia": "mandatory"})
+        validated_data["folder"] = bia.folder
+
+        return super().create(validated_data)
+
 
 class EscalationThresholdReadSerializer(BaseModelSerializer):
     asset_assessment = FieldsRelatedField()
@@ -65,3 +73,12 @@ class EscalationThresholdWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EscalationThreshold
         fields = "__all__"
+
+    def create(self, validated_data):
+        print(validated_data)
+        bia = validated_data.get("asset_assessment").bia
+        if not bia:
+            raise serializers.ValidationError({"bia": "mandatory"})
+        validated_data["folder"] = bia.folder
+
+        return super().create(validated_data)
