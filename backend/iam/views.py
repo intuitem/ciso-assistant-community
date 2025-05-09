@@ -85,6 +85,7 @@ class CurrentUserView(views.APIView):
             "permissions": request.user.permissions,
             "is_third_party": request.user.is_third_party,
             "is_admin": request.user.is_admin(),
+            "is_local": request.user.is_local,
             "accessible_domains": [str(f) for f in accessible_domains],
             "domain_permissions": RoleAssignment.get_permissions_per_folder(
                 principal=request.user, recursive=True
