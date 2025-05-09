@@ -5,8 +5,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /code
 
-RUN apt-get update && apt-get install -y \
-  libyaml-cpp-dev
+RUN apt-get update && apt-get install -y libyaml-cpp-dev && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get install -y --no-install-recommends curl ca-certificates
 ADD https://astral.sh/uv/0.6.9/install.sh /uv-installer.sh

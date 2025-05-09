@@ -320,7 +320,7 @@
 	{:else if URLModel === 'frameworks'}
 		<FrameworksForm {form} {model} {cacheLocks} {formDataCache} />
 	{:else if URLModel === 'users'}
-		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} />
+		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 	{:else if URLModel === 'sso-settings'}
 		<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'general-settings'}
