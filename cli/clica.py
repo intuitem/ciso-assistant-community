@@ -291,6 +291,7 @@ def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
             "ref_id": scenario.ref_id,
             "name": scenario.name,
             "risk_assessment": ra_id,
+            "treatment": str(scenario.treatment).lower(),
         }
         if None in [
             impact_map.get(scenario.current_impact),
