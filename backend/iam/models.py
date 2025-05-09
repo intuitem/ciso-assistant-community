@@ -343,7 +343,11 @@ class UserManager(BaseUserManager):
         logger.info("user created sucessfully", user=user)
 
         if mailing:
-            template = "registration/first_connexion_email.html" if user.is_local else "registration/first_connexion_email_sso.html"
+            template = (
+                "registration/first_connexion_email.html"
+                if user.is_local
+                else "registration/first_connexion_email_sso.html"
+            )
             try:
                 user.mailing(
                     email_template_name="registration/first_connexion_email.html",
