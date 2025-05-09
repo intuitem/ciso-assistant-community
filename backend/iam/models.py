@@ -343,14 +343,14 @@ class UserManager(BaseUserManager):
         logger.info("user created sucessfully", user=user)
 
         if mailing:
-            template = (
+            template_name = (
                 "registration/first_connexion_email.html"
                 if user.is_local
                 else "registration/first_connexion_email_sso.html"
             )
             try:
                 user.mailing(
-                    email_template_name="registration/first_connexion_email.html",
+                    email_template_name=template_name,
                     subject=_("Welcome to Ciso Assistant!"),
                 )
             except Exception as exception:
