@@ -26,7 +26,8 @@ erDiagram
     }
 
     USER_GROUP {
-        string name
+        string  name
+        boolean is_singleton
     }
 
     SSO_SETTINGS {
@@ -41,6 +42,10 @@ erDiagram
     }
 
 ```
+
+For each user, there is a read-only singleton group containing that user, and with name equal to the email of the user. This makes it easier to manage owners fields.
+
+Singleton groups cannot be edited or deleted directly. A singleton group is automatically created/deleted when the user is created/deleted.
 
 ### Folder organization
 
@@ -144,10 +149,10 @@ erDiagram
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
     VULNERABILITY                }o--o{ APPLIED_CONTROL       : is_fixed_by
-    USER                         }o--o{ RISK_SCENARIO         : owns
-    USER                         }o--o{ APPLIED_CONTROL       : owns
-    USER                         }o--o{ ASSET                 : owns
-    USER                         }o--o{ INCIDENT              : owns
+    USER_GROUP                   }o--o{ RISK_SCENARIO         : owns
+    USER_GROUP                   }o--o{ APPLIED_CONTROL       : owns
+    USER_GROUP                   }o--o{ ASSET                 : owns
+    USER_GROUP                   }o--o{ INCIDENT              : owns
     ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
@@ -160,11 +165,11 @@ erDiagram
     APPLIED_CONTROL              }o--o{ SECURITY_EXCEPTION    : mitigates
     FINDINGS_ASSESSMENT          ||--o{ FINDING               : contains
     PERIMETER                    |o--o{ FINDINGS_ASSESSMENT   : contains
-    USER                         }o--o{ FINDINGS_ASSESSMENT   : owns
+    USER_GROUP                   }o--o{ FINDINGS_ASSESSMENT   : owns
     FINDING                      }o--o{ VULNERABILITY         : relates
     FINDING                      }o--o{ REFERENCE_CONTROL     : is_mitigated_by
     FINDING                      }o--o{ APPLIED_CONTROL       : is_mitigated_by
-    USER                         }o--o{ FINDING               : owns
+    USER_GROUP                   }o--o{ FINDING               : owns
     INCIDENT                     ||--o{ TIMELINE_ENTRY        : contains
     INCIDENT                     }o--o{ ASSET                 : impacts
     INCIDENT                     }o--o{ THREATS               : relates
