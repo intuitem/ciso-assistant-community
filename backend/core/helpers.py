@@ -291,7 +291,7 @@ def get_sorted_requirement_nodes(
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
-                "question": req_as.answer if req_as else node.question,
+                "questions": node.questions,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
@@ -332,7 +332,7 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "max_score": max_score if child_req_as else None,
-                    "question": child_req_as.answer if child_req_as else child.question,
+                    "questions": child.questions,
                     "mapping_inference": child_req_as.mapping_inference
                     if child_req_as
                     else None,

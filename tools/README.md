@@ -113,8 +113,8 @@ Conventions:
     For Answers:
         The first line is a header, with the following possible fields (* for required):
             - id(*)
-            - question_type(*)
-            - question_choices(*)
+            - type(*)
+            - choices(*)
     A library has a single locale, which is the reference language. Translations are given in columns with header like "name[fr]"
     Dependencies are given as a comma or blank separated list of urns.
 

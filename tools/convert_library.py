@@ -100,8 +100,8 @@ Conventions:
     For Answers:
         The first line is a header, with the following possible fields (* for required):
             - id(*)
-            - question_type(*)
-            - question_choices(*)
+            - type(*)
+            - choices(*)
     A library has a single locale, which is the reference language. Translations are given in columns with header like "name[fr]"
     Dependencies are given as a comma or blank separated list of urns.
 """
@@ -154,7 +154,6 @@ library_vars_dict_reverse = defaultdict(dict)
 library_vars_dict_arg = defaultdict(dict)
 urn_unicity_checker = set()
 
-
 parser = argparse.ArgumentParser(
     prog="convert-library.py",
     description="convert an Excel file in a library for CISO Assistant",
@@ -180,11 +179,9 @@ questions = []
 risk_matrix = {}
 requirement_mappings = []
 
-
 def error(message):
     print("Error:", message)
     exit(1)
-
 
 def read_header(row):
     """
@@ -203,7 +200,6 @@ def read_header(row):
         i += 1
     return header
 
-
 def get_translations(header, row):
     """read available translations"""
     result = {}
@@ -215,7 +211,6 @@ def get_translations(header, row):
                 result[lang] = {}
             result[lang][v] = row[i].value
     return result
-
 
 def get_translations_content(library_vars, prefix):
     """read available translations in library_vars"""
@@ -230,14 +225,12 @@ def get_translations_content(library_vars, prefix):
             result[lang][k2] = v
     return result
 
-
 # https://gist.github.com/Mike-Honey/b36e651e9a7f1d2e1d60ce1c63b9b633
 from colorsys import rgb_to_hls, hls_to_rgb
 
 RGBMAX = 0xFF  # Corresponds to 255
 HLSMAX = 240  # MS excel's tint function expects that HLS is base 240. see:
 # https://social.msdn.microsoft.com/Forums/en-US/e9d8c136-6d62-4098-9b1b-dac786149f43/excel-color-tint-algorithm-incorrect?forum=os_binaryfile#d3c2ac95-52e0-476b-86f1-e2a697f24969
-
 
 def rgb_to_ms_hls(red, green=None, blue=None):
     """Converts rgb values in range (0,1) or a hex string of the form '[#aa]rrggbb' to HLSMAX based HLS, (alpha values are ignored)"""
@@ -253,13 +246,11 @@ def rgb_to_ms_hls(red, green=None, blue=None):
     h, l, s = rgb_to_hls(red, green, blue)
     return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
 
-
 def ms_hls_to_rgb(hue, lightness=None, saturation=None):
     """Converts HLSMAX based HLS values to rgb values in the range (0,1)"""
     if lightness is None:
         hue, lightness, saturation = hue
     return hls_to_rgb(hue / HLSMAX, lightness / HLSMAX, saturation / HLSMAX)
-
 
 def rgb_to_hex(red, green=None, blue=None):
     """Converts (0,1) based RGB values to a hex string 'rrggbb'"""
@@ -273,7 +264,6 @@ def rgb_to_hex(red, green=None, blue=None):
             int(round(blue * RGBMAX)),
         )
     ).upper()
-
 
 def get_theme_colors(wb):
     """Gets theme colors from the workbook"""
@@ -309,7 +299,6 @@ def get_theme_colors(wb):
 
     return colors
 
-
 def tint_luminance(tint, lum):
     """Tints a HLSMAX based luminance"""
     # See: http://ciintelligence.blogspot.co.uk/2012/02/converting-excel-theme-color-and-tint.html
@@ -318,13 +307,11 @@ def tint_luminance(tint, lum):
     else:
         return int(round(lum * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint))))
 
-
 def theme_and_tint_to_rgb(wb, theme, tint):
     """Given a workbook, a theme number and a tint return a hex based rgb"""
     rgb = get_theme_colors(wb)[theme]
     h, l, s = rgb_to_ms_hls(rgb)
     return rgb_to_hex(ms_hls_to_rgb(h, tint_luminance(tint, l), s))
-
 
 def get_color(wb, cell):
     """get cell color; None for no fill"""
@@ -336,7 +323,6 @@ def get_color(wb, cell):
     tint = cell.fill.start_color.tint
     color = theme_and_tint_to_rgb(wb, theme, tint)
     return "#" + color
-
 
 def build_reference_control_ids_set():
     """
@@ -410,7 +396,7 @@ def validate_control_references(requirement_nodes, control_ids_set):
         print("All reference control references are valid.")
 
 
-def get_question(tab):
+def get_answers(tab):
     print("processing answers")
     found_answers = {}
     is_header = True
@@ -425,24 +411,32 @@ def get_question(tab):
                 if row[header["id"]].value
                 else None
             )
-            question_type = (
+            type = (
                 row[header.get("question_type")].value
                 if "question_type" in header
                 else None
             )
-            question_choices = (
-                row[header.get("question_choices")].value.split("\n")
+            choices_lines = (
+                (
+                    row[header["question_choices"]].value.split("\n")
+                    if row[header["question_choices"]].value
+                    else []
+                )
                 if "question_choices" in header
-                and row[header["question_choices"]].value
-                else None
-            )
+                    else None
+                )
+            choices = []
+            for line in choices_lines:
+                if line.startswith("|"):
+                    choices[-1]["value"] += "\n" + line[1:]
+                else:
+                    choices.append({"urn": "", "value": line.strip()})
             found_answers[row_id] = {
-                "question_type": question_type,
-                "question_choices": question_choices,
+                "type": type,
+                "choices": choices,
             }
 
     return found_answers
-
 
 ################################################################
 def build_ids_set(tab_name):
@@ -451,12 +445,11 @@ def build_ids_set(tab_name):
     output = {cell.value for cell in raw if cell.value is not None}
     return output
 
-
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
     try:
-        answers = get_question(dataframe["answers"])
+        answers = get_answers(dataframe["answers"])
     except KeyError:
         answers = {}
     if title.lower() == "library_content":
@@ -594,16 +587,34 @@ for tab in dataframe:
                     if "reference_controls" in header
                     else None
                 )
-                questions = (
+                questions_lines = (
                     (
                         row[header["questions"]].value.split("\n")
                         if row[header["questions"]].value
-                        else [""]
+                        else []
                     )
                     if "questions" in header
                     else None
                 )
-                answer = row[header["answer"]].value if "answer" in header else None
+                questions = []
+                for line in questions_lines:
+                    if line.startswith("|"):
+                        questions[-1] += "\n" + line[1:]
+                    else:
+                        questions.append(line)
+                answer = (
+                    (
+                        row[header["answer"]].value.split("\n")
+                        if row[header["answer"]].value
+                        else []
+                    )
+                    if "answer" in header
+                    else None
+                )
+                if len(answer) != 1 and len(answer) != len(questions):
+                    print("error: answer and questions mismatch on requirement", urn)
+                    print("hint: please check at least one answer is defined for all questions or each question has an answer")
+                    exit(1)
                 threat_urns = []
                 function_urns = []
                 if threats:
@@ -626,16 +637,20 @@ for tab in dataframe:
                         ][prefix]
                         function_urns.append(f"{urn_prefix}:{part_name}")
                 if answer and questions:
-                    question = {
-                        "questions": [
-                            {
-                                "urn": f"{req_node['urn']}:question:{i + 1}",
-                                "text": question,
-                            }
-                            for i, question in enumerate(questions)
-                        ]
+                    req_node["questions"] = {
+                        f"{req_node['urn']}:question:{i + 1}": {
+                            "type": answers[answer[i]]["type"] if len(answer) > 1 else answers[answer[0]]["type"],
+                            "choices": [
+                                {
+                                    "urn": f"{req_node['urn']}:question:{i + 1}:choice:{j + 1}",
+                                    "value": choice["value"]
+                                }
+                                for j, choice in enumerate(answers[answer[i] or answer[0]]["choices"] if len(answer) > 1 else answers[answer[0]]["choices"])
+                            ],
+                            "text": question,
+                        }
+                        for i, question in enumerate(questions)
                     }
-                    req_node["question"] = {**answers[answer], **question}
                 if threat_urns:
                     req_node["threats"] = threat_urns
                 if function_urns:
