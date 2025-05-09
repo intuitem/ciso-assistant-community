@@ -293,15 +293,17 @@
 			</svelte:fragment>
 		</TabGroup>
 	</div>
-	{#if data.requirementAssessment.answer != null && Object.keys(data.requirementAssessment.answer).length !== 0}
+	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
 		<h1 class="font-semibold text-sm">{m.question()}</h1>
-		{#each data.requirementAssessment.answer.questions as question}
+		{#each Object.keys(data.requirementAssessment.requirement.questions) as key}
 			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
-				{question.text}
-				{#if question.answer}
-					<p class="text-sm font-semibold text-primary-500">{question.answer}</p>
+				{data.requirementAssessment.requirement.questions[key].text}
+				{#if data.requirementAssessment.answers[key].value}
+					<p class="text-sm font-semibold text-primary-500">
+						{data.requirementAssessment.answers[key].value}
+					</p>
 				{:else}
-					{m.undefined()}
+					<p class="text-sm font-semibold text-primary-500">{m.undefined()}</p>
 				{/if}
 			</li>
 		{/each}
