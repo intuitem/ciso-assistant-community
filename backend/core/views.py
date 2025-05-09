@@ -848,7 +848,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     model = RiskAssessment
     filterset_fields = [
         "perimeter",
-        "perimeter__folder",
+        "folder",
         "authors",
         "risk_matrix",
         "status",
@@ -4009,6 +4009,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = [
+        "folder",
         "framework",
         "perimeter",
         "status",
