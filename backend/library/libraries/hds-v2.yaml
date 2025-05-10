@@ -1,21 +1,27 @@
 urn: urn:intuitem:risk:library:hds-v2023-a
 locale: fr
-ref_id: HDS-v2023-A
-name: HDS v2023-A
+ref_id: HDS-v2.0
+name: HDS v2.0
 description: "R\xE9f\xE9rentiel de certification H\xE9bergeur de donn\xE9es de sant\xE9\
-  \ (HDS) - Exigences"
+  \ (HDS) - Exigences\nVersion publi\xE9e par l\u2019arr\xEAt\xE9 du 26 avril 2024\
+  \ portant approbation du r\xE9f\xE9rentiel d'accr\xE9ditation des organismes de\
+  \ certification et du r\xE9f\xE9rentiel de certification pour l'h\xE9bergement de\
+  \ donn\xE9es de sant\xE9 \xE0 caract\xE8re personnel."
 copyright: "Loi fran\xE7aise et europ\xE9enne"
-version: 1
-publication_date: 2024-04-06
+version: 2
+publication_date: 2025-05-10
 provider: "Agence du Num\xE9rique en Sant\xE9"
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:hds-v2023-a
-    ref_id: HDS-v2023-A
-    name: HDS v2023-A
+    ref_id: HDS-v2.0
+    name: HDS v2.0
     description: "R\xE9f\xE9rentiel de certification H\xE9bergeur de donn\xE9es de\
-      \ sant\xE9 (HDS) - Exigences"
+      \ sant\xE9 (HDS) - Exigences\nVersion publi\xE9e par l\u2019arr\xEAt\xE9 du\
+      \ 26 avril 2024 portant approbation du r\xE9f\xE9rentiel d'accr\xE9ditation\
+      \ des organismes de certification et du r\xE9f\xE9rentiel de certification pour\
+      \ l'h\xE9bergement de donn\xE9es de sant\xE9 \xE0 caract\xE8re personnel."
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-01]
       assessable: false
