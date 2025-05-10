@@ -92,7 +92,7 @@ erDiagram
     LOADED_LIBRARY      |o--o{ THREAT                   : contains
     LOADED_LIBRARY      ||--o{ FRAMEWORK                : contains
     LOADED_LIBRARY      ||--o{ RISK_MATRIX              : contains
-    LOADED_LIBRARY      ||--o{ REQUIREMMENT_MAPPING_SET : contains
+    LOADED_LIBRARY      ||--o{ REQUIREMENT_MAPPING_SET : contains
     LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
 
 ```
