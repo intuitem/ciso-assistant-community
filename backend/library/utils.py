@@ -55,7 +55,7 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
-                    question=requirement_node.get("question"),
+                    questions=requirement_node.get("questions"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
@@ -96,7 +96,7 @@ class RequirementNodeImporter:
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
             is_published=True,
-            question=self.requirement_data.get("question"),
+            questions=self.requirement_data.get("questions"),
         )
         for threat in self.requirement_data.get("threats", []):
             requirement_node.threats.add(

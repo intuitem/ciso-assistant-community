@@ -96,6 +96,7 @@ for route in ROUTES:
         basename=ROUTES[route].get("basename"),
     )
 
+
 urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
@@ -105,6 +106,7 @@ urlpatterns = [
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("ebios-rm/", include("ebios_rm.urls")),
     path("privacy/", include("privacy.urls")),
+    path("resilience/", include("resilience.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),

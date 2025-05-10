@@ -848,7 +848,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     model = RiskAssessment
     filterset_fields = [
         "perimeter",
-        "perimeter__folder",
+        "folder",
         "authors",
         "risk_matrix",
         "status",
@@ -2226,6 +2226,7 @@ class UserFilter(df.FilterSet):
             "first_name",
             "last_name",
             "is_active",
+            "keep_local_login",
             "is_approver",
             "is_third_party",
         ]
@@ -4009,6 +4010,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = [
+        "folder",
         "framework",
         "perimeter",
         "status",

@@ -311,7 +311,6 @@ class UserManager(BaseUserManager):
         On mail error, raise a corresponding exception, but the user is properly created
         TODO: find a better way to manage mailing error
         """
-
         validate_email(email)
         email = self.normalize_email(email)
         user = self.model(
@@ -321,9 +320,13 @@ class UserManager(BaseUserManager):
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
             folder=_get_root_folder(),
+            keep_local_login=extra_fields.get("keep_local_login", False),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
-        user.password = make_password(password if password else str(uuid.uuid4()))
+        if password:
+            user.password = make_password(password)
+        else:
+            user.set_unusable_password()
         user.save(using=self._db)
         if initial_group:
             initial_group.user_set.add(user)
@@ -340,9 +343,14 @@ class UserManager(BaseUserManager):
         logger.info("user created sucessfully", user=user)
 
         if mailing:
+            template_name = (
+                "registration/first_connexion_email.html"
+                if user.is_local
+                else "registration/first_connexion_email_sso.html"
+            )
             try:
                 user.mailing(
-                    email_template_name="registration/first_connexion_email.html",
+                    email_template_name=template_name,
                     subject=_("Welcome to Ciso Assistant!"),
                 )
             except Exception as exception:
@@ -373,6 +381,7 @@ class UserManager(BaseUserManager):
             password=password,
             mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
+            keep_local_login=True,
             **extra_fields,
         )
         return superuser
@@ -395,7 +404,12 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
-    is_sso = models.BooleanField(default=False)
+    keep_local_login = models.BooleanField(
+        default=False,
+        help_text=_(
+            "If True allow the user to log in using the normal login form even with SSO forced."
+        ),
+    )
     is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
@@ -443,6 +457,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
+        if self.is_superuser and not self.is_active:
+            # avoid deactivation of superuser
+            self.is_active = True
+        if not self.is_local:
+            self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
 
@@ -585,6 +604,26 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return any(
             any(perm.startswith(prefix) for prefix in editor_prefixes)
             for perm in permissions
+        )
+
+    @property
+    def is_local(self) -> bool:
+        """
+        Indicates whether the user can log in using a local password
+        """
+        from global_settings.models import GlobalSettings
+
+        try:
+            sso_settings = GlobalSettings.objects.get(
+                name=GlobalSettings.Names.SSO
+            ).value
+        except GlobalSettings.DoesNotExist:
+            sso_settings = {}
+
+        return self.is_active and (
+            self.keep_local_login
+            or not sso_settings.get("is_enabled", False)
+            or not sso_settings.get("force_sso", False)
         )
 
     @classmethod

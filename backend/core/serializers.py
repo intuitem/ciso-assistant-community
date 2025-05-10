@@ -707,12 +707,14 @@ class UserReadSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
-            "is_sso",
+            "keep_local_login",
             "is_third_party",
         ]
 
 
 class UserWriteSerializer(BaseModelSerializer):
+    is_local = serializers.BooleanField(required=False)
+
     class Meta:
         model = User
         fields = [
@@ -723,7 +725,9 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "keep_local_login",
             "is_third_party",
+            "is_local",
         ]
 
     def validate_email(self, email):
@@ -1067,6 +1071,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "associated_reference_controls",
                 "associated_threats",
                 "parent_requirement",
+                "questions",
             ]
 
     name = serializers.CharField(source="__str__")
@@ -1156,7 +1161,7 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "requirement",
             "selected",
             "mapping_inference",
-            "answer",
+            "answers",
             "evidences",
             "applied_controls",
         ]

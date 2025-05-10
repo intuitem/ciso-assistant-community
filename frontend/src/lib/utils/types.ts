@@ -8,6 +8,7 @@ export interface User {
 	first_name: string;
 	last_name: string;
 	is_active: boolean;
+	keep_local_login: boolean;
 	date_joined: string;
 	user_groups: Record<string, any>[];
 	roles: Record<string, any>[];
@@ -55,6 +56,7 @@ export const URL_MODEL = [
 	'libraries',
 	'sso-settings',
 	'general-settings',
+	'feature-flags',
 	'requirement-mapping-sets',
 	'entities',
 	'entity-assessments',
@@ -75,6 +77,7 @@ export const URL_MODEL = [
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
+	// privacy,
 	'processings',
 	'purposes',
 	'personal-data',
@@ -82,10 +85,16 @@ export const URL_MODEL = [
 	'data-recipients',
 	'data-contractors',
 	'data-transfers',
+	// incidents,
 	'incidents',
 	'timeline-entries',
+	// tasks,
 	'task-templates',
-	'task-nodes'
+	'task-nodes',
+	// resilience,
+	'business-impact-analysis',
+	'escalation-thresholds',
+	'asset-assessments'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
