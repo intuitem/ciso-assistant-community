@@ -658,8 +658,8 @@ export const listViewFields = {
 		}
 	},
 	users: {
-		head: ['email', 'firstName', 'lastName', 'is_sso', 'is_third_party'],
-		body: ['email', 'first_name', 'last_name', 'is_sso', 'is_third_party']
+		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
+		body: ['email', 'first_name', 'last_name', 'keep_local_login', 'is_third_party']
 	},
 	'user-groups': {
 		head: ['name'],
@@ -773,6 +773,34 @@ export const listViewFields = {
 	representatives: {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
+	},
+	'business-impact-analysis': {
+		head: ['name', 'perimeter', 'status'],
+		body: ['name', 'perimeter', 'status']
+	},
+	'asset-assessments': {
+		head: [
+			'asset',
+			'bia',
+			'dependencies',
+			'associatedControls',
+			'recoveryDocumented',
+			'recoveryTested',
+			'recoveryTargetsMet'
+		],
+		body: [
+			'asset',
+			'bia',
+			'dependencies',
+			'associated_controls',
+			'recovery_documented',
+			'recovery_tested',
+			'recovery_targets_met'
+		]
+	},
+	'escalation-thresholds': {
+		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'justification'],
+		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'justification']
 	},
 	processings: {
 		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
