@@ -364,6 +364,12 @@ export const navData = {
 					permissions: ['backup']
 				},
 				{
+					name: 'Audit log',
+					fa_icon: 'fa-solid fa-newspaper',
+					href: '/audit-log',
+					permissions: ['view_riskscenario'] // TODO: change this to view_logentry
+				},
+				{
 					name: 'experimental',
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
