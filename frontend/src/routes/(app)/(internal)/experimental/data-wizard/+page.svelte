@@ -124,7 +124,6 @@
 								value="User"
 								id="User"
 								class="size-5 border-gray-300 text-blue-500"
-								checked
 								bind:group={selectedModel}
 							/>
 						</label>
