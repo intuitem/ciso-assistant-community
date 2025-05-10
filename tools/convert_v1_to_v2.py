@@ -18,6 +18,7 @@ def convert_v1_to_v2(input_path: str, output_path: str):
     object_metadata = {}
     declared_tabs = {}
     urn_prefixes = {}
+    answers_logical_name = None
 
     known_object_types = {
         "framework", "requirements", "threats", "reference_controls",
@@ -38,16 +39,18 @@ def convert_v1_to_v2(input_path: str, output_path: str):
                 normalized_type = "framework"
             elif val2 == "mappings":
                 normalized_type = "mapping_set"
+            else:
+                normalized_type = val2
+
             tab_entries.append((val1, normalized_type, val3))
             declared_tabs[normalized_type] = val1
 
+            if normalized_type == "answers":
+                answers_logical_name = val1
+
         elif key in {"reference_control_base_urn", "threat_base_urn"} and val1:
             object_type = "reference_control" if "reference_control" in key else "threat"
-
-            # Inject into <object>_meta
             object_metadata.setdefault(object_type, {})["base_urn"] = val1
-
-            # If a prefix is defined in column 3, also store it in urn_prefixes
             if val2:
                 urn_prefixes[val2] = val1
 
@@ -83,8 +86,11 @@ def convert_v1_to_v2(input_path: str, output_path: str):
                 meta_rows.append(("score", "default"))
             if "implementation_groups" in declared_tabs:
                 meta_rows.append(("implementation_groups", "baseline_ig"))
-            if "answers" in declared_tabs:
-                meta_rows.append(("answers", "default_answers"))
+            if answers_logical_name:
+                meta_rows.append(("answers", answers_logical_name))
+
+        elif obj_type == "answers":
+            meta_rows.append(("name", tab_name))
 
         sheets_out[f"{tab_name}_meta"] = pd.DataFrame(meta_rows, columns=["key", "value"])
         sheets_out[f"{tab_name}_content"] = content_df
@@ -105,6 +111,7 @@ def convert_v1_to_v2(input_path: str, output_path: str):
             df.to_excel(writer, sheet_name=name, index=False, header=not is_meta)
 
     print(f"✅ Conversion complete: {output_path}")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Convert Excel library v1 to v2 format.")
