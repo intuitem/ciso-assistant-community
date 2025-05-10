@@ -5,7 +5,7 @@ name: ISO/IEC 27001:2013 -> ISO/IEC 27001:2022
 description: Mapping from International standard ISO/IEC 27001:2013 to International
   standard ISO/IEC 27001:2022
 copyright: intuitem
-version: 2
+version: 1
 publication_date: 2024-07-09
 provider: intuitem
 packager: intuitem
@@ -13,8 +13,8 @@ dependencies:
 - urn:intuitem:risk:library:iso27001-2013
 - urn:intuitem:risk:library:iso27001-2022
 objects:
-  requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:iso27001-2013
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:iso27001-2013
     ref_id: mapping-iso27001-2013-to-iso27001-2022
     name: ISO/IEC 27001:2013 -> ISO/IEC 27001:2022
     description: Mapping from International standard ISO/IEC 27001:2013 to International

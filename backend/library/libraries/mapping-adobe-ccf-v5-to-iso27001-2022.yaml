@@ -4,15 +4,15 @@ ref_id: mapping-adobe-ccf-v5-to-iso27001-2022
 name: adobe-ccf-v5 -> ISO/IEC 27001:2022
 description: Mapping from Adobe CCF v5 to International standard ISO/IEC 27001:2022
 copyright: intuitem
-version: 2
+version: 1
 provider: intuitem
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:adobe-ccf-v5
 - urn:intuitem:risk:library:iso27001-2022
 objects:
-  requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:adobe-ccf-v5
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:adobe-ccf-v5
     ref_id: mapping-adobe-ccf-v5-to-iso27001-2022
     name: adobe-ccf-v5 -> ISO/IEC 27001:2022
     description: Mapping from Adobe CCF v5 to International standard ISO/IEC 27001:2022

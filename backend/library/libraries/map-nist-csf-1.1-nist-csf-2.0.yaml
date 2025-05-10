@@ -3,7 +3,7 @@ locale: en
 ref_id: map-nist-csf-1.1-nist-csf-2.0
 name: Mapping from nist-csf-1.1 to nist-csf-2.0
 description: Mapping from nist-csf-1.1 to nist-csf-2.0
-version: 2
+version: 1
 publication_date: 2024-06-29
 copyright: NIST
 provider: NIST
@@ -12,8 +12,8 @@ dependencies:
 - urn:intuitem:risk:library:nist-csf-2.0
 - urn:intuitem:risk:library:nist-csf-1.1
 objects:
-  requirement_mapping_sets:
-  - urn: urn:intuitem:risk:requirement_mapping_set:nist-csf-1.1-to-nist-csf-2.0
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:requirement_mapping_set:nist-csf-1.1-to-nist-csf-2.0
     ref_id: mapping-nist-csf-1.1-nist-csf-2.0
     name: mapping-nist-csf-1.1-nist-csf-2.0
     source_framework_urn: urn:intuitem:risk:framework:nist-csf-1.1

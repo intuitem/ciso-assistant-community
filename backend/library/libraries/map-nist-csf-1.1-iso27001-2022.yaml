@@ -3,7 +3,7 @@ locale: en
 ref_id: map-nist-csf-1.1-iso27001-2022
 name: Mapping from nist-csf-1.1 to iso27001-2022
 description: Mapping from nist-csf-1.1 to iso27001-2022
-version: 2
+version: 1
 publication_date: 2024-06-24
 copyright: NIST and ISO/IEC
 provider: NIST and ISO/IEC
@@ -12,8 +12,8 @@ dependencies:
 - urn:intuitem:risk:library:iso27001-2022
 - urn:intuitem:risk:library:nist-csf-1.1
 objects:
-  requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:nist-csf-1.1-to-iso27001-2022
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:nist-csf-1.1-to-iso27001-2022
     ref_id: mapping-nist-csf-1.1-iso27001-2022
     name: mapping-nist-csf-1.1-iso27001-2022
     source_framework_urn: urn:intuitem:risk:framework:nist-csf-1.1

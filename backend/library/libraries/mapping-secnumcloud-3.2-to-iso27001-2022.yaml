@@ -6,7 +6,7 @@ description: "Correspondance entre le r\xE9f\xE9rentiel d\u2019exigences de pres
   \ de services d\u2019informatique en nuage (SecNumCloud 3.2) et la norme internationale\
   \ ISO/IEC 27001:2022"
 copyright: https://www.iso.org/standard/27001 - ANSSI - ANS
-version: 2
+version: 1
 publication_date: 2024-10-30
 provider: ISO/IEC - ANSSI - ANS (annexe 1 du document HDS 2.0)
 packager: protocolpaladin
@@ -14,8 +14,8 @@ dependencies:
 - urn:intuitem:risk:library:secnumcloud-3.2
 - urn:intuitem:risk:library:iso27001-2022
 objects:
-  requirement_mapping_sets:
-  - urn: urn:protocolpaladin:risk:req_mapping_set:secnumcloud-3.2
+  requirement_mapping_set:
+    urn: urn:protocolpaladin:risk:req_mapping_set:secnumcloud-3.2
     ref_id: mapping-secnumcloud-3.2-to-iso27001-2022
     name: SecNumCloud v3.2 -> ISO/IEC 27001:2022
     description: "Correspondance entre le r\xE9f\xE9rentiel d\u2019exigences de prestataires\
