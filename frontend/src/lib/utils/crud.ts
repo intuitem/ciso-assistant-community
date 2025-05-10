@@ -675,6 +675,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [{ field: 'asset_assessment', urlModel: 'escalation-thresholds' }],
 		foreignKeyFields: [
 			{ field: 'asset', urlModel: 'assets' },
+			{ field: 'dependencies', urlModel: 'assets' },
+			{ field: 'associated_controls', urlModel: 'applied-controls' },
 			{
 				field: 'bia',
 				urlModel: 'business-impact-analysis',
