@@ -594,7 +594,7 @@ for tab in dataframe:
                         else []
                     )
                     if "questions" in header
-                    else None
+                    else []
                 )
                 questions = []
                 for line in questions_lines:
@@ -609,7 +609,7 @@ for tab in dataframe:
                         else []
                     )
                     if "answer" in header
-                    else None
+                    else []
                 )
                 if len(answer) != 1 and len(answer) != len(questions):
                     print("error: answer and questions mismatch on requirement", urn)
