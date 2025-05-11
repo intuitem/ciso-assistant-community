@@ -85,6 +85,7 @@ from core.models import (
     ComplianceAssessment,
     RequirementMappingSet,
     RiskAssessment,
+    RiskScenario,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -265,6 +266,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
+        self._validate_related_objects_access(request)
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
@@ -273,7 +275,107 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
+        self._validate_related_objects_access(request, instance=self.get_object())
         return super().update(request, *args, **kwargs)
+
+    def _validate_related_objects_access(self, request: Request, instance=None):
+        folder_id = request.data.get("folder")
+        if (
+            not folder_id
+            and "perimeter" in request.data
+            and request.data["perimeter"] not in (-1, None)
+        ):
+            try:
+                perimeter_id = uuid.UUID(str(request.data["perimeter"]))
+                perimeter = get_object_or_404(Perimeter, id=perimeter_id)
+                folder_id = perimeter.folder.id
+            except (ValueError, AttributeError, KeyError, TypeError):
+                raise ValidationError(
+                    {"folder": "Invalid perimeter or missing folder in perimeter"}
+                )
+
+        if (
+            not folder_id
+            and "risk_assessment" in request.data
+            and request.data["risk_assessment"] not in (-1, None)
+        ):
+            try:
+                risk_assessment_id = uuid.UUID(str(request.data["risk_assessment"]))
+                risk_assessment = get_object_or_404(
+                    RiskAssessment, id=risk_assessment_id
+                )
+                folder_id = risk_assessment.folder.id
+            except (ValueError, AttributeError, KeyError, TypeError):
+                raise ValidationError(
+                    {
+                        "risk_assessment": "Invalid risk assessment or missing folder in risk assessment"
+                    }
+                )
+
+        if not folder_id:
+            if (
+                self.model == Folder
+                or self.model == User
+                or self.model == ReferenceControl
+            ):
+                return
+            raise ValidationError(
+                {"folder": "Folder ID is required in the request data"}
+            )
+
+        current_folder = get_object_or_404(Folder, id=folder_id)
+
+        model_class = self.get_queryset().model
+        fields = (instance or model_class())._meta.get_fields()
+
+        skip_fields = {
+            "approver",
+            "authors",
+            "provider",
+            "owner",
+            "folder",
+            "risk_assessment",
+            "perimeter",
+        }
+
+        for field in fields:
+            if field.name in skip_fields:
+                continue
+
+            if not hasattr(field, "related_model") or field.related_model is None:
+                continue
+
+            field_value = request.data.get(field.name)
+            if not field_value or field_value == -1:
+                continue
+
+            accessible_ids = set(
+                RoleAssignment.get_accessible_object_ids(
+                    current_folder, request.user, field.related_model
+                )[0]
+            )
+
+            if field.many_to_many:
+                related_ids = (
+                    field_value if isinstance(field_value, list) else [field_value]
+                )
+                print(related_ids)
+                if not all(uuid.UUID(str(id)) in accessible_ids for id in related_ids):
+                    raise PermissionDenied(
+                        {
+                            field.name: "Some objects are not accessible in the current folder"
+                        }
+                    )
+
+            elif field.one_to_one or field.many_to_one:
+                related_id = uuid.UUID(str(field_value))
+                print(related_id)
+                if related_id not in accessible_ids:
+                    raise PermissionDenied(
+                        {
+                            field.name: "The object is not accessible in the current folder"
+                        }
+                    )
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
