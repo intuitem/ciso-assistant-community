@@ -1825,6 +1825,29 @@ class Asset(
         return super().save(*args, **kwargs)
 
 
+class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    parent = models.ForeignKey(
+        "AssetClass", on_delete=models.PROTECT, blank=True, null=True
+    )
+
+    @property
+    def full_path(self):
+        if self.parent is None:
+            return self.name
+        else:
+            return f"{self.parent.full_path}/{self.name}"
+
+    class Meta:
+        unique_together = ["name", "parent"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name"],
+                condition=models.Q(parent__isnull=True),
+                name="unique_name_for_root_items",
+            )
+        ]
+
+
 class Evidence(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):

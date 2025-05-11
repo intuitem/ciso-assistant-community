@@ -368,6 +368,20 @@ class AssetImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class AssetClassReadSerializer(BaseModelSerializer):
+    full_path = serializers.CharField()
+
+    class Meta:
+        model = AssetClass
+        exclude = ["created_at", "updated_at", "folder", "is_published"]
+
+
+class AssetClassWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = AssetClass
+        exclude = ["created_at", "updated_at", "folder", "is_published"]
+
+
 class ReferenceControlWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ReferenceControl

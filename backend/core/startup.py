@@ -57,6 +57,7 @@ READER_PERMISSIONS_LIST = [
     "view_businessimpactanalysis",
     "view_assetassessment",
     "view_escalationthreshold",
+    "view_assetclass",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -103,6 +104,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_businessimpactanalysis",
     "view_assetassessment",
     "view_escalationthreshold",
+    "view_assetclass",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -251,6 +253,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    "view_assetclass",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -407,6 +410,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "change_assetassessment",
     "delete_assetassessment",
+    "view_assetclass",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -426,6 +430,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_asset",
     "change_asset",
     "delete_asset",
+    "add_assetclass",
+    "view_assetclass",
+    "change_assetclass",
+    "delete_assetclass",
     "add_threat",
     "view_threat",
     "change_threat",

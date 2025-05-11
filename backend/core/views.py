@@ -85,6 +85,7 @@ from core.models import (
     ComplianceAssessment,
     RequirementMappingSet,
     RiskAssessment,
+    AssetClass,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -651,6 +652,14 @@ class AssetViewSet(BaseModelViewSet):
             return HttpResponse(
                 status=500, content="An error occurred while generating the CSV export."
             )
+
+
+class AssetClassViewSet(BaseModelViewSet):
+    model = AssetClass
+    filterset_fields = ["parent"]
+
+    ordering = ["name"]
+    search_fields = ["name", "description"]
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
