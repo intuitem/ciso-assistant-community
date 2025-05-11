@@ -2177,9 +2177,8 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         AssetClass.create_hierarchy(cis_hierarchy)
         AssetClass.create_hierarchy(extra)
 
-    @classmethod
-    def reset_all(cls):
-        cls.objects.all().delete()
+    def __str__(self):
+        return self.full_path
 
     class Meta:
         unique_together = ["name", "parent"]

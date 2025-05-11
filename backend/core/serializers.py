@@ -347,6 +347,8 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
 
+    asset_class = FieldsRelatedField()
+
 
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)

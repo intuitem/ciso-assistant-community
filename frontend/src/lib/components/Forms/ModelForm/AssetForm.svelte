@@ -72,11 +72,9 @@
 
 <AutocompleteSelect
 	{form}
+	optionsEndpoint="asset-class"
+	optionsLabelField="full_path"
 	field="asset_class"
-	options={model.selectOptions['asset_class']}
-	cacheLock={cacheLocks['asset_class']}
-	bind:cachedValue={formDataCache['asset_class']}
-	translateOptions={true}
 	label={m.assetClass()}
 />
 <TextField

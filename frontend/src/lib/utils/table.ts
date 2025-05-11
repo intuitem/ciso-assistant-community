@@ -633,10 +633,9 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'type',
-			'description',
 			'securityObjectives',
 			'disasterRecoveryObjectives',
-			'owner',
+			'assetClass',
 			'domain',
 			'labels'
 		],
@@ -644,10 +643,9 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'type',
-			'description',
 			'security_objectives',
 			'disaster_recovery_objectives',
-			'owner',
+			'asset_class',
 			'folder',
 			'filtering_labels'
 		],
@@ -657,6 +655,10 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+  'asset-class':{
+  head: ['name','description'],
+  body: ['name','description'],
+  },
 	users: {
 		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
 		body: ['email', 'first_name', 'last_name', 'keep_local_login', 'is_third_party']

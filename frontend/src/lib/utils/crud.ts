@@ -431,6 +431,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels' }
 		]
 	},
+  'asset-class': {
+    endpointUrl:'asset-class',
+    name: 'asset-class',
+    localName: 'assetClass',
+    localNamePlural: 'assetClasses',
+    verboseName: 'assetclass',
+    verboseNamePlural: 'assetclasses'
+  },
 	users: {
 		name: 'user',
 		localName: 'user',

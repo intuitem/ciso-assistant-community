@@ -516,11 +516,6 @@ class AssetViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Asset.Type.choices))
 
-    @action(detail=False, name="Get options")
-    def asset_class(self, request):
-        options = sorted([a.full_path for a in AssetClass.objects.all()])
-        return Response(options)
-
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
         nodes = []
