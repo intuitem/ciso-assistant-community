@@ -70,6 +70,15 @@
 	);
 </script>
 
+<AutocompleteSelect
+	{form}
+	field="asset_class"
+	options={model.selectOptions['asset_class']}
+	cacheLock={cacheLocks['asset_class']}
+	bind:cachedValue={formDataCache['asset_class']}
+	translateOptions={true}
+	label={m.assetClass()}
+/>
 <TextField
 	{form}
 	field="ref_id"

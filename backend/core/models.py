@@ -1651,6 +1651,9 @@ class Asset(
         verbose_name="Security exceptions",
         related_name="assets",
     )
+    asset_class = models.ForeignKey(
+        "AssetClass", on_delete=models.SET_NULL, blank=True, null=True
+    )
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
@@ -1839,13 +1842,6 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
     @classmethod
     def build_tree(cls):
-        """
-        Class method that builds a hierarchical tree structure of all AssetClass objects.
-
-        Returns:
-            list: A list of dictionaries, each containing 'name' and 'children' keys,
-                representing the root nodes and their descendants.
-        """
         all_nodes = list(cls.objects.all())
         nodes_by_id = {
             node.id: {"name": node.name, "children": []} for node in all_nodes
@@ -2061,7 +2057,125 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             },
         ]
 
+        extra = [
+            {
+                "name": "Business Process",
+                "description": "Organized set of activities and related procedures by which an organization operates",
+                "children": [
+                    {
+                        "name": "Core Operations",
+                        "description": "Primary processes that directly deliver value to customers",
+                        "children": [
+                            {
+                                "name": "Product/Service Development",
+                                "description": "Processes for designing, creating, and improving products and services",
+                            },
+                            {
+                                "name": "Production/Service Delivery",
+                                "description": "Processes for manufacturing products or delivering services to customers",
+                            },
+                            {
+                                "name": "Sales and Marketing",
+                                "description": "Processes for attracting customers and selling products/services",
+                            },
+                            {
+                                "name": "Customer Service",
+                                "description": "Processes for supporting customers after sales",
+                            },
+                            {
+                                "name": "Supply Chain Management",
+                                "description": "Processes for managing the flow of goods, services, and information",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "Management and Governance",
+                        "description": "Processes that provide oversight, direction, and accountability",
+                        "children": [
+                            {
+                                "name": "Strategic Planning",
+                                "description": "Processes for defining long-term objectives and allocation of resources",
+                            },
+                            {
+                                "name": "Financial Management",
+                                "description": "Processes for budgeting, accounting, and financial reporting",
+                            },
+                            {
+                                "name": "Risk Management",
+                                "description": "Processes for identifying, assessing, and mitigating risks",
+                            },
+                            {
+                                "name": "Compliance Management",
+                                "description": "Processes for ensuring adherence to laws, regulations, and policies",
+                            },
+                            {
+                                "name": "Performance Management",
+                                "description": "Processes for monitoring and improving organizational performance",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "Support functions",
+                        "description": "Processes that enable and facilitate the core business operations",
+                        "children": [
+                            {
+                                "name": "Human Resources",
+                                "description": "Processes for recruiting, developing, and retaining personnel",
+                            },
+                            {
+                                "name": "Information Technology",
+                                "description": "Processes for managing IT infrastructure, applications, and services",
+                            },
+                            {
+                                "name": "Facilities Management",
+                                "description": "Processes for maintaining physical infrastructure and workspaces",
+                            },
+                            {
+                                "name": "Procurement",
+                                "description": "Processes for acquiring goods and services from external suppliers",
+                            },
+                            {
+                                "name": "Legal Services",
+                                "description": "Processes for managing legal affairs and intellectual property",
+                            },
+                            {
+                                "name": "Administrative Services",
+                                "description": "Processes for general administrative support functions",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "External Relationships",
+                        "description": "Processes for managing relationships outside the organization",
+                        "children": [
+                            {
+                                "name": "Vendor Management",
+                                "description": "Processes for managing relationships with suppliers and vendors",
+                            },
+                            {
+                                "name": "Partner Management",
+                                "description": "Processes for establishing and maintaining strategic partnerships",
+                            },
+                            {
+                                "name": "Government Relations",
+                                "description": "Processes for interacting with government entities",
+                            },
+                            {
+                                "name": "Community Relations",
+                                "description": "Processes for engaging with local communities and society",
+                            },
+                            {
+                                "name": "Investor Relations",
+                                "description": "Processes for managing relationships with investors and shareholders",
+                            },
+                        ],
+                    },
+                ],
+            }
+        ]
+
         AssetClass.create_hierarchy(cis_hierarchy)
+        AssetClass.create_hierarchy(extra)
 
     @classmethod
     def reset_all(cls):

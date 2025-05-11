@@ -516,6 +516,11 @@ class AssetViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Asset.Type.choices))
 
+    @action(detail=False, name="Get options")
+    def asset_class(self, request):
+        options = sorted([a.full_path for a in AssetClass.objects.all()])
+        return Response(options)
+
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
         nodes = []
@@ -664,11 +669,6 @@ class AssetClassViewSet(BaseModelViewSet):
     @action(detail=False, name="Get Asset Class Tree")
     def tree(self, request):
         return Response(AssetClass.build_tree())
-
-    @action(detail=False, name="Get options")
-    def fullpath(self, request):
-        options = sorted([a.full_path for a in AssetClass.objects.all()])
-        return Response(options)
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
