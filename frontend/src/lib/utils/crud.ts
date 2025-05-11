@@ -422,7 +422,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
-		selectFields: [{ field: 'type' }, { field: 'asset_class'}],
+		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
 		filters: [
 			{ field: 'parent_assets' },
 			{ field: 'folder' },

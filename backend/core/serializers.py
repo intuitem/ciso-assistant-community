@@ -369,6 +369,7 @@ class AssetImportExportSerializer(BaseModelSerializer):
 
 
 class AssetClassReadSerializer(BaseModelSerializer):
+    parent = FieldsRelatedField()
     full_path = serializers.CharField()
 
     class Meta:

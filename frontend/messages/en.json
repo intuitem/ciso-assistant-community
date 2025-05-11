@@ -21,7 +21,7 @@
 	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
 	"addAppliedControl": "Add applied control",
-  "assetClass": "Asset Class",
+	"assetClass": "Asset Class",
 	"addAsset": "Add asset",
 	"addRiskAssessment": "Add risk assessment",
 	"addRiskScenario": "Add risk scenario",
