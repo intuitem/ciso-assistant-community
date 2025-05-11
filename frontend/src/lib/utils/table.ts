@@ -655,10 +655,10 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
-  'asset-class':{
-  head: ['name','description'],
-  body: ['name','description'],
-  },
+	'asset-class': {
+		head: ['name', 'description'],
+		body: ['name', 'description']
+	},
 	users: {
 		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
 		body: ['email', 'first_name', 'last_name', 'keep_local_login', 'is_third_party']
