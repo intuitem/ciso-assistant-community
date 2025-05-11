@@ -655,7 +655,7 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import Qualification
+    from core.models import Qualification, AssetClass
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
@@ -788,6 +788,12 @@ def startup(sender: AppConfig, **kwargs):
         ProcessingNature.create_default_values()
     except Exception as e:
         logger.error("Error creating default ProcessingNature", exc_info=e)
+
+    # Create default AssetClass
+    try:
+        AssetClass.create_default_values()
+    except Exception as e:
+        logger.error("Error creating default AssetClass", exc_info=e)
 
     call_command("storelibraries")
 

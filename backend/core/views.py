@@ -661,6 +661,15 @@ class AssetClassViewSet(BaseModelViewSet):
     ordering = ["name"]
     search_fields = ["name", "description"]
 
+    @action(detail=False, name="Get Asset Class Tree")
+    def tree(self, request):
+        return Response(AssetClass.build_tree())
+
+    @action(detail=False, name="Get options")
+    def fullpath(self, request):
+        options = sorted([a.full_path for a in AssetClass.objects.all()])
+        return Response(options)
+
 
 class ReferenceControlViewSet(BaseModelViewSet):
     """

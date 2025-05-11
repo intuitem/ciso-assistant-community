@@ -1837,6 +1837,236 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         else:
             return f"{self.parent.full_path}/{self.name}"
 
+    @classmethod
+    def build_tree(cls):
+        """
+        Class method that builds a hierarchical tree structure of all AssetClass objects.
+
+        Returns:
+            list: A list of dictionaries, each containing 'name' and 'children' keys,
+                representing the root nodes and their descendants.
+        """
+        all_nodes = list(cls.objects.all())
+        nodes_by_id = {
+            node.id: {"name": node.name, "children": []} for node in all_nodes
+        }
+
+        tree = []
+
+        for node in all_nodes:
+            node_dict = nodes_by_id[node.id]
+
+            if node.parent_id is None:
+                tree.append(node_dict)
+            else:
+                parent_dict = nodes_by_id.get(node.parent_id)
+                if parent_dict:  # Check if parent exists
+                    parent_dict["children"].append(node_dict)
+
+        return tree
+
+    @classmethod
+    def create_hierarchy(cls, hierarchy_data, parent=None):
+        created_nodes = []
+
+        for item in hierarchy_data:
+            # Get or create the asset class
+            asset_class, created = cls.objects.get_or_create(
+                name=item["name"],
+                parent=parent,
+                defaults={
+                    "description": item.get("description", ""),
+                },
+            )
+
+            created_nodes.append(asset_class)
+
+            if "children" in item and item["children"]:
+                cls.create_hierarchy(item["children"], parent=asset_class)
+
+        return created_nodes
+
+    @classmethod
+    def create_default_values(cls):
+        cis_hierarchy = [
+            {
+                "name": "Devices",
+                "description": "Assets that may exist in physical spaces, virtual infrastructure, or cloud-based environments",
+                "children": [
+                    {
+                        "name": "Enterprise Assets",
+                        "description": "Assets with the potential to store or process data",
+                        "children": [
+                            {
+                                "name": "End-user Devices",
+                                "description": "IT assets used among members of an enterprise",
+                                "children": [
+                                    {
+                                        "name": "Portable",
+                                        "description": "Transportable, end-user devices with wireless connectivity capability",
+                                        "children": [
+                                            {
+                                                "name": "Mobile",
+                                                "description": "Small, enterprise-issued end-user devices with intrinsic wireless capability",
+                                            }
+                                        ],
+                                    }
+                                ],
+                            },
+                            {
+                                "name": "Servers",
+                                "description": "Devices or systems that provide resources, data, services, or programs to other devices",
+                            },
+                            {
+                                "name": "Internet of Things (IoT) and Non-computing Devices",
+                                "description": "Devices embedded with sensors, software, and other technologies for connecting and exchanging data",
+                            },
+                            {
+                                "name": "Network Devices",
+                                "description": "Electronic devices required for communication and interaction between devices on a network",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "Removable Media",
+                        "description": "Storage devices that can be removed from a computer while the system is running",
+                    },
+                ],
+            },
+            {
+                "name": "Software",
+                "description": "Sets of data and instructions used to direct a computer to complete a specific task",
+                "children": [
+                    {
+                        "name": "Applications",
+                        "description": "Programs running on top of an operating system",
+                        "children": [
+                            {
+                                "name": "Services",
+                                "description": "Specialized programs that perform well-defined critical tasks",
+                            },
+                            {
+                                "name": "Libraries",
+                                "description": "Shareable pre-compiled codebase used to develop software programs and applications",
+                            },
+                            {
+                                "name": "APIs",
+                                "description": "Set of rules and interfaces for software components to interact with each other",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "Operating Systems",
+                        "description": "Software that manages computer hardware and software resources",
+                        "children": [
+                            {
+                                "name": "Services",
+                                "description": "Specialized programs that perform well-defined critical tasks",
+                            },
+                            {
+                                "name": "Libraries",
+                                "description": "Shareable pre-compiled codebase used to develop software programs and applications",
+                            },
+                            {
+                                "name": "APIs",
+                                "description": "Set of rules and interfaces for software components to interact with each other",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "Firmware",
+                        "description": "Software stored within a device's non-volatile memory",
+                    },
+                ],
+            },
+            {
+                "name": "Data",
+                "description": "Collection of facts that can be examined, considered, and used for decision-making",
+                "children": [
+                    {
+                        "name": "Sensitive Data",
+                        "description": "Data that must be kept private, accurate, reliable, and available",
+                    },
+                    {
+                        "name": "Log Data",
+                        "description": "Computer-generated data file that records events occurring within the enterprise",
+                    },
+                    {
+                        "name": "Physical Data",
+                        "description": "Data stored in physical documents or on physical types of removable devices",
+                    },
+                ],
+            },
+            {
+                "name": "Users",
+                "description": "Authorized individuals who access enterprise assets",
+                "children": [
+                    {
+                        "name": "Workforce",
+                        "description": "Individuals employed or engaged by an organization with access to its information systems",
+                    },
+                    {
+                        "name": "Service Providers",
+                        "description": "Entities that offer platforms, software, and services to other enterprises",
+                    },
+                    {
+                        "name": "User Accounts",
+                        "description": "Identity with a set of credentials that defines a user on a computing system",
+                    },
+                    {
+                        "name": "Administrator Accounts",
+                        "description": "Accounts for users requiring escalated privileges",
+                    },
+                    {
+                        "name": "Service Accounts",
+                        "description": "Accounts created specifically to run applications, services, and automated tasks",
+                    },
+                ],
+            },
+            {
+                "name": "Network",
+                "description": "Group of interconnected devices that exchange data",
+                "children": [
+                    {
+                        "name": "Network Infrastructure",
+                        "description": "Collection of network resources that provide connectivity, management, and communication",
+                    },
+                    {
+                        "name": "Network Architecture",
+                        "description": "How a network is designed, both physically and logically",
+                    },
+                ],
+            },
+            {
+                "name": "Documentation",
+                "description": "Policies, processes, procedures, plans, and other written material",
+                "children": [
+                    {
+                        "name": "Plans",
+                        "description": "Implements policies and may include groups of policies, processes, and procedures",
+                    },
+                    {
+                        "name": "Policies",
+                        "description": "Official governance statements that outline specific objectives of an information security program",
+                    },
+                    {
+                        "name": "Processes",
+                        "description": "Set of general tasks and activities to achieve a series of security-related goals",
+                    },
+                    {
+                        "name": "Procedures",
+                        "description": "Ordered set of steps that must be followed to accomplish a specific task",
+                    },
+                ],
+            },
+        ]
+
+        AssetClass.create_hierarchy(cis_hierarchy)
+
+    @classmethod
+    def reset_all(cls):
+        cls.objects.all().delete()
+
     class Meta:
         unique_together = ["name", "parent"]
         constraints = [
