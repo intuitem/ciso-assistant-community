@@ -1,16 +1,15 @@
 # This script converts a CISO Assistant Excel library from v1 to v2 format
-# v1 is the original format, with library_content tab
-# v2 is the newer format, with _meta and _content tabs
+# v1 uses a 'library_content' tab (key/value format), v2 uses _meta and _content sheets
 
-import pandas as pd
-from pathlib import Path
 import argparse
+from pathlib import Path
+from openpyxl import load_workbook, Workbook
+import re
 
 def convert_v1_to_v2(input_path: str, output_path: str):
-    xls = pd.read_excel(input_path, sheet_name=None)
+    wb = load_workbook(input_path, data_only=True)
 
-    library_content = xls.get("library_content")
-    if library_content is None:
+    if "library_content" not in wb.sheetnames:
         raise ValueError("Missing 'library_content' sheet.")
 
     library_meta = [("type", "library")]
@@ -19,22 +18,34 @@ def convert_v1_to_v2(input_path: str, output_path: str):
     declared_tabs = {}
     urn_prefixes = {}
     answers_logical_name = None
+    ig_logical_name = None
+    scores_logical_name = None
 
     known_object_types = {
         "framework", "requirements", "threats", "reference_controls",
         "scores", "implementation_groups", "risk_matrix", "mappings", "answers"
     }
 
-    for _, row in library_content.iterrows():
-        key = str(row.iloc[0]).strip().lower()
-        val1 = str(row.iloc[1]).strip() if not pd.isna(row.iloc[1]) else None
-        val2 = str(row.iloc[2]).strip() if len(row) > 2 and not pd.isna(row.iloc[2]) else None
-        val3 = str(row.iloc[3]).strip() if len(row) > 3 and not pd.isna(row.iloc[3]) else None
+    # --- Parse library_content ---
+    sheet = wb["library_content"]
+    for row in sheet.iter_rows(values_only=True):
+        if not any(row):
+            continue
+        key = str(row[0]).strip().lower() if row[0] else None
+        val1 = str(row[1]).strip() if len(row) > 1 and row[1] else None
+        val2 = str(row[2]).strip() if len(row) > 2 and row[2] else None
+        val3 = str(row[3]).strip() if len(row) > 3 and row[3] else None
+
+        if not key:
+            continue
 
         if key.startswith("library_"):
             library_meta.append((key.replace("library_", ""), val1))
-
-        elif key == "tab":
+        if key == "framework_urn" and val1:
+            # Automatically derive base_urn for requirements
+            base_urn = re.sub("framework", "req_node", val1)
+            object_metadata.setdefault("framework", {})["base_urn"] = base_urn
+        if key == "tab":
             if val2 == "requirements":
                 normalized_type = "framework"
             elif val2 == "mappings":
@@ -47,71 +58,91 @@ def convert_v1_to_v2(input_path: str, output_path: str):
 
             if normalized_type == "answers":
                 answers_logical_name = val1
+            if normalized_type == "scores":
+                scores_logical_name = val1
+            if normalized_type == "implementation_groups":
+                ig_logical_name = val1
 
-        elif key in {"reference_control_base_urn", "threat_base_urn"} and val1:
+        if key in ["reference_control_base_urn", "threat_base_urn"] and val1:
             object_type = "reference_control" if "reference_control" in key else "threat"
             object_metadata.setdefault(object_type, {})["base_urn"] = val1
             if val2:
                 urn_prefixes[val2] = val1
 
-        else:
-            for obj_type in known_object_types:
-                if key.startswith(f"{obj_type}_"):
-                    field = key[len(obj_type)+1:]
-                    object_metadata.setdefault(obj_type, {})[field] = val1
+        for obj_type in known_object_types:
+            if key.startswith(f"{obj_type}_"):
+                field = key[len(obj_type)+1:]
+                object_metadata.setdefault(obj_type, {})[field] = val1
 
     sheets_out = {
-        "library_meta": pd.DataFrame(library_meta, columns=["key", "value"])
+        "library_meta": library_meta
     }
 
     used_tabs = set()
 
+    # --- Process each declared tab ---
     for tab_name, obj_type, base_urn in tab_entries:
         tab_name = tab_name.strip()
         obj_type = obj_type.strip()
         used_tabs.add(tab_name)
 
         meta_rows = [("type", obj_type)]
-        if base_urn:
-            meta_rows.append(("base_urn", base_urn))
 
         clean_type = obj_type.rstrip("s")
         for k, v in object_metadata.get(clean_type, {}).items():
             meta_rows.append((k, v))
 
-        content_df = xls.get(tab_name, pd.DataFrame())
 
         if obj_type == "framework":
             if "scores" in declared_tabs:
-                meta_rows.append(("score", "default"))
+                meta_rows.append(("scores_definition", scores_logical_name))
             if "implementation_groups" in declared_tabs:
-                meta_rows.append(("implementation_groups", "baseline_ig"))
+                meta_rows.append(("implementation_groups_definition", ig_logical_name))
             if answers_logical_name:
                 meta_rows.append(("answers", answers_logical_name))
-
         elif obj_type == "answers":
             meta_rows.append(("name", tab_name))
+        elif obj_type == "implementation_groups":
+            meta_rows.append(("name", tab_name))
+        elif obj_type == "scores":
+            meta_rows.append(("name", tab_name))
+        # Read content
+        content_rows = []
+        if tab_name in wb.sheetnames:
+            ws = wb[tab_name]
+            for row in ws.iter_rows(values_only=True):
+                if any(row):
+                    content_rows.append([
+                        str(cell).strip() if cell is not None else "" for cell in row
+                    ])
 
-        sheets_out[f"{tab_name}_meta"] = pd.DataFrame(meta_rows, columns=["key", "value"])
-        sheets_out[f"{tab_name}_content"] = content_df
+        sheets_out[f"{tab_name}_meta"] = meta_rows
+        sheets_out[f"{tab_name}_content"] = content_rows
 
     if urn_prefixes:
-        sheets_out["urn_prefix_meta"] = pd.DataFrame([("type", "urn_prefix")], columns=["key", "value"])
-        sheets_out["urn_prefix_content"] = pd.DataFrame(
-            [{"prefix_id": k, "prefix_value": v} for k, v in urn_prefixes.items()]
-        )
+        sheets_out["urn_prefix_meta"] = [("type", "urn_prefix")]
+        sheets_out["urn_prefix_content"] = [("prefix_id", "prefix_value")] + [
+            (k, v) for k, v in urn_prefixes.items()
+        ]
 
-    for sheet in xls:
-        if sheet not in {"library_content"} and sheet not in sheets_out and sheet not in used_tabs:
-            sheets_out[sheet] = xls[sheet]
+    for sheet_name in wb.sheetnames:
+        if sheet_name not in {"library_content"} and sheet_name not in sheets_out and sheet_name not in used_tabs:
+            ws = wb[sheet_name]
+            raw = [[cell.value for cell in row] for row in ws.iter_rows()]
+            if raw:
+                sheets_out[sheet_name] = raw
 
-    with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-        for name, df in sheets_out.items():
-            is_meta = name.endswith("_meta")
-            df.to_excel(writer, sheet_name=name, index=False, header=not is_meta)
+    # --- Write output workbook ---
+    wb_out = Workbook()
+    del wb_out["Sheet"]
 
+    for sheet_name, rows in sheets_out.items():
+        ws_out = wb_out.create_sheet(title=sheet_name[:31])
+        for row in rows:
+            ws_out.append(row)
+
+    wb_out.save(output_path)
     print(f"✅ Conversion complete: {output_path}")
-
 
 def main():
     parser = argparse.ArgumentParser(description="Convert Excel library v1 to v2 format.")
