@@ -54,8 +54,6 @@ def parse_key_value_sheet(sheet):
 
 # --- urn expansion ------------------------------------------------------------
 
-import re
-
 def expand_urns_from_prefixed_list(field_value, prefix_to_urn):
     """
     Convert a prefixed list like 'abc:xyz, def:uvw' into a list of full URNs,
@@ -89,6 +87,58 @@ def expand_urns_from_prefixed_list(field_value, prefix_to_urn):
         else:
             print(f"⚠️ Malformed element '{element}' — skipped")
     return result
+
+# --- question management ------------------------------------------------------------
+
+def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_dict):
+    """
+    Injects parsed questions and their metadata into a requirement node.
+    Ensures that question type is valid and handles multiple questions/answers.
+
+    :param node: the requirement node (dict)
+    :param raw_question_str: the string from the "questions" column
+    :param raw_answer_str: the string from the "answer" column
+    :param answers_dict: dictionary of all available answers (from answer sheet)
+    """
+    if not raw_question_str:
+        return
+
+    allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
+
+    question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
+    answer_ids = [a.strip() for a in str(raw_answer_str).split("\n") if raw_answer_str] if raw_answer_str else []
+
+    if len(answer_ids) != 1 and len(answer_ids) != len(question_lines):
+        raise ValueError(f"Mismatch between questions and answers for node {node.get('urn')}")
+
+    question_block = {}
+
+    for idx, question_text in enumerate(question_lines):
+        answer_id = answer_ids[0] if len(answer_ids) == 1 else answer_ids[idx]
+        answer_meta = answers_dict.get(answer_id)
+        if not answer_meta:
+            raise ValueError(f"Unknown answer ID: {answer_id} for node {node.get('urn')}")
+        qtype = answer_meta.get("type")
+        if qtype not in allowed_types:
+            raise ValueError(f"Invalid question type '{qtype}' for answer ID: {answer_id}")
+        q_urn = f"{node['urn']}:question:{idx+1}"
+        question_entry = {
+            "type": qtype,
+        }
+        if qtype in {"unique_choice", "multiple_choice"}:
+            choices = []
+            for j, choice in enumerate(answer_meta["choices"]):
+                choice_urn = f"{q_urn}:choice:{j+1}"
+                choices.append({
+                    "urn": choice_urn,
+                    "value": choice["value"]
+                })
+            question_entry["choices"] = choices
+        question_entry["text"] = question_text
+        question_block[q_urn] = question_entry
+    if question_block:
+        node["questions"] = question_block
+
 
 # --- Main logic ---------------------------------------------------------------
 
@@ -274,6 +324,43 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
             content_ws = obj["content_sheet"]
             base_urn = obj["meta"].get("base_urn")
 
+            # --- Retrieve answers block if declared ---
+            answers_dict = {}
+            answers_block_name = meta.get("answers")
+            if answers_block_name:
+                if answers_block_name not in object_blocks:
+                    raise ValueError(f"❌ Missing answers sheet: '{answers_block_name}'")
+
+                answers_sheet = object_blocks[answers_block_name]["content_sheet"]
+                rows = list(answers_sheet.iter_rows())
+                if rows:
+                    header = [str(c.value).strip().lower() if c.value else "" for c in rows[0]]
+
+                    for row in rows[1:]:
+                        data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
+                        answer_id = str(data.get("id", "")).strip()
+                        answer_type = str(data.get("question_type", "")).strip()
+                        choices_raw = str(data.get("question_choices", "")).strip()
+
+                        if not answer_id or not answer_type or not choices_raw:
+                            continue  # Incomplete row
+
+                        choices = []
+                        for line in choices_raw.split("\n"):
+                            line = line.strip()
+                            if not line:
+                                continue
+                            if line.startswith("|") and choices:
+                                # Multi-line value, append to previous
+                                choices[-1]["value"] += "\n" + line[1:].strip()
+                            else:
+                                choices.append({"urn": "", "value": line})
+
+                        answers_dict[answer_id] = {
+                            "type": answer_type,
+                            "choices": choices
+                        }
+
             framework = {
                 "urn": meta.get("urn"),
                 "ref_id": meta.get("ref_id"),
@@ -290,7 +377,6 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
             if "max_score" in meta:
                 framework["max_score"] = int(meta["max_score"])
 
-            print("meta", meta)
             score_name = meta.get("scores_definition")
             if score_name and score_name in object_blocks:
                 score_ws = object_blocks[score_name]["content_sheet"]
@@ -396,6 +482,8 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                         node["description"] = str(data["description"]).strip()
                     if "annotation" in data and data["annotation"]:
                         node["annotation"] = str(data["annotation"]).strip()
+                    if "typical_evidence" in data and data["typical_evidence"]:
+                        node["typical_evidence"] = str(data["typical_evidence"]).strip()
                     if "implementation_groups" in data and data["implementation_groups"]:
                         node["implementation_groups"] = [
                             s.strip() for s in str(data["implementation_groups"]).split(",")
@@ -408,6 +496,13 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                         rc = expand_urns_from_prefixed_list(data["reference_controls"], prefix_to_urn)
                         if rc:
                             node["reference_controls"] = rc
+                    if "questions" in data and data["questions"]:
+                        inject_questions_into_node(
+                            node,
+                            data.get("questions"),
+                            data.get("answer"),
+                            answers_dict
+                        )
                     translations = extract_translations_from_row(header, row)
                     if translations:
                         node["translations"] = translations
@@ -418,7 +513,8 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
             library["objects"]["framework"] = framework
 
         else:
-            print("type not handled:", obj_type)
+            if obj_type not in ["answers", "implementation_groups", "scores", "urn_prefix"]:
+                print("type not handled:", obj_type)
 
     # Step 6: Export to YAML
     print(f"✅ Writing YAML to {output_file}")
