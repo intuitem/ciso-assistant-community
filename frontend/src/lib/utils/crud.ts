@@ -675,6 +675,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [{ field: 'asset_assessment', urlModel: 'escalation-thresholds' }],
 		foreignKeyFields: [
 			{ field: 'asset', urlModel: 'assets' },
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'asset_folder', urlModel: 'folders' },
 			{ field: 'dependencies', urlModel: 'assets' },
 			{ field: 'associated_controls', urlModel: 'applied-controls' },
 			{
@@ -707,6 +709,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'asset-assessments',
 				endpointUrl: 'asset-assessments'
 			}
+		],
+		detailViewFields: [
+			{ field: 'asset_assessment' },
+			{ field: 'get_human_pit' },
+			{ field: 'qualifications' },
+			{ field: 'quali_impact' },
+			{ field: 'justification' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
 		]
 	},
 	processings: {
