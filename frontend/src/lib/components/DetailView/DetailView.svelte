@@ -6,7 +6,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { URL_MODEL_MAP, type ModelMapEntry } from '$lib/utils/crud';
+	import { type ModelMapEntry } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
@@ -189,7 +189,7 @@
 		);
 	};
 
-	$: relatedModels = Object.entries(data.relatedModels).sort(
+	$: relatedModels = Object.entries(data?.relatedModels ?? {}).sort(
 		(a: [string, any], b: [string, any]) => {
 			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
 		}
@@ -294,9 +294,8 @@
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
 																{#if val.str && val.id}
 																	{@const itemHref = `/${
-																		URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																			(item) => item.field === key
-																		)?.urlModel
+																		data.model?.foreignKeyFields?.find((item) => item.field === key)
+																			?.urlModel
 																	}/${val.id}`}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
 																		{truncateString(val.str)}</Anchor
@@ -319,9 +318,8 @@
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
 																{#if val.str && val.id}
 																	{@const itemHref = `/${
-																		URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																			(item) => item.field === key
-																		)?.urlModel
+																		data.model?.foreignKeyFields?.find((item) => item.field === key)
+																			?.urlModel
 																	}/${val.id}`}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 																		>{val.str}</Anchor
@@ -339,9 +337,7 @@
 												{/if}
 											{:else if value.id && !value.hexcolor}
 												{@const itemHref = `/${
-													URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-														(item) => item.field === key
-													)?.urlModel
+													data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel
 												}/${value.id}`}
 												{#if key === 'ro_to_couple'}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
