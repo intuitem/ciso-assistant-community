@@ -139,11 +139,195 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
     if question_block:
         node["questions"] = question_block
 
+# --- risk matrix management ------------------------------------------------------------
+
+# https://gist.github.com/Mike-Honey/b36e651e9a7f1d2e1d60ce1c63b9b633
+from colorsys import rgb_to_hls, hls_to_rgb
+
+RGBMAX = 0xFF  # Corresponds to 255
+HLSMAX = 240  # MS excel's tint function expects that HLS is base 240. see:
+# https://social.msdn.microsoft.com/Forums/en-US/e9d8c136-6d62-4098-9b1b-dac786149f43/excel-color-tint-algorithm-incorrect?forum=os_binaryfile#d3c2ac95-52e0-476b-86f1-e2a697f24969
+
+def rgb_to_ms_hls(red, green=None, blue=None):
+    """Converts rgb values in range (0,1) or a hex string of the form '[#aa]rrggbb' to HLSMAX based HLS, (alpha values are ignored)"""
+    if green is None:
+        if isinstance(red, str):
+            if len(red) > 6:
+                red = red[-6:]  # Ignore preceding '#' and alpha values
+            blue = int(red[4:], 16) / RGBMAX
+            green = int(red[2:4], 16) / RGBMAX
+            red = int(red[0:2], 16) / RGBMAX
+        else:
+            red, green, blue = red
+    h, l, s = rgb_to_hls(red, green, blue)
+    return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
+
+def ms_hls_to_rgb(hue, lightness=None, saturation=None):
+    """Converts HLSMAX based HLS values to rgb values in the range (0,1)"""
+    if lightness is None:
+        hue, lightness, saturation = hue
+    return hls_to_rgb(hue / HLSMAX, lightness / HLSMAX, saturation / HLSMAX)
+
+def rgb_to_hex(red, green=None, blue=None):
+    """Converts (0,1) based RGB values to a hex string 'rrggbb'"""
+    if green is None:
+        red, green, blue = red
+    return (
+        "%02x%02x%02x"
+        % (
+            int(round(red * RGBMAX)),
+            int(round(green * RGBMAX)),
+            int(round(blue * RGBMAX)),
+        )
+    ).upper()
+
+def get_theme_colors(wb):
+    """Gets theme colors from the workbook"""
+    # see: https://groups.google.com/forum/#!topic/openpyxl-users/I0k3TfqNLrc
+    from openpyxl.xml.functions import QName, fromstring
+
+    xlmns = "http://schemas.openxmlformats.org/drawingml/2006/main"
+    root = fromstring(wb.loaded_theme)
+    themeEl = root.find(QName(xlmns, "themeElements").text)
+    colorSchemes = themeEl.findall(QName(xlmns, "clrScheme").text)
+    firstColorScheme = colorSchemes[0]
+
+    colors = []
+
+    for c in [
+        "lt1",
+        "dk1",
+        "lt2",
+        "dk2",
+        "accent1",
+        "accent2",
+        "accent3",
+        "accent4",
+        "accent5",
+        "accent6",
+    ]:
+        accent = firstColorScheme.find(QName(xlmns, c).text)
+        for i in list(accent):  # walk all child nodes, rather than assuming [0]
+            if "window" in i.attrib["val"]:
+                colors.append(i.attrib["lastClr"])
+            else:
+                colors.append(i.attrib["val"])
+
+    return colors
+
+def tint_luminance(tint, lum):
+    """Tints a HLSMAX based luminance"""
+    # See: http://ciintelligence.blogspot.co.uk/2012/02/converting-excel-theme-color-and-tint.html
+    if tint < 0:
+        return int(round(lum * (1.0 + tint)))
+    else:
+        return int(round(lum * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint))))
+
+def theme_and_tint_to_rgb(wb, theme, tint):
+    """Given a workbook, a theme number and a tint return a hex based rgb"""
+    rgb = get_theme_colors(wb)[theme]
+    h, l, s = rgb_to_ms_hls(rgb)
+    return rgb_to_hex(ms_hls_to_rgb(h, tint_luminance(tint, l), s))
+
+def get_color(wb, cell):
+    """get cell color; None for no fill"""
+    if not cell.fill.patternType:
+        return None
+    if isinstance(cell.fill.fgColor.rgb, str):
+        return "#" + cell.fill.fgColor.rgb[2:]
+    theme = cell.fill.start_color.theme
+    tint = cell.fill.start_color.tint
+    color = theme_and_tint_to_rgb(wb, theme, tint)
+    return "#" + color
+
+def parse_risk_matrix(meta, content_ws, wb):
+    """Parse a risk_matrix block into a structured dict."""
+    rows = list(content_ws.iter_rows())
+    if not rows:
+        return None
+    header = {}
+    grid_count = 0
+    for i, cell in enumerate(rows[0]):
+        col = str(cell.value).strip().lower() if cell.value else ""
+        if col == "grid":
+            col = f"grid{grid_count}"
+            grid_count += 1
+        header[col] = i
+
+    assert all(k in header for k in ["type", "id", "color", "abbreviation", "name", "description", "grid0"])
+    index = {k: i for i, k in enumerate(header)}
+    size_grid = len([h for h in header if h.startswith("grid")])
+
+    risk_matrix = {
+        "urn": meta.get("urn"),
+        "ref_id": meta.get("ref_id"),
+        "name": meta.get("name"),
+        "description": meta.get("description"),
+        "probability": [],
+        "impact": [],
+        "risk": [],
+        "grid": []
+    }
+
+    translations = extract_translations_from_metadata(meta, "risk_matrix")
+    if translations:
+        risk_matrix["translations"] = translations
+
+    grid = {}
+    grid_color = {}
+
+    for row in rows[1:]:
+        if not any(c.value for c in row):
+            continue
+
+        ctype = str(row[index["type"]].value).strip().lower()
+        assert ctype in ("probability", "impact", "risk")
+
+        rid = int(row[index["id"]].value)
+        abbrev = str(row[index["abbreviation"]].value or "").strip()
+        name = str(row[index["name"]].value or "").strip()
+        desc = str(row[index["description"]].value or "").strip()
+        color_cell = row[index["color"]]
+
+        obj_data = {
+            "id": rid,
+            "abbreviation": abbrev,
+            "name": name,
+            "description": desc,
+        }
+
+        translations = extract_translations_from_row(header, row)
+        if translations:
+            obj_data["translations"] = translations
+
+        if color := get_color(wb, color_cell):
+            obj_data["hexcolor"] = color
+
+        risk_matrix[ctype].append(obj_data)
+
+        if ctype == "probability":
+            grid[rid] = []
+            grid_color[rid] = []
+            for i in range(size_grid):
+                cell = row[index[f"grid{i}"]]
+                grid[rid].append(int(cell.value))
+                grid_color[rid].append(get_color(wb, cell))
+
+    # Build grid from sorted probability IDs
+    sorted_ids = sorted(grid.keys())
+    risk_matrix["grid"] = [grid[rid] for rid in sorted_ids]
+
+    # Ensure order
+    for k in ("probability", "impact", "risk"):
+        risk_matrix[k].sort(key=lambda x: x["id"])
+
+    return risk_matrix
+
 
 # --- Main logic ---------------------------------------------------------------
 
 def create_library(input_file: str, output_file: str, compat: bool = False):
-    wb = openpyxl.load_workbook(input_file, data_only=True)
+    wb = openpyxl.load_workbook(input_file)
     sheets = wb.sheetnames
     object_blocks = {}
 
@@ -511,6 +695,13 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 framework["requirement_nodes"] = requirement_nodes
 
             library["objects"]["framework"] = framework
+
+        elif obj_type == "risk_matrix":
+            matrix = parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
+            if matrix:
+                if "risk_matrix" not in library["objects"]:
+                    library["objects"]["risk_matrix"] = []
+                library["objects"]["risk_matrix"].append(matrix)
 
         else:
             if obj_type not in ["answers", "implementation_groups", "scores", "urn_prefix"]:
