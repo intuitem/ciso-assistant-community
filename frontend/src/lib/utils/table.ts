@@ -307,11 +307,8 @@ const CURRENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'residual_level',
-		optionsEndpoint: 'risk-matrices/risk',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
-		multiple: true
+		...CURRENT_RISK_LEVEL_FILTER.props,
+		label: 'residual_level'
 	}
 };
 
@@ -331,11 +328,8 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'residual_criticality',
-		options: [1, 2, 3, 4],
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
-		multiple: true
+		...CURRENT_CRITICALITY_FILTER.props,
+		label: 'residual_criticality'
 	}
 };
 
