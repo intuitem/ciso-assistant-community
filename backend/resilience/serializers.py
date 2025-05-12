@@ -32,6 +32,7 @@ class AssetAssessmentReadSerializer(BaseModelSerializer):
 
     bia = FieldsRelatedField()
     asset = FieldsRelatedField()
+    asset_folder = FieldsRelatedField(source="asset.folder")
     folder = FieldsRelatedField()
 
     dependencies = FieldsRelatedField(many=True)

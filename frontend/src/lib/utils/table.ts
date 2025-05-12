@@ -781,6 +781,7 @@ export const listViewFields = {
 	'asset-assessments': {
 		head: [
 			'asset',
+			'folder',
 			'bia',
 			'dependencies',
 			'associatedControls',
@@ -790,6 +791,7 @@ export const listViewFields = {
 		],
 		body: [
 			'asset',
+			'asset_folder',
 			'bia',
 			'dependencies',
 			'associated_controls',

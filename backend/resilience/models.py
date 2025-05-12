@@ -68,12 +68,16 @@ class BusinessImpactAnalysis(Assessment):
         table = list()
         xAxis = set()
         xAxis.add(0)
-        asset_assessments = AssetAssessment.objects.filter(bia=self).prefetch_related(
-            models.Prefetch(
-                "escalationthreshold_set",
-                queryset=EscalationThreshold.objects.order_by("point_in_time"),
-                to_attr="prefetched_thresholds",
+        asset_assessments = (
+            AssetAssessment.objects.filter(bia=self)
+            .prefetch_related(
+                models.Prefetch(
+                    "escalationthreshold_set",
+                    queryset=EscalationThreshold.objects.order_by("point_in_time"),
+                    to_attr="prefetched_thresholds",
+                )
             )
+            .order_by("asset__folder")
         )
 
         # First pass: collect all threshold points
@@ -120,7 +124,13 @@ class BusinessImpactAnalysis(Assessment):
                         data_dict[point] = current_impact
 
             # Add entry to table
-            table.append({"asset": aa.asset.name, "data": data_dict})
+            table.append(
+                {
+                    "asset": aa.asset.name,
+                    "folder": aa.asset.folder.name,
+                    "data": data_dict,
+                }
+            )
 
         for entry in table:
             for point in xAxis:

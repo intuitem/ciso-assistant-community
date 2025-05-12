@@ -1504,6 +1504,7 @@
 	"addBusinessImpactAnalysis": "Démarrer un BIA",
 	"escalationThreshold": "Seuils d'impact",
 	"assetAssessment": "Focus",
+	"assetFolder": "Domaine de l'actif",
 	"impactOn": "Impact sur",
 	"getHumanPit": "Point dans le temps",
 	"assetAssessments": "Evaluations BIA",

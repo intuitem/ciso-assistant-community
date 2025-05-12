@@ -378,6 +378,7 @@
 	"businessImpactAnalysis": "Business Impact Analysis",
 	"escalationThreshold": "Escalation Threshold",
 	"assetAssessment": "Focus",
+	"assetFolder": "Asset domain",
 	"impactOn": "Impact On",
 	"getHumanPit": "Point in time",
 	"assetAssessments": "BIA assessments",
