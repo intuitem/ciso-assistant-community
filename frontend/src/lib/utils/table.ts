@@ -799,8 +799,8 @@ export const listViewFields = {
 		]
 	},
 	'escalation-thresholds': {
-		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'justification'],
-		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'justification']
+		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'impactOn', 'justification'],
+		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
 	processings: {
 		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],

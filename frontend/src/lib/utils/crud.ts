@@ -707,6 +707,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'asset-assessments',
 				endpointUrl: 'asset-assessments'
 			}
+		],
+		detailViewFields: [
+			{ field: 'asset_assessment' },
+			{ field: 'get_human_pit' },
+			{ field: 'qualifications' },
+			{ field: 'quali_impact' },
+			{ field: 'justification' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
 		]
 	},
 	processings: {

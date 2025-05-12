@@ -189,6 +189,9 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     class Meta:
         unique_together = ["asset_assessment", "point_in_time"]
 
+    def __str__(self):
+        return f"Downtime after {self.get_human_pit} on {self.asset_assessment.asset}"
+
     @property
     def risk_matrix(self):
         return self.asset_assessment.bia.risk_matrix
