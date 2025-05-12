@@ -465,7 +465,7 @@ class LoadFileView(APIView):
                                     .first()
                                 )
                             else:
-                                logger.warn("Import attempt: unknown ref_id ")
+                                logger.warning("Import attempt: unknown ref_id ")
                         elif urn:
                             ReqNode = RequirementNode.objects.filter(
                                 framework__id=framework_id, urn=urn
