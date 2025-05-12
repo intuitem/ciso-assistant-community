@@ -343,7 +343,20 @@
 														(item) => item.field === key
 													)?.urlModel
 												}/${value.id}`}
-												{#if key === 'ro_to_couple'}
+												{#if key === 'asset_class'}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
+														{#if value.str.includes('/')}
+															{#each value.str.split('/') as part, i}
+																{safeTranslate(toCamelCase(part))}{i <
+																value.str.split('/').length - 1
+																	? ' / '
+																	: ''}
+															{/each}
+														{:else}
+															{safeTranslate(toCamelCase(value.str))}
+														{/if}
+													</Anchor>
+												{:else if key === 'ro_to_couple'}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 														>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
 															'-'

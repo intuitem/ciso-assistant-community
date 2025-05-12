@@ -1526,11 +1526,11 @@
 	"time": "temps",
 	"devices": "Appareils",
 	"enterpriseAssets": "Actifs d'entreprise",
-	"enduserDevices": "Appareils d'utilisateur final",
+	"endUserDevices": "Ordinateur",
 	"portable": "Portable",
 	"mobile": "Mobile",
 	"servers": "Serveurs",
-	"internetOfThingsIoTAndNoncomputingDevices": "Internet des objets (IoT) et appareils non informatiques",
+	"iotAndNonComputingDevices": "IoT et appareils non informatiques",
 	"networkDevices": "Appareils réseau",
 	"removableMedia": "Supports amovibles",
 	"software": "Logiciels",
@@ -1560,8 +1560,8 @@
 	"procedures": "Procédures",
 	"businessProcess": "Processus métier",
 	"coreOperations": "Opérations essentielles",
-	"productserviceDevelopment": "Développement de produits/services",
-	"productionserviceDelivery": "Production/Livraison de services",
+	"productOrServiceDevelopment": "Développement de produits et services",
+	"productOrServiceDelivery": "Livraison de produits et services",
 	"salesAndMarketing": "Ventes et marketing",
 	"customerService": "Service client",
 	"supplyChainManagement": "Gestion de la chaîne d'approvisionnement",
@@ -1583,5 +1583,7 @@
 	"partnerManagement": "Gestion des partenaires",
 	"governmentRelations": "Relations gouvernementales",
 	"communityRelations": "Relations communautaires",
-	"investorRelations": "Relations avec les investisseurs"
+	"investorRelations": "Relations avec les investisseurs",
+	"saas": "SaaS",
+	"cloudInfrastructure": "Infrastructure Cloud"
 }

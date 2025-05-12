@@ -347,7 +347,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
 
-    asset_class = FieldsRelatedField()
+    asset_class = FieldsRelatedField(["name"])
 
 
 class AssetImportExportSerializer(BaseModelSerializer):

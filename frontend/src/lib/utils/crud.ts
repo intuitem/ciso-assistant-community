@@ -426,6 +426,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [
 			{ field: 'parent_assets' },
 			{ field: 'folder' },
+			{ field: 'asset_class' },
 			{ field: 'type' },
 			{ field: 'owner' },
 			{ field: 'filtering_labels' }

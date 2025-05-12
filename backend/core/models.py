@@ -1894,7 +1894,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                         "description": "Assets with the potential to store or process data",
                         "children": [
                             {
-                                "name": "End-user Devices",
+                                "name": "End user Devices",
                                 "description": "IT assets used among members of an enterprise",
                                 "children": [
                                     {
@@ -1914,7 +1914,11 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                                 "description": "Devices or systems that provide resources, data, services, or programs to other devices",
                             },
                             {
-                                "name": "Internet of Things (IoT) and Non-computing Devices",
+                                "name": "cloudInfrastructure",
+                                "description": "Cloud Infrastructure and resources",
+                            },
+                            {
+                                "name": "iotAndNonComputingDevices",
                                 "description": "Devices embedded with sensors, software, and other technologies for connecting and exchanging data",
                             },
                             {
@@ -1949,6 +1953,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                                 "name": "APIs",
                                 "description": "Set of rules and interfaces for software components to interact with each other",
                             },
+                            {"name": "saas", "description": "Software as a Service"},
                         ],
                     },
                     {
@@ -2067,11 +2072,11 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                         "description": "Primary processes that directly deliver value to customers",
                         "children": [
                             {
-                                "name": "Product/Service Development",
+                                "name": "Product or Service Development",
                                 "description": "Processes for designing, creating, and improving products and services",
                             },
                             {
-                                "name": "Production/Service Delivery",
+                                "name": "Product or Service Delivery",
                                 "description": "Processes for manufacturing products or delivering services to customers",
                             },
                             {
@@ -2179,6 +2184,11 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
     def __str__(self):
         return self.full_path
+
+    @classmethod
+    def clear_all(cls):
+        cls.objects.all().update(parent=None)
+        cls.objects.all().delete()
 
     class Meta:
         unique_together = ["name", "parent"]

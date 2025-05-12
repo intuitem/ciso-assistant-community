@@ -371,6 +371,17 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_FILTER: ListViewFilterConfig = {
+	//still broken
+	component: AutocompleteSelect,
+	props: {
+		label: 'assetClass',
+		optionsEndpoint: 'asset-class',
+		optionsLabelField: 'full_path',
+		optionsValueField: 'id',
+		multiple: false
+	}
+};
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -635,7 +646,6 @@ export const listViewFields = {
 			'type',
 			'securityObjectives',
 			'disasterRecoveryObjectives',
-			'assetClass',
 			'domain',
 			'labels'
 		],
@@ -645,7 +655,6 @@ export const listViewFields = {
 			'type',
 			'security_objectives',
 			'disaster_recovery_objectives',
-			'asset_class',
 			'folder',
 			'filtering_labels'
 		],

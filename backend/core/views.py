@@ -488,6 +488,7 @@ class AssetFilter(df.FilterSet):
             "security_exceptions",
             "applied_controls",
             "filtering_labels",
+            "asset_class",
         ]
 
 
@@ -515,6 +516,13 @@ class AssetViewSet(BaseModelViewSet):
     @action(detail=False, name="Get type choices")
     def type(self, request):
         return Response(dict(Asset.Type.choices))
+
+    @action(detail=False, name="Get asset class choices")
+    def asset_class(self, request):
+        # this is for filters
+        return Response(
+            [{"id": ac.id, "name": ac.full_path} for ac in AssetClass.objects.all()]
+        )
 
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
@@ -660,6 +668,10 @@ class AssetClassViewSet(BaseModelViewSet):
 
     ordering = ["parent", "name"]
     search_fields = ["name", "description"]
+
+    @action(detail=False, name="delete all")
+    def clear_all(self, request):
+        return Response(AssetClass.clear_all())
 
     @action(detail=False, name="Get Asset Class Tree")
     def tree(self, request):

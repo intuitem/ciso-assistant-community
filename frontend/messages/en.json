@@ -1533,11 +1533,11 @@
 	"errorUpdatungObject": "An error occurred while updating the {object} object.",
 	"devices": "Devices",
 	"enterpriseAssets": "Enterprise Assets",
-	"enduserDevices": "End-user Devices",
+	"endUserDevices": "End user Devices",
 	"portable": "Portable",
 	"mobile": "Mobile",
 	"servers": "Servers",
-	"internetOfThingsIoTAndNoncomputingDevices": "Internet of Things (IoT) and Non-computing Devices",
+	"iotAndNonComputingDevices": "IoT and Non computing Devices",
 	"networkDevices": "Network Devices",
 	"removableMedia": "Removable Media",
 	"software": "Software",
@@ -1567,8 +1567,8 @@
 	"procedures": "Procedures",
 	"businessProcess": "Business Process",
 	"coreOperations": "Core Operations",
-	"productserviceDevelopment": "Product/Service Development",
-	"productionserviceDelivery": "Production/Service Delivery",
+	"productOrServiceDevelopment": "Product or Service Development",
+	"productOrServiceDelivery": "Product or Service Delivery",
 	"salesAndMarketing": "Sales and Marketing",
 	"customerService": "Customer Service",
 	"supplyChainManagement": "Supply Chain Management",
@@ -1590,5 +1590,7 @@
 	"partnerManagement": "Partner Management",
 	"governmentRelations": "Government Relations",
 	"communityRelations": "Community Relations",
-	"investorRelations": "Investor Relations"
+	"investorRelations": "Investor Relations",
+	"saas": "SaaS",
+	"cloudInfrastructure": "Cloud Infrastructure"
 }
