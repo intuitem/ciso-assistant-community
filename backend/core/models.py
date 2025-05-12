@@ -553,8 +553,7 @@ class LibraryUpdater:
 
             for requirement_node in requirement_nodes:
                 urn = requirement_node["urn"].lower()
-                question = requirement_node.get("question")
-                question_type = question["question_type"] if question else None
+                questions = requirement_node.get("questions")
 
                 requirement_node_dict = {
                     k: v
@@ -583,31 +582,85 @@ class LibraryUpdater:
                                 compliance_assessment=ca,
                                 requirement=new_requirement_node,
                                 folder=ca.perimeter.folder,
-                                answer=transform_question_to_answer(question)
-                                if question
+                                answers=transform_questions_to_answers(questions)
+                                if questions
                                 else {},
                             )
                         )
 
                 for ra in existing_assessments.get(urn, []):
-                    if not question:
+                    if not questions:
                         assessments_to_update.append(ra)
                         continue
 
-                    answers = ra.answer.get("questions", [])
-                    if any(a["type"] != question_type for a in answers):
-                        ra.answer = transform_question_to_answer(question)
-                        assessments_to_update.append(ra)
-                        continue
+                    answers = ra.answers
 
-                    if question_type == "unique_choice":
-                        for answer in answers:
-                            if answer["answer"] not in question["question_choices"]:
-                                answer["answer"] = ""
-                        ra.answer = {"questions": answers}
-                        assessments_to_update.append(ra)
-                    elif question_type not in ["text", "date"]:
-                        raise NotImplementedError(f"Unsupported type '{question_type}'")
+                    # Remove answers corresponding to questions that have been removed
+                    for urn in list(answers.keys()):
+                        if urn not in questions:
+                            del answers[urn]
+                    # Add answers corresponding to questions that have been updated/added
+                    for urn, question in questions.items():
+                        # If the question is not present in answers, initialize it
+                        if urn not in answers:
+                            answers[urn] = None
+                            continue
+
+                        answer_val = answers[urn]
+                        type = question.get("type")
+
+                        if type == "multiple_choice":
+                            # Keep only the choices that exist in the question
+                            if isinstance(answer_val, list):
+                                valid_choices = {
+                                    choice["urn"]
+                                    for choice in question.get("choices", [])
+                                }
+                                answers[urn] = [
+                                    choice
+                                    for choice in answer_val
+                                    if choice in valid_choices
+                                ]
+                            else:
+                                answers[urn] = []
+
+                        elif type == "unique_choice":
+                            # If the answer does not match a valid choice, reset it to None
+                            valid_choices = {
+                                choice["urn"] for choice in question.get("choices", [])
+                            }
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val if answer_val in valid_choices else None
+                                )
+
+                        elif type == "text":
+                            # For a text question, simply check that it is a string
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val
+                                    if isinstance(answer_val, str)
+                                    and answer_val.split(":")[0] != "urn"
+                                    else None
+                                )
+
+                        elif type == "date":
+                            # For a date question, check the expected format (e.g., "YYYY-MM-DD")
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                try:
+                                    datetime.strptime(answer_val, "%Y-%m-%d")
+                                    answers[urn] = answer_val
+                                except Exception:
+                                    answers[urn] = None
+
+                    ra.answers = answers
+                    assessments_to_update.append(ra)
 
                 for threat_urn in requirement_node.get("threats", []):
                     normalized_threat_urn = threat_urn.lower()
@@ -634,7 +687,7 @@ class LibraryUpdater:
                 # Ensure all needed fields are included
                 fields_to_update = sorted(
                     all_fields_to_update.union(
-                        {"name", "description", "order_id", "question"}
+                        {"name", "description", "order_id", "questions"}
                     )
                 )
                 RequirementNode.objects.bulk_update(
@@ -645,7 +698,7 @@ class LibraryUpdater:
 
             if assessments_to_update:
                 RequirementAssessment.objects.bulk_update(
-                    assessments_to_update, ["answer"], batch_size=100
+                    assessments_to_update, ["answers"], batch_size=100
                 )
 
             if assessments_to_create:
@@ -3902,7 +3955,7 @@ class ComplianceAssessment(Assessment):
             include_non_assessable=False
         )
         for ra in requirement_assessments:
-            if ra.requirement.question:
+            if ra.requirement.questions:
                 return True
         return False
 
