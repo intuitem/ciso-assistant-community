@@ -21,6 +21,7 @@
 	"addVulnerability": "Ajouter une vulnérabilité",
 	"addReferenceControl": "Ajouter une mesure de référence",
 	"addAppliedControl": "Ajouter une mesure appliquée",
+	"assetClass": "Classe",
 	"addAsset": "Ajouter un actif",
 	"addRiskAssessment": "Ajouter une évaluation de risque",
 	"addRiskScenario": "Ajouter un scénario de risque",
