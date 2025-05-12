@@ -703,6 +703,50 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                     library["objects"]["risk_matrix"] = []
                 library["objects"]["risk_matrix"].append(matrix)
 
+        elif obj_type == "requirement_mapping_set":
+            meta = obj["meta"]
+            content_ws = obj["content_sheet"]
+            source_node_base_urn = obj["meta"].get("source_node_base_urn")
+            target_node_base_urn = obj["meta"].get("target_node_base_urn")
+
+            requirement_mapping_set = {
+                "urn": meta.get("urn"),
+                "ref_id": meta.get("ref_id"),
+                "name": meta.get("name"),
+                "description": meta.get("description"),
+                "source_framework_urn": meta.get("source_framework_urn"),
+                "target_framework_urn": meta.get("target_framework_urn"),
+            }
+
+            translations = extract_translations_from_metadata(meta, "requirement_mapping_set")
+            if translations:
+                requirement_mapping_set["translations"] = translations
+
+            rows = list(content_ws.iter_rows())
+            if not rows:
+                continue
+            header = [str(cell.value).strip().lower() if cell.value else "" for cell in rows[0]]
+            requirement_mappings = []
+
+            for row in rows[1:]:
+                if not any(cell.value for cell in row):
+                    continue
+                data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
+                source_node_id = str(data.get("source_node_id", "")).strip()
+                target_node_id = str(data.get("target_node_id", "")).strip()
+                entry = {
+                    "source_requirement_urn": source_node_base_urn + ":" + source_node_id,
+                    "target_requirement_urn": target_node_base_urn + ":" + target_node_id,
+                    "relationship": data.get("relationship").strip(),
+                }
+                if "rationale" in data and data["rationale"]:
+                    entry["rationale"] = data.get("rationale").strip()
+                if "strength_of_relationship" in data and data["strength_of_relationship"]:
+                    entry["strength_of_relationship"] = int(data.get("strength_of_relationship"))
+                requirement_mappings.append(entry)
+            requirement_mapping_set["requirement_mappings"] = requirement_mappings
+            library["objects"]["requirement_mapping_set"] = requirement_mapping_set
+
         else:
             if obj_type not in ["answers", "implementation_groups", "scores", "urn_prefix"]:
                 print("type not handled:", obj_type)
