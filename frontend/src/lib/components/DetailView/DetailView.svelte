@@ -275,7 +275,14 @@
 											: null}
 									>
 										{#if value !== null && value !== undefined && value !== ''}
-											{#if key === 'library'}
+											{#if key === 'asset_class'}
+												<!-- Special case for asset_class - Always translate the value -->
+												{#if typeof value === 'object' && (value.str || value.name)}
+													{safeTranslate(value.str || value.name)}
+												{:else}
+													{safeTranslate(value)}
+												{/if}
+											{:else if key === 'library'}
 												{@const itemHref = `/loaded-libraries/${value.id}`}
 												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 													>{value.name}</Anchor

@@ -70,6 +70,13 @@
 	);
 </script>
 
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="asset-class"
+	optionsLabelField="full_path"
+	field="asset_class"
+	label={m.assetClass()}
+/>
 <TextField
 	{form}
 	field="ref_id"
