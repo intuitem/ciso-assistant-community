@@ -2188,11 +2188,6 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     def __str__(self):
         return self.full_path
 
-    @classmethod
-    def clear_all(cls):
-        cls.objects.all().update(parent=None)
-        cls.objects.all().delete()
-
     class Meta:
         unique_together = ["name", "parent"]
         constraints = [
