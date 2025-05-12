@@ -1,8 +1,9 @@
 import openpyxl
 import argparse
+import re
 import yaml
 from pprint import pprint
-from datetime import datetime
+from collections import defaultdict
 
 
 parser = argparse.ArgumentParser(
@@ -36,8 +37,6 @@ name = f"{source_framework_ref_id} -> {target_framework_ref_id}"
 description = f"Mapping from {source_framework_name} to {target_framework_name}"
 output_file_name = f"{ref_id}.xlsx"
 
-timestamp = str(datetime.now().timestamp()).replace('.', '')
-
 wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
@@ -51,7 +50,9 @@ ws.append(["library_copyright", packager])
 ws.append(["library_provider", packager])
 ws.append(["library_packager", packager])
 ws.append(["library_dependencies", f"{source_library_urn}, {target_library_urn}"])
-ws.append(["mapping_urn", f"urn:{packager.lower()}:risk:req_mapping_set:{source_ref_id}-to-{target_ref_id}_{timestamp}"])
+ws.append(
+    ["mapping_urn", f"urn:{packager.lower()}:risk:req_mapping_set:{ref_id}"]
+)
 ws.append(["mapping_ref_id", ref_id])
 ws.append(["mapping_name", name])
 ws.append(["mapping_description", description])
