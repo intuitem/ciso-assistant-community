@@ -1,0 +1,2561 @@
+urn: urn:intuitem:risk:library:iso42001-2023
+locale: en
+ref_id: ISO/IEC 42001:2023
+name: International standard ISO/IEC 42001:2023
+description: Information technology - Artificial Intelligence - Management System
+copyright: This is the outline of the ISO42001-2023 standard. You can purchase the
+  full standard from https://www.iso.org/standard/81230.html
+version: 1
+publication_date: 2025-05-12
+provider: ISO/IEC
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
+objects:
+  reference_controls:
+  - urn: urn:intuitem:risk:function:doc-pol:a2.2
+    ref_id: A2.2
+    name: AI policy
+    category: policy
+    description: "This control ensures that The organization should document a policy\
+      \ for the development or use of AI systems.  \n\nImplementation guidance \n\n\
+      The AI policy should be informed by:  \n- business strategy;  \n- organizational\
+      \ values and culture and the amount of risk the organization is willing to pursue\
+      \ or  retain;  \n- the level of risk posed by the AI systems;  \n- legal requirements,\
+      \ including contracts;  \n- the risk environment of the organization;  \n- impact\
+      \ to relevant interested parties (see 6.1.4).  \n\nThe AI policy should include\
+      \ (in addition to requirements in 5.2):  \n- principles that guide all activities\
+      \ of the organization related to ai;  \n- processes for handling deviations\
+      \ and exceptions to policy.  \n\nThe AI policy should consider topic-specific\
+      \ aspects where necessary to provide additional guidance or  provide cross-references\
+      \ to other policies dealing with these aspects. examples of such topics include:\
+      \  \n- AI resources and assets;  \n- AI system impact assessments (see 6.1.4);\
+      \  \n- AI system development.  \n\nRelevant policies should guide the development,\
+      \ purchase, operation and use of AI systems.."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a2.3
+    ref_id: A2.3
+    name: Alignment with other organisational policies
+    category: process
+    description: "This control ensures that The organization should determine where\
+      \ other policies can be affected by or apply to, the organization's objectives\
+      \ with respect to AI systems.  \n\nImplementation guidance  \n\nMany domains\
+      \ intersect with ai, including quality, security, safety and privacy. The organization\
+      \ should consider a thorough analysis to determine whether and where current\
+      \ policies can necessarily  intersect and either update those policies if updates\
+      \ are required or include provisions in the AI policy.  \n\nOther information\
+      \  \n\nThe policies that the governing body sets on behalf of the organization\
+      \ should inform the AI policy.  \nISO/IEC 38507 provides guidance for members\
+      \ of the governing body of an organization to enable and govern the AI system\
+      \ throughout its life cycle."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a2.4
+    ref_id: A2.4
+    name: Review of the AI policy
+    category: policy
+    description: "This control ensures that The AI policy should be reviewed at planned\
+      \ intervals or additionally as needed to ensure its continuing suitability,\
+      \ adequacy and effectiveness.  \n\nImplementation guidance  \n\nA role approved\
+      \ by management should be responsible for the development, review and evaluation\
+      \  of the AI policy, or the components within. The review should include assessing\
+      \ opportunities for  improvement of the organization's policies and approach\
+      \ to managing AI systems in response to changes to the organizational environment,\
+      \ business circumstances, legal conditions or technical environment.  The review\
+      \ of AI policy should take the results of management reviews into account. \
+      \ \n\nb.3 internal organization  \n\nb.3.1 objective  \n\nTo establish accountability\
+      \ within the organization to uphold its responsible approach for the  implementation,\
+      \ operation and management of AI systems."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a3.2
+    ref_id: A3.2
+    name: AI roles and responsibilities
+    category: process
+    description: "This control ensures that Roles and responsibilities for AI should\
+      \ be defined and allocated according to the needs of the organization.  \n\n\
+      Implementation guidance \n\nDefining roles and responsibilities is critical\
+      \ for ensuring accountability throughout the organization for its role with\
+      \ respect to the AI system throughout its life cycle. the organization should\
+      \ consider AI policies, AI objectives and identified risks when assigning roles\
+      \ and responsibilities, in order to ensure that all relevant areas are covered.\
+      \ The organization can prioritize how the roles and responsibilities are assigned.\
+      \ Examples of areas that can require defined roles and responsibilities can\
+      \ include:  \n- risk management;  \n- AI system impact assessments;  \n- asset\
+      \ and resource management;  \n- security;  \n- safety;  \n- privacy;  \n- development;\
+      \  \n- performance;  \n- human oversight;  \n- supplier relationships;  \n-\
+      \ demonstrate its ability to consistently fulfil legal requirements;  \n- data\
+      \ quality management (during the whole life cycle).  \n\nResponsibilities of\
+      \ the various roles should be defined to the level appropriate for the individuals\
+      \ to perform their duties.."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a3.3
+    ref_id: A3.3
+    name: Reporting of concerns
+    category: process
+    description: "This control ensures that The organization should define and put\
+      \ in place a process to report concerns about the organization's role with respect\
+      \ to an AI system throughout its life cycle.  \n\nImplementation guidance  \n\
+      \nThe reporting mechanism should fulfil the following functions:  \na) options\
+      \ for confidentiality or anonymity or both;  \nb) available and promoted to\
+      \ employed and contracted persons;  \nc) staffed with qualified persons;  \n\
+      d) stipulates appropriate investigation and resolution powers for the persons\
+      \ referred to in c);  \ne) provides for mechanisms to report and to escalate\
+      \ to management in a timely manner;  \nf) provides for effective protection\
+      \ from reprisals for both the persons concerned with reporting and investigation\
+      \ (e.g. by allowing reports to be made anonymously and confidentially);  \n\
+      g) provides reports according to 4.4 and, if appropriate, e); while maintaining\
+      \ confidentiality and anonymity in a), and respecting general business confidentiality\
+      \ considerations;  \nh) provides response mechanisms within an appropriate time\
+      \ frame.  \n\nnote the organization can utilize existing reporting mechanisms\
+      \ as part of this process.  \n\nOther information  \n\nIn addition to the implementation\
+      \ guidance provided in this clause, the organization should further consider\
+      \ ISO 37002."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a4.2
+    ref_id: A4.2
+    name: Resource documentation
+    category: process
+    description: "This control ensures that the organization should identify and document\
+      \ relevant resources required for the activities at given AI system life cycle\
+      \ stages and other ai-related activities relevant for the organization.  \n\n\
+      Implementation guidance  \n\nDocumentation of resources of the AI system is\
+      \ critical for understanding risks, as well as potential AI system impacts (both\
+      \ positive and negative) to individuals or groups of individuals, or both, and\
+      \  societies. the documentation of such resources (which can utilize, for instance,\
+      \ data flow diagrams or system architecture diagrams) can inform the AI system\
+      \ impact assessments (see b.5).  resources can include, but are not limited\
+      \ to:  \n- AI system components;  \n- data resources, i.e. data used at any\
+      \ stage in the AI system life cycle;  \n- tooling resources (e.g. AI algorithms,\
+      \ models or tools);  \n- system and computing resources (e.g. hardware to develop\
+      \ and run AI models, storage for data and tooling resources);  \n- human resources,\
+      \ i.e. people with the necessary expertise (e.g. for the development, sales,\
+      \ training, operation and maintenance of the AI system) in relation to the organization's\
+      \ role throughout the AI system life cycle.  \n\nResources can be provided by\
+      \ the organization itself, by its customers or by third parties.  Other information\
+      \  documentation of resources can also help to determine if resources are available\
+      \ and, if they are not available, the organization should revise the design\
+      \ specification of the AI system or its deployment requirements."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a4.3
+    ref_id: A4.3
+    name: Data resources
+    category: process
+    description: "This control ensures that as part of resource identification, the\
+      \ organization should document information about the data resources utilized\
+      \ for the AI system.  \n\nImplementation guidance  \n\nDocumentation on data\
+      \ should include, but is not limited to, the following topics:  \n- the provenance\
+      \ of the data;  \n- the date that the data were last updated or modified (e.g.\
+      \ date tag in metadata);  \n- for machine learning, the categories of data (e.g.\
+      \ training, validation, test and production data);  \n- categories of data (e.g.\
+      \ as defined in ISO/IEC 19944-1);  \n- process for labelling data;  \n- intended\
+      \ use of the data;  \n- quality of data (e.g. as described in the ISO/IEC 5259\
+      \ series2));  \n- applicable data retention and disposal policies;  \n- known\
+      \ or potential bias issues in the data;  \n- data preparation."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a4.4
+    ref_id: A4.4
+    name: Tooling resources
+    category: process
+    description: "This control ensures that as part of resource identification, the\
+      \ organization should document information about the tooling resources utilized\
+      \ for the AI system.  \n\nImplementation guidance  \n\nTooling resources for\
+      \ an AI system and particularly for machine learning, can include but are not\
+      \ limited to:  \n- algorithm types and machine learning models;  \n- data conditioning\
+      \ tools or processes;  \n- optimization methods;  \n- evaluation methods;  \n\
+      - provisioning tools for resources;  \n- tools to aid model development;  \n\
+      - software and hardware for AI system design, development and deployment.  \n\
+      \nOther information  \n\nISO/IEC 23053 provides detailed guidance on the types,\
+      \ methods and approaches for various tooling resources for machine learning."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a4.5
+    ref_id: A4.5
+    name: System and computing resources
+    category: process
+    description: "This control ensures that as part of resource identification, the\
+      \ organization should document information about the system and computing resources\
+      \ utilized for the AI system.  \n\nImplementation guidance  \n\nInformation\
+      \ about system and computing resources for an AI system can include but is not\
+      \ limited to:  \n- resource requirements of the AI system (i.e. to help ensure\
+      \ the system can run on constrained resource devices);  \n- where the system\
+      \ and computing resources are located (e.g. on-premises, cloud computing or\
+      \ edge computing);  \n- processing resources (including network and storage);\
+      \  \n- the impact of the hardware used to run the AI system workloads (e.g.\
+      \ the impact to the environment either through use or the manufacturing of the\
+      \ hardware or cost of using the hardware).  \n\nThe organization should consider\
+      \ that different resources can be required to allow continual improvement of\
+      \ AI systems. development, deployment and operation of the system can have different\
+      \ system needs and requirements.  \n\nNote ISO/IEC 22989 describes various system\
+      \ resource considerations.."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a4.6
+    ref_id: A4.6
+    name: Human resources
+    category: process
+    description: "This control ensures that as part of resource identification, the\
+      \ organization should document information about the human resources and their\
+      \ competences utilized for the development, deployment, operation, change management,\
+      \ maintenance, transfer and decommissioning, as well as verification and integration\
+      \ of the AI system.  \n\nImplementation guidance  \n\nThe organization should\
+      \ consider the need for diverse expertise and include the types of roles necessary\
+      \ for the system. for example, the organization can include specific demographic\
+      \ groups related to data sets used to train machine learning models, if their\
+      \ inclusion is a necessary component of the system design. \n\nNecessary human\
+      \ resources can include but are not limited to:  \n- data scientists;  \n- roles\
+      \ related to human oversight of AI systems;  \n- experts on trustworthiness\
+      \ topics such as safety, security and privacy;  \n- AI researchers and specialists,\
+      \ and domain experts relevant to the AI systems.  \n\nDifferent resources can\
+      \ be necessary at different stages of the AI system life cycle."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a5.2
+    ref_id: A5.2
+    name: AI system impact assessment process
+    category: process
+    description: "This control ensures that The organization should establish a process\
+      \ to assess the potential consequences for individuals or groups of individuals,\
+      \ or both, and societies that can result from the AI system throughout its life\
+      \ cycle.  \n\nImplementation guidance  \n\nBecause AI systems potentially generate\
+      \ significant impact to individuals, groups of individuals , or both, and societies,\
+      \ the organization that provides and uses such systems should, based on the\
+      \ intended purpose and use of these systems, assess the potential impacts of\
+      \ these systems on these groups.  \n\nThe organization should consider whether\
+      \ an AI system affects:  \n- the legal position or life opportunities of individuals;\
+      \  \n- the physical or psychological well-being of individuals;  \n- universal\
+      \ human rights;  \n- societies.  \n\nThe organization's procedures should include,\
+      \ but are not limited to:  \na) circumstances under which an AI system impact\
+      \ assessment should be performed, which can include, but are not limited to:\
+      \  \n1) criticality of the intended purpose and context in which the AI system\
+      \ is used or any significant changes to these;  \n2) complexity of AI technology\
+      \ and the level of automation of AI systems or any significant changes to that;\
+      \  \n3) sensitivity of data types and sources processed by the AI system or\
+      \ any significant changes to that;  \nb) elements that are part of the AI system\
+      \ impact assessment process, which can include:  \n1) identification (e.g. sources,\
+      \ events and outcomes);  \n2) analysis (e.g. consequences and likelihood); \
+      \ \n3) evaluation (e.g. acceptance decisions and prioritization);  \n4) treatment\
+      \ (e.g. mitigation measures);  \n5) documentation, reporting and communication\
+      \ (see 7.4, 7.5 and b.3.3);  \nc) who performs the AI system impact assessment;\
+      \  \nd) how the AI system impact assessment can be utilized [e.g. how it can\
+      \ inform the design or use of the system (see b.6 and b.9), whether it can trigger\
+      \ reviews and approvals];  \ne) individuals and societies that are potentially\
+      \ impacted based on the system's intended purpose, use and characteristics (e.g.\
+      \ assessment for individuals, groups of individuals or societies).\n\nImpact\
+      \ assessment should take various aspects of the AI system into account, including\
+      \ the data used for the development of the AI system, the AI technologies used\
+      \ and the functionality of the overall system.  \n\nThe processes can vary based\
+      \ on the role of the organization and the domain of AI application and depending\
+      \ on the specific disciplines for which the impact is assessed (e.g. security,\
+      \ privacy and safety). other information  for some disciplines or organizations,\
+      \ detailed consideration of the impact on individuals or groups of individuals,\
+      \ or both, and societies is part of risk management, particularly in disciplines\
+      \ such as information security, safety and environmental management.       \n\
+      \nThe organization should determine if discipline-specific impact assessments\
+      \ performed as part of such a risk management process sufficiently integrate\
+      \ AI considerations for those specific aspects (e.g. privacy).  \n\nNote ISO/IEC\
+      \ 23894 describes how an organization can perform impact analyses for the organization\
+      \ itself, along with individuals or groups of individuals, or both, and societies,\
+      \ as part of an overall risk management process."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a5.3
+    ref_id: A5.3
+    name: Documentation of AI system impact assessments
+    category: process
+    description: "This control ensures that the organization should document the results\
+      \ of AI system impact assessments and retain results for a defined period. \
+      \ \n\nImplementation guidance  \n\nThe documentation can be helpful in determining\
+      \ information that should be communicated to users and other relevant interested\
+      \ parties.  AI system impact assessments should be retained and updated, as\
+      \ needed, in alignment with the elements of an AI system impact assessment documented\
+      \ in b.5.2. Retention periods can follow  organization retention schedules or\
+      \ be informed by legal requirements or other requirements.  Items that the organization\
+      \ should consider documenting can include, but are not limited to:  \n- the\
+      \ intended use of the AI system and any reasonable foreseeable misuse of the\
+      \ AI system;  \n- positive and negative impacts of the AI system to the relevant\
+      \ individuals or groups of individuals, or both, and societies;  \n- predictable\
+      \ failures, their potential impacts and measures taken to mitigate them;  \n\
+      - relevant demographic groups the system is applicable to;  \n- complexity of\
+      \ the system;  \n- the role of humans in relationships with system, including\
+      \ human oversight capabilities, processes and tools, available to avoid negative\
+      \ impacts;  \n- employment and staff skilling."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a5.4
+    ref_id: A5.4
+    name: Assessing AI system impact on individuals or groups of individuals
+    category: process
+    description: "This control ensures that the organization should assess and document\
+      \ the potential impacts of AI systems to individuals or groups of individuals\
+      \ throughout the system's life cycle.  \n\nImplementation guidance  \n\nWhen\
+      \ assessing the impacts on individuals or groups of individuals, or both, and\
+      \ societies, the organization should consider its governance principles, AI\
+      \ policies and objectives. Individuals using the AI system or whose PII are\
+      \ processed by the AI system, can have expectations related to the trustworthiness\
+      \ of the AI system. Specific protection needs of groups such as children, impaired\
+      \ persons, elderly persons and workers should be taken into account. The organization\
+      \ should evaluate these expectations and consider the means to address them\
+      \ as part of the system impact assessment.  Depending on the scope of AI system\
+      \ purpose and use, areas of impact to consider as part of the assessment can\
+      \ include, but are not limited to:  \n- fairness;  \n- accountability;  \n-\
+      \ transparency and explainability;  \n- security and privacy;  \n- safety and\
+      \ health;  \n- financial consequences;  \n- accessibility;  \n- human rights.\
+      \  \n\nOther information  \n\nWhere necessary, the organization should consult\
+      \ experts (e.g. researchers, subject matter experts and users) to obtain a full\
+      \ understanding of potential impacts of the AI system on individuals or groups\
+      \ of individuals, or both, and societies."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a5.5
+    ref_id: A5.5
+    name: Assessing societal impacts of AI systems
+    category: process
+    description: "This control ensures that the organization should assess and document\
+      \ the potential societal impacts of their AI systems throughout their life cycle.\
+      \  \n\nImplementation guidance  \n\nSocietal impacts can vary widely depending\
+      \ on the organization's context and the types of AI systems. The societal impacts\
+      \ of AIi systems can be both beneficial and detrimental. Examples of these potential\
+      \ societal impacts can include:  \n- environment sustainability (including the\
+      \ impacts on natural resources and greenhouse gas emissions);  \n- economic\
+      \ (including access to financial services, employment opportunities, taxes,\
+      \ trade and commerce);  \n- government (including legislative processes, misinformation\
+      \ for political gain, national security and criminal justice systems);  \n-\
+      \ health and safety (including access to healthcare, medical diagnosis and treatment,\
+      \ and potential physical and psychological harms);  \n- norms, traditions, culture\
+      \ and values (including misinformation that leads to biases or harms to individuals\
+      \ or groups of individuals, or both, and societies).  \n\nOther information\
+      \ \n\nDevelopment and use of AI systems can be computationally intensive with\
+      \ related impacts to environmental sustainability (e.g. greenhouse gas emissions\
+      \ due to increased power usage, impacts on water, land, flora and fauna). \n\
+      Likewise, AI systems can be used to improve the environmental  sustainability\
+      \ of other systems (e.g. reduce greenhouse gas emissions related to buildings\
+      \ and transportation). \nThe organization should consider the impacts of its\
+      \ AI systems in the context of its overall environmental sustainability goals\
+      \ and strategies.  \nThe organization should consider how its AI systems can\
+      \ be misused to create societal harms and how they can be used to address historical\
+      \ harms. For example, can AI systems prevent access to financial services such\
+      \ as loans, grants, insurance and investments and likewise can AI systems improve\
+      \ access to these instruments?  \nAI systems have been used to influence the\
+      \ outcomes of elections and to create misinformation (e.g. deepfakes in digital\
+      \ media) that can lead to political and social unrest. \nGovernment's use of\
+      \ AI systems for criminal-justice purposes has exposed the risk of biases to\
+      \ societies, individuals or groups of individuals. \nThe organization should\
+      \ analyse how actors can misuse AI systems and how the AI systems can reinforce\
+      \ unwanted historical social biases.  \nAI systems can be used to diagnose and\
+      \ treat illnesses and to determine qualifications for health benefits. \nAI\
+      \ systems are also deployed in scenarios where malfunctions can result in death\
+      \ or injury  to humans (e.g. self-driving automobiles, human-machine teaming).\
+      \ \nThe organization should consider both the positive and negative outcomes\
+      \ when using AI systems, such as in health and safety related  scenarios.  \n\
+      \nNote ISO/IEC tr 24368 provides a high-level overview of ethical and societal\
+      \ concerns related to AI systems and applications."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.1.2
+    ref_id: A6.1.2
+    name: Objectives for responsible development of AI system
+    category: process
+    description: "This control ensures that the organization should identify and document\
+      \ objectives to guide the responsible development of AI systems, and take those\
+      \ objectives into account and integrate measures to achieve them in the development\
+      \ life cycle.  \n\nImplementation guidance  \n\nThe organization should identify\
+      \ objectives (see 6.2) that affect the AI system design and development processes.\
+      \ \nThese objectives should be taken into account in the design and development\
+      \ processes. For example, if an organization defines \"fairness\" as one objective,\
+      \ this should be incorporated in the requirements specification, data acquisition,\
+      \ data conditioning, model training, verification and validation, etc. \nThe\
+      \ organization should provide requirements and guidelines as necessary to ensure\
+      \ that measures are integrated into the various stages (e.g. the requirement\
+      \ to use a specific testing tool or method to address unfairness or unwanted\
+      \ bias) to achieve such objectives.  \n\nOther information  \n\nAI techniques\
+      \ are being used to augment security measures such as threat prediction detection\
+      \ and prevention of security attacks. This is an application of AI techniques\
+      \ that can be used to reinforce security measures to protect both AI systems\
+      \ and conventional non-AI based software systems.  \nAnnex c provides examples\
+      \ of organizational objectives for managing risk, which can be useful in determining\
+      \ the objectives for AI system development.."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.1.3
+    ref_id: A6.1.3
+    name: Processes for responsible AI system design and development
+    category: process
+    description: "This control ensures that the organization should define and document\
+      \ the specific processes for the responsible design and development of the AI\
+      \ system.  \n\nImplementation guidance  \n\nResponsible development for AI system\
+      \ processes should include consideration of, without limitation, the following:\
+      \  \n- life cycle stages (a generic AI system life cycle model is provided by\
+      \ ISO/IEC 22989, but the organization can specify their own life cycle stages);\
+      \  \n- testing requirements and planned means for testing;  \n- human oversight\
+      \ requirements, including processes and tools, especially when the AI system\
+      \ can impact natural persons;  \n- at what stages AI system impact assessments\
+      \ should be performed;  \n- training data expectations and rules (e.g. what\
+      \ data can be used, approved data suppliers and labelling);  \n- expertise (subject\
+      \ matter domain or other) required or training for developers of AI systems\
+      \ or both;  \n- release criteria;  \n- approvals and sign-offs necessary at\
+      \ various stages;  \n- change control;  \n- usability and controllability; \
+      \ \n- engagement of interested parties.  \n\nThe specific design and development\
+      \ processes depend on the functionality and the AI technologies that are intended\
+      \ to be used for the AI system."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.2.2
+    ref_id: A6.2.2
+    name: AI system requirements and specification
+    category: process
+    description: "This control ensures that the organization should specify and document\
+      \ requirements for new AI systems or material enhancements to existing systems.\
+      \  \n\nImplementation guidance  \n\nThe organization should document the rationale\
+      \ for developing an AI system and its goals. \nSome of the factors that should\
+      \ be considered, documented and understood can include:  \na) why the AI system\
+      \ is to be developed, for example, is this driven by a business case, customer\
+      \ request or by government policy;  \nb) how the model can be trained and how\
+      \ data requirements can be achieved.  \n\nAI system requirements should be specified\
+      \ and should span the entire AI system life cycle. Such requirements should\
+      \ be revisited in cases where the developed AI system is unable to operate as\
+      \ intended or new information arises that can be used to change and to improve\
+      \ the requirements. For instance, it can become unfeasible from a financial\
+      \ perspective to develop the AI system.  \n\nOther information  \n\nThe processes\
+      \ for describing the AI system life cycle are provided by ISO/IEC 5338. \nFor\
+      \ more information about human-centred design for interactive systems, see ISO\
+      \ 9241-210."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.2.3
+    ref_id: A6.2.3
+    name: Documentation of AI system design and development
+    category: process
+    description: "This control ensures that the organization should document the AI\
+      \ system design and development based on organizational objectives, documented\
+      \ requirements and specification criteria.  \n\nImplementation guidance  \n\n\
+      There are many design choices necessary for an AI system, including, but not\
+      \ limited to:  \n- machine learning approach (e.g. supervised vs. unsupervised);\
+      \  \n- learning algorithm and type of machine learning model utilized;  \n-\
+      \ how the model is intended to be trained and which data quality (see b.7);\
+      \  \n- evaluation and refinement of models;  \n- hardware and software components;\
+      \  \n- security threats considered throughout the AI system life cycle; \n-\
+      \ security threats specific to AI systems include data poisoning, model stealing\
+      \ or model inversion attacks;  \n- interface and presentation of outputs;  \n\
+      - how humans can interact with the system;  \n- interoperability and portability\
+      \ considerations.  \n\nThere can be multiple iterations between design and development,\
+      \ but documentation on the stage should be maintained and a final system architecture\
+      \ documentation should be available.  \nOther information  for more information\
+      \ about human-centred design for interactive systems, see ISO 9241-210."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.2.4
+    ref_id: A6.2.4
+    name: AI system verification and validation
+    category: process
+    description: "This control ensures that the organization should define and document\
+      \ verification and validation measures for the AI system and specify criteria\
+      \ for their use.  \n\nImplementation guidance  \n\nThe verification and validation\
+      \ measures can include, but are not limited to:  \n- testing methodologies and\
+      \ tools;  \n- selection of test data and their representation of the intended\
+      \ domain of use;  \n- release criteria requirements.  \n\nThe organization should\
+      \ define and document evaluation criteria such as, but not limited to:  \n-\
+      \ a plan to evaluate the AI system components and the whole AI system for risks\
+      \ related to impacts on individuals or groups of individuals, or both, and societies;\
+      \  \n- the evaluation plan can be based on, for example:  \n- reliability and\
+      \ safety requirements of the AI system, including acceptable error rates for\
+      \ the AI system performance;  \n- responsible AI system development and use\
+      \ objectives such as those in b.6.1.2 and b.9.3;  \n- operational factors such\
+      \ as quality of data, intended use, including acceptable ranges of each operational\
+      \ factor;  \n- any intended uses which can require more rigorous operational\
+      \ factors to be defined, including different acceptable ranges for operational\
+      \ factors or lower error rates;  \n- the methods, guidance or metrics to be\
+      \ used to evaluate whether relevant interested parties who make decisions or\
+      \ are subject to decisions based on the AI system outputs can adequately interpret\
+      \ the AI system outputs. \n\nThe frequency of evaluation should be determined\
+      \ and can be based upon results from an AI system impact assessment;  \n- any\
+      \ acceptable factors that can account for an inability to meet a target minimum\
+      \ performance level, especially when the AI system is evaluated for impacts\
+      \ on individuals or groups of individuals, or both, and societies (e.g. poor\
+      \ image resolution for computer vision systems or background noise affecting\
+      \ speech recognition systems). \n\nMechanisms to deal with poor AI system performance\
+      \ as a result of these factors should also be documented.  \nThe AI system should\
+      \ be evaluated against the documented criteria for evaluation.  \nWhere the\
+      \ AI system cannot meet the documented criteria for evaluation, especially against\
+      \ responsible AI system development and use objectives (see b.6.1.2 and b.9.3),\
+      \ the organization should reconsider or manage the deficiencies of the intended\
+      \ use of the AI system, its performance requirements and how the organization\
+      \ can effectively address the impacts to individuals or groups of individuals,\
+      \ or both,  and societies.  \n\nNote further information on how to deal with\
+      \ robustness of neural networks can be found in ISO/IEC tr 24029-1."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.2.5
+    ref_id: A6.2.5
+    name: AI system deployment
+    category: process
+    description: "This control ensures that the organization should document a deployment\
+      \ plan and ensure that appropriate requirements are met prior to deployment.\
+      \  \n\nImplementation guidance  \n\nAI systems can be developed in various environments\
+      \ and deployed in others (such as developed on premises and deployed using cloud\
+      \ computing) and the organization should take these differences into account\
+      \ for the deployment plan. \nThe organization should also consider whether components\
+      \ are deployed separately (e.g. software and model can be deployed independently).\
+      \ Additionally, the organization should have a set of requirements to be met\
+      \ prior to release and deployment (sometimes referred to as \"release criteria\"\
+      ). This can include verification and validation measures that are to be passed,\
+      \ performance metrics that are to be met, user testing to be completed, as well\
+      \ as management approvals and sign-offs to be obtained. \nThe deployment plan\
+      \ should take into account the perspectives of and impacts to relevant interested\
+      \ parties."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.2.6
+    ref_id: A6.2.6
+    name: AI system operation and monitoring
+    category: process
+    description: "This control ensures that the organization should define and document\
+      \ the necessary elements for the ongoing operation of the AI system. At the\
+      \ minimum this should include system and performance monitoring, repairs, updates\
+      \ and support.  \n\nImplementation guidance  \n\nEach minimum activity for operation\
+      \ and monitoring can take account of various considerations. for example:  \n\
+      - system and performance monitoring can include monitoring for general errors\
+      \ and failures, as well as for whether the system is performing as expected\
+      \ with production data. technical performance criteria can include success rates\
+      \ in resolving problems or in achieving tasks, or confidence rates. \n\nOther\
+      \ criteria can be related to meeting commitment or expectation and needs of\
+      \ interested parties, including, for example, ongoing monitoring to ensure compliance\
+      \ with customer requirements or applicable legal requirements.  \n- some deployed\
+      \ AI systems evolve their performance as a result of ML, where production data\
+      \ and output data are used to further train the ML model. \n\nWhere continuous\
+      \ learning is used, the  organization should monitor the performance of the\
+      \ AI system to ensure that it continues to meet its design goals and operates\
+      \ on production data as intended.  \n- the performance of some AI systems can\
+      \ change even if such systems do not use continuous learning, usually due to\
+      \ concept or data drift in production data. \n\nIn such cases, monitoring can\
+      \ identify the need for retraining to ensure that the AI system continues to\
+      \ meet its design goals and operates on production data as intended. more information\
+      \ can be found in ISO/IEC 23053.  \n- repairs can include responses to errors\
+      \ and failures in the system. \n\nThe organization should have processes in\
+      \ place for the response and repair of these issues. \nAdditionally, updates\
+      \ can be necessary as the system evolves or as critical issues are identified,\
+      \ or as the result of externally identified issues (e.g. non-compliance with\
+      \ customer expectations or legal requirement). \nThere should be processes in\
+      \ place for updating the system including components affected, update schedule,\
+      \ information to users on what is included in the update.  \n- system updates\
+      \ can also include changes in the system operations, new or modified intended\
+      \ uses, or other changes in system functionality. \n\nThe organization should\
+      \ have procedures in place to address operational changes, including communication\
+      \ to users.  \n- support for the system can be internal, external or both, depending\
+      \ on the needs of the organization and how the system was acquired. \n\nSupport\
+      \ processes should consider how users can contact the appropriate help, how\
+      \ issues and incidents are reported, support service level agreements and metrics.\
+      \  \n- where AI systems are being used for purposes other than those for which\
+      \ they were designed or in ways that were not anticipated, the appropriateness\
+      \ of such uses should be considered.  \n- AI-specific information security threats\
+      \ related to the AI systems applied and developed by the organization should\
+      \ be identified. \n\nAI-specific information security threats include, but are\
+      \ not limited to data poisoning, model stealing and model inversion attacks.\
+      \  \nOther information  the organization should consider operational performance\
+      \ that can affect interested parties and consider this when designing and determining\
+      \ performance criteria.  \nPerformance criteria for AI systems in operation\
+      \ should be determined by the task under consideration, such as classification,\
+      \ regression, ranking, clustering or dimensionality reduction.  \nPerformance\
+      \ criteria can include statistical aspects such as error rates and processing\
+      \ duration. \nFor each criterion, the organization should identify all relevant\
+      \ metrics as well as interdependences between metrics. \nFor each metric, the\
+      \ organization should consider acceptable values based on, for  example, domain\
+      \ expert's recommendations and analysis of expectations of interested parties\
+      \ relative  to existing non-ai practices.  For example, an organization can\
+      \ determine that the f1 score is an appropriate performance metric based on\
+      \ its assessment of the impact of false positives and false negatives, as described\
+      \ in  ISO/IEC ts 4213. \nThe organization can then establish an f1 value that\
+      \ the AI system is expected to meet. It should be evaluated if these issues\
+      \ can be handled by existing measures. If that is not the case, changes to existing\
+      \ measures should be considered or additional measures should be defined to\
+      \ detect  and handle these issues.  \nThe organization should consider the performance\
+      \ of non-AI systems or processes in operation and use them as potentially relevant\
+      \ context when establishing performance criteria.  \nThe organization should\
+      \ additionally ensure that the means and processes used to evaluate the AI system,\
+      \ including, where applicable, the selection and management of evaluation data,\
+      \ improve the completeness and the reliability in assessment of its performance\
+      \ with respect to the defined criteria.  \nDevelopment of performance assessment\
+      \ methodologies can be based on criteria, metrics and values. \nThese should\
+      \ inform the amount of data and the types of processes used in the assessment\
+      \ and the roles and expertise of personnel that carries out the assessment.\
+      \  \nPerformance assessment methodologies should reflect attributes and characteristics\
+      \ of operation and use as closely as possible to ensure that assessment results\
+      \ are useful and relevant. \nSome aspects of performance assessment can require\
+      \ controlled introduction of erroneous or spurious data or  processes to assess\
+      \ impact on performance.  \nThe quality model in ISO/IEC 25059 can be used to\
+      \ define performance criteria.."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.2.7
+    ref_id: A6.2.7
+    name: AI system technical documentation
+    category: process
+    description: "This control ensures that the organization should determine what\
+      \ AI system technical documentation is needed for each relevant category of\
+      \ interested parties, such as users, partners, supervisory authorities, and\
+      \ provide the technical documentation to them in the appropriate form.  \n\n\
+      Implementation guidance  \n\nThe AI system technical documentation can include,\
+      \ but is not limited to the following elements:  \n- a general description of\
+      \ the AI system including its intended purpose;  \n- usage instructions;  \n\
+      - technical assumptions about its deployment and operation (run-time environment,\
+      \ related software and hardware capabilities, assumptions made on data, etc.);\
+      \  \n- technical limitations (e.g. acceptable error rates, accuracy, reliability,\
+      \ robustness);  \n- monitoring capabilities and functions that allow users or\
+      \ operators to influence the system operation.  \n\nDocumentation elements related\
+      \ to all AI system life cycle stages (as defined in ISO/IEC 22989) can include,\
+      \ but are not limited to:  \n- design and system architecture specification;\
+      \  \n- design choices made and quality measures taken during the system development\
+      \ process;  \n- information about the data used during system development; \
+      \ \n- assumptions made and quality measures taken on data quality (e.g. assumed\
+      \ statistical distributions);  \n- management activities (e.g. risk management)\
+      \ taken during development or operation of the AI system;  \n- verification\
+      \ and validation records;  - changes made to the AI system when it is in operation;\
+      \  \n- impact assessment documentation as described in b.5.  \n\nThe organization\
+      \ should document technical information related to the responsible operation\
+      \ of the AI system. This can include, but is not limited to:  \n- documenting\
+      \ a plan for managing failures. This can include for example, the need to describe\
+      \ a rollback plan for the AI system, turning off features of the AI system,\
+      \ an update process or a plan for notifying customers, users, etc. of changes\
+      \ to the AI system, updated information on system failures and how these can\
+      \ be mitigated;  \n- documenting processes for monitoring the health of the\
+      \ AI system (i.e. the AI system operates as intended and within its normal operating\
+      \ margins, also referred to as observability) and processes for addressing AI\
+      \ system failures;  \n- documenting standard operating procedures for the AI\
+      \ system, including which events should be monitored and how event logs are\
+      \ prioritized and reviewed. It can also include how to investigate failures\
+      \ and the prevention of failures;  \n- documenting the roles of personnel responsible\
+      \ for operation of the AI system as well as those responsible for accountability\
+      \ of the system use, especially in relation to handling the effects of AI system\
+      \ failures or managing updates to the AI system;  \n- documenting system updates\
+      \ like changes in the system operations, new or modified intended uses, or other\
+      \ changes in system functionality.  \n\nThe organization should have procedures\
+      \ in place to address operational changes including communication to users and\
+      \ internal evaluations on the type of change.  \nDocumentation should be up\
+      \ to date and accurate. \nDocumentation should be approved by the relevant management\
+      \ within the organization.  "
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a6.2.8
+    ref_id: A6.2.8
+    name: AI system recordings of event logs
+    category: process
+    description: "This control ensures that the organization should determine at which\
+      \ phases of the AI system life cycle, record keeping of event logs should be\
+      \ enabled, but at the minimum when the AI system is in use.  \n\nImplementation\
+      \ guidance  \n\nThe organization should ensure logging for AI systems it deploys\
+      \ to automatically collect and record event logs related to certain events that\
+      \ occur during operation. Such logging can include but is not limited to:  \n\
+      - traceability of the AI system's functionality to ensure that the AI system\
+      \ is operating as intended;  \n- detection of the AI system's performance outside\
+      \ of the AI system's intended operating conditions that can result in undesirable\
+      \ performance on production data or impacts to relevant interested parties through\
+      \ monitoring of the operation of the AI system.  \n\nAI system event logs can\
+      \ include information, such as the time and date each time the AI system is\
+      \ used, the production data on which the AI system operates on, the outputs\
+      \ that fall out of the range of the intended operation of the AI system, etc.\
+      \  \nEvent logs should be kept for as long as required for the intended use\
+      \ of the AI system and within the data retention policies of the organization.\
+      \ \nLegal requirements related to data retention can apply.  \n\nOther information\
+      \  \n\nSome AI systems, such as biometric identification systems, can have additional\
+      \ logging requirements depending on jurisdiction. Organizations should be aware\
+      \ of these requirements."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a7.2
+    ref_id: A7.2
+    name: Data for development and enhancement of AI system
+    category: process
+    description: "This control ensures that the organization should define, document\
+      \ and implement data management processes related to the development of AI systems.\
+      \  \n\nImplementation guidance  \n\nData management can include various topics\
+      \ such as, but not limited to:  \n- privacy and security implications due to\
+      \ the use of data, some of which can be sensitive in nature;  \n- security and\
+      \ safety threats that can arise from data dependent AI system development; \
+      \ \n- transparency and explainability aspects including data provenance and\
+      \ the ability to provide an explanation of how data are used for determining\
+      \ an AI system's output if the system requires transparency and explainability;\
+      \  \n- representativeness of training data compared to operational domain of\
+      \ use;  \n- accuracy and integrity of the data.  \n\nNote detailed information\
+      \ of AI system life cycle and data management concepts is provided by ISO/IEC\
+      \ 22989."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a7.3
+    ref_id: A7.3
+    name: Acquisition of data
+    category: process
+    description: "This control ensures that the organization should determine and\
+      \ document details about the acquisition and selection of the data used in AI\
+      \ systems.  \n\nImplementation guidance  \n\nThe organization can need different\
+      \ categories of data from different sources depending on the scope and use of\
+      \ their AI systems. \nDetails for data acquisition can include:  \n- categories\
+      \ of data needed for the AI system;  \n- quantity of data needed;  \n- data\
+      \ sources (e.g. internal, purchased, shared, open data, synthetic);  \n- characteristics\
+      \ of the data source (e.g. static, streamed, gathered, machine generated); \
+      \ \n- data subject demographics and characteristics (e.g. known or potential\
+      \ biases or other systematic errors);  \n- prior handling of the data (e.g.\
+      \ previous uses, conformity with privacy and security requirements);  \n- data\
+      \ rights (e.g. pii, copyright);  \n- associated meta data (e.g. details of data\
+      \ labelling and enhancing);  \n- provenance of the data.  \n\nOther information\
+      \  \n\nThe data categories and a structure for the data use in ISO/IEC 19944-1\
+      \ can be used to document details about data acquisition and use.."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a7.4
+    ref_id: A7.4
+    name: Quality of data for AI systems
+    category: process
+    description: "This control ensures that the organization should define and document\
+      \ requirements for data quality and ensure that data used to develop and operate\
+      \ the AI system meet those requirements.  \n\nImplementation guidance  \n\n\
+      The quality of data used to develop and operate AI systems potentially has significant\
+      \ impacts on the validity of the system's outputs. \nISO/IEC 25024 defines data\
+      \ quality as the degree to which the characteristics of data satisfy stated\
+      \ and implied needs when used under specified conditions. \nFor AI systems that\
+      \ use supervised or semi-supervised machine learning, it is important that the\
+      \ quality of training, validation, test and production data are defined, measured\
+      \ and improved to the extent possible, and the organization should ensure that\
+      \ the data are suitable for its intended purpose. \nThe organization should\
+      \ consider the impact of bias on system performance and system fairness and\
+      \ make such adjustments as necessary to the model and data used to improve performance\
+      \ and fairness so they are acceptable for the use case.  \n\nOther information\
+      \  \n\nAdditional information regarding data quality is available in the ISO/IEC\
+      \ 5259 series2) on data quality for analytics and ml. additional information\
+      \ regarding different forms of bias in data used in AI systems is available\
+      \ in ISO/IEC tr 24027.."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a7.5
+    ref_id: A7.5
+    name: Data provenance
+    category: process
+    description: "This control ensures that the organization should define and document\
+      \ a process for recording the provenance of data used in its AI systems over\
+      \ the life cycles of the data and the AI system.  \n\nImplementation guidance\
+      \  \n\nAccording to ISO 8000-2, a record of data provenance can include information\
+      \ about the creation, update, transcription, abstraction, validation and transferring\
+      \ of the control of data. Additionally, data sharing (without transfer of control)\
+      \ and data transformations can be considered under data provenance. \nDepending\
+      \ on factors such as the source of the data, its content and the context of\
+      \ its use, organizations should consider whether measures to verify the provenance\
+      \ of the data are needed."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a7.6
+    ref_id: A7.6
+    name: Data preparation
+    category: process
+    description: "This control ensures that the organization shall define and document\
+      \ its criteria for selecting data preparations and the data preparation methods\
+      \ to be used.  \n\nImplementation guidance  \n\nData used in an AI system ordinarily\
+      \ needs preparation to make it usable for a given AI task. \nFor example, machine\
+      \ learning algorithms are sometimes intolerant of missing or incorrect entries,\
+      \ non normal distribution and widely varying scales. preparation methods and\
+      \ transforms can be used to increase the quality of the data. failure to properly\
+      \ prepare the data can potentially lead to AI system errors. \nCommon preparation\
+      \ methods and transformations for data used in AI systems include:  \n- statistical\
+      \ exploration of the data (e.g. distribution, mean, median, standard deviation,\
+      \ range, stratification, sampling) and statistical metadata (e.g. data documentation\
+      \ initiative (ddi) specification[28]);  \n- cleaning (i.e. correcting entries,\
+      \ dealing with missing entries);  \n- imputation (i.e. methods for filling in\
+      \ missing entries);  \n- normalization;  \n- scaling;  \n- labelling of the\
+      \ target variables;  \n- encoding (e.g. converting categorical variables to\
+      \ numbers).  \n\nFor a given AI task, the organization should document its criteria\
+      \ for selecting specific data preparation methods and transforms as well as\
+      \ the specific methods and transforms used in the AI task. \n\nNote for additional\
+      \ information on data preparation specific to machine learning see the ISO/IEC\
+      \ 5259 series2) and ISO/IEC 23053."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a8.2
+    ref_id: A8.2
+    name: System documentation and information for users
+    category: process
+    description: "This control ensures that the organization should determine and\
+      \ provide the necessary information to users of the system.  \n\nImplementation\
+      \ guidance  \n\nInformation about the AI system can include both technical details\
+      \ and instructions, as well as general notifications to users that they are\
+      \ interacting with an AI system, depending on the context. This can also include\
+      \ the system itself, as well as potential outputs of the system (e.g. notifying\
+      \ users that an image is created by AI).  \nAlthough AI systems can be complex,\
+      \ it is critical that users are able to understand when they are interacting\
+      \ with an AI system, how the system works. \nUsers also need to understand its\
+      \ intended purpose and intended uses, its potential to cause harm or benefit\
+      \ the user. \nSome system documentation can necessarily be targeted for more\
+      \ technical uses (e.g. system administrators), and the organization should understand\
+      \ the needs of different interested parties and what understandability can mean\
+      \ to them. \nThe information should also be accessible, both in terms of ease\
+      \ of use in finding it, as well as for users who can need additional accessibility\
+      \ features. information that can be provided to users include, but are not limited\
+      \ to:  \n- purpose of the system;  \n- that the user is interacting with an\
+      \ AI system;  \n- how to interact with the system;  \n- how and when to override\
+      \ the system;  \n- technical requirements for system operation, including the\
+      \ computational resources needed, and limitations of the system as well as its\
+      \ expected lifetime;  \n- needs for human oversight;  \n- information about\
+      \ accuracy and performance;  \n- relevant information from the impact assessment,\
+      \ including potential benefits and harms, particularly if they are applicable\
+      \ in specific contexts or certain demographic groups (see b.5.2 and b.5.4);\
+      \  \n- revisions to claims about the system's benefits;  \n- updates and changes\
+      \ in how the system works, as well as any necessary maintenance measures, including\
+      \ their frequency;  \n- contact information;  \n- educational materials for\
+      \ system use.  \n\nCriteria used by the organization to determine whether and\
+      \ what information is to be provided should be documented. \nRelevant criteria\
+      \ include but are not limited to the intended use and reasonably foreseeable\
+      \ misuse of the AI system, the expertise of the user and specific impact of\
+      \ the AI system. \nInformation can be provided to users in numerous ways, including\
+      \ documented instructions for use, alerts and other notifications built into\
+      \ the system itself, information on a web page, etc. Depending on which methods\
+      \ the organization uses to provide information, it should validate that the\
+      \ users have access to this information, and that the information provided is\
+      \ complete, up to date and accurate."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a8.3
+    ref_id: A8.3
+    name: External reporting
+    category: process
+    description: "This control ensures that the organization should provide capabilities\
+      \ for interested parties to report adverse impacts of the system.  \n\nImplementation\
+      \ guidance  \n\nWhile the system operation should be monitored for reported\
+      \ issues and failures, the organization should also provide capabilities for\
+      \ users or other external parties to report adverse impacts (e.g. unfairness)."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a8.4
+    ref_id: A8.4
+    name: Communication of incidents
+    category: process
+    description: "This control ensures that the organization should determine and\
+      \ document a plan for communicating incidents to users of the system.  \n\n\
+      Implementation guidance  \n\nIncidents related to the AI system can be specific\
+      \ to the AI system itself, or related to information security or privacy (e.g.\
+      \ a data breach). the organization should understand its obligations around\
+      \ notifying users and other interested party about incidents, depending on the\
+      \ context in which the system operates. For example, an incident with an AI\
+      \ component that is part of a product that affects safety can have different\
+      \ notification requirements than other types of systems. \nLegal requirements\
+      \ (such as contracts) and regulatory activity can apply, which can specify requirements\
+      \ for:  \n- types of incidents that must be communicated;  \n- the timeline\
+      \ for notification;  \n- whether and which authorities must be notified;  \n\
+      - the details required to be communicated.  \n\nThe organization can integrate\
+      \ incident response and reporting activities for AI into their broader organizational\
+      \ incident management activities, but should be aware of unique requirements\
+      \ related to AI systems, or individual components of AI systems (e.g. a PII\
+      \ data breach in training data for the system can have different reporting requirements\
+      \ related to privacy).  \n\nOther information  \n\nISO/IEC 27001 and ISO/IEC\
+      \ 27701 provide additional details on incident management for security and privacy\
+      \ respectively."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a8.5
+    ref_id: A8.5
+    name: Information for interested parties
+    category: process
+    description: "This control ensures that the organization should determine and\
+      \ document its obligations to reporting information about the AI system to interested\
+      \ parties.  \n\nImplementation guidance  \n\nIn some cases, a jurisdiction can\
+      \ require information about the system to be shared with authorities such as\
+      \ regulators. \nInformation can be reported to interested parties such as customers\
+      \ or regulatory authorities within the appropriate timeframe. \nThe information\
+      \ shared can include, for example:  \n- technical system documentation, including,\
+      \ but not limited, to data sets for training, validation and testing as well\
+      \ as algorithmic choices justifications and verification and validation records;\
+      \  \n- risks related to the system;  \n- results of impact assessments;  \n\
+      - logs and other system records.  \n\nThe organization should understand their\
+      \ obligations in this respect and ensure that the appropriate information is\
+      \ shared with the correct authorities. \nAdditionally, it is presupposed that\
+      \ the organization is aware of jurisdictional requirements related to information\
+      \ shared with law enforcement authorities."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a9.2
+    ref_id: A9.2
+    name: Processes for responsible use of AI systems
+    category: process
+    description: "This control ensures that the organization should define and document\
+      \ the processes for the responsible use of AI systems.  \n\nImplementation guidance\
+      \  \n\nDepending on its context, the organization can have many considerations\
+      \ for determining whether to use a particular AI system. Whether the AI system\
+      \ is developed by the organization itself or sourced from a third party, the\
+      \ organization should be clear on what these considerations are and develop\
+      \ policies to address them. \nSome examples are:  \n- required approvals;  \n\
+      - cost (including for ongoing monitoring and maintenance);  \n- approved sourcing\
+      \ requirements;  \n- legal requirements applicable to the organization.  \n\n\
+      Where the organization has accepted policies for the use of other systems, assets,\
+      \ etc., these policies can be incorporated if desired."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a9.3
+    ref_id: A9.3
+    name: Objectives for responsible use of AI system
+    category: process
+    description: "This control ensures that the organization should identify and document\
+      \ objectives to guide the responsible use of AI systems.  \n\nImplementation\
+      \ guidance  \n\nThe organization operating in different contexts can have different\
+      \ expectations and objectives for what constitutes the responsible development\
+      \ of AI systems. \nDepending on its context, the organization should identify\
+      \ its objectives related to responsible use. \nSome objectives include:  \n\
+      - fairness;  \n- accountability;  \n- transparency;  \n- explainability;  \n\
+      - reliability;  \n- safety;  \n- robustness and redundancy;  \n- privacy and\
+      \ security;  \n- accessibility.  \n\nOnce defined, the organization should implement\
+      \ mechanisms to achieve its objectives within the organization. This can include\
+      \ determining if a third-party solution fulfils the organization's objectives\
+      \ or if an internally developed solution is applicable for the intended use.\
+      \ the organization should determine at which stages of the AI system life cycle\
+      \ meaningful human oversight objectives should be incorporated. \nThis can include:\
+      \  \n- involving human reviewers to check the outputs of the AI system, including\
+      \ having authority to override decisions made by the AI system;  \n- ensuring\
+      \ that human oversight is included if required for acceptable use of the AI\
+      \ system according to instructions or other documentation associated with the\
+      \ intended deployment of the AI system;  \n- monitoring the performance of the\
+      \ AI system, including the accuracy of the AI system outputs;  \n- reporting\
+      \ concerns related to the outputs of the AI system and their impact to relevant\
+      \ interested parties;  \n- reporting concerns with changes in the performance\
+      \ or ability of the AI system to make correct outputs on the production data;\
+      \  \n- considering whether automated decision-making is appropriate for a responsible\
+      \ approach to the use of an AI system and the intended use of the AI system.\
+      \  \n\nThe need for human oversight can be informed by the AI system impact\
+      \ assessments (see b.5). \nThe personnel involved in human oversight activities\
+      \ related to the AI system should be informed of, trained and understand the\
+      \ instructions and other documentation to the AI system and the duties they\
+      \ carry out to satisfy human oversight objectives. \nWhen reporting performance\
+      \ issues, human oversight can augment automated monitoring.  \n\nOther information\
+      \  \n\nAnnex C provides examples of organizational objectives for managing risk,\
+      \ which can be useful in determining the objectives for AI system use."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a9.4
+    ref_id: A9.4
+    name: Intended use of the AI system
+    category: process
+    description: "This control ensures that the organization should ensure that the\
+      \ AI system is used according to the intended uses of the AI system and its\
+      \ accompanying documentation.  \n\nImplementation guidance  \n\nThe AI system\
+      \ should be deployed according to the instructions and other documentation associated\
+      \ with the AI system (see b.8.2). \nThe deployment can require specific resources\
+      \ to support the deployment, including the need to ensure that human oversight\
+      \ is applied as required (see b.9.3). It can be necessary that for acceptable\
+      \ use of the AI system, the data that the AI system is used on aligns with the\
+      \ documentation associated with the AI system to ensure that the AI system performance\
+      \ is accurate.  \nThe operation of the AI system should be monitored (see b.6.2.6).\
+      \ \nWhere the correct deployment of the AI system according to its associated\
+      \ instructions causes concern regarding the impact to relevant interested parties\
+      \ or the organization's legal requirements, the organization should communicate\
+      \ its concerns to the relevant personnel inside the organization as well as\
+      \ to any third-party suppliers of the AI system.  \nThe organization should\
+      \ keep event logs or other documentation related to the deployment and operation\
+      \ of the AI system which can be used to demonstrate that the AI system is being\
+      \ used as  intended or to help with communicating concerns related to the intended\
+      \ use of the AI system. the time period during which event logs and other documentation\
+      \ are kept depends on the intended use of the AI system, the organization's\
+      \ data retention policies and relevant legal requirements for data retention."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a10.2
+    ref_id: A10.2
+    name: Allocating responsibilities
+    category: process
+    description: "This control ensures that the organization should ensure that responsibilities\
+      \ within their AI system life cycle are allocated between the organization,\
+      \ its partners, suppliers, customers and third parties.  \n\nImplementation\
+      \ guidance  \n\nIn an AI system life cycle, responsibilities can be split between\
+      \ parties providing data, parties providing algorithms and models, parties developing\
+      \ or using the AI system and being accountable with regard to some or all interested\
+      \ parties. \nThe organization should document all parties intervening in the\
+      \ AI system life cycle and their roles and determine their responsibilities.\
+      \ \nWhere the organization supplies an AI system to a third party, the organization\
+      \ should ensure that it takes a responsible approach to developing the AI system.\
+      \ \nSee the controls and guidance in b.6. \nThe organization should be able\
+      \ to provide the necessary documentation (see b.6.2.7 and b.8.2) for the AI\
+      \ system to relevant interested parties and to the third party that the organization\
+      \ is supplying the AI system to.  \nWhen processed data includes PII, responsibilities\
+      \ are usually split between PII processors and controllers. \nISO/IEC 29100\
+      \ provides further information on PII controllers and PII processors. \nWhere\
+      \ the privacy of PII is to be preserved, controls such as those described in\
+      \ ISO/IEC 27701 should be considered. \nBased on the organization's and AI system's\
+      \ data processing activities on pii and the organization's role in application\
+      \ and development of the AI system through their life cycle, the organization\
+      \ can take on the role of a pii controller (or joint pii controller), pii processor\
+      \ or both."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a10.3
+    ref_id: A10.3
+    name: Suppliers
+    category: process
+    description: "This control ensures that the organization should establish a process\
+      \ to ensure that its usage of services, products or materials provided by suppliers\
+      \ aligns with the organization's approach to the responsible development and\
+      \ use of AI systems.  \n\nImplementation guidance  \n\nOrganizations developing\
+      \ or using an AI system can utilize suppliers in a number of ways, from sourcing\
+      \ datasets, machine learning algorithms or models, or other components of a\
+      \ system such as software libraries, to an entire AI system itself for use on\
+      \ its own or as part of another product (e.g. a vehicle).  \nOrganizations should\
+      \ consider different types of suppliers, what they supply, and the varying level\
+      \ of risk this can pose to the system and organization as a whole in determining\
+      \ the selection of suppliers, the requirements placed on those suppliers, and\
+      \ the levels of ongoing monitoring and evaluation needed  for the suppliers.\
+      \  \nOrganizations should document how the AI system and AI system components\
+      \ are integrated into AI systems developed or used by the organization. \nWhere\
+      \ the organization considers that the AI system or AI system components from\
+      \ a supplier do not perform as intended or can result in impacts to individuals\
+      \ or groups of individuals, or both, and  societies that are not aligned with\
+      \ the responsible approach to AI systems taken by the organization, the organization\
+      \ should require the supplier to take corrective actions. \nThe organization\
+      \ can decide to work with the supplier to achieve this objective.  the organization\
+      \ should ensure that the supplier of an AI system delivers appropriate and adequate\
+      \ documentation related to the AI system (see b.6.2.7 and b.8.2)."
+    translations:
+      fr:
+        name: null
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a10.4
+    ref_id: A10.4
+    name: Customers
+    category: process
+    description: "This control ensures that the organization should ensure that its\
+      \ responsible approach to the development and use of AI systems considers their\
+      \ customer expectations and needs.  \n\nImplementation guidance  \n\nThe organization\
+      \ should understand customer expectations and needs when it is supplying a product\
+      \ or service related to an AI system (i.e. when it is itself a supplier). These\
+      \ can come in the form of requirements for the product or service itself during\
+      \ a design or engineering phase, or in the form of contractual requirements\
+      \ or general usage agreements. \nOne organization can have many different types\
+      \ of customer relationships, and these can all have different needs and expectations.\
+      \  \nThe organization should particularly understand the complex nature of supplier\
+      \ and customer relationships and understand where responsibility lies with the\
+      \ provider of the AI system and where it lies with the customer, while still\
+      \ meeting needs and expectations. \nFor example, the organization can identify\
+      \ risks related to the use of its AI products and services by the customer and\
+      \ can decide to treat the identified risks by giving appropriate information\
+      \ to its customer, so that the customer can then treat the corresponding risks.\
+      \ \nAs an example of appropriate information, when an AI system is valid for\
+      \ a certain domain of use, the limits of the domain should be communicated to\
+      \ the customer. See b.6.2.7 and b.8.2."
+    translations:
+      fr:
+        name: null
+        description: null
+  framework:
+    urn: urn:intuitem:risk:framework:iso42001-2023
+    ref_id: ISO/IEC 42001:2023
+    name: International standard ISO/IEC 42001:2023
+    description: Information Technology - Artificial Intelligence - Management System
+    implementation_groups_definition:
+    - ref_id: Clauses
+      name: Clauses
+      description: null
+    - ref_id: SoA
+      name: Statement of Applicability
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:core
+      assessable: false
+      depth: 1
+      ref_id: core
+      name: Clauses
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:core
+      ref_id: '4'
+      name: 'Context of the organization '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+      description: "The organization must identify internal and external factors\u2014\
+        including its role in the AI ecosystem\u2014that affect its ability to achieve\
+        \ the goals of its AI management system. This includes considering legal,\
+        \ ethical, cultural, and environmental aspects (such as climate change), and\
+        \ how its intended use of AI systems aligns with its purpose and obligations."
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      ref_id: '4.2'
+      name: Understanding the needs and expectations of interested parties
+      description: 'The organization must identify stakeholders relevant to its AI
+        management system, understand their requirements, and decide which of those
+        requirements will be met through the system.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      ref_id: '4.3'
+      name: Determining the scope of the AI management system
+      description: 'The organization must define the boundaries and applicability
+        of its AI management system based on its roles, objectives, and external and
+        internal factors.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      ref_id: '4.4'
+      name: AI management system
+      description: 'The organization must establish, implement, maintain, and continually
+        improve an AI management system to manage risks, meet requirements, and support
+        responsible AI use.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:core
+      ref_id: '5'
+      name: Leadership
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:5
+      ref_id: '5.1'
+      name: Leadership and commitment
+      description: Top management must actively support the AI management system by
+        aligning it with organisational goals, providing resources, promoting responsible
+        AI practices, and encouraging continual improvement.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:5
+      ref_id: '5.2'
+      name: AI Policy
+      description: "Top management must create and maintain an AI policy that reflects\
+        \ the organisation\u2019s purpose, supports AI objectives, meets relevant\
+        \ requirements, and is clearly communicated and accessible."
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:5
+      ref_id: '5.3'
+      name: Roles, responsibilities and authorities
+      description: The organization must assign clear roles and responsibilities for
+        the AI management system and ensure the authority and support needed to fulfil
+        those roles effectively.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:core
+      ref_id: '6'
+      name: Planning
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6
+      ref_id: '6.1'
+      name: Actions to address risks and opportunities
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1
+      ref_id: 6.1.1
+      name: General
+      description: 'The organization must identify risks and opportunities related
+        to its AI systems by considering its context, stakeholder requirements, and
+        the intended use of the systems. It must set criteria to assess and treat
+        AI-related risks and plan actions to address them, while ensuring these actions
+        are integrated into its management system and regularly reviewed for effectiveness.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1
+      ref_id: 6.1.2
+      name: AI risk assessment
+      description: 'The organization must establish a consistent and objective process
+        to assess AI-related risks. This process should align with the AI policy and
+        objectives, evaluate the potential impact and likelihood of risks to people,
+        society, and the organization, and help prioritize which risks need treatment.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1
+      ref_id: 6.1.3
+      name: AI risk treatment
+      description: Based on the results of the risk assessment, the organization must
+        define a process to select, apply, and document appropriate controls to manage
+        AI risks. This includes using Annex A as a reference, identifying any additional
+        necessary controls, justifying exclusions, and creating a risk treatment plan
+        that is approved and communicated across the organization.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1
+      ref_id: 6.1.4
+      name: AI system impact assessment
+      description: "The organization must establish a process to assess how the development\
+        \ or use of AI systems may affect individuals, groups, or society. This includes\
+        \ evaluating potential consequences\u2014both intended and unintended\u2014\
+        within the technical, social, and legal context. The results must be documented\
+        \ and considered during risk assessment."
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6
+      ref_id: '6.2'
+      name: AI objectives and planning to achieve them
+      description: 'The organization must define clear and measurable AI objectives
+        that align with its AI policy, meet relevant requirements, and are regularly
+        monitored and updated. It must also plan how to achieve these objectives by
+        identifying responsibilities, timelines, needed resources, and how success
+        will be measured.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6
+      ref_id: '6.3'
+      name: Planning of changes
+      description: 'When updates to the AI management system are needed, the organization
+        must ensure those changes are planned and implemented in a controlled and
+        deliberate way.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:core
+      ref_id: '7'
+      name: ' Support'
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.1'
+      name: Resources
+      description: 'The organization must identify and provide the necessary resources
+        to establish, operate, maintain, and continually improve the AI management
+        system.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.2'
+      name: Competence
+      description: "The organization must ensure that individuals performing tasks\
+        \ that affect AI outcomes have the necessary skills, education, or experience.\
+        \ When gaps are identified, appropriate actions\u2014such as training or hiring\u2014\
+        should be taken and their effectiveness reviewed. Competence must be documented.\n"
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.3'
+      name: Awareness
+      description: 'The organization must ensure that people working under its control
+        understand the AI policy, their role in supporting the AI management system,
+        and the consequences of not following its requirements.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.4'
+      name: Communication
+      description: 'The organization must define how it will manage both internal
+        and external communications related to the AI management system, including
+        what will be communicated, when, how, and to whom.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.5'
+      name: Documented Information
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5
+      ref_id: 7.5.1
+      name: General
+      description: "The organization\u2019s AI management system must include all\
+        \ required documentation, as well as any additional documented information\
+        \ needed to ensure its effectiveness. The level of documentation may vary\
+        \ based on the organization's size, complexity, and expertise."
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5
+      ref_id: 7.5.2
+      name: Creating and Updating documented information
+      description: 'When creating or updating documentation, the organization must
+        ensure it is clearly identified, properly formatted, and reviewed and approved
+        for accuracy and relevance.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5
+      ref_id: 7.5.3
+      name: Control of documented information
+      description: "The organization must ensure that AI management system documentation\
+        \ is accessible where and when needed, is protected from misuse or loss, and\
+        \ is properly managed throughout its lifecycle\u2014including version control,\
+        \ storage, access, and disposal."
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:core
+      ref_id: '8'
+      name: Operations
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      ref_id: '8.1'
+      name: Operational planning and control
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      ref_id: '8.2'
+      name: AI risk assessment
+      description: 'The organization must carry out AI risk assessments regularly
+        and whenever significant changes occur. The results must be documented to
+        ensure traceability and support decision-making.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      ref_id: '8.3'
+      name: AI risk treatment
+      description: 'The organization must carry out its AI risk treatment plan, verify
+        that it works, and update it when new risks are identified or when existing
+        treatments are ineffective.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      ref_id: '8.4'
+      name: AI system impact assessment
+      description: 'The organization must conduct AI system impact assessments regularly
+        and when significant changes are planned. All results must be documented to
+        ensure accountability and informed decision-making.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:core
+      ref_id: '9'
+      name: Performance evaluation
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9
+      ref_id: '9.1'
+      name: Monitoring, measurement, analysis, evaluation
+      description: The organization must decide what to monitor and measure, how and
+        when to do it, and how to analyse the results. It must evaluate the performance
+        and effectiveness of the AI management system and keep records of the findings.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9
+      ref_id: '9.2'
+      name: Internal audit
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2
+      ref_id: 9.2.1
+      name: General
+      description: The organization must conduct internal audits at scheduled intervals
+        to ensure the AI management system meets both internal and ISO 42001 requirements,
+        and is being implemented and maintained effectively.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2
+      ref_id: 9.2.2
+      name: Internal audit programme
+      description: The organization must develop and maintain an internal audit programme
+        that defines how audits are planned, conducted, and reported. It should consider
+        process importance and past audit results, ensure audits are impartial, and
+        retain evidence of the audits and their outcomes.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9
+      ref_id: '9.3'
+      name: Management review
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3
+      ref_id: 9.3.1
+      name: General
+      description: Top management must regularly review the AI management system to
+        ensure it remains suitable, adequate, and effective.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3
+      ref_id: 9.3.2
+      name: Management review inputs
+      description: 'Management reviews must consider changes in context, stakeholder
+        needs, system performance, previous review actions, and improvement opportunities
+        to ensure the AI management system remains effective and up to date.
+
+        '
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3
+      ref_id: 9.3.3
+      name: Management review results
+      description: Management reviews must result in decisions on how to improve the
+        AI management system and whether changes are needed. The outcomes must be
+        documented.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:core
+      ref_id: '10'
+      name: Improvement
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:10
+      ref_id: '10.1'
+      name: "Continual improvement\_"
+      description: The organization must consistently work to enhance the AI management
+        system to ensure it remains suitable, sufficient, and effective over time.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:10
+      ref_id: '10.2'
+      name: Nonconformity and corrective action
+      description: When an issue arises, the organization must address it, investigate
+        the cause, take action to prevent recurrence, and update the AI management
+        system if needed. All actions and outcomes must be documented.
+      implementation_groups:
+      - Clauses
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      assessable: false
+      depth: 1
+      ref_id: annex-a
+      name: Statement of Applicability
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A.2
+      name: Policies related to AI
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      ref_id: A2.2
+      name: AI policy
+      description: The organization should create and maintain a documented policy
+        that guides how AI systems are developed or used.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a2.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      ref_id: A2.3
+      name: Alignment with other organisational policies
+      description: The organization should identify how existing policies may influence
+        or be influenced by its AI-related objectives.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a2.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      ref_id: A2.4
+      name: Review of the AI policy
+      description: The organization should regularly review the AI policy to ensure
+        it remains appropriate, sufficient, and effective.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a2.4
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A3
+      name: Internal Organization
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a3
+      ref_id: A3.2
+      name: AI roles and responsibilities
+      description: The organization should clearly define and assign AI-related roles
+        and responsibilities based on its specific needs.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a3.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a3
+      ref_id: A3.3
+      name: Reporting of concerns
+      description: "The organization should establish a process that allows concerns\
+        \ about its role in an AI system\u2019s lifecycle to be reported and addressed."
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a3.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A4
+      name: Resources for AI Systems
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a4
+      ref_id: A4.2
+      name: Resource documentation
+      description: The organization should identify and document the resources needed
+        for each stage of the AI system lifecycle and other related activities.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a4.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a4
+      ref_id: A4.3
+      name: Data resources
+      description: The organization should document details about the data resources
+        used in the AI system as part of its overall resource planning.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a4.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a4
+      ref_id: A4.4
+      name: Tooling resources
+      description: The organization should document the tools and technologies used
+        in the AI system as part of its resource identification process.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a4.4
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a4
+      ref_id: A4.5
+      name: System and computing resources
+      description: 'The organization should document the system and computing resources
+        used in the AI system as part of its resource identification efforts.
+
+        '
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a4.5
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a4
+      ref_id: A4.6
+      name: Human resources
+      description: The organization should document the roles, skills, and competencies
+        of the people involved in all stages of the AI system lifecycle, including
+        development, operation, and decommissioning.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a4.6
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A5
+      name: Assessing Impacts of AI Systems
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a5
+      ref_id: A5.2
+      name: AI system impact assessment process
+      description: "The organization should implement a process to evaluate the potential\
+        \ impacts of its AI systems on individuals, groups, and society across the\
+        \ system\u2019s lifecycle."
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a5.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a5
+      ref_id: A5.3
+      name: Documentation of AI system impact assessments
+      description: The organization should record the results of AI system impact
+        assessments and keep them for a specified period.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a5.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a5
+      ref_id: A5.4
+      name: Assessing AI system impact on individuals or groups of individuals
+      description: "The organization should evaluate and document how its AI systems\
+        \ may affect individuals or groups at all stages of the system\u2019s lifecycle."
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a5.4
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a5
+      ref_id: A5.5
+      name: Assessing societal impacts of AI systems
+      description: 'The organization should evaluate and document the potential effects
+        its AI systems may have on society across the entire lifecycle.
+
+        '
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a5.5
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A6
+      name: AI System Life Cycle
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6
+      ref_id: A6.1
+      name: Management guidance for AI system development
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.1
+      ref_id: A6.1.2
+      name: Objectives for responsible development of AI system
+      description: The organization should define and document objectives that support
+        responsible AI development and integrate actions to achieve them throughout
+        the AI system lifecycle.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.1.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.1
+      ref_id: A6.1.3
+      name: Processes for responsible AI system design and development
+      description: The organization should define and document clear processes to
+        support the responsible design and development of AI systems.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.1.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6
+      ref_id: A6.2
+      name: AI system life cycle
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2
+      ref_id: A6.2.2
+      name: AI system requirements and specification
+      description: The organization should define and document requirements for developing
+        new AI systems or making significant changes to existing ones.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.2.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2
+      ref_id: A6.2.3
+      name: Documentation of AI system design and development
+      description: The organization should document the design and development of
+        AI systems, ensuring alignment with its objectives, requirements, and defined
+        specifications.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.2.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2
+      ref_id: A6.2.4
+      name: AI system verification and validation
+      description: The organization should define and document how AI systems will
+        be verified and validated, including the criteria used to assess their performance
+        and suitability.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.2.4
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2
+      ref_id: A6.2.5
+      name: AI system deployment
+      description: The organization should create a documented deployment plan for
+        AI systems and ensure that all necessary requirements are fulfilled before
+        deployment.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.2.5
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2
+      ref_id: A6.2.6
+      name: AI system operation and monitoring
+      description: The organization should define and document what is needed to keep
+        AI systems running effectively, including monitoring, maintenance, updates,
+        and support.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.2.6
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2
+      ref_id: A6.2.7
+      name: AI system technical documentation
+      description: "The organization should identify the technical documentation needed\
+        \ by different stakeholders\u2014such as users, partners, and regulators\u2014\
+        and provide it in a suitable format.\n"
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.2.7
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a6.2
+      ref_id: A6.2.8
+      name: AI system recordings of event logs
+      description: The organization should decide when to enable event logging during
+        the AI system lifecycle and ensure it is active at least during system use.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a6.2.8
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A7
+      name: Data for AI Systems
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a7
+      ref_id: A7.2
+      name: Data for development and enhancement of AI system
+      description: The organization should define, document, and apply processes for
+        managing data used in the development of AI systems.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a7.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a7
+      ref_id: A7.3
+      name: Acquisition of data
+      description: The organization should identify and document how data is acquired
+        and selected for use in AI systems.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a7.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a7
+      ref_id: A7.4
+      name: Quality of data for AI systems
+      description: The organization should define and document data quality standards
+        and ensure that all data used in AI systems meets those standards.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a7.4
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a7.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a7
+      ref_id: A7.5
+      name: Data provenance
+      description: The organization should establish and document a process to track
+        the origin and history of data used in AI systems throughout both the data
+        and AI system lifecycles.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a7.5
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a7.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a7
+      ref_id: A7.6
+      name: Data preparation
+      description: The organization should define and document the criteria and methods
+        used to prepare data for AI system development and operation.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a7.6
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A8
+      name: Information for Interested Parties of AI Systems
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a8
+      ref_id: A8.2
+      name: System documentation and information for users
+      description: The organization should identify and supply the essential information
+        that users need to understand and use the AI system properly.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a8.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a8
+      ref_id: A8.3
+      name: External reporting
+      description: 'The organization should enable interested parties to report any
+        negative effects caused by the AI system.
+
+        '
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a8.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a8
+      ref_id: A8.4
+      name: Communication of incidents
+      description: The organization should create and document a plan for informing
+        system users about incidents that may affect them.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a8.4
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a8.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a8
+      ref_id: A8.5
+      name: Information for interested parties
+      description: The organization should identify and document what information
+        about the AI system must be reported to relevant stakeholders.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a8.5
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A9
+      name: Use of AI Systems
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a9
+      ref_id: A9.2
+      name: Processes for responsible use of AI systems
+      description: The organization should define and document procedures to ensure
+        AI systems are used in a responsible and ethical manner.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a9.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a9.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a9
+      ref_id: A9.3
+      name: Objectives for responsible use of AI system
+      description: The organization should establish and document clear objectives
+        that promote the responsible use of AI systems.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a9.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a9.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a9
+      ref_id: A9.4
+      name: Intended use of the AI system
+      description: The organization should ensure that AI systems are used as intended
+        and in line with their documented purpose and guidance.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a9.4
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:annex-a
+      ref_id: A10
+      name: Third-party and Customer Relationships
+      implementation_groups:
+      - SoA
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a10
+      ref_id: A10.2
+      name: Allocating responsibilities
+      description: The organization should clearly assign responsibilities for AI
+        system lifecycle activities among itself, partners, suppliers, customers,
+        and other third parties.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a10.2
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a10.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a10
+      ref_id: A10.3
+      name: Suppliers
+      description: The organization should have a process to ensure that any products,
+        services, or materials from suppliers support its commitment to responsible
+        AI development and use.
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a10.3
+      translations:
+        fr:
+          name: null
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a10.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a10
+      ref_id: A10.4
+      name: Customers
+      description: 'The organization should ensure that its responsible AI practices
+        take into account the expectations and needs of its customers.
+
+        '
+      implementation_groups:
+      - SoA
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:a10.4
+      translations:
+        fr:
+          name: null
+          description: null
