@@ -3,7 +3,6 @@ services:
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     pull_policy: always
-    restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
@@ -26,7 +25,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443

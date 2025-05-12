@@ -4,7 +4,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
@@ -19,7 +18,6 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - backend
-    restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
