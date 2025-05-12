@@ -293,10 +293,21 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_LEVEL_FILTER: ListViewFilterConfig = {
+const CURRENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'current_level',
+		optionsEndpoint: 'risk-matrices/risk',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		multiple: true
+	}
+};
+
+const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'residual_level',
 		optionsEndpoint: 'risk-matrices/risk',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
@@ -536,8 +547,8 @@ export const listViewFields = {
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
-			current_level: RISK_LEVEL_FILTER,
-			residual_level: RISK_LEVEL_FILTER
+			current_level: CURRENT_RISK_LEVEL_FILTER,
+			residual_level: RESIDUAL_RISK_LEVEL_FILTER
 		}
 	},
 	'risk-acceptances': {
