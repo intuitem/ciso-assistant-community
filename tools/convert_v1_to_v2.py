@@ -22,8 +22,8 @@ def convert_v1_to_v2(input_path: str, output_path: str):
     scores_logical_name = None
 
     known_object_types = {
-        "framework", "requirements", "threats", "reference_controls",
-        "scores", "implementation_groups", "risk_matrix", "mappings", "answers"
+        "framework", "threats", "reference_controls",
+        "scores", "implementation_groups", "risk_matrix", "mapping", "answers"
     }
 
     # --- Parse library_content ---
@@ -72,7 +72,8 @@ def convert_v1_to_v2(input_path: str, output_path: str):
         for obj_type in known_object_types:
             if key.startswith(f"{obj_type}_"):
                 field = key[len(obj_type)+1:]
-                object_metadata.setdefault(obj_type, {})[field] = val1
+                normalized_type = "mapping_set" if obj_type == "mapping" else obj_type
+                object_metadata.setdefault(normalized_type, {})[field] = val1
 
     sheets_out = {
         "library_meta": library_meta
