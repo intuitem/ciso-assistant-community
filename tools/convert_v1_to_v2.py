@@ -7,7 +7,7 @@ from openpyxl import load_workbook, Workbook
 import re
 
 def convert_v1_to_v2(input_path: str, output_path: str):
-    wb = load_workbook(input_path, data_only=True)
+    wb = load_workbook(input_path, data_only=False)
 
     if "library_content" not in wb.sheetnames:
         raise ValueError("Missing 'library_content' sheet.")
@@ -110,11 +110,8 @@ def convert_v1_to_v2(input_path: str, output_path: str):
         content_rows = []
         if tab_name in wb.sheetnames:
             ws = wb[tab_name]
-            for row in ws.iter_rows(values_only=True):
-                if any(row):
-                    content_rows.append([
-                        str(cell).strip() if cell is not None else "" for cell in row
-                    ])
+            for row in ws.iter_rows():
+                content_rows.append(list(row))
 
         sheets_out[f"{tab_name}_meta"] = meta_rows
         sheets_out[f"{tab_name}_content"] = content_rows
@@ -133,13 +130,27 @@ def convert_v1_to_v2(input_path: str, output_path: str):
                 sheets_out[sheet_name] = raw
 
     # --- Write output workbook ---
+    from copy import copy
+    from openpyxl.cell.cell import Cell
+
     wb_out = Workbook()
     del wb_out["Sheet"]
 
     for sheet_name, rows in sheets_out.items():
         ws_out = wb_out.create_sheet(title=sheet_name[:31])
-        for row in rows:
-            ws_out.append(row)
+        for r_idx, row in enumerate(rows, 1):
+            for c_idx, cell in enumerate(row, 1):
+                if isinstance(cell, Cell):
+                    new_cell = ws_out.cell(row=r_idx, column=c_idx, value=cell.value)
+                    if cell.has_style:
+                        new_cell.font = copy(cell.font)
+                        new_cell.fill = copy(cell.fill)
+                        new_cell.border = copy(cell.border)
+                        new_cell.number_format = cell.number_format
+                        new_cell.protection = copy(cell.protection)
+                        new_cell.alignment = copy(cell.alignment)
+                else:
+                    ws_out.cell(row=r_idx, column=c_idx, value=cell)
 
     wb_out.save(output_path)
     print(f"✅ Conversion complete: {output_path}")
