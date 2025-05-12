@@ -1887,23 +1887,23 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     def create_default_values(cls):
         cis_hierarchy = [
             {
-                "name": "Devices",
+                "name": "assetClassDevices",
                 "description": "Assets that may exist in physical spaces, virtual infrastructure, or cloud-based environments",
                 "children": [
                     {
-                        "name": "Enterprise Assets",
+                        "name": "assetClassEnterpriseAssets",
                         "description": "Assets with the potential to store or process data",
                         "children": [
                             {
-                                "name": "End user Devices",
+                                "name": "assetClassEndUserDevices",
                                 "description": "IT assets used among members of an enterprise",
                                 "children": [
                                     {
-                                        "name": "Portable",
+                                        "name": "assetClassPortable",
                                         "description": "Transportable, end-user devices with wireless connectivity capability",
                                         "children": [
                                             {
-                                                "name": "Mobile",
+                                                "name": "assetClassMobile",
                                                 "description": "Small, enterprise-issued end-user devices with intrinsic wireless capability",
                                             }
                                         ],
@@ -1911,267 +1911,269 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                                 ],
                             },
                             {
-                                "name": "Servers",
+                                "name": "assetClassServers",
                                 "description": "Devices or systems that provide resources, data, services, or programs to other devices",
                             },
                             {
-                                "name": "cloudInfrastructure",
+                                "name": "assetClassCloudInfrastructure",
                                 "description": "Cloud Infrastructure and resources",
                             },
                             {
-                                "name": "iotAndNonComputingDevices",
+                                "name": "assetClassIotAndNonComputingDevices",
                                 "description": "Devices embedded with sensors, software, and other technologies for connecting and exchanging data",
                             },
                             {
-                                "name": "Network Devices",
+                                "name": "assetClassNetworkDevices",
                                 "description": "Electronic devices required for communication and interaction between devices on a network",
                             },
                         ],
                     },
                     {
-                        "name": "Removable Media",
+                        "name": "assetClassRemovableMedia",
                         "description": "Storage devices that can be removed from a computer while the system is running",
                     },
                 ],
             },
             {
-                "name": "Software",
+                "name": "assetClassSoftware",
                 "description": "Sets of data and instructions used to direct a computer to complete a specific task",
                 "children": [
                     {
-                        "name": "Applications",
+                        "name": "assetClassApplications",
                         "description": "Programs running on top of an operating system",
                         "children": [
                             {
-                                "name": "Services",
+                                "name": "assetClassServices",
                                 "description": "Specialized programs that perform well-defined critical tasks",
                             },
                             {
-                                "name": "Libraries",
+                                "name": "assetClassLibraries",
                                 "description": "Shareable pre-compiled codebase used to develop software programs and applications",
                             },
                             {
-                                "name": "APIs",
+                                "name": "assetClassAPIs",
                                 "description": "Set of rules and interfaces for software components to interact with each other",
                             },
-                            {"name": "saas", "description": "Software as a Service"},
+                            {
+                                "name": "assetClassSaas",
+                                "description": "Software as a Service",
+                            },
                         ],
                     },
                     {
-                        "name": "Operating Systems",
+                        "name": "assetClassOperatingSystems",
                         "description": "Software that manages computer hardware and software resources",
                         "children": [
                             {
-                                "name": "Services",
+                                "name": "assetClassServices",
                                 "description": "Specialized programs that perform well-defined critical tasks",
                             },
                             {
-                                "name": "Libraries",
+                                "name": "assetClassLibraries",
                                 "description": "Shareable pre-compiled codebase used to develop software programs and applications",
                             },
                             {
-                                "name": "APIs",
+                                "name": "assetClassAPIs",
                                 "description": "Set of rules and interfaces for software components to interact with each other",
                             },
                         ],
                     },
                     {
-                        "name": "Firmware",
+                        "name": "assetClassFirmware",
                         "description": "Software stored within a device's non-volatile memory",
                     },
                 ],
             },
             {
-                "name": "Data",
+                "name": "assetClassData",
                 "description": "Collection of facts that can be examined, considered, and used for decision-making",
                 "children": [
                     {
-                        "name": "Sensitive Data",
+                        "name": "assetClassSensitiveData",
                         "description": "Data that must be kept private, accurate, reliable, and available",
                     },
                     {
-                        "name": "Log Data",
+                        "name": "assetClassLogData",
                         "description": "Computer-generated data file that records events occurring within the enterprise",
                     },
                     {
-                        "name": "Physical Data",
+                        "name": "assetClassPhysicalData",
                         "description": "Data stored in physical documents or on physical types of removable devices",
                     },
                 ],
             },
             {
-                "name": "Users",
+                "name": "assetClassUsers",
                 "description": "Authorized individuals who access enterprise assets",
                 "children": [
                     {
-                        "name": "Workforce",
+                        "name": "assetClassWorkforce",
                         "description": "Individuals employed or engaged by an organization with access to its information systems",
                     },
                     {
-                        "name": "Service Providers",
+                        "name": "assetClassServiceProviders",
                         "description": "Entities that offer platforms, software, and services to other enterprises",
                     },
                     {
-                        "name": "User Accounts",
+                        "name": "assetClassUserAccounts",
                         "description": "Identity with a set of credentials that defines a user on a computing system",
                     },
                     {
-                        "name": "Administrator Accounts",
+                        "name": "assetClassAdministratorAccounts",
                         "description": "Accounts for users requiring escalated privileges",
                     },
                     {
-                        "name": "Service Accounts",
+                        "name": "assetClassServiceAccounts",
                         "description": "Accounts created specifically to run applications, services, and automated tasks",
                     },
                 ],
             },
             {
-                "name": "Network",
+                "name": "assetClassNetwork",
                 "description": "Group of interconnected devices that exchange data",
                 "children": [
                     {
-                        "name": "Network Infrastructure",
+                        "name": "assetClassNetworkInfrastructure",
                         "description": "Collection of network resources that provide connectivity, management, and communication",
                     },
                     {
-                        "name": "Network Architecture",
+                        "name": "assetClassNetworkArchitecture",
                         "description": "How a network is designed, both physically and logically",
                     },
                 ],
             },
             {
-                "name": "Documentation",
+                "name": "assetClassDocumentation",
                 "description": "Policies, processes, procedures, plans, and other written material",
                 "children": [
                     {
-                        "name": "Plans",
+                        "name": "assetClassPlans",
                         "description": "Implements policies and may include groups of policies, processes, and procedures",
                     },
                     {
-                        "name": "Policies",
+                        "name": "assetClassPolicies",
                         "description": "Official governance statements that outline specific objectives of an information security program",
                     },
                     {
-                        "name": "Processes",
+                        "name": "assetClassProcesses",
                         "description": "Set of general tasks and activities to achieve a series of security-related goals",
                     },
                     {
-                        "name": "Procedures",
+                        "name": "assetClassProcedures",
                         "description": "Ordered set of steps that must be followed to accomplish a specific task",
                     },
                 ],
             },
         ]
-
         extra = [
             {
-                "name": "Business Process",
+                "name": "assetClassBusinessProcess",
                 "description": "Organized set of activities and related procedures by which an organization operates",
                 "children": [
                     {
-                        "name": "Core Operations",
+                        "name": "assetClassCoreOperations",
                         "description": "Primary processes that directly deliver value to customers",
                         "children": [
                             {
-                                "name": "Product or Service Development",
+                                "name": "assetClassProductOrServiceDevelopment",
                                 "description": "Processes for designing, creating, and improving products and services",
                             },
                             {
-                                "name": "Product or Service Delivery",
+                                "name": "assetClassProductOrServiceDelivery",
                                 "description": "Processes for manufacturing products or delivering services to customers",
                             },
                             {
-                                "name": "Sales and Marketing",
+                                "name": "assetClassSalesAndMarketing",
                                 "description": "Processes for attracting customers and selling products/services",
                             },
                             {
-                                "name": "Customer Service",
+                                "name": "assetClassCustomerService",
                                 "description": "Processes for supporting customers after sales",
                             },
                             {
-                                "name": "Supply Chain Management",
+                                "name": "assetClassSupplyChainManagement",
                                 "description": "Processes for managing the flow of goods, services, and information",
                             },
                         ],
                     },
                     {
-                        "name": "Management and Governance",
+                        "name": "assetClassManagementAndGovernance",
                         "description": "Processes that provide oversight, direction, and accountability",
                         "children": [
                             {
-                                "name": "Strategic Planning",
+                                "name": "assetClassStrategicPlanning",
                                 "description": "Processes for defining long-term objectives and allocation of resources",
                             },
                             {
-                                "name": "Financial Management",
+                                "name": "assetClassFinancialManagement",
                                 "description": "Processes for budgeting, accounting, and financial reporting",
                             },
                             {
-                                "name": "Risk Management",
+                                "name": "assetClassRiskManagement",
                                 "description": "Processes for identifying, assessing, and mitigating risks",
                             },
                             {
-                                "name": "Compliance Management",
+                                "name": "assetClassComplianceManagement",
                                 "description": "Processes for ensuring adherence to laws, regulations, and policies",
                             },
                             {
-                                "name": "Performance Management",
+                                "name": "assetClassPerformanceManagement",
                                 "description": "Processes for monitoring and improving organizational performance",
                             },
                         ],
                     },
                     {
-                        "name": "Support functions",
+                        "name": "assetClassSupportFunctions",
                         "description": "Processes that enable and facilitate the core business operations",
                         "children": [
                             {
-                                "name": "Human Resources",
+                                "name": "assetClassHumanResources",
                                 "description": "Processes for recruiting, developing, and retaining personnel",
                             },
                             {
-                                "name": "Information Technology",
+                                "name": "assetClassInformationTechnology",
                                 "description": "Processes for managing IT infrastructure, applications, and services",
                             },
                             {
-                                "name": "Facilities Management",
+                                "name": "assetClassFacilitiesManagement",
                                 "description": "Processes for maintaining physical infrastructure and workspaces",
                             },
                             {
-                                "name": "Procurement",
+                                "name": "assetClassProcurement",
                                 "description": "Processes for acquiring goods and services from external suppliers",
                             },
                             {
-                                "name": "Legal Services",
+                                "name": "assetClassLegalServices",
                                 "description": "Processes for managing legal affairs and intellectual property",
                             },
                             {
-                                "name": "Administrative Services",
+                                "name": "assetClassAdministrativeServices",
                                 "description": "Processes for general administrative support functions",
                             },
                         ],
                     },
                     {
-                        "name": "External Relationships",
+                        "name": "assetClassExternalRelationships",
                         "description": "Processes for managing relationships outside the organization",
                         "children": [
                             {
-                                "name": "Vendor Management",
+                                "name": "assetClassVendorManagement",
                                 "description": "Processes for managing relationships with suppliers and vendors",
                             },
                             {
-                                "name": "Partner Management",
+                                "name": "assetClassPartnerManagement",
                                 "description": "Processes for establishing and maintaining strategic partnerships",
                             },
                             {
-                                "name": "Government Relations",
+                                "name": "assetClassGovernmentRelations",
                                 "description": "Processes for interacting with government entities",
                             },
                             {
-                                "name": "Community Relations",
+                                "name": "assetClassCommunityRelations",
                                 "description": "Processes for engaging with local communities and society",
                             },
                             {
-                                "name": "Investor Relations",
+                                "name": "assetClassInvestorRelations",
                                 "description": "Processes for managing relationships with investors and shareholders",
                             },
                         ],

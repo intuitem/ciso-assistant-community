@@ -669,6 +669,10 @@ class AssetClassViewSet(BaseModelViewSet):
     ordering = ["parent", "name"]
     search_fields = ["name", "description"]
 
+    @action(detail=False, name="delete all")
+    def clear_all(self, request):
+        return Response(AssetClass.clear_all())
+
     @action(detail=False, name="Get Asset Class Tree")
     def tree(self, request):
         return Response(AssetClass.build_tree())
