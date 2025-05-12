@@ -9,6 +9,7 @@ from typing import Self, Type, Union
 from icecream import ic
 from auditlog.registry import auditlog
 
+from django.utils.functional import cached_property
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
