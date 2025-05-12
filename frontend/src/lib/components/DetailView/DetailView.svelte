@@ -51,12 +51,11 @@
 	};
 
 	if (data.model?.detailViewFields) {
-		exclude = [
-			...exclude,
-			...Object.keys(data.data).filter(
-				(key) => !data.model.detailViewFields.some((field) => field.field === key)
+		data.data = Object.fromEntries(
+			Object.entries(data.data).filter(
+				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
 			)
-		];
+		);
 	}
 
 	let tabSet = 0;
