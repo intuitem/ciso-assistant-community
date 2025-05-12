@@ -1,0 +1,189 @@
+urn: urn:intuitem:risk:library:mapping-nist-ssdf-1.1-to-nist-csf-2.0
+locale: en
+ref_id: mapping-nist-ssdf-1.1-to-nist-csf-2.0
+name: nist-ssdf-1.1 -> NIST-CSF-2.0
+description: Mapping from Secure Software Development Framework (SSDF) to NIST CSF
+  v2.0
+copyright: intuitem
+version: '1'
+publication_date: 2025-05-06
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:nist-ssdf-1.1
+- urn:intuitem:risk:library:nist-csf-2.0
+objects:
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:nist-ssdf-1.1-to-nist-csf-2.0_1746551638191081
+    ref_id: mapping-nist-ssdf-1.1-to-nist-csf-2.0
+    name: nist-ssdf-1.1 -> NIST-CSF-2.0
+    description: Mapping from Secure Software Development Framework (SSDF) to NIST
+      CSF v2.0
+    source_framework_urn: urn:intuitem:risk:framework:nist-ssdf-1.1
+    target_framework_urn: urn:intuitem:risk:framework:nist-csf-2.0
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:po.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:ps.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-11
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ssdf-1.1:pw.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+      rationale: null
+      stregth_of_relationship: null
