@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0071_remove_requirementassessment_answer_and_more"),
         ("iam", "0012_user_keep_local_login"),
