@@ -65,6 +65,34 @@ def get_config():
         "Choose a proxy", choices=["caddy", "traefik", "bunkerweb"], default="caddy"
     ).ask()
 
+    if config["proxy"] == "bunkerweb":
+        config["bunkerweb"] = {
+            "db_name": questionary.text(
+                "BunkerWeb DB name: ", default="db"
+            ).ask(),
+            "db_username": questionary.text(
+                "BunkerWeb DB username: ", default="bunkerweb"
+            ).ask(),
+            "db_password": questionary.text(
+                "BunkerWeb DB password: ", default="changeme"
+            ).ask(),
+            "use_ui": questionary.confirm(
+                "Would you like to use the BunkerWeb UI?",
+                default=False,
+            ).ask(),
+        }
+        if config["bunkerweb"]["use_ui"]:
+            if config["mode"] == "VM/Remote":
+                config["bunkerweb"]["ui_fqdn"] = questionary.text(
+                    "Please enter your BunkerWeb UI FQDN/hostname (must be different from CISO FQDN/hostname): ", default="bw.example.com"
+                ).ask()
+            config["bunkerweb"]["ui_username"] = questionary.password(
+                "BunkerWeb UI username: ", default="admin"
+            ).ask()
+            config["bunkerweb"]["ui_password"] = questionary.password(
+                "BunkerWeb UI password: ", default="ChangeMe123!"
+            ).ask()
+
     # Email configuration
     config["need_mailer"] = questionary.confirm(
         "Do you need email notifications? Mailer settings will be required",
@@ -260,6 +288,15 @@ def main():
         "5. Run './docker-compose.sh' and follow the instructions to create the first admin user"
     )
     print(f"6. Access the application at https://{config['fqdn']}:{config['port']}")
+    if config["proxy"] == "bunkerweb" and config["bunkerweb"]["use_ui"]:
+        if config["mode"] == "VM/Remote":
+            print(
+                f"7. Access the BunkerWeb UI at https://{config['bunkerweb']['ui_fqdn']}:{config['port']} with credentials {config['bunkerweb']['ui_username']}:{config['bunkerweb']['ui_password']}"
+            )
+        else:
+            print(
+                f"7. Access the BunkerWeb UI at http://{config['fqdn']}:7000 with credentials {config['bunkerweb']['ui_username']}:{config['bunkerweb']['ui_password']}"
+            )
 
 
 if __name__ == "__main__":
