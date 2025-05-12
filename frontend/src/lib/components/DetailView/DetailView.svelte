@@ -275,7 +275,14 @@
 											: null}
 									>
 										{#if value !== null && value !== undefined && value !== ''}
-											{#if key === 'library'}
+											{#if key === 'asset_class'}
+												<!-- Special case for asset_class - Always translate the value -->
+												{#if typeof value === 'object' && (value.str || value.name)}
+													{safeTranslate(value.str || value.name)}
+												{:else}
+													{safeTranslate(value)}
+												{/if}
+											{:else if key === 'library'}
 												{@const itemHref = `/loaded-libraries/${value.id}`}
 												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 													>{value.name}</Anchor
@@ -343,20 +350,7 @@
 														(item) => item.field === key
 													)?.urlModel
 												}/${value.id}`}
-												{#if key === 'asset_class'}
-													<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
-														{#if value.str.includes('/')}
-															{#each value.str.split('/') as part, i}
-																{safeTranslate(toCamelCase(part))}{i <
-																value.str.split('/').length - 1
-																	? ' / '
-																	: ''}
-															{/each}
-														{:else}
-															{safeTranslate(toCamelCase(value.str))}
-														{/if}
-													</Anchor>
-												{:else if key === 'ro_to_couple'}
+												{#if key === 'ro_to_couple'}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 														>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
 															'-'
