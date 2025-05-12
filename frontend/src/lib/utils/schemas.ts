@@ -205,6 +205,7 @@ export const AssetSchema = z.object({
 	...NameDescriptionMixin,
 	type: z.string().default('PR'),
 	folder: z.string(),
+	asset_class: z.string().optional(),
 	parent_assets: z.string().optional().array().optional(),
 	security_objectives: z
 		.object({
