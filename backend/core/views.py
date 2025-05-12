@@ -658,7 +658,7 @@ class AssetClassViewSet(BaseModelViewSet):
     model = AssetClass
     filterset_fields = ["parent"]
 
-    ordering = ["name"]
+    ordering = ["parent", "name"]
     search_fields = ["name", "description"]
 
     @action(detail=False, name="Get Asset Class Tree")
