@@ -1833,7 +1833,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         "AssetClass", on_delete=models.PROTECT, blank=True, null=True
     )
 
-    @property
+    @cached_property
     def full_path(self):
         if self.parent is None:
             return self.name
