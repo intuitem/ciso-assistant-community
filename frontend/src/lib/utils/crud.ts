@@ -416,19 +416,29 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
+			{ field: 'asset_class', urlModel: 'asset-class' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
-		selectFields: [{ field: 'type' }],
+		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
 		filters: [
 			{ field: 'parent_assets' },
 			{ field: 'folder' },
+			{ field: 'asset_class' },
 			{ field: 'type' },
 			{ field: 'owner' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	'asset-class': {
+		endpointUrl: 'asset-class',
+		name: 'asset-class',
+		localName: 'assetClass',
+		localNamePlural: 'assetClasses',
+		verboseName: 'assetclass',
+		verboseNamePlural: 'assetclasses'
 	},
 	users: {
 		name: 'user',
