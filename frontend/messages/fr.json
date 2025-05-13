@@ -1591,5 +1591,6 @@
 	"assetClassPartnerManagement": "Gestion des Partenaires",
 	"assetClassGovernmentRelations": "Relations Gouvernementales",
 	"assetClassCommunityRelations": "Relations Communautaires",
-	"assetClassInvestorRelations": "Relations avec les Investisseurs"
+	"assetClassInvestorRelations": "Relations avec les Investisseurs",
+	"unknownOrDeletedUser": "Utilisateur inconnu ou supprimé"
 }

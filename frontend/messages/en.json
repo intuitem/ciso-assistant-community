@@ -1595,5 +1595,6 @@
 	"assetClassPartnerManagement": "Partner Management",
 	"assetClassGovernmentRelations": "Government Relations",
 	"assetClassCommunityRelations": "Community Relations",
-	"assetClassInvestorRelations": "Investor Relations"
+	"assetClassInvestorRelations": "Investor Relations",
+	"unknownOrDeletedUser": "Unknown or deleted user"
 }
