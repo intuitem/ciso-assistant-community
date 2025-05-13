@@ -182,8 +182,6 @@
 			node.resultCounts = countResults(node);
 			const hidden = isNodeHidden(node, displayOnlyAssessableNodes);
 
-			console.log(hidden);
-
 			return {
 				id: id,
 				content: TreeViewItemContent,
