@@ -22,16 +22,16 @@ export const complianceResultColorMap: { [key: string]: string } = {
 	not_assessed: '#d1d5db',
 	partially_compliant: '#fde047',
 	non_compliant: '#f87171',
+	compliant: '#86efac',
 	not_applicable: '#000000',
-	compliant: '#86efac'
 };
 
 export const complianceResultTailwindColorMap: { [key: string]: string } = {
 	not_assessed: 'bg-gray-300',
 	partially_compliant: 'bg-yellow-300',
 	non_compliant: 'bg-red-300',
+	compliant: 'bg-green-300',
 	not_applicable: 'bg-black text-white',
-	compliant: 'bg-green-300'
 };
 
 export const complianceStatusColorMap: { [key: string]: string } = {

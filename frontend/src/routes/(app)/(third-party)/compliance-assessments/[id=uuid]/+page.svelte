@@ -339,7 +339,8 @@
 	const popupFilter: PopupSettings = {
 		event: 'click',
 		target: 'popupFilter',
-		placement: 'bottom-end'
+		placement: 'bottom-end',
+		closeQuery: '#will-close'
 	};
 
 	$: filterCount =
