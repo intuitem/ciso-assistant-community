@@ -55,7 +55,7 @@
 			<tbody>
 				{#each data.data as entry}
 					<tr class="border-t border-gray-200">
-						<td class="px-4 py-2 font-medium">{entry.asset}</td>
+						<td class="px-4 py-2 font-medium">{entry.folder}/{entry.asset}</td>
 						{#each xAxisPoints as point, i}
 							<td
 								class="px-4 py-2 text-center"

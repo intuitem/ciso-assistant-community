@@ -347,6 +347,8 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
 
+    asset_class = FieldsRelatedField(["name"])
+
 
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -366,6 +368,21 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class AssetClassReadSerializer(BaseModelSerializer):
+    parent = FieldsRelatedField()
+    full_path = serializers.CharField()
+
+    class Meta:
+        model = AssetClass
+        exclude = ["created_at", "updated_at", "folder", "is_published"]
+
+
+class AssetClassWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = AssetClass
+        exclude = ["created_at", "updated_at", "folder", "is_published"]
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
