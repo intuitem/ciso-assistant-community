@@ -162,14 +162,10 @@
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 		return (
-			displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren ||
-			(
-				node.assessable &&
-				(
-					(selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
-					(selectedResults.length > 0 && !selectedResults.includes(node.result))
-				)
-			)
+			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
+			(node.assessable &&
+				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
+					(selectedResults.length > 0 && !selectedResults.includes(node.result))))
 		);
 	}
 	function transformToTreeView(nodes: Node[]) {
@@ -177,7 +173,7 @@
 			node.resultCounts = countResults(node);
 			const hidden = isNodeHidden(node, displayOnlyAssessableNodes);
 
-			console.log((hidden))
+			console.log(hidden);
 
 			return {
 				id: id,
@@ -343,8 +339,13 @@
 	const popupFilter: PopupSettings = {
 		event: 'click',
 		target: 'popupFilter',
-		placement: 'bottom-start'
+		placement: 'bottom-end'
 	};
+
+	$: filterCount =
+		(selectedStatus.length > 0 ? 1 : 0) +
+		(selectedResults.length > 0 ? 1 : 0) +
+		(displayOnlyAssessableNodes ? 1 : 0);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -597,69 +598,74 @@
 			>
 				<i class="fa-solid fa-filter mr-2" />
 				{m.filters()}
-				<!-- {#if filterCount}
+				{#if filterCount}
 					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
-				{/if} -->
+				{/if}
 			</button>
 			<div
-				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+				class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
 				data-popup="popupFilter"
 			>
-				<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-					{#each Object.entries(complianceStatusColorMap) as [status, color]}
-						<button
-							type="button"
-							on:click={() => toggleStatus(status)}
-							class="px-2 py-1 rounded-md font-bold"
-							style="background-color: {selectedStatus.includes(status)
-								? color + '44'
-								: 'grey'}; color: {selectedStatus.includes(status)
-								? darkenColor(color, 0.3)
-								: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.5};"
-						>
-							{safeTranslate(status)}
-						</button>
-					{/each}
+				<div>
+					<span class="text-sm font-bold">{m.result()}</span>
+					<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+						{#each Object.entries(complianceResultColorMap) as [result, color]}
+							<button
+								type="button"
+								on:click={() => toggleResult(result)}
+								class="px-2 py-1 rounded-md font-bold"
+								style="background-color: {selectedResults.includes(result)
+									? color
+									: 'grey'}; color: {selectedResults.includes(result)
+									? result === 'not_applicable'
+										? 'white'
+										: 'black'
+									: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+							>
+								{safeTranslate(result)}
+							</button>
+						{/each}
+					</div>
 				</div>
-				<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-					{#each Object.entries(complianceResultColorMap) as [result, color]}
-						<button
-							type="button"
-							on:click={() => toggleResult(result)}
-							class="px-2 py-1 rounded-md font-bold"
-							style="background-color: {selectedResults.includes(result)
-								? color + '44'
-								: 'grey'}; color: {selectedResults.includes(result)
-								? darkenColor(color, 0.3)
-								: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.5};"
-						>
-							{safeTranslate(result)}
-						</button>
-					{/each}
+				<div>
+					<span class="text-sm font-bold">{m.status()}</span>
+					<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+						{#each Object.entries(complianceStatusColorMap) as [status, color]}
+							<button
+								type="button"
+								on:click={() => toggleStatus(status)}
+								class="px-2 py-1 rounded-md font-bold"
+								style="background-color: {selectedStatus.includes(status)
+									? color + '44'
+									: 'grey'}; color: {selectedStatus.includes(status)
+									? darkenColor(color, 0.3)
+									: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+							>
+								{safeTranslate(status)}
+							</button>
+						{/each}
+					</div>
 				</div>
-				<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
-					{#if displayOnlyAssessableNodes}
-						<p class="font-bold">{m.ShowAllNodesMessage()}</p>
-					{:else}
-						<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
-					{/if}
-					<SlideToggle
-						name="questionnaireToggle"
-						class="flex flex-row items-center justify-center"
-						active="bg-primary-500"
-						background="bg-green-500"
-						bind:checked={displayOnlyAssessableNodes}
-						on:click={() => {
-							displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
-							auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
-						}}
-					>
-						{#if displayOnlyAssessableNodes}
-							<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
-						{:else}
-							<p class="font-bold">{m.ShowOnlyAssessable()}</p>
-						{/if}
-					</SlideToggle>
+				<div>
+					<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+					<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+						<SlideToggle
+							name="questionnaireToggle"
+							class="flex flex-row items-center justify-center"
+							active="bg-primary-500"
+							bind:checked={displayOnlyAssessableNodes}
+							on:click={() => {
+								displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
+								auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
+							}}
+						>
+							{#if displayOnlyAssessableNodes}
+								<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+							{:else}
+								<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+							{/if}
+						</SlideToggle>
+					</div>
 				</div>
 			</div>
 		</div>
