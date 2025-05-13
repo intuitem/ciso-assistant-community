@@ -487,6 +487,7 @@ class LibraryUpdater:
             )
 
         if self.new_framework is not None:
+            # update or create the framework object itself
             framework_dict = {**self.new_framework}
             del framework_dict["requirement_nodes"]
 
@@ -501,15 +502,16 @@ class LibraryUpdater:
                 },
             )
 
+            # update requirement_nodes
             requirement_node_urns = set(
                 rc.urn.lower()
                 for rc in RequirementNode.objects.filter(framework=new_framework)
             )
-            new_requirement_node_urns = set(
+            requirement_node_object_urns = set(
                 rc["urn"].lower() for rc in self.new_framework["requirement_nodes"]
             )
             deleted_requirement_node_urns = (
-                requirement_node_urns - new_requirement_node_urns
+                requirement_node_urns - requirement_node_object_urns
             )
 
             for requirement_node_urn in deleted_requirement_node_urns:
@@ -536,22 +538,23 @@ class LibraryUpdater:
                 *ComplianceAssessment.objects.filter(framework=new_framework)
             ]
 
-            existing_requirements = {
+            existing_requirement_node_objects = {
                 rn.urn.lower(): rn
                 for rn in RequirementNode.objects.filter(framework=new_framework)
             }
-            existing_assessments = defaultdict(list)
+            existing_requirement_assessment_objects = defaultdict(list)
             for ra in RequirementAssessment.objects.filter(
                 requirement__framework=new_framework
             ):
-                existing_assessments[ra.requirement.urn.lower()].append(ra)
+                existing_requirement_assessment_objects[ra.requirement.urn.lower()].append(ra)
 
-            assessments_to_create = []
-            assessments_to_update = []
-            requirement_nodes_to_update = []
+            requirement_assessment_objects_to_create = []
+            requirement_assessment_objects_to_update = []
+            requirement_node_objects_to_update = []
             order_id = 0
             all_fields_to_update = set()
 
+            # main loop by requirement_node
             for requirement_node in requirement_nodes:
                 urn = requirement_node["urn"].lower()
                 questions = requirement_node.get("questions")
@@ -565,23 +568,23 @@ class LibraryUpdater:
                 order_id += 1
                 all_fields_to_update.update(requirement_node_dict.keys())
 
-                if urn in existing_requirements:
-                    new_requirement_node = existing_requirements[urn]
+                if urn in existing_requirement_node_objects:
+                    requirement_node_object = existing_requirement_node_objects[urn]
                     for key, value in requirement_node_dict.items():
-                        setattr(new_requirement_node, key, value)
-                    requirement_nodes_to_update.append(new_requirement_node)
+                        setattr(requirement_node_object, key, value)
+                    requirement_node_objects_to_update.append(requirement_node_object)
                 else:
-                    new_requirement_node = RequirementNode.objects.create(
+                    requirement_node_object = RequirementNode.objects.create(
                         urn=urn,
                         framework=new_framework,
                         **referential_object_dict,
                         **requirement_node_dict,
                     )
                     for ca in compliance_assessments:
-                        assessments_to_create.append(
+                        requirement_assessment_objects_to_create.append(
                             RequirementAssessment(
                                 compliance_assessment=ca,
-                                requirement=new_requirement_node,
+                                requirement=requirement_node_object,
                                 folder=ca.perimeter.folder,
                                 answers=transform_questions_to_answers(questions)
                                 if questions
@@ -589,9 +592,10 @@ class LibraryUpdater:
                             )
                         )
 
-                for ra in existing_assessments.get(urn, []):
+                # update anwsers for each ra for the current requirement_node, when relevant
+                for ra in existing_requirement_assessment_objects.get(urn, []):
                     if not questions:
-                        assessments_to_update.append(ra)
+                        requirement_assessment_objects_to_update.append(ra)
                         continue
 
                     answers = ra.answers
@@ -661,30 +665,32 @@ class LibraryUpdater:
                                     answers[urn] = None
 
                     ra.answers = answers
-                    assessments_to_update.append(ra)
+                    requirement_assessment_objects_to_update.append(ra)
 
+                # update threats linked to the requirement_node
                 for threat_urn in requirement_node.get("threats", []):
                     normalized_threat_urn = threat_urn.lower()
-                    threat = (
+                    threat_object = (
                         objects_tracked.get(normalized_threat_urn)
                         or Threat.objects.filter(urn=normalized_threat_urn).first()
                     )
-                    if threat:
-                        new_requirement_node.threats.add(threat)
+                    if threat_object:
+                        requirement_node_object.threats.add(threat_object)
 
+                # update reference_controls linked to the requirement_node
                 for rc_urn in requirement_node.get("reference_controls", []):
                     normalized_rc_urn = rc_urn.lower()
-                    rc = (
+                    rc_object = (
                         objects_tracked.get(normalized_rc_urn)
                         or ReferenceControl.objects.filter(
                             urn=normalized_rc_urn
                         ).first()
                     )
-                    if rc:
-                        new_requirement_node.reference_controls.add(rc)
+                    if rc_object:
+                        requirement_node_object.reference_controls.add(rc_object)
 
             # Fix for the dual bulk_update issue - consolidate into one update
-            if requirement_nodes_to_update:
+            if requirement_node_objects_to_update:
                 # Ensure all needed fields are included
                 fields_to_update = sorted(
                     all_fields_to_update.union(
@@ -692,47 +698,21 @@ class LibraryUpdater:
                     )
                 )
                 RequirementNode.objects.bulk_update(
-                    requirement_nodes_to_update,
+                    requirement_node_objects_to_update,
                     fields_to_update,
                     batch_size=200,
                 )
 
-            if assessments_to_update:
+            if requirement_assessment_objects_to_update:
                 RequirementAssessment.objects.bulk_update(
-                    assessments_to_update, ["answers"], batch_size=100
+                    requirement_assessment_objects_to_update, ["answers"], batch_size=100
                 )
 
-            if assessments_to_create:
+            if requirement_assessment_objects_to_create:
                 RequirementAssessment.objects.bulk_create(
-                    assessments_to_create, batch_size=100
+                    requirement_assessment_objects_to_create, batch_size=100
                 )
 
-                for threat_urn in requirement_node_dict.get("threats", []):
-                    threat_to_add = objects_tracked.get(threat_urn)
-                    if threat_to_add is None:  # I am not 100% this condition is usefull
-                        threat_to_add = Threat.objects.filter(
-                            urn=threat_urn
-                        ).first()  # No locale support
-                    if threat_to_add is not None:
-                        new_requirement_node.threats.add(threat_to_add)
-
-                for reference_control_urn in requirement_node.get(
-                    "reference_controls", []
-                ):
-                    reference_control_to_add = objects_tracked.get(
-                        reference_control_urn
-                    )
-                    if (
-                        reference_control_to_add is None
-                    ):  # I am not 100% this condition is useful
-                        reference_control_to_add = ReferenceControl.objects.filter(
-                            urn=reference_control_urn.lower()
-                        ).first()  # No locale support
-
-                    if reference_control_to_add is not None:
-                        new_requirement_node.reference_controls.add(
-                            reference_control_to_add
-                        )
 
         if self.new_matrices is not None:
             for matrix in self.new_matrices:
