@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { displayOnlyAssessableNodes } from './store';
 
 	import { onMount } from 'svelte';
 
@@ -38,7 +37,8 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
-	import { expandedNodesState } from '$lib/utils/stores';
+	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
+	import { get } from 'svelte/store';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { canPerformAction } from '$lib/utils/access-control';
 
@@ -134,14 +134,13 @@
 		return resultCounts;
 	};
 
-	let selectedStatus = ['done', 'to_do', 'in_progress', 'in_review'];
-	let selectedResults = [
-		'compliant',
-		'non_compliant',
-		'partially_compliant',
-		'not_assessed',
-		'not_applicable'
-	];
+	let id = $page.params.id;
+
+	let filters = get(auditFiltersStore);
+	let selectedStatus = filters[id]?.selectedStatus || [];
+	let selectedResults = filters[id]?.selectedResults || [];
+	let displayOnlyAssessableNodes = filters[id]?.displayOnlyAssessableNodes || false;
+
 	function toggleItem(item, selectedItems) {
 		if (selectedItems.includes(item)) {
 			return selectedItems.filter((s) => s !== item);
@@ -152,25 +151,33 @@
 
 	function toggleStatus(status) {
 		selectedStatus = toggleItem(status, selectedStatus);
+		auditFiltersStore.setStatus(id, selectedStatus);
 	}
 
 	function toggleResult(result) {
 		selectedResults = toggleItem(result, selectedResults);
+		auditFiltersStore.setResults(id, selectedResults);
 	}
 
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 		return (
-			!(!displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
-			((!selectedStatus.includes(node.status) || !selectedResults.includes(node.result)) &&
-				node.assessable)
+			displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren ||
+			(
+				node.assessable &&
+				(
+					(selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
+					(selectedResults.length > 0 && !selectedResults.includes(node.result))
+				)
+			)
 		);
 	}
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
-			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
-			const hidden = isNodeHidden(node, $displayOnlyAssessableNodes);
+			const hidden = isNodeHidden(node, displayOnlyAssessableNodes);
+
+			console.log((hidden))
 
 			return {
 				id: id,
@@ -263,7 +270,6 @@
 				throw new Error('Failed to fetch requirement assessments sync data');
 			}
 		});
-		console.log(requirementAssessmentsSync);
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -333,6 +339,12 @@
 	$: if (createAppliedControlsLoading === true && (form || form?.error))
 		createAppliedControlsLoading = false;
 	$: if (form?.message?.requirementAssessmentsSync) console.log(form);
+
+	const popupFilter: PopupSettings = {
+		event: 'click',
+		target: 'popupFilter',
+		placement: 'bottom-start'
+	};
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -569,66 +581,86 @@
 		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<div class=" flex items-center font-semibold">
-			<span class="h4">{m.associatedRequirements()}</span>
-			<span class="badge variant-soft-primary ml-1">
-				{#if treeViewNodes}
-					{assessableNodesCount(treeViewNodes)}
-				{/if}
-			</span>
-			<span class="text-xs ml-2 text-gray-500">{m.filterBy()}</span>
-			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-				{#each Object.entries(complianceStatusColorMap) as [status, color]}
-					<button
-						type="button"
-						on:click={() => toggleStatus(status)}
-						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {selectedStatus.includes(status)
-							? color + '44'
-							: 'grey'}; color: {selectedStatus.includes(status)
-							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.5};"
-					>
-						{safeTranslate(status)}
-					</button>
-				{/each}
-			</div>
-			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-				{#each Object.entries(complianceResultColorMap) as [result, color]}
-					<button
-						type="button"
-						on:click={() => toggleResult(result)}
-						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {selectedResults.includes(result)
-							? color + '44'
-							: 'grey'}; color: {selectedResults.includes(result)
-							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.5};"
-					>
-						{safeTranslate(result)}
-					</button>
-				{/each}
-			</div>
-			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
-				{#if $displayOnlyAssessableNodes}
-					<p class="font-bold">{m.ShowAllNodesMessage()}</p>
-				{:else}
-					<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
-				{/if}
-				<SlideToggle
-					name="questionnaireToggle"
-					class="flex flex-row items-center justify-center"
-					active="bg-primary-500"
-					background="bg-green-500"
-					bind:checked={$displayOnlyAssessableNodes}
-					on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
-				>
-					{#if $displayOnlyAssessableNodes}
-						<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
-					{:else}
-						<p class="font-bold">{m.ShowOnlyAssessable()}</p>
+		<div class="flex flex-row items-center font-semibold justify-between">
+			<div>
+				<span class="h4">{m.associatedRequirements()}</span>
+				<span class="badge variant-soft-primary ml-1">
+					{#if treeViewNodes}
+						{assessableNodesCount(treeViewNodes)}
 					{/if}
-				</SlideToggle>
+				</span>
+			</div>
+			<button
+				use:popup={popupFilter}
+				class="btn variant-filled-primary self-end relative"
+				id="filters"
+			>
+				<i class="fa-solid fa-filter mr-2" />
+				{m.filters()}
+				<!-- {#if filterCount}
+					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
+				{/if} -->
+			</button>
+			<div
+				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+				data-popup="popupFilter"
+			>
+				<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+					{#each Object.entries(complianceStatusColorMap) as [status, color]}
+						<button
+							type="button"
+							on:click={() => toggleStatus(status)}
+							class="px-2 py-1 rounded-md font-bold"
+							style="background-color: {selectedStatus.includes(status)
+								? color + '44'
+								: 'grey'}; color: {selectedStatus.includes(status)
+								? darkenColor(color, 0.3)
+								: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.5};"
+						>
+							{safeTranslate(status)}
+						</button>
+					{/each}
+				</div>
+				<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+					{#each Object.entries(complianceResultColorMap) as [result, color]}
+						<button
+							type="button"
+							on:click={() => toggleResult(result)}
+							class="px-2 py-1 rounded-md font-bold"
+							style="background-color: {selectedResults.includes(result)
+								? color + '44'
+								: 'grey'}; color: {selectedResults.includes(result)
+								? darkenColor(color, 0.3)
+								: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.5};"
+						>
+							{safeTranslate(result)}
+						</button>
+					{/each}
+				</div>
+				<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
+					{#if displayOnlyAssessableNodes}
+						<p class="font-bold">{m.ShowAllNodesMessage()}</p>
+					{:else}
+						<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
+					{/if}
+					<SlideToggle
+						name="questionnaireToggle"
+						class="flex flex-row items-center justify-center"
+						active="bg-primary-500"
+						background="bg-green-500"
+						bind:checked={displayOnlyAssessableNodes}
+						on:click={() => {
+							displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
+							auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
+						}}
+					>
+						{#if displayOnlyAssessableNodes}
+							<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
+						{:else}
+							<p class="font-bold">{m.ShowOnlyAssessable()}</p>
+						{/if}
+					</SlideToggle>
+				</div>
 			</div>
 		</div>
 
@@ -637,7 +669,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
+			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes
