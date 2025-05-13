@@ -116,7 +116,9 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     def security_objective_scale(self, request):
         choices = {
             "1-4": "1-4",
+            "1-5": "1-5",
             "0-3": "0-3",
+            "0-4": "0-4",
             "FIPS-199": "FIPS-199",
         }
         return Response(choices)

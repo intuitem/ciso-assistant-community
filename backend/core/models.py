@@ -1561,7 +1561,7 @@ class Asset(
                             "value": {
                                 "type": "integer",
                                 "minimum": 0,
-                                "maximum": 3,
+                                "maximum": 5,
                             },
                             "is_enabled": {
                                 "type": "boolean",
@@ -1601,7 +1601,9 @@ class Asset(
 
     SECURITY_OBJECTIVES_SCALES = {
         "1-4": range(1, 5),
+        "1-5": range(1, 6),
         "0-3": range(0, 4),
+        "0-4": range(0, 5),
         "FIPS-199": ["low", "moderate", "moderate", "high"],
     }
 

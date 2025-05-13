@@ -93,6 +93,8 @@ export const ISO_8601_REGEX =
 
 export const SECURITY_OBJECTIVE_SCALE_MAP = {
 	'0-3': ['0', '1', '2', '3'],
+	'0-4': ['0', '1', '2', '3', '4'],
 	'1-4': ['1', '2', '3', '4'],
+	'1-5': ['1', '2', '3', '4', '5'],
 	'FIPS-199': ['low', 'moderate', 'moderate', 'high']
 };
