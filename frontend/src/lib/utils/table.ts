@@ -139,6 +139,29 @@ const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -371,6 +394,17 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_FILTER: ListViewFilterConfig = {
+	//still broken
+	component: AutocompleteSelect,
+	props: {
+		label: 'assetClass',
+		optionsEndpoint: 'asset-class',
+		optionsLabelField: 'full_path',
+		optionsValueField: 'id',
+		multiple: false
+	}
+};
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -633,10 +667,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'type',
-			'description',
 			'securityObjectives',
 			'disasterRecoveryObjectives',
-			'owner',
 			'domain',
 			'labels'
 		],
@@ -644,10 +676,8 @@ export const listViewFields = {
 			'ref_id',
 			'name',
 			'type',
-			'description',
 			'security_objectives',
 			'disaster_recovery_objectives',
-			'owner',
 			'folder',
 			'filtering_labels'
 		],
@@ -656,6 +686,10 @@ export const listViewFields = {
 			type: ASSET_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
+	},
+	'asset-class': {
+		head: ['name', 'description'],
+		body: ['name', 'description']
 	},
 	users: {
 		head: ['email', 'firstName', 'lastName', 'keep_local_login', 'is_third_party'],
@@ -781,6 +815,7 @@ export const listViewFields = {
 	'asset-assessments': {
 		head: [
 			'asset',
+			'folder',
 			'bia',
 			'dependencies',
 			'associatedControls',
@@ -790,6 +825,7 @@ export const listViewFields = {
 		],
 		body: [
 			'asset',
+			'asset_folder',
 			'bia',
 			'dependencies',
 			'associated_controls',
@@ -799,8 +835,8 @@ export const listViewFields = {
 		]
 	},
 	'escalation-thresholds': {
-		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'justification'],
-		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'justification']
+		head: ['pointInTime', 'assetAssessment', 'qualiImpact', 'impactOn', 'justification'],
+		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
 	processings: {
 		head: ['name', 'description', 'status', 'legalBasis', 'processingNature', 'folder'],
@@ -941,8 +977,14 @@ export const listViewFields = {
 		filters: { filtering_labels: LABELS_FILTER }
 	},
 	incidents: {
-		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
-		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
+		head: ['ref_id', 'name', 'status', 'severity', 'folder', 'qualifications', 'updated_at'],
+		body: ['ref_id', 'name', 'status', 'severity', 'folder', 'qualifications', 'updated_at'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			qualifications: QUALIFICATION_FILTER,
+			status: INCIDENT_STATUS_FILTER,
+			severity: INCIDENT_SEVERITY_FILTER
+		}
 	},
 	'timeline-entries': {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
