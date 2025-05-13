@@ -546,7 +546,9 @@ class LibraryUpdater:
             for ra in RequirementAssessment.objects.filter(
                 requirement__framework=new_framework
             ):
-                existing_requirement_assessment_objects[ra.requirement.urn.lower()].append(ra)
+                existing_requirement_assessment_objects[
+                    ra.requirement.urn.lower()
+                ].append(ra)
 
             requirement_assessment_objects_to_create = []
             requirement_assessment_objects_to_update = []
@@ -705,14 +707,15 @@ class LibraryUpdater:
 
             if requirement_assessment_objects_to_update:
                 RequirementAssessment.objects.bulk_update(
-                    requirement_assessment_objects_to_update, ["answers"], batch_size=100
+                    requirement_assessment_objects_to_update,
+                    ["answers"],
+                    batch_size=100,
                 )
 
             if requirement_assessment_objects_to_create:
                 RequirementAssessment.objects.bulk_create(
                     requirement_assessment_objects_to_create, batch_size=100
                 )
-
 
         if self.new_matrices is not None:
             for matrix in self.new_matrices:
