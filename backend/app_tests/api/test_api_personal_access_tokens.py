@@ -198,66 +198,72 @@ class TestPersonalAccessTokenViewSet:
 
     @pytest.mark.django_db
     def test_authenticate_with_token(
-        self, api_client, authenticated_client, protected_url
+        self,
+        api_client,
+        authenticated_client,
+        protected_url,
+        user,
     ):
         """Test that a personal access token can be used to authenticate a request."""
-        # First create a new token
         token_url = "/api/iam/auth-tokens/"
         token_data = {"name": "Auth Test Token", "expiry": 30}
 
-        # Create the token
+        # Create the token using the authenticated_client (associated with 'user')
         response = authenticated_client.post(token_url, token_data)
         assert response.status_code == status.HTTP_200_OK
+        token_value = response.data["token"]  # This is the string token
 
-        # Extract the token value
-        token_value = response.data["token"]
-
-        # Create a fresh client (unauthenticated)
         fresh_client = APIClient()
-
-        # Try to access protected resource without authentication
         response_without_auth = fresh_client.get(protected_url)
         assert response_without_auth.status_code == status.HTTP_401_UNAUTHORIZED
 
-        # Now try with token authentication
         fresh_client.credentials(HTTP_AUTHORIZATION=f"Token {token_value}")
         response_with_auth = fresh_client.get(protected_url)
-        assert response_with_auth.status_code == status.HTTP_200_OK
+        assert response_with_auth.status_code == status.HTTP_200_OK, (
+            response_with_auth.data
+        )
 
     @pytest.mark.django_db
     def test_expired_token_authentication(
-        self, authenticated_client, api_client, protected_url
+        self,
+        authenticated_client,
+        protected_url,
+        user,
     ):
         """Test that an expired token cannot be used for authentication."""
-        # Create a token with a very short expiry time
         token_url = "/api/iam/auth-tokens/"
         token_data = {
             "name": "Short-lived Token",
-            "expiry": 1,  # 1 day expiry
+            "expiry": 1,
         }
 
-        # Create the token
+        # Create the token using the authenticated_client
         response = authenticated_client.post(token_url, token_data)
         assert response.status_code == status.HTTP_200_OK
-        token_value = response.data["token"]
+        token_value = response.data["token"]  # This is the string token key
 
-        # Get the token from the database
-        pat = PersonalAccessToken.objects.get(name="Short-lived Token")
-        auth_token = pat.auth_token
+        # Get the PersonalAccessToken and its associated AuthToken
+        # Ensure you fetch the token created for the 'user' of 'authenticated_client'
+        pat = PersonalAccessToken.objects.get(
+            name="Short-lived Token", auth_token__user=user
+        )
+        auth_token_instance = pat.auth_token
 
         # Verify the token works initially
-        test_client = APIClient()
+        test_client = APIClient()  # Use a fresh client
         test_client.credentials(HTTP_AUTHORIZATION=f"Token {token_value}")
         initial_response = test_client.get(protected_url)
-        assert initial_response.status_code == status.HTTP_200_OK
+        assert initial_response.status_code == status.HTTP_200_OK, (
+            f"Token should initially work. Status: {initial_response.status_code}, Data: {initial_response.data}"
+        )
 
         # Expire the token by setting its expiry time in the past
-        auth_token.expiry = timezone.now() - timedelta(hours=1)
-        auth_token.save()
+        auth_token_instance.expiry = timezone.now() - timedelta(hours=1)
+        auth_token_instance.save()
 
-        # Clear the authentication cache if needed
-        TokenAuthentication.validate_user = lambda self, user: user
-
-        # Try to use the expired token
+        # Try to use the expired token. Use the same client or a new one.
+        test_client.credentials(HTTP_AUTHORIZATION=f"Token {token_value}")
         expired_response = test_client.get(protected_url)
-        assert expired_response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert expired_response.status_code == status.HTTP_401_UNAUTHORIZED, (
+            f"Expired token should be rejected. Status: {expired_response.status_code}, Data: {expired_response.data}"
+        )
