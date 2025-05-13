@@ -9,7 +9,6 @@
 	import type { z } from 'zod';
 	import { m } from '$paraglide/messages';
 	import { auditFiltersStore } from '$lib/utils/stores';
-	import { get } from 'svelte/store';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let ref_id: string;
@@ -49,8 +48,7 @@
 	let showInfo = false;
 
 	let id = $page.params.id;
-	let filters = get(auditFiltersStore);
-	let displayOnlyAssessableNodes = filters[id]?.displayOnlyAssessableNodes || false;
+	$: displayOnlyAssessableNodes = $auditFiltersStore[id]?.displayOnlyAssessableNodes ?? false;
 
 	const getAssessableNodes = (
 		startNode: TreeViewItemNode,

@@ -38,7 +38,7 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
-	import { get } from 'svelte/store';
+	import { derived } from 'svelte/store';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { canPerformAction } from '$lib/utils/access-control';
 
@@ -136,10 +136,19 @@
 
 	let id = $page.params.id;
 
-	let filters = get(auditFiltersStore);
-	let selectedStatus = filters[id]?.selectedStatus || [];
-	let selectedResults = filters[id]?.selectedResults || [];
-	let displayOnlyAssessableNodes = filters[id]?.displayOnlyAssessableNodes || false;
+	// derive the current filters for this audit ID
+	const currentFilters = derived(auditFiltersStore, ($f) => $f[id] ?? {});
+
+	// reactive values that update whenever auditFiltersStore changes
+	let selectedStatus = [];
+	let selectedResults = [];
+	let displayOnlyAssessableNodes = false;
+
+	$: ({
+		selectedStatus = [],
+		selectedResults = [],
+		displayOnlyAssessableNodes = false
+	} = $currentFilters);
 
 	function toggleItem(item, selectedItems) {
 		if (selectedItems.includes(item)) {

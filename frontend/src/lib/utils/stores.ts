@@ -90,7 +90,7 @@ function createPersistedAuditFilters() {
 		},
 		setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes) {
 			update((filters) => {
-				if (!filters[id]) filters[id] = false;
+				if (!filters[id]) filters[id] = {};
 				filters[id].displayOnlyAssessableNodes = displayOnlyAssessableNodes;
 				return filters;
 			});
