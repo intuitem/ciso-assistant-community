@@ -183,6 +183,7 @@ INSTALLED_APPS = [
     "tprm",
     "ebios_rm",
     "privacy",
+    "resilience",
     "core",
     "cal",
     "django_filters",
@@ -366,6 +367,8 @@ LANGUAGES = [
     ("cs", "Czech"),
     ("sv", "Swedish"),
     ("id", "Indonesian"),
+    ("da", "Danish"),
+    ("hu", "Hungarian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

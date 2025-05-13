@@ -9,6 +9,7 @@ from typing import Self, Type, Union
 from icecream import ic
 from auditlog.registry import auditlog
 
+from django.utils.functional import cached_property
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -1704,7 +1705,7 @@ class Asset(
                             "value": {
                                 "type": "integer",
                                 "minimum": 0,
-                                "maximum": 3,
+                                "maximum": 4,
                             },
                             "is_enabled": {
                                 "type": "boolean",
@@ -1743,9 +1744,11 @@ class Asset(
     }
 
     SECURITY_OBJECTIVES_SCALES = {
-        "1-4": range(1, 5),
-        "0-3": range(0, 4),
-        "FIPS-199": ["low", "moderate", "moderate", "high"],
+        "1-4": [1, 2, 3, 4, 4],
+        "1-5": [1, 2, 3, 4, 5],
+        "0-3": [0, 1, 2, 3, 3],
+        "0-4": [0, 1, 2, 3, 4],
+        "FIPS-199": ["low", "moderate", "moderate", "high", "high"],
     }
 
     business_value = models.CharField(
@@ -1794,6 +1797,9 @@ class Asset(
         blank=True,
         verbose_name="Security exceptions",
         related_name="assets",
+    )
+    asset_class = models.ForeignKey(
+        "AssetClass", on_delete=models.SET_NULL, blank=True, null=True
     )
     is_published = models.BooleanField(_("published"), default=True)
 
@@ -1931,7 +1937,7 @@ class Asset(
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
             )
             if content.get("is_enabled", False)
-            and content.get("value", -1) in range(0, 4)
+            and content.get("value", -1) in range(0, 5)
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
@@ -1967,6 +1973,376 @@ class Asset(
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
         return super().save(*args, **kwargs)
+
+
+class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    parent = models.ForeignKey(
+        "AssetClass", on_delete=models.PROTECT, blank=True, null=True
+    )
+
+    @cached_property
+    def full_path(self):
+        if self.parent is None:
+            return self.name
+        else:
+            return f"{self.parent.full_path}/{self.name}"
+
+    @classmethod
+    def build_tree(cls):
+        all_nodes = list(cls.objects.all())
+        nodes_by_id = {
+            node.id: {"name": node.name, "children": []} for node in all_nodes
+        }
+
+        tree = []
+
+        for node in all_nodes:
+            node_dict = nodes_by_id[node.id]
+
+            if node.parent_id is None:
+                tree.append(node_dict)
+            else:
+                parent_dict = nodes_by_id.get(node.parent_id)
+                if parent_dict:  # Check if parent exists
+                    parent_dict["children"].append(node_dict)
+
+        return tree
+
+    @classmethod
+    def create_hierarchy(cls, hierarchy_data, parent=None):
+        created_nodes = []
+
+        for item in hierarchy_data:
+            # Get or create the asset class
+            asset_class, created = cls.objects.get_or_create(
+                name=item["name"],
+                parent=parent,
+                defaults={
+                    "description": item.get("description", ""),
+                },
+            )
+
+            created_nodes.append(asset_class)
+
+            if "children" in item and item["children"]:
+                cls.create_hierarchy(item["children"], parent=asset_class)
+
+        return created_nodes
+
+    @classmethod
+    def create_default_values(cls):
+        cis_hierarchy = [
+            {
+                "name": "assetClassDevices",
+                "description": "Assets that may exist in physical spaces, virtual infrastructure, or cloud-based environments",
+                "children": [
+                    {
+                        "name": "assetClassEnterpriseAssets",
+                        "description": "Assets with the potential to store or process data",
+                        "children": [
+                            {
+                                "name": "assetClassEndUserDevices",
+                                "description": "IT assets used among members of an enterprise",
+                                "children": [
+                                    {
+                                        "name": "assetClassPortable",
+                                        "description": "Transportable, end-user devices with wireless connectivity capability",
+                                        "children": [
+                                            {
+                                                "name": "assetClassMobile",
+                                                "description": "Small, enterprise-issued end-user devices with intrinsic wireless capability",
+                                            }
+                                        ],
+                                    }
+                                ],
+                            },
+                            {
+                                "name": "assetClassServers",
+                                "description": "Devices or systems that provide resources, data, services, or programs to other devices",
+                            },
+                            {
+                                "name": "assetClassCloudInfrastructure",
+                                "description": "Cloud Infrastructure and resources",
+                            },
+                            {
+                                "name": "assetClassIotAndNonComputingDevices",
+                                "description": "Devices embedded with sensors, software, and other technologies for connecting and exchanging data",
+                            },
+                            {
+                                "name": "assetClassNetworkDevices",
+                                "description": "Electronic devices required for communication and interaction between devices on a network",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassRemovableMedia",
+                        "description": "Storage devices that can be removed from a computer while the system is running",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassSoftware",
+                "description": "Sets of data and instructions used to direct a computer to complete a specific task",
+                "children": [
+                    {
+                        "name": "assetClassApplications",
+                        "description": "Programs running on top of an operating system",
+                        "children": [
+                            {
+                                "name": "assetClassServices",
+                                "description": "Specialized programs that perform well-defined critical tasks",
+                            },
+                            {
+                                "name": "assetClassLibraries",
+                                "description": "Shareable pre-compiled codebase used to develop software programs and applications",
+                            },
+                            {
+                                "name": "assetClassAPIs",
+                                "description": "Set of rules and interfaces for software components to interact with each other",
+                            },
+                            {
+                                "name": "assetClassSaas",
+                                "description": "Software as a Service",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassOperatingSystems",
+                        "description": "Software that manages computer hardware and software resources",
+                        "children": [
+                            {
+                                "name": "assetClassServices",
+                                "description": "Specialized programs that perform well-defined critical tasks",
+                            },
+                            {
+                                "name": "assetClassLibraries",
+                                "description": "Shareable pre-compiled codebase used to develop software programs and applications",
+                            },
+                            {
+                                "name": "assetClassAPIs",
+                                "description": "Set of rules and interfaces for software components to interact with each other",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassFirmware",
+                        "description": "Software stored within a device's non-volatile memory",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassData",
+                "description": "Collection of facts that can be examined, considered, and used for decision-making",
+                "children": [
+                    {
+                        "name": "assetClassSensitiveData",
+                        "description": "Data that must be kept private, accurate, reliable, and available",
+                    },
+                    {
+                        "name": "assetClassLogData",
+                        "description": "Computer-generated data file that records events occurring within the enterprise",
+                    },
+                    {
+                        "name": "assetClassPhysicalData",
+                        "description": "Data stored in physical documents or on physical types of removable devices",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassUsers",
+                "description": "Authorized individuals who access enterprise assets",
+                "children": [
+                    {
+                        "name": "assetClassWorkforce",
+                        "description": "Individuals employed or engaged by an organization with access to its information systems",
+                    },
+                    {
+                        "name": "assetClassServiceProviders",
+                        "description": "Entities that offer platforms, software, and services to other enterprises",
+                    },
+                    {
+                        "name": "assetClassUserAccounts",
+                        "description": "Identity with a set of credentials that defines a user on a computing system",
+                    },
+                    {
+                        "name": "assetClassAdministratorAccounts",
+                        "description": "Accounts for users requiring escalated privileges",
+                    },
+                    {
+                        "name": "assetClassServiceAccounts",
+                        "description": "Accounts created specifically to run applications, services, and automated tasks",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassNetwork",
+                "description": "Group of interconnected devices that exchange data",
+                "children": [
+                    {
+                        "name": "assetClassNetworkInfrastructure",
+                        "description": "Collection of network resources that provide connectivity, management, and communication",
+                    },
+                    {
+                        "name": "assetClassNetworkArchitecture",
+                        "description": "How a network is designed, both physically and logically",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassDocumentation",
+                "description": "Policies, processes, procedures, plans, and other written material",
+                "children": [
+                    {
+                        "name": "assetClassPlans",
+                        "description": "Implements policies and may include groups of policies, processes, and procedures",
+                    },
+                    {
+                        "name": "assetClassPolicies",
+                        "description": "Official governance statements that outline specific objectives of an information security program",
+                    },
+                    {
+                        "name": "assetClassProcesses",
+                        "description": "Set of general tasks and activities to achieve a series of security-related goals",
+                    },
+                    {
+                        "name": "assetClassProcedures",
+                        "description": "Ordered set of steps that must be followed to accomplish a specific task",
+                    },
+                ],
+            },
+        ]
+        extra = [
+            {
+                "name": "assetClassBusinessProcess",
+                "description": "Organized set of activities and related procedures by which an organization operates",
+                "children": [
+                    {
+                        "name": "assetClassCoreOperations",
+                        "description": "Primary processes that directly deliver value to customers",
+                        "children": [
+                            {
+                                "name": "assetClassProductOrServiceDevelopment",
+                                "description": "Processes for designing, creating, and improving products and services",
+                            },
+                            {
+                                "name": "assetClassProductOrServiceDelivery",
+                                "description": "Processes for manufacturing products or delivering services to customers",
+                            },
+                            {
+                                "name": "assetClassSalesAndMarketing",
+                                "description": "Processes for attracting customers and selling products/services",
+                            },
+                            {
+                                "name": "assetClassCustomerService",
+                                "description": "Processes for supporting customers after sales",
+                            },
+                            {
+                                "name": "assetClassSupplyChainManagement",
+                                "description": "Processes for managing the flow of goods, services, and information",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassManagementAndGovernance",
+                        "description": "Processes that provide oversight, direction, and accountability",
+                        "children": [
+                            {
+                                "name": "assetClassStrategicPlanning",
+                                "description": "Processes for defining long-term objectives and allocation of resources",
+                            },
+                            {
+                                "name": "assetClassFinancialManagement",
+                                "description": "Processes for budgeting, accounting, and financial reporting",
+                            },
+                            {
+                                "name": "assetClassRiskManagement",
+                                "description": "Processes for identifying, assessing, and mitigating risks",
+                            },
+                            {
+                                "name": "assetClassComplianceManagement",
+                                "description": "Processes for ensuring adherence to laws, regulations, and policies",
+                            },
+                            {
+                                "name": "assetClassPerformanceManagement",
+                                "description": "Processes for monitoring and improving organizational performance",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassSupportFunctions",
+                        "description": "Processes that enable and facilitate the core business operations",
+                        "children": [
+                            {
+                                "name": "assetClassHumanResources",
+                                "description": "Processes for recruiting, developing, and retaining personnel",
+                            },
+                            {
+                                "name": "assetClassInformationTechnology",
+                                "description": "Processes for managing IT infrastructure, applications, and services",
+                            },
+                            {
+                                "name": "assetClassFacilitiesManagement",
+                                "description": "Processes for maintaining physical infrastructure and workspaces",
+                            },
+                            {
+                                "name": "assetClassProcurement",
+                                "description": "Processes for acquiring goods and services from external suppliers",
+                            },
+                            {
+                                "name": "assetClassLegalServices",
+                                "description": "Processes for managing legal affairs and intellectual property",
+                            },
+                            {
+                                "name": "assetClassAdministrativeServices",
+                                "description": "Processes for general administrative support functions",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassExternalRelationships",
+                        "description": "Processes for managing relationships outside the organization",
+                        "children": [
+                            {
+                                "name": "assetClassVendorManagement",
+                                "description": "Processes for managing relationships with suppliers and vendors",
+                            },
+                            {
+                                "name": "assetClassPartnerManagement",
+                                "description": "Processes for establishing and maintaining strategic partnerships",
+                            },
+                            {
+                                "name": "assetClassGovernmentRelations",
+                                "description": "Processes for interacting with government entities",
+                            },
+                            {
+                                "name": "assetClassCommunityRelations",
+                                "description": "Processes for engaging with local communities and society",
+                            },
+                            {
+                                "name": "assetClassInvestorRelations",
+                                "description": "Processes for managing relationships with investors and shareholders",
+                            },
+                        ],
+                    },
+                ],
+            }
+        ]
+
+        AssetClass.create_hierarchy(cis_hierarchy)
+        AssetClass.create_hierarchy(extra)
+
+    def __str__(self):
+        return self.full_path
+
+    class Meta:
+        unique_together = ["name", "parent"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name"],
+                condition=models.Q(parent__isnull=True),
+                name="unique_name_for_root_items",
+            )
+        ]
 
 
 class Evidence(

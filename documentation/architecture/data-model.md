@@ -22,7 +22,7 @@ erDiagram
 
     USER {
         string  email
-        boolean is_sso
+        boolean keep_local_login
     }
 
     USER_GROUP {
@@ -602,9 +602,11 @@ Security objectives are measured using a specifc scale. For now, the following s
 
 - 0-3: coded as 0-3
 - 1-4: coded as 0-3
+- 0-4: coded as 0-4
+- 1-5: coded as 0-4
 - FIPS-199: coded as 0-3
 
-There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "discrete scales"):
+There is a correspondance between the 0-3, 1-4, 0,4, 1-5 and FIPS-199 scales (called "discrete scales"):
 
 | scale    | internal value | scale value |
 | -------- | -------------- | ----------- |
@@ -612,14 +614,27 @@ There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "disc
 | 0-3      | 1              | 1           |
 | 0-3      | 2              | 2           |
 | 0-3      | 3              | 3           |
+| 0-3      | 4              | 3           |
 | 1-4      | 0              | 1           |
 | 1-4      | 1              | 2           |
 | 1-4      | 2              | 3           |
 | 1-4      | 3              | 4           |
+| 1-4      | 4              | 4           |
 | FIPS-199 | 0              | low         |
 | FIPS-199 | 1              | moderate    |
 | FIPS-199 | 2              | moderate    |
 | FIPS-199 | 3              | high        |
+| FIPS-199 | 4              | high        |
+| 0-4      | 0              | 0           |
+| 0-4      | 1              | 1           |
+| 0-4      | 2              | 2           |
+| 0-4      | 3              | 3           |
+| 0-4      | 4              | 4           |
+| 1-5      | 0              | 1           |
+| 1-5      | 1              | 2           |
+| 1-5      | 2              | 3           |
+| 1-5      | 3              | 4           |
+| 1-5      | 4              | 5           |
 
 THe scale to use is a global parameter. It has no impact on the encoding in the database, which always uses the internal value.
 
@@ -1121,9 +1136,16 @@ Names of built-in objects can be internationalized.
 
 ## SSO
 
-A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
+Global SSO settings for the instance are defined in a dedicated object SSO_SETTINGS.
 
-SSO Settings are defined in a dedicated object SSO_SETTINGS.
+A user can be authenticated either locally or with SSO.
+
+When SSO is activated, all users can use SSO.
+
+When the force_sso global flag is set, all users without keep_local_login:
+- have their password disabled, 
+- cannot ask for a password reset,
+- cannot have their password changed by an administrator.
 
 ## TPRM evolution
 

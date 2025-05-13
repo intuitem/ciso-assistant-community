@@ -37,9 +37,11 @@
 	<div class="flex flex-row items-center justify-between">
 		<h1 class="text-xl font-semibold">{$page.data.user.first_name} {$page.data.user.last_name}</h1>
 		<div>
-			<Anchor href="my-profile/change-password" class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-key mr-2" />{m.changePassword()}</Anchor
-			>
+			{#if user.is_local}
+				<Anchor href="my-profile/change-password" class="btn variant-filled-primary h-fit"
+					><i class="fa-solid fa-key mr-2" />{m.changePassword()}</Anchor
+				>
+			{/if}
 			{#if canEditObject}
 				<Anchor
 					href="/users/{$page.data.user.id}/edit?next=/my-profile"

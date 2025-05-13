@@ -1,6 +1,7 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
+import type { evidences } from '$paraglide/messages/hi';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -204,6 +205,7 @@ export const AssetSchema = z.object({
 	...NameDescriptionMixin,
 	type: z.string().default('PR'),
 	folder: z.string(),
+	asset_class: z.string().optional(),
 	parent_assets: z.string().optional().array().optional(),
 	security_objectives: z
 		.object({
@@ -264,10 +266,14 @@ export const UserEditSchema = z.object({
 	first_name: z.string().optional(),
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
+	keep_local_login: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
-export const UserCreateSchema = z.object({ email: z.string().email() });
+export const UserCreateSchema = z.object({
+	email: z.string().email()
+});
+
 export const ChangePasswordSchema = z.object({
 	old_password: z.string(),
 	new_password: z.string(),
@@ -345,6 +351,7 @@ export const FeatureFlagsSchema = z.object({
 
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().optional(),
+	force_sso: z.boolean().optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string(),
@@ -451,6 +458,40 @@ export const vulnerabilitySchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 
+export const BusinessImpactAnalysisSchema = z.object({
+	...NameDescriptionMixin,
+	version: z.string().optional().default('0.1'),
+	perimeter: z.string(),
+	status: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	risk_matrix: z.string(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional()
+});
+
+export const AssetAssessmentSchema = z.object({
+	bia: z.string(),
+	asset: z.string(),
+	associated_controls: z.array(z.string().optional()).optional(),
+	dependencies: z.array(z.string().optional()).optional(),
+	recovery_documented: z.boolean().default(false),
+	recovery_tested: z.boolean().default(false),
+	recovery_targets_met: z.boolean().default(false),
+	evidences: z.array(z.string().optional()).optional(),
+	observation: z.string().optional()
+});
+
+export const EscalationThresholdSchema = z.object({
+	asset_assessment: z.string(),
+	point_in_time: z.number(),
+	qualifications: z.string().uuid().optional().array().optional(),
+	quanti_impact_unit: z.string().optional().default('currency'),
+	quali_impact: z.number().optional().default(-1),
+	quanti_impact: z.number().optional(),
+	justification: z.string().optional()
+});
 export const processingSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -732,6 +773,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	solutions: solutionSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
+	'business-impact-analysis': BusinessImpactAnalysisSchema,
+	'asset-assessments': AssetAssessmentSchema,
+	'escalation-thresholds': EscalationThresholdSchema,
 	processings: processingSchema,
 	purposes: purposeSchema,
 	'personal-data': personalDataSchema,

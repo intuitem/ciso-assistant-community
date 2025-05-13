@@ -347,6 +347,8 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
 
+    asset_class = FieldsRelatedField(["name"])
+
 
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -366,6 +368,21 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class AssetClassReadSerializer(BaseModelSerializer):
+    parent = FieldsRelatedField()
+    full_path = serializers.CharField()
+
+    class Meta:
+        model = AssetClass
+        exclude = ["created_at", "updated_at", "folder", "is_published"]
+
+
+class AssetClassWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = AssetClass
+        exclude = ["created_at", "updated_at", "folder", "is_published"]
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
@@ -707,12 +724,14 @@ class UserReadSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
-            "is_sso",
+            "keep_local_login",
             "is_third_party",
         ]
 
 
 class UserWriteSerializer(BaseModelSerializer):
+    is_local = serializers.BooleanField(required=False)
+
     class Meta:
         model = User
         fields = [
@@ -723,7 +742,9 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "keep_local_login",
             "is_third_party",
+            "is_local",
         ]
 
     def validate_email(self, email):

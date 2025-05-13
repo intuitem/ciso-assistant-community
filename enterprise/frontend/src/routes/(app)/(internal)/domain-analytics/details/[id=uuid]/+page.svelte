@@ -17,7 +17,6 @@
 	$: hasRisks = totalRisksCount > 0;
 </script>
 
-{@debug data}
 <main class="bg-white p-2">
 	{#await data.stream.metrics}
 		<div class="col-span-3 lg:col-span-1">

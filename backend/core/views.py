@@ -85,6 +85,7 @@ from core.models import (
     ComplianceAssessment,
     RequirementMappingSet,
     RiskAssessment,
+    AssetClass,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -487,6 +488,7 @@ class AssetFilter(df.FilterSet):
             "security_exceptions",
             "applied_controls",
             "filtering_labels",
+            "asset_class",
         ]
 
 
@@ -514,6 +516,13 @@ class AssetViewSet(BaseModelViewSet):
     @action(detail=False, name="Get type choices")
     def type(self, request):
         return Response(dict(Asset.Type.choices))
+
+    @action(detail=False, name="Get asset class choices")
+    def asset_class(self, request):
+        # this is for filters
+        return Response(
+            [{"id": ac.id, "name": ac.full_path} for ac in AssetClass.objects.all()]
+        )
 
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
@@ -651,6 +660,18 @@ class AssetViewSet(BaseModelViewSet):
             return HttpResponse(
                 status=500, content="An error occurred while generating the CSV export."
             )
+
+
+class AssetClassViewSet(BaseModelViewSet):
+    model = AssetClass
+    filterset_fields = ["parent"]
+
+    ordering = ["parent", "name"]
+    search_fields = ["name", "description"]
+
+    @action(detail=False, name="Get Asset Class Tree")
+    def tree(self, request):
+        return Response(AssetClass.build_tree())
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
@@ -848,7 +869,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     model = RiskAssessment
     filterset_fields = [
         "perimeter",
-        "perimeter__folder",
+        "folder",
         "authors",
         "risk_matrix",
         "status",
@@ -2226,6 +2247,7 @@ class UserFilter(df.FilterSet):
             "first_name",
             "last_name",
             "is_active",
+            "keep_local_login",
             "is_approver",
             "is_third_party",
         ]
@@ -4009,6 +4031,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = [
+        "folder",
         "framework",
         "perimeter",
         "status",
@@ -5181,6 +5204,7 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
+    filterset_fields = ["folder", "status", "severity", "qualifications"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
