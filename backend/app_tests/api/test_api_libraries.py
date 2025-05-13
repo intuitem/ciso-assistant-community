@@ -137,7 +137,7 @@ class TestLibrariesAuthenticated:
         )
         lib_detail_response = lib_detail_response.content
         lib_detail_response = json.loads(lib_detail_response)
-        lib_detail_response = lib_detail_response["risk_matrices"][0]
+        lib_detail_response = lib_detail_response.get["risk_matrix"][0]
 
         # Asserts that the library is not already loaded
         assert RiskMatrix.objects.all().count() == 0, (
