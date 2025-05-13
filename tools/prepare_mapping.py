@@ -16,9 +16,9 @@ args = parser.parse_args()
 packager = "intuitem"
 
 print("parsing", args.source_yaml, args.target_yaml)
-with open(args.source_yaml, "r") as file:
+with open(args.source_yaml, "r", encoding="utf-8") as file:
     source = yaml.safe_load(file)
-with open(args.target_yaml, "r") as file:
+with open(args.target_yaml, "r", encoding="utf-8") as file:
     target = yaml.safe_load(file)
 
 source_library_urn = source["urn"]
