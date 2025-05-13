@@ -706,109 +706,15 @@ class LibraryUpdater:
                 RequirementAssessment.objects.bulk_create(
                     assessments_to_create, batch_size=100
                 )
-                if created:
-                    for compliance_assessment in compliance_assessments:
-                        ra = RequirementAssessment.objects.create(
-                            compliance_assessment=compliance_assessment,
-                            requirement=new_requirement_node,
-                            folder=compliance_assessment.perimeter.folder,
-                            answers=transform_questions_to_answers(
-                                new_requirement_node.questions
-                            )
-                            if new_requirement_node.questions
-                            else {},
-                        )
-                else:
-                    questions = requirement_node.get("questions")
-
-                    for ra in RequirementAssessment.objects.filter(
-                        requirement=new_requirement_node
-                    ):
-                        ra.name = new_requirement_node.name
-                        ra.description = new_requirement_node.description
-                        if not questions:
-                            ra.save()
-                            continue
-
-                        answers = ra.answers
-
-                        # Remove answers corresponding to questions that have been removed
-                        for urn in list(answers.keys()):
-                            if urn not in questions:
-                                del answers[urn]
-                        # Add answers corresponding to questions that have been updated/added
-                        for urn, question in questions.items():
-                            # If the question is not present in answers, initialize it
-                            if urn not in answers:
-                                answers[urn] = None
-                                continue
-
-                            answer_val = answers[urn]
-                            type = question.get("type")
-
-                            if type == "multiple_choice":
-                                # Keep only the choices that exist in the question
-                                if isinstance(answer_val, list):
-                                    valid_choices = {
-                                        choice["urn"]
-                                        for choice in question.get("choices", [])
-                                    }
-                                    answers[urn] = [
-                                        choice
-                                        for choice in answer_val
-                                        if choice in valid_choices
-                                    ]
-                                else:
-                                    answers[urn] = []
-
-                            elif type == "unique_choice":
-                                # If the answer does not match a valid choice, reset it to None
-                                valid_choices = {
-                                    choice["urn"]
-                                    for choice in question.get("choices", [])
-                                }
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    answers[urn] = (
-                                        answer_val
-                                        if answer_val in valid_choices
-                                        else None
-                                    )
-
-                            elif type == "text":
-                                # For a text question, simply check that it is a string
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    answers[urn] = (
-                                        answer_val
-                                        if isinstance(answer_val, str)
-                                        and answer_val.split(":")[0] != "urn"
-                                        else None
-                                    )
-
-                            elif type == "date":
-                                # For a date question, check the expected format (e.g., "YYYY-MM-DD")
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    try:
-                                        datetime.strptime(answer_val, "%Y-%m-%d")
-                                        answers[urn] = answer_val
-                                    except Exception:
-                                        answers[urn] = None
-                        ra.answers = answers
-                        ra.save()
 
                 for threat_urn in requirement_node_dict.get("threats", []):
-                    thread_to_add = objects_tracked.get(threat_urn)
-                    if thread_to_add is None:  # I am not 100% this condition is usefull
-                        thread_to_add = Threat.objects.filter(
+                    threat_to_add = objects_tracked.get(threat_urn)
+                    if threat_to_add is None:  # I am not 100% this condition is usefull
+                        threat_to_add = Threat.objects.filter(
                             urn=threat_urn
                         ).first()  # No locale support
-                    if thread_to_add is not None:
-                        new_requirement_node.threats.add(thread_to_add)
+                    if threat_to_add is not None:
+                        new_requirement_node.threats.add(threat_to_add)
 
                 for reference_control_urn in requirement_node.get(
                     "reference_controls", []
