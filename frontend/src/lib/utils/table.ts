@@ -139,6 +139,29 @@ const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/severity',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'severity',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -954,8 +977,14 @@ export const listViewFields = {
 		filters: { filtering_labels: LABELS_FILTER }
 	},
 	incidents: {
-		head: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at'],
-		body: ['ref_id', 'name', 'description', 'status', 'severity', 'threats', 'created_at']
+		head: ['ref_id', 'name', 'status', 'severity', 'folder', 'qualifications', 'updated_at'],
+		body: ['ref_id', 'name', 'status', 'severity', 'folder', 'qualifications', 'updated_at'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			qualifications: QUALIFICATION_FILTER,
+			status: INCIDENT_STATUS_FILTER,
+			severity: INCIDENT_SEVERITY_FILTER
+		}
 	},
 	'timeline-entries': {
 		head: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp'],
