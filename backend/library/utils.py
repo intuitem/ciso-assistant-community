@@ -603,11 +603,11 @@ class LibraryImporter:
             )
 
     def init(self) -> Union[str, None]:
-        missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
+        """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
         if missing_fields:
             return "The following fields are missing in the library: {}".format(
                 ", ".join(missing_fields)
-            )
+            )"""
 
         library_objects = self._library.content
 
