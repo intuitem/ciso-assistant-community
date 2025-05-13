@@ -387,21 +387,21 @@ class LibraryUpdater:
         self.new_frameworks = new_library_content.get(
             "frameworks"
         ) or new_library_content.get("framework")
-        if isinstance(self.new_frameworks, dict) :
+        if isinstance(self.new_frameworks, dict):
             self.new_frameworks = [self.new_frameworks]
 
         # The "risk_matrix" field will be ignored if the "risk_matrices" field is defined.
         self.new_matrices = new_library_content.get(
             "risk_matrices"
         ) or new_library_content.get("risk_matrix")
-        if isinstance(self.new_matrices, dict) :
+        if isinstance(self.new_matrices, dict):
             self.new_matrices = [self.new_matrices]
 
         # The "requirement_mapping_sets" field will be ignored if the "requirement_mapping_set" field is defined.
         self.new_requirement_mapping_sets = new_library_content.get(
             "requirement_mapping_sets"
         ) or new_library_content.get("requirement_mapping_set")
-        if isinstance(self.new_requirement_mapping_sets, dict) :
+        if isinstance(self.new_requirement_mapping_sets, dict):
             self.new_requirement_mapping_sets = [self.new_requirement_mapping_sets]
 
         self.threats = new_library_content.get("threats", [])
@@ -517,7 +517,7 @@ class LibraryUpdater:
             )
 
         if self.new_frameworks is not None:
-            for new_framework in self.new_frameworks :
+            for new_framework in self.new_frameworks:
                 requirement_nodes = new_framework["requirement_nodes"]
                 framework_dict = {**new_framework}
                 del framework_dict["requirement_nodes"]
@@ -534,7 +534,8 @@ class LibraryUpdater:
                 )
 
                 requirement_node_urns = set(
-                    rc.urn for rc in RequirementNode.objects.filter(framework=new_framework)
+                    rc.urn
+                    for rc in RequirementNode.objects.filter(framework=new_framework)
                 )
                 new_requirement_node_urns = set(
                     rc["urn"].lower() for rc in requirement_nodes
@@ -559,7 +560,9 @@ class LibraryUpdater:
                 for threat in Threat.objects.filter(library__in=involved_libraries):
                     objects_tracked[threat.urn] = threat
 
-                for rc in ReferenceControl.objects.filter(library__in=involved_libraries):
+                for rc in ReferenceControl.objects.filter(
+                    library__in=involved_libraries
+                ):
                     objects_tracked[rc.urn] = rc
 
                 compliance_assessments = [
@@ -614,7 +617,9 @@ class LibraryUpdater:
                                 continue
 
                             answers = ra.answer["questions"]
-                            if any(answer["type"] != question_type for answer in answers):
+                            if any(
+                                answer["type"] != question_type for answer in answers
+                            ):
                                 ra.answer = transform_question_to_answer(
                                     new_requirement_node.question
                                 )
@@ -623,7 +628,10 @@ class LibraryUpdater:
 
                             if question_type == "unique_choice":
                                 for answer in answers:
-                                    if answer["answer"] not in question["question_choices"]:
+                                    if (
+                                        answer["answer"]
+                                        not in question["question_choices"]
+                                    ):
                                         answer["answer"] = ""
 
                             elif question_type not in ["text", "date"]:
@@ -636,7 +644,9 @@ class LibraryUpdater:
 
                     for threat_urn in requirement_node_dict.get("threats", []):
                         thread_to_add = objects_tracked.get(threat_urn)
-                        if thread_to_add is None:  # I am not 100% this condition is usefull
+                        if (
+                            thread_to_add is None
+                        ):  # I am not 100% this condition is usefull
                             thread_to_add = Threat.objects.filter(
                                 urn=threat_urn
                             ).first()  # No locale support
@@ -694,35 +704,64 @@ class LibraryUpdater:
                 requirement_mapping_set_dict = {
                     key: value
                     for key, value in requirement_mapping_set.items()
-                    if key not in ["requirement_mappings", "source_framework_urn", "target_framework_urn"]
+                    if key
+                    not in [
+                        "requirement_mappings",
+                        "source_framework_urn",
+                        "target_framework_urn",
+                    ]
                 }
 
                 normalized_urn = requirement_mapping_set["urn"].lower()
-                queryset = RequirementMappingSet.objects.filter(
-                    urn=normalized_urn
-                )
+                queryset = RequirementMappingSet.objects.filter(urn=normalized_urn)
                 if not queryset.exists():
                     # We don't support the creation of new RequirementMappingSet during updates for the moment.
                     continue
 
-                requirement_mapping_set_obj = RequirementMappingSet.objects.get(urn=normalized_urn)
-                source_framework_urn = requirement_mapping_set["source_framework_urn"].lower()
-                target_framework_urn = requirement_mapping_set["target_framework_urn"].lower()
-                if requirement_mapping_set_obj.source_framework.urn != source_framework_urn or requirement_mapping_set_obj.target_framework.urn != target_framework_urn :
+                requirement_mapping_set_obj = RequirementMappingSet.objects.get(
+                    urn=normalized_urn
+                )
+                source_framework_urn = requirement_mapping_set[
+                    "source_framework_urn"
+                ].lower()
+                target_framework_urn = requirement_mapping_set[
+                    "target_framework_urn"
+                ].lower()
+                if (
+                    requirement_mapping_set_obj.source_framework.urn
+                    != source_framework_urn
+                    or requirement_mapping_set_obj.target_framework.urn
+                    != target_framework_urn
+                ):
                     # We don't allow an update to modify the "source_framework" and "target_framework" of a RequirementMappingSet.
                     return "invalidLibraryUpdate"
 
-                queryset.update(**referential_object_dict, **requirement_mapping_set_dict)
+                queryset.update(
+                    **referential_object_dict, **requirement_mapping_set_dict
+                )
 
-                for requirement_mapping in requirement_mapping_set.get("requirement_mappings", []):
+                for requirement_mapping in requirement_mapping_set.get(
+                    "requirement_mappings", []
+                ):
                     requirement_mapping_dict = {
                         key: value
                         for key, value in requirement_mapping.items()
-                        if key not in ["source_requirement_urn", "target_requirement_urn", "stregth_of_relationship"]
+                        if key
+                        not in [
+                            "source_requirement_urn",
+                            "target_requirement_urn",
+                            "stregth_of_relationship",
+                        ]
                     }
-                    requirement_mapping_dict["strength_of_relationship"] = requirement_mapping["stregth_of_relationship"] # # Fix the typo caused by the convert_library.py code.
-                    source_requirement = RequirementNode.objects.get(urn=requirement_mapping["source_requirement_urn"])
-                    target_requirement = RequirementNode.objects.get(urn=requirement_mapping["target_requirement_urn"])
+                    requirement_mapping_dict["strength_of_relationship"] = (
+                        requirement_mapping["stregth_of_relationship"]
+                    )  # # Fix the typo caused by the convert_library.py code.
+                    source_requirement = RequirementNode.objects.get(
+                        urn=requirement_mapping["source_requirement_urn"]
+                    )
+                    target_requirement = RequirementNode.objects.get(
+                        urn=requirement_mapping["target_requirement_urn"]
+                    )
 
                     RequirementMapping.objects.update_or_create(
                         mapping_set=requirement_mapping_set_obj,

@@ -587,7 +587,7 @@ class LibraryImporter:
         for index, framework_data in enumerate(frameworks):
             framework_importer = FrameworkImporter(framework_data)
             framework_importers.append(framework_importer)
-            if (framework_error := framework_importer.init()):
+            if framework_error := framework_importer.init():
                 import_errors.append((index, framework_error))
 
         self._frameworks = framework_importers
@@ -601,7 +601,6 @@ class LibraryImporter:
                 {1: "st", 2: "nd", 3: "rd"}.get(invalid_framework_index + 1, "th"),
                 invalid_framework_error,
             )
-
 
     def init(self) -> Union[str, None]:
         missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
@@ -620,19 +619,18 @@ class LibraryImporter:
             )
 
         if "framework" in library_objects and "frameworks" in library_objects:
-            return "A library can't have both 'framework' and 'frameworks' objects fields."
+            return (
+                "A library can't have both 'framework' and 'frameworks' objects fields."
+            )
 
         if keys_found := [
-            key
-            for key in ["framework", "frameworks"]
-            if key in library_objects
+            key for key in ["framework", "frameworks"] if key in library_objects
         ]:
             framework_data = library_objects[keys_found[0]]
             if isinstance(framework_data, dict):
                 framework_data = [framework_data]
             if (
-                framework_import_error
-                := self.init_framework(framework_data)
+                framework_import_error := self.init_framework(framework_data)
             ) is not None:
                 print(
                     "framework_import_error",
@@ -703,14 +701,17 @@ class LibraryImporter:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
                 try:
                     dependency = StoredLibrary.objects.get(urn=dependency_urn)
-                    if (error_msg := dependency.load()) is not None :
+                    if (error_msg := dependency.load()) is not None:
                         return error_msg
                 except StoredLibrary.DoesNotExist:
                     return f"ERROR: Stored Library with URN {dependency_urn} does not exist"
             else:
                 # try to update the dependency, because we might need the last version for the main library
                 dependency = LoadedLibrary.objects.get(urn=dependency_urn)
-                if (error_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
+                if (error_msg := dependency.update()) not in [
+                    None,
+                    "libraryHasNoUpdate",
+                ]:
                     return error_msg
 
     def create_or_update_library(self):
