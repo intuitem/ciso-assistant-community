@@ -1,27 +1,49 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
-	let _class = '';
-	export { _class as class };
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
-	export let helpText: string | undefined = undefined;
-	export let cachedValue: number | undefined;
-	export let cacheLock: CacheLock = {
+	
+
+	
+	interface Props {
+		class?: string;
+		label?: string | undefined;
+		field: string;
+		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
+		helpText?: string | undefined;
+		cachedValue: number | undefined;
+		cacheLock?: CacheLock;
+		form: SuperForm<Record<string, number>>;
+		hidden?: boolean;
+		disabled?: boolean;
+		required?: boolean;
+		// NEW: Allow customization of which time units to display
+		enabledUnits?: string[];
+		[key: string]: any
+	}
+
+	let {
+		class: _class = '',
+		label = $bindable(undefined),
+		field,
+		valuePath = field,
+		helpText = undefined,
+		cachedValue = $bindable(),
+		cacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
-	};
-	export let form: SuperForm<Record<string, number>>;
-	export let hidden = false;
-	export let disabled = false;
-	export let required = false;
-
-	// NEW: Allow customization of which time units to display
-	export let enabledUnits: string[] = ['hours', 'minutes', 'seconds'];
+	},
+		form,
+		hidden = false,
+		disabled = false,
+		required = false,
+		enabledUnits = ['hours', 'minutes', 'seconds'],
+		...rest
+	}: Props = $props();
 
 	label = label ?? field;
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
@@ -59,19 +81,23 @@
 		return units;
 	}
 
-	const timeUnits = setInitialTimeUnitValues($value || 0, _timeUnits);
+	const timeUnits = $state(setInitialTimeUnitValues($value || 0, _timeUnits));
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult) $value = cacheResult;
 	});
 
-	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
-	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
-	$: $value = timeUnits.reduce((acc, timeUnit) => {
-		return timeUnit.enabled ? acc + timeUnit.value * timeUnit.secondsMultiplier : acc;
-	}, 0);
-	$: cachedValue = $value;
+	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
+	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
+	run(() => {
+		$value = timeUnits.reduce((acc, timeUnit) => {
+			return timeUnit.enabled ? acc + timeUnit.value * timeUnit.secondsMultiplier : acc;
+		}, 0);
+	});
+	run(() => {
+		cachedValue = $value;
+	});
 </script>
 
 <div>
@@ -110,7 +136,7 @@
 						{disabled}
 						{required}
 						{...$constraints}
-						{...$$restProps}
+						{...rest}
 					/>
 				</div>
 			{/if}

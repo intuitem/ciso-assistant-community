@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
@@ -8,6 +7,11 @@
 	import AuditCard from './AuditCard.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const eta_span_class = { true: 'bg-orange-400 text-white' };
 	const status_span_class = {

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -8,23 +10,40 @@
 	import { browser } from '$app/environment';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
-	export let title = 'activity';
-	export let meta: Record<string, any>[] = [];
-	export let accent_color = '';
-	export let borderColor = '';
-	export let createRiskAnalysis = false;
-	export let workshop: number = 0;
+	interface Props {
+		title?: string;
+		meta?: Record<string, any>[];
+		accent_color?: string;
+		borderColor?: string;
+		createRiskAnalysis?: boolean;
+		workshop?: number;
+		action?: import('svelte').Snippet;
+		content?: import('svelte').Snippet;
+		addRiskAnalysis?: import('svelte').Snippet;
+	}
 
-	let workshopStatus = 'to_do';
+	let {
+		title = 'activity',
+		meta = [],
+		accent_color = '',
+		borderColor = '',
+		createRiskAnalysis = false,
+		workshop = 0,
+		action,
+		content,
+		addRiskAnalysis
+	}: Props = $props();
 
-	$: {
+	let workshopStatus = $state('to_do');
+
+	run(() => {
 		workshopStatus = meta.every((step) => step.status === 'done')
 			? 'done'
 			: meta.some((step) => step.status === 'done')
 				? 'in_progress'
 				: 'to_do';
 		if (browser) invalidateAll();
-	}
+	});
 
 	let popupHover: PopupSettings[] = [];
 	for (let i = 0; i < meta.length; i++) {
@@ -50,8 +69,8 @@
 				{/if}
 			</div>
 		</div>
-		<slot name="action" />
-		<slot name="content">
+		{@render action?.()}
+		{#if content}{@render content()}{:else}
 			{#if meta}
 				<div class="flex mx-auto">
 					<div>
@@ -59,7 +78,7 @@
 							{#each meta as step, i}
 								<li class="flex flex-row justify-between mb-10 ms-6">
 									{#if createRiskAnalysis && i == 0}
-										<slot name="addRiskAnalysis"></slot>
+										{@render addRiskAnalysis?.()}
 									{:else if !step.disabled}
 										<Anchor
 											href={step.href}
@@ -71,13 +90,13 @@
 												<span
 													class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
 												>
-													<i class="fa-solid fa-check" />
+													<i class="fa-solid fa-check"></i>
 												</span>
 											{:else}
 												<span
 													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
 												>
-													<i class="fa-solid fa-clipboard-check" />
+													<i class="fa-solid fa-clipboard-check"></i>
 												</span>
 											{/if}
 											<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
@@ -95,12 +114,12 @@
 												>
 													{step.tooltip}
 												</p>
-												<div class="arrow bg-white" />
+												<div class="arrow bg-white"></div>
 											</div>
 											<span
 												class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
 											>
-												<i class="fa-solid fa-clipboard-check" />
+												<i class="fa-solid fa-clipboard-check"></i>
 											</span>
 											<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
 											<p class="text-sm">{step.title}</p>
@@ -114,7 +133,7 @@
 												event: 'click',
 												target: `popupStep-${workshop}.${i + 1}`,
 												placement: 'top'
-											}}><i class="fa-solid fa-ellipsis-vertical" /></button
+											}}><i class="fa-solid fa-ellipsis-vertical"></i></button
 										>
 										<div
 											class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
@@ -151,7 +170,7 @@
 					</div>
 				</div>
 			{/if}
-		</slot>
+		{/if}
 		<div class="justify-end flex"></div>
 	</div>
 </div>

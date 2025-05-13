@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { page } from '$app/stores';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
@@ -27,15 +29,30 @@
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { complianceResultColorMap } from '$lib/utils/constants';
 
-	export let data: PageData;
-	export let form: Actions;
-	/** Is the page used for shallow routing? */
-	export let shallow = false;
+	
 
-	export let actionPath: string = '';
-	export let questionnaireOnly: boolean = false;
-	export let assessmentOnly: boolean = false;
-	export let invalidateAll: boolean = true;
+	interface Props {
+		data: PageData;
+		form: Actions;
+		/** Is the page used for shallow routing? */
+		shallow?: boolean;
+		actionPath?: string;
+		questionnaireOnly?: boolean;
+		assessmentOnly?: boolean;
+		invalidateAll?: boolean;
+		[key: string]: any
+	}
+
+	let {
+		data,
+		form,
+		shallow = false,
+		actionPath = '',
+		questionnaireOnly = false,
+		assessmentOnly = false,
+		invalidateAll = true,
+		...rest
+	}: Props = $props();
 
 	const result_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
@@ -56,12 +73,12 @@
 	);
 
 	// Initialize hide suggestion state
-	let hideSuggestionHashmap: Record<string, boolean> = {};
+	let hideSuggestionHashmap: Record<string, boolean> = $state({});
 	data.requirement_assessments.forEach((ra) => {
 		hideSuggestionHashmap[ra.id] = true;
 	});
 
-	$: createdEvidence = form?.createdEvidence;
+	let createdEvidence = $derived(form?.createdEvidence);
 
 	// Memoized title function
 	const titleMap = new Map();
@@ -124,13 +141,13 @@
 		return color;
 	}
 
-	let questionnaireMode = questionnaireOnly
+	let questionnaireMode = $state(questionnaireOnly
 		? true
 		: assessmentOnly
 			? false
 			: $page.data.user.is_third_party
 				? true
-				: false;
+				: false);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -153,19 +170,21 @@
 		modalStore.trigger(modal);
 	}
 
-	let addedEvidence = 0;
+	let addedEvidence = $state(0);
 
-	$: if (createdEvidence && shallow) {
-		const requirement = data.requirements.find((ra) => ra.id === createdEvidence.requirements[0]);
-		if (requirement) {
-			requirement.evidences.push({
-				str: createdEvidence.name,
-				id: createdEvidence.id
-			});
-			createdEvidence = undefined;
-			addedEvidence += 1;
+	run(() => {
+		if (createdEvidence && shallow) {
+			const requirement = data.requirements.find((ra) => ra.id === createdEvidence.requirements[0]);
+			if (requirement) {
+				requirement.evidences.push({
+					str: createdEvidence.name,
+					id: createdEvidence.id
+				});
+				createdEvidence = undefined;
+				addedEvidence += 1;
+			}
 		}
-	}
+	});
 
 	const requirementAssessmentScores = Object.fromEntries(
 		data.requirement_assessments.map((requirement) => {
@@ -222,10 +241,10 @@
 		return complianceResultColorMap[mappingInferenceResult] === '#000000' ? 'text-white' : '';
 	}
 	// Create separate superForm instances for each requirement assessment
-	let scoreForms = {};
-	let docScoreForms = {};
-	let isScoredForms = {};
-	$: {
+	let scoreForms = $state({});
+	let docScoreForms = $state({});
+	let isScoredForms = $state({});
+	run(() => {
 		// Initialize the form instances
 		data.requirement_assessments.forEach((requirementAssessment, index) => {
 			const id = requirementAssessment.id;
@@ -245,7 +264,7 @@
 				});
 			}
 		});
-	}
+	});
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -260,7 +279,7 @@
 					href="/compliance-assessments/{data.compliance_assessment.id}"
 					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 				>
-					<i class="fa-solid fa-arrow-left" />
+					<i class="fa-solid fa-arrow-left"></i>
 					<p class="">{m.goBackToAudit()} {data.compliance_assessment.name}</p>
 				</a>
 				<div class="flex items-center justify-center space-x-4">
@@ -314,13 +333,13 @@
 						>
 							<h2 class="font-semibold text-lg flex flex-row justify-between">
 								<div>
-									<i class="fa-solid fa-circle-info mr-2" />{m.additionalInformation()}
+									<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 								</div>
-								<button on:click={() => toggleSuggestion(requirementAssessment.id)}>
+								<button onclick={() => toggleSuggestion(requirementAssessment.id)}>
 									{#if !hideSuggestionHashmap[requirementAssessment.id]}
-										<i class="fa-solid fa-eye" />
+										<i class="fa-solid fa-eye"></i>
 									{:else}
-										<i class="fa-solid fa-eye-slash" />
+										<i class="fa-solid fa-eye-slash"></i>
 									{/if}
 								</button>
 							</h2>
@@ -328,7 +347,7 @@
 								{#if data.requirements[i].annotation}
 									<div class="my-2">
 										<p class="font-medium">
-											<i class="fa-solid fa-pencil" />
+											<i class="fa-solid fa-pencil"></i>
 											{m.annotation()}
 										</p>
 										<p class="whitespace-pre-line py-1">
@@ -339,7 +358,7 @@
 								{#if requirementAssessment.mapping_inference.result}
 									<div class="my-2">
 										<p class="font-medium">
-											<i class="fa-solid fa-link" />
+											<i class="fa-solid fa-link"></i>
 											{m.mappingInference()}
 										</p>
 										<span class="text-xs text-gray-500"
@@ -532,7 +551,7 @@
 															{requirementAssessment.answers[urn] && requirementAssessment.answers[urn].includes(option.urn)
 															? 'variant-filled-primary rounded-token'
 															: 'hover:variant-soft-primary bg-surface-200-700-token rounded-token'}"
-														on:click={async () => {
+														onclick={async () => {
 															// Initialize the array if it hasn't been already.
 															if (!Array.isArray(requirementAssessment.answers[urn])) {
 																requirementAssessment.answers[urn] = [];
@@ -566,28 +585,28 @@
 												placeholder=""
 												class="input w-fit"
 												bind:value={requirementAssessment.answers[urn]}
-												on:change={async () =>
+												onchange={async () =>
 													await update(
 														requirementAssessment,
 														'answers',
 														requirementAssessment.answers
 													)}
-												{...$$restProps}
+												{...rest}
 											/>
 										{:else}
 											<textarea
 												placeholder=""
 												class="input w-full"
 												bind:value={requirementAssessment.answers[urn]}
-												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-												on:change={async () =>
+												onkeydown={(event) => event.key === 'Enter' && event.preventDefault()}
+												onchange={async () =>
 													await update(
 														requirementAssessment,
 														'answers',
 														requirementAssessment.answers
 													)}
-												{...$$restProps}
-											/>
+												{...rest}
+											></textarea>
 										{/if}
 									</li>
 								{/each}
@@ -610,21 +629,23 @@
 									disabled={!requirementAssessment.is_scored ||
 										requirementAssessment.result === 'not_applicable'}
 								>
-									<div slot="left">
-										<Checkbox
-											form={isScoredForms[requirementAssessment.id]}
-											field="is_scored"
-											label={''}
-											helpText={m.scoringHelpText()}
-											checkboxComponent="switch"
-											class="h-full flex flex-row items-center justify-center my-1"
-											classesContainer="h-full flex flex-row items-center space-x-4"
-											on:change={async () => {
-												requirementAssessment.is_scored = !requirementAssessment.is_scored;
-												await update(requirementAssessment, 'is_scored');
-											}}
-										/>
-									</div>
+									{#snippet left()}
+																		<div >
+											<Checkbox
+												form={isScoredForms[requirementAssessment.id]}
+												field="is_scored"
+												label={''}
+												helpText={m.scoringHelpText()}
+												checkboxComponent="switch"
+												class="h-full flex flex-row items-center justify-center my-1"
+												classesContainer="h-full flex flex-row items-center space-x-4"
+												on:change={async () => {
+													requirementAssessment.is_scored = !requirementAssessment.is_scored;
+													await update(requirementAssessment, 'is_scored');
+												}}
+											/>
+										</div>
+																	{/snippet}
 								</Score>
 								{#if data.compliance_assessment.show_documentation_score}
 									<Score
@@ -698,91 +719,95 @@
 									{/if}
 								{:else}
 									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
-										<svelte:fragment slot="summary"
-											><p class="flex">{m.observation()}</p></svelte:fragment
-										>
-										<svelte:fragment slot="content">
-											<div>
-												<textarea
-													placeholder=""
-													class="input w-full"
-													bind:value={requirementAssessment.observation}
-													on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-												/>
-												{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
-													<button
-														class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
-														on:click={async () => {
+										{#snippet summary()}
+																				<p class="flex">{m.observation()}</p>
+																			{/snippet}
+										{#snippet content()}
+																			
+												<div>
+													<textarea
+														placeholder=""
+														class="input w-full"
+														bind:value={requirementAssessment.observation}
+														onkeydown={(event) => event.key === 'Enter' && event.preventDefault()}
+													></textarea>
+													{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
+														<button
+															class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
+															onclick={async () => {
 															await update(requirementAssessment, 'observation');
 															requirementAssessment.observationBuffer =
 																requirementAssessment.observation;
 														}}
-														type="button"
-													>
-														<i class="fa-solid fa-check opacity-70"></i>
-													</button>
-													<button
-														class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
-														on:click={() =>
+															type="button"
+														>
+															<i class="fa-solid fa-check opacity-70"></i>
+														</button>
+														<button
+															class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
+															onclick={() =>
 															(requirementAssessment.observation =
 																requirementAssessment.observationBuffer)}
-														type="button"
-													>
-														<i class="fa-solid fa-xmark opacity-70"></i>
-													</button>
-												{/if}
-											</div>
-										</svelte:fragment>
+															type="button"
+														>
+															<i class="fa-solid fa-xmark opacity-70"></i>
+														</button>
+													{/if}
+												</div>
+											
+																			{/snippet}
 									</AccordionItem>
 								{/if}
 								{#if requirementAssessment.evidences.length === 0 && shallow}
 									<p class="text-gray-400 italic">{m.noEvidences()}</p>
 								{:else}
 									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
-										<svelte:fragment slot="summary"
-											><p class="flex items-center space-x-2">
-												<span>{m.evidence()}</span>
-												{#key addedEvidence}
-													{#if requirementAssessment.evidences != null}
-														<span class="badge variant-soft-primary"
-															>{requirementAssessment.evidences.length}</span
-														>
-													{/if}
-												{/key}
-											</p></svelte:fragment
-										>
-										<svelte:fragment slot="content">
-											<div class="flex flex-row space-x-2 items-center">
-												{#if !shallow}
-													<button
-														class="btn variant-filled-primary self-start"
-														on:click={() =>
-															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-														type="button"
-														><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
-													>
-													<button
-														class="btn variant-filled-secondary self-start"
-														type="button"
-														on:click={() => modalUpdateForm(requirementAssessment)}
-														><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
-													</button>
-												{/if}
-											</div>
-											<div class="flex flex-wrap space-x-2 items-center">
-												{#key addedEvidence}
-													{#each requirementAssessment.evidences as evidence}
-														<p class="p-2">
-															<a
-																class="text-primary-700 hover:text-primary-500"
-																href="/evidences/{evidence.id}"
-																><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
+										{#snippet summary()}
+																				<p class="flex items-center space-x-2">
+													<span>{m.evidence()}</span>
+													{#key addedEvidence}
+														{#if requirementAssessment.evidences != null}
+															<span class="badge variant-soft-primary"
+																>{requirementAssessment.evidences.length}</span
 															>
-														</p>
-													{/each}
-												{/key}
-											</div>
-										</svelte:fragment>
+														{/if}
+													{/key}
+												</p>
+																			{/snippet}
+										{#snippet content()}
+																			
+												<div class="flex flex-row space-x-2 items-center">
+													{#if !shallow}
+														<button
+															class="btn variant-filled-primary self-start"
+															onclick={() =>
+															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+															type="button"
+															><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+														>
+														<button
+															class="btn variant-filled-secondary self-start"
+															type="button"
+															onclick={() => modalUpdateForm(requirementAssessment)}
+															><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
+														</button>
+													{/if}
+												</div>
+												<div class="flex flex-wrap space-x-2 items-center">
+													{#key addedEvidence}
+														{#each requirementAssessment.evidences as evidence}
+															<p class="p-2">
+																<a
+																	class="text-primary-700 hover:text-primary-500"
+																	href="/evidences/{evidence.id}"
+																	><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
+																>
+															</p>
+														{/each}
+													{/key}
+												</div>
+											
+																			{/snippet}
 									</AccordionItem>
 								{/if}
 							</Accordion>

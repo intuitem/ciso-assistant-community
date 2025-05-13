@@ -10,7 +10,7 @@
 	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
-	export let data;
+	let { data } = $props();
 
 	const showRisks = true;
 

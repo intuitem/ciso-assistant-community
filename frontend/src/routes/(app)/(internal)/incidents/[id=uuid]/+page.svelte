@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -36,20 +38,26 @@
 
 	import { canPerformAction } from '$lib/utils/access-control';
 
-	export let data: PageData;
-	export let form: ActionData;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+		actionsBody?: import('svelte').Snippet<[any]>;
+		[key: string]: any
+	}
+
+	let { ...props }: Props = $props();
 
 	const invalidateAll = true;
 	const formAction = '?/create';
-	const timelineForm = data.relatedModels['timeline-entries'].createForm;
-	const model = data.relatedModels['timeline-entries'];
+	const timelineForm = props.data.relatedModels['timeline-entries'].createForm;
+	const model = props.data.relatedModels['timeline-entries'];
 	const schema = modelSchema('timeline-entries');
 
 	const _form = superForm(timelineForm, {
 		dataType: 'json',
 		enctype: 'application/x-www-form-urlencoded',
 		invalidateAll,
-		applyAction: $$props.applyAction ?? true,
+		applyAction: props.applyAction ?? true,
 		resetForm: true,
 		validators: zod(schema),
 		taintedMessage: false,
@@ -65,7 +73,7 @@
 		}
 	});
 
-	const source = data.relatedModels['timeline-entries'].table;
+	const source = props.data.relatedModels['timeline-entries'].table;
 	const pagination = true;
 	const numberRowsPerPage = 10;
 
@@ -86,24 +94,26 @@
 		}
 	);
 	const rows = handler.getRows();
-	const field = data.model.reverseForeignKeyFields.find(
+	const field = props.data.model.reverseForeignKeyFields.find(
 		(item) => item.urlModel === 'timeline-entries'
 	);
 	handler.onChange((state: State) =>
 		loadTableData({
 			state,
 			URLModel: 'timeline-entries',
-			endpoint: `/timeline-entries?incident=${data.data.id}`,
+			endpoint: `/timeline-entries?incident=${props.data.data.id}`,
 			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field)
 		})
 	);
 
-	let invalidateTable = false;
-	$: if (browser || invalidateTable) {
-		handler.invalidate();
-		_goto($page.url);
-		invalidateTable = false;
-	}
+	let invalidateTable = $state(false);
+	run(() => {
+		if (browser || invalidateTable) {
+			handler.invalidate();
+			_goto($page.url);
+			invalidateTable = false;
+		}
+	});
 
 	const preventDelete = (row: TableSource) =>
 		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
@@ -114,9 +124,9 @@
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: data.evidenceCreateForm,
+				form: props.data.evidenceCreateForm,
 				formAction: '?/createEvidence',
-				model: data.evidenceModel,
+				model: props.data.evidenceModel,
 				debug: false
 			}
 		};
@@ -124,143 +134,149 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add-' + data.evidenceModel.localName)
+			title: safeTranslate('add-' + props.data.evidenceModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
 
-	let refreshKey = false;
+	let refreshKey = $state(false);
 	function forceRefresh() {
 		refreshKey = !refreshKey;
 	}
 
-	let resetForm = true;
+	let resetForm = $state(true);
 
-	$: formStore = _form.form;
+	let formStore = $derived(_form.form);
 
-	$: if (form?.newEvidence) {
-		refreshKey = !refreshKey;
-		resetForm = false;
-		_form.form.update(
-			(current: Record<string, any>) => ({
-				...current,
-				evidences: current.evidences
-					? [...current.evidences, form?.newEvidence]
-					: [form?.newEvidence]
-			}),
-			{ taint: false }
-		);
-		console.debug('formStore', $formStore);
-	}
+	run(() => {
+		if (props.form?.newEvidence) {
+			refreshKey = !refreshKey;
+			resetForm = false;
+			_form.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					evidences: current.evidences
+						? [...current.evidences, props.form?.newEvidence]
+						: [props.form?.newEvidence]
+				}),
+				{ taint: false }
+			);
+			console.debug('formStore', $formStore);
+		}
+	});
 
 	const user = $page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
-		model: data.model.name,
+		model: props.data.model.name,
 		domain:
-			data.model.name === 'folder'
-				? data.data.id
-				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
+			props.data.model.name === 'folder'
+				? props.data.data.id
+				: (props.data.data.folder?.id ?? props.data.data.folder ?? user.root_folder_id)
 	});
 </script>
 
 <div class="flex flex-col space-y-2">
 	<DetailView {data} displayModelTable={false}>
-		<div
-			slot="widgets"
-			class="shadow-xl border-l border-t p-4 rounded bg-gradient-to-tl from-slate-50 to-white"
-			hidden={!canEditObject}
-		>
-			{#if canEditObject}
-				<!-- new record form -->
-				<h1 class="text-xl font-bold font-serif mb-2">{m.addTimelineEntry()}</h1>
-				<SuperForm
-					class="flex flex-col space-y-3"
-					action={formAction}
-					dataType={'json'}
-					enctype={'application/x-www-form-urlencoded'}
-					data={timelineForm}
-					{_form}
-					{invalidateAll}
-					let:form
-					let:data
-					let:initialData
-					validators={zod(schema)}
-					{...$$restProps}
-				>
-					<AutocompleteSelect
-						{form}
-						optionsEndpoint="incidents"
-						field="incident"
-						label={m.incident()}
-						hidden={initialData.incident}
-					/>
-					<Select
-						{form}
-						disableDoubleDash={true}
-						options={model.selectOptions['entry_type']}
-						field="entry_type"
-						label={m.entryType()}
-					/>
-					{#key refreshKey}
-						<TextField
-							type="datetime-local"
-							step="1"
-							{form}
-							field="timestamp"
-							label={m.timestamp()}
-						/>
-					{/key}
-					<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
-					<TextArea {form} field="observation" label={m.observation()} />
-					{#key refreshKey}
-						<div class="flex items-end justify-center">
-							<div class="w-full mr-2">
-								<AutocompleteSelect
-									{form}
-									multiple
-									optionsEndpoint="evidences"
-									field="evidences"
-									{resetForm}
-									label={m.evidences()}
+		{#snippet widgets()}
+				<div
+				
+				class="shadow-xl border-l border-t p-4 rounded bg-gradient-to-tl from-slate-50 to-white"
+				hidden={!canEditObject}
+			>
+				{#if canEditObject}
+					<!-- new record form -->
+					<h1 class="text-xl font-bold font-serif mb-2">{m.addTimelineEntry()}</h1>
+					<SuperForm
+						class="flex flex-col space-y-3"
+						action={formAction}
+						dataType={'json'}
+						enctype={'application/x-www-form-urlencoded'}
+						data={timelineForm}
+						{_form}
+						{invalidateAll}
+						
+						
+						
+						validators={zod(schema)}
+						{...props}
+					>
+						{#snippet children({ form, data, initialData })}
+										<AutocompleteSelect
+								{props.form}
+								optionsEndpoint="incidents"
+								field="incident"
+								label={m.incident()}
+								hidden={initialData.incident}
+							/>
+							<Select
+								{props.form}
+								disableDoubleDash={true}
+								options={model.selectOptions['entry_type']}
+								field="entry_type"
+								label={m.entryType()}
+							/>
+							{#key refreshKey}
+								<TextField
+									type="datetime-local"
+									step="1"
+									{props.form}
+									field="timestamp"
+									label={m.timestamp()}
 								/>
+							{/key}
+							<TextField {props.form} field="entry" label={m.entry()} data-focusindex="0" />
+							<TextArea {props.form} field="observation" label={m.observation()} />
+							{#key refreshKey}
+								<div class="flex items-end justify-center">
+									<div class="w-full mr-2">
+										<AutocompleteSelect
+											{props.form}
+											multiple
+											optionsEndpoint="evidences"
+											field="evidences"
+											{resetForm}
+											label={m.evidences()}
+										/>
+									</div>
+									<button
+										class="btn bg-gray-300 h-11 w-10"
+										onclick={(_) => modalEvidenceCreateForm()}
+										type="button"><i class="fa-solid fa-plus text-sm"></i></button
+									>
+								</div>
+							{/key}
+							<div class="flex flex-row justify-between space-x-4">
+								<button
+									class="btn variant-filled-tertiary font-semibold w-full"
+									data-testid="reset-button"
+									type="button"
+									onclick={() => {
+									_form.reset();
+									_form.form.update((current) => ({
+										...current,
+										evidences: undefined,
+										timestamp: new Date().toISOString()
+									}));
+									refreshKey = !refreshKey;
+									resetForm = true;
+								}}>{m.cancel()}</button
+								>
+								<button
+									class="btn variant-filled-primary font-semibold w-full"
+									data-testid="save-button"
+									type="submit"
+									onclick={() => {
+									resetForm = true;
+								}}>{m.save()}</button
+								>
 							</div>
-							<button
-								class="btn bg-gray-300 h-11 w-10"
-								on:click={(_) => modalEvidenceCreateForm()}
-								type="button"><i class="fa-solid fa-plus text-sm" /></button
-							>
-						</div>
-					{/key}
-					<div class="flex flex-row justify-between space-x-4">
-						<button
-							class="btn variant-filled-tertiary font-semibold w-full"
-							data-testid="reset-button"
-							type="button"
-							on:click={() => {
-								_form.reset();
-								_form.form.update((current) => ({
-									...current,
-									evidences: undefined,
-									timestamp: new Date().toISOString()
-								}));
-								refreshKey = !refreshKey;
-								resetForm = true;
-							}}>{m.cancel()}</button
-						>
-						<button
-							class="btn variant-filled-primary font-semibold w-full"
-							data-testid="save-button"
-							type="submit"
-							on:click={() => {
-								resetForm = true;
-							}}>{m.save()}</button
-						>
-					</div>
-				</SuperForm>
-			{/if}
-		</div>
+															{/snippet}
+								</SuperForm>
+				{/if}
+			</div>
+			{/snippet}
 	</DetailView>
 
 	<div class="card shadow-lg bg-white p-4 space-y-2">
@@ -285,13 +301,13 @@
 							>
 							<TableRowActions
 								baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
-								deleteForm={data.relatedModels['timeline-entries'].deleteForm}
+								deleteForm={props.data.relatedModels['timeline-entries'].deleteForm}
 								model={model.info}
 								URLModel={actionsURLModel}
 								detailURL={`/${actionsURLModel}/${meta.id}`}
 								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`}
 								{row}
-								hasBody={$$slots.actionsBody}
+								hasBody={props.actionsBody}
 								identifierField={'id'}
 								preventDelete={preventDelete(row)}
 							></TableRowActions>

@@ -5,7 +5,7 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { m } from '$paraglide/messages';
 
-	export let data;
+	let { data } = $props();
 
 	const scenarioTreatmentColorMap = (status: string) => {
 		const map: Record<string, string> = {
@@ -111,7 +111,7 @@
 		{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}
 			<tr>
 				<td colspan="9" class="p-2 text-left">
-					<i class="fas fa-exclamation-circle" />
+					<i class="fas fa-exclamation-circle"></i>
 					{m.noAppliedControlYet()}
 				</td>
 			</tr>

@@ -8,7 +8,11 @@
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const tree = data.tree;
 

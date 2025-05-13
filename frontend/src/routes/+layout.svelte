@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	// Most of the app wide CSS should be put in this file
 	import '../app.postcss';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -70,6 +72,11 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import ParaglideJsProvider from './ParaglideJsProvider.svelte';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	const modalRegistry: Record<string, ModalComponent> = {
 		// Set a unique modal ID, then pass the component reference
@@ -78,17 +85,19 @@
 		deleteConfirmModal: { ref: DeleteConfirmModal }
 	};
 
-	$: if (browser && $page.url.searchParams.has('refresh')) {
-		$page.url.searchParams.delete('refresh');
-		window.location.href = $page.url.href;
-	}
+	run(() => {
+		if (browser && $page.url.searchParams.has('refresh')) {
+			$page.url.searchParams.delete('refresh');
+			window.location.href = $page.url.href;
+		}
+	});
 </script>
 
 <svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
 <ParaglideJsProvider>
 	<Modal components={modalRegistry} />
 	<Toast />
-	<slot />
+	{@render children?.()}
 
 	{#if $flash}
 		{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}

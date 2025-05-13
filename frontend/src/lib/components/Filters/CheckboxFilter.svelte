@@ -1,6 +1,10 @@
 <script lang="ts">
-	export let value: boolean = false;
-	export let title: string = 'Filter: ';
+	interface Props {
+		value?: boolean;
+		title?: string;
+	}
+
+	let { value = $bindable(false), title = 'Filter: ' }: Props = $props();
 </script>
 
 <div>

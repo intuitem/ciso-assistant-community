@@ -2,11 +2,21 @@
 	import { isDark } from '$lib/utils/helpers';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
-	export let cell;
-	export let cellData: Array<any> = [];
-	export let dataItemComponent;
-	export let useBubbles = true;
-	export let popupTarget: string | undefined = undefined;
+	interface Props {
+		cell: any;
+		cellData?: Array<any>;
+		dataItemComponent: any;
+		useBubbles?: boolean;
+		popupTarget?: string | undefined;
+	}
+
+	let {
+		cell,
+		cellData = [],
+		dataItemComponent,
+		useBubbles = true,
+		popupTarget = undefined
+	}: Props = $props();
 
 	const bubbleMinCount = 1;
 	const maxBubbleSize = 4.5;
@@ -19,7 +29,7 @@
 		{ max: 34, value: 4 }
 	];
 
-	let popupClick: PopupSettings;
+	let popupClick: PopupSettings = $state();
 	if (cellData.length && popupTarget) {
 		popupClick = {
 			event: 'click',
@@ -28,17 +38,17 @@
 		};
 	}
 
-	$: classesBubbleSize = (itemCount: number) => {
+	let classesBubbleSize = $derived((itemCount: number) => {
 		for (const range of bubbleSizeRanges) {
 			if (itemCount <= range.max) {
 				return `width: ${range.value}rem; height: ${range.value}rem`;
 			}
 		}
 		return `width: ${maxBubbleSize}rem; height: ${maxBubbleSize}rem`;
-	};
-	$: classesCellText = (backgroundHexColor: string) => {
+	});
+	let classesCellText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
-	};
+	});
 </script>
 
 {#if useBubbles && cellData.length >= bubbleMinCount && dataItemComponent}
@@ -59,9 +69,10 @@
 		<div class="card bg-surface-300 text-black z-20" data-popup={popupTarget}>
 			<div class="max-h-56 overflow-y-scroll p-4">
 				{#each cellData as item}
-					<svelte:component this={dataItemComponent} data={item} />
+					{@const SvelteComponent = dataItemComponent}
+					<SvelteComponent data={item} />
 				{/each}
-				<div class="arrow bg-surface-300" />
+				<div class="arrow bg-surface-300"></div>
 			</div>
 		</div>
 	</div>
@@ -75,7 +86,8 @@
 	>
 		{#if dataItemComponent}
 			{#each cellData as item}
-				<svelte:component this={dataItemComponent} data={item} />
+				{@const SvelteComponent_1 = dataItemComponent}
+				<SvelteComponent_1 data={item} />
 			{/each}
 		{:else}
 			<div class="mx-auto text-center">{cellData}</div>

@@ -15,7 +15,11 @@
 	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from '../[id=uuid]/$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
 	const reference_controls =
 		data.requirementAssessment.requirement.associated_reference_controls ?? [];
@@ -25,12 +29,12 @@
 	const has_threats = threats.length > 0;
 	const has_reference_controls = reference_controls.length > 0;
 
-	$: mappingInference = {
+	let mappingInference = $derived({
 		sourceRequirementAssessment:
 			data.requirementAssessment.mapping_inference.source_requirement_assessment,
 		result: data.requirementAssessment.mapping_inference.result,
 		annotation: ''
-	};
+	});
 
 	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
 		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
@@ -38,9 +42,9 @@
 
 	let requirementAssessmentsList: string[] = $hideSuggestions;
 
-	let hideSuggestion = requirementAssessmentsList.includes(data.requirementAssessment.id)
+	let hideSuggestion = $state(requirementAssessmentsList.includes(data.requirementAssessment.id)
 		? true
-		: false;
+		: false);
 
 	function toggleSuggestions() {
 		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)) {
@@ -61,14 +65,14 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	$: classesText =
-		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
+	let classesText =
+		$derived(complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '');
 
 	const max_score = data.complianceAssessmentScore.max_score;
 	const score = data.requirementAssessment.score;
 	const documentationScore = data.requirementAssessment.documentation_score;
 
-	let tabSet = $page.data.user.is_third_party ? 1 : 0;
+	let tabSet = $state($page.data.user.is_third_party ? 1 : 0);
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
@@ -118,13 +122,13 @@
 		<div class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto">
 			<h2 class="font-semibold text-lg flex flex-row justify-between">
 				<div>
-					<i class="fa-solid fa-circle-info mr-2" />{m.additionalInformation()}
+					<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 				</div>
-				<button on:click={toggleSuggestions}>
+				<button onclick={toggleSuggestions}>
 					{#if !hideSuggestion}
-						<i class="fa-solid fa-eye" />
+						<i class="fa-solid fa-eye"></i>
 					{:else}
-						<i class="fa-solid fa-eye-slash" />
+						<i class="fa-solid fa-eye-slash"></i>
 					{/if}
 				</button>
 			</h2>
@@ -134,7 +138,7 @@
 						<div class="flex-1">
 							{#if reference_controls.length > 0}
 								<p class="font-medium">
-									<i class="fa-solid fa-gears" />
+									<i class="fa-solid fa-gears"></i>
 									{m.suggestedReferenceControls()}
 								</p>
 								<ul class="list-disc ml-4">
@@ -155,7 +159,7 @@
 						<div class="flex-1">
 							{#if threats.length > 0}
 								<p class="font-medium">
-									<i class="fa-solid fa-gears" />
+									<i class="fa-solid fa-gears"></i>
 									{m.threatsCovered()}
 								</p>
 								<ul class="list-disc ml-4">
@@ -178,7 +182,7 @@
 				{#if annotation}
 					<div class="my-2">
 						<p class="font-medium">
-							<i class="fa-solid fa-pencil" />
+							<i class="fa-solid fa-pencil"></i>
 							{m.annotation()}
 						</p>
 						<p class="whitespace-pre-line py-1">
@@ -189,7 +193,7 @@
 				{#if typical_evidence}
 					<div class="my-2">
 						<p class="font-medium">
-							<i class="fa-solid fa-pencil" />
+							<i class="fa-solid fa-pencil"></i>
 							{m.typicalEvidence()}
 						</p>
 						<p class="whitespace-pre-line py-1">
@@ -200,7 +204,7 @@
 				{#if mappingInference.result}
 					<div class="my-2">
 						<p class="font-medium">
-							<i class="fa-solid fa-link" />
+							<i class="fa-solid fa-link"></i>
 							{m.mappingInference()}
 						</p>
 						<span class="text-xs text-gray-500"
@@ -255,42 +259,44 @@
 				</Tab>
 			{/if}
 			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
-			<svelte:fragment slot="panel">
-				{#if tabSet === 0 && !$page.data.user.is_third_party}
-					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-						<i class="fa-solid fa-info-circle" />
-						<p>{m.requirementAppliedControlHelpText()}</p>
-					</div>
-					<div
-						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
-					>
-						<ModelTable
-							source={data.tables['applied-controls']}
-							hideFilters={true}
-							URLModel="applied-controls"
-							baseEndpoint="/applied-controls?requirement_assessments={$page.data
-								.requirementAssessment.id}"
-						/>
-					</div>
-				{/if}
-				{#if tabSet === 1}
-					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-						<i class="fa-solid fa-info-circle" />
-						<p>{m.requirementEvidenceHelpText()}</p>
-					</div>
-					<div
-						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
-					>
-						<ModelTable
-							source={data.tables['evidences']}
-							hideFilters={true}
-							URLModel="evidences"
-							baseEndpoint="/evidences?requirement_assessments={$page.data.requirementAssessment
-								.id}"
-						/>
-					</div>
-				{/if}
-			</svelte:fragment>
+			{#snippet panel()}
+					
+					{#if tabSet === 0 && !$page.data.user.is_third_party}
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementAppliedControlHelpText()}</p>
+						</div>
+						<div
+							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+						>
+							<ModelTable
+								source={data.tables['applied-controls']}
+								hideFilters={true}
+								URLModel="applied-controls"
+								baseEndpoint="/applied-controls?requirement_assessments={$page.data
+									.requirementAssessment.id}"
+							/>
+						</div>
+					{/if}
+					{#if tabSet === 1}
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementEvidenceHelpText()}</p>
+						</div>
+						<div
+							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+						>
+							<ModelTable
+								source={data.tables['evidences']}
+								hideFilters={true}
+								URLModel="evidences"
+								baseEndpoint="/evidences?requirement_assessments={$page.data.requirementAssessment
+									.id}"
+							/>
+						</div>
+					{/if}
+				
+					{/snippet}
 		</TabGroup>
 	</div>
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
@@ -315,7 +321,7 @@
 		</div>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
-		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" on:click={cancel}
+		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
 			>{m.back()}</button
 		>
 	</div>

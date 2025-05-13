@@ -3,20 +3,33 @@
 	import type { AnyZodObject } from 'zod';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import { safeTranslate } from '$lib/utils/i18n';
-	let _class = 'w-fit';
 
-	export { _class as class };
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let helpText: string | undefined = undefined;
-	export let questions = {};
+	
 
-	export let form: SuperForm<AnyZodObject>;
+	interface Props {
+		class?: string;
+		label?: string | undefined;
+		field: string;
+		helpText?: string | undefined;
+		questions?: any;
+		form: SuperForm<AnyZodObject>;
+		[key: string]: any
+	}
+
+	let {
+		class: _class = 'w-fit',
+		label = undefined,
+		field,
+		helpText = undefined,
+		questions = {},
+		form,
+		...rest
+	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	$: classesTextField = (errors: string[] | undefined) =>
-		errors && errors.length > 0 ? 'input-error' : '';
+	let classesTextField = $derived((errors: string[] | undefined) =>
+		errors && errors.length > 0 ? 'input-error' : '');
 
 	function toggleSelection(urn, optionUrn) {
 		// Initialize the array if it hasn't been already.
@@ -82,7 +95,7 @@
 									{$value[urn] && $value[urn].includes(option.urn)
 									? 'variant-filled-primary rounded-token'
 									: 'hover:variant-soft-primary bg-surface-200-700-token rounded-token'}"
-								on:click={() => toggleSelection(urn, option.urn)}
+								onclick={() => toggleSelection(urn, option.urn)}
 							>
 								{option.value}
 							</button>
@@ -95,7 +108,7 @@
 						class="{'input ' + _class} {classesTextField($errors)}"
 						bind:value={$value[urn]}
 						{...$constraints}
-						{...$$restProps}
+						{...rest}
 					/>
 				{:else if question.type === 'text'}
 					<textarea
@@ -103,8 +116,8 @@
 						class="{'input w-full' + _class} {classesTextField($errors)}"
 						bind:value={$value[urn]}
 						{...$constraints}
-						{...$$restProps}
-					/>
+						{...rest}
+					></textarea>
 				{/if}
 			</li>
 		{/each}

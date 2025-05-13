@@ -1,6 +1,18 @@
 <script lang="ts">
-	// Accept entity_assessment.data as a prop
-	export let entity_assessment: {
+	
+
+	// State to track if the card is flipped
+	let isFlipped = $state(false);
+
+	// Function to handle the flip action
+	function handleFlip() {
+		isFlipped = !isFlipped;
+	}
+
+	import { m } from '$paraglide/messages';
+	interface Props {
+		// Accept entity_assessment.data as a prop
+		entity_assessment: {
 		provider: string;
 		entity_assessment_id: string;
 		baseline: string;
@@ -15,16 +27,9 @@
 		reviewers: string;
 		has_questions: boolean;
 	};
-
-	// State to track if the card is flipped
-	let isFlipped = false;
-
-	// Function to handle the flip action
-	function handleFlip() {
-		isFlipped = !isFlipped;
 	}
 
-	import { m } from '$paraglide/messages';
+	let { entity_assessment }: Props = $props();
 
 	// Function to determine progress bar color based on completion percentage
 	function getProgressColor(progress: number): string {
@@ -61,7 +66,7 @@
 			<!-- Flip button for front face -->
 			<button
 				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
-				on:click={handleFlip}
+				onclick={handleFlip}
 				aria-label="Flip card"
 			>
 				<svg
@@ -186,7 +191,7 @@
 			<!-- Flip button for back face -->
 			<button
 				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
-				on:click={handleFlip}
+				onclick={handleFlip}
 				aria-label="Flip card back"
 			>
 				<svg

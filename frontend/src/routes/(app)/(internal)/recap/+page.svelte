@@ -8,7 +8,6 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-	export let data: PageData;
 
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
@@ -21,6 +20,11 @@
 
 	const user = $page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const model = URL_MODEL_MAP['perimeters'];
 	const canEditObject = (perimeter): boolean =>
 		canPerformAction({
@@ -111,13 +115,13 @@
 											}
 										]}
 										class="btn variant-filled-primary w-1/2 lg:w-full"
-										><i class="fa-solid fa-edit mr-2" /> {m.edit()}
+										><i class="fa-solid fa-edit mr-2"></i> {m.edit()}
 									</Anchor>
 								{/if}
 								<a
 									href="/compliance-assessments/{compliance_assessment.id}/export"
 									class="btn variant-filled-primary w-1/2 lg:w-full"
-									><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
+									><i class="fa-solid fa-download mr-2"></i> {m.exportButton()}
 								</a>
 							</div>
 						</div>

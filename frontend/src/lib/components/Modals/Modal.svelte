@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { dynamicTransition } from '$lib/components/utils/transitions';
 	import {
 		prefersReducedMotionStore,
@@ -17,6 +17,9 @@
 	lang="ts"
 	generics="TransitionIn extends Transition = FlyTransition, TransitionOut extends Transition = FlyTransition"
 >
+	import { run, createBubbler, passive } from 'svelte/legacy';
+
+	const bubble = createBubbler();
 	import { createEventDispatcher } from 'svelte';
 
 	// Event Dispatcher
@@ -30,51 +33,86 @@
 	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
 	import { focusTrap, getModalStore } from '@skeletonlabs/skeleton';
 
-	// Props (components)
-	export let components: Record<string, ModalComponent> = {};
+	
 
-	// Props (backdrop)
-	export let position: CssClasses = 'items-center';
+	
 
-	// Props (modal)
-	export let background: CssClasses = 'bg-surface-100-800-token';
-	export let width: CssClasses = 'w-modal';
-	export let height: CssClasses = 'h-auto';
-	export let padding: CssClasses = 'p-4';
-	export let spacing: CssClasses = 'space-y-4';
-	export let rounded: CssClasses = 'rounded-container-token';
-	export let shadow: CssClasses = 'shadow-xl';
-	export let zIndex: CssClasses = 'z-[999]';
+	
 
-	// Props (buttons)
-	export let buttonNeutral: CssClasses = 'variant-ghost-surface';
-	export let buttonPositive: CssClasses = 'variant-filled';
-	export let buttonTextCancel: CssClasses = 'Cancel';
-	export let buttonTextConfirm: CssClasses = 'Confirm';
-	export let buttonTextSubmit: CssClasses = 'Submit';
+	
 
-	// Props (regions)
-	export let regionBackdrop: CssClasses = '';
-	export let regionHeader: CssClasses = 'text-2xl font-bold';
-	export let regionBody: CssClasses = 'max-h-[200px] overflow-hidden';
-	export let regionFooter: CssClasses = 'flex justify-end space-x-2';
+	
 
-	// Props (transition)
-	export let transitions = !$prefersReducedMotionStore;
-	export let transitionIn: TransitionIn = fly as TransitionIn;
-	export let transitionInParams: TransitionParams<TransitionIn> = {
+	
+	interface Props {
+		// Props (components)
+		components?: Record<string, ModalComponent>;
+		// Props (backdrop)
+		position?: CssClasses;
+		// Props (modal)
+		background?: CssClasses;
+		width?: CssClasses;
+		height?: CssClasses;
+		padding?: CssClasses;
+		spacing?: CssClasses;
+		rounded?: CssClasses;
+		shadow?: CssClasses;
+		zIndex?: CssClasses;
+		// Props (buttons)
+		buttonNeutral?: CssClasses;
+		buttonPositive?: CssClasses;
+		buttonTextCancel?: CssClasses;
+		buttonTextConfirm?: CssClasses;
+		buttonTextSubmit?: CssClasses;
+		// Props (regions)
+		regionBackdrop?: CssClasses;
+		regionHeader?: CssClasses;
+		regionBody?: CssClasses;
+		regionFooter?: CssClasses;
+		// Props (transition)
+		transitions?: any;
+		transitionIn?: TransitionIn;
+		transitionInParams?: TransitionParams<TransitionIn>;
+		transitionOut?: TransitionOut;
+		transitionOutParams?: TransitionParams<TransitionOut>;
+	}
+
+	let {
+		components = {},
+		position = 'items-center',
+		background = 'bg-surface-100-800-token',
+		width = 'w-modal',
+		height = 'h-auto',
+		padding = 'p-4',
+		spacing = 'space-y-4',
+		rounded = 'rounded-container-token',
+		shadow = 'shadow-xl',
+		zIndex = 'z-[999]',
+		buttonNeutral = 'variant-ghost-surface',
+		buttonPositive = 'variant-filled',
+		buttonTextCancel = $bindable('Cancel'),
+		buttonTextConfirm = $bindable('Confirm'),
+		buttonTextSubmit = $bindable('Submit'),
+		regionBackdrop = '',
+		regionHeader = 'text-2xl font-bold',
+		regionBody = 'max-h-[200px] overflow-hidden',
+		regionFooter = 'flex justify-end space-x-2',
+		transitions = !$prefersReducedMotionStore,
+		transitionIn = fly as TransitionIn,
+		transitionInParams = {
 		duration: 150,
 		opacity: 0,
 		x: 0,
 		y: 100
-	};
-	export let transitionOut: TransitionOut = fly as TransitionOut;
-	export let transitionOutParams: TransitionParams<TransitionOut> = {
+	},
+		transitionOut = fly as TransitionOut,
+		transitionOutParams = {
 		duration: 150,
 		opacity: 0,
 		x: 0,
 		y: 100
-	};
+	}
+	}: Props = $props();
 
 	// Base Styles
 	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-backdrop-token p-4';
@@ -83,21 +121,20 @@
 	const cModalImage = 'w-full h-auto';
 
 	// Local
-	let promptValue: any;
+	let promptValue: any = $state();
 	const buttonTextDefaults: Record<string, string> = {
 		buttonTextCancel,
 		buttonTextConfirm,
 		buttonTextSubmit
 	};
-	let currentComponent: ModalComponent | undefined;
+	let currentComponent: ModalComponent | undefined = $state();
 	let registeredInteractionWithBackdrop = false;
-	let modalElement: HTMLDivElement;
-	let windowHeight: number;
+	let modalElement: HTMLDivElement = $state();
+	let windowHeight: number = $state();
 	let backdropOverflow = 'overflow-y-auto';
 
 	const modalStore = getModalStore();
 
-	$: if ($modalStore.length) handleModals($modalStore);
 
 	function handleModals(modals: ModalSettings[]) {
 		if (modals[0].type === 'prompt') promptValue = modals[0].value;
@@ -116,7 +153,6 @@
 		if (!modalHeight) return;
 	}
 
-	$: onModalHeightChange(modalElement);
 
 	function onBackdropInteractionBegin(event: SvelteEvent<MouseEvent, HTMLDivElement>): void {
 		if (!(event.target instanceof Element)) return;
@@ -172,17 +208,23 @@
 	// Replacing $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
 
-	// State & Reactive
-	$: cPosition = $modalStore[0]?.position ?? position;
-	$: classesBackdrop = `${cBackdrop} ${regionBackdrop} ${zIndex} ${classProp} ${
-		$modalStore[0]?.backdropClasses ?? ''
-	}`;
-	$: classesTransitionLayer = `${cTransitionLayer} ${cPosition ?? ''}`;
-	$: classesModal = `${cModal} ${background} ${width} ${height} ${padding} ${spacing} ${rounded} ${shadow} ${
-		$modalStore[0]?.modalClasses ?? ''
-	}`;
 
-	$: parent = {
+	run(() => {
+		if ($modalStore.length) handleModals($modalStore);
+	});
+	run(() => {
+		onModalHeightChange(modalElement);
+	});
+	// State & Reactive
+	let cPosition = $derived($modalStore[0]?.position ?? position);
+	let classesBackdrop = $derived(`${cBackdrop} ${regionBackdrop} ${zIndex} ${classProp} ${
+		$modalStore[0]?.backdropClasses ?? ''
+	}`);
+	let classesTransitionLayer = $derived(`${cTransitionLayer} ${cPosition ?? ''}`);
+	let classesModal = $derived(`${cModal} ${background} ${width} ${height} ${padding} ${spacing} ${rounded} ${shadow} ${
+		$modalStore[0]?.modalClasses ?? ''
+	}`);
+	let parent = $derived({
 		position,
 		background,
 		width,
@@ -202,22 +244,22 @@
 		regionFooter,
 		onClose,
 		onConfirm
-	};
+	});
 </script>
 
-<svelte:window bind:innerHeight={windowHeight} on:keydown={onKeyDown} />
+<svelte:window bind:innerHeight={windowHeight} onkeydown={onKeyDown} />
 
 {#if $modalStore.length > 0}
 	{#key $modalStore}
 		<!-- Backdrop -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="modal-backdrop {classesBackdrop} {backdropOverflow}"
 			data-testid="modal-backdrop"
-			on:mousedown={onBackdropInteractionBegin}
-			on:mouseup={onBackdropInteractionEnd}
-			on:touchstart|passive
-			on:touchend|passive
+			onmousedown={onBackdropInteractionBegin}
+			onmouseup={onBackdropInteractionEnd}
+			use:passive={['touchstart', () => bubble('touchstart')]}
+			use:passive={['touchend', () => bubble('touchend')]}
 			transition:dynamicTransition|global={{
 				transition: fade,
 				params: { duration: 150 },
@@ -260,21 +302,21 @@
 						{/if}
 						{#if $modalStore[0].type === 'alert'}
 							<footer class="modal-footer {regionFooter}">
-								<button type="button" class="btn {buttonNeutral}" on:click={onClose}
+								<button type="button" class="btn {buttonNeutral}" onclick={onClose}
 									>{buttonTextCancel}</button
 								>
 							</footer>
 						{:else if $modalStore[0].type === 'confirm'}
 							<footer class="modal-footer {regionFooter}">
-								<button type="button" class="btn {buttonNeutral}" on:click={onClose}
+								<button type="button" class="btn {buttonNeutral}" onclick={onClose}
 									>{buttonTextCancel}</button
 								>
-								<button type="button" class="btn {buttonPositive}" on:click={onConfirm}
+								<button type="button" class="btn {buttonPositive}" onclick={onConfirm}
 									>{buttonTextConfirm}</button
 								>
 							</footer>
 						{:else if $modalStore[0].type === 'prompt'}
-							<form class="space-y-4" on:submit={onPromptSubmit}>
+							<form class="space-y-4" onsubmit={onPromptSubmit}>
 								<input
 									class="modal-prompt-input input"
 									name="prompt"
@@ -283,7 +325,7 @@
 									{...$modalStore[0].valueAttr}
 								/>
 								<footer class="modal-footer {regionFooter}">
-									<button type="button" class="btn {buttonNeutral}" on:click={onClose}
+									<button type="button" class="btn {buttonNeutral}" onclick={onClose}
 										>{buttonTextCancel}</button
 									>
 									<button type="submit" class="btn {buttonPositive}">{buttonTextSubmit}</button>
@@ -302,12 +344,13 @@
 						aria-label={$modalStore[0].title ?? 'Modal'}
 					>
 						{#if currentComponent?.slot}
-							<svelte:component this={currentComponent?.ref} {...currentComponent?.props} {parent}>
+							{@const SvelteComponent = currentComponent?.ref}
+							<SvelteComponent {...currentComponent?.props} {parent}>
 								{currentComponent?.slot}
-							</svelte:component>
+							</SvelteComponent>
 						{:else}
-							<svelte:component
-								this={currentComponent?.ref}
+							{@const SvelteComponent_1 = currentComponent?.ref}
+							<SvelteComponent_1
 								{...currentComponent?.props}
 								{parent}
 							/>

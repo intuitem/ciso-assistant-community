@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
@@ -6,16 +8,28 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { isDark } from '$lib/utils/helpers';
 
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let helpText: string | undefined = undefined;
 
-	export let riskMatrix: RiskMatrixJsonDefinition;
 
-	export let probabilityField: string;
-	export let impactField: string;
 
-	export let form;
+	interface Props {
+		label?: string | undefined;
+		field: string;
+		helpText?: string | undefined;
+		riskMatrix: RiskMatrixJsonDefinition;
+		probabilityField: string;
+		impactField: string;
+		form: any;
+	}
+
+	let {
+		label = undefined,
+		field,
+		helpText = undefined,
+		riskMatrix,
+		probabilityField,
+		impactField,
+		form
+	}: Props = $props();
 
 	const { value: probabilityValue } = formFieldProxy(form, probabilityField);
 	const { value: impactValue } = formFieldProxy(form, impactField);
@@ -36,18 +50,20 @@
 	};
 
 	let riskLevel =
-		$probabilityValue >= 0 && $impactValue >= 0
+		$state($probabilityValue >= 0 && $impactValue >= 0
 			? riskMatrix.risk[gridPosition($probabilityValue, $impactValue)!]
-			: undefined;
+			: undefined);
 
-	$: riskLevel =
-		$probabilityValue >= 0 && $impactValue >= 0
-			? riskMatrix.risk[gridPosition($probabilityValue, $impactValue)!]
-			: undefined;
+	run(() => {
+		riskLevel =
+			$probabilityValue >= 0 && $impactValue >= 0
+				? riskMatrix.risk[gridPosition($probabilityValue, $impactValue)!]
+				: undefined;
+	});
 
-	$: classesCellText = (backgroundHexColor: string) => {
+	let classesCellText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
-	};
+	});
 </script>
 
 <div class="flex flex-col">

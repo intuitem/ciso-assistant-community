@@ -1,12 +1,23 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	export let data;
-	export let names;
-	export let uuids;
 	import { m } from '$paraglide/messages';
+	interface Props {
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		data: any;
+		names: any;
+		uuids: any;
+	}
+
+	let {
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = '',
+		data,
+		names,
+		uuids
+	}: Props = $props();
 
 	function truncateString(maxLength: number) {
 		return (name) => (name.length > maxLength ? name.substring(0, maxLength) + '...' : name);
@@ -123,7 +134,7 @@
 </script>
 
 {#if data.length > 0}
-	<div id={chart_id} class="{width} {height} {classesContainer}" />
+	<div id={chart_id} class="{width} {height} {classesContainer}"></div>
 {:else}
 	<div class="flex justify-center items-center h-full">
 		<div class="font-semibold">

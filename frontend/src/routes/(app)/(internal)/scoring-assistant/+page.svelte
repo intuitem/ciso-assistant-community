@@ -1,51 +1,54 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
 	import Selector from './selector.svelte';
 	import { average, forms } from './utils';
 	import { m } from '$paraglide/messages';
 
-	export let data;
-	export let risk_matrices = data.risk_matrices;
+	let { data, risk_matrices = data.risk_matrices } = $props();
 
-	let risk_matrix_select: Element;
-	let risk_matrix: RiskMatrixJsonDefinition;
-	let is_business_impact_ignored = false;
+	let risk_matrix_select: Element = $state();
+	let risk_matrix: RiskMatrixJsonDefinition = $derived(risk_matrices[risk_matrix_index] ?? null);
+	let is_business_impact_ignored = $state(false);
 
-	let risk_matrix_index = 0;
-	$: risk_matrix = risk_matrices[risk_matrix_index] ?? null;
+	let risk_matrix_index = $state(0);
+	
 
-	let vector: number[];
-	let vector_string: string;
-	let form_data = {
+	let vector: number[] = $state();
+	let vector_string: string = $state();
+	let form_data = $state({
 		threat_agent: [0, 0, 0, 0],
 		business_impact: [0, 0, 0, 0],
 		vulnerability: [0, 0, 0, 0],
 		technical_impact: [0, 0, 0, 0]
-	};
+	});
 
-	$: threat_agent_score = average(form_data.threat_agent);
-	$: business_impact_score = average(form_data.business_impact);
-	$: vulnerability_score = average(form_data.vulnerability);
-	$: technical_impact_score = average(form_data.technical_impact);
+	let threat_agent_score = $derived(average(form_data.threat_agent));
+	let business_impact_score = $derived(average(form_data.business_impact));
+	let vulnerability_score = $derived(average(form_data.vulnerability));
+	let technical_impact_score = $derived(average(form_data.technical_impact));
 
-	$: impact_score = is_business_impact_ignored ? technical_impact_score : business_impact_score;
-	$: probability_score = average([threat_agent_score, vulnerability_score]);
-	$: risk_score = average([impact_score, probability_score]);
+	let impact_score = $derived(is_business_impact_ignored ? technical_impact_score : business_impact_score);
+	let probability_score = $derived(average([threat_agent_score, vulnerability_score]));
+	let risk_score = $derived(average([impact_score, probability_score]));
 
-	$: vector = [
-		...form_data.threat_agent,
-		...form_data.business_impact,
-		...form_data.vulnerability,
-		...form_data.technical_impact
-	];
+	run(() => {
+		vector = [
+			...form_data.threat_agent,
+			...form_data.business_impact,
+			...form_data.vulnerability,
+			...form_data.technical_impact
+		];
+	});
 
-	$: {
+	run(() => {
 		let strings: string[] = [];
 		for (let i = 0; i < 4; i++) {
 			strings.push(vector.slice(4 * i, 4 * (i + 1)).join(''));
 		}
 		vector_string = strings.join('-');
-	}
+	});
 
 	function update_scores(risk_score: number, risk_matrix: RiskMatrixJsonDefinition) {
 		if (!risk_matrix) return;
@@ -64,7 +67,7 @@
 		};
 	}
 
-	$: labels = update_scores(risk_score, risk_matrix);
+	let labels = $derived(update_scores(risk_score, risk_matrix));
 </script>
 
 <main class="text-sm h-full flex flex-col">
@@ -220,7 +223,7 @@
 									>{labels.probability.name}
 									{probability_score === 0 ? '--' : probability_score}</span
 								>
-								<span class="text-white text-xs" id="probability_score" />
+								<span class="text-white text-xs" id="probability_score"></span>
 							</div>
 						</div>
 					</div>
@@ -230,7 +233,7 @@
 						id="score"
 					>
 						<div class="text-lg p-1 col-span-3">{m.riskLevel()}</div>
-						<i class="fas fa-arrow-alt-circle-right" />
+						<i class="fas fa-arrow-alt-circle-right"></i>
 						<span
 							class="py-2 px-0 font-semibold rounded shadow"
 							id="risk_label"
@@ -238,7 +241,7 @@
 						>
 							<p class="overflow-clip">{labels.risk.name}</p></span
 						>
-						<i class="fas fa-arrow-alt-circle-left" />
+						<i class="fas fa-arrow-alt-circle-left"></i>
 					</div>
 
 					<div class="mx-auto w-full">
@@ -248,7 +251,7 @@
 								<span class="text-xl text-white font-bold" id="impact_label"
 									>{labels.impact.name} {impact_score === 0 ? '--' : impact_score}</span
 								>
-								<span class="text-white text-xs" id="impact_score" />
+								<span class="text-white text-xs" id="impact_score"></span>
 							</div>
 						</div>
 					</div>

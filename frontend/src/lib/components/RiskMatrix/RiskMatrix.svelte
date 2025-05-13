@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import Cell from './Cell.svelte';
 	import { buildRiskMatrix, reverseCols, reverseRows, transpose } from './utils';
 
@@ -9,21 +11,40 @@
 	import type { ComponentType } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	// --- Props ---
-	export let riskMatrix;
-	export let wrapperClass: string | undefined = '';
-	export let matrixName: string; // used to differentiate bubbles tooltip names
-	export let showRisks = false;
-	export let useBubbles = false;
-	export let data: Array<Array<any>> | undefined = undefined; // Ensure data is typed correctly
-	export let dataItemComponent: ComponentType | undefined = undefined;
+	
 
-	// Axis configuration props
-	export let swapAxes: boolean = $page.data.settings.risk_matrix_swap_axes ?? false; // Probability on X, Impact on Y if true
-	export let flipVertical: boolean = $page.data.settings.risk_matrix_flip_vertical ?? false; // Origin top-left for Y-axis if true
-	export let labelStandard: string = $page.data.settings.risk_matrix_labels ?? 'ISO';
+	
+	interface Props {
+		// --- Props ---
+		riskMatrix: any;
+		wrapperClass?: string | undefined;
+		matrixName: string; // used to differentiate bubbles tooltip names
+		showRisks?: boolean;
+		useBubbles?: boolean;
+		data?: Array<Array<any>> | undefined; // Ensure data is typed correctly
+		dataItemComponent?: ComponentType | undefined;
+		// Axis configuration props
+		swapAxes?: boolean; // Probability on X, Impact on Y if true
+		flipVertical?: boolean; // Origin top-left for Y-axis if true
+		labelStandard?: string;
+	}
 
-	$: console.log($page.data.settings);
+	let {
+		riskMatrix,
+		wrapperClass = '',
+		matrixName,
+		showRisks = false,
+		useBubbles = false,
+		data = undefined,
+		dataItemComponent = undefined,
+		swapAxes = $page.data.settings.risk_matrix_swap_axes ?? false,
+		flipVertical = $page.data.settings.risk_matrix_flip_vertical ?? false,
+		labelStandard = $page.data.settings.risk_matrix_labels ?? 'ISO'
+	}: Props = $props();
+
+	run(() => {
+		console.log($page.data.settings);
+	});
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);
 	const grid = parsedRiskMatrix.grid;
@@ -31,16 +52,16 @@
 	const originalProbabilities = parsedRiskMatrix.probability;
 	const originalImpacts = parsedRiskMatrix.impact;
 
-	let yAxisLabel: string;
-	let xAxisLabel: string;
-	let yAxisHeaders: typeof originalProbabilities | typeof originalImpacts;
-	let xAxisHeaders: typeof originalImpacts | typeof originalProbabilities;
-	let finalMatrix: ReturnType<typeof buildRiskMatrix>;
-	let finalData: typeof data | undefined;
-	let popupHoverY: PopupSettings[] = [];
-	let popupHoverX: PopupSettings[] = [];
+	let yAxisLabel: string = $state();
+	let xAxisLabel: string = $state();
+	let yAxisHeaders: typeof originalProbabilities | typeof originalImpacts = $state();
+	let xAxisHeaders: typeof originalImpacts | typeof originalProbabilities = $state();
+	let finalMatrix: ReturnType<typeof buildRiskMatrix> = $state();
+	let finalData: typeof data | undefined = $state();
+	let popupHoverY: PopupSettings[] = $state([]);
+	let popupHoverX: PopupSettings[] = $state([]);
 
-	$: {
+	run(() => {
 		// Determine base axis types
 		const yAxisType = swapAxes ? 'impact' : 'probability';
 		const xAxisType = swapAxes ? 'probability' : 'impact';
@@ -94,12 +115,12 @@
 			target: `popup-${matrixName}-x-${i}`,
 			placement: 'bottom'
 		}));
-	}
+	});
 
-	$: classesCellText = (backgroundHexColor: string | undefined | null): string => {
+	let classesCellText = $derived((backgroundHexColor: string | undefined | null): string => {
 		if (!backgroundHexColor) return '';
 		return isDark(backgroundHexColor) ? 'text-white' : 'text-black';
-	};
+	});
 </script>
 
 <div class="flex flex-row items-center">
@@ -119,7 +140,7 @@
 			data-testid="risk-matrix"
 		>
 			{#if flipVertical}
-				<div />
+				<div></div>
 
 				{#each xAxisHeaders as xHeader, j}
 					<div
@@ -135,7 +156,7 @@
 							data-popup={'popup-' + matrixName + '-x-' + j}
 						>
 							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
-							<div class="arrow bg-black" />
+							<div class="arrow bg-black"></div>
 						</div>
 						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
 						{#if xHeader.description}
@@ -164,7 +185,7 @@
 						<p data-testid="y-header-description" class="font-semibold">
 							{yHeader.description}
 						</p>
-						<div class="arrow bg-black" />
+						<div class="arrow bg-black"></div>
 					</div>
 					<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
 					{#if yHeader.description}
@@ -187,7 +208,7 @@
 			{/each}
 
 			{#if !flipVertical}
-				<div />
+				<div></div>
 
 				{#each xAxisHeaders as xHeader, j}
 					<div
@@ -203,7 +224,7 @@
 							data-popup={'popup-' + matrixName + '-x-' + j}
 						>
 							<p data-testid="x-header-description" class="font-semibold">{xHeader.description}</p>
-							<div class="arrow bg-black" />
+							<div class="arrow bg-black"></div>
 						</div>
 						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
 						{#if xHeader.description}

@@ -11,8 +11,12 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let data: PageData;
-	export let form: ActionData;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
+
+	let { data, form }: Props = $props();
 
 	const workshopsData = {
 		ws1: [
@@ -188,68 +192,74 @@
 			meta={workshopsData.ws5}
 			createRiskAnalysis={true}
 		>
-			<div slot="addRiskAnalysis">
-				<button class="flex flex-col text-left hover:text-purple-800" on:click={modalCreateForm}>
-					{#if data.data.meta.workshops[4].steps[0].status == 'done'}
-						<span
-							class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
-						>
-							<i class="fa-solid fa-check" />
-						</span>
-					{:else}
-						<span
-							class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
-						>
-							<i class="fa-solid fa-clipboard-check" />
-						</span>
-					{/if}
-					<h3 class="font-medium leading-tight">{m.activity()} 1</h3>
-					<p class="text-sm">{safeTranslate(m.ebiosWs5_1())}</p>
-				</button>
-			</div>
+			{#snippet addRiskAnalysis()}
+						<div >
+					<button class="flex flex-col text-left hover:text-purple-800" onclick={modalCreateForm}>
+						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
+							<span
+								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
+							>
+								<i class="fa-solid fa-check"></i>
+							</span>
+						{:else}
+							<span
+								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+							>
+								<i class="fa-solid fa-clipboard-check"></i>
+							</span>
+						{/if}
+						<h3 class="font-medium leading-tight">{m.activity()} 1</h3>
+						<p class="text-sm">{safeTranslate(m.ebiosWs5_1())}</p>
+					</button>
+				</div>
+					{/snippet}
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
-			<div slot="action">
-				<a
-					class="text-orange-600 hover:text-purple-600 font-medium"
-					href={`${$page.url.pathname}/visual/`}
-					><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded">New</span><i
-						class="fa-solid fa-chart-diagram mr-2"
-					></i><span class="font-semibold">{m.visualAnalysis()}</span></a
-				>
-			</div>
-			<div slot="content">
-				<Card
-					count={data.data.roto_count}
-					label={m.roToCouples()}
-					section={''}
-					customClass="col-span-3 lg:col-span-1"
-				/>
-				<Card
-					count={data.data.selected_roto_count}
-					label={m.selectedRoToCouples()}
-					section={''}
-					customClass="col-span-3 lg:col-span-1"
-				/>
-				<Card
-					count={data.data.selected_attack_path_count}
-					label={m.selectedAttackPaths()}
-					section={''}
-					customClass="col-span-3 lg:col-span-1"
-				/>
-				<Card
-					count={data.data.operational_scenario_count}
-					label={m.operationalScenarios()}
-					section={''}
-					customClass="col-span-3 lg:col-span-1"
-				/>
-				<Card
-					count={data.data.applied_control_count}
-					label={m.appliedControls()}
-					section={''}
-					customClass="col-span-3 lg:col-span-1"
-				/>
-			</div>
+			{#snippet action()}
+						<div >
+					<a
+						class="text-orange-600 hover:text-purple-600 font-medium"
+						href={`${$page.url.pathname}/visual/`}
+						><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded">New</span><i
+							class="fa-solid fa-chart-diagram mr-2"
+						></i><span class="font-semibold">{m.visualAnalysis()}</span></a
+					>
+				</div>
+					{/snippet}
+			{#snippet content()}
+						<div >
+					<Card
+						count={data.data.roto_count}
+						label={m.roToCouples()}
+						section={''}
+						customClass="col-span-3 lg:col-span-1"
+					/>
+					<Card
+						count={data.data.selected_roto_count}
+						label={m.selectedRoToCouples()}
+						section={''}
+						customClass="col-span-3 lg:col-span-1"
+					/>
+					<Card
+						count={data.data.selected_attack_path_count}
+						label={m.selectedAttackPaths()}
+						section={''}
+						customClass="col-span-3 lg:col-span-1"
+					/>
+					<Card
+						count={data.data.operational_scenario_count}
+						label={m.operationalScenarios()}
+						section={''}
+						customClass="col-span-3 lg:col-span-1"
+					/>
+					<Card
+						count={data.data.applied_control_count}
+						label={m.appliedControls()}
+						section={''}
+						customClass="col-span-3 lg:col-span-1"
+					/>
+				</div>
+					{/snippet}
 		</Tile>
 	</div>
 </div>

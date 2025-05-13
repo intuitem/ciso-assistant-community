@@ -1,10 +1,19 @@
 <script lang="ts">
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let title;
-	export let desc;
-	export let link;
-	export let tags: string[] = [];
+	interface Props {
+		title: any;
+		desc: any;
+		link: any;
+		tags?: string[];
+	}
+
+	let {
+		title,
+		desc,
+		link,
+		tags = []
+	}: Props = $props();
 </script>
 
 <article

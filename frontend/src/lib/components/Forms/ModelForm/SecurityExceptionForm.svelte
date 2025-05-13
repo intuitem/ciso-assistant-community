@@ -16,12 +16,23 @@
 	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context = 'default';
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context?: string;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context = 'default'
+	}: Props = $props();
 
 	const modalStore = getModalStore();
 
@@ -148,8 +159,8 @@
 		<div class="mt-4">
 			<button
 				class="btn bg-gray-300 h-10 w-10"
-				on:click={(_) => modalAppliedControlCreateForm('applied_controls')}
-				type="button"><i class="fa-solid fa-plus text-sm" /></button
+				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
+				type="button"><i class="fa-solid fa-plus text-sm"></i></button
 			>
 		</div>
 	{/if}

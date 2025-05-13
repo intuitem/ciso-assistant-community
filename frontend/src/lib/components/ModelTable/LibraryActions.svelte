@@ -5,10 +5,14 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 
-	export let meta: any;
-	export let actionsURLModel: string;
-	$: library = meta;
-	let loading = { form: false, library: '' };
+	interface Props {
+		meta: any;
+		actionsURLModel: string;
+	}
+
+	let { meta, actionsURLModel }: Props = $props();
+	let library = $derived(meta);
+	let loading = $state({ form: false, library: '' });
 
 	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
 		const data = new FormData(event.currentTarget);
@@ -61,15 +65,15 @@
 						update();
 					};
 				}}
-				on:submit={handleSubmit}
+				onsubmit={handleSubmit}
 			>
 				<button
 					type="submit"
 					data-testid="tablerow-import-button"
 					id="tablerow-import-button"
-					on:click={(e) => e.stopPropagation()}
+					onclick={(e) => e.stopPropagation()}
 				>
-					<i class="fa-solid fa-file-import" />
+					<i class="fa-solid fa-file-import"></i>
 				</button>
 			</form>
 		</span>
@@ -111,10 +115,10 @@
 						update();
 					};
 				}}
-				on:submit={handleSubmit}
+				onsubmit={handleSubmit}
 			>
-				<button title={m.updateThisLibrary()} on:click={(e) => e.stopPropagation()}>
-					<i class="fa-solid fa-circle-up" />
+				<button title={m.updateThisLibrary()} onclick={(e) => e.stopPropagation()}>
+					<i class="fa-solid fa-circle-up"></i>
 				</button>
 			</form>
 		</span>

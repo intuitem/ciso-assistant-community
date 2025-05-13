@@ -2,8 +2,7 @@
 	import type { urlModel } from '$lib/utils/types';
 
 	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
+	
 
 	// Stores
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -13,12 +12,6 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let _form = {};
-	export let URLModel: urlModel | '' = '';
-	export let id: string = '';
-	export let formAction: string;
-	export let bodyComponent: ComponentType | undefined;
-	export let bodyProps: Record<string, unknown> = {};
 
 	import { superForm } from 'sveltekit-superforms';
 
@@ -36,7 +29,28 @@
 
 	import SuperDebug from 'sveltekit-superforms';
 	import type { ComponentType } from 'svelte';
-	export let debug = false;
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		_form?: any;
+		URLModel?: urlModel | '';
+		id?: string;
+		formAction: string;
+		bodyComponent: ComponentType | undefined;
+		bodyProps?: Record<string, unknown>;
+		debug?: boolean;
+	}
+
+	let {
+		parent,
+		_form = {},
+		URLModel = '',
+		id = '',
+		formAction,
+		bodyComponent,
+		bodyProps = {},
+		debug = false
+	}: Props = $props();
 </script>
 
 {#if $modalStore[0]}
@@ -44,18 +58,19 @@
 		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 		{#if bodyComponent}
+			{@const SvelteComponent = bodyComponent}
 			<div class="max-h-96 overflow-y-scroll scroll card">
-				<svelte:component this={bodyComponent} {...bodyProps} />
+				<SvelteComponent {...bodyProps} />
 			</div>
 		{/if}
 		<!-- Enable for debugging: -->
 		<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
-        <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{m.cancel()}</button>
+        <button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>{m.cancel()}</button>
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
-        <button class="btn variant-filled-error" type="submit" on:click={parent.onConfirm}>{m.submit()}</button>
+        <button class="btn variant-filled-error" type="submit" onclick={parent.onConfirm}>{m.submit()}</button>
       </footer>
 		</SuperForm>
 		{#if debug === true}

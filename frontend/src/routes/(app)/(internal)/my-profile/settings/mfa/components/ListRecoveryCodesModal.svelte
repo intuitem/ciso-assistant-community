@@ -1,7 +1,6 @@
 <script lang="ts">
 	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
+	
 
 	// Stores
 	import type { ModalStore } from '@skeletonlabs/skeleton';
@@ -12,6 +11,12 @@
 
 	import { enhance } from '$app/forms';
 	import { copy } from '@svelte-put/copy';
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+	}
+
+	let { parent }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -48,7 +53,7 @@
 			</div>
 		{/if}
 		<footer class="modal-footer {parent.regionFooter}">
-			<button type="button" class="btn {parent.buttonPositive}" on:click={parent.onClose}
+			<button type="button" class="btn {parent.buttonPositive}" onclick={parent.onClose}
 				>{m.ok()}</button
 			>
 		</footer>

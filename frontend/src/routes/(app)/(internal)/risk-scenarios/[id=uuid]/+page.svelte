@@ -15,7 +15,11 @@
 
 	import { onMount } from 'svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
@@ -25,15 +29,15 @@
 		model: model.name,
 		domain: data.scenario.perimeter.folder.id
 	});
-	let color_map = {};
+	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
 	data.riskMatrix.risk.forEach((risk, i) => {
 		color_map[risk.name] = risk.hexcolor;
 	});
 
-	$: classesCellText = (backgroundHexColor: string) => {
+	let classesCellText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
-	};
+	});
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
@@ -81,7 +85,7 @@
 			<Anchor
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit mt-1"
-				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
+				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 			>
 		{/if}
 	</div>
@@ -196,7 +200,7 @@
 					{safeTranslate(data.scenario.current_proba.name)}
 				</span>
 			</p>
-			<i class="fa-solid fa-xmark mt-5" />
+			<i class="fa-solid fa-xmark mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 				<span
@@ -206,7 +210,7 @@
 					{safeTranslate(data.scenario.current_impact.name)}
 				</span>
 			</p>
-			<i class="fa-solid fa-equals mt-5" />
+			<i class="fa-solid fa-equals mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400 whitespace-nowrap"
 					>{m.currentRiskLevel()}</span
@@ -243,7 +247,7 @@
 					{safeTranslate(data.scenario.residual_proba.name)}
 				</span>
 			</p>
-			<i class="fa-solid fa-xmark mt-5" />
+			<i class="fa-solid fa-xmark mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
 				<span
@@ -253,7 +257,7 @@
 					{safeTranslate(data.scenario.residual_impact.name)}
 				</span>
 			</p>
-			<i class="fa-solid fa-equals mt-5" />
+			<i class="fa-solid fa-equals mt-5"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400 whitespace-nowrap"
 					>{m.residualRiskLevel()}</span

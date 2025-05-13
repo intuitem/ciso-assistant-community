@@ -8,7 +8,6 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { driverInstance } from '$lib/utils/stores';
 
-	export let sideBarVisibleItems: Record<string, boolean>;
 
 	const user = $page.data.user;
 
@@ -39,6 +38,11 @@
 		.filter((item) => item.items.length > 0); // Filter out items with no sub-items
 
 	import { lastAccordionItem } from '$lib/utils/stores';
+	interface Props {
+		sideBarVisibleItems: Record<string, boolean>;
+	}
+
+	let { sideBarVisibleItems }: Props = $props();
 
 	function lastAccordionItemOpened(value: string) {
 		lastAccordionItem.set(value);
@@ -74,10 +78,12 @@
 					on:click={handleNavClick}
 					open={$lastAccordionItem === item.name}
 				>
-					<svelte:fragment slot="summary"><SideBarCategory {item} /></svelte:fragment>
-					<svelte:fragment slot="content"
-						><SideBarItem item={item.items} {sideBarVisibleItems} /></svelte:fragment
-					>
+					{#snippet summary()}
+										<SideBarCategory {item} />
+									{/snippet}
+					{#snippet content()}
+										<SideBarItem item={item.items} {sideBarVisibleItems} />
+									{/snippet}
 				</AccordionItem>
 			{/if}
 		{/each}

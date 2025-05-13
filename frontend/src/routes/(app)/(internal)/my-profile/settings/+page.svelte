@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import {
 		Tab,
 		TabGroup,
@@ -15,8 +17,12 @@
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';
 
-	export let data: PageData;
-	export let form: ActionData;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
+
+	let { data, form }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -71,16 +77,18 @@
 		modalStore.trigger(recoveryCodesModal);
 	}
 
-	let tabSet = 0;
+	let tabSet = $state(0);
 
-	$: hasTOTP = data.authenticators.some((auth) => auth.type === 'totp');
-	$: $recoveryCodes =
-		form && Object.hasOwn(form, 'recoveryCodes') ? form.recoveryCodes : data.recoveryCodes;
+	let hasTOTP = $derived(data.authenticators.some((auth) => auth.type === 'totp'));
+	run(() => {
+		$recoveryCodes =
+			form && Object.hasOwn(form, 'recoveryCodes') ? form.recoveryCodes : data.recoveryCodes;
+	});
 </script>
 
 <TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
 	<Tab bind:group={tabSet} name="ssoSettings" value={0}
-		><i class="fa-solid fa-shield-halved mr-2" />{m.securitySettings()}</Tab
+		><i class="fa-solid fa-shield-halved mr-2"></i>{m.securitySettings()}</Tab
 	>
 </TabGroup>
 {#if tabSet === 0}
@@ -115,18 +123,18 @@
 								{#if hasTOTP}
 									<button
 										class="btn variant-ringed-surface w-fit"
-										on:click={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
+										onclick={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
 									>
 									{#if data.recoveryCodes}
 										<button
 											class="btn variant-ringed-surface w-fit"
-											on:click={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
+											onclick={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
 										>
 									{/if}
 								{:else}
 									<button
 										class="btn variant-ringed-surface w-fit"
-										on:click={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
+										onclick={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
 									>
 								{/if}
 							</div>

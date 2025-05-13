@@ -4,16 +4,20 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
 
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
-	let form: HTMLFormElement;
-	let file: HTMLInputElement;
+	let form: HTMLFormElement = $state();
+	let file: HTMLInputElement = $state();
 
 	// Function to handle modal confirmation for any action
 	function modalConfirm(): void {
@@ -34,7 +38,7 @@
 		if (file) modalStore.trigger(modal);
 	}
 
-	$: uploadButtonStyles = file ? '' : 'chip-disabled';
+	let uploadButtonStyles = $derived(file ? '' : 'chip-disabled');
 
 	const authorizedExtensions = ['.bak'];
 	const user = $page.data.user;
@@ -44,7 +48,7 @@
 {#if canBackup}
 	<div class="grid grid-cols-2 space-y-2 lg:space-y-0 lg:space-x-4">
 		<div class="card col-span-full lg:col-span-1 bg-white shadow py-4 px-6 space-y-2">
-			<h4 class="h4 font-semibold">{m.exportBackup()} <i class="fa-solid fa-download" /></h4>
+			<h4 class="h4 font-semibold">{m.exportBackup()} <i class="fa-solid fa-download"></i></h4>
 			<div class=" py-4">
 				{m.exportBackupDescription()}
 			</div>
@@ -54,7 +58,7 @@
 		</div>
 
 		<div class="card col-span-full lg:col-span-1 bg-white shadow py-4 px-6 space-y-2">
-			<h4 class="h4 font-semibold">{m.importBackup()} <i class="fa-solid fa-upload" /></h4>
+			<h4 class="h4 font-semibold">{m.importBackup()} <i class="fa-solid fa-upload"></i></h4>
 			<div class=" py-4">
 				{m.importBackupDescription()}
 			</div>
@@ -70,7 +74,7 @@
 				<button
 					class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
 					type="button"
-					on:click={modalConfirm}>{m.upload()}</button
+					onclick={modalConfirm}>{m.upload()}</button
 				>
 			</form>
 		</div>

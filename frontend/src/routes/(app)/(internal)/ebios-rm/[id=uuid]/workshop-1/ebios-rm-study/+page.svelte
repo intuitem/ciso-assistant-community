@@ -21,7 +21,11 @@
 		deprecated: 'bg-orange-300 text-orange-800'
 	};
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const ebiosRmStudy = data.data;
 
@@ -43,7 +47,7 @@
 		modalStore.trigger(modal);
 	}
 
-	let activeActivity: string | null = null;
+	let activeActivity: string | null = $state(null);
 
 	$page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
@@ -72,7 +76,7 @@
 		modalStore.trigger(modal);
 	}
 
-	let tabSet = 0;
+	let tabSet = $state(0);
 
 	const user = $page.data.user;
 	const canEditObject: boolean = canPerformAction({
@@ -93,7 +97,7 @@
 				href="/ebios-rm/{ebiosRmStudy.id}"
 				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
-				<i class="fa-solid fa-arrow-left" />
+				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
 			</a>
 			<div class="flex items-center space-x-2">
@@ -115,7 +119,7 @@
 					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
 					class="btn variant-filled-primary h-fit"
 				>
-					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>
 					{m.edit()}
 				</Anchor>
 			{/if}
@@ -207,53 +211,59 @@
 								{/if}
 							</Tab>
 						{/each}
-						<svelte:fragment slot="panel">
-							{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
-								{#if tabSet === index}
-									<div class="flex flex-row justify-between px-4 py-2">
-										<h4 class="font-semibold lowercase capitalize-first my-auto">
-											{safeTranslate('associated-' + model.info.localNamePlural)}
-										</h4>
-									</div>
-									{#if model.table}
-										<ModelTable
-											source={model.table}
-											deleteForm={model.deleteForm}
-											URLModel={urlmodel}
-											canSelectObject={canEditObject}
-											baseEndpoint="/assets?ebios_rm_studies={$page.params.id}"
-										>
-											<div slot="selectButton">
-												<span
-													class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
-												>
-													<button
-														class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
-														data-testid="select-button"
-														title={m.selectAsset()}
-														on:click={(_) => modalUpdateForm()}
-														><i class="fa-solid fa-hand-pointer"></i>
-													</button>
-												</span>
-											</div>
-											<div slot="addButton">
-												<span
-													class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
-												>
-													<button
-														class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-														data-testid="add-button"
-														title={safeTranslate('add-' + data.model.localName)}
-														on:click={(_) => modalCreateForm(model)}
-														><i class="fa-solid fa-file-circle-plus"></i>
-													</button>
-												</span>
-											</div>
-										</ModelTable>
+						{#snippet panel()}
+											
+								{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
+									{#if tabSet === index}
+										<div class="flex flex-row justify-between px-4 py-2">
+											<h4 class="font-semibold lowercase capitalize-first my-auto">
+												{safeTranslate('associated-' + model.info.localNamePlural)}
+											</h4>
+										</div>
+										{#if model.table}
+											<ModelTable
+												source={model.table}
+												deleteForm={model.deleteForm}
+												URLModel={urlmodel}
+												canSelectObject={canEditObject}
+												baseEndpoint="/assets?ebios_rm_studies={$page.params.id}"
+											>
+												{#snippet selectButton()}
+																						<div >
+														<span
+															class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
+														>
+															<button
+																class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
+																data-testid="select-button"
+																title={m.selectAsset()}
+																onclick={(_) => modalUpdateForm()}
+																><i class="fa-solid fa-hand-pointer"></i>
+															</button>
+														</span>
+													</div>
+																					{/snippet}
+												{#snippet addButton()}
+																						<div >
+														<span
+															class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
+														>
+															<button
+																class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+																data-testid="add-button"
+																title={safeTranslate('add-' + data.model.localName)}
+																onclick={(_) => modalCreateForm(model)}
+																><i class="fa-solid fa-file-circle-plus"></i>
+															</button>
+														</span>
+													</div>
+																					{/snippet}
+											</ModelTable>
+										{/if}
 									{/if}
-								{/if}
-							{/each}
-						</svelte:fragment>
+								{/each}
+							
+											{/snippet}
 					</TabGroup>
 				</div>
 			{/if}

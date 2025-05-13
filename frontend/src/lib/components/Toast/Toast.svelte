@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { fly } from 'svelte/transition';
 	import {
 		type Transition,
@@ -19,37 +19,66 @@
 	lang="ts"
 	generics="TransitionIn extends Transition = FlyTransition, TransitionOut extends Transition = FlyTransition"
 >
+	import { run } from 'svelte/legacy';
+
 	import { flip } from 'svelte/animate';
 
 	// Stores
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	const toastStore = getToastStore();
 
-	// Props
-	export let position: 't' | 'b' | 'l' | 'r' | 'tl' | 'tr' | 'bl' | 'br' = 'b';
-	export let max = 3;
+	
 
-	// Props (styles)
-	export let background: CssClasses = 'variant-filled-secondary';
-	export let width: CssClasses = 'max-w-[640px]';
-	export let color: CssClasses = '';
-	export let padding: CssClasses = 'p-4';
-	export let spacing: CssClasses = 'space-x-4';
-	export let rounded: CssClasses = 'rounded-container-token';
-	export let shadow: CssClasses = 'shadow-lg';
-	export let zIndex: CssClasses = 'z-[888]';
+	
 
-	// Props (buttons)
-	export let buttonAction: CssClasses = 'btn variant-filled';
-	export let buttonDismiss: CssClasses = 'btn-icon btn-icon-sm variant-filled';
-	export let buttonDismissLabel = '✕';
+	
 
-	// Props (transition)
-	export let transitions = !$prefersReducedMotionStore;
-	export let transitionIn: TransitionIn = fly as TransitionIn;
-	export let transitionInParams: TransitionParams<TransitionIn> = { duration: 250 };
-	export let transitionOut: TransitionOut = fly as TransitionOut;
-	export let transitionOutParams: TransitionParams<TransitionOut> = { duration: 250 };
+	
+	interface Props {
+		// Props
+		position?: 't' | 'b' | 'l' | 'r' | 'tl' | 'tr' | 'bl' | 'br';
+		max?: number;
+		// Props (styles)
+		background?: CssClasses;
+		width?: CssClasses;
+		color?: CssClasses;
+		padding?: CssClasses;
+		spacing?: CssClasses;
+		rounded?: CssClasses;
+		shadow?: CssClasses;
+		zIndex?: CssClasses;
+		// Props (buttons)
+		buttonAction?: CssClasses;
+		buttonDismiss?: CssClasses;
+		buttonDismissLabel?: string;
+		// Props (transition)
+		transitions?: any;
+		transitionIn?: TransitionIn;
+		transitionInParams?: TransitionParams<TransitionIn>;
+		transitionOut?: TransitionOut;
+		transitionOutParams?: TransitionParams<TransitionOut>;
+	}
+
+	let {
+		position = 'b',
+		max = 3,
+		background = 'variant-filled-secondary',
+		width = 'max-w-[640px]',
+		color = '',
+		padding = 'p-4',
+		spacing = 'space-x-4',
+		rounded = 'rounded-container-token',
+		shadow = 'shadow-lg',
+		zIndex = 'z-[888]',
+		buttonAction = 'btn variant-filled',
+		buttonDismiss = 'btn-icon btn-icon-sm variant-filled',
+		buttonDismissLabel = '✕',
+		transitions = !$prefersReducedMotionStore,
+		transitionIn = fly as TransitionIn,
+		transitionInParams = { duration: 250 },
+		transitionOut = fly as TransitionOut,
+		transitionOutParams = { duration: 250 }
+	}: Props = $props();
 
 	// Base Classes
 	const cWrapper = 'flex fixed top-0 left-0 right-0 bottom-0 pointer-events-none';
@@ -58,9 +87,9 @@
 	const cToastActions = 'flex items-center space-x-2';
 
 	// Local
-	let cPosition: string;
-	let cAlign: string;
-	let animAxis = { x: 0, y: 0 };
+	let cPosition: string = $state();
+	let cAlign: string = $state();
+	let animAxis = $state({ x: 0, y: 0 });
 
 	// Set Position
 	switch (position) {
@@ -125,19 +154,21 @@
 		}
 	}
 
-	let wrapperVisible = false;
+	let wrapperVisible = $state(false);
 
 	// Reactive
 	let classProp = ''; // Replacing $$props.class
-	$: classesWrapper = `${cWrapper} ${cPosition} ${zIndex} ${classProp}`;
-	$: classesSnackbar = `${cSnackbar} ${cAlign} ${padding}`;
-	$: classesToast = `${cToast} ${width} ${color} ${padding} ${spacing} ${rounded} ${shadow}`;
+	let classesWrapper = $derived(`${cWrapper} ${cPosition} ${zIndex} ${classProp}`);
+	let classesSnackbar = $derived(`${cSnackbar} ${cAlign} ${padding}`);
+	let classesToast = $derived(`${cToast} ${width} ${color} ${padding} ${spacing} ${rounded} ${shadow}`);
 	// Filtered Toast Store
-	$: filteredToasts = Array.from($toastStore).slice(0, max);
+	let filteredToasts = $derived(Array.from($toastStore).slice(0, max));
 
-	$: if (filteredToasts.length) {
-		wrapperVisible = true;
-	}
+	run(() => {
+		if (filteredToasts.length) {
+			wrapperVisible = true;
+		}
+	});
 </script>
 
 {#if filteredToasts.length > 0 || wrapperVisible}
@@ -158,12 +189,12 @@
 						params: { x: animAxis.x, y: animAxis.y, ...transitionOutParams },
 						enabled: transitions
 					}}
-					on:outroend={() => {
+					onoutroend={() => {
 						const outroFinishedForLastToastOnQueue = filteredToasts.length === 0;
 						if (outroFinishedForLastToastOnQueue) wrapperVisible = false;
 					}}
-					on:mouseenter={() => onMouseEnter(i)}
-					on:mouseleave={() => onMouseLeave(i)}
+					onmouseenter={() => onMouseEnter(i)}
+					onmouseleave={() => onMouseLeave(i)}
 					role={t.hideDismiss ? 'alert' : 'alertdialog'}
 					aria-live="polite"
 				>
@@ -176,14 +207,14 @@
 						{#if t.action || !t.hideDismiss}
 							<div class="toast-actions {cToastActions}">
 								{#if t.action}
-									<button class={buttonAction} on:click={() => onAction(i)}>{t.action.label}</button
+									<button class={buttonAction} onclick={() => onAction(i)}>{t.action.label}</button
 									>
 								{/if}
 								{#if !t.hideDismiss}
 									<button
 										class={buttonDismiss}
 										aria-label="Dismiss toast"
-										on:click={() => toastStore.close(t.id)}>{buttonDismissLabel}</button
+										onclick={() => toastStore.close(t.id)}>{buttonDismissLabel}</button
 									>
 								{/if}
 							</div>

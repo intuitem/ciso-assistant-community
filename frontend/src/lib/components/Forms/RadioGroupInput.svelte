@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
@@ -12,33 +14,51 @@
 		suggested?: boolean;
 	}
 
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
-	export let helpText: string | undefined = undefined;
 
-	export let form;
 
-	export let hidden = false;
-	export let disabled = false;
 
-	export let translateOptions = true;
-	export let cacheLock: CacheLock = {
-		promise: new Promise((res) => res(null)),
-		resolve: (x) => x
-	};
-	export let cachedValue: any[] | undefined = undefined;
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
-	export let options: Option[] = [];
+	interface Props {
+		label?: string | undefined;
+		field: string;
+		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
+		helpText?: string | undefined;
+		form: any;
+		hidden?: boolean;
+		disabled?: boolean;
+		translateOptions?: boolean;
+		cacheLock?: CacheLock;
+		cachedValue?: any[] | undefined;
+		options?: Option[];
+	}
+
+	let {
+		label = undefined,
+		field,
+		valuePath = field,
+		helpText = undefined,
+		form,
+		hidden = false,
+		disabled = false,
+		translateOptions = true,
+		cacheLock = {
+		promise: new Promise((res) => res(null)),
+		resolve: (x) => x
+	},
+		cachedValue = $bindable(undefined),
+		options = []
+	}: Props = $props();
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult) $value = cacheResult;
 	});
 
-	$: cachedValue = $value;
+	run(() => {
+		cachedValue = $value;
+	});
 </script>
 
 <div {hidden}>

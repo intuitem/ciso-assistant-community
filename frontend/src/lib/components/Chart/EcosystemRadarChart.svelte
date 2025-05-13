@@ -4,19 +4,35 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 
-	// export let name: string;
+	
 
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = 'border';
-	export let title = '';
-	export let name = '';
-	export let data;
 
-	export let max = $page.data.settings.ebios_radar_max;
-	export let greenZoneRadius = $page.data.settings.ebios_radar_green_zone_radius;
-	export let yellowZoneRadius = $page.data.settings.ebios_radar_yellow_zone_radius;
-	export let redZoneRadius = $page.data.settings.ebios_radar_red_zone_radius;
+	interface Props {
+		// export let name: string;
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		title?: string;
+		name?: string;
+		data: any;
+		max?: any;
+		greenZoneRadius?: any;
+		yellowZoneRadius?: any;
+		redZoneRadius?: any;
+	}
+
+	let {
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = 'border',
+		title = '',
+		name = '',
+		data,
+		max = $page.data.settings.ebios_radar_max,
+		greenZoneRadius = $page.data.settings.ebios_radar_green_zone_radius,
+		yellowZoneRadius = $page.data.settings.ebios_radar_yellow_zone_radius,
+		redZoneRadius = $page.data.settings.ebios_radar_red_zone_radius
+	}: Props = $props();
 
 	// data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors
 	// x,y, z
@@ -301,7 +317,7 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}" />
+<div id={chart_id} class="{width} {height} {classesContainer}"></div>
 {#if data.not_displayed > 0}
 	<div class="text-center">
 		⚠️ {data.not_displayed} items are not displayed as they are lacking data.

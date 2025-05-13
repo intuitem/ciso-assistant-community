@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 </script>
 
 <div class="bg-white p-6 shadow flex overflow-x-auto">

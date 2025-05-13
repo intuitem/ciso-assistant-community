@@ -1,10 +1,11 @@
+<!-- @migration-task Error while migrating Svelte code: Can't migrate code with beforeUpdate. Please migrate by hand. -->
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { beforeUpdate, onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { createEventDispatcher } from 'svelte';
-	import MultiSelect from 'svelte-multiselect';
+	// import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
@@ -329,25 +330,25 @@
 		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
 	>
 		<input type="hidden" name={field} value={$value ? $value : ''} />
-		<MultiSelect
-			bind:selected
-			{options}
-			{...multiSelectOptions}
-			disabled={disabled || $$restProps.disabled}
-			allowEmpty={true}
-			{...$$restProps}
-			let:option
-			{allowUserOptions}
-		>
-			{#if option.suggested}
-				<span class="text-indigo-600">{option.label}</span>
-				<span class="text-sm text-gray-500"> (suggested)</span>
-			{:else if translateOptions && option.label}
-				{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)}
-			{:else}
-				{option.label || option}
-			{/if}
-		</MultiSelect>
+		<!-- <MultiSelect -->
+		<!-- 	bind:selected -->
+		<!-- 	{options} -->
+		<!-- 	{...multiSelectOptions} -->
+		<!-- 	disabled={disabled || $$restProps.disabled} -->
+		<!-- 	allowEmpty={true} -->
+		<!-- 	{...$$restProps} -->
+		<!-- 	let:option -->
+		<!-- 	{allowUserOptions} -->
+		<!-- > -->
+		<!-- 	{#if option.suggested} -->
+		<!-- 		<span class="text-indigo-600">{option.label}</span> -->
+		<!-- 		<span class="text-sm text-gray-500"> (suggested)</span> -->
+		<!-- 	{:else if translateOptions && option.label} -->
+		<!-- 		{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)} -->
+		<!-- 	{:else} -->
+		<!-- 		{option.label || option} -->
+		<!-- 	{/if} -->
+		<!-- </MultiSelect> -->
 		{#if isLoading}
 			<svg
 				class="animate-spin h-5 w-5 text-primary-500"

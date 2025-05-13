@@ -8,13 +8,12 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-	export let data: PageData;
 
 	const roto = data.data;
 
 	pageTitle.set(roto.risk_origin + ' - ' + roto.target_objective);
 
-	let activeActivity: string | null = null;
+	let activeActivity: string | null = $state(null);
 	$page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
@@ -35,6 +34,11 @@
 
 	const user = $page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const model = URL_MODEL_MAP['ro-to'];
 	const canEditObject = (roto): boolean =>
 		canPerformAction({
@@ -53,7 +57,7 @@
 				label={roto.ebios_rm_study.str}
 				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
-				<i class="fa-solid fa-arrow-left" />
+				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
 			</Anchor>
 			{#if canEditObject(roto)}
@@ -61,7 +65,7 @@
 					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
 					class="btn variant-filled-primary h-fit"
 				>
-					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>
 					{m.edit()}
 				</Anchor>
 			{/if}

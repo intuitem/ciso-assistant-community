@@ -7,12 +7,16 @@
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
 
-	export let row: any;
-	export let handler: DataHandler;
+	interface Props {
+		row: any;
+		handler: DataHandler;
+	}
+
+	let { row, handler }: Props = $props();
 
 	const flash = getFlash(page);
 
-	let options: { label: string; value: string }[] = [];
+	let options: { label: string; value: string }[] = $state([]);
 
 	onMount(async () => {
 		options = await fetch('/applied-controls/status').then((r) => r.json());

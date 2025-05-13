@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { Command } from 'cmdk-sv';
@@ -35,9 +37,11 @@
 	}));
 
 	// Close command palette on route change
-	$: if ($page.url.pathname) {
-		commandPaletteOpen.set(false);
-	}
+	run(() => {
+		if ($page.url.pathname) {
+			commandPaletteOpen.set(false);
+		}
+	});
 
 	// Add global event listener
 	onMount(() => {

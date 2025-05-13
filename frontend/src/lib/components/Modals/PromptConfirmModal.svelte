@@ -2,8 +2,7 @@
 	import type { urlModel } from '$lib/utils/types';
 
 	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
+	
 
 	// Stores
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -13,12 +12,6 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let _form = {};
-	export let URLModel: urlModel | '' = '';
-	export let id: string = '';
-	export let formAction: string = '';
-	export let bodyComponent: ComponentType | undefined;
-	export let bodyProps: Record<string, unknown> = {};
 
 	import { superForm } from 'sveltekit-superforms';
 
@@ -37,9 +30,30 @@
 	import SuperDebug from 'sveltekit-superforms';
 	import type { ComponentType } from 'svelte';
 	import { enhance } from '$app/forms';
-	export let debug = false;
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		_form?: any;
+		URLModel?: urlModel | '';
+		id?: string;
+		formAction?: string;
+		bodyComponent: ComponentType | undefined;
+		bodyProps?: Record<string, unknown>;
+		debug?: boolean;
+	}
 
-	let userInput = '';
+	let {
+		parent,
+		_form = {},
+		URLModel = '',
+		id = '',
+		formAction = '',
+		bodyComponent,
+		bodyProps = {},
+		debug = false
+	}: Props = $props();
+
+	let userInput = $state('');
 </script>
 
 {#if $modalStore[0]}
@@ -57,14 +71,15 @@
 		/>
 
 		{#if bodyComponent}
+			{@const SvelteComponent = bodyComponent}
 			<div class="max-h-96 overflow-y-scroll scroll card">
-				<svelte:component this={bodyComponent} {...bodyProps} />
+				<SvelteComponent {...bodyProps} />
 			</div>
 		{/if}
 		{#if _form && Object.keys(_form).length > 0}
 			<form method="POST" action={formAction} use:enhance class="modal-form {cForm}">
 				<footer class="modal-footer {parent.regionFooter}">
-					<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
+					<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}
 						>{m.cancel()}</button
 					>
 					<input type="hidden" name="urlmodel" value={URLModel} />
@@ -73,7 +88,7 @@
 						class="btn variant-filled-error"
 						type="submit"
 						data-testid="delete-prompt-confirm-button"
-						on:click={parent.onConfirm}
+						onclick={parent.onConfirm}
 						disabled={!userInput || userInput.trim().toLowerCase() !== m.yes().toLowerCase()}
 					>
 						{m.submit()}
@@ -86,13 +101,13 @@
 			{/if}
 		{:else}
 			<footer class="modal-footer {parent.regionFooter}">
-				<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}
+				<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}
 					>{m.cancel()}</button
 				>
 				<button
 					class="btn variant-filled-error"
 					type="button"
-					on:click={parent.onConfirm}
+					onclick={parent.onConfirm}
 					disabled={!userInput || userInput.trim().toLowerCase() !== m.yes().toLowerCase()}
 				>
 					{m.submit()}

@@ -1,7 +1,6 @@
 <script lang="ts">
 	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
+	
 
 	// Stores
 	import type { ModalStore } from '@skeletonlabs/skeleton';
@@ -11,9 +10,6 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let totp;
-	export let _form;
-	export let formAction: string;
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
@@ -26,6 +22,20 @@
 	import QR from '@svelte-put/qr/svg/QR.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { activateTOTPSchema } from '../utils/schemas';
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		totp: any;
+		_form: any;
+		formAction: string;
+	}
+
+	let {
+		parent,
+		totp,
+		_form,
+		formAction
+	}: Props = $props();
 </script>
 
 {#if $modalStore[0]}
@@ -55,7 +65,7 @@
 				</div>
 			</div>
 
-			<span class="divider-vertical" />
+			<span class="divider-vertical"></span>
 
 			<div class="flex flex-col space-y-4 items-center self-center">
 				<h4 class="h4">{m.step({ number: 2 })}</h4>
@@ -66,20 +76,22 @@
 					action={formAction}
 					data={_form}
 					validators={zod(activateTOTPSchema)}
-					let:form
+					
 					class="modal-form {cForm}"
 					validationMethod="onsubmit"
 				>
-					<!-- prettier-ignore -->
-					<OTPInput {form} field="code" />
-					<footer class="modal-footer {parent.regionFooter}">
-						<button
-							class="btn variant-filled-primary w-full"
-							data-testid="activate-totp-confirm-button"
-							type="submit">{m.enableTOTP()}</button
-						>
-					</footer>
-				</SuperForm>
+					{#snippet children({ form })}
+										<!-- prettier-ignore -->
+						<OTPInput {form} field="code" />
+						<footer class="modal-footer {parent.regionFooter}">
+							<button
+								class="btn variant-filled-primary w-full"
+								data-testid="activate-totp-confirm-button"
+								type="submit">{m.enableTOTP()}</button
+							>
+						</footer>
+														{/snippet}
+								</SuperForm>
 			</div>
 		</article>
 	</div>

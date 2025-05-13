@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -53,7 +53,7 @@
 		hu: 'Magyar'
 	};
 
-	let value = getLocale();
+	let value = $state(getLocale());
 	async function handleLocaleChange(event: Event) {
 		event.preventDefault();
 		value = event?.target?.value;
@@ -86,7 +86,7 @@
 		modalStore.trigger(modal);
 	}
 
-	let enableMoreBtn = false;
+	let enableMoreBtn = $state(false);
 
 	onMount(() => {
 		enableMoreBtn = true;
@@ -96,19 +96,19 @@
 <div class="border-t pt-2.5">
 	<div class="flex flex-row items-center justify-between">
 		<div class="flex flex-col w-3/4">
-			{#if $page.data.user}
+			{#if page.data.user}
 				<span
 					class="text-gray-900 text-sm whitespace-nowrap overflow-hidden truncate w-full"
 					data-testid="sidebar-user-name-display"
 				>
-					{$page.data.user.first_name}
-					{$page.data.user.last_name}
+					{page.data.user.first_name}
+					{page.data.user.last_name}
 				</span>
 				<span
 					class="font-normal text-xs whitespace-nowrap truncate text-gray-600 mr-2 w-full"
 					data-testid="sidebar-user-email-display"
 				>
-					{$page.data.user.email}
+					{page.data.user.email}
 				</span>
 			{/if}
 		</div>
@@ -118,13 +118,13 @@
 					class="btn bg-initial"
 					data-testid="sidebar-more-btn"
 					id="sidebar-more-btn"
-					use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical" /></button
+					use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical"></i></button
 				>
 			{:else}
 				<button
 					class="btn bg-initial"
 					data-testid="sidebar-more-btn-disabled"
-					id="sidebar-more-btn-disabled"><i class="fa-solid fa-ellipsis-vertical" /></button
+					id="sidebar-more-btn-disabled"><i class="fa-solid fa-ellipsis-vertical"></i></button
 				>
 			{/if}
 		{/key}
@@ -135,15 +135,15 @@
 		>
 			<a
 				href="/my-profile"
-				on:click={(e) => {
+				onclick={(e) => {
 					window.location.href = e.target.href;
 				}}
 				class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="profile-button"><i class="fa-solid fa-address-card mr-2" />{m.myProfile()}</a
+				data-testid="profile-button"><i class="fa-solid fa-address-card mr-2"></i>{m.myProfile()}</a
 			>
 			<select
 				{value}
-				on:change={handleLocaleChange}
+				onchange={handleLocaleChange}
 				class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0"
 				data-testid="language-select"
 			>
@@ -154,33 +154,33 @@
 				{/each}
 			</select>
 			<button
-				on:click={() => dispatch('triggerGT')}
+				onclick={() => dispatch('triggerGT')}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 				data-testid="gt-button"
-				><i class="fa-solid fa-wand-magic-sparkles mr-2" />{m.guidedTour()}</button
+				><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>{m.guidedTour()}</button
 			>
 			<button
-				on:click={() => dispatch('loadDemoDomain')}
+				onclick={() => dispatch('loadDemoDomain')}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 				data-testid="load-demo-data-button"
-				><i class="fa-solid fa-file-import mr-2" />{m.loadDemoData()}</button
+				><i class="fa-solid fa-file-import mr-2"></i>{m.loadDemoData()}</button
 			>
 			<button
-				on:click={modalBuildInfo}
+				onclick={modalBuildInfo}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="about-button"><i class="fa-solid fa-circle-info mr-2" />{m.aboutCiso()}</button
+				data-testid="about-button"><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
 			>
 			<a
 				href="https://intuitem.gitbook.io/ciso-assistant"
 				target="_blank"
 				class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="docs-button"><i class="fa-solid fa-book mr-2" />{m.onlineDocs()}</a
+				data-testid="docs-button"><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
 			>
 			<form action="/logout" method="POST">
 				<button class="w-full" type="submit" data-testid="logout-button">
 					<span
 						class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-						><i class="fa-solid fa-right-from-bracket mr-2" />{m.Logout()}</span
+						><i class="fa-solid fa-right-from-bracket mr-2"></i>{m.Logout()}</span
 					>
 				</button>
 			</form>

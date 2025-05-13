@@ -7,14 +7,26 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let duplicate: boolean = false;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let object: Record<string, any> = {};
-	// export let context: string = 'default';
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		duplicate?: boolean;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: Record<string, any>; // export let context: string = 'default';
+	}
+
+	let {
+		form,
+		model,
+		duplicate = false,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {}
+	}: Props = $props();
+	
 	// export let updated_fields: Set<string> = new Set();
 </script>
 

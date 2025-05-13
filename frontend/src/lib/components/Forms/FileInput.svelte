@@ -1,24 +1,41 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { formFieldProxy, fileProxy } from 'sveltekit-superforms';
 
-	let _class = '';
 
-	export { _class as class };
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let helpText: string | undefined = undefined;
-	export let form;
-	export let allowPaste: boolean = false;
-	export let resetSignal: boolean = false; // Reset the form value if set to true
+	
 	// allowPaste should be set to false when we have multiple FileField at the same time (the ideal implementation would be to deduce to which FileInput the paste operation must be forwarded depending on the targetElement of the "paste" event)
 
 	const { errors, constraints } = formFieldProxy(form, field);
 	let value = fileProxy(form, field);
-	let fileInput: null | HTMLInputElement = null;
+	let fileInput: null | HTMLInputElement = $state(null);
 
-	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
+	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
 
-	export let allowedExtensions: string[] | '*';
+	interface Props {
+		class?: string;
+		label?: string | undefined;
+		field: string;
+		helpText?: string | undefined;
+		form: any;
+		allowPaste?: boolean;
+		resetSignal?: boolean; // Reset the form value if set to true
+		allowedExtensions: string[] | '*';
+		[key: string]: any
+	}
+
+	let {
+		class: _class = '',
+		label = undefined,
+		field,
+		helpText = undefined,
+		form,
+		allowPaste = false,
+		resetSignal = false,
+		allowedExtensions,
+		...rest
+	}: Props = $props();
 
 	function getShortenPreciseType(preciseType: string): string {
 		const shortPreciseTypeResult = /^[a-z0-9]+/.exec(preciseType);
@@ -75,13 +92,15 @@
 		}
 	}
 
-	$: if (resetSignal) {
-		const dataTransfer = new DataTransfer();
-		$value = dataTransfer.files; // Empty FileList
-	}
+	run(() => {
+		if (resetSignal) {
+			const dataTransfer = new DataTransfer();
+			$value = dataTransfer.files; // Empty FileList
+		}
+	});
 </script>
 
-<svelte:document on:paste={onPaste} />
+<svelte:document onpaste={onPaste} />
 
 <div>
 	{#if label !== undefined}
@@ -116,7 +135,7 @@
 						.map((ext) => '.' + ext)
 						.join(',')}
 			{...$constraints}
-			{...$$restProps}
+			{...rest}
 		/>
 	</div>
 	{#if helpText}

@@ -4,7 +4,11 @@
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const possible_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
@@ -18,22 +22,22 @@
 	const requirementAssessments = data.requirement_assessments.filter(
 		(requirement) => requirement.name || requirement.description
 	);
-	let currentIndex = 0;
-	$: currentRequirementAssessment = requirementAssessments[currentIndex];
+	let currentIndex = $state(0);
+	let currentRequirementAssessment = $derived(requirementAssessments[currentIndex]);
 
-	$: color = complianceResultTailwindColorMap[currentRequirementAssessment.result];
+	let color = $derived(complianceResultTailwindColorMap[currentRequirementAssessment.result]);
 
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement) => [requirement.id, requirement])
 	);
-	$: requirement = requirementHashmap[currentRequirementAssessment.requirement.id];
-	$: parent = data.requirements.find((req) => req.urn === requirement.parent_urn);
+	let requirement = $derived(requirementHashmap[currentRequirementAssessment.requirement.id]);
+	let parent = $derived(data.requirements.find((req) => req.urn === requirement.parent_urn));
 
-	$: title = requirement.display_short
+	let title = $derived(requirement.display_short
 		? requirement.display_short
 		: parent.display_short
 			? parent.display_short
-			: parent.description;
+			: parent.description);
 
 	// Function to handle the "Next" button click
 	function nextItem() {
@@ -53,7 +57,7 @@
 		}
 	}
 
-	$: result = currentRequirementAssessment.result;
+	let result = $derived(currentRequirementAssessment.result);
 
 	// Function to update the result of the current item
 	function updateResult(newResult: string | null) {
@@ -77,7 +81,7 @@
 	}
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 <div class="flex flex-col h-full justify-center items-center">
 	<div
 		style="border-color: {color}"
@@ -91,7 +95,7 @@
 							href="/compliance-assessments/{data.compliance_assessment.id}"
 							class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 						>
-							<i class="fa-solid fa-arrow-left" />
+							<i class="fa-solid fa-arrow-left"></i>
 							<p class="">{m.goBackToAudit()}</p>
 						</a>
 					</div>
@@ -136,10 +140,10 @@
 				</div>
 			</div>
 			<div class="flex justify-between">
-				<button class="bg-gray-400 text-white px-4 py-2 rounded" on:click={previousItem}>
+				<button class="bg-gray-400 text-white px-4 py-2 rounded" onclick={previousItem}>
 					{m.previous()}
 				</button>
-				<button class="variant-filled-primary px-4 py-2 rounded" on:click={nextItem}>
+				<button class="variant-filled-primary px-4 py-2 rounded" onclick={nextItem}>
 					{m.next()}
 				</button>
 			</div>

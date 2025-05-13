@@ -1,8 +1,12 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	export let handler: DataHandler;
-	export let filterBy = '';
-	let value = '';
+	interface Props {
+		handler: DataHandler;
+		filterBy?: string;
+	}
+
+	let { handler, filterBy = '' }: Props = $props();
+	let value = $state('');
 	let classProp = ''; // Replacing $$props.class
 </script>
 
@@ -14,7 +18,7 @@
 		aria-label="Filter by {filterBy}"
 		role="searchbox"
 		bind:value
-		on:input={() => {
+		oninput={() => {
 			const debounceTimeout = setTimeout(() => {
 				handler.filter(value, filterBy);
 			}, 300);

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
@@ -40,43 +42,92 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 
-	// Props
-	export let source: TableSource = { head: [], body: [] };
-	export let interactive = true;
+	
 
-	export let search = true;
-	export let rowsPerPage = true;
-	export let rowCount = true;
-	export let pagination = true;
-	export let numberRowsPerPage = 10;
 
-	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
-	// Props (styles)
-	export let element: CssClasses = 'table';
-	export let text: CssClasses = 'text-xs';
-	export let backgroundColor: CssClasses = 'bg-white';
-	export let color: CssClasses = '';
-	export let regionHead: CssClasses = '';
-	export let regionHeadCell: CssClasses = 'uppercase bg-white text-gray-700';
-	export let regionBody: CssClasses = 'bg-white';
-	export let regionCell: CssClasses = '';
-	export let regionFoot: CssClasses = '';
-	export let regionFootCell: CssClasses = '';
+	
 
-	export let displayActions = true;
 
-	export let identifierField = 'id';
-	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
-	export let URLModel: urlModel | undefined = undefined;
-	export let baseEndpoint: string = `/${URLModel}`;
-	export let detailQueryParameter: string | undefined = undefined;
-	export let fields: string[] = [];
-	export let canSelectObject = false;
 
-	export let hideFilters = false;
 
-	export let folderId: string = '';
+	interface Props {
+		// Props
+		source?: TableSource;
+		interactive?: boolean;
+		search?: boolean;
+		rowsPerPage?: boolean;
+		rowCount?: boolean;
+		pagination?: boolean;
+		numberRowsPerPage?: number;
+		orderBy?: { identifier: string; direction: 'asc' | 'desc' } | undefined;
+		// Props (styles)
+		element?: CssClasses;
+		text?: CssClasses;
+		backgroundColor?: CssClasses;
+		color?: CssClasses;
+		regionHead?: CssClasses;
+		regionHeadCell?: CssClasses;
+		regionBody?: CssClasses;
+		regionCell?: CssClasses;
+		regionFoot?: CssClasses;
+		regionFootCell?: CssClasses;
+		displayActions?: boolean;
+		identifierField?: string;
+		deleteForm?: SuperValidated<AnyZodObject> | undefined;
+		URLModel?: urlModel | undefined;
+		baseEndpoint?: string;
+		detailQueryParameter?: string | undefined;
+		fields?: string[];
+		canSelectObject?: boolean;
+		hideFilters?: boolean;
+		folderId?: string;
+		optButton?: import('svelte').Snippet;
+		selectButton?: import('svelte').Snippet;
+		addButton?: import('svelte').Snippet;
+		actions?: import('svelte').Snippet<[any]>;
+		actionsBody?: import('svelte').Snippet;
+		actionsHead?: import('svelte').Snippet;
+		tail?: import('svelte').Snippet;
+	}
+
+	let {
+		source = { head: [], body: [] },
+		interactive = true,
+		search = true,
+		rowsPerPage = true,
+		rowCount = true,
+		pagination = true,
+		numberRowsPerPage = 10,
+		orderBy = undefined,
+		element = 'table',
+		text = 'text-xs',
+		backgroundColor = 'bg-white',
+		color = '',
+		regionHead = '',
+		regionHeadCell = 'uppercase bg-white text-gray-700',
+		regionBody = 'bg-white',
+		regionCell = '',
+		regionFoot = '',
+		regionFootCell = '',
+		displayActions = true,
+		identifierField = 'id',
+		deleteForm = undefined,
+		URLModel = undefined,
+		baseEndpoint = `/${URLModel}`,
+		detailQueryParameter = $bindable(undefined),
+		fields = [],
+		canSelectObject = false,
+		hideFilters = $bindable(false),
+		folderId = '',
+		optButton,
+		selectButton,
+		addButton,
+		actions,
+		actionsBody,
+		actionsHead,
+		tail
+	}: Props = $props();
 
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
@@ -108,8 +159,8 @@
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
 
-	$: classesBase = `${classProp || backgroundColor}`;
-	$: classesTable = `${element} ${text} ${color}`;
+	let classesBase = $derived(`${classProp || backgroundColor}`);
+	let classesTable = $derived(`${element} ${text} ${color}`);
 
 	const handler = new DataHandler(
 		source.body.map((item: Record<string, any>, index: number) => {
@@ -128,7 +179,7 @@
 		}
 	);
 	const rows = handler.getRows();
-	let invalidateTable = false;
+	let invalidateTable = $state(false);
 
 	handler.onChange((state: State) =>
 		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
@@ -170,7 +221,7 @@
 
 	const tableURLModel = URLModel;
 
-	let contextMenuOpenRow: TableSource | undefined = undefined;
+	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
 	const filters =
 		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
@@ -178,15 +229,17 @@
 			: {};
 
 	const filteredFields = Object.keys(filters);
-	const filterValues: { [key: string]: any } = {};
+	const filterValues: { [key: string]: any } = $state({});
 
 	// Initialize filter values from URL search params
 	for (const field of filteredFields)
 		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
 
-	$: hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
+	run(() => {
+		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
+	});
 
-	$: {
+	run(() => {
 		for (const field of filteredFields) {
 			handler.filter(
 				filterValues[field] ? filterValues[field].map((v: Record<string, any>) => v.value) : [],
@@ -204,11 +257,11 @@
 			_goto($page.url);
 			invalidateTable = false;
 		}
-	}
+	});
 
-	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-	$: model = URL_MODEL_MAP[URLModel];
-	$: canCreateObject = model
+	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
+	let model = $derived(URL_MODEL_MAP[URLModel]);
+	let canCreateObject = $derived(model
 		? $page.params.id
 			? canPerformAction({
 					user,
@@ -222,9 +275,9 @@
 						user.root_folder_id
 				})
 			: Object.hasOwn(user.permissions, `add_${model.name}`)
-		: false;
-	$: contextMenuCanEditObject =
-		(model
+		: false);
+	let contextMenuCanEditObject =
+		$derived((model
 			? $page.params.id
 				? canPerformAction({
 						user,
@@ -238,17 +291,19 @@
 									user.root_folder_id)
 					})
 				: Object.hasOwn(user.permissions, `change_${model.name}`)
-			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn);
+			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn));
 
-	$: contextMenuDisplayEdit =
-		contextMenuCanEditObject &&
+	let contextMenuDisplayEdit =
+		$derived(contextMenuCanEditObject &&
 		URLModel &&
-		!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel);
-	$: filterCount = filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0);
+		!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel));
+	let filterCount = $derived(filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0));
 
-	$: classesHexBackgroundText = (backgroundHexColor: string) => {
+	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
-	};
+	});
+
+	const tail_render = $derived(tail);
 </script>
 
 <div class="table-container {classesBase}">
@@ -259,7 +314,7 @@
 				class="btn variant-filled-primary self-end relative"
 				id="filters"
 			>
-				<i class="fa-solid fa-filter mr-2" />
+				<i class="fa-solid fa-filter mr-2"></i>
 				{m.filters()}
 				{#if filterCount}
 					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
@@ -269,25 +324,27 @@
 				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				data-popup="popupFilter"
 			>
-				<SuperForm {_form} validators={zod(z.object({}))} let:form>
-					{#each filteredFields as field}
-						{#if filters[field]?.component}
-							<svelte:component
-								this={filters[field].component}
-								{form}
-								{field}
-								{...filters[field].props}
-								fieldContext="filter"
-								label={safeTranslate(filters[field].props?.label)}
-								on:change={(e) => {
-									const value = e.detail;
-									filterValues[field] = value.map((v) => ({ value: v }));
-									invalidateTable = true;
-								}}
-							/>
-						{/if}
-					{/each}
-				</SuperForm>
+				<SuperForm {_form} validators={zod(z.object({}))} >
+					{#snippet children({ form })}
+										{#each filteredFields as field}
+							{#if filters[field]?.component}
+								{@const SvelteComponent = filters[field].component}
+							<SvelteComponent
+									{form}
+									{field}
+									{...filters[field].props}
+									fieldContext="filter"
+									label={safeTranslate(filters[field].props?.label)}
+									on:change={(e) => {
+										const value = e.detail;
+										filterValues[field] = value.map((v) => ({ value: v }));
+										invalidateTable = true;
+									}}
+								/>
+							{/if}
+						{/each}
+														{/snippet}
+								</SuperForm>
 			</div>
 		{/if}
 		{#if search}
@@ -297,12 +354,12 @@
 			<RowsPerPage {handler} />
 		{/if}
 		<div class="flex space-x-2 items-center">
-			<slot name="optButton" />
+			{@render optButton?.()}
 			{#if canSelectObject}
-				<slot name="selectButton" />
+				{@render selectButton?.()}
 			{/if}
 			{#if canCreateObject}
-				<slot name="addButton" />
+				{@render addButton?.()}
 			{/if}
 		</div>
 	</header>
@@ -327,148 +384,157 @@
 			<tbody class="table-body w-full {regionBody}">
 				{#each $rows as row, rowIndex}
 					{@const meta = row?.meta ?? row}
-					<ContextMenu.Trigger asChild let:builder>
-						<tr
-							use:builder.action
-							{...builder}
-							on:click={(e) => {
-								onRowClick(e, rowIndex);
-							}}
-							on:keydown={(e) => {
-								onRowKeydown(e, rowIndex);
-							}}
-							on:contextmenu={() => (contextMenuOpenRow = row)}
-							aria-rowindex={rowIndex + 1}
-						>
-							{#each Object.entries(row) as [key, value]}
-								{#if key !== 'meta'}
-									{@const component = field_component_map[key]}
-									<td class={regionCell} role="gridcell">
-										{#if component && browser}
-											<svelte:component this={component} {meta} cell={value} />
-										{:else}
-											<span class="font-token whitespace-pre-line break-words">
-												{#if Array.isArray(value)}
-													<ul class="list-disc pl-4 whitespace-normal">
-														{#each value as val}
-															<li>
-																{#if val.str && val.id}
-																	{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
-																	<Anchor href={itemHref} class="anchor" stopPropagation
-																		>{val.str}</Anchor
-																	>
-																{:else if val.str}
-																	{safeTranslate(val.str)}
-																{:else if unsafeTranslate(val.split(':')[0])}
-																	<span class="text"
-																		>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																		{val.split(':')[1]}</span
-																	>
-																{:else}
-																	{val ?? '-'}
-																{/if}
-															</li>
-														{/each}
-													</ul>
-												{:else if value && value.str}
-													{#if value.id}
-														{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-														{#if key === 'ro_to_couple'}
-															<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
-																	'-'
-																)[1]}</Anchor
-															>
+					<ContextMenu.Trigger asChild >
+						{#snippet children({ builder })}
+												<tr
+								use:builder.action
+								{...builder}
+								onclick={(e) => {
+									onRowClick(e, rowIndex);
+								}}
+								onkeydown={(e) => {
+									onRowKeydown(e, rowIndex);
+								}}
+								oncontextmenu={() => (contextMenuOpenRow = row)}
+								aria-rowindex={rowIndex + 1}
+							>
+								{#each Object.entries(row) as [key, value]}
+									{#if key !== 'meta'}
+										{@const component = field_component_map[key]}
+										<td class={regionCell} role="gridcell">
+											{#if component && browser}
+												{@const SvelteComponent_1 = component}
+											<SvelteComponent_1 {meta} cell={value} />
+											{:else}
+												<span class="font-token whitespace-pre-line break-words">
+													{#if Array.isArray(value)}
+														<ul class="list-disc pl-4 whitespace-normal">
+															{#each value as val}
+																<li>
+																	{#if val.str && val.id}
+																		{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																		<Anchor href={itemHref} class="anchor" stopPropagation
+																			>{val.str}</Anchor
+																		>
+																	{:else if val.str}
+																		{safeTranslate(val.str)}
+																	{:else if unsafeTranslate(val.split(':')[0])}
+																		<span class="text"
+																			>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																			{val.split(':')[1]}</span
+																		>
+																	{:else}
+																		{val ?? '-'}
+																	{/if}
+																</li>
+															{/each}
+														</ul>
+													{:else if value && value.str}
+														{#if value.id}
+															{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+															{#if key === 'ro_to_couple'}
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+																		'-'
+																	)[1]}</Anchor
+																>
+															{:else}
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	>{value.str}</Anchor
+																>
+															{/if}
 														{:else}
-															<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																>{value.str}</Anchor
-															>
+															{value.str ?? '-'}
 														{/if}
-													{:else}
-														{value.str ?? '-'}
-													{/if}
-												{:else if value && value.hexcolor}
-													<p
-														class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-															value.hexcolor
-														)}"
-														style="background-color: {value.hexcolor}"
-													>
-														{safeTranslate(value.name ?? value.str) ?? '-'}
-													</p>
-												{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
-													{formatDateOrDateTime(value, getLocale())}
-												{:else if [true, false].includes(value)}
-													<span class="ml-4">{safeTranslate(value ?? '-')}</span>
-												{:else if key === 'progress'}
-													<span class="ml-9"
-														>{safeTranslate('percentageDisplay', { number: value })}</span
-													>
-												{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
-													<div class="flex items-center space-x-2">
-														<span>{safeTranslate(value ?? '-')}</span>
-														<span
-															class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-200 dark:text-green-900"
+													{:else if value && value.hexcolor}
+														<p
+															class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
+																value.hexcolor
+															)}"
+															style="background-color: {value.hexcolor}"
 														>
-															{m.accept()}
-														</span>
-													</div>
-												{:else}
-													<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-													{#if value?.length > 300}
-														{safeTranslate(value ?? '-').slice(0, 300)}...
+															{safeTranslate(value.name ?? value.str) ?? '-'}
+														</p>
+													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
+														{formatDateOrDateTime(value, getLocale())}
+													{:else if [true, false].includes(value)}
+														<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+													{:else if key === 'progress'}
+														<span class="ml-9"
+															>{safeTranslate('percentageDisplay', { number: value })}</span
+														>
+													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+														<div class="flex items-center space-x-2">
+															<span>{safeTranslate(value ?? '-')}</span>
+															<span
+																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-200 dark:text-green-900"
+															>
+																{m.accept()}
+															</span>
+														</div>
 													{:else}
-														{safeTranslate(value ?? '-')}
+														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+														{#if value?.length > 300}
+															{safeTranslate(value ?? '-').slice(0, 300)}...
+														{:else}
+															{safeTranslate(value ?? '-')}
+														{/if}
 													{/if}
-												{/if}
-											</span>
+												</span>
+											{/if}
+										</td>
+									{/if}
+								{/each}
+								{#if displayActions}
+									<td class="text-end {regionCell}" role="gridcell">
+										{#if actions}{@render actions({ meta: row.meta, })}{:else}
+											{#if row.meta[identifierField]}
+												{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
+												{@const actionsURLModel = URLModel}
+												<TableRowActions
+													{deleteForm}
+													{model}
+													URLModel={actionsURLModel}
+													detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
+													editURL={!(row.meta.builtin || row.meta.urn)
+														? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`
+														: undefined}
+													{row}
+													hasBody={actionsBody}
+													{identifierField}
+													preventDelete={preventDelete(row)}
+												>
+													{#snippet head()}
+																							
+															{#if actionsHead}
+																{@render actionsHead?.()}
+															{/if}
+														
+																							{/snippet}
+													{#snippet body()}
+																							
+															{#if actionsBody}
+																{@render actionsBody?.()}
+															{/if}
+														
+																							{/snippet}
+													{#snippet tail()}
+																								{@const SvelteComponent_2 = actionsComponent}
+												{#if tail_render}{@render tail_render()}{:else}
+															<SvelteComponent_2
+																meta={row.meta ?? {}}
+																{actionsURLModel}
+															/>
+														{/if}
+																							{/snippet}
+												</TableRowActions>
+											{/if}
 										{/if}
 									</td>
 								{/if}
-							{/each}
-							{#if displayActions}
-								<td class="text-end {regionCell}" role="gridcell">
-									<slot name="actions" meta={row.meta}>
-										{#if row.meta[identifierField]}
-											{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
-											{@const actionsURLModel = URLModel}
-											<TableRowActions
-												{deleteForm}
-												{model}
-												URLModel={actionsURLModel}
-												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-												editURL={!(row.meta.builtin || row.meta.urn)
-													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`
-													: undefined}
-												{row}
-												hasBody={$$slots.actionsBody}
-												{identifierField}
-												preventDelete={preventDelete(row)}
-											>
-												<svelte:fragment slot="head">
-													{#if $$slots.actionsHead}
-														<slot name="actionsHead" />
-													{/if}
-												</svelte:fragment>
-												<svelte:fragment slot="body">
-													{#if $$slots.actionsBody}
-														<slot name="actionsBody" />
-													{/if}
-												</svelte:fragment>
-												<slot slot="tail" name="tail">
-													<svelte:component
-														this={actionsComponent}
-														meta={row.meta ?? {}}
-														{actionsURLModel}
-													/>
-												</slot>
-											</TableRowActions>
-										{/if}
-									</slot>
-								</td>
-							{/if}
-						</tr>
-					</ContextMenu.Trigger>
+							</tr>
+																	{/snippet}
+										</ContextMenu.Trigger>
 				{/each}
 			</tbody>
 			{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
@@ -477,8 +543,7 @@
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
-							<svelte:component
-								this={action.component}
+							<action.component
 								row={contextMenuOpenRow}
 								{handler}
 								{action}

@@ -12,7 +12,11 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const URLModel = data.URLModel;
 
@@ -71,26 +75,30 @@
 	canSelectObject={canEditObject}
 	baseEndpoint="/compliance-assessments?ebios_rm_studies={data.data.id}"
 >
-	<div slot="selectButton">
-		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-			<button
-				class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
-				data-testid="select-button"
-				title={m.selectAudit()}
-				on:click={modalUpdateForm}
-				><i class="fa-solid fa-hand-pointer"></i>
-			</button>
-		</span>
-	</div>
-	<div slot="addButton">
-		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-			<button
-				class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-				data-testid="add-button"
-				title={safeTranslate('add-' + data.model.localName)}
-				on:click={modalCreateForm}
-				><i class="fa-solid fa-file-circle-plus"></i>
-			</button>
-		</span>
-	</div>
+	{#snippet selectButton()}
+		<div >
+			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+				<button
+					class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
+					data-testid="select-button"
+					title={m.selectAudit()}
+					onclick={modalUpdateForm}
+					><i class="fa-solid fa-hand-pointer"></i>
+				</button>
+			</span>
+		</div>
+	{/snippet}
+	{#snippet addButton()}
+		<div >
+			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+				<button
+					class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+					data-testid="add-button"
+					title={safeTranslate('add-' + data.model.localName)}
+					onclick={modalCreateForm}
+					><i class="fa-solid fa-file-circle-plus"></i>
+				</button>
+			</span>
+		</div>
+	{/snippet}
 </ModelTable>

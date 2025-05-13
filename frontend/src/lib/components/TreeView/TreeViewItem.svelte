@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (children to children_1) making the component unusable -->
 <svelte:options accessors />
 
 <script lang="ts">

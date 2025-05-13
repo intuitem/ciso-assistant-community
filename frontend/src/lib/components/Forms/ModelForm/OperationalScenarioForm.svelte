@@ -8,16 +8,27 @@
 	import Select from '../Select.svelte';
 	import { page } from '$app/stores';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context: string;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context
+	}: Props = $props();
 
 	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
 
-	let activeActivity: string | null = null;
+	let activeActivity: string | null = $state(null);
 	$page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';

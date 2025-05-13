@@ -9,9 +9,13 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 
-	export let composerForm: SuperValidated<Record<string, any>>;
+	interface Props {
+		composerForm: SuperValidated<Record<string, any>>;
+	}
 
-	let options: { label: string; value: string }[];
+	let { composerForm }: Props = $props();
+
+	let options: { label: string; value: string }[] = $state();
 
 	onMount(async () => {
 		const riskAssessments = await fetch('/risk-assessments')
@@ -28,31 +32,33 @@
 <SuperForm
 	dataType="json"
 	data={composerForm}
-	let:form
+	
 	validators={zod(composerSchema)}
 	taintedMessage={null}
-	let:data
+	
 >
-	<div class="flex flex-col space-y-2 items-center card variant-ghost-surface p-4">
-		{#if options}
-			<AutocompleteSelect
-				multiple={true}
-				{form}
-				field="risk_assessment"
-				placeholder={m.selectTargets()}
-				{options}
-			/>
-			{#if data.risk_assessment && data.risk_assessment.length > 0}
-				<Anchor
-					href={`/analytics/composer/?risk_assessment=${data.risk_assessment}`}
-					label={m.composer()}
-					class="btn variant-filled-primary">{m.processButton()}</Anchor
-				>
-			{:else}
-				<p class="btn-base rounded-token select-none variant-filled-surface opacity-30">
-					{m.processButton()}
-				</p>
+	{#snippet children({ form, data })}
+		<div class="flex flex-col space-y-2 items-center card variant-ghost-surface p-4">
+			{#if options}
+				<AutocompleteSelect
+					multiple={true}
+					{form}
+					field="risk_assessment"
+					placeholder={m.selectTargets()}
+					{options}
+				/>
+				{#if data.risk_assessment && data.risk_assessment.length > 0}
+					<Anchor
+						href={`/analytics/composer/?risk_assessment=${data.risk_assessment}`}
+						label={m.composer()}
+						class="btn variant-filled-primary">{m.processButton()}</Anchor
+					>
+				{:else}
+					<p class="btn-base rounded-token select-none variant-filled-surface opacity-30">
+						{m.processButton()}
+					</p>
+				{/if}
 			{/if}
-		{/if}
-	</div>
+		</div>
+	{/snippet}
 </SuperForm>

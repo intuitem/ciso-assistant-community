@@ -9,7 +9,11 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const URLModel = data.URLModel;
 
@@ -30,7 +34,7 @@
 		modalStore.trigger(modal);
 	}
 
-	let activeActivity: string | null = null;
+	let activeActivity: string | null = $state(null);
 	$page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
@@ -49,15 +53,17 @@
 	detailQueryParameter={`activity=${activeActivity}`}
 	baseEndpoint="/ro-to?ebios_rm_study={$page.params.id}"
 >
-	<div slot="addButton">
-		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-			<button
-				class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-				data-testid="add-button"
-				title={safeTranslate('add-' + data.model.localName)}
-				on:click={modalCreateForm}
-				><i class="fa-solid fa-file-circle-plus"></i>
-			</button>
-		</span>
-	</div>
+	{#snippet addButton()}
+		<div >
+			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+				<button
+					class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+					data-testid="add-button"
+					title={safeTranslate('add-' + data.model.localName)}
+					onclick={modalCreateForm}
+					><i class="fa-solid fa-file-circle-plus"></i>
+				</button>
+			</span>
+		</div>
+	{/snippet}
 </ModelTable>

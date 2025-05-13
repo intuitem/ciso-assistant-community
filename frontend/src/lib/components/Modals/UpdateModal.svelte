@@ -1,7 +1,6 @@
 <script lang="ts">
 	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
+	
 
 	// Stores
 	import type { ModelInfo } from '$lib/utils/types';
@@ -10,24 +9,41 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let form: SuperValidated<AnyZodObject>;
-	export let model: ModelInfo;
-	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
-	export let formAction = '?/update';
-	export let context = 'default';
-	export let object: Record<string, any> = {};
 	let closeModal = true;
-	export let suggestions: { [key: string]: any } = {};
-	export let selectOptions: Record<string, any> = {};
 
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
-	export let debug = false;
 
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		form: SuperValidated<AnyZodObject>;
+		model: ModelInfo;
+		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
+		formAction?: string;
+		context?: string;
+		object?: Record<string, any>;
+		suggestions?: { [key: string]: any };
+		selectOptions?: Record<string, any>;
+		debug?: boolean;
+	}
+
+	let {
+		parent,
+		form,
+		model,
+		invalidateAll = true,
+		formAction = '?/update',
+		context = 'default',
+		object = {},
+		suggestions = {},
+		selectOptions = {},
+		debug = false
+	}: Props = $props();
 </script>
 
 {#if $modalStore[0]}
@@ -40,10 +56,10 @@
 				role="button"
 				tabindex="0"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
-				on:click={parent.onClose}
-				on:keydown={parent.onClose}
+				onclick={parent.onClose}
+				onkeydown={parent.onClose}
 			>
-				<i class="fa-solid fa-xmark" />
+				<i class="fa-solid fa-xmark"></i>
 			</div>
 		</div>
 		<ModelForm

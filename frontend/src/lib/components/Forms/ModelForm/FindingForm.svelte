@@ -15,12 +15,23 @@
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 
-	export let form: SuperForm<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context = 'default';
+	interface Props {
+		form: SuperForm<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context?: string;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context = 'default'
+	}: Props = $props();
 
 	const modalStore = getModalStore();
 
@@ -145,8 +156,8 @@
 		<div class="mt-4">
 			<button
 				class="btn bg-gray-300 h-10 w-10"
-				on:click={(_) => modalAppliedControlCreateForm('applied_controls')}
-				type="button"><i class="fa-solid fa-plus text-sm" /></button
+				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
+				type="button"><i class="fa-solid fa-plus text-sm"></i></button
 			>
 		</div>
 	{/if}

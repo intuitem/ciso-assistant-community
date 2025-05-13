@@ -1,8 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	pageTitle.set('Visual Analysis');
 
 	// Extract the x-axis values

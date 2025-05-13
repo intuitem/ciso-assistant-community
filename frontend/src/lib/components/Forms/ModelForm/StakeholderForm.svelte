@@ -12,12 +12,23 @@
 	import { page } from '$app/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	export let form: SuperForm<Record<string, any>>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: 'create' | 'edit' = 'create';
+	interface Props {
+		form: SuperForm<Record<string, any>>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context?: 'create' | 'edit';
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context = 'create'
+	}: Props = $props();
 
 	const formData = form.form;
 
@@ -57,19 +68,19 @@
 		return ((dependency * penetration) / (maturity * trust)).toFixed(2).replace(/\.?0+$/, '');
 	};
 
-	$: currentCriticality = getCriticality(
+	let currentCriticality = $derived(getCriticality(
 		$formData.current_dependency,
 		$formData.current_penetration,
 		$formData.current_maturity,
 		$formData.current_trust
-	);
+	));
 
-	$: residualCriticality = getCriticality(
+	let residualCriticality = $derived(getCriticality(
 		$formData.residual_dependency,
 		$formData.residual_penetration,
 		$formData.residual_maturity,
 		$formData.residual_trust
-	);
+	));
 </script>
 
 <div
@@ -127,7 +138,7 @@
 							bind:cachedValue={formDataCache['current_dependency']}
 							helpText={m.dependencyHelpText()}
 						/>
-						<i class="fa-solid fa-times" />
+						<i class="fa-solid fa-times"></i>
 						<RadioGroupInput
 							{form}
 							options={[
@@ -162,7 +173,7 @@
 							bind:cachedValue={formDataCache['current_maturity']}
 							helpText={m.maturityHelpText()}
 						/>
-						<i class="fa-solid fa-times" />
+						<i class="fa-solid fa-times"></i>
 						<RadioGroupInput
 							{form}
 							options={[
@@ -179,7 +190,7 @@
 						/></span
 					>
 				</div>
-				<i class="fa-solid fa-equals" />
+				<i class="fa-solid fa-equals"></i>
 				<div class="flex flex-col mb-5">
 					<label for="current_criticality" class="text-sm font-semibold">
 						{m.criticality()}
@@ -233,8 +244,8 @@
 				/>
 			</div>
 			<div class="flex items-end">
-				<button class="btn input h-11 w-11" on:click={modalMeasureCreateForm} type="button"
-					><i class="fa-solid fa-plus text-sm" />
+				<button class="btn input h-11 w-11" onclick={modalMeasureCreateForm} type="button"
+					><i class="fa-solid fa-plus text-sm"></i>
 				</button>
 			</div>
 		</div>
@@ -257,7 +268,7 @@
 						cacheLock={cacheLocks['residual_dependency']}
 						bind:cachedValue={formDataCache['residual_dependency']}
 					/>
-					<i class="fa-solid fa-times" />
+					<i class="fa-solid fa-times"></i>
 					<RadioGroupInput
 						{form}
 						options={[
@@ -290,7 +301,7 @@
 						cacheLock={cacheLocks['residual_maturity']}
 						bind:cachedValue={formDataCache['residual_maturity']}
 					/>
-					<i class="fa-solid fa-times" />
+					<i class="fa-solid fa-times"></i>
 					<RadioGroupInput
 						{form}
 						options={[
@@ -306,7 +317,7 @@
 					/></span
 				>
 			</div>
-			<i class="fa-solid fa-equals" />
+			<i class="fa-solid fa-equals"></i>
 			<div class="flex flex-col mb-5">
 				<label for="residual_criticality" class="text-sm font-semibold">
 					{m.criticality()}

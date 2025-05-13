@@ -5,7 +5,7 @@
 	import { m } from '$paraglide/messages';
 	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 
-	export let data;
+	let { data } = $props();
 
 	const appliedControlsHead = {
 		name: 'name',

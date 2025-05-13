@@ -8,7 +8,11 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const URLModel = data.URLModel;
 
 	function modalCreateForm(): void {
@@ -31,15 +35,17 @@
 </script>
 
 <ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
-	<div slot="addButton">
-		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-			<button
-				class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-				data-testid="add-button"
-				title={safeTranslate('add-' + data.model.localName)}
-				on:click={modalCreateForm}
-				><i class="fa-solid fa-file-circle-plus"></i>
-			</button>
-		</span>
-	</div>
+	{#snippet addButton()}
+		<div >
+			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+				<button
+					class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+					data-testid="add-button"
+					title={safeTranslate('add-' + data.model.localName)}
+					onclick={modalCreateForm}
+					><i class="fa-solid fa-file-circle-plus"></i>
+				</button>
+			</span>
+		</div>
+	{/snippet}
 </ModelTable>

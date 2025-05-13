@@ -1,22 +1,13 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { ProgressRadial, RangeSlider } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let isDoc: boolean = false;
-	export let fullDonut: boolean = false;
-	export let inversedColors: boolean = false;
-	export let styles: string = '';
 
-	export let min_score = 0;
-	export let max_score = 100;
-	export let score_step = 1;
-	export let helpText: string | undefined = undefined;
 
-	export let disabled: boolean = false;
 
 	interface ScoresDefinition {
 		score: number;
@@ -24,30 +15,68 @@
 		description: string;
 	}
 
-	export let scores_definition: ScoresDefinition[] = [];
 
-	export let form: SuperForm<Record<string, any>>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	const dispatch = createEventDispatcher();
-	let previous = [$value];
+	let previous = $state([$value]);
 
-	export let score = $value;
-	$: score = $value;
+	interface Props {
+		label?: string | undefined;
+		field: string;
+		isDoc?: boolean;
+		fullDonut?: boolean;
+		inversedColors?: boolean;
+		styles?: string;
+		min_score?: number;
+		max_score?: number;
+		score_step?: number;
+		helpText?: string | undefined;
+		disabled?: boolean;
+		scores_definition?: ScoresDefinition[];
+		form: SuperForm<Record<string, any>>;
+		score?: any;
+		left?: import('svelte').Snippet;
+	}
 
-	$: {
+	let {
+		label = undefined,
+		field,
+		isDoc = false,
+		fullDonut = false,
+		inversedColors = false,
+		styles = '',
+		min_score = 0,
+		max_score = 100,
+		score_step = $bindable(1),
+		helpText = undefined,
+		disabled = false,
+		scores_definition = [],
+		form,
+		score = $bindable($value),
+		left
+	}: Props = $props();
+	run(() => {
+		score = $value;
+	});
+
+	run(() => {
 		if (previous[0] !== $value && previous[0] !== undefined) {
 			dispatch('change', { score: $value });
 		}
 		previous = [$value];
-	}
+	});
 
-	$: if (max_score === 100) score_step = 5;
+	run(() => {
+		if (max_score === 100) score_step = 5;
+	});
 
-	$: $value = !disabled ? ($value ?? min_score) : $value;
+	run(() => {
+		$value = !disabled ? ($value ?? min_score) : $value;
+	});
 </script>
 
-<slot name="left" />
+{@render left?.()}
 {#if !disabled}
 	<div class={styles}>
 		{#if $errors && $errors.length > 0}

@@ -1,35 +1,48 @@
 <script lang="ts">
+	import { stopPropagation } from 'svelte/legacy';
+
 	import { fly } from 'svelte/transition';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let day: number;
-	export let month: number;
-	export let year: number;
-	export let info: any[];
-	export let selectedDay;
-	export let showSidePanel;
+	interface Props {
+		day: number;
+		month: number;
+		year: number;
+		info: any[];
+		selectedDay: any;
+		showSidePanel: any;
+	}
+
+	let {
+		day,
+		month,
+		year,
+		info,
+		selectedDay,
+		showSidePanel
+	}: Props = $props();
 
 	const today = new Date();
 	const MAX_ITEMS = 3;
 
-	$: isToday =
-		day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear();
+	let isToday =
+		$derived(day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear());
 
-	$: isPast =
-		year < today.getFullYear() ||
+	let isPast =
+		$derived(year < today.getFullYear() ||
 		(year === today.getFullYear() && month < today.getMonth() + 1) ||
-		(year === today.getFullYear() && month === today.getMonth() + 1 && day < today.getDate());
+		(year === today.getFullYear() && month === today.getMonth() + 1 && day < today.getDate()));
 
-	$: dayInfo = info.filter(
+	let dayInfo = $derived(info.filter(
 		(item) =>
 			item.date.getDate() === day &&
 			item.date.getMonth() + 1 === month &&
 			item.date.getFullYear() === year
-	);
+	));
 
-	$: visibleItems = dayInfo.slice(0, MAX_ITEMS);
+	let visibleItems = $derived(dayInfo.slice(0, MAX_ITEMS));
 
-	$: extraItemsCount = Math.max(0, dayInfo.length - MAX_ITEMS);
+	let extraItemsCount = $derived(Math.max(0, dayInfo.length - MAX_ITEMS));
 
 	function openSidePanel() {
 		selectedDay.set({ day, month, year });
@@ -52,7 +65,7 @@
 			? 'bg-gray-300 text-gray-500 cursor-pointer hover:bg-gray-400'
 			: 'border-gray-200 bg-white cursor-pointer hover:bg-gray-100'} 
 		       {isToday ? 'border-gray-200 cursor-pointer hover:bg-gray-100' : ''}"
-		on:click={openSidePanel}
+		onclick={openSidePanel}
 	>
 		<span
 			class={isToday ? 'font-bold bg-primary-500 w-fit text-white rounded-full py-0.5 px-1' : ''}
@@ -88,9 +101,9 @@
 				{#if extraItemsCount > 0}
 					<button
 						class="flex justify-center font-bold unstyled hover:bg-primary-200 text-primary-700 bg-primary-50 px-1 rounded-md"
-						on:click|stopPropagation={() => {
+						onclick={stopPropagation(() => {
 							openSidePanel();
-						}}
+						})}
 					>
 						+{extraItemsCount}
 					</button>

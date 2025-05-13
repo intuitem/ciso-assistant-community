@@ -11,18 +11,37 @@
 	import { displayOnlyAssessableNodes } from './store';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let ref_id: string;
-	export let name: string;
-	export let description: string;
-	export let ra_id: string | undefined = undefined;
-	export let threats: z.infer<typeof ThreatSchema>[] | undefined = undefined;
-	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
-	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
-	export let canEditRequirementAssessment: boolean;
-	export let selectedStatus: string[];
-	export let resultCounts: Record<string, number> | undefined;
-	export let assessable: boolean;
-	export let max_score: number;
+	interface Props {
+		ref_id: string;
+		name: string;
+		description: string;
+		ra_id?: string | undefined;
+		threats?: z.infer<typeof ThreatSchema>[] | undefined;
+		reference_controls?: z.infer<typeof ReferenceControlSchema>[] | undefined;
+		children?: Record<string, Record<string, unknown>> | undefined;
+		canEditRequirementAssessment: boolean;
+		selectedStatus: string[];
+		resultCounts: Record<string, number> | undefined;
+		assessable: boolean;
+		max_score: number;
+		[key: string]: any
+	}
+
+	let {
+		ref_id,
+		name,
+		description,
+		ra_id = undefined,
+		threats = undefined,
+		reference_controls = undefined,
+		children = undefined,
+		canEditRequirementAssessment,
+		selectedStatus,
+		resultCounts,
+		assessable,
+		max_score,
+		...rest
+	}: Props = $props();
 
 	const node = {
 		ref_id,
@@ -36,7 +55,7 @@
 		max_score,
 		resultCounts,
 		assessable,
-		...$$restProps
+		...rest
 	} as const;
 
 	type TreeViewItemNode = typeof node;
@@ -45,7 +64,7 @@
 	const title: string =
 		pattern == 3 ? `${ref_id} - ${name}` : pattern == 2 ? ref_id : pattern == 1 ? name : '';
 
-	let showInfo = false;
+	let showInfo = $state(false);
 
 	const getAssessableNodes = (
 		startNode: TreeViewItemNode,
@@ -100,9 +119,9 @@
 		return Math.floor(mean * 10) / 10;
 	}
 
-	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
-	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
-	$: classesPercentText = (resultColor: string) => (resultColor === '#000000' ? 'text-white' : '');
+	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
+	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
+	let classesPercentText = $derived((resultColor: string) => (resultColor === '#000000' ? 'text-white' : ''));
 </script>
 
 {#if !$displayOnlyAssessableNodes || assessable || hasAssessableChildren}
@@ -191,18 +210,18 @@
 				role="button"
 				tabindex="0"
 				class="select-none text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
-				on:click={(e) => {
+				onclick={(e) => {
 					e.preventDefault();
 					showInfo = !showInfo;
 				}}
-				on:keydown={(e) => {
+				onkeydown={(e) => {
 					if (e.key === 'Enter') {
 						e.preventDefault();
 						showInfo = !showInfo;
 					}
 				}}
 			>
-				<i class="text-xs fa-solid fa-info-circle" /> Learn more
+				<i class="text-xs fa-solid fa-info-circle"></i> Learn more
 			</div>
 			<div
 				class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
@@ -211,7 +230,7 @@
 			>
 				<div class="flex-1">
 					<p class="font-medium">
-						<i class="fa-solid fa-gears" />
+						<i class="fa-solid fa-gears"></i>
 						Suggested reference controls
 					</p>
 					{#if reference_controls?.length === 0}
@@ -237,7 +256,7 @@
 				</div>
 				<div class="flex-1">
 					<p class="font-medium">
-						<i class="fa-solid fa-gears" />
+						<i class="fa-solid fa-gears"></i>
 						Threats covered
 					</p>
 					{#if threats?.length === 0}

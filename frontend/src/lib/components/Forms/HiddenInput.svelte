@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms';
 
-	export let field: string;
-	export let form;
+	interface Props {
+		field: string;
+		form: any;
+		[key: string]: any
+	}
+
+	let { field, form, ...rest }: Props = $props();
 
 	const { value, constraints } = formFieldProxy(form, field);
 </script>
@@ -15,7 +20,7 @@
 			placeholder=""
 			bind:value={$value}
 			{...$constraints}
-			{...$$restProps}
+			{...rest}
 		/>
 	</div>
 </div>

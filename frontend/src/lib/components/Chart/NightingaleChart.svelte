@@ -1,16 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	// export let title = '';
-	export let name = '';
+	
 
 	interface ndChartData {
 		name: string;
 		value: number;
 	}
-	export let values: ndChartData[]; // Set the types for these variables later on
+	interface Props {
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		// export let title = '';
+		name?: string;
+		values: ndChartData[]; // Set the types for these variables later on
+	}
+
+	let {
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = '',
+		name = '',
+		values
+	}: Props = $props();
 
 	const chart_id = `${name}_div`;
 	onMount(async () => {
@@ -46,4 +57,4 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}" />
+<div id={chart_id} class="{width} {height} {classesContainer}"></div>

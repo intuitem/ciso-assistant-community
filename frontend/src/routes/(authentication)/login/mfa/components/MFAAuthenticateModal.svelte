@@ -1,7 +1,6 @@
 <script lang="ts">
 	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
+	
 
 	// Stores
 	import type { ModalStore } from '@skeletonlabs/skeleton';
@@ -11,8 +10,6 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let _form;
-	export let formAction: string;
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
@@ -25,8 +22,16 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { mfaAuthenticateSchema } from '../utils/schemas';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		_form: any;
+		formAction: string;
+	}
 
-	let useRecoveryCode = false;
+	let { parent, _form, formAction }: Props = $props();
+
+	let useRecoveryCode = $state(false);
 </script>
 
 {#if $modalStore[0]}
@@ -40,36 +45,38 @@
 				action={formAction}
 				data={_form}
 				validators={zod(mfaAuthenticateSchema)}
-				let:form
+				
 				class="modal-form {cForm}"
 				validationMethod="onsubmit"
 			>
-				<!-- prettier-ignore -->
-				{#if !useRecoveryCode}
-				<OTPInput {form} field="code" />
-          {:else}
-        <TextField {form} field="code" label={m.recoveryCode()} />
-        {/if}
-				<footer class="modal-footer {parent.regionFooter}">
-					<button
-						type="button"
-						on:click={() => (useRecoveryCode = !useRecoveryCode)}
-						class="btn hover:underline"
-						data-testid="mfa-authenticate-confirm-button"
-					>
-						{#if !useRecoveryCode}
-							{m.loginUsingRecoveryCode()}
-						{:else}
-							{m.loginUsingTOTP()}
-						{/if}
-					</button>
-					<button
-						class="btn variant-filled-primary"
-						data-testid="mfa-authenticate-confirm-button"
-						type="submit">{m.login()}</button
-					>
-				</footer>
-			</SuperForm>
+				{#snippet children({ form })}
+								<!-- prettier-ignore -->
+					{#if !useRecoveryCode}
+					<OTPInput {form} field="code" />
+	          {:else}
+	        <TextField {form} field="code" label={m.recoveryCode()} />
+	        {/if}
+					<footer class="modal-footer {parent.regionFooter}">
+						<button
+							type="button"
+							onclick={() => (useRecoveryCode = !useRecoveryCode)}
+							class="btn hover:underline"
+							data-testid="mfa-authenticate-confirm-button"
+						>
+							{#if !useRecoveryCode}
+								{m.loginUsingRecoveryCode()}
+							{:else}
+								{m.loginUsingTOTP()}
+							{/if}
+						</button>
+						<button
+							class="btn variant-filled-primary"
+							data-testid="mfa-authenticate-confirm-button"
+							type="submit">{m.login()}</button
+						>
+					</footer>
+											{/snippet}
+						</SuperForm>
 		</article>
 	</div>
 {/if}

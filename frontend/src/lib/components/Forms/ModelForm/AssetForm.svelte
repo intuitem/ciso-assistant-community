@@ -15,13 +15,25 @@
 	import RadioGroupInput from '../RadioGroupInput.svelte';
 	import Select from '../Select.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let object: any = {};
-	export let data: any = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		object?: any;
+		data?: any;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		object = {},
+		data = {}
+	}: Props = $props();
 
 	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
 	const scale: SecurityObjectiveScale = $page.data.settings.security_objective_scale;
@@ -39,8 +51,8 @@
 		return objectives;
 	}
 
-	let securityObjectives: string[] = [];
-	let disasterRecoveryObjectives: string[] = [];
+	let securityObjectives: string[] = $state([]);
+	let disasterRecoveryObjectives: string[] = $state([]);
 
 	onMount(async () => {
 		securityObjectives = await fetchSecurityObjectives();

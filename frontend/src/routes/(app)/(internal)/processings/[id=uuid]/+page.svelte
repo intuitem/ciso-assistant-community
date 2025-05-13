@@ -4,7 +4,11 @@
 	import { page } from '$app/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import * as m from '$paraglide/messages';
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 </script>
 
 <DetailView {data}>

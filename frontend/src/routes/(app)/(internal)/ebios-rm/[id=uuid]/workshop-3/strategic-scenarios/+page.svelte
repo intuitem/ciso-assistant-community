@@ -10,7 +10,11 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const URLModel = data.URLModel;
 
@@ -39,7 +43,7 @@
 			class="flex items-start gap-3 rounded-xl border border-warning-300 bg-warning-100 p-4 shadow-sm"
 		>
 			<div class="text-warning-600 mt-1">
-				<i class="fa-solid fa-triangle-exclamation text-xl" />
+				<i class="fa-solid fa-triangle-exclamation text-xl"></i>
 			</div>
 			<div>
 				<h2 class="font-semibold text-warning-800 text-md mb-1">
@@ -63,15 +67,17 @@
 	{URLModel}
 	baseEndpoint="/strategic-scenarios?ebios_rm_study={$page.params.id}"
 >
-	<div slot="addButton">
-		<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-			<button
-				class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-				data-testid="add-button"
-				title={safeTranslate('add-' + data.model.localName)}
-				on:click={modalCreateForm}
-				><i class="fa-solid fa-file-circle-plus"></i>
-			</button>
-		</span>
-	</div>
+	{#snippet addButton()}
+		<div >
+			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+				<button
+					class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+					data-testid="add-button"
+					title={safeTranslate('add-' + data.model.localName)}
+					onclick={modalCreateForm}
+					><i class="fa-solid fa-file-circle-plus"></i>
+				</button>
+			</span>
+		</div>
+	{/snippet}
 </ModelTable>

@@ -1,18 +1,31 @@
 <script lang="ts">
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let count: string = '0';
-	export let label: string;
-	export let href: string = '#';
-	// export let help: string;
-	export let icon: string = '';
-	export let section: string = '';
-	export let emphasis: boolean = false;
-	let cEmphasis = '';
+	
+	let cEmphasis = $state('');
 	if (emphasis) {
 		cEmphasis = 'border border-y-0 border-r-0 border-l-2 border-l-violet-600';
 	}
-	export let customClass: string = '';
+	interface Props {
+		count?: string;
+		label: string;
+		href?: string;
+		// export let help: string;
+		icon?: string;
+		section?: string;
+		emphasis?: boolean;
+		customClass?: string;
+	}
+
+	let {
+		count = '0',
+		label,
+		href = '#',
+		icon = '',
+		section = '',
+		emphasis = false,
+		customClass = ''
+	}: Props = $props();
 </script>
 
 {#if href && href !== '#'}

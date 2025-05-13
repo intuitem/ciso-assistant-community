@@ -3,21 +3,36 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 
-	export let statusI18n: string;
-	export let resultI18n: string;
-	export let statusColor: string;
-	export let resultColor: string;
-	export let assessable: boolean;
-	export let score: number | null;
-	export let documentationScore: number | null;
-	export let isScored: boolean;
-	export let showDocumentationScore: boolean;
-	export let max_score: number;
+	interface Props {
+		statusI18n: string;
+		resultI18n: string;
+		statusColor: string;
+		resultColor: string;
+		assessable: boolean;
+		score: number | null;
+		documentationScore: number | null;
+		isScored: boolean;
+		showDocumentationScore: boolean;
+		max_score: number;
+	}
+
+	let {
+		statusI18n,
+		resultI18n,
+		statusColor,
+		resultColor,
+		assessable,
+		score,
+		documentationScore,
+		isScored,
+		showDocumentationScore,
+		max_score
+	}: Props = $props();
 
 	const leadResult = safeTranslate(resultI18n);
 	const lead = safeTranslate(statusI18n);
 
-	$: classesText = resultColor == '#000000' ? 'text-white' : '';
+	let classesText = $derived(resultColor == '#000000' ? 'text-white' : '');
 </script>
 
 {#if assessable}

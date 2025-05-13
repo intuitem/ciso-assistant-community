@@ -4,18 +4,22 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
-	export let form;
 
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	interface Props {
+		data: PageData;
+		form: any;
+	}
+
+	let { data, form }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
-	let formElement: HTMLFormElement;
-	let file: HTMLInputElement;
-	let selectedModel = 'Asset'; // Default selection
+	let formElement: HTMLFormElement = $state();
+	let file: HTMLInputElement = $state();
+	let selectedModel = $state('Asset'); // Default selection
 
 	function modalConfirm(): void {
 		const modalComponent: ModalComponent = {
@@ -36,21 +40,21 @@
 	}
 
 	// Determine if domain selection should be disabled
-	$: isDomainDisabled =
-		selectedModel === 'ComplianceAssessment' || selectedModel === 'FindingsAssessment';
+	let isDomainDisabled =
+		$derived(selectedModel === 'ComplianceAssessment' || selectedModel === 'FindingsAssessment');
 
-	$: isFrameworkDisabled = selectedModel !== 'ComplianceAssessment';
+	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
 
 	// Determine if perimeter selection should be disabled
-	$: isPerimeterDisabled =
-		selectedModel === 'Asset' ||
+	let isPerimeterDisabled =
+		$derived(selectedModel === 'Asset' ||
 		selectedModel === 'AppliedControl' ||
-		selectedModel === 'Perimeter';
+		selectedModel === 'Perimeter');
 
-	$: uploadButtonStyles = file ? '' : 'chip-disabled';
+	let uploadButtonStyles = $derived(file ? '' : 'chip-disabled');
 
 	// Helper to check if the form has been processed (form action has run)
-	$: formSubmitted = form !== null && form !== undefined;
+	let formSubmitted = $derived(form !== null && form !== undefined);
 
 	const authorizedExtensions = ['.xls', '.xlsx'];
 </script>
@@ -59,7 +63,7 @@
 	<div class=" col-span-2 bg-white shadow py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
-				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2" />Load excel data</h4>
+				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2"></i>Load excel data</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400"
 					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
@@ -257,7 +261,7 @@
 				<button
 					class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
 					type="button"
-					on:click={modalConfirm}><i class="fa-solid fa-file-arrow-up mr-2"></i>{m.upload()}</button
+					onclick={modalConfirm}><i class="fa-solid fa-file-arrow-up mr-2"></i>{m.upload()}</button
 				>
 			</div>
 		</form>

@@ -2,8 +2,7 @@
 	import type { urlModel } from '$lib/utils/types';
 
 	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
+	
 
 	// Stores
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -13,11 +12,6 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let _form;
-	export let URLModel: urlModel;
-	export let formAction: string = '?/delete';
-	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
-	export let id: string;
 	import { superForm } from 'sveltekit-superforms';
 
 	const { form /*, message*/, enhance } = superForm(_form, { invalidateAll });
@@ -28,7 +22,26 @@
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
 	import SuperDebug from 'sveltekit-superforms';
-	export let debug = false;
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		_form: any;
+		URLModel: urlModel;
+		formAction?: string;
+		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
+		id: string;
+		debug?: boolean;
+	}
+
+	let {
+		parent,
+		_form,
+		URLModel,
+		formAction = '?/delete',
+		invalidateAll = true,
+		id,
+		debug = false
+	}: Props = $props();
 </script>
 
 {#if $modalStore[0]}
@@ -41,10 +54,10 @@
 		<form method="POST" action={formAction} use:enhance class="modal-form {cForm}">
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
-        <button type="button" class="btn {parent.buttonNeutral}" data-testid="delete-cancel-button" on:click={parent.onClose}>{m.cancel()}</button>
+        <button type="button" class="btn {parent.buttonNeutral}" data-testid="delete-cancel-button" onclick={parent.onClose}>{m.cancel()}</button>
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
-        <button class="btn variant-filled-error" data-testid="delete-confirm-button" type="submit" on:click={parent.onClose}>{m.submit()}</button>
+        <button class="btn variant-filled-error" data-testid="delete-confirm-button" type="submit" onclick={parent.onClose}>{m.submit()}</button>
     </footer>
 		</form>
 		{#if debug === true}

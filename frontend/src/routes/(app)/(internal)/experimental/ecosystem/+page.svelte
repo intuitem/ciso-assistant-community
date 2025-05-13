@@ -1,8 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	export let data: PageData;
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
 	import { m } from '$paraglide/messages';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 </script>
 
 <div class="bg-white shadow flex overflow-x-auto">

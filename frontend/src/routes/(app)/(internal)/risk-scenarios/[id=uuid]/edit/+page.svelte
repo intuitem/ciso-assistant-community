@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
@@ -26,8 +28,12 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 
-	export let data: PageData;
-	export let form: ActionData;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
+
+	let { data, form = $bindable() }: Props = $props();
 
 	const schema = modelSchema(data.model.urlModel!);
 
@@ -81,22 +87,24 @@
 		modalStore.trigger(modal);
 	}
 
-	let refreshKey = false;
-	$: if (form?.newControl) {
-		refreshKey = !refreshKey;
-		_form.form.update((current: Record<string, any>) =>
-			form?.newControl?.field
-				? {
-						...current,
-						[form?.newControl?.field]: [
-							...current[form?.newControl?.field],
-							form?.newControl?.appliedControl
-						]
-					}
-				: current
-		);
-		form = null;
-	}
+	let refreshKey = $state(false);
+	run(() => {
+		if (form?.newControl) {
+			refreshKey = !refreshKey;
+			_form.form.update((current: Record<string, any>) =>
+				form?.newControl?.field
+					? {
+							...current,
+							[form?.newControl?.field]: [
+								...current[form?.newControl?.field],
+								form?.newControl?.appliedControl
+							]
+						}
+					: current
+			);
+			form = null;
+		}
+	});
 
 	const next = getSecureRedirect($page.url.searchParams.get('next'));
 
@@ -241,8 +249,8 @@
 							<div class="">
 								<button
 									class="btn bg-gray-300 h-10 w-10"
-									on:click={(_) => modalMeasureCreateForm('existing_applied_controls')}
-									type="button"><i class="fa-solid fa-plus text-sm" /></button
+									onclick={(_) => modalMeasureCreateForm('existing_applied_controls')}
+									type="button"><i class="fa-solid fa-plus text-sm"></i></button
 								>
 							</div>
 						</div>
@@ -259,7 +267,7 @@
 								label={m.currentProba()}
 							/>
 						</div>
-						<i class="fa-solid fa-xmark mt-8" />
+						<i class="fa-solid fa-xmark mt-8"></i>
 						<div class="min-w-36">
 							<Select
 								form={_form}
@@ -269,7 +277,7 @@
 								label={m.currentImpact()}
 							/>
 						</div>
-						<i class="fa-solid fa-equals mt-8" />
+						<i class="fa-solid fa-equals mt-8"></i>
 						<div class="min-w-38">
 							<RiskLevel
 								form={_form}
@@ -311,8 +319,8 @@
 							<div class="">
 								<button
 									class="btn bg-gray-300 h-10 w-10"
-									on:click={(_) => modalMeasureCreateForm('applied_controls')}
-									type="button"><i class="fa-solid fa-plus text-sm" /></button
+									onclick={(_) => modalMeasureCreateForm('applied_controls')}
+									type="button"><i class="fa-solid fa-plus text-sm"></i></button
 								>
 							</div>
 						</div>
@@ -329,7 +337,7 @@
 								label={m.residualProba()}
 							/>
 						</div>
-						<i class="fa-solid fa-xmark mt-8" />
+						<i class="fa-solid fa-xmark mt-8"></i>
 						<div class="min-w-36">
 							<Select
 								form={_form}
@@ -339,7 +347,7 @@
 								label={m.residualImpact()}
 							/>
 						</div>
-						<i class="fa-solid fa-equals mt-8" />
+						<i class="fa-solid fa-equals mt-8"></i>
 						<div class="min-w-38">
 							<RiskLevel
 								form={_form}
@@ -384,7 +392,7 @@
 				class="btn bg-gray-400 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				on:click={cancel}>{m.cancel()}</button
+				onclick={cancel}>{m.cancel()}</button
 			>
 			<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button"
 				>{m.save()}</button

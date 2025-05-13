@@ -3,13 +3,17 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
-	export let item: { name: string; href: string; fa_icon: string }[] = [];
-	export let sideBarVisibleItems: Record<string, boolean>;
+	interface Props {
+		item?: { name: string; href: string; fa_icon: string }[];
+		sideBarVisibleItems: Record<string, boolean>;
+	}
 
-	$: classesActive = (href: string) =>
+	let { item = [], sideBarVisibleItems }: Props = $props();
+
+	let classesActive = $derived((href: string) =>
 		href === $page.url.pathname
 			? 'bg-primary-100 text-primary-800'
-			: 'hover:bg-primary-50 text-gray-800 ';
+			: 'hover:bg-primary-50 text-gray-800 ');
 </script>
 
 {#each item as item}
@@ -28,7 +32,7 @@
 				id={item.name}
 				title={safeTranslate(item.name)}
 			>
-				<i class="{item.fa_icon} w-1/12" />
+				<i class="{item.fa_icon} w-1/12"></i>
 				<span class="text-sm tracking-wide truncate">{safeTranslate(item.name)}</span>
 			</span>
 		</Anchor>

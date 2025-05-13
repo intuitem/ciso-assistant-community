@@ -3,10 +3,14 @@
 	import Calendar from '$lib/components/Calendar/Calendar.svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	$: year = parseInt($page.params.year);
-	$: month = parseInt($page.params.month);
+	let { data }: Props = $props();
+
+	let year = $derived(parseInt($page.params.year));
+	let month = $derived(parseInt($page.params.month));
 
 	function createCalendarEvents(
 		appliedControls: Record<string, string>[],
@@ -41,7 +45,7 @@
 		return events;
 	}
 
-	$: info = createCalendarEvents(data.appliedControls, data.riskAcceptances, data.tasks);
+	let info = $derived(createCalendarEvents(data.appliedControls, data.riskAcceptances, data.tasks));
 </script>
 
 <Calendar {info} {year} {month} />

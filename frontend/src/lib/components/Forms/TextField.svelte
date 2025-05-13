@@ -1,35 +1,59 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CssClasses } from '@skeletonlabs/skeleton';
 
-	let _class = '';
-	export let type = 'text';
-	export { _class as class };
-	export let classesContainer: CssClasses = '';
-	export let label: string | undefined = undefined;
-	export let field: string;
-	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
-	export let helpText: string | undefined = undefined;
-	export let cachedValue: string | undefined = undefined;
-	export let cacheLock: CacheLock = {
+	
+	interface Props {
+		class?: string;
+		type?: string;
+		classesContainer?: CssClasses;
+		label?: string | undefined;
+		field: string;
+		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
+		helpText?: string | undefined;
+		cachedValue?: string | undefined;
+		cacheLock?: CacheLock;
+		form: any;
+		hidden?: boolean;
+		disabled?: boolean;
+		required?: boolean;
+		[key: string]: any
+	}
+
+	let {
+		class: _class = '',
+		type = 'text',
+		classesContainer = '',
+		label = $bindable(undefined),
+		field,
+		valuePath = field,
+		helpText = undefined,
+		cachedValue = $bindable(undefined),
+		cacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
-	};
-	export let form;
-	export let hidden = false;
-	export let disabled = false;
-	export let required = false;
+	},
+		form,
+		hidden = false,
+		disabled = false,
+		required = false,
+		...rest
+	}: Props = $props();
 
 	label = label ?? field;
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	// Store the display value separately from the actual form value
-	let displayValue: string;
+	let displayValue: string = $state();
 
-	$: cachedValue = $value;
+	run(() => {
+		cachedValue = $value;
+	});
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
@@ -41,8 +65,8 @@
 		}
 	});
 
-	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
-	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
+	let classesTextField = $derived((errors: string[] | undefined) => (errors ? 'input-error' : ''));
+	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
 
 	// Function to convert local datetime to UTC format for storage
 	function convertToUTC(dateTimeLocal: string): string {
@@ -81,9 +105,11 @@
 	}
 
 	// Initialize display value if it's a datetime-local input
-	$: if (type === 'datetime-local' && $value && !displayValue) {
-		displayValue = formatDateForInput($value);
-	}
+	run(() => {
+		if (type === 'datetime-local' && $value && !displayValue) {
+			displayValue = formatDateForInput($value);
+		}
+	});
 </script>
 
 <div class={classesContainer}>
@@ -116,9 +142,9 @@
 				aria-invalid={$errors ? 'true' : undefined}
 				placeholder=""
 				value={displayValue}
-				on:input={handleDateTimeChange}
+				oninput={handleDateTimeChange}
 				{...$constraints}
-				{...$$restProps}
+				{...rest}
 				{disabled}
 				{required}
 			/>
@@ -133,7 +159,7 @@
 				placeholder=""
 				bind:value={$value}
 				{...$constraints}
-				{...$$restProps}
+				{...rest}
 				{disabled}
 				{required}
 			/>
