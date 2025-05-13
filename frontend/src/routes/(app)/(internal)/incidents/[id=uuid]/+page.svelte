@@ -280,7 +280,8 @@
 					<div class="flex flex-col">
 						<div class="flex flex-row items-center space-x-3">
 							<time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-								{formatDateOrDateTime(meta.timestamp, getLocale())} - {meta.author.str}</time
+								{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta?.author
+										?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
 							>
 							<TableRowActions
 								baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
