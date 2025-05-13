@@ -46,6 +46,9 @@
 	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 	import TaskTemplateForm from './ModelForm/TaskTemplateForm.svelte';
 	import TaskNodeForm from './ModelForm/TaskNodeForm.svelte';
+	import BusinessImpactAnalysisForm from './ModelForm/BusinessImpactAnalysisForm.svelte';
+	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
+	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -317,7 +320,7 @@
 	{:else if URLModel === 'frameworks'}
 		<FrameworksForm {form} {model} {cacheLocks} {formDataCache} />
 	{:else if URLModel === 'users'}
-		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} />
+		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 	{:else if URLModel === 'sso-settings'}
 		<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'general-settings'}
@@ -326,6 +329,22 @@
 		<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
+	{:else if URLModel === 'business-impact-analysis'}
+		<BusinessImpactAnalysisForm
+			{form}
+			{model}
+			{duplicate}
+			{cacheLocks}
+			{formDataCache}
+			{initialData}
+			{object}
+			{context}
+			{updated_fields}
+		/>
+	{:else if URLModel === 'asset-assessments'}
+		<AssetAssessmentForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'escalation-thresholds'}
+		<EscalationThresholdForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'processings'}
 		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'purposes'}
