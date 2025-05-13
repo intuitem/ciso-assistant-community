@@ -17,7 +17,7 @@ description: "Version: 3.0 du 19/06/2020\n\nL\u2019ANSSI a r\xE9dig\xE9 un guide
   \ le document :\nhttps://cyber.gouv.fr/sites/default/files/2020/06/anssi-guide-passerelle_internet_securisee-v3.pdf"
 copyright: "Licence ouverte / Open Licence (\xC9talab - v2.0)"
 version: 1
-publication_date: 2025-05-03
+publication_date: 2025-05-13
 provider: ANSSI
 packager: protocolpaladin
 objects:
@@ -53,7 +53,7 @@ objects:
       description: "Cette recommandation permet de mettre en \u0153uvre une premi\xE8\
         re alternative, d\u2019un niveaude s\xE9curit\xE9 moindre que la recommandation\
         \ R."
-    - ref_id: R --
+    - ref_id: R--
       name: Recommandation alternative de second niveau
       description: "Cette recommandation permet de mettre en \u0153uvre une seconde\
         \ alternative, d\u2019un .niveau de s\xE9curit\xE9 moindre que les recommandations\
@@ -85,7 +85,7 @@ objects:
         ux entrants et les \uFB02ux sortants. Cette liste doit \xEAtre mise \xE0 jour\
         \ d\xE8s que n\xE9cessaire et revue r\xE9guli\xE8rement."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -121,7 +121,7 @@ objects:
         \ correspondant au juste besoin op\xE9rationnel doit \xEAtre d\xE9\uFB01nie,\
         \ .mise en \u0153uvre sur ce pare-feu et revue r\xE9guli\xE8rement."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -139,7 +139,7 @@ objects:
         \ \uFB02ux correspondant au juste besoin op\xE9rationnel doit \xEAtre d\xE9\
         \uFB01nie, .mise en \u0153uvre sur ce pare-feu et revue r\xE9guli\xE8rement."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -160,7 +160,7 @@ objects:
         \ d\xE9di\xE9) doit \xEAtre r\xE9alis\xE9 depuis des infrastructures physiquement\
         \ distinctes."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -176,7 +176,7 @@ objects:
         \ la mise en \u0153uvre d\u2019un ou plusieurs pare-feux interm\xE9diaires\
         \ compl\xE9mentaires est recommand\xE9e."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -201,7 +201,7 @@ objects:
         \ de s\xE9curit\xE9 et de l\u2019exposition des services et doit \xEAtre d\xE9\
         termin\xE9e par une .analyse de risque."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -219,7 +219,7 @@ objects:
         \ la passerelle Internet s\xE9curis\xE9e vers le SI interne de l\u2019entit\xE9\
         ."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -247,7 +247,7 @@ objects:
         \ \xEAtre mise en \u0153uvre au sein de la passerelle Internet s\xE9curis\xE9\
         e."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -262,7 +262,7 @@ objects:
         \ malveillants, une analyse des . \uFB02ux est recommand\xE9e lors de cette\
         \ rupture protocolaire."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -284,7 +284,7 @@ objects:
         e pour les besoins propres d\u2019authenti\uFB01cation. Trois architectures\
         \ sont propos\xE9es pour y r\xE9pondre :"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -295,7 +295,7 @@ objects:
       description: "- un annuaire d\xE9di\xE9, minimaliste et en lecture seule, au\
         \ sein de la passerelle Internet s\xE9curis\xE9e (cf. \uFB01gure 2.7);"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -306,7 +306,7 @@ objects:
       description: "- un serveur mandataire inverse d\u2019authenti\uFB01cation au\
         \ sein de la passerelle Internet s\xE9curis\xE9e (cf. \uFB01gure 2.8);"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -318,7 +318,7 @@ objects:
         di\xE9 aux besoins d\u2019authenti\uFB01cation de la passerelle Internet s\xE9\
         curis\xE9e (cf. \uFB01gure 2.9)."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -347,7 +347,7 @@ objects:
         \ services qu\u2019elles portent aient des besoins de s\xE9curit\xE9 et une\
         \ exposition homog\xE8nes."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -393,7 +393,7 @@ objects:
         \ et \xE0 l\u2019\xE9ventuelle zone de services expos\xE9s doivent \xEAtre\
         \ maintenus."
       implementation_groups:
-      - R --
+      - R--
       - R-
     - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.4
       assessable: false
@@ -416,7 +416,7 @@ objects:
         me \xE0 l\u2019aide d\u2019instances virtuelles distinctes d\xE9ploy\xE9es\
         \ sur un socle physique commun, doit \xEAtre proscrite."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -439,7 +439,7 @@ objects:
         \ architecture (ou un sous-ensemble) et les m\xEAmes produits pour chaque\
         \ passerelle Internet s\xE9curis\xE9e."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -478,7 +478,7 @@ objects:
         analyse de risque doit \xEAtre men\xE9e avec d\u2019autant plus de rigueur\
         \ et d\u2019exhaustivit\xE9."
       implementation_groups:
-      - R --
+      - R--
       - R-
     - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3
       assessable: false
@@ -502,7 +502,7 @@ objects:
         e de mani\xE8re s\xE9curis\xE9e selon les recommandations de l\u2019ANSSI\
         \ rassembl\xE9es dans le guide a\uFB00\xE9rent."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -522,7 +522,7 @@ objects:
       description: "L\u2019entit\xE9 doit prendre les mesures n\xE9cessaires pour\
         \ garantir la disponibilit\xE9 attendue de l\u2019acc\xE8s \xE0 Internet :"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -533,7 +533,7 @@ objects:
       description: "- travaux de g\xE9nie civil pour \xE9viter tout point unique de\
         \ rupture ;"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -544,7 +544,7 @@ objects:
       description: "- d\xE9ploiement d\u2019\xE9quipements suppl\xE9mentaires pour\
         \ assurer la redondance mat\xE9rielle ;"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -555,7 +555,7 @@ objects:
       description: "-con\uFB01guration logicielle pour garantir une r\xE9silience\
         \ r\xE9seau protocolaire. "
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -569,7 +569,7 @@ objects:
         \ d\u2019un FAI ou g\xE9r\xE9 en propre par l\u2019entit\xE9, il .est recommand\xE9\
         \ de d\xE9ployer une solution de protection anti-DDoS."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -584,7 +584,7 @@ objects:
         \ de d\xE9clarer statiquement les routes IP dans les \xE9quipements r\xE9\
         seau et de d\xE9sactiver explicitement les protocoles de routage dynamique."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -604,7 +604,7 @@ objects:
         \ d\u2019un pare-feu externe ne g\xE9n\xE8rent pas de r\xE9ponses (mode DROP\
         \ et non REJECT)."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -618,7 +618,7 @@ objects:
         \ d\u2019anonymiser les champs techniques divulguant de l\u2019information\
         \ sur les infrastructures internes de l\u2019entit\xE9."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -643,7 +643,7 @@ objects:
         \ serveur mandataire doit \xEAtre mis en place au sein de la zone de services\
         \ relais de la passerelle Internet s\xE9curis\xE9e."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -665,7 +665,7 @@ objects:
         n\xE9rique, une tra\xE7abilit\xE9 de son utilisation (relev\xE9 d\u2019identit\xE9\
         ) doit \xEAtre mise en place."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -684,7 +684,7 @@ objects:
         autorisations d\u2019un large masque de sous-r\xE9seau (ex. :\nsup\xE9rieur\
         \ \xE0 /24 en IPv4) ou d\u2019un domaine DNS tr\xE8s \xE9tendu (ex. : *.moncdn.fr)."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -712,7 +712,7 @@ objects:
         \ sites r\xE9put\xE9s de con\uFB01ance et non inspect\xE9s doit \xEAtre \xE9\
         tablie (ex. : sites bancaires) et partag\xE9e avec les utilisateurs."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -737,7 +737,7 @@ objects:
         \ C.3.1 sur la conservation des \xE9l\xE9ments de journalisation par les fournisseurs\
         \ d\u2019acc\xE8s \xE0 Internet."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -788,7 +788,7 @@ objects:
         duite au strict n\xE9cessaire par d\xE9sactivation de tout module ou param\xE8\
         tre inutile."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -807,7 +807,7 @@ objects:
       description: "Du point de vue de la s\xE9curit\xE9, le serveur mandataire doit\
         \ \xEAtre con\uFB01gur\xE9 en mode explicite sur les clients."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -829,7 +829,7 @@ objects:
         ) n\xE9cessitant d\u2019acc\xE9der au Web \xE0 travers un navigateur ou les\
         \ protocoles HTTP/HTTPS."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -846,7 +846,7 @@ objects:
         \ contr\xF4le de l\u2019entit\xE9) n\xE9cessitant d\u2019acc\xE9der au Web\
         \ \xE0 travers un navigateur ou les protocoles HTTP/HTTPS."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -873,7 +873,7 @@ objects:
         \ de courriels, interconnexion \xE0 Internet, r\xF4les des exp\xE9diteurs\
         \ (ex. : utilisateurs, services), noms de domaines associ\xE9s, etc."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -890,7 +890,7 @@ objects:
         \ et conform\xE9ment \xE0 R15, il est recommand\xE9 que le service soit quali\uFB01\
         \xE9 selon le r\xE9f\xE9rentiel d\u2019exigences SecNumCloud de l\u2019ANSSI."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -916,7 +916,7 @@ objects:
         \ doivent \xEAtre d\xE9ploy\xE9s au sein du SI de l\u2019entit\xE9 (et non\
         \ au sein de la passerelle Internet s\xE9curis\xE9e)."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -934,7 +934,7 @@ objects:
         \ une interconnexion \xE0 Internet), au moins un serveur SMTP doit \xEAtre\
         \ positionn\xE9 au sein de la passerelle Internet s\xE9curis\xE9e."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -949,7 +949,7 @@ objects:
         \ la passerelle Internet s\xE9curis\xE9e. Ils doivent \xEAtre con\uFB01gur\xE9\
         s en cons\xE9quence ; par exemple :"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -962,7 +962,7 @@ objects:
         \ de bo\xEEtes aux lettres) et assure des fonctions de nettoyage des en-t\xEA\
         tes (cf. recommandation R21) ;"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -976,7 +976,7 @@ objects:
         \ transmet in \uFB01ne les courriers \xE0 un autre serveur relais de l\u2019\
         entit\xE9 ou \xE0 un serveur de bo\xEEtes aux lettres."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -995,7 +995,7 @@ objects:
         \ par un serveur autre qu\u2019un serveur SMTP doit .g\xE9n\xE9rer des journaux\
         \ au niveau des pare-feux et une alerte de s\xE9curit\xE9."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1015,7 +1015,7 @@ objects:
         \ dans les bo\xEEtes aux lettres, des m\xE9canismes antispam doivent \xEA\
         tre mis en \u0153uvre en amont, par exemple :"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1027,7 +1027,7 @@ objects:
         \ ou d\u2019interdictions provisoires d\u2019adresses IP ou de noms de domaine\
         \ ;"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1037,7 +1037,7 @@ objects:
       parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38
       description: "- l\u2019analyse heuristique du corps des courriels ;"
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1047,7 +1047,7 @@ objects:
       parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38
       description: "- le test de Turing pour les nouveaux exp\xE9diteurs."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1062,7 +1062,7 @@ objects:
         uvre, comme l\u2019analyse antivirus des pi\xE8ces jointes ou l\u2019analyse\
         \ des liens Web pr\xE9sents dans le corps des courriels."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1097,7 +1097,7 @@ objects:
         \ ressources d\xE9di\xE9es, des restrictions d\u2019acc\xE8s et une strat\xE9\
         gie renforc\xE9e de d\xE9tection, par exemple :"
       implementation_groups:
-      - R --
+      - R--
       - R-
     - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-):1
       assessable: true
@@ -1106,7 +1106,7 @@ objects:
       description: "- un serveur d\u2019exposition (ex. : portail Webmail) h\xE9berg\xE9\
         \ au sein de la zone de services expos\xE9s ;"
       implementation_groups:
-      - R --
+      - R--
       - R-
     - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-):2
       assessable: true
@@ -1116,7 +1116,7 @@ objects:
         \ inverse (reverse proxy), voire un pare-feu applicatif, h\xE9berg\xE9s en\
         \ zone de services relais ;"
       implementation_groups:
-      - R --
+      - R--
       - R-
     - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-):3
       assessable: true
@@ -1126,7 +1126,7 @@ objects:
         \ facteur pour les utilisateurs, \xE9ventuellement avec la fourniture d\u2019\
         un certi\uFB01cat \xE9lectronique ;"
       implementation_groups:
-      - R --
+      - R--
       - R-
     - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-):4
       assessable: true
@@ -1136,7 +1136,7 @@ objects:
         \ d\xE9tection (g\xE9olocalisation des connexions, nombre d\u2019authenti\uFB01\
         cations \xE9chou\xE9es, volumes de courriels \xE9chang\xE9s)."
       implementation_groups:
-      - R --
+      - R--
       - R-
     - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.3
       assessable: false
@@ -1159,7 +1159,7 @@ objects:
         curis\xE9s de messagerie, d\xE9sormais standards (ex. : .SMTPS, POPS, IMAPS\
         \ ou HTTPS) est recommand\xE9e."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1177,7 +1177,7 @@ objects:
         \ SMTP, et de bloquer sur les briques de \uFB01ltrage, le service SMTP avec\
         \ chi\uFB00rement implicite (TCP/465)."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1214,7 +1214,7 @@ objects:
         \ Microsoft Exchange) doit \xEAtre support\xE9 sur les serveurs SMTP de r\xE9\
         ception de l\u2019entit\xE9."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1231,7 +1231,7 @@ objects:
         \ d\u2019envoi, qu\u2019ils soient internes ou externes, et d\u2019autre part\
         \ aux usages sp\xE9ci\uFB01ques (ex. : utilisation d\u2019alias)."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1250,7 +1250,7 @@ objects:
       description: "Le protocole DKIM doit \xEAtre support\xE9 sur les serveurs SMTP\
         \ de r\xE9ception de l\u2019entit\xE9."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1314,7 +1314,7 @@ objects:
         \ que les r\xE9solutions DNSSEC soient support\xE9es sur les serveurs DNS\
         \ de r\xE9solution publique de l\u2019entit\xE9."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
@@ -1342,7 +1342,7 @@ objects:
         \ des mesures de protection en disponibilit\xE9 du service de messagerie \xE9\
         lectronique, pour couvrir les cas de panne et les attaques."
       implementation_groups:
-      - R --
+      - R--
       - R-
       - R
       - R+
