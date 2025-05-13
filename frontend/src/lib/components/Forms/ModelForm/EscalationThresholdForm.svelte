@@ -37,6 +37,13 @@
 	label={m.assetAssessment()}
 	hidden={initialData.asset_assessment}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="qualifications"
+	field="qualifications"
+	label={m.qualifications()}
+/>
 <Select
 	{form}
 	options={model.selectOptions['quali_impact']}

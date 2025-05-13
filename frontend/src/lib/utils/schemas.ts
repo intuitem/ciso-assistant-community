@@ -205,6 +205,7 @@ export const AssetSchema = z.object({
 	...NameDescriptionMixin,
 	type: z.string().default('PR'),
 	folder: z.string(),
+	asset_class: z.string().optional(),
 	parent_assets: z.string().optional().array().optional(),
 	security_objectives: z
 		.object({
@@ -485,6 +486,7 @@ export const AssetAssessmentSchema = z.object({
 export const EscalationThresholdSchema = z.object({
 	asset_assessment: z.string(),
 	point_in_time: z.number(),
+	qualifications: z.string().uuid().optional().array().optional(),
 	quanti_impact_unit: z.string().optional().default('currency'),
 	quali_impact: z.number().optional().default(-1),
 	quanti_impact: z.number().optional(),

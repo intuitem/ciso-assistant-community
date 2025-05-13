@@ -39,6 +39,14 @@ export function unsafeTranslate(key: string, params = {}, options = {}): string 
 				return translatedFrom + '->' + translatedTo;
 			}
 		}
+		if (typeof key === 'string' && key.includes('/')) {
+			const parts = key.split('/');
+			const translatedParts = parts.map((part) => {
+				const camelCasePart = toCamelCase(part);
+				return m[camelCasePart] ? m[camelCasePart](params, options) : part;
+			});
+			return translatedParts.join('/');
+		}
 	} catch (e) {
 		console.error(`Error translating key "${key}"`, e);
 	}
