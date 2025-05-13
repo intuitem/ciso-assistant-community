@@ -26,6 +26,7 @@
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
+	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
@@ -45,6 +46,9 @@
 	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 	import TaskTemplateForm from './ModelForm/TaskTemplateForm.svelte';
 	import TaskNodeForm from './ModelForm/TaskNodeForm.svelte';
+	import BusinessImpactAnalysisForm from './ModelForm/BusinessImpactAnalysisForm.svelte';
+	import AssetAssessmentForm from './ModelForm/AssetAssessmentForm.svelte';
+	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -71,7 +75,7 @@
 	export let context = 'default';
 	export let caching: boolean = false;
 	export let closeModal = false;
-	export let parent: any;
+	export let parent: any = {};
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
 	export let duplicate = false;
@@ -157,7 +161,9 @@
 				goto(getSecureRedirect(form.message.redirect));
 			}
 			if (form.valid) {
-				parent.onConfirm();
+				if (parent && typeof parent.onConfirm === 'function') {
+					parent.onConfirm();
+				}
 				createModalCache.deleteCache(model.urlModel);
 			}
 		}
@@ -314,13 +320,31 @@
 	{:else if URLModel === 'frameworks'}
 		<FrameworksForm {form} {model} {cacheLocks} {formDataCache} />
 	{:else if URLModel === 'users'}
-		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} />
+		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 	{:else if URLModel === 'sso-settings'}
 		<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'general-settings'}
 		<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
+	{:else if URLModel === 'feature-flags'}
+		<FeatureFlagsSettingForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
+	{:else if URLModel === 'business-impact-analysis'}
+		<BusinessImpactAnalysisForm
+			{form}
+			{model}
+			{duplicate}
+			{cacheLocks}
+			{formDataCache}
+			{initialData}
+			{object}
+			{context}
+			{updated_fields}
+		/>
+	{:else if URLModel === 'asset-assessments'}
+		<AssetAssessmentForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
+	{:else if URLModel === 'escalation-thresholds'}
+		<EscalationThresholdForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} />
 	{:else if URLModel === 'processings'}
 		<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'purposes'}

@@ -272,7 +272,6 @@
 	"cancel": "منسوخ کریں",
 	"save": "محفوظ کریں",
 	"assetsImpactedByTheRiskScenario": "خطرے کے منظرنامے سے متاثرہ اثاثے",
-	"ecistingMeasures": "موجودہ کنٹرول",
 	"theExistingAppliedControlsToManageThisRisk": "اس خطرے کو منظم کرنے کے لیے موجودہ لاگو کنٹرول",
 	"currentRiskLevelGivenCurrentMeasures": "موجودہ لاگو کنٹرول کے مطابق موجودہ خطرے کی سطح",
 	"riskLevelWhenAllExtraMeasuresDone": "جب تمام اضافی اقدامات مکمل ہو جائیں تو خطرے کی سطح",
@@ -880,5 +879,15 @@
 	"associatedFindings": "وابستہ نتائج",
 	"findings_count": "نتائج کی تعداد",
 	"addFinding": "نتیجہ شامل کریں۔",
-	"youCanSetPasswordHere": "آپ یہاں اپنا پاس ورڈ سیٹ کر سکتے ہیں"
+	"youCanSetPasswordHere": "آپ یہاں اپنا پاس ورڈ سیٹ کر سکتے ہیں",
+	"failedToContactProvider": "فراہم کنندہ سے رابطہ کرنے میں ناکامی",
+	"userIsNotSSO": "آپ کے اکاؤنٹ کے لیے SSO لاگ ان فی الحال غیر فعال ہے۔",
+	"enableSSOHelpText": "تمام صارفین کے لیے SSO کو لاگ ان کے اختیارات کے طور پر فعال کریں۔",
+	"keepLocalLogin": "مجبور SSO سے مستثنیٰ کریں",
+	"keepLocalLoginHelpText": "جب عالمی 'مجبور SSO' فعال ہو، تو یہ صارف کو اسے بائی پاس کرنے اور ضرورت پڑنے پر مقامی طور پر منظم کردہ پاس ورڈ کے ذریعے لاگ ان کرنے کی اجازت دیتا ہے۔",
+	"forceSSOLogin": "SSO لاگ ان کو مجبور کریں",
+	"forceSSOLoginHelpText": "تمام صارفین کے لیے SSO کی ضرورت ہے اور کسی بھی محفوظ کردہ پاس ورڈز کو ری سیٹ کرتا ہے۔ جن صارفین کے لیے 'مجبور SSO سے مستثنیٰ کریں' فعال ہے، وہ پاس ورڈ پر مبنی بیک اپ رسائی برقرار رکھیں گے۔",
+	"forceSSOLoginHelpText2": "اس آپشن کو فعال کرنے سے پہلے یقینی بنائیں کہ آپ کا SSO فعال ہے یا آپ کے پاس بیک اپ اکاؤنٹ موجود ہے۔",
+	"youCanSetPasswordHere": "آپ یہاں اپنا پاس ورڈ سیٹ کر سکتے ہیں",
+	"taskScheduleWarning": "نئی شیڈول کا حصہ نہ ہونے والے کسی بھی کام کو مستقل طور پر حذف کر دیا جائے گا۔"
 }

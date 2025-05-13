@@ -22,7 +22,7 @@ erDiagram
 
     USER {
         string  email
-        boolean is_sso
+        boolean keep_local_login
     }
 
     USER_GROUP {
@@ -602,9 +602,11 @@ Security objectives are measured using a specifc scale. For now, the following s
 
 - 0-3: coded as 0-3
 - 1-4: coded as 0-3
+- 0-4: coded as 0-4
+- 1-5: coded as 0-4
 - FIPS-199: coded as 0-3
 
-There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "discrete scales"):
+There is a correspondance between the 0-3, 1-4, 0,4, 1-5 and FIPS-199 scales (called "discrete scales"):
 
 | scale    | internal value | scale value |
 | -------- | -------------- | ----------- |
@@ -612,14 +614,27 @@ There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "disc
 | 0-3      | 1              | 1           |
 | 0-3      | 2              | 2           |
 | 0-3      | 3              | 3           |
+| 0-3      | 4              | 3           |
 | 1-4      | 0              | 1           |
 | 1-4      | 1              | 2           |
 | 1-4      | 2              | 3           |
 | 1-4      | 3              | 4           |
+| 1-4      | 4              | 4           |
 | FIPS-199 | 0              | low         |
 | FIPS-199 | 1              | moderate    |
 | FIPS-199 | 2              | moderate    |
 | FIPS-199 | 3              | high        |
+| FIPS-199 | 4              | high        |
+| 0-4      | 0              | 0           |
+| 0-4      | 1              | 1           |
+| 0-4      | 2              | 2           |
+| 0-4      | 3              | 3           |
+| 0-4      | 4              | 4           |
+| 1-5      | 0              | 1           |
+| 1-5      | 1              | 2           |
+| 1-5      | 2              | 3           |
+| 1-5      | 3              | 4           |
+| 1-5      | 4              | 5           |
 
 THe scale to use is a global parameter. It has no impact on the encoding in the database, which always uses the internal value.
 
@@ -1121,9 +1136,16 @@ Names of built-in objects can be internationalized.
 
 ## SSO
 
-A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
+Global SSO settings for the instance are defined in a dedicated object SSO_SETTINGS.
 
-SSO Settings are defined in a dedicated object SSO_SETTINGS.
+A user can be authenticated either locally or with SSO.
+
+When SSO is activated, all users can use SSO.
+
+When the force_sso global flag is set, all users without keep_local_login:
+- have their password disabled, 
+- cannot ask for a password reset,
+- cannot have their password changed by an administrator.
 
 ## TPRM evolution
 
@@ -1142,7 +1164,7 @@ The following approach has been retained:
 - This compliance assessment is reviewed by the client, requirement by requirement.
 - An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
 - Review features are added to compliance assessment to enable this workflow in a generic way.
-- A requirement node can include a question (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
+- A requirement node can include questions (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
 
 ### Entity-relationship diagram
 
@@ -1282,22 +1304,22 @@ There is no link between representatives (modeling of the ecosystem) and users o
 
 - add field observation
 
-#### Requirement assessment
+### Requirement assessment
 
 - add the following fields:
-  - answer: a json corresponding to the optional question of the requirement node.
+  - answers: a json corresponding to the answers of the requirement node questions.
 
-#### Compliance assessment
+### Compliance assessment
 
 - add the following fields:
   - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
 
-#### Requirement node
+### Requirement node
 
 - Add the following fields:
-  - question: a json field describing a form.
+  - questions: a json corresponding to the optional questions of the requirement node.
 
-#### Applied control
+### Applied control
 
 - Add a "contract" category
 - Add a foreign key "contract" to point to a contract
@@ -1308,16 +1330,46 @@ Note: in the future, we will use the same approach for policies.
 
 ### Question and answer format
 
-The format for question and answer json fields will evolve over time. The initial format is the following:
+The format for questions and answers json fields will evolve over time. The initial format is the following:
 
-- question:
+- questions:
 
 ```json
 {
-    "question": {
-        "version": 1
-        "schema": {...}
+    "urn:intuitem:risk:req_node:example:a.1:question:1": {
+        "type": "unique_choice",
+        "choices": [
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
+                "value": "yes"
+            },
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
+                "value": "no"
+            },
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:3",
+                "value": "n/a"
+            }
+        ],
+        "text": "Question title",
+    },
+    "urn:intuitem:risk:req_node:example:a.1:question:2": {
+    ...
     }
+}
+```
+
+- answers:
+
+```json
+{
+    "urn:intuitem:risk:req_node:example:a.1:question:1": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1",
+        "urn:intuitem:risk:framework:example:answer01:choice:2"
+    ],
+    "urn:intuitem:risk:req_node:example:a.1:question:2": "yes",
+    ...
 }
 ```
 
@@ -1560,7 +1612,6 @@ erDiagram
 ### Implementation
 
 - EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
-- There is no object for "strategic scenarios", as they result directly from attack paths and corresponding feared event (which is the title of the strategic scenario).
 - the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
 
 ## Domain import/export

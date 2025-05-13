@@ -32,20 +32,20 @@ Star the project 🌟 to get releases notification and help growing the communit
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
-- Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,  
-- Built as a **multi-paradigm** tool that adapts to different backgrounds, methodologies, and expectations,  
-- Explicitly **decouples** compliance from cybersecurity controls, enabling reusability across the platform,  
-- Promotes **reusability** and interlinking instead of redundant work,  
-- Developed with an **API-first** approach to support both UI interaction and external **automation**,  
-- Comes packed with a wide range of built-in standards, security controls, and threat libraries,  
-- Offers an **open format** to customize and reuse your own objects and frameworks,  
-- Includes built-in **risk assessment** and **remediation tracking** workflows,  
-- Supports custom frameworks via a simple syntax and flexible tooling,  
+- Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,
+- Built as a **multi-paradigm** tool that adapts to different backgrounds, methodologies, and expectations,
+- Explicitly **decouples** compliance from cybersecurity controls, enabling reusability across the platform,
+- Promotes **reusability** and interlinking instead of redundant work,
+- Developed with an **API-first** approach to support both UI interaction and external **automation**,
+- Comes packed with a wide range of built-in standards, security controls, and threat libraries,
+- Offers an **open format** to customize and reuse your own objects and frameworks,
+- Includes built-in **risk assessment** and **remediation tracking** workflows,
+- Supports custom frameworks via a simple syntax and flexible tooling,
 - Provides rich **import/export** capabilities across various channels and formats (UI, CLI, Kafka, reports, etc.).
 
-Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.  
+Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.
 
-As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.  
+As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
 
 We’re constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
 
@@ -75,22 +75,18 @@ CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/),
 
 At the heart of CISO Assistant lies the **decoupling principle**, which enables powerful use cases and major time savings:
 
-- Reuse past assessments across scopes or frameworks,  
-- Evaluate a single scope against multiple frameworks simultaneously,  
-- Let CISO Assistant handle reporting and consistency checks so you can focus on remediation,  
+- Reuse past assessments across scopes or frameworks,
+- Evaluate a single scope against multiple frameworks simultaneously,
+- Let CISO Assistant handle reporting and consistency checks so you can focus on remediation,
 - Separate control implementation from compliance tracking.
 
 Here is an illustration of the **decoupling** principle and its advantages:
 
-https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
-
-
+<https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62>
 
 ## System architecture
 
 ![](./documentation/system-architecture.png)
-
-
 
 ## Quick Start 🚀
 
@@ -221,6 +217,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
 10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
 11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
+12. Framework Nazionale per la Cybersecurity e la Data Protection, ACN Italia 🇮🇹
+13. PSSIE du Bénin, ANSSI Bénin 🇧🇯
+14. IGI 1300 / II 901 - Liste des exigences pour la mise en oeuvre d'un SI classifié (ANSSI) 🇫🇷
 
 <br/>
 
@@ -350,7 +349,16 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# Add a second backup mailer
+# CISO Assistant will use filesystem storage backend bu default.
+# You can use a S3 Bucket by declaring these variables
+# The S3 bucket must be created before starting CISO Assistant
+export USE_S3=True
+export AWS_ACCESS_KEY_ID=<XXX>
+export AWS_SECRET_ACCESS_KEY=<XXX>
+export AWS_STORAGE_BUCKET_NAME=<your-bucket-name>
+export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>
+
+# Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
 export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE=<XXX>
@@ -371,13 +379,14 @@ export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBU
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
 
 # Authentication options
-export AUTH_TOKEN_TTL=900 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
+export AUTH_TOKEN_TTL=3600 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
+export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
 ```
 
 3. Install poetry
 
-Visit the poetry website for instructions: https://python-poetry.org/docs/#installation
+Visit the poetry website for instructions: <https://python-poetry.org/docs/#installation>
 
 4. Install required dependencies.
 
@@ -403,13 +412,22 @@ pre-commit install
   - `create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';`
   - `grant all privileges on database ciso-assistant to ciso-assistantuser;`
 
-7. Apply migrations.
+7. If you want to setup s3 bucket:
+
+- Choose your s3 provider or try s3 feature with miniO with this command:
+  - `docker run -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=XXX" -e "MINIO_ROOT_PASSWORD=XXX" quay.io/minio/minio server /data --console-address ":9001"`
+- You can now check your bucket on http://localhost:9001
+  - Fill the login with the credentials you filled on the docker run env variables
+- Export in the backend directory all the env variables asked about S3
+  - You can see the list above in the recommanded variables
+
+8. Apply migrations.
 
 ```sh
 poetry run python manage.py migrate
 ```
 
-8. Create a Django superuser, that will be CISO Assistant administrator.
+9. Create a Django superuser, that will be CISO Assistant administrator.
 
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
@@ -417,13 +435,13 @@ poetry run python manage.py migrate
 poetry run python manage.py createsuperuser
 ```
 
-9. Run development server.
+10. Run development server.
 
 ```sh
 poetry run python manage.py runserver
 ```
 
-10. for Huey (tasks runner)
+11. for Huey (tasks runner)
 
 - prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
@@ -541,6 +559,7 @@ Set DJANGO_DEBUG=False for security reason.
 - SV: Swedish
 - ID: Indonesian
 - DA: Danish
+- HU: Hungarian
 
 ## Contributors 🤝
 

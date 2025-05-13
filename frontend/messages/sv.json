@@ -273,7 +273,6 @@
 	"cancel": "Avbryt",
 	"save": "Spara",
 	"assetsImpactedByTheRiskScenario": "Tillgångar påverkade av riskscenariot",
-	"ecistingMeasures": "Befintliga kontroller",
 	"theExistingAppliedControlsToManageThisRisk": "De befintliga tillämpade kontrollerna för att hantera denna risk",
 	"currentRiskLevelGivenCurrentMeasures": "Nuvarande risknivå givet de aktuella tillämpade kontrollerna",
 	"riskLevelWhenAllExtraMeasuresDone": "Risknivå när alla extra åtgärder är klara",
@@ -867,7 +866,7 @@
 	"existingMeasures": "Befintliga kontroller",
 	"youCanSetPasswordHere": "Du kan ställa in ditt lösenord här.",
 	"forgotPassword": "Glömt lösenord",
-	"score": "Göra",
+	"score": "Poäng",
 	"mappingInferenceHelpText": "Dessa variabler är fasta och kommer inte att ändras beroende på källan.",
 	"bringTheEvidences": "Kom med bevisen",
 	"bringTheEvidencesHelpText": "Om det är inaktiverat kommer objektet att dupliceras utan dess bevis",
@@ -903,5 +902,14 @@
 	"statusChanged": "Status ändrad",
 	"cannotDeleteAutoTimeline": "Automatiska tidslinje kan inte raderas",
 	"author": "Författare",
-	"timestampCannotBeInTheFuture": "Tidsstämpeln kan inte vara i framtiden"
+	"timestampCannotBeInTheFuture": "Tidsstämpeln kan inte vara i framtiden",
+	"failedToContactProvider": "Misslyckades att kontakta leverantören",
+	"userIsNotSSO": "SSO-inloggning är för närvarande inaktiverad för ditt konto.",
+	"enableSSOHelpText": "Aktivera SSO som ett inloggningsalternativ för alla användare.",
+	"keepLocalLogin": "Undanta från tvingad SSO",
+	"keepLocalLoginHelpText": "När global 'Tvingad SSO' är aktiverad tillåter detta användaren att kringgå det och logga in med ett lokalt hanterat lösenord om det behövs.",
+	"forceSSOLogin": "Tvinga SSO-inloggning",
+	"forceSSOLoginHelpText": "Kräv SSO för alla användare och återställ alla sparade lösenord. Användare med 'Undanta från tvingad SSO' aktiverat behåller lösenordsbaserad reservåtkomst.",
+	"forceSSOLoginHelpText2": "Se till att din SSO fungerar eller att du har ett reservkonto innan du aktiverar detta alternativ.",
+	"taskScheduleWarning": "Alla uppgifter som inte ingår i det nya schemat kommer att raderas permanent"
 }
