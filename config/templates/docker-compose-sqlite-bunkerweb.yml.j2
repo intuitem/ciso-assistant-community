@@ -144,8 +144,8 @@ services:
 
   {% if bunkerweb.use_ui %}bw-ui:
     image: bunkerity/bunkerweb-ui:1.6.1
-    ports:
-      {% if mode == "local" %}- 7000:7000{% endif %}
+    {% if mode == "local" %}ports:
+      - 7000:7000{% endif %}
     environment:
       - "DATABASE_URI=mariadb+pymysql://{{ bunkerweb.db_username }}:{{ bunkerweb.db_password }}@bw-db:3306/{{ bunkerweb.db_name }}"
       - "ADMIN_USERNAME={{ bunkerweb.ui_username }}"

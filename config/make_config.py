@@ -78,7 +78,7 @@ def get_config():
             ).ask(),
             "use_ui": questionary.confirm(
                 "Would you like to use the BunkerWeb UI?",
-                default=False,
+                default=True,
             ).ask(),
         }
         if config["bunkerweb"]["use_ui"]:
@@ -86,10 +86,10 @@ def get_config():
                 config["bunkerweb"]["ui_fqdn"] = questionary.text(
                     "Please enter your BunkerWeb UI FQDN/hostname (must be different from CISO FQDN/hostname): ", default="bw.example.com"
                 ).ask()
-            config["bunkerweb"]["ui_username"] = questionary.password(
+            config["bunkerweb"]["ui_username"] = questionary.text(
                 "BunkerWeb UI username: ", default="admin"
             ).ask()
-            config["bunkerweb"]["ui_password"] = questionary.password(
+            config["bunkerweb"]["ui_password"] = questionary.text(
                 "BunkerWeb UI password: ", default="ChangeMe123!"
             ).ask()
 
