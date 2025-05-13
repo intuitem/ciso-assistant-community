@@ -32,6 +32,7 @@ class AssetAssessmentReadSerializer(BaseModelSerializer):
 
     bia = FieldsRelatedField()
     asset = FieldsRelatedField()
+    asset_folder = FieldsRelatedField(source="asset.folder")
     folder = FieldsRelatedField()
 
     dependencies = FieldsRelatedField(many=True)
@@ -60,7 +61,9 @@ class AssetAssessmentWriteSerializer(BaseModelSerializer):
 class EscalationThresholdReadSerializer(BaseModelSerializer):
     asset_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
+    name = serializers.CharField(source="__str__")
 
+    qualifications = FieldsRelatedField(["name"], many=True)
     get_human_pit = serializers.CharField()
     quali_impact = serializers.JSONField(source="get_impact_display")
 
