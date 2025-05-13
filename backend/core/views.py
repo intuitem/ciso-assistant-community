@@ -5204,6 +5204,7 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
+    filterset_fields = ["folder", "status", "severity", "qualifications"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
