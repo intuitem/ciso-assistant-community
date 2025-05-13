@@ -69,26 +69,32 @@
       }
 
       return acc;
-    }, {} as Record<string, ProcessedChange>); // Initialize with correct type
-
+    }, {} as Record<string, ProcessedChange>);
 </script>
 
-<dl class="px-4 py-1 text-sm flex flex-col space-y-4">
+<dl class="px-4 text-sm flex flex-col">
   {#each Object.entries(changes) as [field, change]}
-    <div>
+    <div class="w-full py-1">
     {#if typeof change.before === 'object' && change.before !== null && typeof change.after === 'object' && change.after !== null && !Array.isArray(change.before) && !Array.isArray(change.after)}
+      {@const allKeys = [...new Set([...Object.keys(change.before), ...Object.keys(change.after)])]}
+      <div class="ml-4">
       <dt
         class="font-medium text-gray-900"
         data-testid="{field.replace('_', '-')}-field-title"
       >
         {safeTranslate(field)}
       </dt>
-      {@const allKeys = [...new Set([...Object.keys(change.before), ...Object.keys(change.after)])]}
-      {#each allKeys as subKey}
-         {@const subLog = { changes: { [subKey]: [change.before[subKey], change.after[subKey]] } }}
-         <dd class="pl-4"> <RecursiveLogEntryChanges log={subLog} />
-         </dd>
-      {/each}
+      <span class="flex flex-row h-full border-l border-gray-50 border-dashed">
+        <div class="w-full">
+          {#each allKeys as subKey}
+            {@const subLog = { changes: { [subKey]: [change.before[subKey], change.after[subKey]] } }}
+            <dd class="pl-4">
+                <RecursiveLogEntryChanges log={subLog} />
+            </dd>
+          {/each}
+        </div>
+      </span>
+      </div>
     {:else}
       <LogEntryChange
         field={field}

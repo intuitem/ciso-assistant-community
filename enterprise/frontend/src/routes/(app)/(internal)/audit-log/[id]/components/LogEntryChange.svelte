@@ -27,7 +27,7 @@
       </li>
     </ul>
   </dd>
-  <i class="fa-solid fa-arrow-right" />
+  <i class="fa-solid fa-arrow-right my-auto" />
   <dd class="text-gray-700 col-span-2">
     <ul>
       <li
