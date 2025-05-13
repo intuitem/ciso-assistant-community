@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { SSOSettingsSchema, GeneralSettingsSchema } from '$lib/utils/schemas';
+	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import ClientSettings from './client-settings/+page.svelte';
@@ -18,10 +18,13 @@
 	>
 	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key" /> {m.sso()}</Tab
 	>
+	<Tab bind:group={tabSet} name="featureFlags" value={2}
+		><i class="fa-solid fa-flag" /> {m.featureFlags()}</Tab
+	>
 	<Tab
 		bind:group={tabSet}
 		name="clientSettings"
-		value={2}
+		value={3}
 		on:change={async (e) => {
 			e.preventDefault();
 			const href = '/settings/client-settings';
@@ -58,5 +61,16 @@
 		/>
 	</div>
 {:else if tabSet === 2}
+	<div>
+		<span class="text-gray-500">{m.configureFeatureFlags()}</span>
+		<ModelForm
+			form={data.featureFlagForm}
+			schema={FeatureFlagsSchema}
+			model={data.featureFlagModel}
+			cancelButton={false}
+			action="?/featureFlags"
+		/>
+	</div>
+{:else if tabSet === 3}
 	<ClientSettings data={$page.state.clientSettings} />
 {/if}

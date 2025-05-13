@@ -97,18 +97,11 @@
 	async function update(
 		requirementAssessment,
 		field: string,
-		question: {
-			urn: string;
-			answer: string;
+		answers: {
+			urn: { value: string | string[] };
 		} | null = null
 	) {
-		if (question) {
-			const questionIndex = requirementAssessment.answer.questions.findIndex(
-				(q) => q.urn === question.urn
-			);
-			requirementAssessment.answer.questions[questionIndex].answer = question.answer;
-		}
-		const value = question ? requirementAssessment.answer : requirementAssessment[field];
+		const value = answers ? requirementAssessment.answers : requirementAssessment[field];
 		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
@@ -472,14 +465,30 @@
 								</div>
 							</div>
 						{/if}
-						{#if requirementAssessment.answer != null && Object.keys(requirementAssessment.answer).length !== 0}
+						{#if requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
 							<div class="flex flex-col w-full space-y-2">
-								{#each requirementAssessment.answer.questions as question}
+								{#each Object.entries(requirementAssessment.requirement.questions) as [urn, question]}
 									<li class="flex flex-col space-y-2 rounded-xl">
-										<p>{question.text}</p>
+										<p>{question.text} ({safeTranslate(question.type)})</p>
 										{#if shallow}
-											{#if question.answer}
-												<p class="text-primary-500 font-semibold">{question.answer}</p>
+											{#if Array.isArray(requirementAssessment.answers[urn])}
+												{#each requirementAssessment.answers[urn] as answerUrn}
+													{#if question.choices.find((choice) => choice.urn === answerUrn)}
+														<p class="text-primary-500 font-semibold">
+															{question.choices.find((choice) => choice.urn === answerUrn).value}
+														</p>
+													{:else}
+														<p class="text-primary-500 font-semibold">
+															{answerUrn}
+														</p>
+													{/if}
+												{/each}
+											{:else if question.choices.find((choice) => choice.urn === requirementAssessment.answers[urn])}
+												<p class="text-primary-500 font-semibold">
+													{question.choices.find(
+														(choice) => choice.urn === requirementAssessment.answers[urn]
+													).value}
+												</p>
 											{:else}
 												<p class="text-gray-400 italic">{m.noAnswer()}</p>
 											{/if}
@@ -489,39 +498,94 @@
 												active="variant-filled-primary"
 												hover="hover:variant-soft-primary"
 											>
-												{#each question.options as option}
+												{#each question.choices as option}
 													<RadioItem
 														class="shadow-md flex"
-														bind:group={question.answer}
+														bind:group={requirementAssessment.answers[urn]}
 														name="question"
-														value={option}
+														value={option.urn}
 														on:click={async () => {
-															const newAnswer = question.answer === option ? null : option;
-															question.answer = newAnswer;
-															await update(requirementAssessment, 'answer', question);
+															const newAnswer =
+																requirementAssessment.answers[urn] === option.urn
+																	? null
+																	: option.urn;
+															requirementAssessment.answers[urn] = newAnswer;
+															await update(
+																requirementAssessment,
+																'answers',
+																requirementAssessment.answers
+															);
 														}}
-														><span class="text-left">{option}</span>
+														><span class="text-left">{option.value}</span>
 													</RadioItem>
 												{/each}
 											</RadioGroup>
+										{:else if question.type === 'multiple_choice'}
+											<div
+												class="flex flex-col gap-1 p-1 bg-surface-200-700-token border-token border-surface-400-500-token rounded-token"
+											>
+												{#each question.choices as option}
+													<button
+														type="button"
+														name="question"
+														class="shadow-md p-1
+															{requirementAssessment.answers[urn] && requirementAssessment.answers[urn].includes(option.urn)
+															? 'variant-filled-primary rounded-token'
+															: 'hover:variant-soft-primary bg-surface-200-700-token rounded-token'}"
+														on:click={async () => {
+															// Initialize the array if it hasn't been already.
+															if (!Array.isArray(requirementAssessment.answers[urn])) {
+																requirementAssessment.answers[urn] = [];
+															}
+															// Toggle the option's selection
+															if (requirementAssessment.answers[urn].includes(option.urn)) {
+																requirementAssessment.answers[urn] = requirementAssessment.answers[
+																	urn
+																].filter((val) => val !== option.urn);
+															} else {
+																requirementAssessment.answers[urn] = [
+																	...requirementAssessment.answers[urn],
+																	option.urn
+																];
+															}
+															// Update the requirement assessment with the new answers
+															await update(
+																requirementAssessment,
+																'answers',
+																requirementAssessment.answers
+															);
+														}}
+													>
+														{option.value}
+													</button>
+												{/each}
+											</div>
 										{:else if question.type === 'date'}
 											<input
 												type="date"
 												placeholder=""
 												class="input w-fit"
-												bind:value={question.answer}
+												bind:value={requirementAssessment.answers[urn]}
 												on:change={async () =>
-													await update(requirementAssessment, 'answer', question)}
+													await update(
+														requirementAssessment,
+														'answers',
+														requirementAssessment.answers
+													)}
 												{...$$restProps}
 											/>
 										{:else}
 											<textarea
 												placeholder=""
 												class="input w-full"
-												bind:value={question.answer}
+												bind:value={requirementAssessment.answers[urn]}
 												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
 												on:change={async () =>
-													await update(requirementAssessment, 'answer', question)}
+													await update(
+														requirementAssessment,
+														'answers',
+														requirementAssessment.answers
+													)}
 												{...$$restProps}
 											/>
 										{/if}

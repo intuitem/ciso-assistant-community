@@ -4,7 +4,6 @@ import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.
 import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
-import { BASE_API_URL } from './constants';
 import { type urlModel } from './types';
 
 type GetOptionsParams = {
@@ -112,6 +111,8 @@ interface SelectField {
 	field: string;
 	detail?: boolean;
 	valueType?: 'string' | 'number';
+	endpointUrl?: string;
+	formNestedField?: string;
 }
 
 export interface ModelMapEntry {
@@ -415,19 +416,29 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
+			{ field: 'asset_class', urlModel: 'asset-class' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
 		],
-		selectFields: [{ field: 'type' }],
+		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
 		filters: [
 			{ field: 'parent_assets' },
 			{ field: 'folder' },
+			{ field: 'asset_class' },
 			{ field: 'type' },
 			{ field: 'owner' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	'asset-class': {
+		endpointUrl: 'asset-class',
+		name: 'asset-class',
+		localName: 'assetClass',
+		localNamePlural: 'assetClasses',
+		verboseName: 'assetclass',
+		verboseNamePlural: 'assetclasses'
 	},
 	users: {
 		name: 'user',
@@ -561,6 +572,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'General settings',
 		selectFields: [{ field: 'security_objective_scale' }]
 	},
+	'feature-flags': {
+		name: 'featureFlags',
+		localName: 'featureFlags',
+		localNamePlural: 'featureFlags',
+		verboseName: 'Feature flag',
+		verboseNamePlural: 'Feature flags'
+	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
 		localName: 'requirementMappingSet',
@@ -638,6 +656,79 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'qualifications',
 		verboseName: 'Qualification',
 		verboseNamePlural: 'Qualifications'
+	},
+	'business-impact-analysis': {
+		endpointUrl: 'resilience/business-impact-analysis',
+		name: 'businessimpactanalysis',
+		localName: 'businessImpactAnalysis',
+		localNamePlural: 'businessImpactAnalysis',
+		verboseName: 'businessimpactanalysis',
+		verboseNamePlural: 'businessimpactanalysis',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
+		],
+		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }]
+	},
+	'asset-assessments': {
+		endpointUrl: 'resilience/asset-assessments',
+		name: 'assetassessment',
+		localName: 'assetAssessment',
+		localNamePlural: 'assetAssessments',
+		verboseName: 'assetassessment',
+		verboseNamePlural: 'assetassessments',
+		reverseForeignKeyFields: [{ field: 'asset_assessment', urlModel: 'escalation-thresholds' }],
+		foreignKeyFields: [
+			{ field: 'asset', urlModel: 'assets' },
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'asset_folder', urlModel: 'folders' },
+			{ field: 'dependencies', urlModel: 'assets' },
+			{ field: 'associated_controls', urlModel: 'applied-controls' },
+			{
+				field: 'bia',
+				urlModel: 'business-impact-analysis',
+				endpointUrl: 'business-impact-analysis'
+			}
+		]
+	},
+	'escalation-thresholds': {
+		endpointUrl: 'resilience/escalation-thresholds',
+		name: 'escalationthreshold',
+		localName: 'escalationThreshold',
+		localNamePlural: 'escalationThresholds',
+		verboseName: 'escalationthreshold',
+		verboseNamePlural: 'escalationthresholds',
+		selectFields: [
+			{ field: 'quant_unit' },
+			{
+				field: 'quali_impact',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'resilience/asset-assessments',
+				formNestedField: 'asset_assessment'
+			} //this is for edit only
+		],
+		foreignKeyFields: [
+			{
+				field: 'asset_assessment',
+				urlModel: 'asset-assessments',
+				endpointUrl: 'asset-assessments'
+			}
+		],
+		detailViewFields: [
+			{ field: 'asset_assessment' },
+			{ field: 'get_human_pit' },
+			{ field: 'qualifications' },
+			{ field: 'quali_impact' },
+			{ field: 'justification' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		]
 	},
 	processings: {
 		endpointUrl: 'privacy/processings',
@@ -1138,8 +1229,8 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	users: {
 		email: {
 			keys: {
-				is_sso: {
-					true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
+				keep_local_login: {
+					true: { text: 'Local', cssClasses: 'badge bg-violet-200' }
 				},
 				is_third_party: {
 					true: { text: 'Third party', cssClasses: 'badge bg-stone-200' }

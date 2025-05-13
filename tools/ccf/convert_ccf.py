@@ -136,7 +136,7 @@ for row in output_table:
     ws1.append(row)
 
 ws2 = wb_output.create_sheet("answers")
-ws2.append(["id", "question_type", "question_choices"])
+ws2.append(["id", "type", "choices"])
 ws2.append(["YNNA", "unique_choice", "Yes\nNo\nN/A"])
 
 print("generate ", output_file_name)

@@ -54,6 +54,10 @@ READER_PERMISSIONS_LIST = [
     "view_timelineentry",
     "view_tasknode",
     "view_tasktemplate",
+    "view_businessimpactanalysis",
+    "view_assetassessment",
+    "view_escalationthreshold",
+    "view_assetclass",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -97,6 +101,10 @@ APPROVER_PERMISSIONS_LIST = [
     "view_timelineentry",
     "view_tasknode",
     "view_tasktemplate",
+    "view_businessimpactanalysis",
+    "view_assetassessment",
+    "view_escalationthreshold",
+    "view_assetclass",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -232,6 +240,20 @@ ANALYST_PERMISSIONS_LIST = [
     "view_tasknode",
     "change_tasknode",
     "delete_tasknode",
+    # resilience,
+    "add_businessimpactanalysis",
+    "view_businessimpactanalysis",
+    "change_businessimpactanalysis",
+    "delete_businessimpactanalysis",
+    "add_escalationthreshold",
+    "view_escalationthreshold",
+    "change_escalationthreshold",
+    "delete_escalationthreshold",
+    "add_assetassessment",
+    "view_assetassessment",
+    "change_assetassessment",
+    "delete_assetassessment",
+    "view_assetclass",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -375,6 +397,20 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_tasknode",
     "change_tasknode",
     "delete_tasknode",
+    # resilience,
+    "add_businessimpactanalysis",
+    "view_businessimpactanalysis",
+    "change_businessimpactanalysis",
+    "delete_businessimpactanalysis",
+    "add_escalationthreshold",
+    "view_escalationthreshold",
+    "change_escalationthreshold",
+    "delete_escalationthreshold",
+    "add_assetassessment",
+    "view_assetassessment",
+    "change_assetassessment",
+    "delete_assetassessment",
+    "view_assetclass",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -394,6 +430,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_asset",
     "change_asset",
     "delete_asset",
+    "add_assetclass",
+    "view_assetclass",
+    "change_assetclass",
+    "delete_assetclass",
     "add_threat",
     "view_threat",
     "change_threat",
@@ -580,6 +620,19 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_tasknode",
     "change_tasknode",
     "delete_tasknode",
+    # resilience,
+    "add_businessimpactanalysis",
+    "view_businessimpactanalysis",
+    "change_businessimpactanalysis",
+    "delete_businessimpactanalysis",
+    "add_escalationthreshold",
+    "view_escalationthreshold",
+    "change_escalationthreshold",
+    "delete_escalationthreshold",
+    "add_assetassessment",
+    "view_assetassessment",
+    "change_assetassessment",
+    "delete_assetassessment",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -602,7 +655,7 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import Qualification
+    from core.models import Qualification, AssetClass
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
@@ -735,6 +788,12 @@ def startup(sender: AppConfig, **kwargs):
         ProcessingNature.create_default_values()
     except Exception as e:
         logger.error("Error creating default ProcessingNature", exc_info=e)
+
+    # Create default AssetClass
+    try:
+        AssetClass.create_default_values()
+    except Exception as e:
+        logger.error("Error creating default AssetClass", exc_info=e)
 
     call_command("storelibraries")
 
