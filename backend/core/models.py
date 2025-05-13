@@ -1561,7 +1561,7 @@ class Asset(
                             "value": {
                                 "type": "integer",
                                 "minimum": 0,
-                                "maximum": 3,
+                                "maximum": 4,
                             },
                             "is_enabled": {
                                 "type": "boolean",
@@ -1600,9 +1600,11 @@ class Asset(
     }
 
     SECURITY_OBJECTIVES_SCALES = {
-        "1-4": range(1, 5),
-        "0-3": range(0, 4),
-        "FIPS-199": ["low", "moderate", "moderate", "high"],
+        "1-4": [1, 2, 3, 4, 4],
+        "1-5": [1, 2, 3, 4, 5],
+        "0-3": [0, 1, 2, 3, 3],
+        "0-4": [0, 1, 2, 3, 4],
+        "FIPS-199": ["low", "moderate", "moderate", "high", "high"],
     }
 
     business_value = models.CharField(
@@ -1791,7 +1793,7 @@ class Asset(
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
             )
             if content.get("is_enabled", False)
-            and content.get("value", -1) in range(0, 4)
+            and content.get("value", -1) in range(0, 5)
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
