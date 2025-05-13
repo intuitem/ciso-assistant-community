@@ -1533,5 +1533,11 @@
 	"changeStatus": "Change status",
 	"errorUpdatungObject": "An error occurred while updating the {object} object.",
 	"logEntryRepr": "{timestamp} - {actor} - {action} - {object}",
-	"auditLog": "Audit log"
+	"auditLog": "Audit log",
+	"actor": "Actor",
+	"action": "Action",
+	"objectRepr": "Object",
+	"value": "Value",
+	"isEnabled": "Enabled",
+	"objectives": "Objectives"
 }
