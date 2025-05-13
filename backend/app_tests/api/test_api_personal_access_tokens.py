@@ -102,7 +102,7 @@ class TestPersonalAccessTokenViewSet:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.django_db
-    def test_token_limit_per_user(self, authenticated_client, monkeypatch):
+    def test_token_limit_per_user(self, authenticated_client, monkeypatch, user):
         """Test that users cannot exceed their token limit."""
         # Set token limit for test
         monkeypatch.setattr(knox_settings, "TOKEN_LIMIT_PER_USER", 2)
@@ -122,7 +122,7 @@ class TestPersonalAccessTokenViewSet:
         assert "Maximum amount of tokens allowed" in response.data["error"]
 
         # Verify only 2 tokens were created
-        assert PersonalAccessToken.objects.count() == 2
+        assert PersonalAccessToken.objects.filter(auth_token__user=user).count() == 2
 
     @pytest.mark.django_db
     def test_get_tokens(self, authenticated_client, personal_access_token):
