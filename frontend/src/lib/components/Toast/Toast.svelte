@@ -166,9 +166,9 @@
 
 <!---->
 <!-- {#if filteredToasts.length > 0 || wrapperVisible} -->
-<!-- 	<!-- Wrapper --> -->
+<!-- 	<!-- Wrapper -->
 <!-- 	<div class="snackbar-wrapper {classesWrapper}" data-testid="snackbar-wrapper"> -->
-<!-- 		<!-- List --> -->
+<!-- 		<!-- List -->
 <!-- 		<div class="snackbar {classesSnackbar}"> -->
 <!-- 			{#each filteredToasts as t, i (t)} -->
 <!-- 				<div -->
@@ -192,7 +192,7 @@
 <!-- 					role={t.hideDismiss ? 'alert' : 'alertdialog'} -->
 <!-- 					aria-live="polite" -->
 <!-- 				> -->
-<!-- 					<!-- Toast --> -->
+<!-- 					<!-- Toast -->
 <!-- 					<div -->
 <!-- 						class="toast {classesToast} {t.background ?? background} {t.classes ?? ''}" -->
 <!-- 						data-testid="toast" -->

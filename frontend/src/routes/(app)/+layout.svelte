@@ -77,10 +77,7 @@
 </script>
 
 <!-- App Shell -->
-<div
-	slotPageContent="p-8 bg-linear-to-br from-violet-100 to-slate-200"
-	regionPage="transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
->
+<div>
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar background="bg-white" padding="py-2 px-4" class="relative">
 		<span
@@ -104,6 +101,12 @@
 	</AppBar>
 	<!-- Router Slot -->
 	<CommandPalette />
-	{@render children?.()}
+	<main
+		class="h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
+			sidebarOpen
+		)}"
+	>
+		{@render children?.()}
+	</main>
 	<!-- ---- / ---- -->
 </div>
