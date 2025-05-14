@@ -5,7 +5,7 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	interface Props {
 		data: PageData;
@@ -29,7 +29,7 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 </script>
 

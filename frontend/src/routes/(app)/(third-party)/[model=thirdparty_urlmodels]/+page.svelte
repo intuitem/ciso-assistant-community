@@ -14,7 +14,7 @@
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
@@ -30,7 +30,7 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 </script>
 

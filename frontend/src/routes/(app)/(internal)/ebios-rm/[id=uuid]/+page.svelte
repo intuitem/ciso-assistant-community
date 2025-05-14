@@ -8,7 +8,7 @@
 	import Tile from './Tile.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	interface Props {
 		data: PageData;
@@ -147,7 +147,7 @@
 			// Data
 			title: safeTranslate('add-' + data.riskModel.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 </script>
 
