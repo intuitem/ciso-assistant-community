@@ -18,17 +18,17 @@
 		PopupSettings,
 		ModalComponent,
 		ModalSettings,
-		ModalStore,
-		Tabs
+		ModalStore
 	} from '@skeletonlabs/skeleton-svelte';
-	import { Tab } from '@skeletonlabs/skeleton-svelte';
+
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
 	import { listViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
 
@@ -73,8 +73,6 @@
 		);
 	}
 
-	let tabSet = $state(0);
-
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
@@ -113,7 +111,7 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	function modalConfirm(id: string, name: string, action: string): void {
@@ -135,7 +133,7 @@
 			title: m.confirmModalTitle(),
 			body: `${m.confirmModalMessage()}: ${name}?`
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	function modalAppliedControlDuplicateForm(): void {
@@ -155,7 +153,7 @@
 			component: modalComponent,
 			title: m.duplicateAppliedControl()
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	function modalMailConfirm(id: string, name: string, action: string): void {
@@ -181,7 +179,7 @@
 			title: m.confirmModalTitle(),
 			body: m.sureToSendQuestionnaire({ questionnaire: name })
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	const user = page.data.user;
@@ -209,6 +207,8 @@
 			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
 		})
 	);
+
+	let group = $derived(relatedModels[0][0]);
 
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
@@ -509,18 +509,20 @@
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
-		<Tabs justify="justify-center">
-			{#each relatedModels as [urlmodel, model], index}
-				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
-					{safeTranslate(model.info.localNamePlural)}
-					{#if model.table.body.length > 0}
-						<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
-					{/if}
-				</Tab>
-			{/each}
-			{#snippet panel()}
-				{#each relatedModels as [urlmodel, model], index}
-					{#if tabSet === index}
+		<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
+			{#snippet list()}
+				{#each relatedModels as [urlmodel, model]}
+					<Tabs.Control value={urlmodel}>
+						{safeTranslate(model.info.localNamePlural)}
+						{#if model.table.body.length > 0}
+							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+						{/if}
+					</Tabs.Control>
+				{/each}
+			{/snippet}
+			{#snippet content()}
+				{#each relatedModels as [urlmodel, model]}
+					<Tabs.Panel value={urlmodel}>
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
 								{safeTranslate('associated-' + model.info.localNamePlural)}
@@ -556,7 +558,7 @@
 								fields={fieldsToUse}
 							/>
 						{/if}
-					{/if}
+					</Tabs.Panel>
 				{/each}
 			{/snippet}
 		</Tabs>
