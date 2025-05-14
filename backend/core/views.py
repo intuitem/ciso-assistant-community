@@ -716,7 +716,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
         undefined = {-1: "--"}
-        options = []
+        options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
             _choices = {
                 i: name
@@ -724,11 +724,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
                     x["name"] for x in matrix.json_definition["risk"]
                 )
             }
-            choices = undefined | _choices
-            options = options | choices.items()
-        return Response(
-            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
-        )
+            options = options | _choices
+        res = [{"value": k, "label": v} for k, v in options.items()]
+        return Response(res)
 
     @action(detail=False, name="Get impact choices")
     def impact(self, request):
