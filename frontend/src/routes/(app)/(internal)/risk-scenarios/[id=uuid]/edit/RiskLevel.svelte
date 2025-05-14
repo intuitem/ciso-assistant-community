@@ -8,9 +8,6 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { isDark } from '$lib/utils/helpers';
 
-
-
-
 	interface Props {
 		label?: string | undefined;
 		field: string;
@@ -49,10 +46,11 @@
 		return riskMatrix.grid[probabilityValue][impactValue];
 	};
 
-	let riskLevel =
-		$state($probabilityValue >= 0 && $impactValue >= 0
+	let riskLevel = $state(
+		$probabilityValue >= 0 && $impactValue >= 0
 			? riskMatrix.risk[gridPosition($probabilityValue, $impactValue)!]
-			: undefined);
+			: undefined
+	);
 
 	run(() => {
 		riskLevel =

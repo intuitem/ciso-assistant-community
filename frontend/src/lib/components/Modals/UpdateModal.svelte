@@ -1,6 +1,5 @@
 <script lang="ts">
 	// Props
-	
 
 	// Stores
 	import type { ModelInfo } from '$lib/utils/types';

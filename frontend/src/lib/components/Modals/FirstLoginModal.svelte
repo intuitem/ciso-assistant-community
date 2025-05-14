@@ -1,6 +1,5 @@
 <script lang="ts">
 	// Props
-	
 
 	// Stores
 	import type { CssClasses, ModalStore } from '@skeletonlabs/skeleton-svelte';

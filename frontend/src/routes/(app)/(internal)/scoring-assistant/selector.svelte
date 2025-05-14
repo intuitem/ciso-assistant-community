@@ -11,12 +11,7 @@
 		disabled?: boolean;
 	}
 
-	let {
-		text,
-		id,
-		choices,
-		disabled = false
-	}: Props = $props();
+	let { text, id, choices, disabled = false }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 

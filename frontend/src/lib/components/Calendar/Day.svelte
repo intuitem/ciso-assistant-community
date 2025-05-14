@@ -13,32 +13,29 @@
 		showSidePanel: any;
 	}
 
-	let {
-		day,
-		month,
-		year,
-		info,
-		selectedDay,
-		showSidePanel
-	}: Props = $props();
+	let { day, month, year, info, selectedDay, showSidePanel }: Props = $props();
 
 	const today = new Date();
 	const MAX_ITEMS = 3;
 
-	let isToday =
-		$derived(day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear());
+	let isToday = $derived(
+		day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear()
+	);
 
-	let isPast =
-		$derived(year < today.getFullYear() ||
-		(year === today.getFullYear() && month < today.getMonth() + 1) ||
-		(year === today.getFullYear() && month === today.getMonth() + 1 && day < today.getDate()));
+	let isPast = $derived(
+		year < today.getFullYear() ||
+			(year === today.getFullYear() && month < today.getMonth() + 1) ||
+			(year === today.getFullYear() && month === today.getMonth() + 1 && day < today.getDate())
+	);
 
-	let dayInfo = $derived(info.filter(
-		(item) =>
-			item.date.getDate() === day &&
-			item.date.getMonth() + 1 === month &&
-			item.date.getFullYear() === year
-	));
+	let dayInfo = $derived(
+		info.filter(
+			(item) =>
+				item.date.getDate() === day &&
+				item.date.getMonth() + 1 === month &&
+				item.date.getFullYear() === year
+		)
+	);
 
 	let visibleItems = $derived(dayInfo.slice(0, MAX_ITEMS));
 

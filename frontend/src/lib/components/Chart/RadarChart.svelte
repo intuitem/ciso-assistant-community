@@ -2,9 +2,6 @@
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	
-
-
 	interface Props {
 		// export let name: string;
 		s_label?: string;

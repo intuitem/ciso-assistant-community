@@ -15,7 +15,7 @@
 
 <DetailView {data}>
 	{#snippet actions()}
-		<div  class="flex flex-col space-y-2">
+		<div class="flex flex-col space-y-2">
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}
 				class="btn preset-filled-primary-500 h-fit"
@@ -25,7 +25,7 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		<div  class="h-full flex flex-col space-y-4">
+		<div class="h-full flex flex-col space-y-4">
 			<div class="card p-4 bg-gray-50 shadow-xs">
 				<h3 class="text-lg font-semibold mb-2">{m.summary()}</h3>
 				<div class="grid grid-cols-2 gap-2">

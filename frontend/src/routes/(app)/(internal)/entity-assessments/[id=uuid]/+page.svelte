@@ -37,21 +37,19 @@
 				>
 					<span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
 					{#snippet children()}
-									
-							{#if Object.hasOwn($page.state, 'auditTableMode')}
-								<div class="max-h-192 overflow-y-scroll">
-									<AuditTableMode
-										{form}
-										data={$page.state.auditTableMode}
-										actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`}
-										shallow
-										questionnaireOnly
-										invalidateAll={false}
-									/>
-								</div>
-							{/if}
-						
-									{/snippet}
+						{#if Object.hasOwn($page.state, 'auditTableMode')}
+							<div class="max-h-192 overflow-y-scroll">
+								<AuditTableMode
+									{form}
+									data={$page.state.auditTableMode}
+									actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`}
+									shallow
+									questionnaireOnly
+									invalidateAll={false}
+								/>
+							</div>
+						{/if}
+					{/snippet}
 				</TreeViewItem>
 			</TreeView>
 		</div>

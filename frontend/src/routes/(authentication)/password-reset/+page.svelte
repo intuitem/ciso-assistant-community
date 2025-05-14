@@ -39,11 +39,10 @@
 						class="flex flex-col space-y-3"
 						data={data?.form}
 						dataType="form"
-						
 						validators={zod(emailSchema)}
 					>
 						{#snippet children({ form })}
-												<TextField type="email" {form} field="email" label={m.email()} />
+							<TextField type="email" {form} field="email" label={m.email()} />
 							<p class="pt-3">
 								<button
 									class="btn preset-filled-primary-500 font-semibold w-full"
@@ -51,8 +50,8 @@
 									type="submit">{m.send()}</button
 								>
 							</p>
-																	{/snippet}
-										</SuperForm>
+						{/snippet}
+					</SuperForm>
 				</div>
 				<a
 					href="/login"

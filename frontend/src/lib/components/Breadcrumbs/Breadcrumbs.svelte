@@ -47,8 +47,7 @@
 
 	run(() => {
 		$pageTitle = getPageTitle();
-		if ($breadcrumbs.length < 2)
-			breadcrumbs.push([{ label: $pageTitle, href: page.url.pathname }]);
+		if ($breadcrumbs.length < 2) breadcrumbs.push([{ label: $pageTitle, href: page.url.pathname }]);
 	});
 </script>
 

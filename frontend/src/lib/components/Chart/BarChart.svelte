@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-
 	interface Props {
 		name: string;
 		values: any[]; // Set this type later

@@ -2,7 +2,6 @@
 	import type { urlModel } from '$lib/utils/types';
 
 	// Props
-	
 
 	// Stores
 	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
@@ -10,7 +9,6 @@
 	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
-
 
 	import { superForm } from 'sveltekit-superforms';
 

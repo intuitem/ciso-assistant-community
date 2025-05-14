@@ -15,12 +15,7 @@
 		formDataCache?: Record<string, any>;
 	}
 
-	let {
-		form,
-		model,
-		cacheLocks = {},
-		formDataCache = $bindable({})
-	}: Props = $props();
+	let { form, model, cacheLocks = {}, formDataCache = $bindable({}) }: Props = $props();
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 	let xAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact');
@@ -36,163 +31,151 @@
 <Accordion regionControl="font-bold">
 	<Accordion.Item open>
 		{#snippet summary()}
-				<i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}
-			{/snippet}
+			<i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}
+		{/snippet}
 		{#snippet content()}
-			
-				<div class="p-4">
-					<Checkbox
-						{form}
-						field="notifications_enable_mailing"
-						label={m.settingsNotificationsMail()}
-					/>
-				</div>
-			
-			{/snippet}
-	</Accordion.Item>
-	<Accordion.Item open>
-		{#snippet summary()}
-			
-				<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
-			
-			{/snippet}
-		{#snippet content()}
-			
-				<div class="p-4">
-					<Checkbox
-						{form}
-						field="interface_agg_scenario_matrix"
-						label={m.settingsAggregateMatrix()}
-					/>
-				</div>
-			
-			{/snippet}
-	</Accordion.Item>
-	<Accordion.Item open>
-		{#snippet summary()}
-				<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
-			{/snippet}
-		{#snippet content()}
-			
-				<Select
+			<div class="p-4">
+				<Checkbox
 					{form}
-					field="security_objective_scale"
-					cacheLock={cacheLocks['security_objective_scale']}
-					bind:cachedValue={formDataCache['security_objective_scale']}
-					options={model.selectOptions['security_objective_scale']}
-					helpText={m.securityObjectiveScaleHelpText()}
-					label={m.securityObjectiveScale()}
+					field="notifications_enable_mailing"
+					label={m.settingsNotificationsMail()}
 				/>
-			
-			{/snippet}
+			</div>
+		{/snippet}
 	</Accordion.Item>
 	<Accordion.Item open>
 		{#snippet summary()}
-				<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
-			{/snippet}
+			<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
+		{/snippet}
 		{#snippet content()}
-			
-				<div class="flex flex-row gap-4">
-					<div class="flex flex-col flex-1 space-y-4">
-						<Checkbox
-							{form}
-							field="risk_matrix_swap_axes"
-							label={m.settingsRiskMatrixSwapAxes()}
-							helpText={m.settingsRiskMatrixSwapAxesHelpText()}
-							bind:cachedValue={formDataCache['risk_matrix_swap_axes']}
-						/>
-						<Checkbox
-							{form}
-							field="risk_matrix_flip_vertical"
-							label={m.settingsRiskMatrixFlipVertical()}
-							helpText={m.settingsRiskMatrixFlipVerticalHelpText()}
-							bind:cachedValue={formDataCache['risk_matrix_flip_vertical']}
-						/>
-						<RadioGroupInput
-							{form}
-							label={m.settingsRiskMatrixLabels()}
-							field="risk_matrix_labels"
-							options={[
-								{ label: m.iso27005(), value: 'ISO' },
-								{ label: m.ebiosRM(), value: 'EBIOS' }
-							]}
-						/>
-					</div>
-					<div class="flex-1">
-						<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
-							<!-- Point d’origine -->
-							<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="interface_agg_scenario_matrix"
+					label={m.settingsAggregateMatrix()}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item open>
+		{#snippet summary()}
+			<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
+		{/snippet}
+		{#snippet content()}
+			<Select
+				{form}
+				field="security_objective_scale"
+				cacheLock={cacheLocks['security_objective_scale']}
+				bind:cachedValue={formDataCache['security_objective_scale']}
+				options={model.selectOptions['security_objective_scale']}
+				helpText={m.securityObjectiveScaleHelpText()}
+				label={m.securityObjectiveScale()}
+			/>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item open>
+		{#snippet summary()}
+			<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
+		{/snippet}
+		{#snippet content()}
+			<div class="flex flex-row gap-4">
+				<div class="flex flex-col flex-1 space-y-4">
+					<Checkbox
+						{form}
+						field="risk_matrix_swap_axes"
+						label={m.settingsRiskMatrixSwapAxes()}
+						helpText={m.settingsRiskMatrixSwapAxesHelpText()}
+						bind:cachedValue={formDataCache['risk_matrix_swap_axes']}
+					/>
+					<Checkbox
+						{form}
+						field="risk_matrix_flip_vertical"
+						label={m.settingsRiskMatrixFlipVertical()}
+						helpText={m.settingsRiskMatrixFlipVerticalHelpText()}
+						bind:cachedValue={formDataCache['risk_matrix_flip_vertical']}
+					/>
+					<RadioGroupInput
+						{form}
+						label={m.settingsRiskMatrixLabels()}
+						field="risk_matrix_labels"
+						options={[
+							{ label: m.iso27005(), value: 'ISO' },
+							{ label: m.ebiosRM(), value: 'EBIOS' }
+						]}
+					/>
+				</div>
+				<div class="flex-1">
+					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
+						<!-- Point d’origine -->
+						<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
 
-							<!-- Axe horizontal -->
-							<div class={`absolute ${horizontalAxisPos} left-8 w-4/5 h-0.5 bg-black`}></div>
+						<!-- Axe horizontal -->
+						<div class={`absolute ${horizontalAxisPos} left-8 w-4/5 h-0.5 bg-black`}></div>
 
-							<!-- Label axe horizontal -->
-							<div
-								class={`absolute ${horizontalLabelPos} left-1/2 transform -translate-x-1/2 text-center`}
-							>
-								<span class="font-medium">{xAxisLabel}</span>
-							</div>
+						<!-- Label axe horizontal -->
+						<div
+							class={`absolute ${horizontalLabelPos} left-1/2 transform -translate-x-1/2 text-center`}
+						>
+							<span class="font-medium">{xAxisLabel}</span>
+						</div>
 
-							<!-- Axe vertical -->
-							<div class={`absolute ${horizontalAxisPos} left-8 w-0.5 h-4/5 bg-black`}></div>
+						<!-- Axe vertical -->
+						<div class={`absolute ${horizontalAxisPos} left-8 w-0.5 h-4/5 bg-black`}></div>
 
-							<!-- Label axe vertical -->
-							<div class="absolute top-1/2 left-4 transform -translate-y-1/2 -rotate-90 origin-left">
-								<span class="font-medium">{yAxisLabel}</span>
-							</div>
+						<!-- Label axe vertical -->
+						<div class="absolute top-1/2 left-4 transform -translate-y-1/2 -rotate-90 origin-left">
+							<span class="font-medium">{yAxisLabel}</span>
 						</div>
 					</div>
 				</div>
-			
-			{/snippet}
+			</div>
+		{/snippet}
 	</Accordion.Item>
 	<Accordion.Item>
 		{#snippet summary()}
-				<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
-			{/snippet}
+			<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
+		{/snippet}
 		{#snippet content()}
-			
-				<NumberField
-					{form}
-					field="ebios_radar_max"
-					label={m.maxRadius()}
-					min={6}
-					max={16}
-					step={0.1}
-					cacheLock={cacheLocks['ebios_radar_max']}
-					bind:cachedValue={formDataCache['ebios_radar_max']}
-				/>
-				<NumberField
-					{form}
-					field="ebios_radar_green_zone_radius"
-					label={m.greenZoneRadius()}
-					min={0.1}
-					max={16}
-					step={0.1}
-					cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
-					bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
-				/>
-				<NumberField
-					{form}
-					field="ebios_radar_yellow_zone_radius"
-					label={m.yellowZoneRadius()}
-					min={0.5}
-					max={16}
-					step={0.1}
-					cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
-					bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
-				/>
-				<NumberField
-					{form}
-					field="ebios_radar_red_zone_radius"
-					label={m.redZoneRadius()}
-					min={1}
-					max={16}
-					step={0.1}
-					cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
-					bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
-				/>
-			
-			{/snippet}
+			<NumberField
+				{form}
+				field="ebios_radar_max"
+				label={m.maxRadius()}
+				min={6}
+				max={16}
+				step={0.1}
+				cacheLock={cacheLocks['ebios_radar_max']}
+				bind:cachedValue={formDataCache['ebios_radar_max']}
+			/>
+			<NumberField
+				{form}
+				field="ebios_radar_green_zone_radius"
+				label={m.greenZoneRadius()}
+				min={0.1}
+				max={16}
+				step={0.1}
+				cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
+				bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
+			/>
+			<NumberField
+				{form}
+				field="ebios_radar_yellow_zone_radius"
+				label={m.yellowZoneRadius()}
+				min={0.5}
+				max={16}
+				step={0.1}
+				cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
+				bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
+			/>
+			<NumberField
+				{form}
+				field="ebios_radar_red_zone_radius"
+				label={m.redZoneRadius()}
+				min={1}
+				max={16}
+				step={0.1}
+				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
+				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
+			/>
+		{/snippet}
 	</Accordion.Item>
 </Accordion>

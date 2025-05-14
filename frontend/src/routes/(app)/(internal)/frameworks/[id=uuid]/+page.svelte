@@ -121,8 +121,9 @@
 			</div>
 		</div>
 		<div class="">
-			<a class="btn preset-filled-primary-500" href="/frameworks/{data.framework.id}/excel-template/"
-				>Download Excel template</a
+			<a
+				class="btn preset-filled-primary-500"
+				href="/frameworks/{data.framework.id}/excel-template/">Download Excel template</a
 			>
 		</div>
 	</div>

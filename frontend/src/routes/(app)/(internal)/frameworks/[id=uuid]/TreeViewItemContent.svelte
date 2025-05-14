@@ -10,7 +10,7 @@
 		reference_controls?: Record<string, unknown>[];
 		children: Record<string, unknown>[];
 		assessable: boolean;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {

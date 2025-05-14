@@ -42,9 +42,9 @@
 
 	let requirementAssessmentsList: string[] = $hideSuggestions;
 
-	let hideSuggestion = $state(requirementAssessmentsList.includes(data.requirementAssessment.id)
-		? true
-		: false);
+	let hideSuggestion = $state(
+		requirementAssessmentsList.includes(data.requirementAssessment.id) ? true : false
+	);
 
 	function toggleSuggestions() {
 		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)) {
@@ -65,8 +65,9 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	let classesText =
-		$derived(complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '');
+	let classesText = $derived(
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
+	);
 
 	const max_score = data.complianceAssessmentScore.max_score;
 	const score = data.requirementAssessment.score;
@@ -260,43 +261,36 @@
 			{/if}
 			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
 			{#snippet panel()}
-					
-					{#if tabSet === 0 && !page.data.user.is_third_party}
-						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-							<i class="fa-solid fa-info-circle"></i>
-							<p>{m.requirementAppliedControlHelpText()}</p>
-						</div>
-						<div
-							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
-						>
-							<ModelTable
-								source={data.tables['applied-controls']}
-								hideFilters={true}
-								URLModel="applied-controls"
-								baseEndpoint="/applied-controls?requirement_assessments={page.data
-									.requirementAssessment.id}"
-							/>
-						</div>
-					{/if}
-					{#if tabSet === 1}
-						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-							<i class="fa-solid fa-info-circle"></i>
-							<p>{m.requirementEvidenceHelpText()}</p>
-						</div>
-						<div
-							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
-						>
-							<ModelTable
-								source={data.tables['evidences']}
-								hideFilters={true}
-								URLModel="evidences"
-								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
-									.id}"
-							/>
-						</div>
-					{/if}
-				
-					{/snippet}
+				{#if tabSet === 0 && !page.data.user.is_third_party}
+					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+						<i class="fa-solid fa-info-circle"></i>
+						<p>{m.requirementAppliedControlHelpText()}</p>
+					</div>
+					<div class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4">
+						<ModelTable
+							source={data.tables['applied-controls']}
+							hideFilters={true}
+							URLModel="applied-controls"
+							baseEndpoint="/applied-controls?requirement_assessments={page.data
+								.requirementAssessment.id}"
+						/>
+					</div>
+				{/if}
+				{#if tabSet === 1}
+					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+						<i class="fa-solid fa-info-circle"></i>
+						<p>{m.requirementEvidenceHelpText()}</p>
+					</div>
+					<div class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4">
+						<ModelTable
+							source={data.tables['evidences']}
+							hideFilters={true}
+							URLModel="evidences"
+							baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
+						/>
+					</div>
+				{/if}
+			{/snippet}
 		</Tabs>
 	</div>
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}

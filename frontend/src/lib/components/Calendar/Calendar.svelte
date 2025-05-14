@@ -11,7 +11,6 @@
 
 	import { m } from '$paraglide/messages';
 
-
 	const today = new Date();
 	interface Props {
 		info: object[];
@@ -29,7 +28,6 @@
 	function closePanel() {
 		$showSidePanel = false;
 	}
-
 
 	const daysOfWeek = [
 		m.monday(),
@@ -88,14 +86,16 @@
 		}
 	});
 	// Fonction pour obtenir les items du jour sélectionné
-	let selectedDayItems = $derived($selectedDay
-		? filteredInfo.filter(
-				(item) =>
-					item.date.getDate() === $selectedDay.day &&
-					item.date.getMonth() + 1 === $selectedDay.month &&
-					item.date.getFullYear() === $selectedDay.year
-			)
-		: []);
+	let selectedDayItems = $derived(
+		$selectedDay
+			? filteredInfo.filter(
+					(item) =>
+						item.date.getDate() === $selectedDay.day &&
+						item.date.getMonth() + 1 === $selectedDay.month &&
+						item.date.getFullYear() === $selectedDay.year
+				)
+			: []
+	);
 </script>
 
 <div class="flex flex-row h-full space-x-2">

@@ -4,7 +4,6 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
-
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	interface Props {

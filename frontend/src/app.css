@@ -1,6 +1,6 @@
 @import 'tailwindcss';
-@import "@skeletonlabs/skeleton";
-@import "@skeletonlabs/skeleton/optional/presets";
+@import '@skeletonlabs/skeleton';
+@import '@skeletonlabs/skeleton/optional/presets';
 
 /*
   Add your theme import for your theme: "ciso-theme" here
@@ -21,37 +21,37 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentcolor);
+	}
 }
 
 @utility btn-mini-primary {
-  @apply text-gray-50 bg-violet-600 hover:bg-violet-500;
+	@apply text-gray-50 bg-violet-600 hover:bg-violet-500;
 }
 @utility btn-mini-secondary {
-  @apply text-gray-50 bg-pink-500 hover:bg-pink-400;
+	@apply text-gray-50 bg-pink-500 hover:bg-pink-400;
 }
 @utility btn-mini-tertiary {
-  @apply text-gray-50 bg-sky-500 hover:bg-sky-400;
+	@apply text-gray-50 bg-sky-500 hover:bg-sky-400;
 }
 
 @layer utilities {
 }
 
 @layer utilities {
-  /* (all other styles here...) */
-  html,
-  body {
-    @apply h-full overflow-auto;
-  }
-  .capitalize-first:first-letter {
-    @apply capitalize;
-  }
+	/* (all other styles here...) */
+	html,
+	body {
+		@apply h-full overflow-auto;
+	}
+	.capitalize-first:first-letter {
+		@apply capitalize;
+	}
 }
 
 @layer base {

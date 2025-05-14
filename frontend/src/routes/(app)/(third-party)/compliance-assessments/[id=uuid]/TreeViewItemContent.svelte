@@ -24,7 +24,7 @@
 		resultCounts: Record<string, number> | undefined;
 		assessable: boolean;
 		max_score: number;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -121,7 +121,9 @@
 
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
-	let classesPercentText = $derived((resultColor: string) => (resultColor === '#000000' ? 'text-white' : ''));
+	let classesPercentText = $derived((resultColor: string) =>
+		resultColor === '#000000' ? 'text-white' : ''
+	);
 </script>
 
 {#if !$displayOnlyAssessableNodes || assessable || hasAssessableChildren}
@@ -240,10 +242,7 @@
 							{#each reference_controls as func}
 								<li>
 									{#if func.id}
-										<a
-											class="anchor"
-											href="/reference-controls/{func.id}?next={page.url.pathname}"
-										>
+										<a class="anchor" href="/reference-controls/{func.id}?next={page.url.pathname}">
 											{func.name}
 										</a>
 									{:else}

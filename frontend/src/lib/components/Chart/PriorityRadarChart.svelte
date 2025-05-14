@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 
 	import { goto } from '$app/navigation';
-	
 
 	interface Props {
 		// export let name: string;

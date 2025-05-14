@@ -5,15 +5,6 @@
 	import RecursiveTreeViewItem from '$lib/components/TreeView/RecursiveTreeViewItem.svelte';
 	import type { CssClasses, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 
-	
-
-	
-
-	
-
-	
-
-	
 	interface Props {
 		// Props (parent)
 		selection?: boolean;

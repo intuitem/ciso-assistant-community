@@ -2,7 +2,7 @@
 	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants.js';
 	interface Props {
 		cell: Array<any>;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let { cell, ...rest }: Props = $props();

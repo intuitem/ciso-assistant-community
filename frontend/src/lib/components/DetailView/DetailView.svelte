@@ -18,7 +18,9 @@
 		PopupSettings,
 		ModalComponent,
 		ModalSettings,
-		ModalStore, Tabs } from '@skeletonlabs/skeleton-svelte';
+		ModalStore,
+		Tabs
+	} from '@skeletonlabs/skeleton-svelte';
 	import { Tab } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
@@ -202,11 +204,11 @@
 		);
 	});
 
-	let relatedModels = $derived(Object.entries(data.relatedModels).sort(
-		(a: [string, any], b: [string, any]) => {
+	let relatedModels = $derived(
+		Object.entries(data.relatedModels).sort((a: [string, any], b: [string, any]) => {
 			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
-		}
-	));
+		})
+	);
 
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
@@ -470,7 +472,10 @@
 						{m.submit()}
 					</button>
 					{#if !data.data.approver}
-						<div class="card preset-tonal-surface border border-surface-500 p-4 z-20" data-popup="popupHover">
+						<div
+							class="card preset-tonal-surface border border-surface-500 p-4 z-20"
+							data-popup="popupHover"
+						>
 							<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
 							<div class="arrow preset-filled-surface-500"></div>
 						</div>
@@ -482,7 +487,8 @@
 					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
 					label={m.edit()}
 					class="btn preset-filled-primary-500 h-fit"
-					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>{m.edit()}</Anchor
+					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"
+					></i>{m.edit()}</Anchor
 				>
 
 				{#if data.urlModel === 'applied-controls'}
@@ -513,49 +519,46 @@
 				</Tab>
 			{/each}
 			{#snippet panel()}
-					
-					{#each relatedModels as [urlmodel, model], index}
-						{#if tabSet === index}
-							<div class="flex flex-row justify-between px-4 py-2">
-								<h4 class="font-semibold lowercase capitalize-first my-auto">
-									{safeTranslate('associated-' + model.info.localNamePlural)}
-								</h4>
-							</div>
-							{@const field = data.model.reverseForeignKeyFields.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
-							{#if model.table && !model.disableAddDeleteButtons}
-								<ModelTable
-									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
-									source={model.table}
-									deleteForm={model.deleteForm}
-									URLModel={urlmodel}
-									fields={fieldsToUse}
-								>
-									{#snippet addButton()}
-																<button
-											
-											class="btn preset-filled-primary-500 self-end my-auto"
-											onclick={(_) => modalCreateForm(model)}
-											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
-												'add-' + model.info.localName
-											)}</button
-										>
-															{/snippet}
-								</ModelTable>
-							{:else if model.table}
-								<ModelTable
-									source={model.table}
-									URLModel={urlmodel}
-									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
-									fields={fieldsToUse}
-								/>
-							{/if}
+				{#each relatedModels as [urlmodel, model], index}
+					{#if tabSet === index}
+						<div class="flex flex-row justify-between px-4 py-2">
+							<h4 class="font-semibold lowercase capitalize-first my-auto">
+								{safeTranslate('associated-' + model.info.localNamePlural)}
+							</h4>
+						</div>
+						{@const field = data.model.reverseForeignKeyFields.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						{@const fieldsToUse = listViewFields[urlmodel].body.filter((v) => v !== field.field)}
+						{#if model.table && !model.disableAddDeleteButtons}
+							<ModelTable
+								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+								source={model.table}
+								deleteForm={model.deleteForm}
+								URLModel={urlmodel}
+								fields={fieldsToUse}
+							>
+								{#snippet addButton()}
+									<button
+										class="btn preset-filled-primary-500 self-end my-auto"
+										onclick={(_) => modalCreateForm(model)}
+										><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
+											'add-' + model.info.localName
+										)}</button
+									>
+								{/snippet}
+							</ModelTable>
+						{:else if model.table}
+							<ModelTable
+								source={model.table}
+								URLModel={urlmodel}
+								baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+								fields={fieldsToUse}
+							/>
 						{/if}
-					{/each}
-				
-					{/snippet}
+					{/if}
+				{/each}
+			{/snippet}
 		</Tabs>
 	</div>
 {/if}

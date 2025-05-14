@@ -192,7 +192,7 @@
 			createRiskAnalysis={true}
 		>
 			{#snippet addRiskAnalysis()}
-						<div >
+				<div>
 					<button class="flex flex-col text-left hover:text-purple-800" onclick={modalCreateForm}>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
 							<span
@@ -211,11 +211,11 @@
 						<p class="text-sm">{safeTranslate(m.ebiosWs5_1())}</p>
 					</button>
 				</div>
-					{/snippet}
+			{/snippet}
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
 			{#snippet action()}
-						<div >
+				<div>
 					<a
 						class="text-orange-600 hover:text-purple-600 font-medium"
 						href={`${page.url.pathname}/visual/`}
@@ -224,9 +224,9 @@
 						></i><span class="font-semibold">{m.visualAnalysis()}</span></a
 					>
 				</div>
-					{/snippet}
+			{/snippet}
 			{#snippet content()}
-						<div >
+				<div>
 					<Card
 						count={data.data.roto_count}
 						label={m.roToCouples()}
@@ -258,7 +258,7 @@
 						customClass="col-span-3 lg:col-span-1"
 					/>
 				</div>
-					{/snippet}
+			{/snippet}
 		</Tile>
 	</div>
 </div>

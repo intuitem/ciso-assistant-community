@@ -6,9 +6,6 @@
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
-	
-
-	
 	interface Props {
 		class?: string;
 		label?: string | undefined;
@@ -23,7 +20,7 @@
 		required?: boolean;
 		// NEW: Allow customization of which time units to display
 		enabledUnits?: string[];
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -34,9 +31,9 @@
 		helpText = undefined,
 		cachedValue = $bindable(),
 		cacheLock = {
-		promise: new Promise((res) => res(null)),
-		resolve: (x) => x
-	},
+			promise: new Promise((res) => res(null)),
+			resolve: (x) => x
+		},
 		form,
 		hidden = false,
 		disabled = false,

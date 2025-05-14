@@ -13,7 +13,6 @@
 	let is_business_impact_ignored = $state(false);
 
 	let risk_matrix_index = $state(0);
-	
 
 	let vector: number[] = $state();
 	let vector_string: string = $state();
@@ -29,7 +28,9 @@
 	let vulnerability_score = $derived(average(form_data.vulnerability));
 	let technical_impact_score = $derived(average(form_data.technical_impact));
 
-	let impact_score = $derived(is_business_impact_ignored ? technical_impact_score : business_impact_score);
+	let impact_score = $derived(
+		is_business_impact_ignored ? technical_impact_score : business_impact_score
+	);
 	let probability_score = $derived(average([threat_agent_score, vulnerability_score]));
 	let risk_score = $derived(average([impact_score, probability_score]));
 

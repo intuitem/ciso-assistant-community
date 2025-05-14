@@ -24,16 +24,16 @@
 		name = 'graph',
 		data,
 		color = [
-		'#fc8452',
-		'#ee6666',
-		'#5470c6',
-		'#91cc75',
-		'#fac858',
-		'#73c0de',
-		'#3ba272',
-		'#9a60b4',
-		'#ea7ccc'
-	]
+			'#fc8452',
+			'#ee6666',
+			'#5470c6',
+			'#91cc75',
+			'#fac858',
+			'#73c0de',
+			'#3ba272',
+			'#9a60b4',
+			'#ea7ccc'
+		]
 	}: Props = $props();
 
 	let searchQuery = $state('');

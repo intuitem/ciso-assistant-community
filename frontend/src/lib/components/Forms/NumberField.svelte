@@ -5,7 +5,6 @@
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 
-	
 	interface Props {
 		class?: string;
 		label?: string | undefined;
@@ -19,7 +18,7 @@
 		hidden?: boolean;
 		disabled?: boolean;
 		required?: boolean;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -31,9 +30,9 @@
 		helpText = undefined,
 		cachedValue = $bindable(),
 		cacheLock = {
-		promise: new Promise((res) => res(null)),
-		resolve: (x) => x
-	},
+			promise: new Promise((res) => res(null)),
+			resolve: (x) => x
+		},
 		form,
 		hidden = false,
 		disabled = false,

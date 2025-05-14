@@ -8,12 +8,7 @@
 		tags?: string[];
 	}
 
-	let {
-		title,
-		desc,
-		link,
-		tags = []
-	}: Props = $props();
+	let { title, desc, link, tags = [] }: Props = $props();
 </script>
 
 <article

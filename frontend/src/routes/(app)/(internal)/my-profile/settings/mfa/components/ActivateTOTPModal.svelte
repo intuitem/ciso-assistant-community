@@ -1,13 +1,11 @@
 <script lang="ts">
 	// Props
-	
 
 	// Stores
 	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
-
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
@@ -28,12 +26,7 @@
 		formAction: string;
 	}
 
-	let {
-		parent,
-		totp,
-		_form,
-		formAction
-	}: Props = $props();
+	let { parent, totp, _form, formAction }: Props = $props();
 </script>
 
 {#if $modalStore[0]}
@@ -74,12 +67,11 @@
 					action={formAction}
 					data={_form}
 					validators={zod(activateTOTPSchema)}
-					
 					class="modal-form {cForm}"
 					validationMethod="onsubmit"
 				>
 					{#snippet children({ form })}
-										<!-- prettier-ignore -->
+						<!-- prettier-ignore -->
 						<OTPInput {form} field="code" />
 						<footer class="modal-footer {parent.regionFooter}">
 							<button
@@ -88,8 +80,8 @@
 								type="submit">{m.enableTOTP()}</button
 							>
 						</footer>
-														{/snippet}
-								</SuperForm>
+					{/snippet}
+				</SuperForm>
 			</div>
 		</article>
 	</div>

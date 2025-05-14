@@ -32,13 +32,13 @@
 <SuperForm
 	dataType="json"
 	data={composerForm}
-	
 	validators={zod(composerSchema)}
 	taintedMessage={null}
-	
 >
 	{#snippet children({ form, data })}
-		<div class="flex flex-col space-y-2 items-center card preset-tonal-surface border border-surface-500 p-4">
+		<div
+			class="flex flex-col space-y-2 items-center card preset-tonal-surface border border-surface-500 p-4"
+		>
 			{#if options}
 				<AutocompleteSelect
 					multiple={true}

@@ -8,7 +8,6 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-
 	const roto = data.data;
 
 	pageTitle.set(roto.risk_origin + ' - ' + roto.target_objective);

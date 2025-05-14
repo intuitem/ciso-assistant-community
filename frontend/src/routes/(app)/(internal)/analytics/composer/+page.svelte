@@ -4,7 +4,6 @@
 	import { m } from '$paraglide/messages';
 	import type { AppliedControlStatus } from '$lib/utils/types';
 
-	
 	interface Props {
 		// Props
 		data: any;
@@ -75,9 +74,8 @@
 		</div>
 		<div class="bg-zinc-100 shadow-sm rounded-sm p-3 flex flex-col space-y-2">
 			<div>
-				<i class="far fa-lightbulb mr-1"></i> <span class="font-semibold"
-					>{m.forTheSelectedScope()}:</span
-				>
+				<i class="far fa-lightbulb mr-1"></i>
+				<span class="font-semibold">{m.forTheSelectedScope()}:</span>
 			</div>
 			<ul class="list-disc px-6">
 				<li>

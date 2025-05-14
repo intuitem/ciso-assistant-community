@@ -262,14 +262,13 @@
 				]}
 			>
 				{#snippet addButton()}
-								<button
-						
+					<button
 						class="btn preset-filled-primary-500 self-end my-auto"
 						onclick={(_) => modalCreateForm()}
 						><i class="fa-solid fa-plus mr-2 lowercase"></i>
 						{m.addRiskScenario()}
 					</button>
-							{/snippet}
+				{/snippet}
 			</ModelTable>
 		</div>
 	</div>

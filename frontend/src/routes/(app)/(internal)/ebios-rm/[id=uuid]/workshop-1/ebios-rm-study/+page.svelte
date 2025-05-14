@@ -6,7 +6,12 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { ModalComponent, ModalSettings, ModalStore, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import type {
+		ModalComponent,
+		ModalSettings,
+		ModalStore,
+		Tabs
+	} from '@skeletonlabs/skeleton-svelte';
 	import { Tab } from '@skeletonlabs/skeleton-svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
@@ -212,58 +217,56 @@
 							</Tab>
 						{/each}
 						{#snippet panel()}
-											
-								{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
-									{#if tabSet === index}
-										<div class="flex flex-row justify-between px-4 py-2">
-											<h4 class="font-semibold lowercase capitalize-first my-auto">
-												{safeTranslate('associated-' + model.info.localNamePlural)}
-											</h4>
-										</div>
-										{#if model.table}
-											<ModelTable
-												source={model.table}
-												deleteForm={model.deleteForm}
-												URLModel={urlmodel}
-												canSelectObject={canEditObject}
-												baseEndpoint="/assets?ebios_rm_studies={page.params.id}"
-											>
-												{#snippet selectButton()}
-																						<div >
-														<span
-															class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-														>
-															<button
-																class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
-																data-testid="select-button"
-																title={m.selectAsset()}
-																onclick={(_) => modalUpdateForm()}
-																><i class="fa-solid fa-hand-pointer"></i>
-															</button>
-														</span>
-													</div>
-																					{/snippet}
-												{#snippet addButton()}
-																						<div >
-														<span
-															class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-														>
-															<button
-																class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-																data-testid="add-button"
-																title={safeTranslate('add-' + data.model.localName)}
-																onclick={(_) => modalCreateForm(model)}
-																><i class="fa-solid fa-file-circle-plus"></i>
-															</button>
-														</span>
-													</div>
-																					{/snippet}
-											</ModelTable>
-										{/if}
-									{/if}
-								{/each}
-							
+							{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
+								{#if tabSet === index}
+									<div class="flex flex-row justify-between px-4 py-2">
+										<h4 class="font-semibold lowercase capitalize-first my-auto">
+											{safeTranslate('associated-' + model.info.localNamePlural)}
+										</h4>
+									</div>
+									{#if model.table}
+										<ModelTable
+											source={model.table}
+											deleteForm={model.deleteForm}
+											URLModel={urlmodel}
+											canSelectObject={canEditObject}
+											baseEndpoint="/assets?ebios_rm_studies={page.params.id}"
+										>
+											{#snippet selectButton()}
+												<div>
+													<span
+														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+													>
+														<button
+															class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
+															data-testid="select-button"
+															title={m.selectAsset()}
+															onclick={(_) => modalUpdateForm()}
+															><i class="fa-solid fa-hand-pointer"></i>
+														</button>
+													</span>
+												</div>
 											{/snippet}
+											{#snippet addButton()}
+												<div>
+													<span
+														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+													>
+														<button
+															class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+															data-testid="add-button"
+															title={safeTranslate('add-' + data.model.localName)}
+															onclick={(_) => modalCreateForm(model)}
+															><i class="fa-solid fa-file-circle-plus"></i>
+														</button>
+													</span>
+												</div>
+											{/snippet}
+										</ModelTable>
+									{/if}
+								{/if}
+							{/each}
+						{/snippet}
 					</Tabs>
 				</div>
 			{/if}

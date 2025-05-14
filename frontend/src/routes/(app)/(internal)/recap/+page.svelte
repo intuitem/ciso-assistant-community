@@ -8,7 +8,6 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
 		'partially_compliant',

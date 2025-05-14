@@ -5,12 +5,6 @@
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 
 	// this can't be passed using context, since we have to pass it to recursive children.
-	
-
-	
-	
-	
-	
 
 	// Context API
 	let selection: boolean = getContext('selection');
@@ -102,29 +96,28 @@
 		}
 	});
 
-	
 	interface Props {
 		/** Provide data-driven nodes. */
 		nodes?: TreeViewNode[];
 		/**
-	 * provides id's of expanded nodes
-	 * @type {string[]}
-	 */
+		 * provides id's of expanded nodes
+		 * @type {string[]}
+		 */
 		expandedNodes?: string[];
 		/**
-	 * provides id's of disabled nodes
-	 * @type {string[]}
-	 */
+		 * provides id's of disabled nodes
+		 * @type {string[]}
+		 */
 		disabledNodes?: string[];
 		/**
-	 * provides id's of checked nodes
-	 * @type {string[]}
-	 */
+		 * provides id's of checked nodes
+		 * @type {string[]}
+		 */
 		checkedNodes?: string[];
 		/**
-	 * provides id's of indeterminate nodes
-	 * @type {string[]}
-	 */
+		 * provides id's of indeterminate nodes
+		 * @type {string[]}
+		 */
 		indeterminateNodes?: string[];
 		// important to pass children up to items (recursively)
 		treeItems?: TreeViewItem[];
@@ -192,16 +185,14 @@
 				<node.content {...node.contentProps} />
 			{/if}
 			{#snippet lead()}
-					
-					{#if typeof node.lead === 'string'}
-						{node.lead}
-					{:else}
-						<node.lead {...node.leadProps} />
-					{/if}
-				
-					{/snippet}
+				{#if typeof node.lead === 'string'}
+					{node.lead}
+				{:else}
+					<node.lead {...node.leadProps} />
+				{/if}
+			{/snippet}
 			<!-- @migration-task: migrate this slot by hand, `children` would shadow a prop on the parent component -->
-	<svelte:fragment slot="children">
+			<svelte:fragment slot="children">
 				<RecursiveTreeViewItem
 					nodes={node.children}
 					bind:expandedNodes

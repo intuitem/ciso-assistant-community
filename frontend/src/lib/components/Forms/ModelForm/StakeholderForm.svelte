@@ -68,19 +68,23 @@
 		return ((dependency * penetration) / (maturity * trust)).toFixed(2).replace(/\.?0+$/, '');
 	};
 
-	let currentCriticality = $derived(getCriticality(
-		$formData.current_dependency,
-		$formData.current_penetration,
-		$formData.current_maturity,
-		$formData.current_trust
-	));
+	let currentCriticality = $derived(
+		getCriticality(
+			$formData.current_dependency,
+			$formData.current_penetration,
+			$formData.current_maturity,
+			$formData.current_trust
+		)
+	);
 
-	let residualCriticality = $derived(getCriticality(
-		$formData.residual_dependency,
-		$formData.residual_penetration,
-		$formData.residual_maturity,
-		$formData.residual_trust
-	));
+	let residualCriticality = $derived(
+		getCriticality(
+			$formData.residual_dependency,
+			$formData.residual_penetration,
+			$formData.residual_maturity,
+			$formData.residual_trust
+		)
+	);
 </script>
 
 <div

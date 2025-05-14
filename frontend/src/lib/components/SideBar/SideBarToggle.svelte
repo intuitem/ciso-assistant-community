@@ -9,7 +9,9 @@
 		open = !open;
 	}
 
-	let classesSidebarOpenButton = $derived((open: boolean) => (open ? 'left-[15.3rem]' : 'rotate-180 left-5'));
+	let classesSidebarOpenButton = $derived((open: boolean) =>
+		open ? 'left-[15.3rem]' : 'rotate-180 left-5'
+	);
 </script>
 
 <!-- SIDEBAR TOGGLE -->

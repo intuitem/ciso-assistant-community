@@ -6,7 +6,7 @@
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 
 	// Props unused but referenced to avoid browser warnings because they're needed for enterprise Folderform
-	
+
 	interface Props {
 		form: SuperValidated<any>;
 		importFolder?: boolean;

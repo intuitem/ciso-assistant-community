@@ -27,11 +27,10 @@
 				class="flex flex-col space-y-3 w-full"
 				data={data?.form}
 				dataType="form"
-				
 				validators={zod(ChangePasswordSchema)}
 			>
 				{#snippet children({ form })}
-								<TextField type="password" {form} field="old_password" label={m.oldPassword()} />
+					<TextField type="password" {form} field="old_password" label={m.oldPassword()} />
 					<TextField type="password" {form} field="new_password" label={m.newPassword()} />
 					<TextField
 						type="password"
@@ -56,8 +55,8 @@
 							{m.changePassword()}
 						</button>
 					</div>
-											{/snippet}
-						</SuperForm>
+				{/snippet}
+			</SuperForm>
 		</div>
 	</div>
 </div>

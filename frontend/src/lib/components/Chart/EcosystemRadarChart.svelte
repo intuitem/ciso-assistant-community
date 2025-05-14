@@ -4,9 +4,6 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 
-	
-
-
 	interface Props {
 		// export let name: string;
 		width?: string;

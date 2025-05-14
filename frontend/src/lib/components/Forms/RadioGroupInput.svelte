@@ -14,10 +14,6 @@
 		suggested?: boolean;
 	}
 
-
-
-
-
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	interface Props {
@@ -44,9 +40,9 @@
 		disabled = false,
 		translateOptions = true,
 		cacheLock = {
-		promise: new Promise((res) => res(null)),
-		resolve: (x) => x
-	},
+			promise: new Promise((res) => res(null)),
+			resolve: (x) => x
+		},
 		cachedValue = $bindable(undefined),
 		options = []
 	}: Props = $props();

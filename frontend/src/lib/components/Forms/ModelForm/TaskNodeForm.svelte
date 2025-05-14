@@ -14,12 +14,7 @@
 		formDataCache?: Record<string, any>;
 	}
 
-	let {
-		form,
-		model,
-		cacheLocks = {},
-		formDataCache = $bindable({})
-	}: Props = $props();
+	let { form, model, cacheLocks = {}, formDataCache = $bindable({}) }: Props = $props();
 </script>
 
 <TextField

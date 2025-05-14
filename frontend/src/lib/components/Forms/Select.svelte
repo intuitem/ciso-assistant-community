@@ -8,11 +8,6 @@
 	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
 
-
-	
-
-
-
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 	// $: value.set(cachedValue);
 	run(() => {
@@ -43,7 +38,7 @@
 		color_map?: any;
 		form: SuperForm<AnyZodObject>;
 		options?: Option[];
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -56,9 +51,9 @@
 		blank = false,
 		disableDoubleDash = false,
 		cacheLock = {
-		promise: new Promise((res) => res(null)),
-		resolve: (x) => x
-	},
+			promise: new Promise((res) => res(null)),
+			resolve: (x) => x
+		},
 		color_map = {},
 		form,
 		options = [],
@@ -66,7 +61,8 @@
 	}: Props = $props();
 
 	let classesTextField = $derived((errors: string[] | undefined) =>
-		errors && errors.length > 0 ? 'input-error' : '');
+		errors && errors.length > 0 ? 'input-error' : ''
+	);
 </script>
 
 <div>

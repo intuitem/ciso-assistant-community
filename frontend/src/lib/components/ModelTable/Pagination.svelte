@@ -73,11 +73,7 @@
 			</button>
 		{/each}
 	{/if}
-	<button
-		type="button"
-		class:disabled={$pageNumber === $pageCount}
-		onclick={() => setPage('next')}
-	>
+	<button type="button" class:disabled={$pageNumber === $pageCount} onclick={() => setPage('next')}>
 		{m.next()}
 	</button>
 </section>

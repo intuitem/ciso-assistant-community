@@ -5,7 +5,6 @@
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
 	import type { ActionData, PageData } from './$types';
 
-
 	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
 	const reference_controls =
 		data.requirementAssessment.requirement.associated_reference_controls ?? [];
@@ -29,7 +28,10 @@
 		Tab,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore, ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
+		type ModalStore,
+		ProgressRing,
+		Tabs
+	} from '@skeletonlabs/skeleton-svelte';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -44,7 +46,7 @@
 	interface Props {
 		data: PageData;
 		form: ActionData;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let { data, form, ...rest }: Props = $props();
@@ -177,9 +179,9 @@
 
 	let requirementAssessmentsList: string[] = $hideSuggestions;
 
-	let hideSuggestion = $state(requirementAssessmentsList.includes(data.requirementAssessment.id)
-		? true
-		: false);
+	let hideSuggestion = $state(
+		requirementAssessmentsList.includes(data.requirementAssessment.id) ? true : false
+	);
 
 	function toggleSuggestions() {
 		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)) {
@@ -193,8 +195,9 @@
 		hideSuggestions.set(requirementAssessmentsList);
 	}
 
-	let classesText =
-		$derived(complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '');
+	let classesText = $derived(
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
+	);
 
 	let tabSet = $state(page.data.user.is_third_party ? 1 : 0);
 
@@ -402,13 +405,11 @@
 			class="flex flex-col"
 			_form={requirementAssessmentForm}
 			data={data.form}
-			
-			
 			action="?/updateRequirementAssessment"
 			{...rest}
 		>
 			{#snippet children({ form, data })}
-						<div class="card shadow-lg bg-white">
+				<div class="card shadow-lg bg-white">
 					<Tabs>
 						{#if !page.data.user.is_third_party}
 							<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
@@ -420,138 +421,137 @@
 							>{m.securityExceptions()}</Tab
 						>
 						{#snippet panel()}
-									
-								{#if tabSet === 0 && !page.data.user.is_third_party}
-									<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-										<i class="fa-solid fa-info-circle"></i>
-										<p>{m.requirementAppliedControlHelpText()}</p>
-									</div>
-									<div
-										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
-									>
-										<span class="flex flex-row justify-end items-center space-x-2">
-											{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
-												<button
-													class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
-													type="button"
-													onclick={() => {
+							{#if tabSet === 0 && !page.data.user.is_third_party}
+								<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+									<i class="fa-solid fa-info-circle"></i>
+									<p>{m.requirementAppliedControlHelpText()}</p>
+								</div>
+								<div
+									class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
+								>
+									<span class="flex flex-row justify-end items-center space-x-2">
+										{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
+											<button
+												class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+												type="button"
+												onclick={() => {
 													modalConfirmCreateSuggestedControls(
 														page.data.requirementAssessment.id,
 														page.data.requirementAssessment.name,
 														'?/createSuggestedControls'
 													);
 												}}
-												>
-													<span class="mr-2">
-														{#if createAppliedControlsLoading}
-															<ProgressRing
-																class="-ml-2"
-																width="w-6"
-																meter="stroke-white"
-																stroke={80}
-															/>
-														{:else}
-															<i class="fa-solid fa-fire-extinguisher"></i>
-														{/if}
-													</span>
-													{m.suggestControls()}
-												</button>
-											{/if}
-											<button
-												class="btn preset-filled-primary-500 self-end"
-												onclick={modalMeasureCreateForm}
-												type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
 											>
-										</span>
-										{#key refreshKey}
-											<AutocompleteSelect
-												multiple
-												{form}
-												optionsEndpoint="applied-controls"
-												optionsDetailedUrlParameters={[
-													['scope_folder_id', page.data.requirementAssessment.folder.id]
-												]}
-												optionsExtraFields={[['folder', 'str']]}
-												field="applied_controls"
-											/>
-										{/key}
-										<ModelTable
-											baseEndpoint="/applied-controls?requirement_assessments={page.data
-												.requirementAssessment.id}"
-											source={page.data.tables['applied-controls']}
-											hideFilters={true}
-											URLModel="applied-controls"
+												<span class="mr-2">
+													{#if createAppliedControlsLoading}
+														<ProgressRing
+															class="-ml-2"
+															width="w-6"
+															meter="stroke-white"
+															stroke={80}
+														/>
+													{:else}
+														<i class="fa-solid fa-fire-extinguisher"></i>
+													{/if}
+												</span>
+												{m.suggestControls()}
+											</button>
+										{/if}
+										<button
+											class="btn preset-filled-primary-500 self-end"
+											onclick={modalMeasureCreateForm}
+											type="button"
+											><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
+										>
+									</span>
+									{#key refreshKey}
+										<AutocompleteSelect
+											multiple
+											{form}
+											optionsEndpoint="applied-controls"
+											optionsDetailedUrlParameters={[
+												['scope_folder_id', page.data.requirementAssessment.folder.id]
+											]}
+											optionsExtraFields={[['folder', 'str']]}
+											field="applied_controls"
 										/>
-									</div>
-								{/if}
-								{#if tabSet === 1}
-									<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-										<i class="fa-solid fa-info-circle"></i>
-										<p>{m.requirementEvidenceHelpText()}</p>
-									</div>
-									<div
-										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
-									>
-										<span class="flex flex-row justify-end items-center">
-											<button
-												class="btn preset-filled-primary-500 self-end"
-												onclick={modalEvidenceCreateForm}
-												type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
-											>
-										</span>
-										{#key refreshKey}
-											<AutocompleteSelect
-												multiple
-												{form}
-												optionsEndpoint="evidences"
-												optionsExtraFields={[['folder', 'str']]}
-												optionsDetailedUrlParameters={[
-													['scope_folder_id', page.data.requirementAssessment.folder.id]
-												]}
-												field="evidences"
-											/>
-										{/key}
-										<ModelTable
-											source={page.data.tables['evidences']}
-											hideFilters={true}
-											URLModel="evidences"
-											baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
-												.id}"
+									{/key}
+									<ModelTable
+										baseEndpoint="/applied-controls?requirement_assessments={page.data
+											.requirementAssessment.id}"
+										source={page.data.tables['applied-controls']}
+										hideFilters={true}
+										URLModel="applied-controls"
+									/>
+								</div>
+							{/if}
+							{#if tabSet === 1}
+								<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+									<i class="fa-solid fa-info-circle"></i>
+									<p>{m.requirementEvidenceHelpText()}</p>
+								</div>
+								<div
+									class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
+								>
+									<span class="flex flex-row justify-end items-center">
+										<button
+											class="btn preset-filled-primary-500 self-end"
+											onclick={modalEvidenceCreateForm}
+											type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+										>
+									</span>
+									{#key refreshKey}
+										<AutocompleteSelect
+											multiple
+											{form}
+											optionsEndpoint="evidences"
+											optionsExtraFields={[['folder', 'str']]}
+											optionsDetailedUrlParameters={[
+												['scope_folder_id', page.data.requirementAssessment.folder.id]
+											]}
+											field="evidences"
 										/>
-									</div>
-								{/if}
-								{#if tabSet === 2 && !page.data.user.is_third_party}
-									<div
-										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
-									>
-										<span class="flex flex-row justify-end items-center">
-											<button
-												class="btn preset-filled-primary-500 self-end"
-												onclick={modalSecurityExceptionCreateForm}
-												type="button"
-												><i class="fa-solid fa-plus mr-2"></i>{m.addSecurityException()}</button
-											>
-										</span>
-										{#key refreshKey}
-											<AutocompleteSelect
-												multiple
-												{form}
-												optionsEndpoint="security-exceptions"
-												optionsExtraFields={[['folder', 'str']]}
-												field="security_exceptions"
-											/>
-										{/key}
-										<ModelTable
-											source={page.data.tables['security-exceptions']}
-											hideFilters={true}
-											URLModel="security-exceptions"
-											baseEndpoint="/security-exceptions?requirement_assessments={page.data
-												.requirementAssessment.id}"
+									{/key}
+									<ModelTable
+										source={page.data.tables['evidences']}
+										hideFilters={true}
+										URLModel="evidences"
+										baseEndpoint="/evidences?requirement_assessments={page.data
+											.requirementAssessment.id}"
+									/>
+								</div>
+							{/if}
+							{#if tabSet === 2 && !page.data.user.is_third_party}
+								<div
+									class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
+								>
+									<span class="flex flex-row justify-end items-center">
+										<button
+											class="btn preset-filled-primary-500 self-end"
+											onclick={modalSecurityExceptionCreateForm}
+											type="button"
+											><i class="fa-solid fa-plus mr-2"></i>{m.addSecurityException()}</button
+										>
+									</span>
+									{#key refreshKey}
+										<AutocompleteSelect
+											multiple
+											{form}
+											optionsEndpoint="security-exceptions"
+											optionsExtraFields={[['folder', 'str']]}
+											field="security_exceptions"
 										/>
-									</div>
-								{/if}
-							
-									{/snippet}
+									{/key}
+									<ModelTable
+										source={page.data.tables['security-exceptions']}
+										hideFilters={true}
+										URLModel="security-exceptions"
+										baseEndpoint="/security-exceptions?requirement_assessments={page.data
+											.requirementAssessment.id}"
+									/>
+								</div>
+							{/if}
+						{/snippet}
 					</Tabs>
 				</div>
 				<HiddenInput {form} field="folder" />
@@ -591,7 +591,7 @@
 							disabled={!data.is_scored || data.result === 'not_applicable'}
 						>
 							{#snippet left()}
-												<div >
+								<div>
 									<Checkbox
 										{form}
 										field="is_scored"
@@ -602,7 +602,7 @@
 										classesContainer="h-full flex flex-row items-center space-x-4"
 									/>
 								</div>
-											{/snippet}
+							{/snippet}
 						</Score>
 					</div>
 					{#if page.data.compliance_assessment_score.show_documentation_score}
@@ -632,7 +632,7 @@
 						>
 					</div>
 				</div>
-								{/snippet}
-				</SuperForm>
+			{/snippet}
+		</SuperForm>
 	</div>
 </div>

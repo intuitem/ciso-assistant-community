@@ -11,9 +11,6 @@
 	import type { ComponentType } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	
-
-	
 	interface Props {
 		// --- Props ---
 		riskMatrix: any;

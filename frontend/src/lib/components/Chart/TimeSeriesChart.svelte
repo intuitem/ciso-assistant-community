@@ -8,12 +8,7 @@
 		name?: string;
 	}
 
-	let {
-		width = 'w-auto',
-		height = 'h-full',
-		classesContainer = '',
-		name = ''
-	}: Props = $props();
+	let { width = 'w-auto', height = 'h-full', classesContainer = '', name = '' }: Props = $props();
 	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');

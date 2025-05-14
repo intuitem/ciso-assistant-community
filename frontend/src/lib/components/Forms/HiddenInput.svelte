@@ -4,7 +4,7 @@
 	interface Props {
 		field: string;
 		form: any;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let { field, form, ...rest }: Props = $props();
@@ -14,13 +14,6 @@
 
 <div>
 	<div class="control">
-		<input
-			hidden
-			name={field}
-			placeholder=""
-			bind:value={$value}
-			{...$constraints}
-			{...rest}
-		/>
+		<input hidden name={field} placeholder="" bind:value={$value} {...$constraints} {...rest} />
 	</div>
 </div>

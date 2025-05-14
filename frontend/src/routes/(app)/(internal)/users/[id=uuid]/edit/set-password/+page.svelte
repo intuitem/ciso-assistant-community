@@ -35,11 +35,10 @@
 				class="flex flex-col space-y-3 w-full"
 				data={data?.form}
 				dataType="form"
-				
 				validators={zod(SetPasswordSchema)}
 			>
 				{#snippet children({ form })}
-								<input class="input" type="hidden" name="user" value={getUUID()} />
+					<input class="input" type="hidden" name="user" value={getUUID()} />
 					<TextField type="password" {form} field="new_password" label={m.newPassword()} />
 					<TextField
 						type="password"
@@ -54,8 +53,8 @@
 							type="submit">{m.setPassword()}</button
 						>
 					</p>
-											{/snippet}
-						</SuperForm>
+				{/snippet}
+			</SuperForm>
 		</div>
 	</div>
 </div>

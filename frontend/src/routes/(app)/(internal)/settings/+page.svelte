@@ -13,7 +13,8 @@
 	<Tab bind:group={tabSet} name="instanceSettings" value={0}
 		><i class="fa-solid fa-globe"></i> {m.general()}</Tab
 	>
-	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key"></i> {m.sso()}</Tab
+	<Tab bind:group={tabSet} name="ssoSettings" value={1}
+		><i class="fa-solid fa-key"></i> {m.sso()}</Tab
 	>
 	<Tab bind:group={tabSet} name="featureFlags" value={2}
 		><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tab

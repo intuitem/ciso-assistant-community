@@ -33,11 +33,13 @@
 	let requirement = $derived(requirementHashmap[currentRequirementAssessment.requirement.id]);
 	let parent = $derived(data.requirements.find((req) => req.urn === requirement.parent_urn));
 
-	let title = $derived(requirement.display_short
-		? requirement.display_short
-		: parent.display_short
-			? parent.display_short
-			: parent.description);
+	let title = $derived(
+		requirement.display_short
+			? requirement.display_short
+			: parent.display_short
+				? parent.display_short
+				: parent.description
+	);
 
 	// Function to handle the "Next" button click
 	function nextItem() {

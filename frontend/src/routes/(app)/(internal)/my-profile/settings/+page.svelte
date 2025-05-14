@@ -5,7 +5,9 @@
 		Tab,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore, Tabs } from '@skeletonlabs/skeleton-svelte';
+		type ModalStore,
+		Tabs
+	} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
 

@@ -8,7 +8,6 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-
 	const operationalScenario = data.data;
 
 	pageTitle.set(m.operationalScenarioRefId({ refId: operationalScenario.ref_id }));

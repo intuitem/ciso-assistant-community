@@ -15,13 +15,7 @@
 		context: string;
 	}
 
-	let {
-		form,
-		model,
-		cacheLocks = {},
-		formDataCache = $bindable({}),
-		context
-	}: Props = $props();
+	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), context }: Props = $props();
 </script>
 
 {#if context === 'selectEvidences'}

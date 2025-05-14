@@ -1,6 +1,5 @@
 <script lang="ts">
 	// Props
-	
 
 	// Stores
 	import type { ModelInfo } from '$lib/utils/types';
@@ -31,7 +30,7 @@
 		suggestions?: { [key: string]: any };
 		taintedMessage?: string | boolean;
 		debug?: boolean;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {

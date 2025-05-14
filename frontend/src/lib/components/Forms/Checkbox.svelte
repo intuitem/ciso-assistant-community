@@ -5,7 +5,6 @@
 	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
-	
 	interface Props {
 		label?: string | undefined;
 		field: string;
@@ -18,7 +17,7 @@
 		disabled?: boolean;
 		checkboxComponent?: 'checkbox' | 'switch';
 		classesContainer?: CssClasses;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {

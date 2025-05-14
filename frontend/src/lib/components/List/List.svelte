@@ -5,10 +5,15 @@
 		items: NestedArray<Record<string, string> | string>;
 		message?: string;
 		classesMessage?: string;
-		[key: string]: any
+		[key: string]: any;
 	}
 
-	let { items, message = '', classesMessage = 'bg-surface-100 bg-opacity-80 backdrop-blur-xs', ...rest }: Props = $props();
+	let {
+		items,
+		message = '',
+		classesMessage = 'bg-surface-100 bg-opacity-80 backdrop-blur-xs',
+		...rest
+	}: Props = $props();
 </script>
 
 <article {...rest}>

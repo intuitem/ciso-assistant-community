@@ -48,32 +48,30 @@
 			</div>
 		{/if}
 		{#snippet panel()}
-			
-				<!-- storedlibraries -->
-				{#if tabSet === 0}
-					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-						<i class="fa-solid fa-info-circle"></i>
-						<p>{m.librariesCanOnlyBeLoadedByAdmin()}</p>
-					</div>
-					<ModelTable
-						source={data.storedLibrariesTable}
-						URLModel="stored-libraries"
-						deleteForm={data.deleteForm}
-						server={false}
-					/>
-				{/if}
-				{#if tabSet === 1}
-					<!-- loadedlibraries -->
-					<ModelTable
-						source={data.loadedLibrariesTable}
-						URLModel="loaded-libraries"
-						deleteForm={data.deleteForm}
-						detailQueryParameter="loaded"
-						server={false}
-					/>
-				{/if}
-			
-			{/snippet}
+			<!-- storedlibraries -->
+			{#if tabSet === 0}
+				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+					<i class="fa-solid fa-info-circle"></i>
+					<p>{m.librariesCanOnlyBeLoadedByAdmin()}</p>
+				</div>
+				<ModelTable
+					source={data.storedLibrariesTable}
+					URLModel="stored-libraries"
+					deleteForm={data.deleteForm}
+					server={false}
+				/>
+			{/if}
+			{#if tabSet === 1}
+				<!-- loadedlibraries -->
+				<ModelTable
+					source={data.loadedLibrariesTable}
+					URLModel="loaded-libraries"
+					deleteForm={data.deleteForm}
+					detailQueryParameter="loaded"
+					server={false}
+				/>
+			{/if}
+		{/snippet}
 	</Tabs>
 </div>
 {#if tabSet === 0 && page.data.user.is_admin}
@@ -86,7 +84,6 @@
 				dataType="form"
 				enctype="multipart/form-data"
 				data={form}
-				
 				validators={zod(LibraryUploadSchema)}
 				action="?/upload"
 				useFocusTrap={false}
@@ -101,7 +98,7 @@
 				{...rest}
 			>
 				{#snippet children({ form })}
-								<FileInput
+					<FileInput
 						{form}
 						helpText={m.libraryFileInYaml()}
 						field="file"
@@ -115,8 +112,8 @@
 						data-testid="save-button"
 						type="submit">{m.add()}</button
 					>
-											{/snippet}
-						</SuperForm>
+				{/snippet}
+			</SuperForm>
 		{:catch err}
 			<h1>{m.errorOccurredWhileLoadingLibrary()}: {err}</h1>
 		{/await}

@@ -5,7 +5,6 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
-
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;

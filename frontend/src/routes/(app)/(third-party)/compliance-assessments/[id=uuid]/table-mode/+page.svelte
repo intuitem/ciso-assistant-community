@@ -16,14 +16,16 @@
 		Accordion,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore, Segment, Switch, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+		type ModalStore,
+		Segment,
+		Switch,
+		ProgressRing
+	} from '@skeletonlabs/skeleton-svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
-	import { } from '@skeletonlabs/skeleton-svelte';
+	import {} from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { complianceResultColorMap } from '$lib/utils/constants';
-
-	
 
 	interface Props {
 		data: PageData;
@@ -34,7 +36,7 @@
 		questionnaireOnly?: boolean;
 		assessmentOnly?: boolean;
 		invalidateAll?: boolean;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -135,13 +137,15 @@
 		return color;
 	}
 
-	let questionnaireMode = $state(questionnaireOnly
-		? true
-		: assessmentOnly
-			? false
-			: $page.data.user.is_third_party
-				? true
-				: false);
+	let questionnaireMode = $state(
+		questionnaireOnly
+			? true
+			: assessmentOnly
+				? false
+				: $page.data.user.is_third_party
+					? true
+					: false
+	);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -624,7 +628,7 @@
 										requirementAssessment.result === 'not_applicable'}
 								>
 									{#snippet left()}
-																		<div >
+										<div>
 											<Checkbox
 												form={isScoredForms[requirementAssessment.id]}
 												field="is_scored"
@@ -639,7 +643,7 @@
 												}}
 											/>
 										</div>
-																	{/snippet}
+									{/snippet}
 								</Score>
 								{#if data.compliance_assessment.show_documentation_score}
 									<Score
@@ -714,42 +718,40 @@
 								{:else}
 									<Accordion.Item caretOpen="rotate-0" caretClosed="-rotate-90">
 										{#snippet summary()}
-																				<p class="flex">{m.observation()}</p>
-																			{/snippet}
+											<p class="flex">{m.observation()}</p>
+										{/snippet}
 										{#snippet content()}
-																			
-												<div>
-													<textarea
-														placeholder=""
-														class="input w-full"
-														bind:value={requirementAssessment.observation}
-														onkeydown={(event) => event.key === 'Enter' && event.preventDefault()}
-													></textarea>
-													{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
-														<button
-															class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
-															onclick={async () => {
+											<div>
+												<textarea
+													placeholder=""
+													class="input w-full"
+													bind:value={requirementAssessment.observation}
+													onkeydown={(event) => event.key === 'Enter' && event.preventDefault()}
+												></textarea>
+												{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
+													<button
+														class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
+														onclick={async () => {
 															await update(requirementAssessment, 'observation');
 															requirementAssessment.observationBuffer =
 																requirementAssessment.observation;
 														}}
-															type="button"
-														>
-															<i class="fa-solid fa-check opacity-70"></i>
-														</button>
-														<button
-															class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
-															onclick={() =>
+														type="button"
+													>
+														<i class="fa-solid fa-check opacity-70"></i>
+													</button>
+													<button
+														class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
+														onclick={() =>
 															(requirementAssessment.observation =
 																requirementAssessment.observationBuffer)}
-															type="button"
-														>
-															<i class="fa-solid fa-xmark opacity-70"></i>
-														</button>
-													{/if}
-												</div>
-											
-																			{/snippet}
+														type="button"
+													>
+														<i class="fa-solid fa-xmark opacity-70"></i>
+													</button>
+												{/if}
+											</div>
+										{/snippet}
 									</Accordion.Item>
 								{/if}
 								{#if requirementAssessment.evidences.length === 0 && shallow}
@@ -757,51 +759,49 @@
 								{:else}
 									<Accordion.Item caretOpen="rotate-0" caretClosed="-rotate-90">
 										{#snippet summary()}
-																				<p class="flex items-center space-x-2">
-													<span>{m.evidence()}</span>
-													{#key addedEvidence}
-														{#if requirementAssessment.evidences != null}
-															<span class="badge preset-tonal-primary"
-																>{requirementAssessment.evidences.length}</span
-															>
-														{/if}
-													{/key}
-												</p>
-																			{/snippet}
-										{#snippet content()}
-																			
-												<div class="flex flex-row space-x-2 items-center">
-													{#if !shallow}
-														<button
-															class="btn preset-filled-primary-500 self-start"
-															onclick={() =>
-															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-															type="button"
-															><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+											<p class="flex items-center space-x-2">
+												<span>{m.evidence()}</span>
+												{#key addedEvidence}
+													{#if requirementAssessment.evidences != null}
+														<span class="badge preset-tonal-primary"
+															>{requirementAssessment.evidences.length}</span
 														>
-														<button
-															class="btn preset-filled-secondary-500 self-start"
-															type="button"
-															onclick={() => modalUpdateForm(requirementAssessment)}
-															><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
-														</button>
 													{/if}
-												</div>
-												<div class="flex flex-wrap space-x-2 items-center">
-													{#key addedEvidence}
-														{#each requirementAssessment.evidences as evidence}
-															<p class="p-2">
-																<a
-																	class="text-primary-700 hover:text-primary-500"
-																	href="/evidences/{evidence.id}"
-																	><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
-																>
-															</p>
-														{/each}
-													{/key}
-												</div>
-											
-																			{/snippet}
+												{/key}
+											</p>
+										{/snippet}
+										{#snippet content()}
+											<div class="flex flex-row space-x-2 items-center">
+												{#if !shallow}
+													<button
+														class="btn preset-filled-primary-500 self-start"
+														onclick={() =>
+															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+														type="button"
+														><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+													>
+													<button
+														class="btn preset-filled-secondary-500 self-start"
+														type="button"
+														onclick={() => modalUpdateForm(requirementAssessment)}
+														><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
+													</button>
+												{/if}
+											</div>
+											<div class="flex flex-wrap space-x-2 items-center">
+												{#key addedEvidence}
+													{#each requirementAssessment.evidences as evidence}
+														<p class="p-2">
+															<a
+																class="text-primary-700 hover:text-primary-500"
+																href="/evidences/{evidence.id}"
+																><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
+															>
+														</p>
+													{/each}
+												{/key}
+											</div>
+										{/snippet}
 									</Accordion.Item>
 								{/if}
 							</Accordion>

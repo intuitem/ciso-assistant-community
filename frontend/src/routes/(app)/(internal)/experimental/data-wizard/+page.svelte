@@ -4,7 +4,6 @@
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
-
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	interface Props {
@@ -39,16 +38,16 @@
 	}
 
 	// Determine if domain selection should be disabled
-	let isDomainDisabled =
-		$derived(selectedModel === 'ComplianceAssessment' || selectedModel === 'FindingsAssessment');
+	let isDomainDisabled = $derived(
+		selectedModel === 'ComplianceAssessment' || selectedModel === 'FindingsAssessment'
+	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
 
 	// Determine if perimeter selection should be disabled
-	let isPerimeterDisabled =
-		$derived(selectedModel === 'Asset' ||
-		selectedModel === 'AppliedControl' ||
-		selectedModel === 'Perimeter');
+	let isPerimeterDisabled = $derived(
+		selectedModel === 'Asset' || selectedModel === 'AppliedControl' || selectedModel === 'Perimeter'
+	);
 
 	let uploadButtonStyles = $derived(file ? '' : 'chip-disabled');
 

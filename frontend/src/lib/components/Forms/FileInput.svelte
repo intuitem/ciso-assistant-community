@@ -3,8 +3,6 @@
 
 	import { formFieldProxy, fileProxy } from 'sveltekit-superforms';
 
-
-	
 	// allowPaste should be set to false when we have multiple FileField at the same time (the ideal implementation would be to deduce to which FileInput the paste operation must be forwarded depending on the targetElement of the "paste" event)
 
 	const { errors, constraints } = formFieldProxy(form, field);
@@ -22,7 +20,7 @@
 		allowPaste?: boolean;
 		resetSignal?: boolean; // Reset the form value if set to true
 		allowedExtensions: string[] | '*';
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {

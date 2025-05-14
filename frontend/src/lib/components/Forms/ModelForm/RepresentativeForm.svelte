@@ -13,13 +13,7 @@
 		data?: any;
 	}
 
-	let {
-		form,
-		model,
-		cacheLocks = {},
-		formDataCache = $bindable({}),
-		data = {}
-	}: Props = $props();
+	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), data = {} }: Props = $props();
 </script>
 
 <TextField

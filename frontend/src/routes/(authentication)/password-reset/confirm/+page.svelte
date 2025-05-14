@@ -34,11 +34,10 @@
 					class="flex flex-col space-y-3 w-full"
 					data={data?.form}
 					dataType="form"
-					
 					validators={zod(ResetPasswordSchema)}
 				>
 					{#snippet children({ form })}
-										<TextField type="password" {form} field="new_password" label={m.newPassword()} />
+						<TextField type="password" {form} field="new_password" label={m.newPassword()} />
 						<TextField
 							type="password"
 							{form}
@@ -52,8 +51,8 @@
 								data-testid="set-password-btn">{m.resetPassword()}</button
 							>
 						</p>
-														{/snippet}
-								</SuperForm>
+					{/snippet}
+				</SuperForm>
 			</div>
 		</div>
 	</div>

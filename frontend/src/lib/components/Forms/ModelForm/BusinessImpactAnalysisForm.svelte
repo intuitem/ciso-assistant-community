@@ -26,7 +26,7 @@
 		initialData = {},
 		object = {}
 	}: Props = $props();
-	
+
 	// export let updated_fields: Set<string> = new Set();
 </script>
 

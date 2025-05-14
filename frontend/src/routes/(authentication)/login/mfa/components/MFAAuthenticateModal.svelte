@@ -1,13 +1,11 @@
 <script lang="ts">
 	// Props
-	
 
 	// Stores
 	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
-
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
@@ -43,12 +41,11 @@
 				action={formAction}
 				data={_form}
 				validators={zod(mfaAuthenticateSchema)}
-				
 				class="modal-form {cForm}"
 				validationMethod="onsubmit"
 			>
 				{#snippet children({ form })}
-								<!-- prettier-ignore -->
+					<!-- prettier-ignore -->
 					{#if !useRecoveryCode}
 					<OTPInput {form} field="code" />
 	          {:else}
@@ -73,8 +70,8 @@
 							type="submit">{m.login()}</button
 						>
 					</footer>
-											{/snippet}
-						</SuperForm>
+				{/snippet}
+			</SuperForm>
 		</article>
 	</div>
 {/if}

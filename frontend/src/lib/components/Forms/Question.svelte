@@ -4,8 +4,6 @@
 	import { Segment } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	
-
 	interface Props {
 		class?: string;
 		label?: string | undefined;
@@ -13,7 +11,7 @@
 		helpText?: string | undefined;
 		questions?: any;
 		form: SuperForm<AnyZodObject>;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -29,7 +27,8 @@
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	let classesTextField = $derived((errors: string[] | undefined) =>
-		errors && errors.length > 0 ? 'input-error' : '');
+		errors && errors.length > 0 ? 'input-error' : ''
+	);
 
 	function toggleSelection(urn, optionUrn) {
 		// Initialize the array if it hasn't been already.

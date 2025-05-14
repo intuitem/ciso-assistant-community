@@ -1,6 +1,4 @@
 <script lang="ts">
-	
-
 	// State to track if the card is flipped
 	let isFlipped = $state(false);
 
@@ -13,20 +11,20 @@
 	interface Props {
 		// Accept entity_assessment.data as a prop
 		entity_assessment: {
-		provider: string;
-		entity_assessment_id: string;
-		baseline: string;
-		solutions: string;
-		completion: number;
-		review_progress: number;
-		conclusion: string;
-		last_update: string;
-		due_date: string;
-		eta_date: string;
-		observation: string;
-		reviewers: string;
-		has_questions: boolean;
-	};
+			provider: string;
+			entity_assessment_id: string;
+			baseline: string;
+			solutions: string;
+			completion: number;
+			review_progress: number;
+			conclusion: string;
+			last_update: string;
+			due_date: string;
+			eta_date: string;
+			observation: string;
+			reviewers: string;
+			has_questions: boolean;
+		};
 	}
 
 	let { entity_assessment }: Props = $props();

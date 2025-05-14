@@ -2,7 +2,12 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import type { ModalComponent, ModalSettings, ModalStore, Accordion } from '@skeletonlabs/skeleton-svelte';
+	import type {
+		ModalComponent,
+		ModalSettings,
+		ModalStore,
+		Accordion
+	} from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { m } from '$paraglide/messages';
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
@@ -44,33 +49,31 @@
 	>
 		<Accordion.Item>
 			{#snippet lead()}
-						<i class="fa-solid fa-bullseye"></i>
-					{/snippet}
+				<i class="fa-solid fa-bullseye"></i>
+			{/snippet}
 			{#snippet summary()}
-						{m.ecosystemRadar()}
-					{/snippet}
+				{m.ecosystemRadar()}
+			{/snippet}
 			{#snippet content()}
-					
-					<div class="bg-white flex">
-						<div class="flex w-full h-fit">
-							<EcosystemRadarChart
-								title={m.current()}
-								name="c_ecosystem"
-								data={data.radar.current}
-								classesContainer="w-full"
-								height="h-screen"
-							/>
-							<EcosystemRadarChart
-								title={m.residual()}
-								name="r_ecosystem"
-								classesContainer="w-full"
-								height="h-screen"
-								data={data.radar.residual}
-							/>
-						</div>
+				<div class="bg-white flex">
+					<div class="flex w-full h-fit">
+						<EcosystemRadarChart
+							title={m.current()}
+							name="c_ecosystem"
+							data={data.radar.current}
+							classesContainer="w-full"
+							height="h-screen"
+						/>
+						<EcosystemRadarChart
+							title={m.residual()}
+							name="r_ecosystem"
+							classesContainer="w-full"
+							height="h-screen"
+							data={data.radar.residual}
+						/>
 					</div>
-				
-					{/snippet}
+				</div>
+			{/snippet}
 		</Accordion.Item>
 	</Accordion>
 	<ModelTable
@@ -80,7 +83,7 @@
 		baseEndpoint="/stakeholders?ebios_rm_study={page.params.id}"
 	>
 		{#snippet addButton()}
-				<div >
+			<div>
 				<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 					<button
 						class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
@@ -91,6 +94,6 @@
 					</button>
 				</span>
 			</div>
-			{/snippet}
+		{/snippet}
 	</ModelTable>
 </div>

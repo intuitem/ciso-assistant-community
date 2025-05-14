@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	
 	interface Props {
 		width?: string;
 		height?: string;
@@ -10,12 +9,7 @@
 		name?: string;
 	}
 
-	let {
-		width = 'w-auto',
-		height = 'h-full',
-		classesContainer = '',
-		name = ''
-	}: Props = $props();
+	let { width = 'w-auto', height = 'h-full', classesContainer = '', name = '' }: Props = $props();
 
 	// interface waterfallData {
 	// 	placeholder: number[];

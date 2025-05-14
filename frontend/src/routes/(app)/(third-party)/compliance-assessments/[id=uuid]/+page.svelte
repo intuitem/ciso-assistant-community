@@ -12,11 +12,14 @@
 		ModalSettings,
 		ModalStore,
 		PopupSettings,
-		TreeViewNode, Switch, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+		TreeViewNode,
+		Switch,
+		ProgressRing
+	} from '@skeletonlabs/skeleton-svelte';
 
 	import { goto } from '$app/navigation';
 
-	import { } from '@skeletonlabs/skeleton-svelte';
+	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
@@ -33,15 +36,12 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 
-
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
-	import { } from '@skeletonlabs/skeleton-svelte';
+	import {} from '@skeletonlabs/skeleton-svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
-
-
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
@@ -502,7 +502,8 @@
 				<Anchor
 					href={`${page.url.pathname}/action-plan`}
 					class="btn preset-filled-primary-500 h-fit"
-					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
+					breadcrumbAction="push"
+					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 			{/if}
 			<span class="pt-4 text-sm">{m.powerUps()}</span>

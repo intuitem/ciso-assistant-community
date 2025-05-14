@@ -25,7 +25,9 @@
 		}
 	};
 
-	let classesHover = $derived((href: string | undefined) => (href ? 'hover:preset-tonal-secondary' : ''));
+	let classesHover = $derived((href: string | undefined) =>
+		href ? 'hover:preset-tonal-secondary' : ''
+	);
 </script>
 
 <div

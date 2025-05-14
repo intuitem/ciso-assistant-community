@@ -6,15 +6,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
-
-
-
 	interface ScoresDefinition {
 		score: number;
 		name: string;
 		description: string;
 	}
-
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
