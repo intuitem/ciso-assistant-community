@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	// Most of the app wide CSS should be put in this file
-	import '../app.postcss';
+	import '../app.css';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 	import { browser } from '$app/environment';
 
