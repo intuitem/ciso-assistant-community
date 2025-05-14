@@ -32,7 +32,7 @@
 
 	const formData = form.form;
 
-	const modalStore = getModalStore();
+	// const modalStore = getModalStore();
 
 	function modalMeasureCreateForm(): void {
 		const measureModel = page.data.measureModel;
@@ -52,7 +52,7 @@
 			// Data
 			title: safeTranslate('add-' + measureModel.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
