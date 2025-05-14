@@ -2,11 +2,6 @@ import { join } from 'path';
 import type { Config } from 'tailwindcss';
 import plugin from 'tailwindcss/plugin';
 
-// 1. Import the Skeleton plugin
-import { skeleton } from '@skeletonlabs/tw-plugin';
-
-import { cisoTheme } from './ciso-theme';
-
 const config = {
 	// 2. Opt for dark mode to be handled via the class method
 	darkMode: 'class',
@@ -22,11 +17,6 @@ const config = {
 	plugins: [
 		require('@tailwindcss/typography'),
 		require('@tailwindcss/forms'),
-		skeleton({
-			themes: {
-				custom: [cisoTheme]
-			}
-		}),
 		// Courtesy of bholmesdev: https://gist.github.com/bholmesdev/f326094e2097068c5de8f818f9aa8713
 		plugin(function spicyGradients({ addUtilities }) {
 			addUtilities({
