@@ -8,7 +8,6 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { driverInstance } from '$lib/utils/stores';
 
-
 	const user = page.data.user;
 
 	const items = navData.items
@@ -48,7 +47,8 @@
 		lastAccordionItem.set(value);
 	}
 
-	function handleNavClick() {
+	function handleNavClick(item: any) {
+		lastAccordionItemOpened(item.name);
 		setTimeout(() => {
 			$driverInstance?.moveNext();
 		}, 0);
@@ -56,13 +56,7 @@
 </script>
 
 <nav class="grow scrollbar">
-	<Accordion
-		autocollapse
-		spacing="space-y-4"
-		regionPanel="space-y-2"
-		caretClosed="-rotate-90"
-		caretOpen=""
-	>
+	<Accordion spacing="space-y-4" regionPanel="space-y-2" caretClosed="-rotate-90" caretOpen="">
 		{#each items as item}
 			<!-- This commented code adds Accordion persistency but changes its visual behavior -->
 			<!-- {#if $lastAccordionItem === item.name}
@@ -74,16 +68,15 @@
 			{#if sideBarVisibleItems && sideBarVisibleItems[item.name] !== false}
 				<Accordion.Item
 					id={item.name.toLowerCase().replace(' ', '-')}
-					on:click={() => lastAccordionItemOpened(item.name)}
-					on:click={handleNavClick}
+					onClick={() => handleNavClick(item)}
 					open={$lastAccordionItem === item.name}
 				>
-					{#snippet summary()}
-										<SideBarCategory {item} />
-									{/snippet}
-					{#snippet content()}
-										<SideBarItem item={item.items} {sideBarVisibleItems} />
-									{/snippet}
+					{#snippet control()}
+						<SideBarCategory {item} />
+					{/snippet}
+					{#snippet panel()}
+						<SideBarItem item={item.items} {sideBarVisibleItems} />
+					{/snippet}
 				</Accordion.Item>
 			{/if}
 		{/each}
