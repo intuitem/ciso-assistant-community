@@ -60,7 +60,7 @@
 {#key month}
 	<button
 		in:fly={{ delay: 100, duration: 300 }}
-		class="flex flex-col p-1 rounded-md text-sm h-[8rem] max-h-[8rem] border
+		class="flex flex-col p-1 rounded-md text-sm h-32 max-h-32 border
 		       {isPast
 			? 'bg-gray-300 text-gray-500 cursor-pointer hover:bg-gray-400'
 			: 'border-gray-200 bg-white cursor-pointer hover:bg-gray-100'} 

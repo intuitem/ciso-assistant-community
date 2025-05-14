@@ -28,7 +28,7 @@
 			<i class="fa-solid fa-info-circle mr-2"></i>{m.composerHint()}
 		</div>
 	</div>
-	<div class="card p-4 bg-white shadow">
+	<div class="card p-4 bg-white shadow-sm">
 		<div class="p-2 font-semibold text-lg">
 			{riskData.risk_assessment_objects.length <= 1
 				? m.composerTitle()
@@ -73,7 +73,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="bg-zinc-100 shadow rounded p-3 flex flex-col space-y-2">
+		<div class="bg-zinc-100 shadow-sm rounded-sm p-3 flex flex-col space-y-2">
 			<div>
 				<i class="far fa-lightbulb mr-1"></i>&nbsp;<span class="font-semibold"
 					>{m.forTheSelectedScope()}:</span
@@ -109,7 +109,7 @@
 	<div class="flex flex-col space-y-2">
 		{#each riskData.risk_assessment_objects as item}
 			<div>
-				<div class="card bg-white overflow-hidden shadow" id="headingOne">
+				<div class="card bg-white overflow-hidden shadow-sm" id="headingOne">
 					<div
 						class="flex flex-row space-x-4 px-8 py-4 w-full hover:bg-gray-100 cursor-pointer items-center"
 						onclick={() => {
@@ -128,16 +128,16 @@
 								<i class="fas fa-angle-down"></i>
 							{/if}
 						</div>
-						<button class="text-gray-700 font-semibold focus:outline-none" type="button">
+						<button class="text-gray-700 font-semibold focus:outline-hidden" type="button">
 							{item.risk_assessment.perimeter.str}/{item.risk_assessment.name}
 						</button>
 						<div>
 							{#if item.risk_assessment.quality_check.count > 0}
-								<span class="text-xs px-2 py-1 rounded bg-orange-200 shadow"
+								<span class="text-xs px-2 py-1 rounded-sm bg-orange-200 shadow-sm"
 									>{m.reviewNeeded()}</span
 								>
 							{:else}
-								<span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{m.ok()}</span>
+								<span class="text-xs px-2 py-1 rounded-sm bg-green-200 shadow-sm">{m.ok()}</span>
 							{/if}
 						</div>
 					</div>
@@ -159,7 +159,7 @@
 									{/if}
 								</div>
 								<div>
-									<table class="border border-collapse my-2 p-2 rounded">
+									<table class="border border-collapse my-2 p-2 rounded-sm">
 										<thead>
 											<tr>
 												<th class="border p-2 bg-gray-200"></th>

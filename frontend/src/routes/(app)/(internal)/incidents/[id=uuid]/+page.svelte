@@ -182,7 +182,7 @@
 		{#snippet widgets()}
 				<div
 				
-				class="shadow-xl border-l border-t p-4 rounded bg-gradient-to-tl from-slate-50 to-white"
+				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white"
 				hidden={!canEditObject}
 			>
 				{#if canEditObject}
@@ -318,7 +318,7 @@
 							{/if}
 						</div>
 						<div class="mb-1">
-							<span class="text-xs font-mono bg-violet-700 text-white p-1 rounded"
+							<span class="text-xs font-mono bg-violet-700 text-white p-1 rounded-sm"
 								>{safeTranslate(meta.entry_type)}</span
 							>
 						</div>

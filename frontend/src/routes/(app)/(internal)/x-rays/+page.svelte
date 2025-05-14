@@ -44,7 +44,7 @@
 	}));
 </script>
 
-<div class="card bg-white p-6 shadow flex flex-col space-y-4">
+<div class="card bg-white p-6 shadow-sm flex flex-col space-y-4">
 	{#if perimeters.length == 0}
 		<span class="text-2xl">{m.xRaysEmptyMessage()}</span>
 	{/if}

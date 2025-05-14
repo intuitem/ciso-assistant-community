@@ -151,7 +151,7 @@
 						data-testid="x-axis-header-{j}"
 					>
 						<div
-							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
 							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
 							data-popup={'popup-' + matrixName + '-x-' + j}
 						>
@@ -161,7 +161,7 @@
 						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
 						{#if xHeader.description}
 							<i
-								class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
+								class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"
 								use:popup={popupHoverX[j]}
 							></i>
 						{/if}
@@ -178,7 +178,7 @@
 					data-testid="y-axis-header-{i}"
 				>
 					<div
-						class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+						class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
 						style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
 						data-popup={'popup-' + matrixName + '-y-' + i}
 					>
@@ -190,7 +190,7 @@
 					<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
 					{#if yHeader.description}
 						<i
-							class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
+							class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"
 							use:popup={popupHoverY[i]}
 						></i>
 					{/if}
@@ -219,7 +219,7 @@
 						data-testid="x-axis-header-{j}"
 					>
 						<div
-							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded"
+							class="card bg-black text-gray-200 p-4 z-20 shadow-lg rounded-sm"
 							style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
 							data-popup={'popup-' + matrixName + '-x-' + j}
 						>
@@ -229,7 +229,7 @@
 						<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
 						{#if xHeader.description}
 							<i
-								class="fa-solid fa-circle-info cursor-help [&>*]:pointer-events-none mt-1"
+								class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"
 								use:popup={popupHoverX[j]}
 							></i>
 						{/if}

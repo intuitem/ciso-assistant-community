@@ -47,7 +47,7 @@
 
 {#if canBackup}
 	<div class="grid grid-cols-2 space-y-2 lg:space-y-0 lg:space-x-4">
-		<div class="card col-span-full lg:col-span-1 bg-white shadow py-4 px-6 space-y-2">
+		<div class="card col-span-full lg:col-span-1 bg-white shadow-sm py-4 px-6 space-y-2">
 			<h4 class="h4 font-semibold">{m.exportBackup()} <i class="fa-solid fa-download"></i></h4>
 			<div class=" py-4">
 				{m.exportBackupDescription()}
@@ -57,7 +57,7 @@
 			</form>
 		</div>
 
-		<div class="card col-span-full lg:col-span-1 bg-white shadow py-4 px-6 space-y-2">
+		<div class="card col-span-full lg:col-span-1 bg-white shadow-sm py-4 px-6 space-y-2">
 			<h4 class="h4 font-semibold">{m.importBackup()} <i class="fa-solid fa-upload"></i></h4>
 			<div class=" py-4">
 				{m.importBackupDescription()}

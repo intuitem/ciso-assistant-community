@@ -77,7 +77,7 @@
 <style lang="postcss">
 	/* Global styles for the command palette */
 	:global([data-cmdk-dialog]) {
-		@apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2;
+		@apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-2;
 	}
 
 	:global([data-cmdk-root]) {

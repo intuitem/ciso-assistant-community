@@ -165,7 +165,7 @@
 					<span class="badge bg-red-200 text-red-700">{m.notSelected()}</span>
 				{/if}
 			</p>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-table text-gray-500 opacity-75"></i>
 					<span>{m.fearedEvents()}</span>
@@ -179,7 +179,7 @@
 					baseEndpoint={'feared-events/?ro_to_couples=' + roto.id}
 				></ModelTable>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
 					<span>{m.justification()}</span>

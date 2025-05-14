@@ -78,7 +78,7 @@
 	</div>
 {:else}
 	<div
-		class="flex flex-wrap flex-col items-center justify-center h-full [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar {classesCellText(
+		class="flex flex-wrap flex-col items-center justify-center h-full *:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar {classesCellText(
 			cell.level.hexcolor
 		)}"
 		style="background-color: {cell.level.hexcolor};"

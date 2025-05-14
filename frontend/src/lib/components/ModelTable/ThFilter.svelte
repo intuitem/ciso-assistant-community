@@ -10,7 +10,7 @@
 	let classProp = ''; // Replacing $$props.class
 </script>
 
-<th class="{classProp} !py-0">
+<th class="{classProp} py-0!">
 	<input
 		type="text"
 		class="input variant-form-material placeholder:text-xs bg-transparent p-0"

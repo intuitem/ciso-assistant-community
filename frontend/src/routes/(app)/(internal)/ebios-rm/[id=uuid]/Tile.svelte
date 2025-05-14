@@ -103,7 +103,7 @@
 											<p class="text-sm">{step.title}</p>
 										</Anchor>
 									{:else}
-										<div class="text-gray-300 [&>*]:pointer-events-none" use:popup={popupHover[i]}>
+										<div class="text-gray-300 *:pointer-events-none" use:popup={popupHover[i]}>
 											<div
 												class="transition card bg-white shadow-lg p-4 z-20 duration-300"
 												data-popup={'popup' + workshop + i}

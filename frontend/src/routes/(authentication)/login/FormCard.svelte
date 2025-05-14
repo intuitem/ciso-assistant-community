@@ -56,7 +56,7 @@
 			<i class="fa-solid fa-right-to-bracket"></i>
 		</div>
 		<h3
-			class="font-bold leading-tight tracking-tight md:text-2xl bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+			class="font-bold leading-tight tracking-tight md:text-2xl bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
 		>
 			{m.logIntoYourAccount()}
 		</h3>
@@ -101,7 +101,7 @@
 				<hr class="w-64 items-center bg-gray-200 border-0" />
 			</div>
 			<button
-				class="btn bg-gradient-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
+				class="btn bg-linear-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
 				onclick={() =>
 					redirectToProvider(data.SSOInfo.sp_entity_id, data.SSOInfo.callback_url, 'login')}
 				>{m.loginSSO()}</button

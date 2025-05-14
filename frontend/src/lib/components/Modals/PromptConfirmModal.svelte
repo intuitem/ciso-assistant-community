@@ -67,7 +67,7 @@
 			data-testid="delete-prompt-confirm-textfield"
 			bind:value={userInput}
 			placeholder={m.confirmYesPlaceHolder()}
-			class="w-full mt-2 p-2 border border-gray-300 rounded"
+			class="w-full mt-2 p-2 border border-gray-300 rounded-sm"
 		/>
 
 		{#if bodyComponent}

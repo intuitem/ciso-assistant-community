@@ -40,7 +40,7 @@
 	{@const missingScenarios = data.scenariosWithoutAttackPath.results}
 	<section class="my-6">
 		<div
-			class="flex items-start gap-3 rounded-xl border border-warning-300 bg-warning-100 p-4 shadow-sm"
+			class="flex items-start gap-3 rounded-xl border border-warning-300 bg-warning-100 p-4 shadow-xs"
 		>
 			<div class="text-warning-600 mt-1">
 				<i class="fa-solid fa-triangle-exclamation text-xl"></i>
@@ -69,7 +69,7 @@
 >
 	{#snippet addButton()}
 		<div >
-			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 				<button
 					class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 					data-testid="add-button"

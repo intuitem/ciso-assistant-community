@@ -77,7 +77,7 @@
 	}
 </script>
 
-<div class="card bg-white p-4 shadow space-y-4">
+<div class="card bg-white p-4 shadow-sm space-y-4">
 	<div class="flex flex-col space-y-2">
 		<span class="w-full flex flex-row justify-between">
 			<h1 class="font-medium text-xl">{data.library.name}</h1>

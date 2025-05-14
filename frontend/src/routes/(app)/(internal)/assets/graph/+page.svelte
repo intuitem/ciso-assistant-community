@@ -10,7 +10,7 @@
 	pageTitle.set('Assets Explorer');
 </script>
 
-<div class="bg-white shadow flex overflow-x-auto">
+<div class="bg-white shadow-sm flex overflow-x-auto">
 	<div class="w-full h-screen">
 		<GraphExplorer title="Assets Explorer" data={data.data} edgeLength={100} />
 	</div>

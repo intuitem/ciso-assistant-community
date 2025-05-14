@@ -25,7 +25,7 @@
 	});
 </script>
 
-<div class="card bg-white shadow">
+<div class="card bg-white shadow-sm">
 	<TabGroup>
 		{#if data.loadedLibrariesTable.meta.count > 0}
 			<Tab bind:group={tabSet} value={0}
@@ -77,7 +77,7 @@
 	</TabGroup>
 </div>
 {#if tabSet === 0 && page.data.user.is_admin}
-	<div class="card bg-white p-4 mt-4 shadow">
+	<div class="card bg-white p-4 mt-4 shadow-sm">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>
 		{:then form}

@@ -270,7 +270,7 @@
 	<input
 		id="graph-search"
 		type="text"
-		class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-sm"
+		class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-xs"
 		bind:value={searchQuery}
 		onkeydown={handleKeyDown}
 		placeholder="Find a node ..."

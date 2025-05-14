@@ -87,7 +87,7 @@
 		spacing = 'space-y-4',
 		rounded = 'rounded-container-token',
 		shadow = 'shadow-xl',
-		zIndex = 'z-[999]',
+		zIndex = 'z-999',
 		buttonNeutral = 'variant-ghost-surface',
 		buttonPositive = 'variant-filled',
 		buttonTextCancel = $bindable('Cancel'),

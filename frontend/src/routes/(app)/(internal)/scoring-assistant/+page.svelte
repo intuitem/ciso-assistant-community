@@ -90,7 +90,7 @@
 					<!--Threat Agent Factors-->
 					<div
 						id="ta_div"
-						class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5"
+						class="px-4 py-2 mx-1 my-2 bg-white shadow-sm rounded-sm h-1/2 grid grid-cols-5"
 					>
 						<div class="col-span-4 p-2">
 							{#each forms.threat_agent as selector_data, index}
@@ -114,7 +114,7 @@
 					<!--Vulnerability Factors-->
 					<div
 						id="vf_div"
-						class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5"
+						class="px-4 py-2 mx-1 my-2 bg-white shadow-sm rounded-sm h-1/2 grid grid-cols-5"
 					>
 						<div class="col-span-4 p-2">
 							{#each forms.vulnerability as selector_data, index}
@@ -210,7 +210,7 @@
 				</div>
 			</div>
 
-			<div class="p-2 my-8 bg-white rounded shadow">
+			<div class="p-2 my-8 bg-white rounded-sm shadow-sm">
 				<div class="p-1 m-1 text-xs">
 					{m.assessmentVector()}: <span id="vector">{vector_string}</span>
 				</div>
@@ -235,7 +235,7 @@
 						<div class="text-lg p-1 col-span-3">{m.riskLevel()}</div>
 						<i class="fas fa-arrow-alt-circle-right"></i>
 						<span
-							class="py-2 px-0 font-semibold rounded shadow"
+							class="py-2 px-0 font-semibold rounded-sm shadow-sm"
 							id="risk_label"
 							style="background-color: {labels.risk.hexcolor}"
 						>

@@ -217,7 +217,7 @@
 <div class="flex flex-col space-y-2">
 	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
 		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 justify-between"
+			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow-sm px-6 py-2 justify-between"
 		>
 			<div class="text-yellow-900">
 				{m.riskAcceptanceValidatingReviewMessage()}
@@ -270,7 +270,7 @@
 	<div class="card shadow-lg bg-white p-4">
 		<div class="flex flex-row flex-wrap gap-4">
 			<!-- Left side - Details (now takes half width) -->
-			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-sm flex-1 min-w-[300px]">
+			<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs flex-1 min-w-[300px]">
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
 					{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
 						<div class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
@@ -463,7 +463,7 @@
 							modalConfirm(data.data.id, data.data.name, '?/submit');
 						}}
 						onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
-						class="btn variant-filled-primary [&>*]:pointer-events-none"
+						class="btn variant-filled-primary *:pointer-events-none"
 						disabled={!data.data.approver}
 						use:popup={popupHover}
 					>
@@ -488,7 +488,7 @@
 
 				{#if data.urlModel === 'applied-controls'}
 					<button
-						class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
+						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
 						onclick={(_) => modalAppliedControlDuplicateForm()}
 						data-testid="duplicate-button"
 					>

@@ -3,7 +3,7 @@
 	const license = data.license;
 </script>
 
-<div class="card bg-white p-4 shadow space-y-4">
+<div class="card bg-white p-4 shadow-sm space-y-4">
 	<table class="border-separate border-spacing-y-4">
 		<tbody
 			><tr class="py-6">

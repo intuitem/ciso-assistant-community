@@ -128,7 +128,7 @@
 				</div>
 				<div class="grid grid-cols-3 gap-12 items-center">
 					<div
-						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
@@ -137,7 +137,7 @@
 						</p>
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
@@ -152,7 +152,7 @@
 						{/each}
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
@@ -160,7 +160,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
@@ -194,7 +194,7 @@
 				{m.ebiosWs4_2()}
 			</h1>
 			<div
-				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-sm space-x-4 justify-between"
+				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-xs space-x-4 justify-between"
 			>
 				<div
 					style="background-color: {operationalScenario.likelihood.hexcolor}"
@@ -271,7 +271,7 @@
 					></i>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
 					<span>{m.justification()}</span>

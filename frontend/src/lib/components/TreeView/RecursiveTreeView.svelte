@@ -80,7 +80,7 @@
 	setContext('padding', padding);
 	setContext('indent', indent);
 	setContext('hover', hover);
-	setContext('rounded', rounded);
+	setContext('rounded-sm', rounded);
 	setContext('caretOpen', caretOpen);
 	setContext('caretClosed', caretClosed);
 	setContext('hyphenOpacity', hyphenOpacity);

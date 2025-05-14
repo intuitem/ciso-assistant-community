@@ -250,7 +250,7 @@
 	});
 </script>
 
-<div class="card space-y-2 p-4 bg-white shadow">
+<div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
 		<span class="code left h-min">{data.requirement.urn}</span>
 		<a class="text-pink-500 hover:text-pink-400" href={complianceAssessmentURL}
@@ -436,7 +436,7 @@
 										<span class="flex flex-row justify-end items-center space-x-2">
 											{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 												<button
-													class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+													class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
 													type="button"
 													onclick={() => {
 													modalConfirmCreateSuggestedControls(

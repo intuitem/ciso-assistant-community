@@ -140,10 +140,10 @@
 				</div>
 			</div>
 			<div class="flex justify-between">
-				<button class="bg-gray-400 text-white px-4 py-2 rounded" onclick={previousItem}>
+				<button class="bg-gray-400 text-white px-4 py-2 rounded-sm" onclick={previousItem}>
 					{m.previous()}
 				</button>
-				<button class="variant-filled-primary px-4 py-2 rounded" onclick={nextItem}>
+				<button class="variant-filled-primary px-4 py-2 rounded-sm" onclick={nextItem}>
 					{m.next()}
 				</button>
 			</div>

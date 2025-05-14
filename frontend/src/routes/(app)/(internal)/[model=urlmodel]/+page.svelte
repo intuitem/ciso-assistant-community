@@ -110,7 +110,7 @@
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				{#snippet addButton()}
 								<div >
-						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
 								<button
 									class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"

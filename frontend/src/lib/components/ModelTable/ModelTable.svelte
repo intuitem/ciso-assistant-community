@@ -464,7 +464,7 @@
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
 															<span
-																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-200 dark:text-green-900"
+																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
 															>
 																{m.accept()}
 															</span>
@@ -529,7 +529,7 @@
 			</tbody>
 			{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 w-full max-w-[229px] outline-none card bg-white px-1 py-1.5 shadow-md cursor-default"
+					class="z-50 w-full max-w-[229px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
@@ -539,18 +539,18 @@
 					{/if}
 					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
 						<ContextMenu.Item
-							class="flex h-10 select-none items-center rounded-sm py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-surface-50"
+							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
 						>
 							<Anchor
 								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
-								class="flex items-cente w-full h-full cursor-default outline-none !ring-0 !ring-transparent"
+								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
 								>{m.edit()}</Anchor
 							>
 						</ContextMenu.Item>
 					{/if}
 					<!-- {#if !preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] })} -->
 					<!-- 	<ContextMenu.Item -->
-					<!-- 		class="flex h-10 select-none items-center rounded-sm py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-surface-50" -->
+					<!-- 		class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50" -->
 					<!-- 	> -->
 					<!-- 		<div class="flex items-center w-full h-full">{m.delete()}</div> -->
 					<!-- 	</ContextMenu.Item> -->

@@ -60,7 +60,7 @@
 </script>
 
 <div class="grid grid-cols-4 gap-4">
-	<div class=" col-span-2 bg-white shadow py-4 px-6 space-y-2">
+	<div class=" col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
 				<h4 class="h4 font-bold"><i class="fa-solid fa-file-excel mr-2"></i>Load excel data</h4>
@@ -95,7 +95,7 @@
 					<div>
 						<label
 							for="Asset"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
 						>
 							<div>
 								<p class="text-gray-700">{m.assets()}</p>
@@ -116,7 +116,7 @@
 					<div>
 						<label
 							for="User"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
 						>
 							<div>
 								<p class="text-gray-700">{m.users()}</p>
@@ -135,7 +135,7 @@
 					<div>
 						<label
 							for="AppliedControl"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
 						>
 							<div>
 								<p class="text-gray-700">{m.appliedControls()}</p>
@@ -155,7 +155,7 @@
 					<div>
 						<label
 							for="Perimeter"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
 						>
 							<div>
 								<p class="text-gray-700">{m.perimeters()}</p>
@@ -175,7 +175,7 @@
 					<div>
 						<label
 							for="ComplianceAssessment"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
 						>
 							<div>
 								<p class="text-gray-700">{m.complianceAssessment()}</p>
@@ -195,7 +195,7 @@
 					<div>
 						<label
 							for="FindingsAssessment"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
 						>
 							<div>
 								<p class="text-gray-700">{m.findingsAssessment()}</p>

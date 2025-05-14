@@ -13,7 +13,7 @@
 <DetailView {data}>
 	{#snippet widgets()}
 		<div  class="h-full flex flex-col space-y-4">
-			<div class="card p-4 bg-gray-50 shadow-sm flex-grow">
+			<div class="card p-4 bg-gray-50 shadow-xs grow">
 				<div class="grid grid-cols-2">
 					<div class="w-1/2">
 						<div class="font-serif font-bold mb-2 capitalize">

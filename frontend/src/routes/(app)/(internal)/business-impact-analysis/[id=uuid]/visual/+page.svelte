@@ -43,7 +43,7 @@
 	}
 </script>
 
-<div class="bg-white shadow flex overflow-x-auto">
+<div class="bg-white shadow-sm flex overflow-x-auto">
 	<div class="w-full">
 		<table class="min-w-full border-collapse">
 			<thead>

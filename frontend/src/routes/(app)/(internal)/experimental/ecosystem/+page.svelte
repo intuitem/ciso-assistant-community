@@ -9,7 +9,7 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="bg-white shadow flex overflow-x-auto">
+<div class="bg-white shadow-sm flex overflow-x-auto">
 	<div class="w-full h-screen">
 		<EcosystemRadarChart title={m.current()} name="c_ecosystem" data={data.data.current} />
 		<EcosystemRadarChart title={m.residual()} name="r_ecosystem" data={data.data.residual} />

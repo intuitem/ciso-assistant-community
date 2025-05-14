@@ -310,7 +310,7 @@
 
 			<span class="relative flex justify-center py-4">
 				<div
-					class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-gradient-to-r from-transparent via-gray-500 to-transparent opacity-75"
+					class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
 				></div>
 
 				<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl z-auto">
@@ -319,7 +319,7 @@
 			</span>
 			<div class="h-2"></div>
 			<div
-				class="flex flex-col items-center justify-center border px-4 py-2 shadow rounded-xl space-y-2"
+				class="flex flex-col items-center justify-center border px-4 py-2 shadow-sm rounded-xl space-y-2"
 			>
 				{#if requirementAssessment.description}
 					<div class="flex w-full font-semibold">

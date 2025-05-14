@@ -26,7 +26,7 @@
 	export let label = '';
 
 	// Context
-	export let rounded: CssClasses = getContext('rounded');
+	export let rounded: CssClasses = getContext('rounded-sm');
 	export let padding: CssClasses = getContext('padding');
 	export let active: CssClasses = getContext('active');
 	export let hover: CssClasses = getContext('hover');

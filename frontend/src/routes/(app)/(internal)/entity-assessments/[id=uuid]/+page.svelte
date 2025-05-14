@@ -40,7 +40,7 @@
 					{#snippet children()}
 									
 							{#if Object.hasOwn($page.state, 'auditTableMode')}
-								<div class="max-h-[48rem] overflow-y-scroll">
+								<div class="max-h-192 overflow-y-scroll">
 									<AuditTableMode
 										{form}
 										data={$page.state.auditTableMode}

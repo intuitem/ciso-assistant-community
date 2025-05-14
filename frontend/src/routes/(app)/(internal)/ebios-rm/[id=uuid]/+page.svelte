@@ -220,7 +220,7 @@
 					<a
 						class="text-orange-600 hover:text-purple-600 font-medium"
 						href={`${page.url.pathname}/visual/`}
-						><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded">New</span><i
+						><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded-sm">New</span><i
 							class="fa-solid fa-chart-diagram mr-2"
 						></i><span class="font-semibold">{m.visualAnalysis()}</span></a
 					>

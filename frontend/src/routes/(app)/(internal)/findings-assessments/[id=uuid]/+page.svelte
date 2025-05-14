@@ -26,7 +26,7 @@
 
 	{#snippet widgets()}
 		<div  class="h-full flex flex-col space-y-4">
-			<div class="card p-4 bg-gray-50 shadow-sm">
+			<div class="card p-4 bg-gray-50 shadow-xs">
 				<h3 class="text-lg font-semibold mb-2">{m.summary()}</h3>
 				<div class="grid grid-cols-2 gap-2">
 					<div class="rounded-lg bg-primary-100 p-3 text-center">
@@ -44,7 +44,7 @@
 				</div>
 			</div>
 
-			<div class="card p-4 bg-gray-50 shadow-sm flex-grow">
+			<div class="card p-4 bg-gray-50 shadow-xs grow">
 				<div class="h-1/2">
 					<HalfDonutChart
 						name="current_h"

@@ -156,7 +156,7 @@
 						/>
 					</span>
 
-					<hr class="!border-t-2 !border-surface-900 self-stretch" />
+					<hr class="border-t-2! border-surface-900! self-stretch" />
 
 					<span class="flex flex-row items-center space-x-4">
 						<RadioGroupInput
@@ -201,7 +201,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="flex flex-col flex-grow">
+		<div class="flex flex-col grow">
 			<Checkbox
 				{form}
 				field="is_selected"
@@ -285,7 +285,7 @@
 					/>
 				</span>
 
-				<hr class="!border-t-2 !border-surface-900 self-stretch" />
+				<hr class="border-t-2! border-surface-900! self-stretch" />
 
 				<span class="flex flex-row items-center space-x-4">
 					<RadioGroupInput

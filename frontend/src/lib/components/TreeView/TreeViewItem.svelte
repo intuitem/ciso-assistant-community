@@ -27,7 +27,7 @@
 	export let padding: CssClasses = getContext('padding');
 	export let indent: CssClasses = getContext('indent');
 	export let hover: CssClasses = getContext('hover');
-	export let rounded: CssClasses = getContext('rounded');
+	export let rounded: CssClasses = getContext('rounded-sm');
 	export let caretOpen: CssClasses = getContext('caretOpen');
 	export let caretClosed: CssClasses = getContext('caretClosed');
 	export let hyphenOpacity: CssClasses = getContext('hyphenOpacity');
@@ -237,9 +237,9 @@
 
 	const cBase = 'space-y-1';
 	const cSummary = 'list-none [&::-webkit-details-marker]:hidden items-center cursor-pointer flex';
-	const cSymbol = 'fill-current w-3 text-center transition-transform duration-[200ms]';
+	const cSymbol = 'fill-current w-3 text-center transition-transform duration-200';
 	const cChildren = 'space-y-1';
-	const cDisabled = 'opacity-50 !cursor-not-allowed';
+	const cDisabled = 'opacity-50 cursor-not-allowed!';
 
 	$: classesCaretState = open && $$slots.children && !hideChildren ? caretOpen : caretClosed;
 	$: classesDisabled = disabled ? cDisabled : '';

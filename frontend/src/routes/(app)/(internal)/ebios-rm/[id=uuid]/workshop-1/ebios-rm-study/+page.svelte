@@ -157,7 +157,7 @@
 			{:else}
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-user text-purple-500"></i>
 					<span>{m.authors()}</span>
@@ -172,7 +172,7 @@
 					{/if}
 				</ul>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-users text-blue-500"></i>
 					<span>{m.reviewers()}</span>
@@ -231,7 +231,7 @@
 												{#snippet selectButton()}
 																						<div >
 														<span
-															class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
+															class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
 														>
 															<button
 																class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
@@ -246,7 +246,7 @@
 												{#snippet addButton()}
 																						<div >
 														<span
-															class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
+															class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
 														>
 															<button
 																class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
@@ -268,7 +268,7 @@
 				</div>
 			{/if}
 		</div>
-		<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+		<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 			<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 				<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
 				<span>{m.observation()}</span>

@@ -110,9 +110,9 @@
 	};
 </script>
 
-<main class="flex-grow main">
+<main class="grow main">
 	<div>
-		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
+		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
@@ -227,7 +227,7 @@
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
+					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
 					onclick={(_) => modalDuplicateForm()}
 					data-testid="duplicate-button"
 				>
@@ -238,7 +238,7 @@
 		</div>
 	</div>
 	<!--Risk risk_assessment-->
-	<div class="card m-4 p-4 shadow bg-white">
+	<div class="card m-4 p-4 shadow-sm bg-white">
 		<div class="bg-white">
 			<div class="flex flex-row justify-between">
 				<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
@@ -276,7 +276,7 @@
 		</div>
 	</div>
 	<!--Matrix view-->
-	<div class="card m-4 p-4 shadow bg-white page-break">
+	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
 		<div class="flex flex-col xl:flex-row xl:space-x-4 justify-between">
 			<div class="flex-1">

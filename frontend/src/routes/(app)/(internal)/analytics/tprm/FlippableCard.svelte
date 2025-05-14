@@ -65,7 +65,7 @@
 		>
 			<!-- Flip button for front face -->
 			<button
-				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
+				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-sm opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
 				onclick={handleFlip}
 				aria-label="Flip card"
 			>
@@ -116,7 +116,7 @@
 					<div class="mb-3">
 						<span class="block text-sm text-gray-500">Baseline</span>
 						<div
-							class="inline-block bg-gray-100 px-2 py-1 rounded text-sm font-mono overflow-hidden"
+							class="inline-block bg-gray-100 px-2 py-1 rounded-sm text-sm font-mono overflow-hidden"
 						>
 							<div class="line-clamp-2 min-h-[2.4em] flex items-center">
 								{entity_assessment.baseline}
@@ -190,7 +190,7 @@
 		>
 			<!-- Flip button for back face -->
 			<button
-				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
+				class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-sm opacity-40 transition-all duration-200 hover:bg-black/5 hover:opacity-100 z-10"
 				onclick={handleFlip}
 				aria-label="Flip card back"
 			>

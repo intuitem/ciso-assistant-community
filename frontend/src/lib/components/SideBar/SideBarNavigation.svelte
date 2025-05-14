@@ -55,7 +55,7 @@
 	}
 </script>
 
-<nav class="flex-grow scrollbar">
+<nav class="grow scrollbar">
 	<Accordion
 		autocollapse
 		spacing="space-y-4"

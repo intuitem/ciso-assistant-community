@@ -105,7 +105,7 @@
 			: 'w-full'} p-2 space-y-1 shadow-xl"
 	>
 		<div
-			class="flex flex-col items-center justify-center bg-gradient-to-r from-primary-500 to-secondary-400 text-white rounded-lg p-2 text-3xl font-semibold shadow-md"
+			class="flex flex-col items-center justify-center bg-linear-to-r from-primary-500 to-secondary-400 text-white rounded-lg p-2 text-3xl font-semibold shadow-md"
 		>
 			<div class="flex flex-row justify-between w-3/4">
 				<a class="sticky" href={prevMonth(year, month)}>
@@ -144,7 +144,7 @@
 				{/key}
 			{/each}
 		</div>
-		<div class="flex flex-col bg-gradient-to-r from-primary-500 to-secondary-400 rounded-lg p-2">
+		<div class="flex flex-col bg-linear-to-r from-primary-500 to-secondary-400 rounded-lg p-2">
 			<div class="flex w-full h-full justify-between items-center">
 				<a
 					href={currentMonth()}
@@ -170,12 +170,12 @@
 					{$selectedDay.day}
 					{monthNames[$selectedDay.month - 1]}, {$selectedDay.year}
 				</h2>
-				<button onclick={closePanel} class="text-gray-500 hover:text-gray-700 focus:outline-none">
+				<button onclick={closePanel} class="text-gray-500 hover:text-gray-700 focus:outline-hidden">
 					<i class="fas fa-times"></i>
 				</button>
 			</div>
 
-			<div class="overflow-y-auto flex-grow">
+			<div class="overflow-y-auto grow">
 				{#if selectedDayItems.length > 0}
 					<ul class="space-y-2">
 						{#each selectedDayItems as item}

@@ -69,7 +69,7 @@
 		spacing = 'space-x-4',
 		rounded = 'rounded-container-token',
 		shadow = 'shadow-lg',
-		zIndex = 'z-[888]',
+		zIndex = 'z-888',
 		buttonAction = 'btn variant-filled',
 		buttonDismiss = 'btn-icon btn-icon-sm variant-filled',
 		buttonDismissLabel = '✕',

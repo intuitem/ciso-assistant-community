@@ -31,7 +31,7 @@
 <div
 	class="card p-2 bg-inherit w-full flex flex-col whitespace-normal group {classesHover(
 		href
-	)} bg-gradient-to-br from-white to-violet-50"
+	)} bg-linear-to-br from-white to-violet-50"
 	onclick={clickHandler}
 	role={href ? 'button' : ''}
 >
