@@ -303,10 +303,6 @@
 	const tail_render = $derived(tail);
 
 	let openState = $state(false);
-
-	function popoverClose() {
-		openState = false;
-	}
 </script>
 
 <div class="table-container {classesBase}">
@@ -321,13 +317,13 @@
 				zIndex="1000"
 			>
 				{#snippet trigger()}
-					<button id="filters">
+					<div id="filters">
 						<i class="fa-solid fa-filter mr-2"></i>
 						{m.filters()}
 						{#if filterCount}
 							<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
 						{/if}
-					</button>
+					</div>
 				{/snippet}
 				{#snippet content()}
 					<div

@@ -13,7 +13,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	export let row: Record<string, any>;
 	export let model: ModelMapEntry | undefined = undefined;
@@ -61,7 +61,7 @@
 			title: m.deleteModalTitle(),
 			body: body
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	function promptModalConfirmDelete(
@@ -93,7 +93,7 @@
 			title: m.deleteModalTitle(),
 			body: body
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	const user = $page.data.user;

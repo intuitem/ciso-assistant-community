@@ -103,7 +103,7 @@
 	});
 </script>
 
-{#if data.table}
+{#if data?.table}
 	<div class="shadow-lg">
 		{#key URLModel}
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>

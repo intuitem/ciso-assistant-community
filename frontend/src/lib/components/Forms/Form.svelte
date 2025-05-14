@@ -70,7 +70,7 @@
 	<SuperDebug data={$errors} />
 {/if}
 
-<form method="POST" use:enhance use:focusTrap={useFocusTrap} {...rest}>
+<form method="POST" use:enhance {...rest}>
 	{#if $errors._errors}
 		{#each $errors._errors as error}
 			<p class="text-error-500 text-sm font-medium">{error}</p>
