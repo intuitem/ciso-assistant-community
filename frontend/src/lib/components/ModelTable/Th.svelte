@@ -5,16 +5,18 @@
 		orderBy?: string;
 		_class?: any;
 		children?: import('svelte').Snippet;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
 		handler,
 		orderBy = '',
-		_class = `${rest.class} cursor-pointer select-none`,
+		_class = 'cursor-pointer select-none ',
 		children,
 		...rest
 	}: Props = $props();
+
+	_class += rest.class;
 
 	const identifier = orderBy?.toString();
 

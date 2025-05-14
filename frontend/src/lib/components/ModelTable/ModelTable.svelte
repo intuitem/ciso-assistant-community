@@ -42,15 +42,6 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 
-	
-
-
-
-	
-
-
-
-
 	interface Props {
 		// Props
 		source?: TableSource;
@@ -252,32 +243,34 @@
 				}
 			}
 		}
-		if (browser || invalidateTable) {
-			handler.invalidate();
-			_goto(page.url);
-			invalidateTable = false;
-		}
 	});
+	if (browser || invalidateTable) {
+		handler.invalidate();
+		_goto(page.url);
+		invalidateTable = false;
+	}
 
 	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
 	let model = $derived(URL_MODEL_MAP[URLModel]);
-	let canCreateObject = $derived(model
-		? page.params.id
-			? canPerformAction({
-					user,
-					action: 'add',
-					model: model.name,
-					domain:
-						folderId ||
-						page.data?.data?.folder?.id ||
-						page.data?.data?.folder ||
-						page.params.id ||
-						user.root_folder_id
-				})
-			: Object.hasOwn(user.permissions, `add_${model.name}`)
-		: false);
-	let contextMenuCanEditObject =
-		$derived((model
+	let canCreateObject = $derived(
+		model
+			? page.params.id
+				? canPerformAction({
+						user,
+						action: 'add',
+						model: model.name,
+						domain:
+							folderId ||
+							page.data?.data?.folder?.id ||
+							page.data?.data?.folder ||
+							page.params.id ||
+							user.root_folder_id
+					})
+				: Object.hasOwn(user.permissions, `add_${model.name}`)
+			: false
+	);
+	let contextMenuCanEditObject = $derived(
+		(model
 			? page.params.id
 				? canPerformAction({
 						user,
@@ -291,13 +284,17 @@
 									user.root_folder_id)
 					})
 				: Object.hasOwn(user.permissions, `change_${model.name}`)
-			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn));
+			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)
+	);
 
-	let contextMenuDisplayEdit =
-		$derived(contextMenuCanEditObject &&
-		URLModel &&
-		!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel));
-	let filterCount = $derived(filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0));
+	let contextMenuDisplayEdit = $derived(
+		contextMenuCanEditObject &&
+			URLModel &&
+			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel)
+	);
+	let filterCount = $derived(
+		filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0)
+	);
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		return isDark(backgroundHexColor) ? 'text-white' : '';
@@ -324,12 +321,12 @@
 				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				data-popup="popupFilter"
 			>
-				<SuperForm {_form} validators={zod(z.object({}))} >
+				<SuperForm {_form} validators={zod(z.object({}))}>
 					{#snippet children({ form })}
-										{#each filteredFields as field}
+						{#each filteredFields as field}
 							{#if filters[field]?.component}
 								{@const SvelteComponent = filters[field].component}
-							<SvelteComponent
+								<SvelteComponent
 									{form}
 									{field}
 									{...filters[field].props}
@@ -343,8 +340,8 @@
 								/>
 							{/if}
 						{/each}
-														{/snippet}
-								</SuperForm>
+					{/snippet}
+				</SuperForm>
 			</div>
 		{/if}
 		{#if search}
@@ -384,9 +381,9 @@
 			<tbody class="table-body w-full {regionBody}">
 				{#each $rows as row, rowIndex}
 					{@const meta = row?.meta ?? row}
-					<ContextMenu.Trigger asChild >
+					<ContextMenu.Trigger asChild>
 						{#snippet children({ builder })}
-												<tr
+							<tr
 								use:builder.action
 								{...builder}
 								onclick={(e) => {
@@ -404,7 +401,7 @@
 										<td class={regionCell} role="gridcell">
 											{#if component && browser}
 												{@const SvelteComponent_1 = component}
-											<SvelteComponent_1 {meta} cell={value} />
+												<SvelteComponent_1 {meta} cell={value} />
 											{:else}
 												<span class="font-token whitespace-pre-line break-words">
 													{#if Array.isArray(value)}
@@ -487,54 +484,47 @@
 								{/each}
 								{#if displayActions}
 									<td class="text-end {regionCell}" role="gridcell">
-										{#if actions}{@render actions({ meta: row.meta, })}{:else}
-											{#if row.meta[identifierField]}
-												{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
-												{@const actionsURLModel = URLModel}
-												<TableRowActions
-													{deleteForm}
-													{model}
-													URLModel={actionsURLModel}
-													detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-													editURL={!(row.meta.builtin || row.meta.urn)
-														? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
-														: undefined}
-													{row}
-													hasBody={actionsBody}
-													{identifierField}
-													preventDelete={preventDelete(row)}
-												>
-													{#snippet head()}
-																							
-															{#if actionsHead}
-																{@render actionsHead?.()}
-															{/if}
-														
-																							{/snippet}
-													{#snippet body()}
-																							
-															{#if actionsBody}
-																{@render actionsBody?.()}
-															{/if}
-														
-																							{/snippet}
-													{#snippet tail()}
-																								{@const SvelteComponent_2 = actionsComponent}
-												{#if tail_render}{@render tail_render()}{:else}
-															<SvelteComponent_2
-																meta={row.meta ?? {}}
-																{actionsURLModel}
-															/>
-														{/if}
-																							{/snippet}
-												</TableRowActions>
-											{/if}
+										{#if actions}{@render actions({
+												meta: row.meta
+											})}{:else if row.meta[identifierField]}
+											{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
+											{@const actionsURLModel = URLModel}
+											<TableRowActions
+												{deleteForm}
+												{model}
+												URLModel={actionsURLModel}
+												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
+												editURL={!(row.meta.builtin || row.meta.urn)
+													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
+													: undefined}
+												{row}
+												hasBody={actionsBody}
+												{identifierField}
+												preventDelete={preventDelete(row)}
+											>
+												{#snippet head()}
+													{#if actionsHead}
+														{@render actionsHead?.()}
+													{/if}
+												{/snippet}
+												{#snippet body()}
+													{#if actionsBody}
+														{@render actionsBody?.()}
+													{/if}
+												{/snippet}
+												{#snippet tail()}
+													{@const SvelteComponent_2 = actionsComponent}
+													{#if tail_render}{@render tail_render()}{:else}
+														<SvelteComponent_2 meta={row.meta ?? {}} {actionsURLModel} />
+													{/if}
+												{/snippet}
+											</TableRowActions>
 										{/if}
 									</td>
 								{/if}
 							</tr>
-																	{/snippet}
-										</ContextMenu.Trigger>
+						{/snippet}
+					</ContextMenu.Trigger>
 				{/each}
 			</tbody>
 			{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
@@ -543,11 +533,7 @@
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
-							<action.component
-								row={contextMenuOpenRow}
-								{handler}
-								{action}
-							/>
+							<action.component row={contextMenuOpenRow} {handler} {action} />
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
 					{/if}
