@@ -7,66 +7,66 @@
 	import { browser } from '$app/environment';
 
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
-	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
+	// storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
 	// Initializing stores prevents known security issues with SvelteKit SSR
 	// https://github.com/skeletonlabs/skeleton/wiki/SvelteKit-SSR-Warning
-	initializeStores();
+	// initializeStores();
 
 	import Toast from '$lib/components/Toast/Toast.svelte';
-	import Modal from '$lib/components/Modals/Modal.svelte';
-	import type { ModalComponent, ToastSettings } from '@skeletonlabs/skeleton-svelte';
-	import { clientSideToast } from '$lib/utils/stores';
+	// import Modal from '$lib/components/Modals/Modal.svelte';
+	// import type { ModalComponent, ToastSettings } from '@skeletonlabs/skeleton-svelte';
+	// import { clientSideToast } from '$lib/utils/stores';
 
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
 
 	const flash = getFlash(page);
-	const toastStore = getToastStore();
+	// const toastStore = getToastStore();
 
-	const toast = (message: string, options: Record<string, string>) => {
-		const t: ToastSettings = {
-			message: message,
-			...options
-		};
-		toastStore.trigger(t);
-	};
+	// const toast = (message: string, options: Record<string, string>) => {
+	// 	const t: ToastSettings = {
+	// 		message: message,
+	// 		...options
+	// 	};
+	// 	// toastStore.trigger(t);
+	// };
+	//
+	// interface FlashMessage {
+	// 	message: string;
+	// 	type: 'success' | 'error' | 'warning' | 'info';
+	// }
+	//
+	// function handleToast(flash: FlashMessage | undefined) {
+	// 	if (!flash) return;
+	//
+	// 	toast(flash.message, {
+	// 		background:
+	// 			flash.type == 'success'
+	// 				? 'preset-filled-success-500'
+	// 				: flash.type === 'error'
+	// 					? 'preset-filled-error-500'
+	// 					: flash.type == 'warning'
+	// 						? 'preset-filled-warning-500'
+	// 						: 'preset-filled-primary-500'
+	// 	});
+	// }
+	//
+	// clientSideToast.subscribe((flash) => {
+	// 	handleToast(flash);
+	// 	clientSideToast.set(undefined);
+	// });
+	//
+	// flash.subscribe(($flash) => {
+	// 	handleToast($flash);
+	// 	// Clearing the flash message could sometimes
+	// 	// be required here to avoid double-toasting.
+	// 	flash.set(undefined);
+	// });
 
-	interface FlashMessage {
-		message: string;
-		type: 'success' | 'error' | 'warning' | 'info';
-	}
-
-	function handleToast(flash: FlashMessage | undefined) {
-		if (!flash) return;
-
-		toast(flash.message, {
-			background:
-				flash.type == 'success'
-					? 'preset-filled-success-500'
-					: flash.type === 'error'
-						? 'preset-filled-error-500'
-						: flash.type == 'warning'
-							? 'preset-filled-warning-500'
-							: 'preset-filled-primary-500'
-		});
-	}
-
-	clientSideToast.subscribe((flash) => {
-		handleToast(flash);
-		clientSideToast.set(undefined);
-	});
-
-	flash.subscribe(($flash) => {
-		handleToast($flash);
-		// Clearing the flash message could sometimes
-		// be required here to avoid double-toasting.
-		flash.set(undefined);
-	});
-
-	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	// import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
+	// import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	// import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import ParaglideJsProvider from './ParaglideJsProvider.svelte';
 	interface Props {
 		children?: import('svelte').Snippet;
@@ -74,12 +74,12 @@
 
 	let { children }: Props = $props();
 
-	const modalRegistry: Record<string, ModalComponent> = {
-		// Set a unique modal ID, then pass the component reference
-		displayJSONModal: { ref: DisplayJSONModal },
-		createModal: { ref: CreateModal },
-		deleteConfirmModal: { ref: DeleteConfirmModal }
-	};
+	// const modalRegistry: Record<string, ModalComponent> = {
+	// 	// Set a unique modal ID, then pass the component reference
+	// 	displayJSONModal: { ref: DisplayJSONModal },
+	// 	createModal: { ref: CreateModal },
+	// 	deleteConfirmModal: { ref: DeleteConfirmModal }
+	// };
 
 	run(() => {
 		if (browser && $page.url.searchParams.has('refresh')) {
@@ -91,7 +91,7 @@
 
 <svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
 <ParaglideJsProvider>
-	<Modal components={modalRegistry} />
+	<!-- <Modal components={modalRegistry} /> -->
 	<Toast />
 	{@render children?.()}
 

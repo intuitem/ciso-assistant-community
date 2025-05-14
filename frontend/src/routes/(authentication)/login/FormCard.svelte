@@ -8,13 +8,13 @@
 	import { page } from '$app/state';
 	import { redirectToProvider } from '$lib/allauth.js';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
-	import {
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore
-	} from '@skeletonlabs/skeleton-svelte';
-
+	// import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
+	// import {
+	// 	type ModalComponent,
+	// 	type ModalSettings,
+	// 	type ModalStore
+	// } from '@skeletonlabs/skeleton-svelte';
+	//
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -24,25 +24,25 @@
 
 	let { data, form }: Props = $props();
 
-	const modalStore: ModalStore = getModalStore();
-
-	function modalMFAAuthenticate(): void {
-		const modalComponent: ModalComponent = {
-			ref: MfaAuthenticateModal,
-			props: {
-				_form: data.mfaAuthenticateForm,
-				formAction: '?/mfaAuthenticate'
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.mfaAuthenticateTitle(),
-			body: m.enterCodeGeneratedByApp()
-		};
-		modalStore.trigger(modal);
-	}
+	// const modalStore: ModalStore = getModalStore();
+	//
+	// function modalMFAAuthenticate(): void {
+	// 	const modalComponent: ModalComponent = {
+	// 		ref: MfaAuthenticateModal,
+	// 		props: {
+	// 			_form: data.mfaAuthenticateForm,
+	// 			formAction: '?/mfaAuthenticate'
+	// 		}
+	// 	};
+	// 	const modal: ModalSettings = {
+	// 		type: 'component',
+	// 		component: modalComponent,
+	// 		// Data
+	// 		title: m.mfaAuthenticateTitle(),
+	// 		body: m.enterCodeGeneratedByApp()
+	// 	};
+	// 	// modalStore.trigger(modal);
+	// }
 
 	run(() => {
 		form && form.mfaFlow ? modalMFAAuthenticate() : null;

@@ -1,9 +1,6 @@
 <script lang="ts" module>
 	import { dynamicTransition } from '$lib/components/utils/transitions';
-	import {
-		type Transition,
-		type TransitionParams
-	} from '@skeletonlabs/skeleton-svelte';
+	import { type Transition, type TransitionParams } from '@skeletonlabs/skeleton-svelte';
 	import { fade, fly } from 'svelte/transition';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -84,25 +81,26 @@
 		regionHeader = 'text-2xl font-bold',
 		regionBody = 'max-h-[200px] overflow-hidden',
 		regionFooter = 'flex justify-end space-x-2',
-		transitions = !$prefersReducedMotionStore,
+		transitions = true,
 		transitionIn = fly as TransitionIn,
 		transitionInParams = {
-		duration: 150,
-		opacity: 0,
-		x: 0,
-		y: 100
-	},
+			duration: 150,
+			opacity: 0,
+			x: 0,
+			y: 100
+		},
 		transitionOut = fly as TransitionOut,
 		transitionOutParams = {
-		duration: 150,
-		opacity: 0,
-		x: 0,
-		y: 100
-	}
+			duration: 150,
+			opacity: 0,
+			x: 0,
+			y: 100
+		}
 	}: Props = $props();
 
 	// Base Styles
-	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-50/50 dark:bg-surface-950/50 p-4';
+	const cBackdrop =
+		'fixed top-0 left-0 right-0 bottom-0 bg-surface-50/50 dark:bg-surface-950/50 p-4';
 	const cTransitionLayer = 'w-full h-fit min-h-full overflow-y-auto flex justify-center';
 	const cModal = 'block overflow-y-auto';
 	const cModalImage = 'w-full h-auto';
@@ -122,7 +120,6 @@
 
 	const modalStore = getModalStore();
 
-
 	function handleModals(modals: ModalSettings[]) {
 		if (modals[0].type === 'prompt') promptValue = modals[0].value;
 		buttonTextCancel = modals[0].buttonTextCancel || buttonTextDefaults.buttonTextCancel;
@@ -139,7 +136,6 @@
 		if (!modalHeight) modalHeight = (modal?.firstChild as HTMLElement)?.clientHeight;
 		if (!modalHeight) return;
 	}
-
 
 	function onBackdropInteractionBegin(event: SvelteEvent<MouseEvent, HTMLDivElement>): void {
 		if (!(event.target instanceof Element)) return;
@@ -195,7 +191,6 @@
 	// Replacing $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
 
-
 	run(() => {
 		if ($modalStore.length) handleModals($modalStore);
 	});
@@ -204,13 +199,15 @@
 	});
 	// State & Reactive
 	let cPosition = $derived($modalStore[0]?.position ?? position);
-	let classesBackdrop = $derived(`${cBackdrop} ${regionBackdrop} ${zIndex} ${classProp} ${
-		$modalStore[0]?.backdropClasses ?? ''
-	}`);
+	let classesBackdrop = $derived(
+		`${cBackdrop} ${regionBackdrop} ${zIndex} ${classProp} ${$modalStore[0]?.backdropClasses ?? ''}`
+	);
 	let classesTransitionLayer = $derived(`${cTransitionLayer} ${cPosition ?? ''}`);
-	let classesModal = $derived(`${cModal} ${background} ${width} ${height} ${padding} ${spacing} ${rounded} ${shadow} ${
-		$modalStore[0]?.modalClasses ?? ''
-	}`);
+	let classesModal = $derived(
+		`${cModal} ${background} ${width} ${height} ${padding} ${spacing} ${rounded} ${shadow} ${
+			$modalStore[0]?.modalClasses ?? ''
+		}`
+	);
 	let parent = $derived({
 		position,
 		background,
@@ -337,10 +334,7 @@
 							</SvelteComponent>
 						{:else}
 							{@const SvelteComponent_1 = currentComponent?.ref}
-							<SvelteComponent_1
-								{...currentComponent?.props}
-								{parent}
-							/>
+							<SvelteComponent_1 {...currentComponent?.props} {parent} />
 						{/if}
 					</div>
 				{/if}

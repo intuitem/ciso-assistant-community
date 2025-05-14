@@ -3,18 +3,15 @@
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
-	const modalStore: ModalStore = getModalStore();
+	// import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
+	// const modalStore: ModalStore = getModalStore();
 
 	import { m } from '$paraglide/messages';
-
-
-
 
 	function handleFormUpdated({ form, closeModal }: { form: any; closeModal: boolean }) {
 		if (form.valid) {
 			onUpdated(form);
-			if (closeModal) $modalStore[0] ? modalStore.close() : null;
+			// if (closeModal) $modalStore[0] ? modalStore.close() : null;
 		}
 	}
 
@@ -33,7 +30,7 @@
 		debug?: boolean; // set to true to enable SuperDebug component
 		_form?: any;
 		children?: import('svelte').Snippet<[any]>;
-		[key: string]: any
+		[key: string]: any;
 	}
 
 	let {
@@ -50,16 +47,16 @@
 		useFocusTrap = true,
 		debug = false,
 		_form = superForm(data, {
-		dataType: dataType,
-		invalidateAll: invalidateAll,
-		applyAction: applyAction,
-		resetForm: resetForm,
-		validators: validators,
-		onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true }),
-		onSubmit: onSubmit,
-		taintedMessage: taintedMessage,
-		validationMethod
-	}),
+			dataType: dataType,
+			invalidateAll: invalidateAll,
+			applyAction: applyAction,
+			resetForm: resetForm,
+			validators: validators,
+			onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true }),
+			onSubmit: onSubmit,
+			taintedMessage: taintedMessage,
+			validationMethod
+		}),
 		children,
 		...rest
 	}: Props = $props();
@@ -82,5 +79,15 @@
 	{#if $errors.non_field_errors}
 		<p class="text-error-500 text-sm font-medium">{$errors.non_field_errors}</p>
 	{/if}
-	{@render children?.({ form: _form, initialData: data?.data, data: $form, formData: $form, message: $message, errors: $errors, allErrors: $allErrors, delayed: $delayed, tainted: $tainted, })}
+	{@render children?.({
+		form: _form,
+		initialData: data?.data,
+		data: $form,
+		formData: $form,
+		message: $message,
+		errors: $errors,
+		allErrors: $allErrors,
+		delayed: $delayed,
+		tainted: $tainted
+	})}
 </form>
