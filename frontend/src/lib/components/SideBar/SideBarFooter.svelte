@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
 	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton-svelte';
 	import { locales, getLocale, setLocale } from '$paraglide/runtime';
@@ -89,6 +90,12 @@
 	onMount(() => {
 		enableMoreBtn = true;
 	});
+
+	let openState = $state(false);
+
+	function popoverClose() {
+		openState = false;
+	}
 </script>
 
 <div class="border-t pt-2.5">
@@ -112,12 +119,78 @@
 		</div>
 		<!-- {#key $modalStore} -->
 		{#if enableMoreBtn}
-			<button
-				class="btn bg-initial"
-				data-testid="sidebar-more-btn"
-				id="sidebar-more-btn"
-				use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical"></i></button
+			<Popover
+				open={openState}
+				onOpenChange={(e) => (openState = e.open)}
+				positioning={{ placement: 'top' }}
+				triggerBase="btn "
+				contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+				zIndex="1000"
 			>
+				{#snippet trigger()}
+					<button class="btn bg-initial" data-testid="sidebar-more-btn" id="sidebar-more-btn">
+						<i class="fa-solid fa-ellipsis-vertical"></i>
+					</button>
+				{/snippet}
+				<!-- {/key} -->
+				{#snippet content()}
+					<div class="" data-testid="sidebar-more-panel" data-popup="popupUser">
+						<a
+							href="/my-profile"
+							onclick={(e) => {
+								window.location.href = e.target.href;
+							}}
+							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+							data-testid="profile-button"
+							><i class="fa-solid fa-address-card mr-2"></i>{m.myProfile()}</a
+						>
+						<select
+							{value}
+							onchange={handleLocaleChange}
+							class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0"
+							data-testid="language-select"
+						>
+							{#each locales as lang}
+								<option value={lang} selected={lang === getLocale()}>
+									{defaultLangLabels[lang]} ({language[LOCALE_MAP[lang].name]})
+								</option>
+							{/each}
+						</select>
+						<button
+							onclick={() => dispatch('triggerGT')}
+							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+							data-testid="gt-button"
+							><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>{m.guidedTour()}</button
+						>
+						<button
+							onclick={() => dispatch('loadDemoDomain')}
+							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+							data-testid="load-demo-data-button"
+							><i class="fa-solid fa-file-import mr-2"></i>{m.loadDemoData()}</button
+						>
+						<button
+							onclick={modalBuildInfo}
+							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+							data-testid="about-button"
+							><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
+						>
+						<a
+							href="https://intuitem.gitbook.io/ciso-assistant"
+							target="_blank"
+							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+							data-testid="docs-button"><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
+						>
+						<form action="/logout" method="POST">
+							<button class="w-full" type="submit" data-testid="logout-button">
+								<span
+									class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
+									><i class="fa-solid fa-right-from-bracket mr-2"></i>{m.Logout()}</span
+								>
+							</button>
+						</form>
+					</div>
+				{/snippet}
+			</Popover>
 		{:else}
 			<button
 				class="btn bg-initial"
@@ -125,64 +198,5 @@
 				id="sidebar-more-btn-disabled"><i class="fa-solid fa-ellipsis-vertical"></i></button
 			>
 		{/if}
-		<!-- {/key} -->
-		<div
-			class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-			data-testid="sidebar-more-panel"
-			data-popup="popupUser"
-		>
-			<a
-				href="/my-profile"
-				onclick={(e) => {
-					window.location.href = e.target.href;
-				}}
-				class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="profile-button"><i class="fa-solid fa-address-card mr-2"></i>{m.myProfile()}</a
-			>
-			<select
-				{value}
-				onchange={handleLocaleChange}
-				class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0"
-				data-testid="language-select"
-			>
-				{#each locales as lang}
-					<option value={lang} selected={lang === getLocale()}>
-						{defaultLangLabels[lang]} ({language[LOCALE_MAP[lang].name]})
-					</option>
-				{/each}
-			</select>
-			<button
-				onclick={() => dispatch('triggerGT')}
-				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="gt-button"
-				><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>{m.guidedTour()}</button
-			>
-			<button
-				onclick={() => dispatch('loadDemoDomain')}
-				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="load-demo-data-button"
-				><i class="fa-solid fa-file-import mr-2"></i>{m.loadDemoData()}</button
-			>
-			<button
-				onclick={modalBuildInfo}
-				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="about-button"
-				><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
-			>
-			<a
-				href="https://intuitem.gitbook.io/ciso-assistant"
-				target="_blank"
-				class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="docs-button"><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
-			>
-			<form action="/logout" method="POST">
-				<button class="w-full" type="submit" data-testid="logout-button">
-					<span
-						class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-						><i class="fa-solid fa-right-from-bracket mr-2"></i>{m.Logout()}</span
-					>
-				</button>
-			</form>
-		</div>
 	</div>
 </div>
