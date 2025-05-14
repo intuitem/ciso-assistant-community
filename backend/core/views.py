@@ -1915,28 +1915,41 @@ class PolicyViewSet(AppliedControlViewSet):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
+class RiskScenarioFilter(df.FilterSet):
+    # Aliased filters for user-friendly query params
+    folder = df.UUIDFilter(
+        field_name="risk_assessment__perimeter__folder", label="Folder ID"
+    )
+    perimeter = df.UUIDFilter(
+        field_name="risk_assessment__perimeter", label="Perimeter ID"
+    )
+
+    class Meta:
+        model = RiskScenario
+        # Only include actual model fields here
+        fields = {
+            "risk_assessment": ["exact"],
+            "current_impact": ["exact"],
+            "current_proba": ["exact"],
+            "current_level": ["exact"],
+            "residual_impact": ["exact"],
+            "residual_proba": ["exact"],
+            "residual_level": ["exact"],
+            "treatment": ["exact"],
+            "threats": ["exact"],
+            "assets": ["exact"],
+            "applied_controls": ["exact"],
+            "security_exceptions": ["exact"],
+        }
+
+
 class RiskScenarioViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk scenarios to be viewed or edited.
     """
 
     model = RiskScenario
-    filterset_fields = [
-        "risk_assessment",
-        "risk_assessment__perimeter",
-        "risk_assessment__perimeter__folder",
-        "current_impact",
-        "current_proba",
-        "current_level",
-        "residual_impact",
-        "residual_proba",
-        "residual_level",
-        "treatment",
-        "threats",
-        "assets",
-        "applied_controls",
-        "security_exceptions",
-    ]
+    filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
 
