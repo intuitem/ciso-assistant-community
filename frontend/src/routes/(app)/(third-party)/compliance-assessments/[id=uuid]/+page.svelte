@@ -43,6 +43,13 @@
 	import {} from '@skeletonlabs/skeleton-svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
+
+	let { data, form }: Props = $props();
+
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
 	const canEditObject: boolean = canPerformAction({
@@ -78,12 +85,6 @@
 	}
 
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
-	interface Props {
-		data: PageData;
-		form: ActionData;
-	}
-
-	let { data, form }: Props = $props();
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -226,7 +227,7 @@
 		placement: 'bottom'
 	};
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -244,7 +245,7 @@
 			// Data
 			title: m.createAuditFromBaseline()
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 	let syncingToActionsIsLoading = $state(false);
 	async function modalConfirmSyncToActions(
@@ -292,7 +293,7 @@
 				syncingToActionsIsLoading = r;
 			}
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 	let createAppliedControlsLoading = $state(false);
 
@@ -324,7 +325,7 @@
 				createAppliedControlsLoading = r;
 			}
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	let tree = $derived(data.tree);
