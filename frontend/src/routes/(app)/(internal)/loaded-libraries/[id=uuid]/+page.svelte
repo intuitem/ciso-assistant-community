@@ -7,7 +7,6 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import { tableSourceMapper } from '@skeletonlabs/skeleton';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	let { data } = $props();

@@ -18,7 +18,7 @@
 		<div  class="flex flex-col space-y-2">
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}
-				class="btn variant-filled-primary h-fit"
+				class="btn preset-filled-primary-500 h-fit"
 				breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 			>
 		</div>

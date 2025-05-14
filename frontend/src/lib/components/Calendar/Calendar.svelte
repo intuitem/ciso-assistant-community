@@ -3,7 +3,7 @@
 
 	import { fly } from 'svelte/transition';
 	import Day from './Day.svelte';
-	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
 	import { showAllEvents } from '$lib/utils/stores';
 	import { writable } from 'svelte/store';
@@ -153,8 +153,8 @@
 					<i class="fas fa-calendar-day"></i>
 					{m.today()}
 				</a>
-				<SlideToggle name="tasks-toggle" bind:checked={$showAllEvents} active="bg-green-500"
-					><span class="text-white font-light text-lg">{m.showAllEvents()}</span></SlideToggle
+				<Switch name="tasks-toggle" bind:checked={$showAllEvents} active="bg-green-500"
+					><span class="text-white font-light text-lg">{m.showAllEvents()}</span></Switch
 				>
 			</div>
 		</div>

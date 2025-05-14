@@ -25,7 +25,7 @@
 		}
 	};
 
-	let classesHover = $derived((href: string | undefined) => (href ? 'hover:variant-soft-secondary' : ''));
+	let classesHover = $derived((href: string | undefined) => (href ? 'hover:preset-tonal-secondary' : ''));
 </script>
 
 <div
@@ -35,7 +35,7 @@
 	onclick={clickHandler}
 	role={href ? 'button' : ''}
 >
-	<div class="text-sm font-medium text-gray-500 group-hover:text-secondary-700-200-token">
+	<div class="text-sm font-medium text-gray-500 group-hover:text-secondary-800-200">
 		{label}
 	</div>
 	<div class="flex flex-row items-end h-full content-end">

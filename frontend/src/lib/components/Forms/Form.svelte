@@ -3,11 +3,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
-	import { focusTrap } from '@skeletonlabs/skeleton';
-
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
+	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	const modalStore: ModalStore = getModalStore();
 
 	import { m } from '$paraglide/messages';

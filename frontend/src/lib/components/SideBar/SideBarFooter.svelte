@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { popup } from '@skeletonlabs/skeleton';
-	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton-svelte';
 	import { locales, getLocale, setLocale } from '$paraglide/runtime';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import { m } from '$paraglide/messages';

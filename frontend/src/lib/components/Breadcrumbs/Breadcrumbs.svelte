@@ -90,7 +90,7 @@
 					</span>
 				{/if}
 			</li>
-			<li class="crumb-separator" aria-hidden>&rsaquo;</li>
+			<li class="crumb-separator" aria-hidden>›</li>
 		{/if}
 	{/each}
 </ol>

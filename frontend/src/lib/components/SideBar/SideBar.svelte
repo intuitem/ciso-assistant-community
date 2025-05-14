@@ -14,7 +14,7 @@
 	import { page } from '$app/stores';
 	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
 	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
 	import { getFlash } from 'sveltekit-flash-message';
@@ -202,13 +202,13 @@
 					{
 						label: m.showGuidedTour(),
 						action: triggerVisit,
-						classes: 'variant-filled-surface',
+						classes: 'preset-filled-surface-500',
 						btnIcon: 'fa-wand-magic-sparkles'
 					},
 					{
 						label: m.loadDemoData(),
 						action: loadDemoDomain,
-						classes: 'variant-filled-secondary',
+						classes: 'preset-filled-secondary-500',
 						btnIcon: 'fa-file-import',
 						async: true
 					}

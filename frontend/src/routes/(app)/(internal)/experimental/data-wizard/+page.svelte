@@ -5,8 +5,7 @@
 	import type { PageData } from './$types';
 
 
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	interface Props {
 		data: PageData;
@@ -259,7 +258,7 @@
 			</div>
 			<div class="flex py-4">
 				<button
-					class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
+					class="btn preset-filled mt-2 lg:mt-0 {uploadButtonStyles}"
 					type="button"
 					onclick={modalConfirm}><i class="fa-solid fa-file-arrow-up mr-2"></i>{m.upload()}</button
 				>
@@ -271,12 +270,12 @@
 		{#if formSubmitted}
 			<div class="col-span-full mb-4">
 				{#if form?.success}
-					<div class="alert alert-success variant-filled-success">
+					<div class="alert alert-success preset-filled-success-500">
 						<div>{form.message || 'File uploaded successfully'}</div>
 					</div>
 					<div class="text-xs font-mono p-2">{JSON.stringify(form?.results, null, 2)}</div>
 				{:else}
-					<div class="alert alert-error variant-filled-error">
+					<div class="alert alert-error preset-filled-error-500">
 						<p>
 							{form?.error
 								? typeof m[form.error] === 'function'

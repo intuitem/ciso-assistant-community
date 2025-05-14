@@ -1,10 +1,9 @@
 <script lang="ts" module>
 	import { dynamicTransition } from '$lib/components/utils/transitions';
 	import {
-		prefersReducedMotionStore,
 		type Transition,
 		type TransitionParams
-	} from '@skeletonlabs/skeleton';
+	} from '@skeletonlabs/skeleton-svelte';
 	import { fade, fly } from 'svelte/transition';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -29,21 +28,9 @@
 	const dispatch = createEventDispatcher<ModalEvent>();
 
 	// Types
-	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton';
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
-	import { focusTrap, getModalStore } from '@skeletonlabs/skeleton';
+	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton-svelte';
+	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
 
-	
-
-	
-
-	
-
-	
-
-	
-
-	
 	interface Props {
 		// Props (components)
 		components?: Record<string, ModalComponent>;
@@ -80,16 +67,16 @@
 	let {
 		components = {},
 		position = 'items-center',
-		background = 'bg-surface-100-800-token',
+		background = 'bg-surface-100-900',
 		width = 'w-modal',
 		height = 'h-auto',
 		padding = 'p-4',
 		spacing = 'space-y-4',
-		rounded = 'rounded-container-token',
+		rounded = 'rounded-container',
 		shadow = 'shadow-xl',
 		zIndex = 'z-999',
-		buttonNeutral = 'variant-ghost-surface',
-		buttonPositive = 'variant-filled',
+		buttonNeutral = 'preset-tonal-surface border border-surface-500',
+		buttonPositive = 'preset-filled',
 		buttonTextCancel = $bindable('Cancel'),
 		buttonTextConfirm = $bindable('Confirm'),
 		buttonTextSubmit = $bindable('Submit'),
@@ -115,7 +102,7 @@
 	}: Props = $props();
 
 	// Base Styles
-	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-backdrop-token p-4';
+	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-50/50 dark:bg-surface-950/50 p-4';
 	const cTransitionLayer = 'w-full h-fit min-h-full overflow-y-auto flex justify-center';
 	const cModal = 'block overflow-y-auto';
 	const cModalImage = 'w-full h-auto';

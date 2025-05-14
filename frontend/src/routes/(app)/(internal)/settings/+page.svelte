@@ -2,14 +2,14 @@
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
-	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
+	import { Tab, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	let tabSet = $state(0);
 
 	let { data } = $props();
 </script>
 
-<TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
+<Tabs active="bg-primary-100 text-primary-800 border-b border-primary-800">
 	<Tab bind:group={tabSet} name="instanceSettings" value={0}
 		><i class="fa-solid fa-globe"></i> {m.general()}</Tab
 	>
@@ -18,7 +18,7 @@
 	<Tab bind:group={tabSet} name="featureFlags" value={2}
 		><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tab
 	>
-</TabGroup>
+</Tabs>
 {#if tabSet === 0}
 	<div>
 		<span class="text-gray-500">{m.generalSettingsDescription()}</span>

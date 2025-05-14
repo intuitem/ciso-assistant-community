@@ -3,7 +3,7 @@
 
 	// Types
 	import RecursiveTreeViewItem from '$lib/components/TreeView/RecursiveTreeViewItem.svelte';
-	import type { CssClasses, TreeViewNode } from '@skeletonlabs/skeleton';
+	import type { CssClasses, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 
 	
 
@@ -60,8 +60,8 @@
 		disabled = false,
 		padding = 'py-4 px-4',
 		indent = 'ml-4',
-		hover = 'hover:variant-soft',
-		rounded = 'rounded-container-token',
+		hover = 'hover:preset-tonal',
+		rounded = 'rounded-container',
 		caretOpen = '',
 		caretClosed = '-rotate-90',
 		hyphenOpacity = 'opacity-10',

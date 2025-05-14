@@ -5,8 +5,7 @@
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import type { ModelMapEntry } from '$lib/utils/crud';
 	import type { urlModel } from '$lib/utils/types';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 

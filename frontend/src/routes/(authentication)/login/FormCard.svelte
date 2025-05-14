@@ -10,11 +10,10 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
 	import {
-		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '@skeletonlabs/skeleton';
+	} from '@skeletonlabs/skeleton-svelte';
 
 	import { m } from '$paraglide/messages';
 
@@ -86,7 +85,7 @@
 					</div>
 					<p class="">
 						<button
-							class="btn variant-filled-primary font-semibold w-full"
+							class="btn preset-filled-primary-500 font-semibold w-full"
 							data-testid="login-btn"
 							type="submit">{m.login()}</button
 						>

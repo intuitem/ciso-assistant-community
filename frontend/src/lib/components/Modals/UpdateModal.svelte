@@ -4,9 +4,7 @@
 
 	// Stores
 	import type { ModelInfo } from '$lib/utils/types';
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
+	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	const modalStore: ModalStore = getModalStore();
 
 	let closeModal = true;

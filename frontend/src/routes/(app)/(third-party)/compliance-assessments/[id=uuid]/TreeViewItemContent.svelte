@@ -3,7 +3,7 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
@@ -130,7 +130,7 @@
 			<div class="flex flex-row space-x-2" style="font-weight: 300;">
 				<div>
 					{#if assessable}
-						<span class="w-full h-full flex rounded-token hover:text-primary-500">
+						<span class="w-full h-full flex rounded-base hover:text-primary-500">
 							{#if canEditRequirementAssessment}
 								<Anchor
 									breadcrumbAction="push"
@@ -224,7 +224,7 @@
 				<i class="text-xs fa-solid fa-info-circle"></i> Learn more
 			</div>
 			<div
-				class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
+				class="card p-2 preset-tonal-primary border border-primary-500 text-sm flex flex-row cursor-auto {classesShowInfo(
 					showInfo
 				)}"
 			>
@@ -299,12 +299,12 @@
 				</div>
 				{#if nodeScore() !== null}
 					<span>
-						<ProgressRadial
+						<ProgressRing
 							stroke={100}
 							meter={displayScoreColor(nodeScore(), node.max_score)}
 							font={150}
 							value={formatScoreValue(nodeScore(), node.max_score)}
-							width={'w-10'}>{nodeScore()}</ProgressRadial
+							width={'w-10'}>{nodeScore()}</ProgressRing
 						>
 					</span>
 				{/if}

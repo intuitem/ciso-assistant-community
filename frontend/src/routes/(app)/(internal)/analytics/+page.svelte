@@ -12,7 +12,7 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { Tab, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
 	import type { PageData } from './$types';
@@ -83,7 +83,7 @@
 	}
 </script>
 
-<TabGroup class="">
+<Tabs class="">
 	<Tab bind:group={tabSet} on:click={() => handleTabChange(0)} name="summary" value={0}
 		>{m.summary()}</Tab
 	>
@@ -516,4 +516,4 @@
 			{/if}
 		</div>
 	{/snippet}
-</TabGroup>
+</Tabs>

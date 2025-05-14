@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { SlideToggle, type CssClasses } from '@skeletonlabs/skeleton';
+	import { type CssClasses, Switch } from '@skeletonlabs/skeleton-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
@@ -85,7 +85,7 @@
 					{disabled}
 				/>
 			{:else if checkboxComponent === 'switch'}
-				<SlideToggle
+				<Switch
 					name={field}
 					type="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"

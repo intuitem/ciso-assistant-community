@@ -12,12 +12,11 @@
 		ModalSettings,
 		ModalStore,
 		PopupSettings,
-		TreeViewNode
-	} from '@skeletonlabs/skeleton';
+		TreeViewNode, Switch, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto } from '$app/navigation';
 
-	import { getModalStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
+	import { } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
@@ -39,7 +38,7 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { } from '@skeletonlabs/skeleton-svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
 
@@ -416,7 +415,7 @@
 				{#if data.global_score.score >= 0}
 					<div class="absolute font-bold text-sm">{m.maturity()}</div>
 					<div class="flex justify-center items-center w-full">
-						<ProgressRadial
+						<ProgressRing
 							stroke={100}
 							meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
 							font={125}
@@ -424,7 +423,7 @@
 							width={'w-52'}
 						>
 							{data.global_score.score}
-						</ProgressRadial>
+						</ProgressRing>
 					</div>
 				{/if}
 			</div>
@@ -455,7 +454,7 @@
 		{/key}
 		<div class="flex flex-col space-y-2 ml-4">
 			<div class="flex flex-row space-x-2">
-				<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
+				<button class="btn preset-filled-primary-500 w-full" use:popup={popupDownload}
 					><i class="fa-solid fa-download mr-2"></i>{m.exportButton()}</button
 				>
 				<div
@@ -493,7 +492,7 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
-						class="btn variant-filled-primary h-fit"
+						class="btn preset-filled-primary-500 h-fit"
 						data-testid="edit-button"
 						><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 					>
@@ -502,7 +501,7 @@
 			{#if !page.data.user.is_third_party}
 				<Anchor
 					href={`${page.url.pathname}/action-plan`}
-					class="btn variant-filled-primary h-fit"
+					class="btn preset-filled-primary-500 h-fit"
 					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 			{/if}
@@ -541,7 +540,7 @@
 			>
 				<span class="mr-2">
 					{#if syncingToActionsIsLoading}
-						<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+						<ProgressRing class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
 					{:else}
 						<i class="fa-solid fa-arrows-rotate mr-2"></i>
 					{/if}
@@ -562,7 +561,7 @@
 				>
 					<span class="mr-2">
 						{#if createAppliedControlsLoading}
-							<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+							<ProgressRing class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
 						{:else}
 							<i class="fa-solid fa-wand-magic-sparkles"></i>
 						{/if}
@@ -587,7 +586,7 @@
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
 		<div class=" flex items-center font-semibold">
 			<span class="h4">{m.associatedRequirements()}</span>
-			<span class="badge variant-soft-primary ml-1">
+			<span class="badge preset-tonal-primary ml-1">
 				{#if treeViewNodes}
 					{assessableNodesCount(treeViewNodes)}
 				{/if}
@@ -631,7 +630,7 @@
 				{:else}
 					<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
 				{/if}
-				<SlideToggle
+				<Switch
 					name="questionnaireToggle"
 					class="flex flex-row items-center justify-center"
 					active="bg-primary-500"
@@ -644,7 +643,7 @@
 					{:else}
 						<p class="font-bold">{m.ShowOnlyAssessable()}</p>
 					{/if}
-				</SlideToggle>
+				</Switch>
 			</div>
 		</div>
 
@@ -671,7 +670,7 @@
 	>
 		<div class="flex justify-between items-center mb-4">
 			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
-			<button class="btn btn-sm variant-filled-error" onclick={closeThreatsDialog}>
+			<button class="btn btn-sm preset-filled-error-500" onclick={closeThreatsDialog}>
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>

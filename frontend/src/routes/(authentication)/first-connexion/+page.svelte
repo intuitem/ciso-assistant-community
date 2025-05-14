@@ -64,7 +64,7 @@
 						/>
 						<p class="pt-3">
 							<button
-								class="btn variant-filled-primary font-semibold w-full"
+								class="btn preset-filled-primary-500 font-semibold w-full"
 								type="submit"
 								data-testid="set-password-btn">{m.setPassword()}</button
 							>

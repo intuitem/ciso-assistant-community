@@ -3,8 +3,7 @@
 	
 
 	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { recoveryCodes } from '../utils/stores';
 
 	import { m } from '$paraglide/messages';
@@ -33,7 +32,7 @@
 			<div class="flex flex-col space-y-4 mx-auto card p-4 max-w-lg">
 				<div class="flex flex-wrap justify-evenly">
 					{#each $recoveryCodes.unused_codes as code}
-						<pre>{code}&nbsp;</pre>
+						<pre>{code} </pre>
 					{/each}
 				</div>
 				<span class="flex flex-row space-x-2 justify-end">

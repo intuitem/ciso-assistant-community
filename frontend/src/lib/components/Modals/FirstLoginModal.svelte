@@ -3,8 +3,7 @@
 	
 
 	// Stores
-	import type { CssClasses, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { CssClasses, ModalStore } from '@skeletonlabs/skeleton-svelte';
 
 	interface Action {
 		label: string;
@@ -43,7 +42,7 @@
 							const result = await action.action();
 							return result ? parent.onConfirm(event) : null;
 						}}
-						class="btn {action.classes ?? 'variant-filled-surface'}"
+						class="btn {action.classes ?? 'preset-filled-surface-500'}"
 					>
 						{#if action.btnIcon}
 							<i class="fa-solid mr-2 {action.btnIcon}"></i>

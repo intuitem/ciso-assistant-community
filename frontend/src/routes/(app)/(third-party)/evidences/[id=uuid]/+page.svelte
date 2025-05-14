@@ -1,8 +1,7 @@
 <script lang="ts">
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud.js';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
@@ -89,7 +88,7 @@
 			<div class="space-x-2">
 				<Anchor
 					href={`./${data.data.id}/attachment`}
-					class="btn variant-filled-primary h-fit"
+					class="btn preset-filled-primary-500 h-fit"
 					data-testid="attachment-download-button"
 					><i class="fa-solid fa-download mr-2"></i> {m.download()}</Anchor
 				>
@@ -100,7 +99,7 @@
 						}}
 						onkeydown={(_) =>
 							modalConfirm(data.data.id, data.data.attachment, '?/deleteAttachment')}
-						class="btn variant-filled-tertiary h-full"><i class="fa-solid fa-trash"></i></button
+						class="btn preset-filled-tertiary-500 h-full"><i class="fa-solid fa-trash"></i></button
 					>
 				{/if}
 			</div>

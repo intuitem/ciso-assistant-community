@@ -3,9 +3,8 @@
 	import {
 		type Transition,
 		type TransitionParams,
-		type CssClasses,
-		prefersReducedMotionStore
-	} from '@skeletonlabs/skeleton';
+		type CssClasses
+	} from '@skeletonlabs/skeleton-svelte';
 
 	import { dynamicTransition } from '$lib/components/utils/transitions';
 
@@ -24,7 +23,6 @@
 	import { flip } from 'svelte/animate';
 
 	// Stores
-	import { getToastStore } from '@skeletonlabs/skeleton';
 	const toastStore = getToastStore();
 
 	
@@ -62,16 +60,16 @@
 	let {
 		position = 'b',
 		max = 3,
-		background = 'variant-filled-secondary',
+		background = 'preset-filled-secondary-500',
 		width = 'max-w-[640px]',
 		color = '',
 		padding = 'p-4',
 		spacing = 'space-x-4',
-		rounded = 'rounded-container-token',
+		rounded = 'rounded-container',
 		shadow = 'shadow-lg',
 		zIndex = 'z-888',
-		buttonAction = 'btn variant-filled',
-		buttonDismiss = 'btn-icon btn-icon-sm variant-filled',
+		buttonAction = 'btn preset-filled',
+		buttonDismiss = 'btn-icon btn-icon-sm preset-filled',
 		buttonDismissLabel = '✕',
 		transitions = !$prefersReducedMotionStore,
 		transitionIn = fly as TransitionIn,

@@ -38,18 +38,18 @@
 		<h1 class="text-xl font-semibold">{page.data.user.first_name} {page.data.user.last_name}</h1>
 		<div>
 			{#if user.is_local}
-				<Anchor href="my-profile/change-password" class="btn variant-filled-primary h-fit"
+				<Anchor href="my-profile/change-password" class="btn preset-filled-primary-500 h-fit"
 					><i class="fa-solid fa-key mr-2"></i>{m.changePassword()}</Anchor
 				>
 			{/if}
 			{#if canEditObject}
 				<Anchor
 					href="/users/{page.data.user.id}/edit?next=/my-profile"
-					class="btn variant-filled-primary h-fit"
+					class="btn preset-filled-primary-500 h-fit"
 					><i class="fa-solid fa-pen-to-square mr-2"></i>{m.edit()}</Anchor
 				>
 			{/if}
-			<Anchor href="my-profile/settings" class="btn variant-filled-primary h-fit"
+			<Anchor href="my-profile/settings" class="btn preset-filled-primary-500 h-fit"
 				><i class="fa-solid fa-sliders mr-2"></i>{m.settings()}</Anchor
 			>
 		</div>
@@ -69,7 +69,7 @@
 				{#each page.data.user.user_groups as group}
 					<div class="flex flex-row items-center">
 						{#if group[1]}
-							<span class="badge variant-soft-primary mr-2">{m.builtin()}</span>
+							<span class="badge preset-tonal-primary mr-2">{m.builtin()}</span>
 						{/if}
 						<p class="font-semibold text-sm">{group[0]}</p>
 					</div>

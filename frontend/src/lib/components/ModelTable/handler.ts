@@ -1,6 +1,5 @@
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
-import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';
 

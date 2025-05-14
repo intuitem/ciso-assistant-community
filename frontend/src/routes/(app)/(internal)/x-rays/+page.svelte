@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { Tab, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -52,28 +52,28 @@
 		{@const compliance_assessments = Object.values(perimeter.compliance_assessments.objects)}
 		{@const risk_assessments = Object.values(perimeter.risk_assessments.objects)}
 		<div>
-			<span class="text-2xl">&#128161;</span>
+			<span class="text-2xl">💡</span>
 			<Anchor
 				class="text-2xl font-bold mb-1 hover:underline text-blue-600"
 				href="/perimeters/{perimeter.perimeter.id}"
 			>
 				{perimeter.perimeter.folder.str}/{perimeter.perimeter.name}
 			</Anchor>
-			<TabGroup>
+			<Tabs>
 				<Tab bind:group={perimeter.tabSet} name="compliance_assessments_tab" value={0}
 					>{m.complianceAssessments()}
 					{#if perimeter.compliance_assessments.errors.length > 0}
-						<span class="badge variant-soft-error"
+						<span class="badge preset-tonal-error"
 							>{perimeter.compliance_assessments.errors.length}</span
 						>
 					{/if}
 					{#if perimeter.compliance_assessments.warnings.length > 0}
-						<span class="badge variant-soft-warning"
+						<span class="badge preset-tonal-warning"
 							>{perimeter.compliance_assessments.warnings.length}</span
 						>
 					{/if}
 					{#if perimeter.compliance_assessments.info.length > 0}
-						<span class="badge variant-soft-secondary"
+						<span class="badge preset-tonal-secondary"
 							>{perimeter.compliance_assessments.info.length}</span
 						>
 					{/if}
@@ -81,15 +81,15 @@
 				<Tab bind:group={perimeter.tabSet} name="risk_assessments_tab" value={1}
 					>{m.riskAssessments()}
 					{#if perimeter.risk_assessments.errors.length > 0}
-						<span class="badge variant-soft-error">{perimeter.risk_assessments.errors.length}</span>
+						<span class="badge preset-tonal-error">{perimeter.risk_assessments.errors.length}</span>
 					{/if}
 					{#if perimeter.risk_assessments.warnings.length > 0}
-						<span class="badge variant-soft-warning"
+						<span class="badge preset-tonal-warning"
 							>{perimeter.risk_assessments.warnings.length}</span
 						>
 					{/if}
 					{#if perimeter.risk_assessments.info.length > 0}
-						<span class="badge variant-soft-secondary"
+						<span class="badge preset-tonal-secondary"
 							>{perimeter.risk_assessments.info.length}</span
 						>
 					{/if}
@@ -110,7 +110,7 @@
 									<div class="flex flex-col space-y-3">
 										{#if quality_check.errors.length > 0}
 											<div class="space-y-2">
-												<div class="variant-soft-error rounded-token px-2 py-1">
+												<div class="preset-tonal-error rounded-base px-2 py-1">
 													<i class="fa-solid fa-bug mr-1"></i>
 													{#if quality_check.errors.length === 1}
 														<span class="font-bold">{quality_check.errors.length}</span>
@@ -134,7 +134,7 @@
 										{/if}
 										{#if quality_check.warnings.length > 0}
 											<div class="space-y-2">
-												<div class="variant-soft-warning rounded-token px-2 py-1">
+												<div class="preset-tonal-warning rounded-base px-2 py-1">
 													<i class="fa-solid fa-triangle-exclamation mr-1"></i>
 													{#if quality_check.warnings.length === 1}
 														<span class="font-bold">{quality_check.warnings.length}</span>
@@ -160,7 +160,7 @@
 										{/if}
 										{#if quality_check.info.length > 0}
 											<div class="space-y-2">
-												<div class="variant-soft-secondary rounded-token px-2 py-1">
+												<div class="preset-tonal-secondary rounded-base px-2 py-1">
 													<i class="fa-solid fa-circle-info mr-1"></i>
 													{#if quality_check.info.length === 1}
 														<span class="font-bold">{quality_check.info.length}</span>
@@ -202,7 +202,7 @@
 									<div class="flex flex-col space-y-3">
 										{#if quality_check.errors.length > 0}
 											<div class="space-y-2">
-												<div class="variant-soft-error rounded-token px-2 py-1">
+												<div class="preset-tonal-error rounded-base px-2 py-1">
 													<i class="fa-solid fa-bug mr-1"></i>
 													{#if quality_check.errors.length === 1}
 														<span class="font-bold">{quality_check.errors.length}</span>
@@ -226,7 +226,7 @@
 										{/if}
 										{#if quality_check.warnings.length > 0}
 											<div class="space-y-2">
-												<div class="variant-soft-warning rounded-token px-2 py-1">
+												<div class="preset-tonal-warning rounded-base px-2 py-1">
 													<i class="fa-solid fa-triangle-exclamation mr-1"></i>
 													{#if quality_check.warnings.length === 1}
 														<span class="font-bold">{quality_check.warnings.length}</span>
@@ -250,7 +250,7 @@
 										{/if}
 										{#if quality_check.info.length > 0}
 											<div class="space-y-2">
-												<div class="variant-soft-secondary rounded-token px-2 py-1">
+												<div class="preset-tonal-secondary rounded-base px-2 py-1">
 													<i class="fa-solid fa-circle-info mr-1"></i>
 													{#if quality_check.info.length === 1}
 														<span class="font-bold">{quality_check.info.length}</span>
@@ -281,7 +281,7 @@
 						{/if}
 					
 							{/snippet}
-			</TabGroup>
+			</Tabs>
 		</div>
 		{#if index != perimeters.length - 1}
 			<hr />

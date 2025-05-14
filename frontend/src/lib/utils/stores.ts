@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { persisted } from 'svelte-persisted-store';
-import type { TreeViewNode } from '@skeletonlabs/skeleton';
+import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 import type { Driver } from 'driver.js';
 
 export const showNotification = writable(

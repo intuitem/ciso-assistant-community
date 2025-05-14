@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { type PopupSettings } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
 
@@ -87,7 +87,7 @@
 			{#if canEditObject(operationalScenario)}
 				<a
 					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
-					class="btn variant-filled-primary h-fit justify-self-end"
+					class="btn preset-filled-primary-500 h-fit justify-self-end"
 				>
 					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>
 					{m.edit()}

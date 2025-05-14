@@ -3,12 +3,9 @@
 
 	import {
 		Tab,
-		TabGroup,
-		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore
-	} from '@skeletonlabs/skeleton';
+		type ModalStore, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
 
@@ -86,11 +83,11 @@
 	});
 </script>
 
-<TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
+<Tabs active="bg-primary-100 text-primary-800 border-b border-primary-800">
 	<Tab bind:group={tabSet} name="ssoSettings" value={0}
 		><i class="fa-solid fa-shield-halved mr-2"></i>{m.securitySettings()}</Tab
 	>
-</TabGroup>
+</Tabs>
 {#if tabSet === 0}
 	<div class="p-4 flex flex-col space-y-4">
 		<div class="flex flex-col">
@@ -108,12 +105,12 @@
 								<span class="flex flex-row justify-between text-xl">
 									<i class="fa-solid fa-mobile-screen-button"></i>
 									{#if hasTOTP}
-										<i class="fa-solid fa-circle-check text-success-500-400-token"></i>
+										<i class="fa-solid fa-circle-check text-success-600-400"></i>
 									{/if}
 								</span>
 								<span class="flex flex-row space-x-2">
-									<h6 class="h6 text-token">{m.authenticatorApp()}</h6>
-									<p class="badge h-fit variant-soft-secondary">{m.recommended()}</p>
+									<h6 class="h6 base-font-color">{m.authenticatorApp()}</h6>
+									<p class="badge h-fit preset-tonal-secondary">{m.recommended()}</p>
 								</span>
 								<p class="text-sm text-surface-800 max-w-[50ch]">
 									{m.authenticatorAppDescription()}
@@ -122,18 +119,18 @@
 							<div class="flex flex-wrap justify-between gap-2">
 								{#if hasTOTP}
 									<button
-										class="btn variant-ringed-surface w-fit"
+										class="btn preset-outlined-surface-500 w-fit"
 										onclick={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
 									>
 									{#if data.recoveryCodes}
 										<button
-											class="btn variant-ringed-surface w-fit"
+											class="btn preset-outlined-surface-500 w-fit"
 											onclick={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
 										>
 									{/if}
 								{:else}
 									<button
-										class="btn variant-ringed-surface w-fit"
+										class="btn preset-outlined-surface-500 w-fit"
 										onclick={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
 									>
 								{/if}

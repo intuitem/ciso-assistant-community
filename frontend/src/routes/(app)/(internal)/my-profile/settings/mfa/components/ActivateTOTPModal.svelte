@@ -3,9 +3,7 @@
 	
 
 	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
+	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
@@ -16,7 +14,7 @@
 	// Base Classes
 	const cBase = 'card p-4 w-fit shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
-	const cForm = 'p-4 space-y-4 rounded-container-token';
+	const cForm = 'p-4 space-y-4 rounded-container';
 
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
@@ -85,7 +83,7 @@
 						<OTPInput {form} field="code" />
 						<footer class="modal-footer {parent.regionFooter}">
 							<button
-								class="btn variant-filled-primary w-full"
+								class="btn preset-filled-primary-500 w-full"
 								data-testid="activate-totp-confirm-button"
 								type="submit">{m.enableTOTP()}</button
 							>

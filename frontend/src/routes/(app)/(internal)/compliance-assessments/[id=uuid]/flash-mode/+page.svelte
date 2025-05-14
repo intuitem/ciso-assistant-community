@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
 	import { m } from '$paraglide/messages';
-	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import { Segment } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -116,9 +116,9 @@
 						<ul
 							class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
 						>
-							<RadioGroup class="w-full flex-wrap items-center">
+							<Segment class="w-full flex-wrap items-center">
 								{#each possible_options as option}
-									<RadioItem
+									<Segment.Item
 										class="h-full"
 										active={color}
 										id={option.id}
@@ -132,9 +132,9 @@
 										}}
 									>
 										{option.label}
-									</RadioItem>
+									</Segment.Item>
 								{/each}
-							</RadioGroup>
+							</Segment>
 						</ul>
 					</form>
 				</div>
@@ -143,7 +143,7 @@
 				<button class="bg-gray-400 text-white px-4 py-2 rounded-sm" onclick={previousItem}>
 					{m.previous()}
 				</button>
-				<button class="variant-filled-primary px-4 py-2 rounded-sm" onclick={nextItem}>
+				<button class="preset-filled-primary-500 px-4 py-2 rounded-sm" onclick={nextItem}>
 					{m.next()}
 				</button>
 			</div>

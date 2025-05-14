@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isDark } from '$lib/utils/helpers';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { type PopupSettings } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		cell: any;

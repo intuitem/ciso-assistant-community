@@ -26,14 +26,10 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import {
-		ProgressRadial,
 		Tab,
-		TabGroup,
-		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore
-	} from '@skeletonlabs/skeleton';
+		type ModalStore, ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -263,7 +259,7 @@
 		</p>
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
-		<div class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto">
+		<div class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto">
 			<h2 class="font-semibold text-lg flex flex-row justify-between">
 				<div>
 					<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
@@ -413,7 +409,7 @@
 		>
 			{#snippet children({ form, data })}
 						<div class="card shadow-lg bg-white">
-					<TabGroup>
+					<Tabs>
 						{#if !page.data.user.is_third_party}
 							<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
 								>{m.appliedControls()}
@@ -431,7 +427,7 @@
 										<p>{m.requirementAppliedControlHelpText()}</p>
 									</div>
 									<div
-										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
 									>
 										<span class="flex flex-row justify-end items-center space-x-2">
 											{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
@@ -448,7 +444,7 @@
 												>
 													<span class="mr-2">
 														{#if createAppliedControlsLoading}
-															<ProgressRadial
+															<ProgressRing
 																class="-ml-2"
 																width="w-6"
 																meter="stroke-white"
@@ -462,7 +458,7 @@
 												</button>
 											{/if}
 											<button
-												class="btn variant-filled-primary self-end"
+												class="btn preset-filled-primary-500 self-end"
 												onclick={modalMeasureCreateForm}
 												type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
 											>
@@ -494,11 +490,11 @@
 										<p>{m.requirementEvidenceHelpText()}</p>
 									</div>
 									<div
-										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
 									>
 										<span class="flex flex-row justify-end items-center">
 											<button
-												class="btn variant-filled-primary self-end"
+												class="btn preset-filled-primary-500 self-end"
 												onclick={modalEvidenceCreateForm}
 												type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
 											>
@@ -526,11 +522,11 @@
 								{/if}
 								{#if tabSet === 2 && !page.data.user.is_third_party}
 									<div
-										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
 									>
 										<span class="flex flex-row justify-end items-center">
 											<button
-												class="btn variant-filled-primary self-end"
+												class="btn preset-filled-primary-500 self-end"
 												onclick={modalSecurityExceptionCreateForm}
 												type="button"
 												><i class="fa-solid fa-plus mr-2"></i>{m.addSecurityException()}</button
@@ -556,7 +552,7 @@
 								{/if}
 							
 									{/snippet}
-					</TabGroup>
+					</Tabs>
 				</div>
 				<HiddenInput {form} field="folder" />
 				<HiddenInput {form} field="requirement" />
@@ -630,7 +626,7 @@
 							onclick={cancel}>{m.cancel()}</button
 						>
 						<button
-							class="btn variant-filled-primary font-semibold w-full"
+							class="btn preset-filled-primary-500 font-semibold w-full"
 							data-testid="save-button"
 							type="submit">{m.save()}</button
 						>

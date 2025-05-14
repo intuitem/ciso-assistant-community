@@ -5,8 +5,7 @@
 	
 
 	// Stores
-	import { getModalStore } from '@skeletonlabs/skeleton';
-	import type { ModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 
 	import { m } from '$paraglide/messages';
 
@@ -19,7 +18,7 @@
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
-	const cForm = 'p-4 space-y-4 rounded-container-token';
+	const cForm = 'p-4 space-y-4 rounded-container';
 
 	import SuperDebug from 'sveltekit-superforms';
 	interface Props {
@@ -57,7 +56,7 @@
         <button type="button" class="btn {parent.buttonNeutral}" data-testid="delete-cancel-button" onclick={parent.onClose}>{m.cancel()}</button>
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
-        <button class="btn variant-filled-error" data-testid="delete-confirm-button" type="submit" onclick={parent.onClose}>{m.submit()}</button>
+        <button class="btn preset-filled-error-500" data-testid="delete-confirm-button" type="submit" onclick={parent.onClose}>{m.submit()}</button>
     </footer>
 		</form>
 		{#if debug === true}

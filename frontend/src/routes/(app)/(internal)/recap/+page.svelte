@@ -2,7 +2,7 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -81,7 +81,7 @@
 						</div>
 						{#if compliance_assessment.globalScore.score >= 0}
 							<div class="justify-center flex items-center">
-								<ProgressRadial
+								<ProgressRing
 									stroke={100}
 									meter={displayScoreColor(
 										compliance_assessment.globalScore.score,
@@ -92,7 +92,7 @@
 										compliance_assessment.globalScore.max_score
 									)}
 									font={150}
-									width={'w-20'}>{compliance_assessment.globalScore.score}</ProgressRadial
+									width={'w-20'}>{compliance_assessment.globalScore.score}</ProgressRing
 								>
 							</div>
 						{/if}
@@ -114,13 +114,13 @@
 												href: `/compliance-assessments/${compliance_assessment.id}`
 											}
 										]}
-										class="btn variant-filled-primary w-1/2 lg:w-full"
+										class="btn preset-filled-primary-500 w-1/2 lg:w-full"
 										><i class="fa-solid fa-edit mr-2"></i> {m.edit()}
 									</Anchor>
 								{/if}
 								<a
 									href="/compliance-assessments/{compliance_assessment.id}/export"
-									class="btn variant-filled-primary w-1/2 lg:w-full"
+									class="btn preset-filled-primary-500 w-1/2 lg:w-full"
 									><i class="fa-solid fa-download mr-2"></i> {m.exportButton()}
 								</a>
 							</div>

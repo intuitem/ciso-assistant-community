@@ -3,7 +3,7 @@
 
 	// Most of your app wide CSS should be put in this file
 	import '../../app.postcss';
-	import { AppShell, AppBar } from '@skeletonlabs/skeleton';
+	import { AppBar } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
@@ -40,8 +40,7 @@
 			}
 		}
 	});
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData, ActionData } from './$types';
 	import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
 

@@ -12,7 +12,7 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
-	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { Tab, ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 
 	interface Props {
@@ -93,22 +93,22 @@
 			{safeTranslate(data.requirementAssessment.result)}
 		</span>
 		{#if data.requirementAssessment.is_scored}
-			<ProgressRadial
+			<ProgressRing
 				stroke={100}
 				meter={displayScoreColor(score, max_score)}
 				value={formatScoreValue(score, max_score)}
 				font={150}
 				class="shrink-0"
-				width={'w-10'}>{score}</ProgressRadial
+				width={'w-10'}>{score}</ProgressRing
 			>
 			{#if data.complianceAssessmentScore.show_documentation_score}
-				<ProgressRadial
+				<ProgressRing
 					stroke={100}
 					meter={displayScoreColor(documentationScore, max_score)}
 					value={formatScoreValue(documentationScore, max_score)}
 					font={150}
 					class="shrink-0"
-					width={'w-10'}>{documentationScore}</ProgressRadial
+					width={'w-10'}>{documentationScore}</ProgressRing
 				>
 			{/if}
 		{/if}
@@ -119,7 +119,7 @@
 		</p>
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
-		<div class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto">
+		<div class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto">
 			<h2 class="font-semibold text-lg flex flex-row justify-between">
 				<div>
 					<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
@@ -252,7 +252,7 @@
 		</div>
 	{/if}
 	<div>
-		<TabGroup>
+		<Tabs>
 			{#if !page.data.user.is_third_party}
 				<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
 					>{m.appliedControls()}
@@ -267,7 +267,7 @@
 							<p>{m.requirementAppliedControlHelpText()}</p>
 						</div>
 						<div
-							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
 						>
 							<ModelTable
 								source={data.tables['applied-controls']}
@@ -284,7 +284,7 @@
 							<p>{m.requirementEvidenceHelpText()}</p>
 						</div>
 						<div
-							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+							class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
 						>
 							<ModelTable
 								source={data.tables['evidences']}
@@ -297,7 +297,7 @@
 					{/if}
 				
 					{/snippet}
-		</TabGroup>
+		</Tabs>
 	</div>
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
 		<h1 class="font-semibold text-sm">{m.question()}</h1>
@@ -315,7 +315,7 @@
 		{/each}
 	{/if}
 	{#if data.requirementAssessment.observation}
-		<div class="card p-4 space-y-2 variant-glass-primary">
+		<div class="card p-4 space-y-2 preset-tonal-primary">
 			<h1 class="font-semibold text-sm">{m.observation()}</h1>
 			<span class="text-sm">{data.requirementAssessment.observation}</span>
 		</div>

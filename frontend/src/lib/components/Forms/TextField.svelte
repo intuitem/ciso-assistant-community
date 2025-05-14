@@ -5,7 +5,7 @@
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import type { CssClasses } from '@skeletonlabs/skeleton';
+	import type { CssClasses } from '@skeletonlabs/skeleton-svelte';
 
 	
 	interface Props {

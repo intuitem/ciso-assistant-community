@@ -26,7 +26,7 @@
 		context
 	}: Props = $props();
 
-	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
+	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
 
 	let activeActivity: string | null = $state(null);
 	page.url.searchParams.forEach((value, key) => {

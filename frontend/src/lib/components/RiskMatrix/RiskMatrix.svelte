@@ -7,7 +7,7 @@
 	import { page } from '$app/state';
 	import { isDark } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { type PopupSettings } from '@skeletonlabs/skeleton-svelte';
 	import type { ComponentType } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 

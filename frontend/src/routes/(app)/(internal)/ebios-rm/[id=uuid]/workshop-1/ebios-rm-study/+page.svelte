@@ -6,8 +6,8 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { TabGroup, Tab, getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tab } from '@skeletonlabs/skeleton-svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
@@ -117,7 +117,7 @@
 			{#if canEditObject}
 				<Anchor
 					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
-					class="btn variant-filled-primary h-fit"
+					class="btn preset-filled-primary-500 h-fit"
 				>
 					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>
 					{m.edit()}
@@ -202,12 +202,12 @@
 			>
 			{#if Object.keys(data.relatedModels).length > 0}
 				<div class="card shadow-lg mt-8 bg-white w-full">
-					<TabGroup justify="justify-center">
+					<Tabs justify="justify-center">
 						{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
 							<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
 								{safeTranslate(model.info.localNamePlural)}
 								{#if model.table.body.length > 0}
-									<span class="badge variant-soft-secondary">{model.table.body.length}</span>
+									<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
 								{/if}
 							</Tab>
 						{/each}
@@ -264,7 +264,7 @@
 								{/each}
 							
 											{/snippet}
-					</TabGroup>
+					</Tabs>
 				</div>
 			{/if}
 		</div>

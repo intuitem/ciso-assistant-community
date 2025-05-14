@@ -2,12 +2,11 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore, Accordion } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { m } from '$paraglide/messages';
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
-	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
 
 	const modalStore: ModalStore = getModalStore();
@@ -43,7 +42,7 @@
 		class="bg-white rounded-md border hover:text-primary-700 text-gray-800"
 		hover="bg-white"
 	>
-		<AccordionItem>
+		<Accordion.Item>
 			{#snippet lead()}
 						<i class="fa-solid fa-bullseye"></i>
 					{/snippet}
@@ -72,7 +71,7 @@
 					</div>
 				
 					{/snippet}
-		</AccordionItem>
+		</Accordion.Item>
 	</Accordion>
 	<ModelTable
 		source={data.table}

@@ -2,8 +2,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
 	const modalStore: ModalStore = getModalStore();

@@ -18,9 +18,8 @@
 		PopupSettings,
 		ModalComponent,
 		ModalSettings,
-		ModalStore
-	} from '@skeletonlabs/skeleton';
-	import { popup, Tab, TabGroup, getModalStore } from '@skeletonlabs/skeleton';
+		ModalStore, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tab } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 
@@ -217,7 +216,7 @@
 <div class="flex flex-col space-y-2">
 	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
 		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow-sm px-6 py-2 justify-between"
+			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
 			<div class="text-yellow-900">
 				{m.riskAcceptanceValidatingReviewMessage()}
@@ -228,7 +227,7 @@
 						modalConfirm(data.data.id, data.data.name, '?/accept');
 					}}
 					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/accept')}
-					class="btn variant-filled-success"
+					class="btn preset-filled-success-500"
 				>
 					<i class="fas fa-check mr-2"></i> {m.validate()}</button
 				>
@@ -237,7 +236,7 @@
 						modalConfirm(data.data.id, data.data.name, '?/reject');
 					}}
 					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/reject')}
-					class="btn variant-filled-error"
+					class="btn preset-filled-error-500"
 				>
 					<i class="fas fa-xmark mr-2"></i> {m.reject()}</button
 				>
@@ -245,7 +244,7 @@
 		</div>
 	{:else if data.data.state === 'Accepted'}
 		<div
-			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container-token shadow-lg px-6 py-2 mt-2 justify-between"
+			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container shadow-lg px-6 py-2 mt-2 justify-between"
 		>
 			<div class="text-green-900">
 				{m.riskAcceptanceValidatedMessage()}
@@ -257,7 +256,7 @@
 							modalConfirm(data.data.id, data.data.name, '?/revoke');
 						}}
 						onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/revoke')}
-						class="btn variant-filled-error"
+						class="btn preset-filled-error-500"
 					>
 						<i class="fas fa-xmark mr-2"></i> {m.revoke()}</button
 					>
@@ -423,7 +422,7 @@
 		<div class="flex flex-row justify-end mt-4 gap-2">
 			{#if mailing}
 				<button
-					class="btn variant-filled-primary h-fit"
+					class="btn preset-filled-primary-500 h-fit"
 					onclick={(_) => {
 						modalMailConfirm(
 							data.data.compliance_assessment.id,
@@ -449,7 +448,7 @@
 						modalConfirm(data.data.id, data.data.name, '?/draft');
 					}}
 					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/draft')}
-					class="btn variant-filled-primary"
+					class="btn preset-filled-primary-500"
 					disabled={!data.data.approver}
 				>
 					<i class="fas fa-arrow-alt-circle-left mr-2"></i> {m.draft()}</button
@@ -463,7 +462,7 @@
 							modalConfirm(data.data.id, data.data.name, '?/submit');
 						}}
 						onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/submit')}
-						class="btn variant-filled-primary *:pointer-events-none"
+						class="btn preset-filled-primary-500 *:pointer-events-none"
 						disabled={!data.data.approver}
 						use:popup={popupHover}
 					>
@@ -471,9 +470,9 @@
 						{m.submit()}
 					</button>
 					{#if !data.data.approver}
-						<div class="card variant-ghost-surface p-4 z-20" data-popup="popupHover">
+						<div class="card preset-tonal-surface border border-surface-500 p-4 z-20" data-popup="popupHover">
 							<p class="font-normal">{m.riskAcceptanceMissingApproverMessage()}</p>
-							<div class="arrow variant-filled-surface"></div>
+							<div class="arrow preset-filled-surface-500"></div>
 						</div>
 					{/if}
 				{/if}
@@ -482,7 +481,7 @@
 					breadcrumbAction="push"
 					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
 					label={m.edit()}
-					class="btn variant-filled-primary h-fit"
+					class="btn preset-filled-primary-500 h-fit"
 					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>{m.edit()}</Anchor
 				>
 
@@ -504,12 +503,12 @@
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
-		<TabGroup justify="justify-center">
+		<Tabs justify="justify-center">
 			{#each relatedModels as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
 					{safeTranslate(model.info.localNamePlural)}
 					{#if model.table.body.length > 0}
-						<span class="badge variant-soft-secondary">{model.table.body.length}</span>
+						<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
 					{/if}
 				</Tab>
 			{/each}
@@ -537,7 +536,7 @@
 									{#snippet addButton()}
 																<button
 											
-											class="btn variant-filled-primary self-end my-auto"
+											class="btn preset-filled-primary-500 self-end my-auto"
 											onclick={(_) => modalCreateForm(model)}
 											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
 												'add-' + model.info.localName
@@ -557,6 +556,6 @@
 					{/each}
 				
 					{/snippet}
-		</TabGroup>
+		</Tabs>
 	</div>
 {/if}

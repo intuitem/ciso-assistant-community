@@ -5,8 +5,7 @@
 	import type { PageData } from './$types';
 
 
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	interface Props {
 		data: PageData;
@@ -53,7 +52,7 @@
 				{m.exportBackupDescription()}
 			</div>
 			<form action="/backup-restore/dump-db/">
-				<button type="submit" class="btn variant-filled-primary">{m.exportDatabase()}</button>
+				<button type="submit" class="btn preset-filled-primary-500">{m.exportDatabase()}</button>
 			</form>
 		</div>
 
@@ -72,7 +71,7 @@
 					bind:value={file}
 				/>
 				<button
-					class="btn variant-filled mt-2 lg:mt-0 {uploadButtonStyles}"
+					class="btn preset-filled mt-2 lg:mt-0 {uploadButtonStyles}"
 					type="button"
 					onclick={modalConfirm}>{m.upload()}</button
 				>

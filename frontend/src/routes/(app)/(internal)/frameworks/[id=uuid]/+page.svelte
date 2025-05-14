@@ -3,7 +3,7 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton';
+	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -121,7 +121,7 @@
 			</div>
 		</div>
 		<div class="">
-			<a class="btn variant-filled-primary" href="/frameworks/{data.framework.id}/excel-template/"
+			<a class="btn preset-filled-primary-500" href="/frameworks/{data.framework.id}/excel-template/"
 				>Download Excel template</a
 			>
 		</div>
@@ -130,7 +130,7 @@
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
 		<h4 class="h4 flex items-center font-semibold">
 			{m.associatedRequirements()}
-			<span class="badge variant-soft-primary ml-1">
+			<span class="badge preset-tonal-primary ml-1">
 				{assessableNodesCount(treeViewNodes)}
 			</span>
 		</h4>

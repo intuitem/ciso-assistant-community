@@ -6,7 +6,7 @@
 	import { defaults, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { zod } from 'sveltekit-superforms/adapters';

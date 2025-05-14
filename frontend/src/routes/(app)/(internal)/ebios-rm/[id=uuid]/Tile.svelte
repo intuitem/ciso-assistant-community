@@ -8,7 +8,7 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { type PopupSettings } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		title?: string;

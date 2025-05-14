@@ -72,7 +72,7 @@
 	{/if}
 	{#if riskLevel}
 		<div
-			class="flex font-medium w-32 justify-center p-2 rounded-token {classesCellText(
+			class="flex font-medium w-32 justify-center p-2 rounded-base {classesCellText(
 				riskLevel.hexcolor
 			)}"
 			style="background-color: {riskLevel.hexcolor}"
@@ -80,7 +80,7 @@
 			{safeTranslate(riskLevel.name)}
 		</div>
 	{:else}
-		<div class="flex font-medium w-32 justify-center p-2 rounded-token bg-gray-300">--</div>
+		<div class="flex font-medium w-32 justify-center p-2 rounded-base bg-gray-300">--</div>
 	{/if}
 	{#if helpText}
 		<p class="text-sm text-gray-500 w-64">{helpText}</p>

@@ -4,7 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import RadioGroupInput from '../RadioGroupInput.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -34,7 +34,7 @@
 </script>
 
 <Accordion regionControl="font-bold">
-	<AccordionItem open>
+	<Accordion.Item open>
 		{#snippet summary()}
 				<i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}
 			{/snippet}
@@ -49,8 +49,8 @@
 				</div>
 			
 			{/snippet}
-	</AccordionItem>
-	<AccordionItem open>
+	</Accordion.Item>
+	<Accordion.Item open>
 		{#snippet summary()}
 			
 				<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
@@ -67,8 +67,8 @@
 				</div>
 			
 			{/snippet}
-	</AccordionItem>
-	<AccordionItem open>
+	</Accordion.Item>
+	<Accordion.Item open>
 		{#snippet summary()}
 				<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
 			{/snippet}
@@ -85,8 +85,8 @@
 				/>
 			
 			{/snippet}
-	</AccordionItem>
-	<AccordionItem open>
+	</Accordion.Item>
+	<Accordion.Item open>
 		{#snippet summary()}
 				<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
 			{/snippet}
@@ -145,8 +145,8 @@
 				</div>
 			
 			{/snippet}
-	</AccordionItem>
-	<AccordionItem>
+	</Accordion.Item>
+	<Accordion.Item>
 		{#snippet summary()}
 				<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
 			{/snippet}
@@ -194,5 +194,5 @@
 				/>
 			
 			{/snippet}
-	</AccordionItem>
+	</Accordion.Item>
 </Accordion>

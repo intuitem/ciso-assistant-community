@@ -7,7 +7,7 @@
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroupInput from '../RadioGroupInput.svelte';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -55,7 +55,7 @@
 		modalStore.trigger(modal);
 	}
 
-	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
+	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
 	const activeActivity: string = page.url.searchParams.get('activity') || '';
 
 	const getCriticality = (
@@ -84,7 +84,7 @@
 </script>
 
 <div
-	class="relative p-2 space-y-2 rounded-container-token {activeActivity === 'one'
+	class="relative p-2 space-y-2 rounded-container {activeActivity === 'one'
 		? 'border-2 border-primary-500'
 		: 'border-2 border-gray-300 border-dashed'}"
 >
@@ -195,7 +195,7 @@
 					<label for="current_criticality" class="text-sm font-semibold">
 						{m.criticality()}
 					</label>
-					<span class="chip text-base text-center px-4 py-1 rounded-token variant-filled">
+					<span class="chip text-base text-center px-4 py-1 rounded-base preset-filled">
 						{currentCriticality}
 					</span>
 				</div>
@@ -221,7 +221,7 @@
 
 {#if context === 'edit'}
 	<div
-		class="relative p-2 space-y-2 rounded-container-token {activeActivity === 'three'
+		class="relative p-2 space-y-2 rounded-container {activeActivity === 'three'
 			? 'border-2 border-primary-500'
 			: 'border-2 border-gray-300 border-dashed'}"
 	>
@@ -322,7 +322,7 @@
 				<label for="residual_criticality" class="text-sm font-semibold">
 					{m.criticality()}
 				</label>
-				<span class="chip text-base text-center px-4 py-1 rounded-token variant-filled">
+				<span class="chip text-base text-center px-4 py-1 rounded-base preset-filled">
 					{residualCriticality}
 				</span>
 			</div>

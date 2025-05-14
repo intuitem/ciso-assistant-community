@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
-	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import { Segment } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	
@@ -67,25 +67,25 @@
 			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
 				<p class="font-semibold p-2">{question.text} ({safeTranslate(question.type)})</p>
 				{#if question.type === 'unique_choice'}
-					<RadioGroup
+					<Segment
 						class="flex-col"
-						active="variant-filled-primary"
-						hover="hover:variant-soft-primary"
+						active="preset-filled-primary-500"
+						hover="hover:preset-tonal-primary"
 					>
 						{#each question.choices as option}
-							<RadioItem
+							<Segment.Item
 								class="shadow-md flex"
 								bind:group={$value[urn]}
 								name="question"
 								value={option.urn}
 								on:click={() => ($value[urn] = $value[urn] === option.urn ? null : option.urn)}
-								><span class="text-left">{option.value}</span></RadioItem
+								><span class="text-left">{option.value}</span></Segment.Item
 							>
 						{/each}
-					</RadioGroup>
+					</Segment>
 				{:else if question.type === 'multiple_choice'}
 					<div
-						class="flex flex-col gap-1 p-1 bg-surface-200-700-token border-token border-surface-400-500-token rounded-token"
+						class="flex flex-col gap-1 p-1 bg-surface-200-800 border border-surface-500 rounded-base"
 					>
 						{#each question.choices as option}
 							<button
@@ -93,8 +93,8 @@
 								name="question"
 								class="shadow-md p-1
 									{$value[urn] && $value[urn].includes(option.urn)
-									? 'variant-filled-primary rounded-token'
-									: 'hover:variant-soft-primary bg-surface-200-700-token rounded-token'}"
+									? 'preset-filled-primary-500 rounded-base'
+									: 'hover:preset-tonal-primary bg-surface-200-800 rounded-base'}"
 								onclick={() => toggleSelection(urn, option.urn)}
 							>
 								{option.value}

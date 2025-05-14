@@ -2,7 +2,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 
 import { modelSchema } from '$lib/utils/schemas';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';

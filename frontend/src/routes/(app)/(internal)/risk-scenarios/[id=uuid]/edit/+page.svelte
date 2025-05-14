@@ -11,11 +11,10 @@
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 	import {
-		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '@skeletonlabs/skeleton';
+	} from '@skeletonlabs/skeleton-svelte';
 	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
 
@@ -394,7 +393,7 @@
 				type="button"
 				onclick={cancel}>{m.cancel()}</button
 			>
-			<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button"
+			<button class="btn preset-filled-primary-500 font-semibold w-full" data-testid="save-button"
 				>{m.save()}</button
 			>
 		</div>

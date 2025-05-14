@@ -6,8 +6,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 
 	import { onMount } from 'svelte';

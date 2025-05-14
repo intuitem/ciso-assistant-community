@@ -38,7 +38,7 @@
 	
 >
 	{#snippet children({ form, data })}
-		<div class="flex flex-col space-y-2 items-center card variant-ghost-surface p-4">
+		<div class="flex flex-col space-y-2 items-center card preset-tonal-surface border border-surface-500 p-4">
 			{#if options}
 				<AutocompleteSelect
 					multiple={true}
@@ -51,10 +51,10 @@
 					<Anchor
 						href={`/analytics/composer/?risk_assessment=${data.risk_assessment}`}
 						label={m.composer()}
-						class="btn variant-filled-primary">{m.processButton()}</Anchor
+						class="btn preset-filled-primary-500">{m.processButton()}</Anchor
 					>
 				{:else}
-					<p class="btn-base rounded-token select-none variant-filled-surface opacity-30">
+					<p class="btn-base rounded-base select-none preset-filled-surface-500 opacity-30">
 						{m.processButton()}
 					</p>
 				{/if}

@@ -3,9 +3,7 @@
 	
 
 	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
+	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
@@ -16,7 +14,7 @@
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
-	const cForm = 'p-4 space-y-4 rounded-container-token';
+	const cForm = 'p-4 space-y-4 rounded-container';
 
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -70,7 +68,7 @@
 							{/if}
 						</button>
 						<button
-							class="btn variant-filled-primary"
+							class="btn preset-filled-primary-500"
 							data-testid="mfa-authenticate-confirm-button"
 							type="submit">{m.login()}</button
 						>

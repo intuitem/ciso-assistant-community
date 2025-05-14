@@ -38,7 +38,7 @@
 
 	export let multiSelectOptions = {
 		maxSelect: multiple ? undefined : 1,
-		liSelectedClass: multiple ? '!chip !variant-filled' : 'bg-transparent!',
+		liSelectedClass: multiple ? '!chip !preset-filled' : 'bg-transparent!',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
 		outerDivClass: '!select',
 		closeDropdownOnSelect: !multiple

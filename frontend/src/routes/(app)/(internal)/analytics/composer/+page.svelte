@@ -75,7 +75,7 @@
 		</div>
 		<div class="bg-zinc-100 shadow-sm rounded-sm p-3 flex flex-col space-y-2">
 			<div>
-				<i class="far fa-lightbulb mr-1"></i>&nbsp;<span class="font-semibold"
+				<i class="far fa-lightbulb mr-1"></i> <span class="font-semibold"
 					>{m.forTheSelectedScope()}:</span
 				>
 			</div>

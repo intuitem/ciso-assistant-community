@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-	import { ProgressRadial, RangeSlider } from '@skeletonlabs/skeleton';
+	import { ProgressRing, Slider } from '@skeletonlabs/skeleton-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
@@ -88,7 +88,7 @@
 		{/if}
 		<div class="flex flex-row w-full items-center justify-evenly space-x-4">
 			<div class="flex w-full items-center justify-center border-2 rounded-lg p-2">
-				<RangeSlider
+				<Slider
 					class="w-full"
 					data-testid="range-slider-input"
 					name="range-slider"
@@ -126,17 +126,17 @@
 								{/if}
 							</p>
 						</div>
-						<ProgressRadial
+						<ProgressRing
 							stroke={100}
 							meter={displayScoreColor($value, max_score, inversedColors)}
 							value={!disabled ? formatScoreValue($value, max_score, fullDonut) : min_score}
 							font={150}
 							class="shrink-0"
 							border-4
-							width={'w-12'}>{!disabled ? $value : '--'}</ProgressRadial
+							width={'w-12'}>{!disabled ? $value : '--'}</ProgressRing
 						>
 					</div>
-				</RangeSlider>
+				</Slider>
 			</div>
 		</div>
 		{#if helpText}

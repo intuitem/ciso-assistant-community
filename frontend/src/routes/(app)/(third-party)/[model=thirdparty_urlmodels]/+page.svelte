@@ -3,8 +3,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData, ActionData } from './$types';
 
 	interface Props {

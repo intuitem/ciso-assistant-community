@@ -5,7 +5,7 @@
 	import { getContext, createEventDispatcher, onMount } from 'svelte';
 
 	// Types
-	import type { CssClasses, SvelteEvent, TreeViewItem } from '@skeletonlabs/skeleton';
+	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton-svelte';
 
 	// Props (state)
 	export let group: unknown = undefined;

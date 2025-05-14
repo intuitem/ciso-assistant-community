@@ -84,7 +84,7 @@
 		{#if canEditObject}
 			<Anchor
 				href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
-				class="btn variant-filled-primary h-fit mt-1"
+				class="btn preset-filled-primary-500 h-fit mt-1"
 				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 			>
 		{/if}

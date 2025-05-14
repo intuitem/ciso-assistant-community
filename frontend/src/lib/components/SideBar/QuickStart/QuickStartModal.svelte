@@ -9,8 +9,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-	import type { ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 
@@ -130,7 +129,7 @@
 				>
 
 				<button
-					class="btn variant-filled-primary font-semibold w-full"
+					class="btn preset-filled-primary-500 font-semibold w-full"
 					data-testid="save-button"
 					type="submit">{m.save()}</button
 				>

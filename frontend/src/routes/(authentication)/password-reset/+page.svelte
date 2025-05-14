@@ -46,7 +46,7 @@
 												<TextField type="email" {form} field="email" label={m.email()} />
 							<p class="pt-3">
 								<button
-									class="btn variant-filled-primary font-semibold w-full"
+									class="btn preset-filled-primary-500 font-semibold w-full"
 									data-testid="send-btn"
 									type="submit">{m.send()}</button
 								>

@@ -8,7 +8,7 @@
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { Tab, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 
@@ -26,23 +26,23 @@
 </script>
 
 <div class="card bg-white shadow-sm">
-	<TabGroup>
+	<Tabs>
 		{#if data.loadedLibrariesTable.meta.count > 0}
 			<Tab bind:group={tabSet} value={0}
 				>{m.librariesStore()}
-				<span class="badge variant-soft-primary">{data.storedLibrariesTable.meta.count}</span></Tab
+				<span class="badge preset-tonal-primary">{data.storedLibrariesTable.meta.count}</span></Tab
 			>
 			<Tab bind:group={tabSet} value={1}
 				>{m.loadedLibraries()}
-				<span class="badge variant-soft-primary">{data.loadedLibrariesTable.meta.count}</span>
+				<span class="badge preset-tonal-primary">{data.loadedLibrariesTable.meta.count}</span>
 				{#if availableUpdatesCount > 0}
-					<span class="badge variant-soft-success"
+					<span class="badge preset-tonal-success"
 						>{availableUpdatesCount} <i class="fa-solid fa-circle-up ml-1"></i></span
 					>
 				{/if}
 			</Tab>
 		{:else}
-			<div class="card p-4 variant-soft-secondary w-full m-4">
+			<div class="card p-4 preset-tonal-secondary w-full m-4">
 				<i class="fa-solid fa-info-circle mr-2"></i>
 				{m.currentlyNoLoadedLibraries()}.
 			</div>
@@ -74,7 +74,7 @@
 				{/if}
 			
 			{/snippet}
-	</TabGroup>
+	</Tabs>
 </div>
 {#if tabSet === 0 && page.data.user.is_admin}
 	<div class="card bg-white p-4 mt-4 shadow-sm">
@@ -111,7 +111,7 @@
 					/>
 
 					<button
-						class="btn variant-filled-primary font-semibold w-full"
+						class="btn preset-filled-primary-500 font-semibold w-full"
 						data-testid="save-button"
 						type="submit">{m.add()}</button
 					>

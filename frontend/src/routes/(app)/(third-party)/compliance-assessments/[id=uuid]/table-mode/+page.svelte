@@ -14,18 +14,12 @@
 	import { m } from '$paraglide/messages';
 	import {
 		Accordion,
-		AccordionItem,
-		getModalStore,
-		RadioGroup,
-		RadioItem,
-		SlideToggle,
 		type ModalComponent,
 		type ModalSettings,
-		type ModalStore
-	} from '@skeletonlabs/skeleton';
+		type ModalStore, Segment, Switch, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { complianceResultColorMap } from '$lib/utils/constants';
 
@@ -288,7 +282,7 @@
 					{:else}
 						<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
 					{/if}
-					<SlideToggle
+					<Switch
 						name="questionnaireToggle"
 						class="flex flex-row items-center justify-center"
 						active="bg-primary-500"
@@ -301,7 +295,7 @@
 						{:else}
 							<p class="font-bold text-sm">{m.questionnaireMode()}</p>
 						{/if}
-					</SlideToggle>
+					</Switch>
 				</div>
 			</div>
 		{/if}
@@ -329,7 +323,7 @@
 				{#if requirementAssessment.assessable}
 					{#if data.requirements[i].annotation || requirementAssessment.mapping_inference.result}
 						<div
-							class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto w-full"
+							class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto w-full"
 						>
 							<h2 class="font-semibold text-lg flex flex-row justify-between">
 								<div>
@@ -433,9 +427,9 @@
 							<div class="flex flex-row w-full space-x-2 my-4">
 								<div class="flex flex-col items-center w-1/2">
 									<p class="flex items-center font-semibold text-blue-600 italic">{m.status()}</p>
-									<RadioGroup class="w-full flex-wrap items-center">
+									<Segment class="w-full flex-wrap items-center">
 										{#each status_options as option}
-											<RadioItem
+											<Segment.Item
 												class="h-full"
 												id={option.id}
 												active={addColor(
@@ -450,18 +444,18 @@
 														requirementAssessment.status === option.id ? 'to_do' : option.id;
 													requirementAssessment.status = newStatus;
 													await update(requirementAssessment, 'status');
-												}}>{option.label}</RadioItem
+												}}>{option.label}</Segment.Item
 											>
 										{/each}
-									</RadioGroup>
+									</Segment>
 								</div>
 								<div class="flex flex-col items-center w-1/2">
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
 									</p>
-									<RadioGroup class="w-full flex-wrap items-center">
+									<Segment class="w-full flex-wrap items-center">
 										{#each result_options as option}
-											<RadioItem
+											<Segment.Item
 												class="h-full"
 												active={addColor(
 													requirementAssessment.result,
@@ -478,9 +472,9 @@
 													await update(requirementAssessment, 'result'); // Update result for both select and deselect
 												}}
 												>{option.label}
-											</RadioItem>
+											</Segment.Item>
 										{/each}
-									</RadioGroup>
+									</Segment>
 								</div>
 							</div>
 						{/if}
@@ -512,13 +506,13 @@
 												<p class="text-gray-400 italic">{m.noAnswer()}</p>
 											{/if}
 										{:else if question.type === 'unique_choice'}
-											<RadioGroup
+											<Segment
 												class="flex-col"
-												active="variant-filled-primary"
-												hover="hover:variant-soft-primary"
+												active="preset-filled-primary-500"
+												hover="hover:preset-tonal-primary"
 											>
 												{#each question.choices as option}
-													<RadioItem
+													<Segment.Item
 														class="shadow-md flex"
 														bind:group={requirementAssessment.answers[urn]}
 														name="question"
@@ -536,12 +530,12 @@
 															);
 														}}
 														><span class="text-left">{option.value}</span>
-													</RadioItem>
+													</Segment.Item>
 												{/each}
-											</RadioGroup>
+											</Segment>
 										{:else if question.type === 'multiple_choice'}
 											<div
-												class="flex flex-col gap-1 p-1 bg-surface-200-700-token border-token border-surface-400-500-token rounded-token"
+												class="flex flex-col gap-1 p-1 bg-surface-200-800 border border-surface-500 rounded-base"
 											>
 												{#each question.choices as option}
 													<button
@@ -549,8 +543,8 @@
 														name="question"
 														class="shadow-md p-1
 															{requirementAssessment.answers[urn] && requirementAssessment.answers[urn].includes(option.urn)
-															? 'variant-filled-primary rounded-token'
-															: 'hover:variant-soft-primary bg-surface-200-700-token rounded-token'}"
+															? 'preset-filled-primary-500 rounded-base'
+															: 'hover:preset-tonal-primary bg-surface-200-800 rounded-base'}"
 														onclick={async () => {
 															// Initialize the array if it hasn't been already.
 															if (!Array.isArray(requirementAssessment.answers[urn])) {
@@ -664,7 +658,7 @@
 							{:else if data.compliance_assessment.show_documentation_score && requirementAssessment.is_scored}
 								<div class="flex flex-row items-center space-x-2 w-full">
 									<span>{m.implementationScoreResult()}</span>
-									<ProgressRadial
+									<ProgressRing
 										stroke={100}
 										meter={displayScoreColor(
 											requirementAssessment.score,
@@ -676,9 +670,9 @@
 										width="w-10"
 									>
 										{requirementAssessment.score ?? '--'}
-									</ProgressRadial>
+									</ProgressRing>
 									<span>{m.documentationScoreResult()}</span>
-									<ProgressRadial
+									<ProgressRing
 										stroke={100}
 										meter={displayScoreColor(
 											requirementAssessment.documentation_score,
@@ -690,12 +684,12 @@
 										width="w-10"
 									>
 										{requirementAssessment.documentation_score ?? '--'}
-									</ProgressRadial>
+									</ProgressRing>
 								</div>
 							{:else if requirementAssessment.is_scored}
 								<div class="flex flex-row items-center space-x-2 w-full">
 									<span>{m.scoreResult()}</span>
-									<ProgressRadial
+									<ProgressRing
 										stroke={100}
 										meter={displayScoreColor(
 											requirementAssessment.score,
@@ -707,7 +701,7 @@
 										width="w-10"
 									>
 										{requirementAssessment.score ?? '--'}
-									</ProgressRadial>
+									</ProgressRing>
 								</div>
 							{/if}
 							<Accordion regionCaret="flex">
@@ -718,7 +712,7 @@
 										<p class="text-gray-400 italic">{m.noObservation()}</p>
 									{/if}
 								{:else}
-									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
+									<Accordion.Item caretOpen="rotate-0" caretClosed="-rotate-90">
 										{#snippet summary()}
 																				<p class="flex">{m.observation()}</p>
 																			{/snippet}
@@ -756,18 +750,18 @@
 												</div>
 											
 																			{/snippet}
-									</AccordionItem>
+									</Accordion.Item>
 								{/if}
 								{#if requirementAssessment.evidences.length === 0 && shallow}
 									<p class="text-gray-400 italic">{m.noEvidences()}</p>
 								{:else}
-									<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
+									<Accordion.Item caretOpen="rotate-0" caretClosed="-rotate-90">
 										{#snippet summary()}
 																				<p class="flex items-center space-x-2">
 													<span>{m.evidence()}</span>
 													{#key addedEvidence}
 														{#if requirementAssessment.evidences != null}
-															<span class="badge variant-soft-primary"
+															<span class="badge preset-tonal-primary"
 																>{requirementAssessment.evidences.length}</span
 															>
 														{/if}
@@ -779,14 +773,14 @@
 												<div class="flex flex-row space-x-2 items-center">
 													{#if !shallow}
 														<button
-															class="btn variant-filled-primary self-start"
+															class="btn preset-filled-primary-500 self-start"
 															onclick={() =>
 															modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
 															type="button"
 															><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
 														>
 														<button
-															class="btn variant-filled-secondary self-start"
+															class="btn preset-filled-secondary-500 self-start"
 															type="button"
 															onclick={() => modalUpdateForm(requirementAssessment)}
 															><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
@@ -808,7 +802,7 @@
 												</div>
 											
 																			{/snippet}
-									</AccordionItem>
+									</Accordion.Item>
 								{/if}
 							</Accordion>
 						</div>

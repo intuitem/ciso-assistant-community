@@ -3,8 +3,6 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { m } from '$paraglide/messages';
-	import { tableSourceMapper } from '@skeletonlabs/skeleton';
-
 	let { data } = $props();
 
 	const appliedControlsHead = {

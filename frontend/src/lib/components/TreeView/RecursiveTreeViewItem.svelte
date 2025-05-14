@@ -1,7 +1,7 @@
 <script lang="ts">
 	import TreeViewItem from './TreeViewItem.svelte';
 	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton';
+	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 
 	// this can't be passed using context, since we have to pass it to recursive children.
