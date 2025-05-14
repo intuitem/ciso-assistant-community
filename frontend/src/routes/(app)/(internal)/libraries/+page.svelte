@@ -8,31 +8,34 @@
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { Tab, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 
 	let { data, ...rest } = $props();
 
-	let tabSet: number = $state(data.loadedLibrariesTable.meta.count > 0 ? 0 : 1);
+	let group: 'stored' | 'loaded' = $state(
+		data.loadedLibrariesTable.meta.count > 0 ? 'stored' : 'loaded'
+	);
 
 	let fileResetSignal = $state(false);
 
 	let availableUpdatesCount = $derived(data?.updatableLibraries?.length);
 
 	run(() => {
-		if (data.loadedLibrariesTable.meta.count === 0) tabSet = 0;
+		if (data.loadedLibrariesTable.meta.count === 0) group = 'stored';
 	});
 </script>
 
 <div class="card bg-white shadow-sm">
-	<Tabs>
-		{#if data.loadedLibrariesTable.meta.count > 0}
-			<Tab bind:group={tabSet} value={0}
+	<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
+		{#snippet list()}
+			<Tabs.Control value="stored"
 				>{m.librariesStore()}
-				<span class="badge preset-tonal-primary">{data.storedLibrariesTable.meta.count}</span></Tab
+				<span class="badge preset-tonal-primary">{data.storedLibrariesTable.meta.count}</span
+				></Tabs.Control
 			>
-			<Tab bind:group={tabSet} value={1}
+			<Tabs.Control value="loaded"
 				>{m.loadedLibraries()}
 				<span class="badge preset-tonal-primary">{data.loadedLibrariesTable.meta.count}</span>
 				{#if availableUpdatesCount > 0}
@@ -40,16 +43,17 @@
 						>{availableUpdatesCount} <i class="fa-solid fa-circle-up ml-1"></i></span
 					>
 				{/if}
-			</Tab>
-		{:else}
+			</Tabs.Control>
+		{/snippet}
+		{#if data.loadedLibrariesTable.meta.count < 0}
 			<div class="card p-4 preset-tonal-secondary w-full m-4">
 				<i class="fa-solid fa-info-circle mr-2"></i>
 				{m.currentlyNoLoadedLibraries()}.
 			</div>
 		{/if}
-		{#snippet panel()}
-			<!-- storedlibraries -->
-			{#if tabSet === 0}
+
+		{#snippet content()}
+			<Tabs.Panel value="stored">
 				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 					<i class="fa-solid fa-info-circle"></i>
 					<p>{m.librariesCanOnlyBeLoadedByAdmin()}</p>
@@ -60,9 +64,8 @@
 					deleteForm={data.deleteForm}
 					server={false}
 				/>
-			{/if}
-			{#if tabSet === 1}
-				<!-- loadedlibraries -->
+			</Tabs.Panel>
+			<Tabs.Panel value="loaded">
 				<ModelTable
 					source={data.loadedLibrariesTable}
 					URLModel="loaded-libraries"
@@ -70,11 +73,11 @@
 					detailQueryParameter="loaded"
 					server={false}
 				/>
-			{/if}
+			</Tabs.Panel>
 		{/snippet}
 	</Tabs>
 </div>
-{#if tabSet === 0 && page.data.user.is_admin}
+{#if group === 'stored' && page.data.user.is_admin}
 	<div class="card bg-white p-4 mt-4 shadow-sm">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>
