@@ -59,6 +59,7 @@
 		height: 0;
 		width: 0;
 	}
+	/*
 	th span:before {
 		@apply border-b-surface-200 mt-0.5;
 	}
@@ -71,4 +72,5 @@
 	th.active span.desc:after {
 		@apply border-t-surface-700;
 	}
+  */
 </style>
