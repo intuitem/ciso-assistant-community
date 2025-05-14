@@ -2,9 +2,6 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	let cEmphasis = $state('');
-	if (emphasis) {
-		cEmphasis = 'border border-y-0 border-r-0 border-l-2 border-l-violet-600';
-	}
 	interface Props {
 		count?: string;
 		label: string;
@@ -25,6 +22,10 @@
 		emphasis = false,
 		customClass = ''
 	}: Props = $props();
+
+	if (emphasis) {
+		cEmphasis = 'border border-y-0 border-r-0 border-l-2 border-l-violet-600';
+	}
 </script>
 
 {#if href && href !== '#'}
