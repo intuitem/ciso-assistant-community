@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Tab, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -31,7 +31,7 @@
 		Object.entries(data.data).map(([key, value]) => {
 			return {
 				id: key,
-				tabSet: 0,
+				group: 'compliance_assessments',
 				...(value as Record<string, any>),
 				compliance_assessments: {
 					...value.compliance_assessments,
@@ -61,43 +61,51 @@
 			>
 				{perimeter.perimeter.folder.str}/{perimeter.perimeter.name}
 			</Anchor>
-			<Tabs>
-				<Tab bind:group={perimeter.tabSet} name="compliance_assessments_tab" value={0}
-					>{m.complianceAssessments()}
-					{#if perimeter.compliance_assessments.errors.length > 0}
-						<span class="badge preset-tonal-error"
-							>{perimeter.compliance_assessments.errors.length}</span
-						>
-					{/if}
-					{#if perimeter.compliance_assessments.warnings.length > 0}
-						<span class="badge preset-tonal-warning"
-							>{perimeter.compliance_assessments.warnings.length}</span
-						>
-					{/if}
-					{#if perimeter.compliance_assessments.info.length > 0}
-						<span class="badge preset-tonal-secondary"
-							>{perimeter.compliance_assessments.info.length}</span
-						>
-					{/if}
-				</Tab>
-				<Tab bind:group={perimeter.tabSet} name="risk_assessments_tab" value={1}
-					>{m.riskAssessments()}
-					{#if perimeter.risk_assessments.errors.length > 0}
-						<span class="badge preset-tonal-error">{perimeter.risk_assessments.errors.length}</span>
-					{/if}
-					{#if perimeter.risk_assessments.warnings.length > 0}
-						<span class="badge preset-tonal-warning"
-							>{perimeter.risk_assessments.warnings.length}</span
-						>
-					{/if}
-					{#if perimeter.risk_assessments.info.length > 0}
-						<span class="badge preset-tonal-secondary"
-							>{perimeter.risk_assessments.info.length}</span
-						>
-					{/if}
-				</Tab>
-				{#snippet panel()}
-					{#if perimeter.tabSet === 0}
+			<Tabs
+				value={perimeter.group}
+				onValueChange={(e) => (perimeter.group = e.value)}
+				listJustify="justify-center"
+			>
+				{#snippet list()}
+					<Tabs.Control value="compliance_assessments"
+						>{m.complianceAssessments()}
+						{#if perimeter.compliance_assessments.errors.length > 0}
+							<span class="badge preset-tonal-error"
+								>{perimeter.compliance_assessments.errors.length}</span
+							>
+						{/if}
+						{#if perimeter.compliance_assessments.warnings.length > 0}
+							<span class="badge preset-tonal-warning"
+								>{perimeter.compliance_assessments.warnings.length}</span
+							>
+						{/if}
+						{#if perimeter.compliance_assessments.info.length > 0}
+							<span class="badge preset-tonal-secondary"
+								>{perimeter.compliance_assessments.info.length}</span
+							>
+						{/if}
+					</Tabs.Control>
+					<Tabs.Control value="risk_assessments"
+						>{m.riskAssessments()}
+						{#if perimeter.risk_assessments.errors.length > 0}
+							<span class="badge preset-tonal-error"
+								>{perimeter.risk_assessments.errors.length}</span
+							>
+						{/if}
+						{#if perimeter.risk_assessments.warnings.length > 0}
+							<span class="badge preset-tonal-warning"
+								>{perimeter.risk_assessments.warnings.length}</span
+							>
+						{/if}
+						{#if perimeter.risk_assessments.info.length > 0}
+							<span class="badge preset-tonal-secondary"
+								>{perimeter.risk_assessments.info.length}</span
+							>
+						{/if}
+					</Tabs.Control>
+				{/snippet}
+				{#snippet content()}
+					<Tabs.Panel value="compliance_assessments">
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each compliance_assessments as compliance_assessment, index}
 								<li class="h4 font-semibold mb-1">
@@ -189,8 +197,8 @@
 								{/if}
 							{/each}
 						</ul>
-					{/if}
-					{#if perimeter.tabSet === 1}
+					</Tabs.Panel>
+					<Tabs.Panel value="risk_assessments">
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each risk_assessments as risk_assessment, index}
 								<li class="h4 font-semibold mb-1">
@@ -279,7 +287,7 @@
 								{/if}
 							{/each}
 						</ul>
-					{/if}
+					</Tabs.Panel>
 				{/snippet}
 			</Tabs>
 		</div>
