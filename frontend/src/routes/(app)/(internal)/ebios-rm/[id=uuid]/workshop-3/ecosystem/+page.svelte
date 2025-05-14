@@ -8,7 +8,7 @@
 	import { m } from '$paraglide/messages';
 	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -78,7 +78,7 @@
 		source={data.table}
 		deleteForm={data.deleteForm}
 		{URLModel}
-		baseEndpoint="/stakeholders?ebios_rm_study={$page.params.id}"
+		baseEndpoint="/stakeholders?ebios_rm_study={page.params.id}"
 	>
 		{#snippet addButton()}
 				<div >

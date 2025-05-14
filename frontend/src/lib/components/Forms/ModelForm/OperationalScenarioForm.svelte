@@ -6,7 +6,7 @@
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -29,7 +29,7 @@
 	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
 
 	let activeActivity: string | null = $state(null);
-	$page.url.searchParams.forEach((value, key) => {
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {

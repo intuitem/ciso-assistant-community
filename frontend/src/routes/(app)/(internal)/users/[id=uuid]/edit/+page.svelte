@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { UserEditSchema } from '$lib/utils/schemas';
 	import type { PageData } from './$types';
@@ -22,7 +22,7 @@
 		<p class="text-gray-500 text-sm">
 			{m.setTemporaryPassword1()}
 			<a
-				href="{$page.url.pathname}/set-password"
+				href="{page.url.pathname}/set-password"
 				class="text-primary-700 hover:text-primary-500"
 				data-testid="set-password-btn">{m.setTemporaryPassword()}</a
 			>. {m.setTemporaryPassword2()}.

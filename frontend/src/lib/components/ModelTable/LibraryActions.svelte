@@ -3,7 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		meta: any;
@@ -51,7 +51,7 @@
 				/>
 			</svg>
 		</div>
-	{:else if $page.data.user.is_admin}
+	{:else if page.data.user.is_admin}
 		<span class="hover:text-primary-500">
 			<form
 				method="post"

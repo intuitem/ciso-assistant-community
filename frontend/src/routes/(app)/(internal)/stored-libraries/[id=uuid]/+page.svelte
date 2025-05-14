@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
@@ -123,7 +123,7 @@
 							}}
 							onsubmit={handleSubmit}
 						>
-							{#if $page.data.user.is_admin}
+							{#if page.data.user.is_admin}
 								<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
 									<i class="fa-solid fa-file-import"></i>
 								</button>

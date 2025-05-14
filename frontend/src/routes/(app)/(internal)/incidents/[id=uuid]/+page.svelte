@@ -19,7 +19,7 @@
 	import { listViewFields } from '$lib/utils/table';
 	import { browser } from '$app/environment';
 	import { goto as _goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime.js';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
@@ -110,7 +110,7 @@
 	run(() => {
 		if (browser || invalidateTable) {
 			handler.invalidate();
-			_goto($page.url);
+			_goto(page.url);
 			invalidateTable = false;
 		}
 	});
@@ -165,7 +165,7 @@
 		}
 	});
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
@@ -305,7 +305,7 @@
 								model={model.info}
 								URLModel={actionsURLModel}
 								detailURL={`/${actionsURLModel}/${meta.id}`}
-								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`}
+								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
 								{row}
 								hasBody={props.actionsBody}
 								identifierField={'id'}

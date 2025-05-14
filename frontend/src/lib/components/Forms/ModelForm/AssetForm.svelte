@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -36,7 +36,7 @@
 	}: Props = $props();
 
 	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
-	const scale: SecurityObjectiveScale = $page.data.settings.security_objective_scale;
+	const scale: SecurityObjectiveScale = page.data.settings.security_objective_scale;
 	const securityObjectiveScaleMap: string[] = SECURITY_OBJECTIVE_SCALE_MAP[scale];
 
 	async function fetchSecurityObjectives(): Promise<string[]> {

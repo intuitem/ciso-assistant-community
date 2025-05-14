@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { displayOnlyAssessableNodes } from './store';
 
@@ -44,7 +44,7 @@
 
 
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -91,11 +91,11 @@
 		if (document.activeElement?.tagName !== 'BODY') return; // otherwise it will interfere with input fields
 		if (event.key === 'f') {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/flash-mode`);
+			goto(`${page.url.pathname}/flash-mode`);
 		}
 		if (event.key === 't') {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/table-mode`);
+			goto(`${page.url.pathname}/table-mode`);
 		}
 	}
 
@@ -254,7 +254,7 @@
 		action: string
 	): Promise<void> {
 		const requirementAssessmentsSync = await fetch(
-			`/compliance-assessments/${$page.params.id}/sync-to-actions`,
+			`/compliance-assessments/${page.params.id}/sync-to-actions`,
 			{ method: 'POST' }
 		).then((response) => {
 			if (response.ok) {
@@ -378,7 +378,7 @@
 															(item) => item.field === key
 														)?.urlModel
 													}/${val.id}`}
-													{#if !$page.data.user.is_third_party}
+													{#if !page.data.user.is_third_party}
 														<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 													{:else}
 														{val.str}
@@ -395,7 +395,7 @@
 											(item) => item.field === key
 										)?.urlModel
 									}/${value.id}`}
-									{#if !$page.data.user.is_third_party}
+									{#if !page.data.user.is_third_party}
 										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 									{:else}
 										{value.str}
@@ -463,7 +463,7 @@
 					data-popup="popupDownload"
 				>
 					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-					{#if !$page.data.user.is_third_party}
+					{#if !page.data.user.is_third_party}
 						<a
 							href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
 							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
@@ -477,7 +477,7 @@
 						href="/compliance-assessments/{data.compliance_assessment.id}/export"
 						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
 					>
-					{#if !$page.data.user.is_third_party}
+					{#if !page.data.user.is_third_party}
 						<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 						<a
 							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/csv"
@@ -492,36 +492,36 @@
 				{#if canEditObject}
 					<Anchor
 						breadcrumbAction="push"
-						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+						href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
 						class="btn variant-filled-primary h-fit"
 						data-testid="edit-button"
 						><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 					>
 				{/if}
 			</div>
-			{#if !$page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party}
 				<Anchor
-					href={`${$page.url.pathname}/action-plan`}
+					href={`${page.url.pathname}/action-plan`}
 					class="btn variant-filled-primary h-fit"
 					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 			{/if}
 			<span class="pt-4 text-sm">{m.powerUps()}</span>
-			{#if !$page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party}
 				<Anchor
 					breadcrumbAction="push"
-					href={`${$page.url.pathname}/flash-mode`}
+					href={`${page.url.pathname}/flash-mode`}
 					class="btn text-gray-100 bg-gradient-to-r from-indigo-500 to-violet-500 h-fit"
 					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 				>
 			{/if}
 			<Anchor
 				breadcrumbAction="push"
-				href={`${$page.url.pathname}/table-mode`}
+				href={`${page.url.pathname}/table-mode`}
 				class="btn text-gray-100 bg-gradient-to-r from-blue-500 to-sky-500 h-fit"
 				><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
 			>
-			{#if !$page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party}
 				<button
 					class="btn text-gray-100 bg-gradient-to-r from-teal-500 to-emerald-500 h-fit"
 					onclick={() => modalCreateForm()}
@@ -549,7 +549,7 @@
 				{m.syncToAppliedControls()}
 			</button>
 
-			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+			{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
 					class="btn text-gray-100 bg-gradient-to-r from-purple-500 to-fuchsia-500 h-fit"
 					onclick={() => {

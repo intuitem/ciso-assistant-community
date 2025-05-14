@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { PageData } from './$types';
 
@@ -13,7 +13,7 @@
 {#key data.form}
 	<ModelForm
 		form={data.form}
-		action="?/updateStakeholder&next={$page.url.searchParams.get('next')}"
+		action="?/updateStakeholder&next={page.url.searchParams.get('next')}"
 		object={data.object}
 		selectOptions={data.selectOptions}
 		model={data.model}

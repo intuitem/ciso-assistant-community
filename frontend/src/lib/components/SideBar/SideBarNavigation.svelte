@@ -4,12 +4,12 @@
 	import SideBarItem from '$lib/components/SideBar/SideBarItem.svelte';
 	import SideBarCategory from '$lib/components/SideBar/SideBarCategory.svelte';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { driverInstance } from '$lib/utils/stores';
 
 
-	const user = $page.data.user;
+	const user = page.data.user;
 
 	const items = navData.items
 		.map((item) => {

@@ -5,7 +5,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { m } from '$paraglide/messages';
@@ -66,7 +66,7 @@
 		attachment = data.data.attachment ? await fetchAttachment() : undefined;
 	});
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',

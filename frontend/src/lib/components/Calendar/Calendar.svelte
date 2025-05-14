@@ -4,7 +4,7 @@
 	import { fly } from 'svelte/transition';
 	import Day from './Day.svelte';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { showAllEvents } from '$lib/utils/stores';
 	import { writable } from 'svelte/store';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -75,7 +75,7 @@
 		}
 	}
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	let filteredInfo = $state(info);
 
 	let daysInMonth = $derived(new Date(year, month, 0).getDate());

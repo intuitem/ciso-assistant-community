@@ -4,7 +4,7 @@
 	import Cell from './Cell.svelte';
 	import { buildRiskMatrix, reverseCols, reverseRows, transpose } from './utils';
 
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { isDark } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
@@ -37,13 +37,13 @@
 		useBubbles = false,
 		data = undefined,
 		dataItemComponent = undefined,
-		swapAxes = $page.data.settings.risk_matrix_swap_axes ?? false,
-		flipVertical = $page.data.settings.risk_matrix_flip_vertical ?? false,
-		labelStandard = $page.data.settings.risk_matrix_labels ?? 'ISO'
+		swapAxes = page.data.settings.risk_matrix_swap_axes ?? false,
+		flipVertical = page.data.settings.risk_matrix_flip_vertical ?? false,
+		labelStandard = page.data.settings.risk_matrix_labels ?? 'ISO'
 	}: Props = $props();
 
 	run(() => {
-		console.log($page.data.settings);
+		console.log(page.data.settings);
 	});
 
 	const parsedRiskMatrix = JSON.parse(riskMatrix.json_definition);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -23,41 +23,41 @@
 			{
 				title: safeTranslate(m.ebiosWs1_1()),
 				status: data.data.meta.workshops[0].steps[0].status,
-				href: `${$page.url.pathname}/workshop-1/ebios-rm-study?activity=one&next=${$page.url.pathname}`
+				href: `${page.url.pathname}/workshop-1/ebios-rm-study?activity=one&next=${page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_2()),
 				status: data.data.meta.workshops[0].steps[1].status,
-				href: `${$page.url.pathname}/workshop-1/ebios-rm-study?activity=two&next=${$page.url.pathname}`
+				href: `${page.url.pathname}/workshop-1/ebios-rm-study?activity=two&next=${page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_3()),
 				status: data.data.meta.workshops[0].steps[2].status,
-				href: `${$page.url.pathname}/workshop-1/feared-events?next=${$page.url.pathname}`
+				href: `${page.url.pathname}/workshop-1/feared-events?next=${page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs1_4()),
 				status: data.data.meta.workshops[0].steps[3].status,
-				href: `${$page.url.pathname}/workshop-1/baseline?next=${$page.url.pathname}`
+				href: `${page.url.pathname}/workshop-1/baseline?next=${page.url.pathname}`
 			}
 		],
 		ws2: [
 			{
 				title: safeTranslate(m.ebiosWs2_1()),
 				status: data.data.meta.workshops[1].steps[0].status,
-				href: `${$page.url.pathname}/workshop-2/ro-to?activity=one&next=${$page.url.pathname}`
+				href: `${page.url.pathname}/workshop-2/ro-to?activity=one&next=${page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_2()),
 				status: data.data.meta.workshops[1].steps[1].status,
-				href: `${$page.url.pathname}/workshop-2/ro-to?activity=two&next=${$page.url.pathname}`,
+				href: `${page.url.pathname}/workshop-2/ro-to?activity=two&next=${page.url.pathname}`,
 				disabled: data.data.roto_count < 1,
 				tooltip: safeTranslate(m.ebiosWs2_2_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs2_3()),
 				status: data.data.meta.workshops[1].steps[2].status,
-				href: `${$page.url.pathname}/workshop-2/ro-to?activity=three&next=${$page.url.pathname}`,
+				href: `${page.url.pathname}/workshop-2/ro-to?activity=three&next=${page.url.pathname}`,
 				disabled: data.data.roto_count < 1,
 				tooltip: safeTranslate(m.ebiosWs2_3_tooltip())
 			}
@@ -66,33 +66,33 @@
 			{
 				title: safeTranslate(m.ebiosWs3_1()),
 				status: data.data.meta.workshops[2].steps[0].status,
-				href: `${$page.url.pathname}/workshop-3/ecosystem?activity=one&next=${$page.url.pathname}`
+				href: `${page.url.pathname}/workshop-3/ecosystem?activity=one&next=${page.url.pathname}`
 			},
 			{
 				title: safeTranslate(m.ebiosWs3_2()),
 				status: data.data.meta.workshops[2].steps[1].status,
-				href: `${$page.url.pathname}/workshop-3/strategic-scenarios?next=${$page.url.pathname}`,
+				href: `${page.url.pathname}/workshop-3/strategic-scenarios?next=${page.url.pathname}`,
 				disabled: data.data.selected_roto_count < 1,
 				tooltip: safeTranslate(m.ebiosWs3_2_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs3_3()),
 				status: data.data.meta.workshops[2].steps[2].status,
-				href: `${$page.url.pathname}/workshop-3/ecosystem?activity=three&next=${$page.url.pathname}`
+				href: `${page.url.pathname}/workshop-3/ecosystem?activity=three&next=${page.url.pathname}`
 			}
 		],
 		ws4: [
 			{
 				title: safeTranslate(m.ebiosWs4_1()),
 				status: data.data.meta.workshops[3].steps[0].status,
-				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=one&next=${$page.url.pathname}`,
+				href: `${page.url.pathname}/workshop-4/operational-scenario?activity=one&next=${page.url.pathname}`,
 				disabled: data.data.selected_attack_path_count < 1,
 				tooltip: safeTranslate(m.ebiosWs4_1_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs4_2()),
 				status: data.data.meta.workshops[3].steps[1].status,
-				href: `${$page.url.pathname}/workshop-4/operational-scenario?activity=two&next=${$page.url.pathname}`,
+				href: `${page.url.pathname}/workshop-4/operational-scenario?activity=two&next=${page.url.pathname}`,
 				disabled: data.data.operational_scenario_count < 1,
 				tooltip: safeTranslate(m.ebiosWs4_2_tooltip())
 			}
@@ -106,28 +106,28 @@
 			{
 				title: safeTranslate(m.ebiosWs5_2()),
 				status: data.data.meta.workshops[4].steps[1].status,
-				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=two&next=${$page.url.pathname}`,
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=two&next=${page.url.pathname}`,
 				disabled: data.data.last_risk_assessment == null,
 				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_3()),
 				status: data.data.meta.workshops[4].steps[2].status,
-				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=three&next=${$page.url.pathname}`,
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=three&next=${page.url.pathname}`,
 				disabled: data.data.last_risk_assessment == null,
 				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_4()),
 				status: data.data.meta.workshops[4].steps[3].status,
-				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=four&next=${$page.url.pathname}`,
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}?activity=four&next=${page.url.pathname}`,
 				disabled: data.data.last_risk_assessment == null,
 				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			},
 			{
 				title: safeTranslate(m.ebiosWs5_5()),
 				status: data.data.meta.workshops[4].steps[4].status,
-				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/remediation-plan?next=${$page.url.pathname}`,
+				href: `/risk-assessments/${data.data.last_risk_assessment?.id}/remediation-plan?next=${page.url.pathname}`,
 				disabled: data.data.last_risk_assessment == null,
 				tooltip: safeTranslate(m.ebiosWs5_tooltip())
 			}
@@ -219,7 +219,7 @@
 						<div >
 					<a
 						class="text-orange-600 hover:text-purple-600 font-medium"
-						href={`${$page.url.pathname}/visual/`}
+						href={`${page.url.pathname}/visual/`}
 						><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded">New</span><i
 							class="fa-solid fa-chart-diagram mr-2"
 						></i><span class="font-semibold">{m.visualAnalysis()}</span></a

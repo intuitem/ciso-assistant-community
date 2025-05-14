@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { goto as _goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { CUSTOM_ACTIONS_COMPONENT, FIELD_COMPONENT_MAP, URL_MODEL_MAP } from '$lib/utils/crud';
@@ -154,7 +154,7 @@
 
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
-	const user = $page.data.user;
+	const user = page.data.user;
 
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
@@ -200,7 +200,7 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type);
 
-	const filterInitialData = $page.url.searchParams.entries();
+	const filterInitialData = page.url.searchParams.entries();
 
 	const _form = superForm(defaults(filterInitialData, zod(z.object({}))), {
 		SPA: true,
@@ -233,7 +233,7 @@
 
 	// Initialize filter values from URL search params
 	for (const field of filteredFields)
-		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
+		filterValues[field] = page.url.searchParams.getAll(field).map((value) => ({ value }));
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
@@ -245,16 +245,16 @@
 				filterValues[field] ? filterValues[field].map((v: Record<string, any>) => v.value) : [],
 				field
 			);
-			$page.url.searchParams.delete(field);
+			page.url.searchParams.delete(field);
 			if (filterValues[field] && filterValues[field].length > 0) {
 				for (const value of filterValues[field]) {
-					$page.url.searchParams.append(field, value.value);
+					page.url.searchParams.append(field, value.value);
 				}
 			}
 		}
 		if (browser || invalidateTable) {
 			handler.invalidate();
-			_goto($page.url);
+			_goto(page.url);
 			invalidateTable = false;
 		}
 	});
@@ -262,23 +262,23 @@
 	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	let canCreateObject = $derived(model
-		? $page.params.id
+		? page.params.id
 			? canPerformAction({
 					user,
 					action: 'add',
 					model: model.name,
 					domain:
 						folderId ||
-						$page.data?.data?.folder?.id ||
-						$page.data?.data?.folder ||
-						$page.params.id ||
+						page.data?.data?.folder?.id ||
+						page.data?.data?.folder ||
+						page.params.id ||
 						user.root_folder_id
 				})
 			: Object.hasOwn(user.permissions, `add_${model.name}`)
 		: false);
 	let contextMenuCanEditObject =
 		$derived((model
-			? $page.params.id
+			? page.params.id
 				? canPerformAction({
 						user,
 						action: 'change',
@@ -497,7 +497,7 @@
 													URLModel={actionsURLModel}
 													detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
 													editURL={!(row.meta.builtin || row.meta.urn)
-														? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`
+														? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 														: undefined}
 													{row}
 													hasBody={actionsBody}
@@ -556,7 +556,7 @@
 							class="flex h-10 select-none items-center rounded-sm py-3 pl-3 pr-1.5 text-sm font-medium outline-none !ring-0 !ring-transparent data-[highlighted]:bg-surface-50"
 						>
 							<Anchor
-								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`}
+								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
 								class="flex items-cente w-full h-full cursor-default outline-none !ring-0 !ring-transparent"
 								>{m.edit()}</Anchor
 							>

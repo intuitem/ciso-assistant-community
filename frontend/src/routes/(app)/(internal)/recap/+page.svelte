@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
@@ -18,7 +18,7 @@
 		'to_do'
 	] as const;
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	interface Props {
 		data: PageData;

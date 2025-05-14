@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import {
@@ -72,7 +72,7 @@
 	const score = data.requirementAssessment.score;
 	const documentationScore = data.requirementAssessment.documentation_score;
 
-	let tabSet = $state($page.data.user.is_third_party ? 1 : 0);
+	let tabSet = $state(page.data.user.is_third_party ? 1 : 0);
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
@@ -253,7 +253,7 @@
 	{/if}
 	<div>
 		<TabGroup>
-			{#if !$page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party}
 				<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
 					>{m.appliedControls()}
 				</Tab>
@@ -261,7 +261,7 @@
 			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
 			{#snippet panel()}
 					
-					{#if tabSet === 0 && !$page.data.user.is_third_party}
+					{#if tabSet === 0 && !page.data.user.is_third_party}
 						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 							<i class="fa-solid fa-info-circle"></i>
 							<p>{m.requirementAppliedControlHelpText()}</p>
@@ -273,7 +273,7 @@
 								source={data.tables['applied-controls']}
 								hideFilters={true}
 								URLModel="applied-controls"
-								baseEndpoint="/applied-controls?requirement_assessments={$page.data
+								baseEndpoint="/applied-controls?requirement_assessments={page.data
 									.requirementAssessment.id}"
 							/>
 						</div>
@@ -290,7 +290,7 @@
 								source={data.tables['evidences']}
 								hideFilters={true}
 								URLModel="evidences"
-								baseEndpoint="/evidences?requirement_assessments={$page.data.requirementAssessment
+								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
 									.id}"
 							/>
 						</div>

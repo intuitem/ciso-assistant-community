@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
@@ -11,7 +11,7 @@
 	let { item = [], sideBarVisibleItems }: Props = $props();
 
 	let classesActive = $derived((href: string) =>
-		href === $page.url.pathname
+		href === page.url.pathname
 			? 'bg-primary-100 text-primary-800'
 			: 'hover:bg-primary-50 text-gray-800 ');
 </script>

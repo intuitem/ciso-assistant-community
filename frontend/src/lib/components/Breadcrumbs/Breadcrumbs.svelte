@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { afterNavigate } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { breadcrumbs, type Breadcrumb } from '$lib/utils/breadcrumbs';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -23,9 +23,9 @@
 	function getPageTitle(): string {
 		// Check each source in priority order
 		const title =
-			$page.data.title ??
-			$page.data.str ??
-			$page.data.name ??
+			page.data.title ??
+			page.data.str ??
+			page.data.name ??
 			getBreadcrumbTitle() ??
 			getUrlModelTitle();
 
@@ -37,18 +37,18 @@
 	}
 
 	function getUrlModelTitle(): string | undefined {
-		const lastPathSegment = $page.url.pathname.split('/').pop() as string;
+		const lastPathSegment = page.url.pathname.split('/').pop() as string;
 		return URL_MODEL_MAP[lastPathSegment]?.localNamePlural;
 	}
 
 	afterNavigate(async () => {
-		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, $page.url.pathname);
+		$breadcrumbs = await trimBreadcrumbsToCurrentPath($breadcrumbs, page.url.pathname);
 	});
 
 	run(() => {
 		$pageTitle = getPageTitle();
 		if ($breadcrumbs.length < 2)
-			breadcrumbs.push([{ label: $pageTitle, href: $page.url.pathname }]);
+			breadcrumbs.push([{ label: $pageTitle, href: page.url.pathname }]);
 	});
 </script>
 

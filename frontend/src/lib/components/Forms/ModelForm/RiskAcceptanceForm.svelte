@@ -4,7 +4,7 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -35,9 +35,9 @@
 	cacheLock={cacheLocks['expiry_date']}
 	bind:cachedValue={formDataCache['expiry_date']}
 />
-{#if object.id && $page.data.user.id === object.approver}
+{#if object.id && page.data.user.id === object.approver}
 	<TextArea
-		disabled={$page.data.user.id !== object.approver}
+		disabled={page.data.user.id !== object.approver}
 		{form}
 		field="justification"
 		label={m.justification()}

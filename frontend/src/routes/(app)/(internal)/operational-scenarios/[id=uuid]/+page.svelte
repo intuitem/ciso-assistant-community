@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
@@ -14,7 +14,7 @@
 	pageTitle.set(m.operationalScenarioRefId({ refId: operationalScenario.ref_id }));
 
 	let activeActivity: string | null = $state(null);
-	$page.url.searchParams.forEach((value, key) => {
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -40,7 +40,7 @@
 		placement: 'bottom'
 	};
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	interface Props {
 		data: PageData;
@@ -86,7 +86,7 @@
 			</div>
 			{#if canEditObject(operationalScenario)}
 				<a
-					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
 					class="btn variant-filled-primary h-fit justify-self-end"
 				>
 					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -14,7 +14,7 @@
 	pageTitle.set(roto.risk_origin + ' - ' + roto.target_objective);
 
 	let activeActivity: string | null = $state(null);
-	$page.url.searchParams.forEach((value, key) => {
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -32,7 +32,7 @@
 		higly_relevant: 'bg-red-200 text-red-700'
 	};
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	interface Props {
 		data: PageData;
@@ -62,7 +62,7 @@
 			</Anchor>
 			{#if canEditObject(roto)}
 				<Anchor
-					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
 					class="btn variant-filled-primary h-fit"
 				>
 					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>

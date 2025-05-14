@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -49,7 +49,7 @@
 
 	let activeActivity: string | null = $state(null);
 
-	$page.url.searchParams.forEach((value, key) => {
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -78,7 +78,7 @@
 
 	let tabSet = $state(0);
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
@@ -116,7 +116,7 @@
 			</div>
 			{#if canEditObject}
 				<Anchor
-					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
+					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
 					class="btn variant-filled-primary h-fit"
 				>
 					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>
@@ -226,7 +226,7 @@
 												deleteForm={model.deleteForm}
 												URLModel={urlmodel}
 												canSelectObject={canEditObject}
-												baseEndpoint="/assets?ebios_rm_studies={$page.params.id}"
+												baseEndpoint="/assets?ebios_rm_studies={page.params.id}"
 											>
 												{#snippet selectButton()}
 																						<div >

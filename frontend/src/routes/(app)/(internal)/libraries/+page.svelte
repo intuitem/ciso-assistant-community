@@ -4,7 +4,7 @@
 	import { LibraryUploadSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -76,7 +76,7 @@
 			{/snippet}
 	</TabGroup>
 </div>
-{#if tabSet === 0 && $page.data.user.is_admin}
+{#if tabSet === 0 && page.data.user.is_admin}
 	<div class="card bg-white p-4 mt-4 shadow">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>

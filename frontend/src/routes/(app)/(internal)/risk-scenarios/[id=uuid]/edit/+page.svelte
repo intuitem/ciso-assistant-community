@@ -20,7 +20,7 @@
 	import RiskLevel from './RiskLevel.svelte';
 
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -106,7 +106,7 @@
 		}
 	});
 
-	const next = getSecureRedirect($page.url.searchParams.get('next'));
+	const next = getSecureRedirect(page.url.searchParams.get('next'));
 
 	const probabilityColorMap = data.riskMatrix.probability.map(
 		(probability) => probability.hexcolor
@@ -185,7 +185,7 @@
 					optionsExtraFields={[['folder', 'str']]}
 					field="assets"
 					optionsDetailedUrlParameters={[
-						['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						['scope_folder_id', page.data.scenario.perimeter.folder.id]
 					]}
 					label={m.assets()}
 				/>
@@ -194,7 +194,7 @@
 					multiple
 					optionsEndpoint="threats"
 					optionsDetailedUrlParameters={[
-						['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						['scope_folder_id', page.data.scenario.perimeter.folder.id]
 					]}
 					optionsExtraFields={[['folder', 'str']]}
 					optionsLabelField="auto"
@@ -206,7 +206,7 @@
 					form={_form}
 					optionsEndpoint="vulnerabilities"
 					optionsDetailedUrlParameters={[
-						['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+						['scope_folder_id', page.data.scenario.perimeter.folder.id]
 					]}
 					optionsExtraFields={[['folder', 'str']]}
 					field="vulnerabilities"
@@ -237,7 +237,7 @@
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
 									optionsDetailedUrlParameters={[
-										['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+										['scope_folder_id', page.data.scenario.perimeter.folder.id]
 									]}
 									field="existing_applied_controls"
 									label={m.existingControls()}
@@ -307,7 +307,7 @@
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
 									optionsDetailedUrlParameters={[
-										['scope_folder_id', $page.data.scenario.perimeter.folder.id]
+										['scope_folder_id', page.data.scenario.perimeter.folder.id]
 									]}
 									field="applied_controls"
 									label={m.extraAppliedControls()}

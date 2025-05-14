@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Command } from 'cmdk-sv';
 	import { onMount, onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -38,7 +38,7 @@
 
 	// Close command palette on route change
 	run(() => {
-		if ($page.url.pathname) {
+		if (page.url.pathname) {
 			commandPaletteOpen.set(false);
 		}
 	});

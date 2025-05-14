@@ -3,7 +3,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 	interface Props {
 		data: PageData;
@@ -16,7 +16,7 @@
 	{#snippet actions()}
 		<div  class="flex flex-col space-y-2">
 			<Anchor
-				href={`${$page.url.pathname}/visual`}
+				href={`${page.url.pathname}/visual`}
 				class="btn variant-filled-primary h-fit"
 				breadcrumbAction="push"><i class="fa-solid fa-stopwatch mr-2"></i>{m.impactOverTime()}</Anchor
 			>

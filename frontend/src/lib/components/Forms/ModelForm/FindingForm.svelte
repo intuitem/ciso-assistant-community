@@ -11,7 +11,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppliedControlSchema } from '$lib/utils/schemas';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 
@@ -54,7 +54,7 @@
 			props: {
 				form: defaults(
 					{
-						findings: [$page.data.object.id]
+						findings: [page.data.object.id]
 					},
 					zod(AppliedControlSchema)
 				),
@@ -141,7 +141,7 @@
 />
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
-		{#key $page.data}
+		{#key page.data}
 			<AutocompleteSelect
 				multiple
 				{form}

@@ -5,7 +5,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { loginSchema } from '$lib/utils/schemas';
 
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { redirectToProvider } from '$lib/allauth.js';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
@@ -70,7 +70,7 @@
 				data={data?.form}
 				dataType="form"
 				validators={zod(loginSchema)}
-				action="?/login&next={$page.url.searchParams.get('next') || '/'}"
+				action="?/login&next={page.url.searchParams.get('next') || '/'}"
 			>
 				{#snippet children({ form })}
 					<TextField type="email" {form} field="username" label={m.email()} />

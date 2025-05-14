@@ -5,7 +5,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { m } from '$paraglide/messages';
@@ -74,7 +74,7 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
-			baseEndpoint="/applied-controls?findings_assessments={$page.params.id}"
+			baseEndpoint="/applied-controls?findings_assessments={page.params.id}"
 			fields={[
 				'name',
 				'status',

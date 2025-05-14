@@ -15,7 +15,7 @@
 	const has_threats = threats.length > 0;
 	const has_reference_controls = reference_controls.length > 0;
 
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
@@ -200,7 +200,7 @@
 	let classesText =
 		$derived(complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '');
 
-	let tabSet = $state($page.data.user.is_third_party ? 1 : 0);
+	let tabSet = $state(page.data.user.is_third_party ? 1 : 0);
 
 	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = $state(false);
@@ -414,7 +414,7 @@
 			{#snippet children({ form, data })}
 						<div class="card shadow-lg bg-white">
 					<TabGroup>
-						{#if !$page.data.user.is_third_party}
+						{#if !page.data.user.is_third_party}
 							<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
 								>{m.appliedControls()}
 							</Tab>
@@ -425,7 +425,7 @@
 						>
 						{#snippet panel()}
 									
-								{#if tabSet === 0 && !$page.data.user.is_third_party}
+								{#if tabSet === 0 && !page.data.user.is_third_party}
 									<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 										<i class="fa-solid fa-info-circle"></i>
 										<p>{m.requirementAppliedControlHelpText()}</p>
@@ -434,14 +434,14 @@
 										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 									>
 										<span class="flex flex-row justify-end items-center space-x-2">
-											{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
+											{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 												<button
 													class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
 													type="button"
 													onclick={() => {
 													modalConfirmCreateSuggestedControls(
-														$page.data.requirementAssessment.id,
-														$page.data.requirementAssessment.name,
+														page.data.requirementAssessment.id,
+														page.data.requirementAssessment.name,
 														'?/createSuggestedControls'
 													);
 												}}
@@ -473,16 +473,16 @@
 												{form}
 												optionsEndpoint="applied-controls"
 												optionsDetailedUrlParameters={[
-													['scope_folder_id', $page.data.requirementAssessment.folder.id]
+													['scope_folder_id', page.data.requirementAssessment.folder.id]
 												]}
 												optionsExtraFields={[['folder', 'str']]}
 												field="applied_controls"
 											/>
 										{/key}
 										<ModelTable
-											baseEndpoint="/applied-controls?requirement_assessments={$page.data
+											baseEndpoint="/applied-controls?requirement_assessments={page.data
 												.requirementAssessment.id}"
-											source={$page.data.tables['applied-controls']}
+											source={page.data.tables['applied-controls']}
 											hideFilters={true}
 											URLModel="applied-controls"
 										/>
@@ -510,21 +510,21 @@
 												optionsEndpoint="evidences"
 												optionsExtraFields={[['folder', 'str']]}
 												optionsDetailedUrlParameters={[
-													['scope_folder_id', $page.data.requirementAssessment.folder.id]
+													['scope_folder_id', page.data.requirementAssessment.folder.id]
 												]}
 												field="evidences"
 											/>
 										{/key}
 										<ModelTable
-											source={$page.data.tables['evidences']}
+											source={page.data.tables['evidences']}
 											hideFilters={true}
 											URLModel="evidences"
-											baseEndpoint="/evidences?requirement_assessments={$page.data.requirementAssessment
+											baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
 												.id}"
 										/>
 									</div>
 								{/if}
-								{#if tabSet === 2 && !$page.data.user.is_third_party}
+								{#if tabSet === 2 && !page.data.user.is_third_party}
 									<div
 										class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 									>
@@ -546,10 +546,10 @@
 											/>
 										{/key}
 										<ModelTable
-											source={$page.data.tables['security-exceptions']}
+											source={page.data.tables['security-exceptions']}
 											hideFilters={true}
 											URLModel="security-exceptions"
-											baseEndpoint="/security-exceptions?requirement_assessments={$page.data
+											baseEndpoint="/security-exceptions?requirement_assessments={page.data
 												.requirementAssessment.id}"
 										/>
 									</div>
@@ -562,34 +562,34 @@
 				<HiddenInput {form} field="requirement" />
 				<HiddenInput {form} field="compliance_assessment" />
 				<div class="flex flex-col my-8 space-y-6">
-					{#if $page.data.requirementAssessment.requirement.questions != null && Object.keys($page.data.requirementAssessment.requirement.questions).length !== 0}
+					{#if page.data.requirementAssessment.requirement.questions != null && Object.keys(page.data.requirementAssessment.requirement.questions).length !== 0}
 						<Question
 							{form}
 							field="answers"
-							questions={$page.data.requirementAssessment.requirement.questions}
+							questions={page.data.requirementAssessment.requirement.questions}
 							label={m.question()}
 						/>
 					{/if}
 					<Select
 						{form}
-						options={$page.data.model.selectOptions['status']}
+						options={page.data.model.selectOptions['status']}
 						field="status"
 						label={m.status()}
 					/>
 					<Select
 						{form}
-						options={$page.data.model.selectOptions['result']}
+						options={page.data.model.selectOptions['result']}
 						field="result"
 						label={m.result()}
 					/>
 					<div class="flex flex-col">
 						<Score
 							{form}
-							min_score={$page.data.compliance_assessment_score.min_score}
-							max_score={$page.data.compliance_assessment_score.max_score}
-							scores_definition={$page.data.compliance_assessment_score.scores_definition}
+							min_score={page.data.compliance_assessment_score.min_score}
+							max_score={page.data.compliance_assessment_score.max_score}
+							scores_definition={page.data.compliance_assessment_score.scores_definition}
 							field="score"
-							label={$page.data.compliance_assessment_score.show_documentation_score
+							label={page.data.compliance_assessment_score.show_documentation_score
 								? m.implementationScore()
 								: m.score()}
 							disabled={!data.is_scored || data.result === 'not_applicable'}
@@ -609,12 +609,12 @@
 											{/snippet}
 						</Score>
 					</div>
-					{#if $page.data.compliance_assessment_score.show_documentation_score}
+					{#if page.data.compliance_assessment_score.show_documentation_score}
 						<Score
 							{form}
-							min_score={$page.data.compliance_assessment_score.min_score}
-							max_score={$page.data.compliance_assessment_score.max_score}
-							scores_definition={$page.data.compliance_assessment_score.scores_definition}
+							min_score={page.data.compliance_assessment_score.min_score}
+							max_score={page.data.compliance_assessment_score.max_score}
+							scores_definition={page.data.compliance_assessment_score.scores_definition}
 							field="documentation_score"
 							label={m.documentationScore()}
 							isDoc={true}

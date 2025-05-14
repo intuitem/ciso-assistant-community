@@ -9,7 +9,7 @@
 	import RadioGroupInput from '../RadioGroupInput.svelte';
 	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
@@ -35,12 +35,12 @@
 	const modalStore = getModalStore();
 
 	function modalMeasureCreateForm(): void {
-		const measureModel = $page.data.measureModel;
+		const measureModel = page.data.measureModel;
 		console.log('measureModel', measureModel);
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: $page.data.measureCreateForm,
+				form: page.data.measureCreateForm,
 				formAction: '?/createAppliedControl',
 				model: measureModel,
 				debug: false
@@ -56,7 +56,7 @@
 	}
 
 	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
-	const activeActivity: string = $page.url.searchParams.get('activity') || '';
+	const activeActivity: string = page.url.searchParams.get('activity') || '';
 
 	const getCriticality = (
 		dependency: number,

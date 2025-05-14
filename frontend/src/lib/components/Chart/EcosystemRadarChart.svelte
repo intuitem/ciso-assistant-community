@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	
 
@@ -28,10 +28,10 @@
 		title = '',
 		name = '',
 		data,
-		max = $page.data.settings.ebios_radar_max,
-		greenZoneRadius = $page.data.settings.ebios_radar_green_zone_radius,
-		yellowZoneRadius = $page.data.settings.ebios_radar_yellow_zone_radius,
-		redZoneRadius = $page.data.settings.ebios_radar_red_zone_radius
+		max = page.data.settings.ebios_radar_max,
+		greenZoneRadius = page.data.settings.ebios_radar_green_zone_radius,
+		yellowZoneRadius = page.data.settings.ebios_radar_yellow_zone_radius,
+		redZoneRadius = page.data.settings.ebios_radar_red_zone_radius
 	}: Props = $props();
 
 	// data format: f1-f4 (fiabilité cyber = maturité x confiance ) to get the clusters and colors

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { SetPasswordSchema } from '$lib/utils/schemas';
@@ -15,7 +15,7 @@
 	let { data }: Props = $props();
 
 	function getUUID() {
-		const matches = $page.url.pathname.split('/');
+		const matches = page.url.pathname.split('/');
 		return matches ? matches[2] : null;
 	}
 </script>

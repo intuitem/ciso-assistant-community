@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
@@ -81,7 +81,7 @@
 
 		if (event.key === 'e' && displayEditButton()) {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+			goto(`${page.url.pathname}/edit?next=${page.url.pathname}`);
 		}
 	}
 
@@ -183,7 +183,7 @@
 		modalStore.trigger(modal);
 	}
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
@@ -215,7 +215,7 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === 'Submitted' && $page.data.user.id === data.data.approver.id}
+	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 justify-between"
 		>
@@ -250,7 +250,7 @@
 			<div class="text-green-900">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
-			{#if $page.data.user.id === data.data.approver.id}
+			{#if page.data.user.id === data.data.approver.id}
 				<div class="ml-auto whitespace-nowrap">
 					<button
 						onclick={(_) => {
@@ -480,7 +480,7 @@
 
 				<Anchor
 					breadcrumbAction="push"
-					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
 					label={m.edit()}
 					class="btn variant-filled-primary h-fit"
 					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>{m.edit()}</Anchor

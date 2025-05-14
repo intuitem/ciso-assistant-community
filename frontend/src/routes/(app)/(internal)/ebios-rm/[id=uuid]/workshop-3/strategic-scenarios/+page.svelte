@@ -5,7 +5,7 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
@@ -65,7 +65,7 @@
 	source={data.table}
 	deleteForm={data.deleteForm}
 	{URLModel}
-	baseEndpoint="/strategic-scenarios?ebios_rm_study={$page.params.id}"
+	baseEndpoint="/strategic-scenarios?ebios_rm_study={page.params.id}"
 >
 	{#snippet addButton()}
 		<div >

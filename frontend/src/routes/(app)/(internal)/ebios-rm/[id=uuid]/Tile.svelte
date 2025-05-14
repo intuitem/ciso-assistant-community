@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
@@ -141,7 +141,7 @@
 											data-popup="popupStep-{workshop}.{i + 1}"
 										>
 											<form
-												action="/ebios-rm/{$page.params.id}?/changeStepState"
+												action="/ebios-rm/{page.params.id}?/changeStepState"
 												method="POST"
 												use:enhance={() => {
 													return async () => {

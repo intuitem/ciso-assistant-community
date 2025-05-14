@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { PageData } from './$types';
 
@@ -21,7 +21,7 @@
 
 	let { data }: Props = $props();
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -45,7 +45,7 @@
 
 		if (event.key === 'e' && canEditObject) {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/edit?next=${$page.url.pathname}`);
+			goto(`${page.url.pathname}/edit?next=${page.url.pathname}`);
 		}
 	}
 	onMount(() => {
@@ -83,7 +83,7 @@
 		</div>
 		{#if canEditObject}
 			<Anchor
-				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+				href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
 				class="btn variant-filled-primary h-fit mt-1"
 				data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 			>
@@ -148,7 +148,7 @@
 				source={data.tables['assets']}
 				hideFilters={true}
 				URLModel="assets"
-				baseEndpoint="/assets?risk_scenarios={$page.params.id}"
+				baseEndpoint="/assets?risk_scenarios={page.params.id}"
 			/>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto">
@@ -157,7 +157,7 @@
 				source={data.tables['threats']}
 				hideFilters={true}
 				URLModel="threats"
-				baseEndpoint="/threats?risk_scenarios={$page.params.id}"
+				baseEndpoint="/threats?risk_scenarios={page.params.id}"
 			/>
 		</div>
 	</div>
@@ -167,7 +167,7 @@
 			source={data.tables['vulnerabilities']}
 			hideFilters={true}
 			URLModel="vulnerabilities"
-			baseEndpoint="/vulnerabilities?risk_scenarios={$page.params.id}"
+			baseEndpoint="/vulnerabilities?risk_scenarios={page.params.id}"
 		/>
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-auto">
@@ -176,7 +176,7 @@
 			source={data.tables['security-exceptions']}
 			hideFilters={true}
 			URLModel="security-exceptions"
-			baseEndpoint="/security-exceptions?risk_scenarios={$page.params.id}"
+			baseEndpoint="/security-exceptions?risk_scenarios={page.params.id}"
 		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
@@ -187,7 +187,7 @@
 				source={data.tables['risk_scenarios_e']}
 				hideFilters={true}
 				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?risk_scenarios_e={$page.params.id}"
+				baseEndpoint="/applied-controls?risk_scenarios_e={page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
@@ -234,7 +234,7 @@
 				source={data.tables['risk_scenarios']}
 				hideFilters={true}
 				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?risk_scenarios={$page.params.id}"
+				baseEndpoint="/applied-controls?risk_scenarios={page.params.id}"
 			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">

@@ -5,7 +5,7 @@
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -35,7 +35,7 @@
 	}
 
 	let activeActivity: string | null = $state(null);
-	$page.url.searchParams.forEach((value, key) => {
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -51,7 +51,7 @@
 	deleteForm={data.deleteForm}
 	{URLModel}
 	detailQueryParameter={`activity=${activeActivity}`}
-	baseEndpoint="/ro-to?ebios_rm_study={$page.params.id}"
+	baseEndpoint="/ro-to?ebios_rm_study={page.params.id}"
 >
 	{#snippet addButton()}
 		<div >

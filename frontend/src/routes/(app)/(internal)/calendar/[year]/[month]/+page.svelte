@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Calendar from '$lib/components/Calendar/Calendar.svelte';
 	import type { PageData } from './$types';
 
@@ -9,8 +9,8 @@
 
 	let { data }: Props = $props();
 
-	let year = $derived(parseInt($page.params.year));
-	let month = $derived(parseInt($page.params.month));
+	let year = $derived(parseInt(page.params.year));
+	let month = $derived(parseInt(page.params.month));
 
 	function createCalendarEvents(
 		appliedControls: Record<string, string>[],

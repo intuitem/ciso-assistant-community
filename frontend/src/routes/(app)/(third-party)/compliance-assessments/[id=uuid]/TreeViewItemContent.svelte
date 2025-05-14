@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
@@ -134,7 +134,7 @@
 							{#if canEditRequirementAssessment}
 								<Anchor
 									breadcrumbAction="push"
-									href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}"
+									href="/requirement-assessments/{ra_id}/edit?next={page.url.pathname}"
 								>
 									{#if title || description}
 										{#if title}
@@ -151,7 +151,7 @@
 							{:else}
 								<Anchor
 									breadcrumbAction="push"
-									href="/requirement-assessments/{ra_id}?next={$page.url.pathname}"
+									href="/requirement-assessments/{ra_id}?next={page.url.pathname}"
 								>
 									{#if title}
 										<span style="font-weight: 600;">{title}</span>
@@ -242,7 +242,7 @@
 									{#if func.id}
 										<a
 											class="anchor"
-											href="/reference-controls/{func.id}?next={$page.url.pathname}"
+											href="/reference-controls/{func.id}?next={page.url.pathname}"
 										>
 											{func.name}
 										</a>
@@ -266,7 +266,7 @@
 							{#each threats as threat}
 								<li>
 									{#if threat.id}
-										<a class="anchor" href="/threats/{threat.id}?next={$page.url.pathname}">
+										<a class="anchor" href="/threats/{threat.id}?next={page.url.pathname}">
 											{threat.name}
 										</a>
 									{:else}

@@ -8,7 +8,7 @@
 	import { m } from '$paraglide/messages';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -56,7 +56,7 @@
 		modalStore.trigger(modal);
 	}
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
