@@ -4,6 +4,14 @@ import type { Option } from 'svelte-multiselect';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 
+export function tableSourceMapper(source: any[], keys: string[]): any[] {
+	return source.map((row) => {
+		const mappedRow: any = {};
+		keys.forEach((key) => (mappedRow[key] = row[key]));
+		return mappedRow;
+	});
+}
+
 interface ListViewFilterConfig {
 	component: ComponentType;
 	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tableSourceMapper } from '$lib/utils/table';
 	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';

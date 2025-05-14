@@ -1,4 +1,4 @@
-import { listViewFields } from '$lib/utils/table';
+import { listViewFields, tableSourceMapper } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';

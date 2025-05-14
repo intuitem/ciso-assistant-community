@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { tableSourceMapper } from '$lib/utils/table';
 import { getModelInfo } from '$lib/utils/crud';
 
 import { modelSchema } from '$lib/utils/schemas';

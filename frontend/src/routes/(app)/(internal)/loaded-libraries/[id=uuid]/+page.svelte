@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tableSourceMapper } from '$lib/utils/table';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
