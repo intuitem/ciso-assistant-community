@@ -191,7 +191,7 @@
 		}
 	];
 
-	const modalStore = getModalStore();
+	// const modalStore = getModalStore();
 	const flash = getFlash(page);
 
 	function modalFirstLogin(): void {
@@ -222,7 +222,7 @@
 			title: m.firstTimeLoginModalTitle(),
 			body: m.firstTimeLoginModalDescription()
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	const loading = writable(false);

@@ -29,7 +29,7 @@
 		hungarian: m.hungarian()
 	};
 
-	const modalStore = getModalStore();
+	// const modalStore = getModalStore();
 
 	const defaultLangLabels = {
 		fr: 'Français',
@@ -81,7 +81,7 @@
 			title: 'About CISO Assistant',
 			body: JSON.stringify(res)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	let enableMoreBtn = $state(false);
@@ -110,22 +110,22 @@
 				</span>
 			{/if}
 		</div>
-		{#key $modalStore}
-			{#if enableMoreBtn}
-				<button
-					class="btn bg-initial"
-					data-testid="sidebar-more-btn"
-					id="sidebar-more-btn"
-					use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical"></i></button
-				>
-			{:else}
-				<button
-					class="btn bg-initial"
-					data-testid="sidebar-more-btn-disabled"
-					id="sidebar-more-btn-disabled"><i class="fa-solid fa-ellipsis-vertical"></i></button
-				>
-			{/if}
-		{/key}
+		<!-- {#key $modalStore} -->
+		{#if enableMoreBtn}
+			<button
+				class="btn bg-initial"
+				data-testid="sidebar-more-btn"
+				id="sidebar-more-btn"
+				use:popup={popupUser}><i class="fa-solid fa-ellipsis-vertical"></i></button
+			>
+		{:else}
+			<button
+				class="btn bg-initial"
+				data-testid="sidebar-more-btn-disabled"
+				id="sidebar-more-btn-disabled"><i class="fa-solid fa-ellipsis-vertical"></i></button
+			>
+		{/if}
+		<!-- {/key} -->
 		<div
 			class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
 			data-testid="sidebar-more-panel"
@@ -166,7 +166,8 @@
 			<button
 				onclick={modalBuildInfo}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="about-button"><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
+				data-testid="about-button"
+				><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
 			>
 			<a
 				href="https://intuitem.gitbook.io/ciso-assistant"

@@ -19,7 +19,7 @@
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
@@ -35,7 +35,7 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	function modalFolderImportForm(): void {
@@ -56,7 +56,7 @@
 			// Data
 			title: safeTranslate('importFolder')
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -108,7 +108,7 @@
 		{#key URLModel}
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				{#snippet addButton()}
-								<div >
+					<div>
 						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
 								<button
@@ -179,7 +179,7 @@
 							{/if}
 						</span>
 					</div>
-							{/snippet}
+				{/snippet}
 			</ModelTable>
 		{/key}
 	</div>
