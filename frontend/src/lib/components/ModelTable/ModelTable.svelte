@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { run } from 'svelte/legacy';
 
 	import { goto as _goto } from '$app/navigation';
@@ -300,48 +301,63 @@
 	});
 
 	const tail_render = $derived(tail);
+
+	let openState = $state(false);
+
+	function popoverClose() {
+		openState = false;
+	}
 </script>
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
-			<button
-				use:popup={popupFilter}
-				class="btn preset-filled-primary-500 self-end relative"
-				id="filters"
+			<Popover
+				open={openState}
+				onOpenChange={(e) => (openState = e.open)}
+				positioning={{ placement: 'bottom-start' }}
+				triggerBase="btn preset-filled-primary-500 self-end relative"
+				contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+				zIndex="1000"
 			>
-				<i class="fa-solid fa-filter mr-2"></i>
-				{m.filters()}
-				{#if filterCount}
-					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
-				{/if}
-			</button>
-			<div
-				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
-				data-popup="popupFilter"
-			>
-				<SuperForm {_form} validators={zod(z.object({}))}>
-					{#snippet children({ form })}
-						{#each filteredFields as field}
-							{#if filters[field]?.component}
-								{@const SvelteComponent = filters[field].component}
-								<SvelteComponent
-									{form}
-									{field}
-									{...filters[field].props}
-									fieldContext="filter"
-									label={safeTranslate(filters[field].props?.label)}
-									on:change={(e) => {
-										const value = e.detail;
-										filterValues[field] = value.map((v) => ({ value: v }));
-										invalidateTable = true;
-									}}
-								/>
-							{/if}
-						{/each}
-					{/snippet}
-				</SuperForm>
-			</div>
+				{#snippet trigger()}
+					<button id="filters">
+						<i class="fa-solid fa-filter mr-2"></i>
+						{m.filters()}
+						{#if filterCount}
+							<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
+						{/if}
+					</button>
+				{/snippet}
+				{#snippet content()}
+					<div
+						class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+						data-popup="popupFilter"
+					>
+						<SuperForm {_form} validators={zod(z.object({}))}>
+							{#snippet children({ form })}
+								{#each filteredFields as field}
+									{#if filters[field]?.component}
+										{@const SvelteComponent = filters[field].component}
+										<SvelteComponent
+											{form}
+											{field}
+											{...filters[field].props}
+											fieldContext="filter"
+											label={safeTranslate(filters[field].props?.label)}
+											on:change={(e) => {
+												const value = e.detail;
+												filterValues[field] = value.map((v) => ({ value: v }));
+												invalidateTable = true;
+											}}
+										/>
+									{/if}
+								{/each}
+							{/snippet}
+						</SuperForm>
+					</div>
+				{/snippet}
+			</Popover>
 		{/if}
 		{#if search}
 			<Search {handler} />
