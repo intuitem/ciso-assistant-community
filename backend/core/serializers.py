@@ -1009,7 +1009,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
-    progress = serializers.ReadOnlyField()
+    progress = serializers.ReadOnlyField(source="get_progress")
     assets = FieldsRelatedField(many=True)
 
     class Meta:
