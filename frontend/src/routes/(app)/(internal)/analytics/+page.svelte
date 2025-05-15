@@ -12,7 +12,7 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import { Tab, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
 	import type { PageData } from './$types';
@@ -73,31 +73,24 @@
 		meta: []
 	};
 
-	let tabSet = $state(
-		page.url.searchParams.get('tab') ? parseInt(page.url.searchParams.get('tab') || '0') : 0
-	);
+	let group = $derived(page.url.searchParams.get('tab') || 'summary');
 
-	function handleTabChange(index: number) {
-		page.url.searchParams.set('tab', index.toString());
+	function handleTabChange(tabValue: string): void {
+		page.url.searchParams.set('tab', tabValue);
 		goto(page.url);
 	}
 </script>
 
-<Tabs class="">
-	<Tab bind:group={tabSet} on:click={() => handleTabChange(0)} name="summary" value={0}
-		>{m.summary()}</Tab
-	>
-	<Tab bind:group={tabSet} on:click={() => handleTabChange(1)} name="governance" value={1}
-		>{m.governance()}</Tab
-	>
-	<Tab bind:group={tabSet} on:click={() => handleTabChange(2)} name="risk" value={2}>{m.risk()}</Tab
-	>
-	<Tab bind:group={tabSet} on:click={() => handleTabChange(3)} name="compliance" value={3}
-		>{m.compliance()}</Tab
-	>
-	{#snippet panel()}
+<Tabs value={group} onValueChange={(e) => handleTabChange(e.value)}>
+	{#snippet list()}
+		<Tabs.Control value="summary">{m.summary()}</Tabs.Control>
+		<Tabs.Control value="governance">{m.governance()}</Tabs.Control>
+		<Tabs.Control value="risk">{m.risk()}</Tabs.Control>
+		<Tabs.Control value="compliance">{m.compliance()}</Tabs.Control>
+	{/snippet}
+	{#snippet content()}
 		<div class="px-4 pb-4 space-y-8">
-			{#if tabSet === 0}
+			<Tabs.Panel value="summary">
 				{#await data.stream.metrics}
 					<div class="col-span-3 lg:col-span-1">
 						<div>Refreshing data ..</div>
@@ -289,7 +282,8 @@
 						<p class="text-red-500">Error loading metrics</p>
 					</div>
 				{/await}
-			{:else if tabSet === 1}
+			</Tabs.Panel>
+			<Tabs.Panel value="governance">
 				{#await data.stream.counters}
 					<div class="col-span-3 lg:col-span-1">
 						<div>Refreshing data ..</div>
@@ -339,7 +333,7 @@
 							/>
 						</div>
 					</section>
-				{:catch error}
+				{:catch}
 					<div>Data load eror</div>
 				{/await}
 				<section class="space-y-4">
@@ -459,7 +453,8 @@
 						</div>
 					</div>
 				</section>
-			{:else if tabSet === 2}
+			</Tabs.Panel>
+			<Tabs.Panel value="risk">
 				<!-- Risk tab -->
 
 				<section>
@@ -508,12 +503,13 @@
 						/>
 					</div>
 				</section>
-			{:else if tabSet === 3}
+			</Tabs.Panel>
+			<Tabs.Panel value="compliance">
 				<span class="text-xl font-extrabold"
 					><a href="/recap" class="hover:text-purple-500">{m.sectionMoved()}</a></span
 				>
 				<div class="flex flex-col space-y-2"></div>
-			{/if}
+			</Tabs.Panel>
 		</div>
 	{/snippet}
 </Tabs>
