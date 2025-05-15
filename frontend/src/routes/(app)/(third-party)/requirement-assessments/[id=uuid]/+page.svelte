@@ -255,11 +255,9 @@
 	<div>
 		<Tabs>
 			{#if !page.data.user.is_third_party}
-				<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
-					>{m.appliedControls()}
-				</Tab>
+				<Tabs.Control value="compliance_assessments_tab">{m.appliedControls()}</Tabs.Control>
 			{/if}
-			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
+			<Tabs.Controls.Control value="risk_assessments_tab">{m.evidences()}</Tabs.Controls.Control>
 			{#snippet panel()}
 				{#if tabSet === 0 && !page.data.user.is_third_party}
 					<div class="flex items-center mb-2 px-2 text-xs space-x-2">

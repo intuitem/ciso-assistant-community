@@ -412,14 +412,10 @@
 				<div class="card shadow-lg bg-white">
 					<Tabs>
 						{#if !page.data.user.is_third_party}
-							<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
-								>{m.appliedControls()}
-							</Tab>
+							<Tabs.Control value="compliance_assessments_tab">{m.appliedControls()}</Tabs.Control>
 						{/if}
-						<Tab bind:group={tabSet} name="evidences_tab" value={1}>{m.evidences()}</Tab>
-						<Tab bind:group={tabSet} name="security_exceptions_tab" value={2}
-							>{m.securityExceptions()}</Tab
-						>
+						<Tabs.Controls.Control value="evidences_tab">{m.evidences()}</Tabs.Controls.Control>
+						<Tabs.Control value="security_exceptions_tab">{m.securityExceptions()}</Tabs.Control>
 						{#snippet panel()}
 							{#if tabSet === 0 && !page.data.user.is_third_party}
 								<div class="flex items-center mb-2 px-2 text-xs space-x-2">

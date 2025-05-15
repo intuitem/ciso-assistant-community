@@ -79,7 +79,13 @@
 	});
 </script>
 
-<Tabs value={group} active="bg-primary-100 text-primary-800 border-b border-primary-800">
+<Tabs
+	value={group}
+	onValueChange={(e) => {
+		group = e.value;
+	}}
+	active="bg-primary-100 text-primary-800 border-b border-primary-800"
+>
 	{#snippet list()}
 		<Tabs.Control value="security"
 			><i class="fa-solid fa-shield-halved mr-2"></i>{m.securitySettings()}</Tabs.Control
