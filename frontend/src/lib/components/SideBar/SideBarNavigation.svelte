@@ -56,20 +56,20 @@
 </script>
 
 <nav class="grow scrollbar">
-	<Accordion spacing="space-y-4" regionPanel="space-y-2" caretClosed="-rotate-90" caretOpen="">
+	<Accordion
+		spacing="space-y-4"
+		regionPanel="space-y-2"
+		caretClosed="-rotate-90"
+		caretOpen=""
+		value={$lastAccordionItem}
+		onValueChange={(e) => ($lastAccordionItem = e.value)}
+	>
 		{#each items as item}
-			<!-- This commented code adds Accordion persistency but changes its visual behavior -->
-			<!-- {#if $lastAccordionItem === item.name}
-				<AccordionItem id={item.name} on:click={() => lastAccordionItemOpened(item.name)}  open>
-					<svelte:fragment slot="summary"><SideBarCategory {item} /></svelte:fragment>
-					<svelte:fragment slot="content"><SideBarItem item={item.items} /></svelte:fragment>
-				</AccordionItem>
-			{:else} -->
 			{#if sideBarVisibleItems && sideBarVisibleItems[item.name] !== false}
 				<Accordion.Item
 					id={item.name.toLowerCase().replace(' ', '-')}
 					onClick={() => handleNavClick(item)}
-					open={$lastAccordionItem === item.name}
+					value={item.name}
 				>
 					{#snippet control()}
 						<SideBarCategory {item} />
