@@ -4,7 +4,11 @@ New: use the config builder on the `config` folder.
 
 To run CISO Assistant Enterprise locally in a straightforward way, you can use Docker compose.
 
-1. Make sure you are located in the enterprise directory of the repository
+1. Go to community root directory
+
+```sh
+cd ..
+```
 
 2. Launch docker-compose script with enterprise docker-compose.yml file:
 
