@@ -13,7 +13,7 @@
 
 	let { data, form }: Props = $props();
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	let formElement: HTMLFormElement = $state();
 	let file: HTMLInputElement = $state();
@@ -34,7 +34,7 @@
 			}
 		};
 
-		if (file) modalStore.trigger(modal);
+		// if (file) modalStore.trigger(modal);
 	}
 
 	// Determine if domain selection should be disabled
