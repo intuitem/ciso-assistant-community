@@ -1,16 +1,13 @@
+> [!WARNING]
+> Both installation assume you're located in the root folder (`ciso-assistant-community/`)
+
 ## Testing locally 🚀
 
 New: use the config builder on the `config` folder.
 
 To run CISO Assistant Enterprise locally in a straightforward way, you can use Docker compose.
 
-1. Go to community root directory
-
-```sh
-cd ..
-```
-
-2. Launch docker-compose script with enterprise docker-compose.yml file:
+1. Launch docker-compose script with enterprise docker-compose.yml file:
 
 ```sh
 ./docker-compose-build.sh -f enterprise/docker-compose-build.yml
@@ -27,48 +24,63 @@ You can then reach CISO Assistant using your web browser at [https://localhost:8
 
 ### Running the backend
 
-1. Go to community backend directory.
+1. Go to enterprise backend directory.
 
 ```sh
-cd ../backend
+cd enterprise/backend
 ```
 
-2. Open poetry shell.
+2. Install the shell plugin (which [replaces the shell command](https://python-poetry.org/docs/cli/#shell)).
+
+```sh
+poetry self add poetry-plugin-shell
+```
+
+3. Open poetry shell.
 
 ```sh
 poetry shell
 ```
 
-3. Install enterprise backend module.
+4. Install community backend module.
+
+```sh
+cd ../../backend
+poetry install
+```
+
+5. Install enterprise backend module.
 
 ```sh
 cd ../enterprise/backend
 poetry install
 ```
 
-4. Set the `SQLITE_FILE` environment variable if you use SQLite.
+6. Set the `SQLITE_FILE` environment variable if you use SQLite.
 
 ```sh
 export SQLITE_FILE=db/ciso-assistant-enterprise.sqlite3
 ```
 
-5. Apply migrations.
+7. Apply migrations.
 
 ```sh
 poetry run ./manage.sh migrate
 ```
 
-6. Create a Django superuser, that will be CISO Assistant administrator.
+8. Create a Django superuser, that will be CISO Assistant administrator.
 
 ```sh
 poetry run ./manage.sh createsuperuser
 ```
 
-7. Run the development server.
+9. Run the development server.
 
 ```sh
 poetry run ./manage.sh runserver
 ```
+
+To exit the poetry shell you can use the `exit` command.
 
 ### Running the frontend
 
