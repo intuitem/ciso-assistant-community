@@ -92,10 +92,6 @@
 	});
 
 	let openState = $state(false);
-
-	function popoverClose() {
-		openState = false;
-	}
 </script>
 
 <div class="border-t pt-2.5">
@@ -117,7 +113,6 @@
 				</span>
 			{/if}
 		</div>
-		<!-- {#key $modalStore} -->
 		{#if enableMoreBtn}
 			<Popover
 				open={openState}
@@ -132,7 +127,6 @@
 						<i class="fa-solid fa-ellipsis-vertical"></i>
 					</button>
 				{/snippet}
-				<!-- {/key} -->
 				{#snippet content()}
 					<div class="" data-testid="sidebar-more-panel" data-popup="popupUser">
 						<a
@@ -147,7 +141,7 @@
 						<select
 							{value}
 							onchange={handleLocaleChange}
-							class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0"
+							class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full px-4 py-2.5 cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0"
 							data-testid="language-select"
 						>
 							{#each locales as lang}
