@@ -80,7 +80,7 @@
 		// modalStore.trigger(modal);
 	}
 
-	let tabSet = Object.keys(data.relatedModels)[0];
+	let group = $state(Object.keys(data.relatedModels)[0]);
 
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
@@ -206,7 +206,13 @@
 			>
 			{#if Object.keys(data.relatedModels).length > 0}
 				<div class="card shadow-lg mt-8 bg-white w-full">
-					<Tabs value={tabSet} listJustify="justify-center">
+					<Tabs
+						value={group}
+						onValueChange={(e) => {
+							group = e.value;
+						}}
+						listJustify="justify-center"
+					>
 						{#snippet list()}
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
 								<Tabs.Control value={urlmodel}>
