@@ -6,17 +6,16 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-		Tabs
+	import {
+		Tabs,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
 	} from '@skeletonlabs/skeleton-svelte';
-	import { Tab } from '@skeletonlabs/skeleton-svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	const statusMap = {
 		planned: 'bg-indigo-300 text-indigo-800',
@@ -49,7 +48,7 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	let activeActivity: string | null = $state(null);
@@ -78,10 +77,10 @@
 			// Data
 			title: m.selectAsset()
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
-	let tabSet = $state(0);
+	let tabSet = Object.keys(data.relatedModels)[0];
 
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
@@ -207,18 +206,20 @@
 			>
 			{#if Object.keys(data.relatedModels).length > 0}
 				<div class="card shadow-lg mt-8 bg-white w-full">
-					<Tabs justify="justify-center">
-						{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
-							<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
-								{safeTranslate(model.info.localNamePlural)}
-								{#if model.table.body.length > 0}
-									<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
-								{/if}
-							</Tab>
-						{/each}
-						{#snippet panel()}
-							{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
-								{#if tabSet === index}
+					<Tabs value={tabSet} listJustify="justify-center">
+						{#snippet list()}
+							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+								<Tabs.Control value={urlmodel}>
+									{safeTranslate(model.info.localNamePlural)}
+									{#if model.table.body.length > 0}
+										<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+									{/if}
+								</Tabs.Control>
+							{/each}
+						{/snippet}
+						{#snippet content()}
+							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+								<Tabs.Panel value={urlmodel}>
 									<div class="flex flex-row justify-between px-4 py-2">
 										<h4 class="font-semibold lowercase capitalize-first my-auto">
 											{safeTranslate('associated-' + model.info.localNamePlural)}
@@ -264,7 +265,7 @@
 											{/snippet}
 										</ModelTable>
 									{/if}
-								{/if}
+								</Tabs.Panel>
 							{/each}
 						{/snippet}
 					</Tabs>
