@@ -20,8 +20,6 @@
 
 	const formStore = form.form;
 
-	$effect(() => console.log('formDataCache', formDataCache));
-
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 	let xAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact');
 	let yAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'impact' : 'probability');

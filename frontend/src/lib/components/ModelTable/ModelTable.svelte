@@ -2,7 +2,7 @@
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { run } from 'svelte/legacy';
 
-	import { goto as _goto } from '$app/navigation';
+	import { goto as _goto, afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
@@ -170,7 +170,7 @@
 		}
 	);
 	const rows = handler.getRows();
-	let invalidateTable = $state(false);
+	let invalidateTable = $state(true);
 
 	handler.onChange((state: State) =>
 		loadTableData({ state, URLModel, endpoint: baseEndpoint, fields })
@@ -244,11 +244,13 @@
 			}
 		}
 	});
-	if (browser || invalidateTable) {
-		handler.invalidate();
-		_goto(page.url);
-		invalidateTable = false;
-	}
+	$effect(() => {
+		if (invalidateTable) {
+			handler.invalidate();
+			_goto(page.url);
+			invalidateTable = false;
+		}
+	});
 
 	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
 	let model = $derived(URL_MODEL_MAP[URLModel]);
