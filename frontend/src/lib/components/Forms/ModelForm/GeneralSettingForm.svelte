@@ -17,23 +17,32 @@
 
 	let { form, model, cacheLocks = {}, formDataCache = $bindable({}) }: Props = $props();
 
+	const formStore = form.form;
+
+	form.form.subscribe((e) => console.log(e));
+
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 	let xAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact');
 	let yAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'impact' : 'probability');
 	let xAxisLabel = $derived(safeTranslate(`${xAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`));
 	let yAxisLabel = $derived(safeTranslate(`${yAxis}${$formStore.risk_matrix_labels ?? 'ISO'}`));
 
-	const formStore = form.form;
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
+
+	let openAccordionItems = $state(['notifications', 'interface']);
 </script>
 
-<Accordion regionControl="font-bold">
-	<Accordion.Item open>
-		{#snippet summary()}
+<Accordion
+	value={openAccordionItems}
+	onValueChange={(e) => (openAccordionItems = e.value)}
+	multiple
+>
+	<Accordion.Item value="notifications">
+		{#snippet control()}
 			<i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}
 		{/snippet}
-		{#snippet content()}
+		{#snippet panel()}
 			<div class="p-4">
 				<Checkbox
 					{form}
@@ -43,11 +52,11 @@
 			</div>
 		{/snippet}
 	</Accordion.Item>
-	<Accordion.Item open>
-		{#snippet summary()}
+	<Accordion.Item value="interface">
+		{#snippet control()}
 			<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
 		{/snippet}
-		{#snippet content()}
+		{#snippet panel()}
 			<div class="p-4">
 				<Checkbox
 					{form}
@@ -57,11 +66,11 @@
 			</div>
 		{/snippet}
 	</Accordion.Item>
-	<Accordion.Item open>
-		{#snippet summary()}
+	<Accordion.Item value="assets">
+		{#snippet control()}
 			<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
 		{/snippet}
-		{#snippet content()}
+		{#snippet panel()}
 			<Select
 				{form}
 				field="security_objective_scale"
@@ -73,11 +82,11 @@
 			/>
 		{/snippet}
 	</Accordion.Item>
-	<Accordion.Item open>
-		{#snippet summary()}
+	<Accordion.Item value="riskMatrix">
+		{#snippet control()}
 			<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
 		{/snippet}
-		{#snippet content()}
+		{#snippet panel()}
 			<div class="flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
 					<Checkbox
@@ -131,11 +140,11 @@
 			</div>
 		{/snippet}
 	</Accordion.Item>
-	<Accordion.Item>
-		{#snippet summary()}
+	<Accordion.Item value="ebiosRadar">
+		{#snippet control()}
 			<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
 		{/snippet}
-		{#snippet content()}
+		{#snippet panel()}
 			<NumberField
 				{form}
 				field="ebios_radar_max"

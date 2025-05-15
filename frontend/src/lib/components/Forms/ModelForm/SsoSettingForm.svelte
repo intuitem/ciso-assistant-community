@@ -16,9 +16,15 @@
 	}
 
 	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), data = {} }: Props = $props();
+
+	let openAccordionItems = $state(['saml', 'idp', 'sp']);
 </script>
 
-<Accordion>
+<Accordion
+	value={openAccordionItems}
+	onValueChange={(e) => (openAccordionItems = e.value)}
+	multiple
+>
 	<Checkbox {form} field="is_enabled" label={m.enableSSO()} helpText={m.enableSSOHelpText()} />
 	<!-- Incomplete Translation -->
 	<Checkbox
@@ -36,24 +42,22 @@
 		hidden={model.selectOptions['provider'].length < 2}
 		field="provider"
 		cacheLock={cacheLocks['provider']}
-		bind:cachedValue={formDataCache['provider']}
 		options={model.selectOptions['provider']}
 		label={m.provider()}
 		disabled={!data.is_enabled}
 	/>
 	{#if data.provider !== 'saml'}
-		<Accordion.Item open>
-			{#snippet summary()}
+		<Accordion.Item value="idp">
+			{#snippet control()}
 				{m.IdPConfiguration()}
 			{/snippet}
-			{#snippet content()}
+			{#snippet panel()}
 				<TextField
 					{form}
 					field="provider_name"
 					label={m.name()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['provider_name']}
-					bind:cachedValue={formDataCache['provider_name']}
 				/>
 				<TextField
 					hidden
@@ -62,7 +66,6 @@
 					label={m.providerID()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['provider_id']}
-					bind:cachedValue={formDataCache['provider_id']}
 				/>
 				<TextField
 					{form}
@@ -71,7 +74,6 @@
 					helpText={m.clientIDHelpText()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['client_id']}
-					bind:cachedValue={formDataCache['client_id']}
 				/>
 				{#if data.provider !== 'saml'}
 					<TextField
@@ -81,7 +83,6 @@
 						helpText={m.secretHelpText()}
 						disabled={!data.is_enabled}
 						cacheLock={cacheLocks['secret']}
-						bind:cachedValue={formDataCache['secret']}
 					/>
 					<TextField
 						{form}
@@ -89,18 +90,17 @@
 						label={m.key()}
 						disabled={!data.is_enabled}
 						cacheLock={cacheLocks['key']}
-						bind:cachedValue={formDataCache['key']}
 					/>
 				{/if}
 			{/snippet}
 		</Accordion.Item>
 	{/if}
 	{#if data.provider === 'saml'}
-		<Accordion.Item open>
-			{#snippet summary()}
+		<Accordion.Item value="saml">
+			{#snippet control()}
 				<span class="font-semibold">{m.SAMLIdPConfiguration()}</span>
 			{/snippet}
-			{#snippet content()}
+			{#snippet panel()}
 				<TextField
 					{form}
 					field="idp_entity_id"
@@ -108,7 +108,6 @@
 					required={data.provider === 'saml'}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['idp_entity_id']}
-					bind:cachedValue={formDataCache['idp_entity_id']}
 				/>
 				<p class="text-gray-600 text-sm">{m.fillMetadataURL()}</p>
 				<TextField
@@ -117,7 +116,6 @@
 					label={m.metadataURL()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['metadata_url']}
-					bind:cachedValue={formDataCache['metadata_url']}
 				/>
 				<div class="flex items-center justify-center w-full space-x-2">
 					<hr class="w-1/2 items-center bg-gray-200 border-0" />
@@ -131,7 +129,6 @@
 					label={m.SSOURL()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['sso_url']}
-					bind:cachedValue={formDataCache['sso_url']}
 				/>
 				<TextField
 					{form}
@@ -139,7 +136,6 @@
 					label={m.SLOURL()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['slo_url']}
-					bind:cachedValue={formDataCache['slo_url']}
 				/>
 				<TextArea
 					{form}
@@ -147,16 +143,15 @@
 					label={m.x509Cert()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['x509cert']}
-					bind:cachedValue={formDataCache['x509cert']}
 				/>
 			{/snippet}
 		</Accordion.Item>
 
-		<Accordion.Item open>
-			{#snippet summary()}
+		<Accordion.Item value="sp">
+			{#snippet control()}
 				<span class="font-semibold">{m.SPConfiguration()}</span>
 			{/snippet}
-			{#snippet content()}
+			{#snippet panel()}
 				<TextField
 					{form}
 					field="sp_entity_id"
@@ -164,23 +159,21 @@
 					required={data.provider === 'saml'}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['sp_entity_id']}
-					bind:cachedValue={formDataCache['sp_entity_id']}
 				/>
 			{/snippet}
 		</Accordion.Item>
 
-		<Accordion.Item
-			>{#snippet summary()}
+		<Accordion.Item value="advanced"
+			>{#snippet control()}
 				<span class="font-semibold">{m.advancedSettings()}</span>
 			{/snippet}
-			{#snippet content()}
+			{#snippet panel()}
 				<TextField
 					{form}
 					field="attribute_mapping_uid"
 					label={m.attributeMappingUID()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['attribute_mapping_uid']}
-					bind:cachedValue={formDataCache['attribute_mapping_uid']}
 				/>
 				<TextField
 					{form}
@@ -188,7 +181,6 @@
 					label={m.attributeMappingEmailVerified()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['attribute_mapping_email_verified']}
-					bind:cachedValue={formDataCache['attribute_mapping_email_verified']}
 				/>
 				<TextField
 					{form}
@@ -196,7 +188,6 @@
 					label={m.attributeMappingEmail()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['attribute_mapping_email']}
-					bind:cachedValue={formDataCache['attribute_mapping_email']}
 				/>
 
 				<Checkbox
@@ -225,7 +216,6 @@
 					label={m.digestAlgorithm()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['digest_algorithm']}
-					bind:cachedValue={formDataCache['digest_algorithm']}
 				/>
 				<Checkbox
 					{form}
@@ -275,7 +265,6 @@
 					label={m.signatureAlgorithm()}
 					disabled={!data.is_enabled}
 					cacheLock={cacheLocks['signature_algorithm']}
-					bind:cachedValue={formDataCache['signature_algorithm']}
 				/>
 				<Checkbox
 					{form}
