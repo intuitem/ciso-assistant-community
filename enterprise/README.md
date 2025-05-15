@@ -80,7 +80,7 @@ poetry run ./manage.sh createsuperuser
 poetry run ./manage.sh runserver
 ```
 
-To exit the poetry shell you can use the `exit` command.
+To close the poetry shell you [**should**](https://github.com/python-poetry/poetry-plugin-shell?tab=readme-ov-file#usage) use `exit`.
 
 ### Running the frontend
 
