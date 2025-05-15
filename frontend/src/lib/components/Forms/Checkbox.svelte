@@ -45,7 +45,11 @@
 	}
 
 	run(() => {
-		cachedValue = $value;
+		if (cachedValue !== undefined) {
+			value.set(cachedValue);
+		} else {
+			cachedValue = $value;
+		}
 	});
 
 	let classesHidden = $derived((h: boolean) => (h ? 'hidden' : ''));

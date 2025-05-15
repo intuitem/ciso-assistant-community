@@ -15,11 +15,12 @@
 		formDataCache?: Record<string, any>;
 	}
 
-	let { form, model, cacheLocks = {}, formDataCache = $bindable({}) }: Props = $props();
+	let { form, model, cacheLocks = {} }: Props = $props();
+	let formDataCache = $state({});
 
 	const formStore = form.form;
 
-	form.form.subscribe((e) => console.log(e));
+	$effect(() => console.log('formDataCache', formDataCache));
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 	let xAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact');
