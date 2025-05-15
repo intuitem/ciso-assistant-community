@@ -12,10 +12,10 @@
 		ModalSettings,
 		ModalStore,
 		PopupSettings,
-		TreeViewNode,
-		Switch,
-		ProgressRing
+		TreeViewNode
 	} from '@skeletonlabs/skeleton-svelte';
+
+	import { Switch, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto } from '$app/navigation';
 
