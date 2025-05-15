@@ -8,7 +8,6 @@
 	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
 
-	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 	// $: value.set(cachedValue);
 	run(() => {
 		cachedValue = $value;
@@ -47,7 +46,7 @@
 		field,
 		valuePath = field,
 		helpText = undefined,
-		cachedValue = $bindable(undefined),
+		cachedValue = $bindable(),
 		blank = false,
 		disableDoubleDash = false,
 		cacheLock = {
@@ -59,6 +58,8 @@
 		options = [],
 		...rest
 	}: Props = $props();
+
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	let classesTextField = $derived((errors: string[] | undefined) =>
 		errors && errors.length > 0 ? 'input-error' : ''

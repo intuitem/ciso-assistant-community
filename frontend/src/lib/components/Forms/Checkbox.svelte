@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { type CssClasses, Switch } from '@skeletonlabs/skeleton-svelte';
+	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
@@ -16,7 +16,7 @@
 		hidden?: boolean;
 		disabled?: boolean;
 		checkboxComponent?: 'checkbox' | 'switch';
-		classesContainer?: CssClasses;
+		classesContainer?: string;
 		[key: string]: any;
 	}
 
@@ -45,11 +45,7 @@
 	}
 
 	run(() => {
-		if (cachedValue !== undefined) {
-			value.set(cachedValue);
-		} else {
-			cachedValue = $value;
-		}
+		cachedValue = $value;
 	});
 
 	let classesHidden = $derived((h: boolean) => (h ? 'hidden' : ''));

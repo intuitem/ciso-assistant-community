@@ -6,15 +6,12 @@
 	import { onMount } from 'svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { Segment } from '@skeletonlabs/skeleton-svelte';
-	import RadioItem from '$lib/components/Forms/RadioItem.svelte';
 
 	interface Option {
 		label: string;
 		value: string;
 		suggested?: boolean;
 	}
-
-	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	interface Props {
 		label?: string | undefined;
@@ -43,9 +40,11 @@
 			promise: new Promise((res) => res(null)),
 			resolve: (x) => x
 		},
-		cachedValue = $bindable(undefined),
+		cachedValue = $bindable(),
 		options = []
 	}: Props = $props();
+
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
@@ -76,19 +75,13 @@
 	{/if}
 	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		{#if options.length > 0}
-			<Segment>
-				{#each options as option, index}
+			<Segment name={field} value={$value} onValueChange={(e) => ($value = e.value)}>
+				{#each options as option}
 					{#if option.label}
-						<RadioItem
-							bind:group={$value}
-							name={field}
-							value={option.value}
-							displayChecked={(index < options.length - 1 &&
-								$value === options[index + 1].value &&
-								!options[index + 1].label) ||
-								undefined}
-							{disabled}
-							>{translateOptions === true ? safeTranslate(option.label) : option.label}</RadioItem
+						<Segment.Item value={option.value} {disabled}
+							>{translateOptions === true
+								? safeTranslate(option.label)
+								: option.label}</Segment.Item
 						>
 					{/if}
 				{/each}
