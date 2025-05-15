@@ -15,7 +15,7 @@
 		TreeViewNode
 	} from '@skeletonlabs/skeleton-svelte';
 
-	import { Switch, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto } from '$app/navigation';
 
@@ -221,12 +221,6 @@
 
 	expandedNodes = $expandedNodesState;
 
-	const popupDownload: PopupSettings = {
-		event: 'click',
-		target: 'popupDownload',
-		placement: 'bottom'
-	};
-
 	// const modalStore: ModalStore = getModalStore();
 
 	function modalCreateForm(): void {
@@ -330,6 +324,9 @@
 
 	let tree = $derived(data.tree);
 	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
+
+	let exportPopupOpen = $state(false);
+
 	run(() => {
 		if (tree) {
 			treeViewNodes = transformToTreeView(Object.entries(tree));
@@ -455,40 +452,51 @@
 		{/key}
 		<div class="flex flex-col space-y-2 ml-4">
 			<div class="flex flex-row space-x-2">
-				<button class="btn preset-filled-primary-500 w-full" use:popup={popupDownload}
-					><i class="fa-solid fa-download mr-2"></i>{m.exportButton()}</button
+				<Popover
+					open={exportPopupOpen}
+					onOpenChange={(e) => (exportPopupOpen = e.open)}
+					positioning={{ placement: 'bottom' }}
+					triggerBase="btn preset-filled-primary-500 w-full"
+					contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+					zIndex="1000"
 				>
-				<div
-					class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 z-10"
-					data-popup="popupDownload"
-				>
-					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-					{#if !page.data.user.is_third_party}
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-						>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asWord()}</a
-						>
-					{/if}
-					<a
-						href="/compliance-assessments/{data.compliance_assessment.id}/export"
-						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
-					>
-					{#if !page.data.user.is_third_party}
-						<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-						>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/pdf"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-						>
-					{/if}
-				</div>
+					{#snippet trigger()}
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					{/snippet}
+					{#snippet content()}
+						<div>
+							<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+							{#if !page.data.user.is_third_party}
+								<a
+									href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+								>
+								<a
+									href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+									>... {m.asWord()}</a
+								>
+							{/if}
+							<a
+								href="/compliance-assessments/{data.compliance_assessment.id}/export"
+								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
+							>
+							{#if !page.data.user.is_third_party}
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+								<a
+									href="/compliance-assessments/{data.compliance_assessment
+										.id}/action-plan/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+								>
+								<a
+									href="/compliance-assessments/{data.compliance_assessment
+										.id}/action-plan/export/pdf"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								>
+							{/if}
+						</div>
+					{/snippet}
+				</Popover>
 				{#if canEditObject}
 					<Anchor
 						breadcrumbAction="push"
