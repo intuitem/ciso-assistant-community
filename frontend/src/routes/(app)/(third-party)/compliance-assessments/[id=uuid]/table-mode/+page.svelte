@@ -261,6 +261,17 @@
 			}
 		});
 	});
+
+	const accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
+		data.requirement_assessments.reduce((acc, requirementAssessment) => {
+			const requirement =
+				requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
+			return {
+				...acc,
+				[requirementAssessment.id]: ['']
+			};
+		})
+	);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -706,7 +717,10 @@
 									</ProgressRing>
 								</div>
 							{/if}
-							<Accordion regionCaret="flex">
+							<Accordion
+								value={accordionItems[requirementAssessment.id]}
+								onValueChange={(e) => (accordionItems[requirementAssessment.id] = e.value)}
+							>
 								{#if shallow}
 									{#if requirementAssessment.observation}
 										<p class="text-primary-500">{requirementAssessment.observation}</p>
@@ -714,7 +728,7 @@
 										<p class="text-gray-400 italic">{m.noObservation()}</p>
 									{/if}
 								{:else}
-									<Accordion.Item caretOpen="rotate-0" caretClosed="-rotate-90">
+									<Accordion.Item value="observation">
 										{#snippet control()}
 											<p class="flex">{m.observation()}</p>
 										{/snippet}
@@ -755,7 +769,7 @@
 								{#if requirementAssessment.evidences.length === 0 && shallow}
 									<p class="text-gray-400 italic">{m.noEvidences()}</p>
 								{:else}
-									<Accordion.Item caretOpen="rotate-0" caretClosed="-rotate-90">
+									<Accordion.Item value="evidence">
 										{#snippet control()}
 											<p class="flex items-center space-x-2">
 												<span>{m.evidence()}</span>
