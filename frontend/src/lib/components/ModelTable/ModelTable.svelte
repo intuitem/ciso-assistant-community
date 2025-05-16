@@ -106,7 +106,7 @@
 		deleteForm = undefined,
 		URLModel = undefined,
 		baseEndpoint = `/${URLModel}`,
-		detailQueryParameter = $bindable(undefined),
+		detailQueryParameter = $bindable(),
 		fields = [],
 		canSelectObject = false,
 		hideFilters = $bindable(false),

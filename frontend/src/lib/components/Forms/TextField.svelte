@@ -28,11 +28,11 @@
 		class: _class = '',
 		type = 'text',
 		classesContainer = '',
-		label = $bindable(undefined),
+		label = $bindable(),
 		field,
 		valuePath = field,
 		helpText = undefined,
-		cachedValue = $bindable(undefined),
+		cachedValue = $bindable(),
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
 			resolve: (x) => x

@@ -21,11 +21,11 @@
 	}
 
 	let {
-		label = $bindable(undefined),
+		label = $bindable(),
 		field,
 		valuePath = field,
 		helpText = undefined,
-		cachedValue = $bindable(undefined),
+		cachedValue = $bindable(),
 		form,
 		hidden = false,
 		disabled = false,

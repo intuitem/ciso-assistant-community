@@ -23,7 +23,7 @@
 
 	let {
 		class: _class = '',
-		label = $bindable(undefined),
+		label = $bindable(),
 		step = 1,
 		field,
 		valuePath = field,

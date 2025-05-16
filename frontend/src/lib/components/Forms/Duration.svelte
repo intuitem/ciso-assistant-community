@@ -25,7 +25,7 @@
 
 	let {
 		class: _class = '',
-		label = $bindable(undefined),
+		label = $bindable(),
 		field,
 		valuePath = field,
 		helpText = undefined,

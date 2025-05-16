@@ -22,11 +22,11 @@
 
 	let {
 		class: _class = '',
-		label = $bindable(undefined),
+		label = $bindable(),
 		field,
 		helpText = undefined,
 		form,
-		cachedValue = $bindable(''),
+		cachedValue = $bindable(),
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
 			resolve: (x) => x
