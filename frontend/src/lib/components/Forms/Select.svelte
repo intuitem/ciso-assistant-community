@@ -8,10 +8,6 @@
 	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
 
-	// $: value.set(cachedValue);
-	run(() => {
-		cachedValue = $value;
-	}); // I must add an initial value.set(cachedValue) to make the cache work after that, but i firstly want to see if i can pass the test with this.
 	let selectElement: HTMLElement | null = $state(null);
 
 	onMount(async () => {
@@ -64,6 +60,11 @@
 	let classesTextField = $derived((errors: string[] | undefined) =>
 		errors && errors.length > 0 ? 'input-error' : ''
 	);
+
+	// $: value.set(cachedValue);
+	run(() => {
+		cachedValue = $value;
+	}); // I must add an initial value.set(cachedValue) to make the cache work after that, but i firstly want to see if i can pass the test with this.
 </script>
 
 <div>
