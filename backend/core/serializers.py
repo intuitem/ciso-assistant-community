@@ -1446,6 +1446,7 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     assigned_to = FieldsRelatedField(many=True)
+    findings_assessment = FieldsRelatedField(many=True)
 
     next_occurrence = serializers.DateField(read_only=True)
     last_occurrence_status = serializers.CharField(read_only=True)
