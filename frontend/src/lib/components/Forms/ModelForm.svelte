@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { setContext, onDestroy } from 'svelte';
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -68,24 +70,46 @@
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	export let form: SuperValidated<AnyZodObject>;
-	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
-	export let taintedMessage: string | boolean = m.taintedFormMessage();
-	export let model: ModelInfo;
-	export let context = 'default';
-	export let caching: boolean = false;
-	export let closeModal = false;
-	export let parent: any = {};
-	export let suggestions: { [key: string]: any } = {};
-	export let cancelButton = true;
-	export let duplicate = false;
-	export let importFolder = false;
-	export let customNameDescription = false;
-	export let additionalInitialData = {};
-
 	const URLModel = model.urlModel as urlModel;
-	export let schema = modelSchema(URLModel);
-	export let object: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<AnyZodObject>;
+		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
+		taintedMessage?: string | boolean;
+		model: ModelInfo;
+		context?: string;
+		caching?: boolean;
+		closeModal?: boolean;
+		parent?: any;
+		suggestions?: { [key: string]: any };
+		cancelButton?: boolean;
+		duplicate?: boolean;
+		importFolder?: boolean;
+		customNameDescription?: boolean;
+		additionalInitialData?: any;
+		schema?: any;
+		object?: Record<string, any>;
+		[key: string]: any;
+	}
+
+	let {
+		form,
+		invalidateAll = true,
+		taintedMessage = m.taintedFormMessage(),
+		model,
+		context = 'default',
+		caching = false,
+		closeModal = false,
+		parent = {},
+		suggestions = {},
+		cancelButton = true,
+		duplicate = false,
+		importFolder = false,
+		customNameDescription = false,
+		additionalInitialData = {},
+		schema = modelSchema(URLModel),
+		object = {},
+		...rest
+	}: Props = $props();
 
 	function cancel(): void {
 		if (browser) {
@@ -95,7 +119,7 @@
 			if (nextValue) goto(nextValue);
 		}
 	}
-	$: shape = schema.shape || schema._def.schema.shape;
+	let shape = $derived(schema.shape || schema._def.schema.shape);
 	let updated_fields = new Set();
 
 	function makeCacheLock(): CacheLock {
@@ -106,32 +130,38 @@
 		return { resolve, promise };
 	}
 
-	let cacheLocks = {};
-	$: if (shape)
-		cacheLocks = Object.keys(shape).reduce((acc, field) => {
-			acc[field] = makeCacheLock();
-			return acc;
-		}, {});
+	let cacheLocks = $state({});
+	run(() => {
+		if (shape)
+			cacheLocks = Object.keys(shape).reduce((acc, field) => {
+				acc[field] = makeCacheLock();
+				return acc;
+			}, {});
+	});
 
-	let formDataCache = {};
-	let urlModelFromPage;
+	let formDataCache = $state({});
+	let urlModelFromPage = $state();
 
-	$: if ($page) {
-		urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
-		createModalCache.setModelName(urlModelFromPage);
+	run(() => {
+		if ($page) {
+			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
+			createModalCache.setModelName(urlModelFromPage);
+			if (caching) {
+				createModalCache.data[model.urlModel] ??= {};
+				formDataCache = createModalCache.data[model.urlModel];
+			}
+		}
+	});
+
+	run(() => {
 		if (caching) {
-			createModalCache.data[model.urlModel] ??= {};
-			formDataCache = createModalCache.data[model.urlModel];
+			for (const key of Object.keys(cacheLocks)) {
+				cacheLocks[key].resolve(formDataCache[key]);
+			}
 		}
-	}
+	});
 
-	$: if (caching) {
-		for (const key of Object.keys(cacheLocks)) {
-			cacheLocks[key].resolve(formDataCache[key]);
-		}
-	}
-
-	let missingConstraints: string[] = [];
+	let missingConstraints: string[] = $state([]);
 	// Context function to update missing constraints
 	function updateMissingConstraint(field: string, isMissing: boolean) {
 		if (isMissing && !missingConstraints.includes(field)) {
@@ -151,8 +181,8 @@
 		dataType: shape?.attachment ? 'form' : 'json',
 		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
 		invalidateAll,
-		applyAction: $$restProps.applyAction ?? true,
-		resetForm: $$restProps.resetForm ?? false,
+		applyAction: rest.applyAction ?? true,
+		resetForm: rest.resetForm ?? false,
 		validators: zod(schema),
 		taintedMessage,
 		validationMethod: 'auto',
@@ -188,7 +218,7 @@
 	{invalidateAll}
 	validators={zod(schema)}
 	onUpdated={() => createModalCache.deleteCache(model.urlModel)}
-	{...$$restProps}
+	{...rest}
 >
 	{#snippet children({ form, data, initialData })}
 		<input type="hidden" name="urlmodel" value={model.urlModel} />
@@ -428,7 +458,7 @@
 					class="btn bg-gray-400 text-white font-semibold w-full"
 					data-testid="cancel-button"
 					type="button"
-					on:click={(event) => {
+					onclick={(event) => {
 						parent.onClose(event);
 						createModalCache.deleteCache(model.urlModel);
 					}}>{m.cancel()}</button
@@ -444,7 +474,7 @@
 						class="btn bg-gray-400 text-white font-semibold w-full"
 						data-testid="cancel-button"
 						type="button"
-						on:click={cancel}>{m.cancel()}</button
+						onclick={cancel}>{m.cancel()}</button
 					>
 				{/if}
 				<button
