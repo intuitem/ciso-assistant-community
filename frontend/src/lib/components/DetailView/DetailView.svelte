@@ -14,12 +14,6 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
-	import type {
-		PopupSettings,
-		ModalComponent,
-		ModalSettings,
-		ModalStore
-	} from '@skeletonlabs/skeleton-svelte';
 
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
@@ -28,11 +22,18 @@
 	import { goto } from '$app/navigation';
 	import { listViewFields } from '$lib/utils/table';
 	import { canPerformAction } from '$lib/utils/access-control';
-	// const modalStore: ModalStore = getModalStore();
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+
+	const modalStore: ModalStore = getModalStore();
 
 	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str'];
 
-	const popupHover: PopupSettings = {
+	const popupHover = {
 		event: 'hover',
 		target: 'popupHover',
 		placement: 'left'
@@ -111,7 +112,7 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	function modalConfirm(id: string, name: string, action: string): void {
@@ -133,7 +134,7 @@
 			title: m.confirmModalTitle(),
 			body: `${m.confirmModalMessage()}: ${name}?`
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	function modalAppliedControlDuplicateForm(): void {
@@ -153,7 +154,7 @@
 			component: modalComponent,
 			title: m.duplicateAppliedControl()
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	function modalMailConfirm(id: string, name: string, action: string): void {
@@ -179,7 +180,7 @@
 			title: m.confirmModalTitle(),
 			body: m.sureToSendQuestionnaire({ questionnaire: name })
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	const user = page.data.user;

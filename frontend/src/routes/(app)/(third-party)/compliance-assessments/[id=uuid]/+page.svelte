@@ -7,13 +7,7 @@
 
 	import { onMount } from 'svelte';
 
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-		PopupSettings,
-		TreeViewNode
-	} from '@skeletonlabs/skeleton-svelte';
+	import type { ModalComponent, ModalSettings, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 
 	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
 
@@ -85,6 +79,7 @@
 	}
 
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -221,7 +216,7 @@
 
 	expandedNodes = $expandedNodesState;
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -239,7 +234,7 @@
 			// Data
 			title: m.createAuditFromBaseline()
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 	let syncingToActionsIsLoading = $state(false);
 	async function modalConfirmSyncToActions(
@@ -270,7 +265,7 @@
 				bodyProps: {
 					items: Object.values(requirementAssessmentsSync.changes).map(
 						(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
-					), //feed this
+					),
 					message: m.theFollowingChangesWillBeApplied()
 				}
 			}
@@ -287,7 +282,7 @@
 				syncingToActionsIsLoading = r;
 			}
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 	let createAppliedControlsLoading = $state(false);
 
@@ -319,7 +314,7 @@
 				createAppliedControlsLoading = r;
 			}
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	let tree = $derived(data.tree);
@@ -663,11 +658,11 @@
 		</div>
 		{#key data}
 			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
-				<RecursiveTreeView
-					nodes={transformToTreeView(Object.entries(tree))}
-					bind:expandedNodes
-					hover="hover:bg-initial"
-				/>
+				<!-- <RecursiveTreeView -->
+				<!-- 	nodes={transformToTreeView(Object.entries(tree))} -->
+				<!-- 	bind:expandedNodes -->
+				<!-- 	hover="hover:bg-initial" -->
+				<!-- /> -->
 			{/key}
 		{/key}
 	</div>

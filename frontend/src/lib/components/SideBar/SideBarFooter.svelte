@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
-	import type { ModalSettings, PopupSettings } from '@skeletonlabs/skeleton-svelte';
 	import { locales, getLocale, setLocale } from '$paraglide/runtime';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import { m } from '$paraglide/messages';
 	import { setCookie } from '$lib/utils/cookies';
 
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	const dispatch = createEventDispatcher();
 
 	const language: any = {
@@ -30,7 +30,7 @@
 		hungarian: m.hungarian()
 	};
 
-	// const modalStore = getModalStore();
+	const modalStore = getModalStore();
 
 	const defaultLangLabels = {
 		fr: 'Français',
@@ -68,12 +68,6 @@
 		window.location.reload();
 	}
 
-	const popupUser: PopupSettings = {
-		event: 'click',
-		target: 'popupUser',
-		placement: 'top'
-	};
-
 	async function modalBuildInfo() {
 		const res = await fetch('/fe-api/build').then((res) => res.json());
 		const modal: ModalSettings = {
@@ -82,7 +76,7 @@
 			title: 'About CISO Assistant',
 			body: JSON.stringify(res)
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	let enableMoreBtn = $state(false);
