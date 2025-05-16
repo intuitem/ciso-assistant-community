@@ -3,6 +3,7 @@
 
 	// Most of your app wide CSS should be put in this file
 	import '../../app.css';
+
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
@@ -12,6 +13,17 @@
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
 	import { m } from '$paraglide/messages';
+
+	import type { PageData, ActionData } from './$types';
+	import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
+
+	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 
@@ -40,11 +52,6 @@
 			}
 		}
 	});
-	// import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
-	import type { PageData, ActionData } from './$types';
-	// import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
-
-	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
 
 	interface Props {
 		data: PageData;
@@ -60,20 +67,20 @@
 		children
 	}: Props = $props();
 
-	// const modalStore: ModalStore = getModalStore();
-	// function modalQuickStart(): void {
-	// 	let modalComponent: ModalComponent = {
-	// 		ref: QuickStartModal,
-	// 		props: {}
-	// 	};
-	// 	let modal: ModalSettings = {
-	// 		type: 'component',
-	// 		component: modalComponent,
-	// 		// Data
-	// 		title: m.quickStart()
-	// 	};
-	// 	modalStore.trigger(modal);
-	// }
+	const modalStore: ModalStore = getModalStore();
+	function modalQuickStart(): void {
+		let modalComponent: ModalComponent = {
+			ref: QuickStartModal,
+			props: {}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.quickStart()
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <!-- App Shell -->
@@ -88,6 +95,7 @@
 		</span>
 		{#if data?.user?.is_admin}
 			<button
+				onclick={modalQuickStart}
 				class="absolute top-7 right-9 p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
         ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
         hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50

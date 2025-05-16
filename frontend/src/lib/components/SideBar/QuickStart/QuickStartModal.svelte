@@ -1,15 +1,8 @@
-<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
-	// Props
-	/** Exposes parent props to this component. */
-	export let parent: any;
-
-	// Stores
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 
@@ -18,15 +11,30 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { quickStartSchema } from '$lib/utils/schemas';
 	import { getLocale } from '$paraglide/runtime';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
-	export let formAction = '/quick-start?/create';
-	export let additionalInitialData = {};
-	export let suggestions: { [key: string]: any } = {};
+	interface Props {
+		/** Exposes parent props to this component. */
+		parent: any;
+		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
+		formAction?: string;
+		additionalInitialData?: any;
+		suggestions?: { [key: string]: any };
+		debug?: boolean;
+		[key: string]: any;
+	}
 
-	export let debug = false;
+	let {
+		parent,
+		invalidateAll = true,
+		formAction = '/quick-start?/create',
+		additionalInitialData = {},
+		suggestions = {},
+		debug = false,
+		...rest
+	}: Props = $props();
 
 	let closeModal = true;
 
@@ -47,8 +55,8 @@
 	const _form = superForm(form, {
 		dataType: 'json',
 		invalidateAll,
-		applyAction: $$props.applyAction ?? true,
-		resetForm: $$props.resetForm ?? false,
+		applyAction: rest.applyAction ?? true,
+		resetForm: rest.resetForm ?? false,
 		validators: zod(quickStartSchema),
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto',
@@ -73,10 +81,10 @@
 				role="button"
 				tabindex="0"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
-				on:click={parent.onClose}
-				on:keydown={parent.onClose}
+				onclick={parent.onClose}
+				onkeydown={parent.onClose}
 			>
-				<i class="fa-solid fa-xmark" />
+				<i class="fa-solid fa-xmark"></i>
 			</div>
 		</div>
 		<SuperForm
@@ -86,54 +94,53 @@
 			data={form}
 			{_form}
 			{invalidateAll}
-			let:form
-			let:data
-			let:initialData
 			validators={zod(quickStartSchema)}
 			action={formAction}
-			{...$$restProps}
+			{...rest}
 		>
-			<AutocompleteSelect
-				{form}
-				field="framework"
-				label={m.framework()}
-				optionsEndpoint="stored-libraries"
-				optionsDetailedUrlParameters={[['object_type', 'framework']]}
-				optionsValueField="urn"
-			/>
-			<TextField {form} field="audit_name" label={m.auditName()} />
-			<Checkbox {form} field="create_risk_assessment" label={m.createRiskAssessment()} />
-			<TextField
-				{form}
-				field="risk_assessment_name"
-				label={m.riskAssessmentName()}
-				disabled={!data.create_risk_assessment}
-			/>
-			<AutocompleteSelect
-				{form}
-				field="risk_matrix"
-				label={m.riskMatrix()}
-				optionsEndpoint="stored-libraries"
-				optionsDetailedUrlParameters={[['object_type', 'risk_matrix']]}
-				optionsValueField="urn"
-				disabled={!data.create_risk_assessment}
-			/>
-			<div class="flex flex-row justify-between space-x-4">
-				<button
-					class="btn bg-gray-400 text-white font-semibold w-full"
-					data-testid="cancel-button"
-					type="button"
-					on:click={(event) => {
-						parent.onClose(event);
-					}}>{m.cancel()}</button
-				>
+			{#snippet children({ form, data, initialData })}
+				<AutocompleteSelect
+					{form}
+					field="framework"
+					label={m.framework()}
+					optionsEndpoint="stored-libraries"
+					optionsDetailedUrlParameters={[['object_type', 'framework']]}
+					optionsValueField="urn"
+				/>
+				<TextField {form} field="audit_name" label={m.auditName()} />
+				<Checkbox {form} field="create_risk_assessment" label={m.createRiskAssessment()} />
+				<TextField
+					{form}
+					field="risk_assessment_name"
+					label={m.riskAssessmentName()}
+					disabled={!data.create_risk_assessment}
+				/>
+				<AutocompleteSelect
+					{form}
+					field="risk_matrix"
+					label={m.riskMatrix()}
+					optionsEndpoint="stored-libraries"
+					optionsDetailedUrlParameters={[['object_type', 'risk_matrix']]}
+					optionsValueField="urn"
+					disabled={!data.create_risk_assessment}
+				/>
+				<div class="flex flex-row justify-between space-x-4">
+					<button
+						class="btn bg-gray-400 text-white font-semibold w-full"
+						data-testid="cancel-button"
+						type="button"
+						onclick={(event) => {
+							parent.onClose(event);
+						}}>{m.cancel()}</button
+					>
 
-				<button
-					class="btn preset-filled-primary-500 font-semibold w-full"
-					data-testid="save-button"
-					type="submit">{m.save()}</button
-				>
-			</div>
+					<button
+						class="btn preset-filled-primary-500 font-semibold w-full"
+						data-testid="save-button"
+						type="submit">{m.save()}</button
+					>
+				</div>
+			{/snippet}
 		</SuperForm>
 	</div>
 {/if}
