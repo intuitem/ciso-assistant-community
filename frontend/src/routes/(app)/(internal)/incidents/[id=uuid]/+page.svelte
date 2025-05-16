@@ -36,6 +36,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
 	import { canPerformAction } from '$lib/utils/access-control';
+	import { getModalStore } from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;

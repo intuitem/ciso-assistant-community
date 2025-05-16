@@ -2,13 +2,13 @@
 	// Props
 
 	// Stores
-	import type { CssClasses, ModalStore } from '@skeletonlabs/skeleton-svelte';
+	import { getModalStore, type ModalStore } from './stores';
 
 	interface Action {
 		label: string;
 		action: () => boolean | Promise<boolean>;
 		async: boolean;
-		classes?: CssClasses;
+		classes?: string;
 		btnIcon?: string;
 	}
 

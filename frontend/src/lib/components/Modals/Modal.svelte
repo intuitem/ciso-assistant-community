@@ -27,6 +27,7 @@
 	// Types
 	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton-svelte';
 	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
+	import { getModalStore } from './stores';
 
 	interface Props {
 		// Props (components)

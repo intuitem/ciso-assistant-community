@@ -1,9 +1,10 @@
 <script lang="ts">
-	// Props
-
-	// Stores
+	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
+	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { AnyZodObject } from 'zod';
+	import { getModalStore, type ModalStore } from './stores';
 	import type { ModelInfo } from '$lib/utils/types';
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
+
 	const modalStore: ModalStore = getModalStore();
 
 	let closeModal = true;
@@ -12,9 +13,6 @@
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;

@@ -1,6 +1,4 @@
 <script lang="ts">
-	// Props
-
 	// Stores
 	import type { ModelInfo } from '$lib/utils/types';
 	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
@@ -15,6 +13,7 @@
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
+	import { getModalStore } from './stores';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;

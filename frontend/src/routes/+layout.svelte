@@ -14,7 +14,7 @@
 	// initializeStores();
 
 	import Toast from '$lib/components/Toast/Toast.svelte';
-	// import Modal from '$lib/components/Modals/Modal.svelte';
+	import Modal from '$lib/components/Modals/Modal.svelte';
 	// import type { ModalComponent, ToastSettings } from '@skeletonlabs/skeleton-svelte';
 	// import { clientSideToast } from '$lib/utils/stores';
 
@@ -64,22 +64,25 @@
 	// 	flash.set(undefined);
 	// });
 
-	// import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
-	// import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	// import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import ParaglideJsProvider from './ParaglideJsProvider.svelte';
+	import { initializeModalStore, type ModalComponent } from '$lib/components/Modals/stores';
 	interface Props {
 		children?: import('svelte').Snippet;
 	}
 
 	let { children }: Props = $props();
 
-	// const modalRegistry: Record<string, ModalComponent> = {
-	// 	// Set a unique modal ID, then pass the component reference
-	// 	displayJSONModal: { ref: DisplayJSONModal },
-	// 	createModal: { ref: CreateModal },
-	// 	deleteConfirmModal: { ref: DeleteConfirmModal }
-	// };
+	const modalRegistry: Record<string, ModalComponent> = {
+		// Set a unique modal ID, then pass the component reference
+		displayJSONModal: { ref: DisplayJSONModal },
+		createModal: { ref: CreateModal },
+		deleteConfirmModal: { ref: DeleteConfirmModal }
+	};
+
+	initializeModalStore();
 
 	run(() => {
 		if (browser && $page.url.searchParams.has('refresh')) {
@@ -91,7 +94,7 @@
 
 <svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
 <ParaglideJsProvider>
-	<!-- <Modal components={modalRegistry} /> -->
+	<Modal components={modalRegistry} />
 	<Toast />
 	{@render children?.()}
 

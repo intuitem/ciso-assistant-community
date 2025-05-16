@@ -1,23 +1,11 @@
 <script lang="ts">
 	import type { urlModel } from '$lib/utils/types';
 
-	// Props
-
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
-
 	import { m } from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
 
 	import { superForm } from 'sveltekit-superforms';
-
-	const { form } = _form
-		? superForm(_form, {
-				dataType: 'json',
-				id: `confirm-modal-form-${crypto.randomUUID()}`
-			})
-		: null;
 
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
@@ -27,6 +15,7 @@
 	import SuperDebug from 'sveltekit-superforms';
 	import type { ComponentType } from 'svelte';
 	import { enhance } from '$app/forms';
+	import { getModalStore, type ModalStore } from './stores';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
@@ -49,6 +38,13 @@
 		bodyProps = {},
 		debug = false
 	}: Props = $props();
+
+	const { form } = _form
+		? superForm(_form, {
+				dataType: 'json',
+				id: `confirm-modal-form-${crypto.randomUUID()}`
+			})
+		: null;
 
 	let userInput = $state('');
 </script>

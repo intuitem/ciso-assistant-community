@@ -6,10 +6,15 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 
 	import { onMount } from 'svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
@@ -19,7 +24,7 @@
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
@@ -35,7 +40,7 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	function modalFolderImportForm(): void {
@@ -56,7 +61,7 @@
 			// Data
 			title: safeTranslate('importFolder')
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {

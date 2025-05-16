@@ -5,7 +5,7 @@
 	// export let parent: any;
 
 	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
+	import { getModalStore, type ModalStore } from './stores';
 	const modalStore: ModalStore = getModalStore();
 
 	// Base Classes
