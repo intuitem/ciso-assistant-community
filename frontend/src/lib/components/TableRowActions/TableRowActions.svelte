@@ -5,15 +5,20 @@
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import type { ModelMapEntry } from '$lib/utils/crud';
 	import type { urlModel } from '$lib/utils/types';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import {
+		getModalStore,
+		type ModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	export let row: Record<string, any>;
 	export let model: ModelMapEntry | undefined = undefined;
@@ -61,7 +66,7 @@
 			title: m.deleteModalTitle(),
 			body: body
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	function promptModalConfirmDelete(
@@ -93,7 +98,7 @@
 			title: m.deleteModalTitle(),
 			body: body
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	const user = $page.data.user;
