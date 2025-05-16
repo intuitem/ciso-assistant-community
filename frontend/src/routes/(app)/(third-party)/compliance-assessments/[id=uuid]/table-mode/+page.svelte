@@ -12,20 +12,18 @@
 	} from '$lib/utils/constants';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import {
-		Accordion,
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore,
-		Segment,
-		Switch,
-		ProgressRing
-	} from '@skeletonlabs/skeleton-svelte';
+	import { Accordion, Segment, Switch, ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
 	import {} from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { complianceResultColorMap } from '$lib/utils/constants';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
@@ -717,10 +715,10 @@
 									{/if}
 								{:else}
 									<Accordion.Item caretOpen="rotate-0" caretClosed="-rotate-90">
-										{#snippet summary()}
+										{#snippet control()}
 											<p class="flex">{m.observation()}</p>
 										{/snippet}
-										{#snippet content()}
+										{#snippet panel()}
 											<div>
 												<textarea
 													placeholder=""
@@ -758,7 +756,7 @@
 									<p class="text-gray-400 italic">{m.noEvidences()}</p>
 								{:else}
 									<Accordion.Item caretOpen="rotate-0" caretClosed="-rotate-90">
-										{#snippet summary()}
+										{#snippet control()}
 											<p class="flex items-center space-x-2">
 												<span>{m.evidence()}</span>
 												{#key addedEvidence}
@@ -770,7 +768,7 @@
 												{/key}
 											</p>
 										{/snippet}
-										{#snippet content()}
+										{#snippet panel()}
 											<div class="flex flex-row space-x-2 items-center">
 												{#if !shallow}
 													<button
