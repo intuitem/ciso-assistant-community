@@ -12,11 +12,6 @@
 		description: string;
 	}
 
-	const { value, errors, constraints } = formFieldProxy(form, field);
-
-	const dispatch = createEventDispatcher();
-	let previous = $state([$value]);
-
 	interface Props {
 		label?: string | undefined;
 		field: string;
@@ -49,10 +44,18 @@
 		disabled = false,
 		scores_definition = [],
 		form,
-		score = $bindable($value),
+		score = $bindable(),
 		left
 	}: Props = $props();
+
+	const { value, errors, constraints } = formFieldProxy(form, field);
+	const dispatch = createEventDispatcher();
+	let previous = $state([$value]);
+
+	let sliderValue = $state([$value]);
+
 	run(() => {
+		$value = sliderValue;
 		score = $value;
 	});
 
@@ -88,7 +91,7 @@
 					class="w-full"
 					data-testid="range-slider-input"
 					name="range-slider"
-					bind:value={$value}
+					value={sliderValue}
 					min={min_score}
 					max={max_score}
 					step={score_step}
