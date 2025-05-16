@@ -1,14 +1,12 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { page } from '$app/state';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
-
-	export let data: PageData;
 
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
@@ -19,8 +17,13 @@
 		'to_do'
 	] as const;
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const model = URL_MODEL_MAP['perimeters'];
 	const canEditObject = (perimeter): boolean =>
 		canPerformAction({
@@ -77,7 +80,7 @@
 						</div>
 						{#if compliance_assessment.globalScore.score >= 0}
 							<div class="justify-center flex items-center">
-								<ProgressRadial
+								<ProgressRing
 									stroke={100}
 									meter={displayScoreColor(
 										compliance_assessment.globalScore.score,
@@ -88,7 +91,7 @@
 										compliance_assessment.globalScore.max_score
 									)}
 									font={150}
-									width={'w-20'}>{compliance_assessment.globalScore.score}</ProgressRadial
+									width={'w-20'}>{compliance_assessment.globalScore.score}</ProgressRing
 								>
 							</div>
 						{/if}
@@ -110,14 +113,14 @@
 												href: `/compliance-assessments/${compliance_assessment.id}`
 											}
 										]}
-										class="btn variant-filled-primary w-1/2 lg:w-full"
-										><i class="fa-solid fa-edit mr-2" /> {m.edit()}
+										class="btn preset-filled-primary-500 w-1/2 lg:w-full"
+										><i class="fa-solid fa-edit mr-2"></i> {m.edit()}
 									</Anchor>
 								{/if}
 								<a
 									href="/compliance-assessments/{compliance_assessment.id}/export"
-									class="btn variant-filled-primary w-1/2 lg:w-full"
-									><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
+									class="btn preset-filled-primary-500 w-1/2 lg:w-full"
+									><i class="fa-solid fa-download mr-2"></i> {m.exportButton()}
 								</a>
 							</div>
 						</div>

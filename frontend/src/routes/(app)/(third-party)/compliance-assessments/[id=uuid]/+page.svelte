@@ -1,21 +1,19 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { run } from 'svelte/legacy';
+
+	import { page } from '$app/state';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { displayOnlyAssessableNodes } from './store';
 
 	import { onMount } from 'svelte';
 
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-		PopupSettings,
-		TreeViewNode
-	} from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
+
+	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto } from '$app/navigation';
 
-	import { getModalStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
+	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
@@ -32,21 +30,21 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 
-	export let data: PageData;
-	export let form: ActionData;
-
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import {} from '@skeletonlabs/skeleton-svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-	$: tree = data.tree;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
 
-	$: compliance_assessment_donut_values = data.compliance_assessment_donut_values;
+	let { data, form }: Props = $props();
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -64,8 +62,8 @@
 
 	const has_threats = data.threats.total_unique_threats > 0;
 
-	let threatDialogOpen = false;
-	let dialogElement;
+	let threatDialogOpen = $state(false);
+	let dialogElement = $state();
 
 	function openThreatsDialog() {
 		threatDialogOpen = true;
@@ -81,17 +79,18 @@
 	}
 
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return; // otherwise it will interfere with input fields
 		if (event.key === 'f') {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/flash-mode`);
+			goto(`${page.url.pathname}/flash-mode`);
 		}
 		if (event.key === 't') {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/table-mode`);
+			goto(`${page.url.pathname}/table-mode`);
 		}
 	}
 
@@ -134,14 +133,14 @@
 		return resultCounts;
 	};
 
-	let selectedStatus = ['done', 'to_do', 'in_progress', 'in_review'];
-	let selectedResults = [
+	let selectedStatus = $state(['done', 'to_do', 'in_progress', 'in_review']);
+	let selectedResults = $state([
 		'compliant',
 		'non_compliant',
 		'partially_compliant',
 		'not_assessed',
 		'not_applicable'
-	];
+	]);
 	function toggleItem(item, selectedItems) {
 		if (selectedItems.includes(item)) {
 			return selectedItems.filter((s) => s !== item);
@@ -198,10 +197,7 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[];
-	$: if (tree) {
-		treeViewNodes = transformToTreeView(Object.entries(tree));
-	}
+	let treeViewNodes: TreeViewNode[] = $state();
 
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
@@ -216,16 +212,9 @@
 		return count;
 	}
 
-	let expandedNodes: TreeViewNode[] = [];
+	let expandedNodes: TreeViewNode[] = $state([]);
 
 	expandedNodes = $expandedNodesState;
-	$: expandedNodesState.set(expandedNodes);
-
-	const popupDownload: PopupSettings = {
-		event: 'click',
-		target: 'popupDownload',
-		placement: 'bottom'
-	};
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -247,14 +236,14 @@
 		};
 		modalStore.trigger(modal);
 	}
-	let syncingToActionsIsLoading = false;
+	let syncingToActionsIsLoading = $state(false);
 	async function modalConfirmSyncToActions(
 		id: string,
 		name: string,
 		action: string
 	): Promise<void> {
 		const requirementAssessmentsSync = await fetch(
-			`/compliance-assessments/${$page.params.id}/sync-to-actions`,
+			`/compliance-assessments/${page.params.id}/sync-to-actions`,
 			{ method: 'POST' }
 		).then((response) => {
 			if (response.ok) {
@@ -276,7 +265,7 @@
 				bodyProps: {
 					items: Object.values(requirementAssessmentsSync.changes).map(
 						(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
-					), //feed this
+					),
 					message: m.theFollowingChangesWillBeApplied()
 				}
 			}
@@ -295,7 +284,7 @@
 		};
 		modalStore.trigger(modal);
 	}
-	let createAppliedControlsLoading = false;
+	let createAppliedControlsLoading = $state(false);
 
 	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
 		const modalComponent: ModalComponent = {
@@ -328,11 +317,30 @@
 		modalStore.trigger(modal);
 	}
 
-	$: if (syncingToActionsIsLoading === true && (form || form?.error))
-		syncingToActionsIsLoading = false;
-	$: if (createAppliedControlsLoading === true && (form || form?.error))
-		createAppliedControlsLoading = false;
-	$: if (form?.message?.requirementAssessmentsSync) console.log(form);
+	let tree = $derived(data.tree);
+	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
+
+	let exportPopupOpen = $state(false);
+
+	run(() => {
+		if (tree) {
+			treeViewNodes = transformToTreeView(Object.entries(tree));
+		}
+	});
+	run(() => {
+		expandedNodesState.set(expandedNodes);
+	});
+	run(() => {
+		if (syncingToActionsIsLoading === true && (form || form?.error))
+			syncingToActionsIsLoading = false;
+	});
+	run(() => {
+		if (createAppliedControlsLoading === true && (form || form?.error))
+			createAppliedControlsLoading = false;
+	});
+	run(() => {
+		if (form?.message?.requirementAssessmentsSync) console.log(form);
+	});
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -362,7 +370,7 @@
 															(item) => item.field === key
 														)?.urlModel
 													}/${val.id}`}
-													{#if !$page.data.user.is_third_party}
+													{#if !page.data.user.is_third_party}
 														<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 													{:else}
 														{val.str}
@@ -379,7 +387,7 @@
 											(item) => item.field === key
 										)?.urlModel
 									}/${value.id}`}
-									{#if !$page.data.user.is_third_party}
+									{#if !page.data.user.is_third_party}
 										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 									{:else}
 										{value.str}
@@ -400,7 +408,7 @@
 				{#if data.global_score.score >= 0}
 					<div class="absolute font-bold text-sm">{m.maturity()}</div>
 					<div class="flex justify-center items-center w-full">
-						<ProgressRadial
+						<ProgressRing
 							stroke={100}
 							meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
 							font={125}
@@ -408,7 +416,7 @@
 							width={'w-52'}
 						>
 							{data.global_score.score}
-						</ProgressRadial>
+						</ProgressRing>
 					</div>
 				{/if}
 			</div>
@@ -439,83 +447,95 @@
 		{/key}
 		<div class="flex flex-col space-y-2 ml-4">
 			<div class="flex flex-row space-x-2">
-				<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
-					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
+				<Popover
+					open={exportPopupOpen}
+					onOpenChange={(e) => (exportPopupOpen = e.open)}
+					positioning={{ placement: 'bottom' }}
+					triggerBase="btn preset-filled-primary-500 w-full"
+					contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+					zIndex="1000"
 				>
-				<div
-					class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 z-10"
-					data-popup="popupDownload"
-				>
-					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-					{#if !$page.data.user.is_third_party}
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-						>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asWord()}</a
-						>
-					{/if}
-					<a
-						href="/compliance-assessments/{data.compliance_assessment.id}/export"
-						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
-					>
-					{#if !$page.data.user.is_third_party}
-						<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-						>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/pdf"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-						>
-					{/if}
-				</div>
+					{#snippet trigger()}
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					{/snippet}
+					{#snippet content()}
+						<div>
+							<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+							{#if !page.data.user.is_third_party}
+								<a
+									href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+								>
+								<a
+									href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+									>... {m.asWord()}</a
+								>
+							{/if}
+							<a
+								href="/compliance-assessments/{data.compliance_assessment.id}/export"
+								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
+							>
+							{#if !page.data.user.is_third_party}
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+								<a
+									href="/compliance-assessments/{data.compliance_assessment
+										.id}/action-plan/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+								>
+								<a
+									href="/compliance-assessments/{data.compliance_assessment
+										.id}/action-plan/export/pdf"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								>
+							{/if}
+						</div>
+					{/snippet}
+				</Popover>
 				{#if canEditObject}
 					<Anchor
 						breadcrumbAction="push"
-						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
-						class="btn variant-filled-primary h-fit"
+						href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
+						class="btn preset-filled-primary-500 h-fit"
 						data-testid="edit-button"
-						><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
+						><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 					>
 				{/if}
 			</div>
-			{#if !$page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party}
 				<Anchor
-					href={`${$page.url.pathname}/action-plan`}
-					class="btn variant-filled-primary h-fit"
-					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
+					href={`${page.url.pathname}/action-plan`}
+					class="btn preset-filled-primary-500 h-fit"
+					breadcrumbAction="push"
+					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 				>
 			{/if}
 			<span class="pt-4 text-sm">{m.powerUps()}</span>
-			{#if !$page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party}
 				<Anchor
 					breadcrumbAction="push"
-					href={`${$page.url.pathname}/flash-mode`}
-					class="btn text-gray-100 bg-gradient-to-r from-indigo-500 to-violet-500 h-fit"
-					><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</Anchor
+					href={`${page.url.pathname}/flash-mode`}
+					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 				>
 			{/if}
 			<Anchor
 				breadcrumbAction="push"
-				href={`${$page.url.pathname}/table-mode`}
-				class="btn text-gray-100 bg-gradient-to-r from-blue-500 to-sky-500 h-fit"
-				><i class="fa-solid fa-table-list mr-2" /> {m.tableMode()}</Anchor
+				href={`${page.url.pathname}/table-mode`}
+				class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+				><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
 			>
-			{#if !$page.data.user.is_third_party}
+			{#if !page.data.user.is_third_party}
 				<button
-					class="btn text-gray-100 bg-gradient-to-r from-teal-500 to-emerald-500 h-fit"
-					on:click={() => modalCreateForm()}
-					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
+					class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
+					onclick={() => modalCreateForm()}
+					><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
 				</button>
 			{/if}
 
 			<button
-				class="btn text-gray-100 bg-gradient-to-r from-cyan-500 to-blue-500 h-fit"
-				on:click={async () => {
+				class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+				onclick={async () => {
 					await modalConfirmSyncToActions(
 						data.compliance_assessment.id,
 						data.compliance_assessment.name,
@@ -525,7 +545,7 @@
 			>
 				<span class="mr-2">
 					{#if syncingToActionsIsLoading}
-						<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+						<ProgressRing class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
 					{:else}
 						<i class="fa-solid fa-arrows-rotate mr-2"></i>
 					{/if}
@@ -533,10 +553,10 @@
 				{m.syncToAppliedControls()}
 			</button>
 
-			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+			{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
-					class="btn text-gray-100 bg-gradient-to-r from-purple-500 to-fuchsia-500 h-fit"
-					on:click={() => {
+					class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
+					onclick={() => {
 						modalConfirmCreateSuggestedControls(
 							data.compliance_assessment.id,
 							data.compliance_assessment.name,
@@ -546,7 +566,7 @@
 				>
 					<span class="mr-2">
 						{#if createAppliedControlsLoading}
-							<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+							<ProgressRing class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
 						{:else}
 							<i class="fa-solid fa-wand-magic-sparkles"></i>
 						{/if}
@@ -556,8 +576,8 @@
 			{/if}
 			{#if has_threats}
 				<button
-					class="btn text-gray-100 bg-gradient-to-r from-amber-500 to-orange-500 h-fit"
-					on:click={openThreatsDialog}
+					class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
+					onclick={openThreatsDialog}
 				>
 					<div class="flex items-center space-x-2">
 						<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
@@ -571,7 +591,7 @@
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
 		<div class=" flex items-center font-semibold">
 			<span class="h4">{m.associatedRequirements()}</span>
-			<span class="badge variant-soft-primary ml-1">
+			<span class="badge preset-tonal-primary ml-1">
 				{#if treeViewNodes}
 					{assessableNodesCount(treeViewNodes)}
 				{/if}
@@ -581,7 +601,7 @@
 				{#each Object.entries(complianceStatusColorMap) as [status, color]}
 					<button
 						type="button"
-						on:click={() => toggleStatus(status)}
+						onclick={() => toggleStatus(status)}
 						class="px-2 py-1 rounded-md font-bold"
 						style="background-color: {selectedStatus.includes(status)
 							? color + '44'
@@ -597,7 +617,7 @@
 				{#each Object.entries(complianceResultColorMap) as [result, color]}
 					<button
 						type="button"
-						on:click={() => toggleResult(result)}
+						onclick={() => toggleResult(result)}
 						class="px-2 py-1 rounded-md font-bold"
 						style="background-color: {selectedResults.includes(result)
 							? color + '44'
@@ -615,7 +635,7 @@
 				{:else}
 					<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
 				{/if}
-				<SlideToggle
+				<Switch
 					name="questionnaireToggle"
 					class="flex flex-row items-center justify-center"
 					active="bg-primary-500"
@@ -628,21 +648,21 @@
 					{:else}
 						<p class="font-bold">{m.ShowOnlyAssessable()}</p>
 					{/if}
-				</SlideToggle>
+				</Switch>
 			</div>
 		</div>
 
 		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
-			<i class="fa-solid fa-diagram-project" />
+			<i class="fa-solid fa-diagram-project"></i>
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
 			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
-				<RecursiveTreeView
-					nodes={transformToTreeView(Object.entries(tree))}
-					bind:expandedNodes
-					hover="hover:bg-initial"
-				/>
+				<!-- <RecursiveTreeView -->
+				<!-- 	nodes={transformToTreeView(Object.entries(tree))} -->
+				<!-- 	bind:expandedNodes -->
+				<!-- 	hover="hover:bg-initial" -->
+				<!-- /> -->
 			{/key}
 		{/key}
 	</div>
@@ -651,11 +671,11 @@
 	<dialog
 		bind:this={dialogElement}
 		class="card p-4 bg-white shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
-		on:close={() => (threatDialogOpen = false)}
+		onclose={() => (threatDialogOpen = false)}
 	>
 		<div class="flex justify-between items-center mb-4">
 			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
-			<button class="btn btn-sm variant-filled-error" on:click={closeThreatsDialog}>
+			<button class="btn btn-sm preset-filled-error-500" onclick={closeThreatsDialog}>
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>

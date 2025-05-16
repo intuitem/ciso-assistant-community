@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	export let classesContainer = '';
-	export let name = 'metrics_tracker';
-	export let metrics;
+	interface Props {
+		classesContainer?: string;
+		name?: string;
+		metrics: any;
+	}
+
+	let { classesContainer = '', name = 'metrics_tracker', metrics }: Props = $props();
 	const chart_id = `${name}_div`;
 
 	onMount(async () => {
@@ -101,4 +105,4 @@
 	});
 </script>
 
-<div id={chart_id} class={classesContainer} style="width: 400px; height: 400px;" />
+<div id={chart_id} class={classesContainer} style="width: 400px; height: 400px;"></div>

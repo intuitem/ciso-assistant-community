@@ -6,22 +6,33 @@
 	import { defaults, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { invalidateAll } from '$app/navigation';
 	import { AppliedControlSchema } from '$lib/utils/schemas';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context = 'default';
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context?: string;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context = 'default'
+	}: Props = $props();
 
 	const modalStore = getModalStore();
 
@@ -44,7 +55,7 @@
 			props: {
 				form: defaults(
 					{
-						security_exceptions: [$page.data.object.id]
+						security_exceptions: [page.data.object.id]
 					},
 					zod(AppliedControlSchema)
 				),
@@ -133,7 +144,7 @@
 />
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
-		{#key $page.data}
+		{#key page.data}
 			<AutocompleteSelect
 				multiple
 				{form}
@@ -148,8 +159,8 @@
 		<div class="mt-4">
 			<button
 				class="btn bg-gray-300 h-10 w-10"
-				on:click={(_) => modalAppliedControlCreateForm('applied_controls')}
-				type="button"><i class="fa-solid fa-plus text-sm" /></button
+				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
+				type="button"><i class="fa-solid fa-plus text-sm"></i></button
 			>
 		</div>
 	{/if}

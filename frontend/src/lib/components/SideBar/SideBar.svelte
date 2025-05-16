@@ -14,15 +14,19 @@
 	import { page } from '$app/stores';
 	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
 	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
 	import { getFlash } from 'sveltekit-flash-message';
 	import './driver-custom.css';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
-	export let open: boolean;
-	export let sideBarVisibleItems: Record<string, boolean>;
+	interface Props {
+		open: boolean;
+		sideBarVisibleItems: Record<string, boolean>;
+	}
+
+	let { open = $bindable(), sideBarVisibleItems }: Props = $props();
 
 	const user = $page.data?.user;
 
@@ -187,7 +191,7 @@
 		}
 	];
 
-	const modalStore = getModalStore();
+	// const modalStore = getModalStore();
 	const flash = getFlash(page);
 
 	function modalFirstLogin(): void {
@@ -198,13 +202,13 @@
 					{
 						label: m.showGuidedTour(),
 						action: triggerVisit,
-						classes: 'variant-filled-surface',
+						classes: 'preset-filled-surface-500',
 						btnIcon: 'fa-wand-magic-sparkles'
 					},
 					{
 						label: m.loadDemoData(),
 						action: loadDemoDomain,
-						classes: 'variant-filled-secondary',
+						classes: 'preset-filled-secondary-500',
 						btnIcon: 'fa-file-import',
 						async: true
 					}
@@ -218,7 +222,7 @@
 			title: m.firstTimeLoginModalTitle(),
 			body: m.firstTimeLoginModalDescription()
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
 	const loading = writable(false);
@@ -272,7 +276,7 @@
 		setCookie('show_first_login_modal', 'false');
 	});
 
-	$: classesSidebarOpen = (open: boolean) => (open ? '' : '-ml-[14rem] pointer-events-none');
+	let classesSidebarOpen = $derived((open: boolean) => (open ? '' : '-ml-56 pointer-events-none'));
 </script>
 
 <div data-testid="sidebar">
@@ -288,7 +292,7 @@
 		</nav>
 	</aside>
 	{#if $loading}
-		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-[1000]">
+		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-1000">
 			<div class="flex flex-col items-center space-y-2">
 				<LoadingSpinner></LoadingSpinner>
 			</div>

@@ -1,33 +1,10 @@
 <script lang="ts">
 	import TreeViewItem from './TreeViewItem.svelte';
 	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton';
+	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 
 	// this can't be passed using context, since we have to pass it to recursive children.
-	/** Provide data-driven nodes. */
-	export let nodes: TreeViewNode[] = [];
-
-	/**
-	 * provides id's of expanded nodes
-	 * @type {string[]}
-	 */
-	export let expandedNodes: string[] = [];
-	/**
-	 * provides id's of disabled nodes
-	 * @type {string[]}
-	 */
-	export let disabledNodes: string[] = [];
-	/**
-	 * provides id's of checked nodes
-	 * @type {string[]}
-	 */
-	export let checkedNodes: string[] = [];
-	/**
-	 * provides id's of indeterminate nodes
-	 * @type {string[]}
-	 */
-	export let indeterminateNodes: string[] = [];
 
 	// Context API
 	let selection: boolean = getContext('selection');
@@ -35,8 +12,8 @@
 	let relational: boolean = getContext('relational');
 
 	// Locals
-	let group: unknown = multiple ? [] : '';
-	let name = '';
+	let group: unknown = $state(multiple ? [] : '');
+	let name = $state('');
 
 	// events
 	const dispatch = createEventDispatcher();
@@ -119,9 +96,42 @@
 		}
 	});
 
-	// important to pass children up to items (recursively)
-	export let treeItems: TreeViewItem[] = [];
-	let children: TreeViewItem[][] = [];
+	interface Props {
+		/** Provide data-driven nodes. */
+		nodes?: TreeViewNode[];
+		/**
+		 * provides id's of expanded nodes
+		 * @type {string[]}
+		 */
+		expandedNodes?: string[];
+		/**
+		 * provides id's of disabled nodes
+		 * @type {string[]}
+		 */
+		disabledNodes?: string[];
+		/**
+		 * provides id's of checked nodes
+		 * @type {string[]}
+		 */
+		checkedNodes?: string[];
+		/**
+		 * provides id's of indeterminate nodes
+		 * @type {string[]}
+		 */
+		indeterminateNodes?: string[];
+		// important to pass children up to items (recursively)
+		treeItems?: TreeViewItem[];
+	}
+
+	let {
+		nodes = [],
+		expandedNodes = $bindable([]),
+		disabledNodes = $bindable([]),
+		checkedNodes = $bindable([]),
+		indeterminateNodes = $bindable([]),
+		treeItems = $bindable([])
+	}: Props = $props();
+	let children: TreeViewItem[][] = $state([]);
 
 	function hasMappingInference(node: TreeViewNode) {
 		const length = Object.keys(node.contentProps?.mapping_inference ?? {}).length;
@@ -172,15 +182,16 @@
 			{#if typeof node.content === 'string'}
 				{node.content}
 			{:else}
-				<svelte:component this={node.content} {...node.contentProps} />
+				<node.content {...node.contentProps} />
 			{/if}
-			<svelte:fragment slot="lead">
+			{#snippet lead()}
 				{#if typeof node.lead === 'string'}
 					{node.lead}
 				{:else}
-					<svelte:component this={node.lead} {...node.leadProps} />
+					<node.lead {...node.leadProps} />
 				{/if}
-			</svelte:fragment>
+			{/snippet}
+			<!-- @migration-task: migrate this slot by hand, `children` would shadow a prop on the parent component -->
 			<svelte:fragment slot="children">
 				<RecursiveTreeViewItem
 					nodes={node.children}

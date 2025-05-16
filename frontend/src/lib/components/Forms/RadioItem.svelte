@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
 	import { getContext } from 'svelte';
 
@@ -25,7 +26,7 @@
 	export let label = '';
 
 	// Context
-	export let rounded: CssClasses = getContext('rounded');
+	export let rounded: CssClasses = getContext('rounded-sm');
 	export let padding: CssClasses = getContext('padding');
 	export let active: CssClasses = getContext('active');
 	export let hover: CssClasses = getContext('hover');

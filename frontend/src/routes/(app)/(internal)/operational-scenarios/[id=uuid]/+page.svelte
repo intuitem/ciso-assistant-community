@@ -1,21 +1,19 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { type PopupSettings } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
-
-	export let data: PageData;
 
 	const operationalScenario = data.data;
 
 	pageTitle.set(m.operationalScenarioRefId({ refId: operationalScenario.ref_id }));
 
-	let activeActivity: string | null = null;
-	$page.url.searchParams.forEach((value, key) => {
+	let activeActivity: string | null = $state(null);
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -41,8 +39,13 @@
 		placement: 'bottom'
 	};
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 	const model = URL_MODEL_MAP['operational-scenarios'];
 	const canEditObject = (operational_scenarios): boolean =>
 		canPerformAction({
@@ -60,7 +63,7 @@
 				href="/ebios-rm/{operationalScenario.ebios_rm_study.id}"
 				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
-				<i class="fa-solid fa-arrow-left" />
+				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
 			</a>
 			<div class="flex font-bold text-2xl space-x-2">
@@ -82,10 +85,10 @@
 			</div>
 			{#if canEditObject(operationalScenario)}
 				<a
-					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-					class="btn variant-filled-primary h-fit justify-self-end"
+					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
+					class="btn preset-filled-primary-500 h-fit justify-self-end"
 				>
-					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>
 					{m.edit()}
 				</a>
 			{/if}
@@ -124,7 +127,7 @@
 				</div>
 				<div class="grid grid-cols-3 gap-12 items-center">
 					<div
-						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-red-200 border-red-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
@@ -133,7 +136,7 @@
 						</p>
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-violet-200 border-violet-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
@@ -148,7 +151,7 @@
 						{/each}
 					</div>
 					<div
-						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-sm text-center"
+						class="flex flex-col space-y-4 p-4 bg-blue-200 border-blue-400 border rounded-md shadow-xs text-center"
 					>
 						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
@@ -156,7 +159,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
@@ -190,7 +193,7 @@
 				{m.ebiosWs4_2()}
 			</h1>
 			<div
-				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-sm space-x-4 justify-between"
+				class="flex items-center w-full p-4 bg-gray-50 border rounded-md shadow-xs space-x-4 justify-between"
 			>
 				<div
 					style="background-color: {operationalScenario.likelihood.hexcolor}"
@@ -204,7 +207,7 @@
 						<p data-testid="likelihood-description" class="font-semibold">
 							{operationalScenario.likelihood.description}
 						</p>
-						<div class="arrow bg-black" />
+						<div class="arrow bg-black"></div>
 					</div>
 					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 						<i class="fa-solid fa-dice text-black opacity-75"></i>
@@ -229,7 +232,7 @@
 						<p data-testid="gravity-description" class="font-semibold">
 							{operationalScenario.gravity.description}
 						</p>
-						<div class="arrow bg-black" />
+						<div class="arrow bg-black"></div>
 					</div>
 					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 						<i class="fa-solid fa-bomb text-black opacity-75"></i>
@@ -254,7 +257,7 @@
 						<p data-testid="risk-level-description" class="font-semibold">
 							{operationalScenario.risk_level.description}
 						</p>
-						<div class="arrow bg-black" />
+						<div class="arrow bg-black"></div>
 					</div>
 					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 						<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
@@ -267,7 +270,7 @@
 					></i>
 				</div>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
 					<span>{m.justification()}</span>

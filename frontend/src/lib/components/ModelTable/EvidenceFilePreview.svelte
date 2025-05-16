@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 
-	export let cell: any;
-	export let meta: any;
+	interface Props {
+		cell: any;
+		meta: any;
+	}
+
+	let { cell, meta }: Props = $props();
 
 	interface Attachment {
 		type: string;
@@ -11,7 +17,7 @@
 		fileExists: boolean;
 	}
 
-	let attachment: Attachment | undefined;
+	let attachment: Attachment | undefined = $state();
 
 	const fetchAttachment = async () => {
 		const res = await fetch(`/evidences/${meta.id}/attachment`);
@@ -23,13 +29,13 @@
 		};
 	};
 
-	let mounted = false;
+	let mounted = $state(false);
 	onMount(async () => {
 		attachment = meta.attachment ? await fetchAttachment() : undefined;
 		mounted = true;
 	});
 
-	$: {
+	run(() => {
 		if (mounted && meta.attachment) {
 			fetchAttachment().then((_attachment) => {
 				attachment = _attachment;
@@ -37,7 +43,7 @@
 		} else {
 			attachment = undefined;
 		}
-	}
+	});
 </script>
 
 {#if cell}

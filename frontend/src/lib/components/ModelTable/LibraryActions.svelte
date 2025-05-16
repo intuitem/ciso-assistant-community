@@ -3,12 +3,16 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
 	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
-	export let meta: any;
-	export let actionsURLModel: string;
-	$: library = meta;
-	let loading = { form: false, library: '' };
+	interface Props {
+		meta: any;
+		actionsURLModel: string;
+	}
+
+	let { meta, actionsURLModel }: Props = $props();
+	let library = $derived(meta);
+	let loading = $state({ form: false, library: '' });
 
 	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
 		const data = new FormData(event.currentTarget);
@@ -47,7 +51,7 @@
 				/>
 			</svg>
 		</div>
-	{:else if $page.data.user.is_admin}
+	{:else if page.data.user.is_admin}
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
@@ -61,15 +65,15 @@
 						update();
 					};
 				}}
-				on:submit={handleSubmit}
+				onsubmit={handleSubmit}
 			>
 				<button
 					type="submit"
 					data-testid="tablerow-import-button"
 					id="tablerow-import-button"
-					on:click={(e) => e.stopPropagation()}
+					onclick={(e) => e.stopPropagation()}
 				>
-					<i class="fa-solid fa-file-import" />
+					<i class="fa-solid fa-file-import"></i>
 				</button>
 			</form>
 		</span>
@@ -111,10 +115,10 @@
 						update();
 					};
 				}}
-				on:submit={handleSubmit}
+				onsubmit={handleSubmit}
 			>
-				<button title={m.updateThisLibrary()} on:click={(e) => e.stopPropagation()}>
-					<i class="fa-solid fa-circle-up" />
+				<button title={m.updateThisLibrary()} onclick={(e) => e.stopPropagation()}>
+					<i class="fa-solid fa-circle-up"></i>
 				</button>
 			</form>
 		</span>

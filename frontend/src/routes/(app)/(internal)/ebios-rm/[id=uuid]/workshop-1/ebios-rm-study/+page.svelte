@@ -2,16 +2,20 @@
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { TabGroup, Tab, getModalStore } from '@skeletonlabs/skeleton';
+	import {
+		Tabs,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '@skeletonlabs/skeleton-svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
 
-	const modalStore: ModalStore = getModalStore();
+	// const modalStore: ModalStore = getModalStore();
 
 	const statusMap = {
 		planned: 'bg-indigo-300 text-indigo-800',
@@ -21,7 +25,11 @@
 		deprecated: 'bg-orange-300 text-orange-800'
 	};
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const ebiosRmStudy = data.data;
 
@@ -40,12 +48,12 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
-	let activeActivity: string | null = null;
+	let activeActivity: string | null = $state(null);
 
-	$page.url.searchParams.forEach((value, key) => {
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -69,12 +77,12 @@
 			// Data
 			title: m.selectAsset()
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
-	let tabSet = 0;
+	let group = $state(Object.keys(data.relatedModels)[0]);
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
@@ -93,7 +101,7 @@
 				href="/ebios-rm/{ebiosRmStudy.id}"
 				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 			>
-				<i class="fa-solid fa-arrow-left" />
+				<i class="fa-solid fa-arrow-left"></i>
 				<p class="">{m.goBackToEbiosRmStudy()}</p>
 			</a>
 			<div class="flex items-center space-x-2">
@@ -112,10 +120,10 @@
 			</div>
 			{#if canEditObject}
 				<Anchor
-					href={`${$page.url.pathname}/edit?activity=${activeActivity}&next=${$page.url.pathname}?activity=${activeActivity}`}
-					class="btn variant-filled-primary h-fit"
+					href={`${page.url.pathname}/edit?activity=${activeActivity}&next=${page.url.pathname}?activity=${activeActivity}`}
+					class="btn preset-filled-primary-500 h-fit"
 				>
-					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />
+					<i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"></i>
 					{m.edit()}
 				</Anchor>
 			{/if}
@@ -153,7 +161,7 @@
 			{:else}
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-user text-purple-500"></i>
 					<span>{m.authors()}</span>
@@ -168,7 +176,7 @@
 					{/if}
 				</ul>
 			</div>
-			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 				<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 					<i class="fa-solid fa-users text-blue-500"></i>
 					<span>{m.reviewers()}</span>
@@ -198,18 +206,26 @@
 			>
 			{#if Object.keys(data.relatedModels).length > 0}
 				<div class="card shadow-lg mt-8 bg-white w-full">
-					<TabGroup justify="justify-center">
-						{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
-							<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
-								{safeTranslate(model.info.localNamePlural)}
-								{#if model.table.body.length > 0}
-									<span class="badge variant-soft-secondary">{model.table.body.length}</span>
-								{/if}
-							</Tab>
-						{/each}
-						<svelte:fragment slot="panel">
-							{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
-								{#if tabSet === index}
+					<Tabs
+						value={group}
+						onValueChange={(e) => {
+							group = e.value;
+						}}
+						listJustify="justify-center"
+					>
+						{#snippet list()}
+							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+								<Tabs.Control value={urlmodel}>
+									{safeTranslate(model.info.localNamePlural)}
+									{#if model.table.body.length > 0}
+										<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+									{/if}
+								</Tabs.Control>
+							{/each}
+						{/snippet}
+						{#snippet content()}
+							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+								<Tabs.Panel value={urlmodel}>
 									<div class="flex flex-row justify-between px-4 py-2">
 										<h4 class="font-semibold lowercase capitalize-first my-auto">
 											{safeTranslate('associated-' + model.info.localNamePlural)}
@@ -221,44 +237,48 @@
 											deleteForm={model.deleteForm}
 											URLModel={urlmodel}
 											canSelectObject={canEditObject}
-											baseEndpoint="/assets?ebios_rm_studies={$page.params.id}"
+											baseEndpoint="/assets?ebios_rm_studies={page.params.id}"
 										>
-											<div slot="selectButton">
-												<span
-													class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
-												>
-													<button
-														class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
-														data-testid="select-button"
-														title={m.selectAsset()}
-														on:click={(_) => modalUpdateForm()}
-														><i class="fa-solid fa-hand-pointer"></i>
-													</button>
-												</span>
-											</div>
-											<div slot="addButton">
-												<span
-													class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm"
-												>
-													<button
-														class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-														data-testid="add-button"
-														title={safeTranslate('add-' + data.model.localName)}
-														on:click={(_) => modalCreateForm(model)}
-														><i class="fa-solid fa-file-circle-plus"></i>
-													</button>
-												</span>
-											</div>
+											{#snippet selectButton()}
+												<div>
+													<span
+														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+													>
+														<button
+															class="inline-block border-e p-3 btn-mini-secondary w-12 focus:relative"
+															data-testid="select-button"
+															title={m.selectAsset()}
+															onclick={(_) => modalUpdateForm()}
+															><i class="fa-solid fa-hand-pointer"></i>
+														</button>
+													</span>
+												</div>
+											{/snippet}
+											{#snippet addButton()}
+												<div>
+													<span
+														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+													>
+														<button
+															class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+															data-testid="add-button"
+															title={safeTranslate('add-' + data.model.localName)}
+															onclick={(_) => modalCreateForm(model)}
+															><i class="fa-solid fa-file-circle-plus"></i>
+														</button>
+													</span>
+												</div>
+											{/snippet}
 										</ModelTable>
 									{/if}
-								{/if}
+								</Tabs.Panel>
 							{/each}
-						</svelte:fragment>
-					</TabGroup>
+						{/snippet}
+					</Tabs>
 				</div>
 			{/if}
 		</div>
-		<div class="w-full p-4 bg-gray-50 border rounded-md shadow-sm">
+		<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
 			<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 				<i class="fa-solid fa-eye text-gray-500 opacity-75"></i>
 				<span>{m.observation()}</span>

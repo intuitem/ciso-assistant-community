@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppBar, AppShell } from '@skeletonlabs/skeleton';
-	import '../../app.postcss';
+	import '../../app.css';
 
 	import { browser } from '$app/environment';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';

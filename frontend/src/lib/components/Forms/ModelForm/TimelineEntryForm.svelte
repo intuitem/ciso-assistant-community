@@ -8,12 +8,23 @@
 	import * as m from '$paraglide/messages.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let context: string;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		context: string;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		context,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, 'entry_type');
 </script>

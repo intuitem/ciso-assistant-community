@@ -1,8 +1,22 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	export let handler: DataHandler;
-	export let orderBy = '';
-	export let _class = `${$$restProps.class} cursor-pointer select-none`;
+	interface Props {
+		handler: DataHandler;
+		orderBy?: string;
+		_class?: any;
+		children?: import('svelte').Snippet;
+		[key: string]: any;
+	}
+
+	let {
+		handler,
+		orderBy = '',
+		_class = 'cursor-pointer select-none ',
+		children,
+		...rest
+	}: Props = $props();
+
+	_class += rest.class;
 
 	const identifier = orderBy?.toString();
 
@@ -14,7 +28,7 @@
 </script>
 
 <th
-	on:click={update}
+	onclick={update}
 	class:active={$sort?.orderBy === identifier}
 	class={_class}
 	data-testid="tableheader"
@@ -26,13 +40,13 @@
 		: 'none'}
 >
 	<div class="flex items-center h-full">
-		<slot />
+		{@render children?.()}
 		<span
 			class="pl-2"
 			class:asc={$sort?.direction === 'asc'}
 			class:desc={$sort?.direction === 'desc'}
 			aria-hidden="true"
-		/>
+		></span>
 	</div>
 </th>
 
@@ -45,6 +59,7 @@
 		height: 0;
 		width: 0;
 	}
+	/*
 	th span:before {
 		@apply border-b-surface-200 mt-0.5;
 	}
@@ -57,4 +72,5 @@
 	th.active span.desc:after {
 		@apply border-t-surface-700;
 	}
+  */
 </style>

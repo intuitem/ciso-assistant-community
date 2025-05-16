@@ -3,7 +3,11 @@
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 </script>
 
 {#if data.data && data.data.length > 0}
