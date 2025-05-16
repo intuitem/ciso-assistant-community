@@ -19,7 +19,7 @@
 	const modalStore: ModalStore = getModalStore();
 
 	// Base Classes
-	const cBase = 'card p-4 w-fit shadow-xl space-y-4';
+	const cBase = 'card bg-white p-4 w-fit shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 </script>
 
