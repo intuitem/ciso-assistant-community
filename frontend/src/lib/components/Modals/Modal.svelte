@@ -250,7 +250,8 @@
 				params: { duration: 150 },
 				enabled: transitions
 			}}
-			use:focusTrap={true}
+			role="dialog"
+			tabindex="0"
 		>
 			<!-- Transition Layer -->
 			<div
