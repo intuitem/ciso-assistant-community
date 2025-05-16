@@ -1,4 +1,3 @@
-<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
 	import { setContext, onDestroy } from 'svelte';
 
@@ -152,8 +151,8 @@
 		dataType: shape?.attachment ? 'form' : 'json',
 		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
 		invalidateAll,
-		applyAction: $$props.applyAction ?? true,
-		resetForm: $$props.resetForm ?? false,
+		applyAction: $$restProps.applyAction ?? true,
+		resetForm: $$restProps.resetForm ?? false,
 		validators: zod(schema),
 		taintedMessage,
 		validationMethod: 'auto',
