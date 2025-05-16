@@ -1,23 +1,19 @@
 <script lang="ts">
-	// Props
-
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
+	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { mfaAuthenticateSchema } from '../utils/schemas';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import { m } from '$paraglide/messages';
+	import SuperForm from '$lib/components/Forms/Form.svelte';
 
 	const modalStore: ModalStore = getModalStore();
-
-	import SuperForm from '$lib/components/Forms/Form.svelte';
 
 	// Base Classes
 	const cBase = 'card bg-white p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
-	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { mfaAuthenticateSchema } from '../utils/schemas';
-	import TextField from '$lib/components/Forms/TextField.svelte';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;

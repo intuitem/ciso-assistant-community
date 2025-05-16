@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { type ModalComponent, type ModalSettings, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
 
@@ -9,6 +9,12 @@
 	import { m } from '$paraglide/messages';
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
@@ -17,7 +23,7 @@
 
 	let { data, form }: Props = $props();
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	function modalActivateTOTP(totp: Record<string, any>): void {
 		const modalComponent: ModalComponent = {
@@ -35,7 +41,7 @@
 			title: m.activateTOTPTitle(),
 			body: m.activateTOTPMessage()
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	function modalConfirm(action: string): void {
@@ -53,7 +59,7 @@
 			title: m.confirmModalTitle(),
 			body: m.disableTOTPConfirm()
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	function modalListRecoveryCodes(): void {
@@ -67,7 +73,7 @@
 			title: m.recoveryCodes(),
 			body: m.listRecoveryCodesHelpText()
 		};
-		// modalStore.trigger(recoveryCodesModal);
+		modalStore.trigger(recoveryCodesModal);
 	}
 
 	let group = $state('security');

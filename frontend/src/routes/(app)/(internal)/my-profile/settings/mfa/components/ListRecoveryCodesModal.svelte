@@ -1,14 +1,16 @@
 <script lang="ts">
-	// Props
-
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { recoveryCodes } from '../utils/stores';
 
 	import { m } from '$paraglide/messages';
 
 	import { enhance } from '$app/forms';
 	import { copy } from '@svelte-put/copy';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+
+	// Base Classes
+	const cBase = 'card bg-white p-4 w-fit shadow-xl space-y-4';
+	const cHeader = 'text-2xl font-bold';
+
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
@@ -17,10 +19,6 @@
 	let { parent }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
-
-	// Base Classes
-	const cBase = 'card bg-white p-4 w-fit shadow-xl space-y-4';
-	const cHeader = 'text-2xl font-bold';
 </script>
 
 {#if $modalStore[0]}

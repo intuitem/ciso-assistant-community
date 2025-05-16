@@ -1,23 +1,19 @@
 <script lang="ts">
-	// Props
-
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import { m } from '$paraglide/messages';
 
-	const modalStore: ModalStore = getModalStore();
-
 	import SuperForm from '$lib/components/Forms/Form.svelte';
+
+	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
+	import QR from '@svelte-put/qr/svg/QR.svelte';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { activateTOTPSchema } from '../utils/schemas';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	// Base Classes
 	const cBase = 'card bg-white p-4 w-fit shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
-	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
-	import QR from '@svelte-put/qr/svg/QR.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { activateTOTPSchema } from '../utils/schemas';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
@@ -27,6 +23,8 @@
 	}
 
 	let { parent, totp, _form, formAction }: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
 </script>
 
 {#if $modalStore[0]}
