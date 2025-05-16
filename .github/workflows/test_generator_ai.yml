@@ -13,12 +13,11 @@ on:
 concurrency:
   group:
     ${{ github.repository }}-${{ github.event.number || github.head_ref ||
-    github.sha }}-${{ github.workflow }}-${{ github.event_name ==
-    'pull_request_review_comment' && 'pr_comment' || 'pr' }}
+    github.sha }}-${{ github.workflow }}-${{ github.event_name =='pull_request_review_comment' && 'pr_comment' || 'pr' }}
   cancel-in-progress: ${{ github.event_name != 'pull_request_review_comment' }}
 
 jobs:
-  review:
+  Test-Generator-AI-Call:
     runs-on: ubuntu-latest
     steps:
       - uses: Poulereaper/ai-pr-test-generator@v0.1
