@@ -110,4 +110,6 @@
 	optionsLabelField="auto"
 	field="evidences"
 	label={m.evidences()}
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
 />
