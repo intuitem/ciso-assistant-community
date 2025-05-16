@@ -1,7 +1,4 @@
 <script lang="ts">
-	// Props
-
-	// Stores
 	import { getModalStore, type ModalStore } from './stores';
 
 	interface Action {

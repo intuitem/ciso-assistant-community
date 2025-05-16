@@ -1,26 +1,17 @@
 <script lang="ts">
 	import type { urlModel } from '$lib/utils/types';
-
-	// Props
-
-	// Stores
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
-
 	import { m } from '$paraglide/messages';
-
-	const modalStore: ModalStore = getModalStore();
-
+	import SuperDebug from 'sveltekit-superforms';
+	import { getModalStore, type ModalStore } from './stores';
 	import { superForm } from 'sveltekit-superforms';
 
-	const { form /*, message*/, enhance } = superForm(_form, { invalidateAll });
+	const modalStore: ModalStore = getModalStore();
 
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
-	import SuperDebug from 'sveltekit-superforms';
-	import { getModalStore } from './stores';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
@@ -41,6 +32,8 @@
 		id,
 		debug = false
 	}: Props = $props();
+
+	const { form /*, message*/, enhance } = superForm(_form, { invalidateAll });
 </script>
 
 {#if $modalStore[0]}
