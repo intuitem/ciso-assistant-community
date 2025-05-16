@@ -102,3 +102,12 @@
 	cacheLock={cacheLocks['observation']}
 	bind:cachedValue={formDataCache['observation']}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	field="evidences"
+	label={m.evidences()}
+/>
