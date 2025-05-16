@@ -70,7 +70,6 @@
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	const URLModel = model.urlModel as urlModel;
 	interface Props {
 		form: SuperValidated<AnyZodObject>;
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
@@ -106,10 +105,12 @@
 		importFolder = false,
 		customNameDescription = false,
 		additionalInitialData = {},
-		schema = modelSchema(URLModel),
+		schema = modelSchema(model.urlModel),
 		object = {},
 		...rest
 	}: Props = $props();
+
+	const URLModel = model.urlModel as urlModel;
 
 	function cancel(): void {
 		if (browser) {
