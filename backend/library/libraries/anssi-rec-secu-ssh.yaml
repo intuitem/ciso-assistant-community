@@ -1,0 +1,541 @@
+urn: urn:protocolpaladin:risk:library:anssi-rec-secu-ssh
+locale: fr
+ref_id: ANSSI-REC-SECU-SSH
+name: "Recommandations pour un usage s\xE9curis\xE9 d\u2019(Open)SSH"
+description: "Version: 1.3 du 17/08/2015\n\nUsage s\xE9curis\xE9 d\u2019(Open)SSH\n\
+  \nCouramment utilis\xE9 pour l\u2019administration distante, le transfert de fichiers,\
+  \ les redirections et encapsulations de flux sensibles, OpenSSH est devenu un \xE9\
+  l\xE9ment incontournable d\u2019un grand nombre de syst\xE8mes d\u2019information.\n\
+  \nIl est donc vital d\u2019en ma\xEEtriser sa configuration, de durcir son installation\
+  \ et d\u2019appliquer des r\xE8gles d\u2019hygi\xE8ne strictes pour son exploitation.\
+  \ Tout cela se traduit par les recommandations pr\xE9sent\xE9es dans ce document.\n\
+  \nCette note technique s\u2019adresse aux int\xE9grateurs et administrateurs syst\xE8\
+  me et r\xE9seaux, soucieux d\u2019installer et d\u2019administrer correctement un\
+  \ parc gr\xE2ce au protocole SSH et \xE0 son impl\xE9mentation de r\xE9f\xE9rence\
+  \ : OpenSSH.\n\nLien vers le document :\nhttps://cyber.gouv.fr/sites/default/files/2014/01/NT_OpenSSH.pdf"
+copyright: Note technique publique
+version: 1
+publication_date: 2025-05-04
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-rec-secu-ssh
+    ref_id: ANSSI-REC-SECU-SSH
+    name: "Recommandations pour un usage s\xE9curis\xE9 d\u2019(Open)SSH"
+    description: "Version: 1.3 du 17/08/2015\n\nUsage s\xE9curis\xE9 d\u2019(Open)SSH\n\
+      \nCouramment utilis\xE9 pour l\u2019administration distante, le transfert de\
+      \ fichiers, les redirections et encapsulations de flux sensibles, OpenSSH est\
+      \ devenu un \xE9l\xE9ment incontournable d\u2019un grand nombre de syst\xE8\
+      mes d\u2019information.\n\nIl est donc vital d\u2019en ma\xEEtriser sa configuration,\
+      \ de durcir son installation et d\u2019appliquer des r\xE8gles d\u2019hygi\xE8\
+      ne strictes pour son exploitation. Tout cela se traduit par les recommandations\
+      \ pr\xE9sent\xE9es dans ce document.\n\nCette note technique s\u2019adresse\
+      \ aux int\xE9grateurs et administrateurs syst\xE8me et r\xE9seaux, soucieux\
+      \ d\u2019installer et d\u2019administrer correctement un parc gr\xE2ce au protocole\
+      \ SSH et \xE0 son impl\xE9mentation de r\xE9f\xE9rence : OpenSSH.\n\nLien vers\
+      \ le document :\nhttps://cyber.gouv.fr/sites/default/files/2014/01/NT_OpenSSH.pdf"
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Pr\xE9sentation de SSH"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:2
+      ref_id: '2.1'
+      name: Le protocole SSH
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:2.1
+      ref_id: R1
+      name: "Seule la version 2 du protocole SSH doit \xEAtre autoris\xE9e."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "Cas d\u2019usage"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3
+      ref_id: '3.1'
+      name: "Administration \xE0 distance en ligne de commande"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3.1
+      ref_id: R2
+      name: "SSH doit \xEAtre utilis\xE9 en lieu et place de protocoles historiques\
+        \ (TELNET, RSH, RLOGIN) pour des acc\xE8s shell distants."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r3
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3.1
+      ref_id: R3
+      name: "Les serveurs d\u2019acc\xE8s distants TELNET, RSH, RLOGIN doivent \xEA\
+        tre desinstall\xE9s du syst\xE8me."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3
+      ref_id: '3.2'
+      name: "Transfert, t\xE9l\xE9chargement de fichiers"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r4
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3.2
+      ref_id: R4
+      name: "SCP ou SFTP doivent \xEAtre utilis\xE9s en lieu et place de protocoles\
+        \ historiques (RCP, FTP) pour du transfert ou du t\xE9l\xE9chargement de fichiers."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3
+      ref_id: '3.3'
+      name: Redirection de flux
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r5
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:3.3
+      ref_id: R5
+      name: "La mise en place de tunnels SSH doit \xEAtre strictement r\xE9serv\xE9\
+        e aux protocoles n\u2019offrant pas de m\xE9canismes de s\xE9curit\xE9 robustes\
+        \ et pouvant en tirer un b\xE9n\xE9fice relatif."
+      description: "Par exemple : X11, VNC. Cette recommandation n\u2019exclut pas\
+        \ l\u2019usage de protocoles de s\xE9curit\xE9 plus bas niveau suppl\xE9mentaires\
+        \ comme IPSEC (cf. \"Recommandations de s\xE9curit\xE9 relatives \xE0 IPsec\"\
+        )."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Bonnes pratiques d\u2019exploitation OpenSSH"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4
+      ref_id: '4.1'
+      name: Cryptographie
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1
+      ref_id: 4.1.1
+      name: Authentification
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r6
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.1
+      ref_id: R6
+      name: "Il faut s\u2019assurer de la l\xE9gitimit\xE9 du serveur contact\xE9\
+        \ avant de poursuivre l\u2019acc\xE8s."
+      description: " Cela passe par l\u2019authentification pr\xE9alable de la machine\
+        \ au travers de l\u2019empreinte de sa cl\xE9 publique, ou d\u2019un certificat\
+        \ valide et v\xE9rifi\xE9."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1
+      ref_id: 4.1.2
+      name: "G\xE9n\xE9ration de cl\xE9s - tailles et algorithmes"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r7
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.2
+      ref_id: R7
+      name: "L\u2019usage de cl\xE9s DSA n\u2019est pas recommand\xE9."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r8
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.2
+      ref_id: R8
+      name: "La taille de cl\xE9 minimale doit \xEAtre de 2048 bits pour RSA."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r9
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.2
+      ref_id: R9
+      name: "La taille de cl\xE9 minimale doit \xEAtre de 256 bits pour ECDSA."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r10
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.2
+      ref_id: R10
+      name: "Lorsque les clients et les serveurs SSH supportent ECDSA, son usage doit\
+        \ \xEAtre pr\xE9f\xE9r\xE9 \xE0 RSA."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1
+      ref_id: 4.1.3
+      name: "G\xE9n\xE9ration de cl\xE9s - qualit\xE9 de l\u2019al\xE9a"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r11
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.3
+      ref_id: R11
+      name: "Les cl\xE9s doivent \xEAtre g\xE9n\xE9r\xE9es dans un contexte o\xF9\
+        \ la source d\u2019al\xE9a est fiable, ou \xE0 d\xE9faut dans un environnement\
+        \ o\xF9 suffisamment d\u2019entropie a \xE9t\xE9 accumul\xE9e."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r12
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.3
+      ref_id: R12
+      name: "Quelques r\xE8gles permettent de s\u2019assurer que le r\xE9servoir d\u2019\
+        entropie est correctement rempli :"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r12:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r12
+      description: "la machine de g\xE9n\xE9ration de cl\xE9s doit \xEAtre une machine\
+        \ physique ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r12:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r12
+      description: "elle doit disposer de plusieurs sources d\u2019entropie ind\xE9\
+        pendantes ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r12:3
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r12
+      description: "l\u2019al\xE9a ne doit \xEAtre obtenu qu\u2019apr\xE8s une p\xE9\
+        riode d\u2019activit\xE9 suffisamment importante\n(plusieurs minutes voire\
+        \ heures)."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1
+      ref_id: 4.1.4
+      name: "Droits d\u2019acc\xE8s et diffusion des cl\xE9s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r13
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.4
+      ref_id: R13
+      name: "La cl\xE9 priv\xE9e ne doit \xEAtre connue que de l\u2019entit\xE9 qui\
+        \ cherche \xE0 prouver son identit\xE9 \xE0 un tiers et \xE9ventuellement\
+        \ d\u2019une autorit\xE9 de confiance."
+      description: " Cette cl\xE9 priv\xE9e doit \xEAtre d\xFBment prot\xE9g\xE9e\
+        \ pour en \xE9viter la diffusion \xE0 une personne non autoris\xE9e."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r14
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.4
+      ref_id: R14
+      name: "L\u2019AES-128 mode CBC doit \xEAtre utilis\xE9 comme algorithme de chiffrement\
+        \ pour la protection de la cl\xE9 priv\xE9e utilisateur par mot de passe."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1
+      ref_id: 4.1.5
+      name: "Choix des algorithmes sym\xE9triques"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r15
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.1.5
+      ref_id: R15
+      name: "L\u2019algorithme de chiffrement doit reposer sur de l\u2019AES 128,\
+        \ AES 192 ou AES 256, en mode CTR. L\u2019int\xE9grit\xE9 doit reposer sur\
+        \ du HMAC SHA-1, SHA-256 ou SHA-512."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4
+      ref_id: '4.2'
+      name: "Durcissement syst\xE8me"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.2
+      ref_id: 4.2.1
+      name: "Durcissement \xE0 la compilation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r16
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.2.1
+      ref_id: R16
+      name: "Une \xE9tape pr\xE9liminaire \xE0 ce durcissement est donc d\u2019user\
+        \ de drapeaux de compilation ad\xE9quats. Se rapporter par exemple aux \"\
+        Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me GNU/Linux\"\
+        ."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4
+      ref_id: '4.3'
+      name: "Authentification et contr\xF4le d\u2019acc\xE8s utilisateur"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3
+      ref_id: 4.3.1
+      name: "Authentification d\u2019un utilisateur"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.1
+      ref_id: R17
+      name: "L\u2019authentification d\u2019un utilisateur doit se faire \xE0 l\u2019\
+        aide d\u2019un des m\xE9canismes suivants, par ordre de pr\xE9f\xE9rence :"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17
+      description: "par cryptographie asym\xE9trique ECDSA ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17
+      description: "par cryptographie asym\xE9trique RSA ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17:3
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17
+      description: "par cryptographie sym\xE9trique (tickets Kerberos par la GSSAPI)\
+        \ ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17:4
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17
+      description: "PAM (ou BSD Auth) permettant de faire appel \xE0 des modules d\u2019\
+        authentification tiers n\u2019exposant pas le mot de passe utilisateur ou\
+        \ son condensat (OTP) ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17:5
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r17
+      description: "par mot de passe vis \xE0 vis d\u2019une base de donn\xE9es comme\
+        \ passwd/shadow ou annuaire."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r18
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.1
+      ref_id: R18
+      name: "Les droits d\u2019un utilisateur doivent suivre le principe de moindre\
+        \ privil\xE8ge."
+      description: "La restriction peut porter sur de nombreux param\xE8tres : commandes\
+        \ accessibles, adresses IPs d\u2019origine, droit de redirections ou de forwarding."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3
+      ref_id: 4.3.2
+      name: "Agent d\u2019authentification"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r19
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.2
+      ref_id: R19
+      name: "L\u2019usage du m\xE9canisme d\u2019agent forwarding (option -A de ssh)\
+        \ est recommand\xE9 dans les cas o\xF9 un rebond SSH est n\xE9cessaire au\
+        \ travers d\u2019un serveur h\xF4te relais."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r20
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.2
+      ref_id: R20
+      name: "Le serveur h\xF4te relais doit \xEAtre un h\xF4te de confiance."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3
+      ref_id: 4.3.3
+      name: "Imputabilit\xE9 des acc\xE8s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r21
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.3
+      ref_id: R21
+      name: Chaque utilisateur doit disposer de son propre compte, unique, incessible.
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3
+      ref_id: 4.3.4
+      name: AllowUsers, AllowGroups
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r22
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.4
+      ref_id: R22
+      name: "Les acc\xE8s \xE0 un service doivent \xEAtre restreints aux utilisateurs\
+        \ qui en ont un besoin justifi\xE9."
+      description: "Cette restriction doit s\u2019appliquer en droits positifs : uniquement\
+        \ ceux explicitement autoris\xE9s ont le droit de se connecter en SSH sur\
+        \ un h\xF4te, et \xE9ventuellement en provenance d\u2019adresses IP sp\xE9\
+        cifi\xE9es."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3
+      ref_id: 4.3.5
+      name: "Restriction de l\u2019environnement utilisateur"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r23
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.5
+      ref_id: R23
+      name: "L\u2019alt\xE9ration de l\u2019environnement par un utilisateur doit\
+        \ \xEAtre bloqu\xE9e par d\xE9faut. Les variables autoris\xE9es \xE0 la modification\
+        \ par le client doivent \xEAtre s\xE9lectionn\xE9es au cas par cas."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r24
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.3.5
+      ref_id: R24
+      name: "Les commandes lanc\xE9es par un utilisateur au travers d\u2019une session\
+        \ SSH doivent \xEAtre r\xE9duites au strict n\xE9cessaire ; cette restriction\
+        \ peut \xEAtre mise en place par l\u2019utilisation :"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r24:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r24
+      description: "\u2013 de la directive ForceCommand pour un utilisateur donn\xE9\
+        , dans le fichier sshd_config ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r24:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r24
+      description: "\u2013 en sp\xE9cifiant des options dans le fichier authorized_keys.\
+        \ Voir section 4.3.1 ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r24:3
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r24
+      description: "\u2013 de binaires d\xFBment prot\xE9g\xE9s comme sudo ou su."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4
+      ref_id: '4.4'
+      name: "Protocole et acc\xE8s r\xE9seau"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4
+      ref_id: 4.4.1
+      name: ListenAddress et Ports
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r25
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4.1
+      ref_id: R25
+      name: "Le serveur SSH doit \xE9couter uniquement sur une adresse d\u2019administration."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r26
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4.1
+      ref_id: R26
+      name: "Lorsque le serveur SSH est expos\xE9 \xE0 un r\xE9seau non ma\xEEtris\xE9\
+        , il est recommand\xE9 de lui mettre un port d\u2019\xE9coute diff\xE9rent\
+        \ du port par d\xE9faut (22)."
+      description: "Il faut privil\xE9gier un port inf\xE9rieur \xE0 1024 afin d\u2019\
+        emp\xEAcher les tentatives d\u2019usurpation par des services non administrateur\
+        \ sur la machine distante. Sur un r\xE9seau ma\xEEtris\xE9, le serveur SSH\
+        \ doit \xE9couter uniquement sur une interface du r\xE9seau d\u2019administration,\
+        \ distinct du r\xE9seau op\xE9rationnel."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4
+      ref_id: 4.4.2
+      name: AllowTCPForwarding
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r27
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4.2
+      ref_id: R27
+      name: "Sauf besoin d\xFBment justifi\xE9, toute fonctionnalit\xE9 de redirections\
+        \ de flux doit \xEAtre d\xE9sactiv\xE9e :"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r27:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r27
+      description: "\u2022 au niveau de la configuration du serveur SSH ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r27:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r27
+      description: "\u2022 au niveau du pare-feu local en bloquant les connexions."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4
+      ref_id: 4.4.3
+      name: X11Forwarding
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r28
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.4.3
+      ref_id: R28
+      name: "La redirection X11 doit \xEAtre d\xE9sactiv\xE9e sur le serveur."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4
+      ref_id: '4.5'
+      name: IGC OpenSSH
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.5.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.5
+      ref_id: 4.5.1
+      name: "Autorit\xE9 de certification"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r29
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.5.1
+      ref_id: R29
+      name: "Il est recommand\xE9 de cr\xE9er des ACs distinctes lorsque leurs r\xF4\
+        les diff\xE8rent. On aura par exemple :"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r29:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r29
+      description: "\u2022 une qui jouera le r\xF4le d\u2019AC \xAB h\xF4te \xBB ;"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r29:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r29
+      description: "\u2022 une qui jouera le r\xF4le d\u2019AC \xAButilisateurs\xBB\
+        ."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r29:3
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r29
+      description: "Chaque cl\xE9 priv\xE9e d\u2019une AC doit \xEAtre prot\xE9g\xE9\
+        e par un mot de passe unique, robuste."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.5.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.5
+      ref_id: 4.5.3
+      name: "R\xE9vocation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r30
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.5.3
+      ref_id: R30
+      name: "Dans le cas o\xF9 une cl\xE9 ne peut plus \xEAtre consid\xE9r\xE9e comme\
+        \ s\xFBre, l\u2019usage de celle-ci doit \xEAtre rapidement r\xE9voqu\xE9\
+        \ au niveau de SSH."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4
+      ref_id: '4.6'
+      name: Enregistrements DNS
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:r31
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ssh:4.6
+      ref_id: R31
+      name: "La validation des empreintes SSH h\xF4te envoy\xE9es par le serveur DNS\
+        \ ne doit pas se faire sans une v\xE9rification compl\xE9mentaire."
