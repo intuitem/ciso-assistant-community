@@ -5116,6 +5116,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "folder",
         "authors",
         "status",
+        "evidences",
     ]
     search_fields = ["name", "description", "ref_id"]
 

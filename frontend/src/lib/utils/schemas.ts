@@ -670,7 +670,8 @@ export const FindingsAssessmentSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	category: z.string().default('--')
+	category: z.string().default('--'),
+	evidences: z.array(z.string().optional()).optional()
 });
 
 export const IncidentSchema = z.object({

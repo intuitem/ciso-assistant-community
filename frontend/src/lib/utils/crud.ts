@@ -1010,7 +1010,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' }],
 		selectFields: [{ field: 'status' }, { field: 'category' }]
