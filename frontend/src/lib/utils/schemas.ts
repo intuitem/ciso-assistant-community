@@ -747,6 +747,11 @@ export const TaskNodeSchema = z.object({
 	evidences: z.string().uuid().optional().array().optional()
 });
 
+export const AuthTokenCreateSchema = z.object({
+	name: z.string().min(1),
+	expiry: z.number().positive().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
