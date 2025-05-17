@@ -316,7 +316,7 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_LEVEL_FILTER: ListViewFilterConfig = {
+const CURRENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'current_level',
@@ -324,6 +324,14 @@ const RISK_LEVEL_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		multiple: true
+	}
+};
+
+const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		...CURRENT_RISK_LEVEL_FILTER.props,
+		label: 'residual_level'
 	}
 };
 
@@ -343,11 +351,8 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'residual_criticality',
-		options: [1, 2, 3, 4],
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
-		multiple: true
+		...CURRENT_CRITICALITY_FILTER.props,
+		label: 'residual_criticality'
 	}
 };
 
@@ -570,8 +575,8 @@ export const listViewFields = {
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
-			current_level: RISK_LEVEL_FILTER,
-			residual_level: RISK_LEVEL_FILTER
+			current_level: CURRENT_RISK_LEVEL_FILTER,
+			residual_level: RESIDUAL_RISK_LEVEL_FILTER
 		}
 	},
 	'risk-acceptances': {
