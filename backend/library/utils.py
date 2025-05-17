@@ -456,7 +456,8 @@ class LibraryImporter:
         "reference_controls",
         "risk_matrix",  # This field name is deprecated
         "risk_matrices",
-        "framework",
+        "framework",  # This field name is deprecated
+        "frameworks",
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
     ]
