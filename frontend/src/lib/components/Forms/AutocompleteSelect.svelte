@@ -280,7 +280,7 @@
 
 	$: cachedValue = selected.map((option) => option.value);
 
-	$: selectedValues = selected.map((item) => item.value || item.label || item);
+	$: selectedValues = selected.map((item) => item.value ?? item.label ?? item);
 
 	$: {
 		// Only update value after options are loaded
