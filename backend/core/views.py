@@ -745,7 +745,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
         undefined = {-1: "--"}
-        options = []
+        options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
             _choices = {
                 i: name
@@ -753,11 +753,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
                     x["name"] for x in matrix.json_definition["risk"]
                 )
             }
-            choices = undefined | _choices
-            options = options | choices.items()
-        return Response(
-            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
-        )
+            options = options | _choices
+        res = [{"value": k, "label": v} for k, v in options.items()]
+        return Response(res)
 
     @action(detail=False, name="Get impact choices")
     def impact(self, request):
@@ -1946,28 +1944,41 @@ class PolicyViewSet(AppliedControlViewSet):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
+class RiskScenarioFilter(df.FilterSet):
+    # Aliased filters for user-friendly query params
+    folder = df.UUIDFilter(
+        field_name="risk_assessment__perimeter__folder", label="Folder ID"
+    )
+    perimeter = df.UUIDFilter(
+        field_name="risk_assessment__perimeter", label="Perimeter ID"
+    )
+
+    class Meta:
+        model = RiskScenario
+        # Only include actual model fields here
+        fields = {
+            "risk_assessment": ["exact"],
+            "current_impact": ["exact"],
+            "current_proba": ["exact"],
+            "current_level": ["exact"],
+            "residual_impact": ["exact"],
+            "residual_proba": ["exact"],
+            "residual_level": ["exact"],
+            "treatment": ["exact"],
+            "threats": ["exact"],
+            "assets": ["exact"],
+            "applied_controls": ["exact"],
+            "security_exceptions": ["exact"],
+        }
+
+
 class RiskScenarioViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk scenarios to be viewed or edited.
     """
 
     model = RiskScenario
-    filterset_fields = [
-        "risk_assessment",
-        "risk_assessment__perimeter",
-        "risk_assessment__perimeter__folder",
-        "current_impact",
-        "current_proba",
-        "current_level",
-        "residual_impact",
-        "residual_proba",
-        "residual_level",
-        "treatment",
-        "threats",
-        "assets",
-        "applied_controls",
-        "security_exceptions",
-    ]
+    filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
 
