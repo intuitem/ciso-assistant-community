@@ -8,7 +8,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
 	import { m } from '$paraglide/messages';
-	import { displayOnlyAssessableNodes } from './store';
+	import { auditFiltersStore } from '$lib/utils/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let ref_id: string;
@@ -46,6 +46,9 @@
 		pattern == 3 ? `${ref_id} - ${name}` : pattern == 2 ? ref_id : pattern == 1 ? name : '';
 
 	let showInfo = false;
+
+	let id = $page.params.id;
+	$: displayOnlyAssessableNodes = $auditFiltersStore[id]?.displayOnlyAssessableNodes ?? false;
 
 	const getAssessableNodes = (
 		startNode: TreeViewItemNode,
@@ -105,7 +108,7 @@
 	$: classesPercentText = (resultColor: string) => (resultColor === '#000000' ? 'text-white' : '');
 </script>
 
-{#if !$displayOnlyAssessableNodes || assessable || hasAssessableChildren}
+{#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
 	<div class="flex flex-row justify-between space-x-8">
 		<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
 			<div class="flex flex-row space-x-2" style="font-weight: 300;">
@@ -157,7 +160,7 @@
 				<div>
 					{#if hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}
-							{#if resultCounts[status] && selectedStatus.includes(status)}
+							{#if resultCounts[status] && (selectedStatus.includes(status) || selectedStatus.length === 0)}
 								<span
 									class="badge mr-1"
 									style="background-color: {color + '44'}; color: {darkenColor(color, 0.3)}"
