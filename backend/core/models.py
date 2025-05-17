@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Type, Union
+from typing import Self, Type, Union, List
 
 from icecream import ic
 from auditlog.registry import auditlog
@@ -299,7 +299,7 @@ class StoredLibrary(LibraryMixin):
             outdated_library.delete()
 
         objects_meta = {
-            key: (1 if key in ["framework", "requirement_mapping_set"] else len(value))
+            key: (1 if key == "framework" else len(value))
             for key, value in library_data["objects"].items()
         }
 
@@ -356,32 +356,43 @@ class StoredLibrary(LibraryMixin):
 
 
 class LibraryUpdater:
-    def __init__(self, old_library: Type["LoadedLibrary"], new_library: StoredLibrary):
+    def __init__(self, old_library: "LoadedLibrary", new_library: StoredLibrary):
         self.old_library = old_library
-        self.old_objects = [
-            *old_library.threats.all(),
-            *old_library.reference_controls.all(),
-            *old_library.threats.all(),
-            *old_library.risk_matrices.all(),
-        ]
         self.new_library = new_library
         new_library_content = self.new_library.content
-        self.dependencies = self.new_library.dependencies
-        if self.dependencies is None:
-            self.dependencies = []
-        self.new_framework = new_library_content.get("framework")
-        self.new_matrices = new_library_content.get("risk_matrix")
+        self.dependencies: List[str] = self.new_library.dependencies or []
+        self.i18n_object_dict = {
+            "locale": self.old_library.locale,
+            "default_locale": self.old_library.default_locale,
+        }
+        self.referential_object_dict = {
+            "provider": self.new_library.provider,
+            "is_published": True,
+        }
+
+        # The "framework" field will be ignored if the "frameworks" field is defined.
+        self.new_frameworks = new_library_content.get(
+            "frameworks"
+        ) or new_library_content.get("framework")
+        if isinstance(self.new_frameworks, dict):
+            self.new_frameworks = [self.new_frameworks]
+
+        # The "risk_matrix" field will be ignored if the "risk_matrices" field is defined.
+        self.new_matrices = new_library_content.get(
+            "risk_matrices"
+        ) or new_library_content.get("risk_matrix")
+        if isinstance(self.new_matrices, dict):
+            self.new_matrices = [self.new_matrices]
+
+        # The "requirement_mapping_sets" field will be ignored if the "requirement_mapping_set" field is defined.
+        self.new_requirement_mapping_sets = new_library_content.get(
+            "requirement_mapping_sets"
+        ) or new_library_content.get("requirement_mapping_set")
+        if isinstance(self.new_requirement_mapping_sets, dict):
+            self.new_requirement_mapping_sets = [self.new_requirement_mapping_sets]
+
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
-        self.new_objects = {obj["urn"].lower(): obj for obj in self.threats}
-        self.new_objects.update(
-            {obj["urn"].lower(): obj for obj in self.reference_controls}
-        )
-        if self.new_framework:
-            self.new_objects[self.new_framework["urn"].lower()] = self.new_framework
-        if self.new_matrices:
-            for matrix in self.new_matrices:
-                self.new_objects[matrix["urn"].lower()] = matrix
 
     def update_dependencies(self) -> Union[str, None]:
         for dependency_urn in self.dependencies:
@@ -399,8 +410,8 @@ class LibraryUpdater:
                     stored_dependency = stored_dependencies[i]
                     if stored_dependency.locale == self.old_library.locale:
                         dependency = stored_dependency
-                if err_msg := dependency.load():
-                    return err_msg
+                if error_msg := dependency.load():
+                    return error_msg
                 continue
 
             dependency = possible_dependencies[0]
@@ -409,93 +420,47 @@ class LibraryUpdater:
                 if possible_dependency.locale == self.old_library.locale:
                     dependency = possible_dependency
 
-            if (err_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
-                return err_msg
+            if (error_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
+                return error_msg
 
-    # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
-    def update_library(self) -> Union[str, None]:
-        if (error_msg := self.update_dependencies()) is not None:
-            return error_msg
-
-        old_dependencies_urn = {
-            dependency.urn for dependency in self.old_library.dependencies.all()
-        }
-        dependencies_urn = set(self.dependencies)
-        new_dependencies_urn = dependencies_urn - old_dependencies_urn
-
-        if not set(dependencies_urn).issuperset(old_dependencies_urn):
-            return "invalidLibraryUpdate"
-
-        new_dependencies = []
-        for new_dependency_urn in new_dependencies_urn:
-            try:
-                new_dependency = LoadedLibrary.objects.filter(
-                    urn=new_dependency_urn
-                ).first()  # The locale is not handled by this code
-            except:
-                return "dependencyNotFound"
-            new_dependencies.append(new_dependency)
-        for key, value in [
-            ("name", self.new_library.name),
-            ("version", self.new_library.version),
-            ("provider", self.new_library.provider),
-            (
-                "packager",
-                self.new_library.packager,
-            ),  # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
-            ("publication_date", self.new_library.publication_date),
-            # Should we even update the ref_id ?
-            ("ref_id", self.new_library.ref_id),
-            ("description", self.new_library.description),
-            ("annotation", self.new_library.annotation),
-            ("translations", self.new_library.translations),
-            ("copyright", self.new_library.copyright),
-            ("objects_meta", self.new_library.objects_meta),
-        ]:
-            setattr(self.old_library, key, value)
-        self.old_library.save()
-
-        for new_dependency in new_dependencies:
-            self.old_library.dependencies.add(new_dependency)
-
-        referential_object_dict = {
-            "locale": self.old_library.locale,
-            "default_locale": self.old_library.default_locale,
-            "provider": self.new_library.provider,
-            "is_published": True,
-        }
-
+    def update_threats(self):
         for threat in self.threats:
             Threat.objects.update_or_create(
                 urn=threat["urn"].lower(),
                 defaults=threat,
                 create_defaults={
-                    **referential_object_dict,
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
                     **threat,
                     "library": self.old_library,
                 },
             )
 
+    def update_reference_controls(self):
         for reference_control in self.reference_controls:
             ReferenceControl.objects.update_or_create(
                 urn=reference_control["urn"].lower(),
                 defaults=reference_control,
                 create_defaults={
-                    **referential_object_dict,
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
                     **reference_control,
                     "library": self.old_library,
                 },
             )
 
-        if self.new_framework is not None:
-            framework_dict = {**self.new_framework}
+    def update_frameworks(self):
+        for new_framework in self.new_frameworks:
+            requirement_nodes = new_framework["requirement_nodes"]
+            framework_dict = {**new_framework}
             del framework_dict["requirement_nodes"]
 
             new_framework, _ = Framework.objects.update_or_create(
-                urn=self.new_framework["urn"],
+                urn=new_framework["urn"],
                 defaults=framework_dict,
                 create_defaults={
-                    **referential_object_dict,
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
                     **framework_dict,
                     "library": self.old_library,
                 },
@@ -505,7 +470,7 @@ class LibraryUpdater:
                 rc.urn for rc in RequirementNode.objects.filter(framework=new_framework)
             )
             new_requirement_node_urns = set(
-                rc["urn"].lower() for rc in self.new_framework["requirement_nodes"]
+                rc["urn"].lower() for rc in requirement_nodes
             )
             deleted_requirement_node_urns = (
                 requirement_node_urns - new_requirement_node_urns
@@ -518,7 +483,6 @@ class LibraryUpdater:
                 if requirement_node is not None:
                     requirement_node.delete()
 
-            requirement_nodes = self.new_framework["requirement_nodes"]
             involved_library_urns = [*self.dependencies, self.old_library.urn]
             involved_libraries = set(
                 LoadedLibrary.objects.filter(urn__in=involved_library_urns)
@@ -550,7 +514,8 @@ class LibraryUpdater:
                     urn=requirement_node["urn"].lower(),
                     defaults=requirement_node_dict,
                     create_defaults={
-                        **referential_object_dict,
+                        **self.referential_object_dict,
+                        **self.i18n_object_dict,
                         **requirement_node_dict,
                         "framework": new_framework,
                     },
@@ -580,7 +545,7 @@ class LibraryUpdater:
                             ra.save()
                             continue
 
-                        answers = ra.answers
+                        answers = ra.answers or {}
 
                         # Remove answers corresponding to questions that have been removed
                         for urn in list(answers.keys()):
@@ -678,32 +643,170 @@ class LibraryUpdater:
                             reference_control_to_add
                         )
 
-        if self.new_matrices is not None:
-            for matrix in self.new_matrices:
-                json_definition_keys = {
-                    "grid",
-                    "probability",
-                    "impact",
-                    "risk",
-                }  # Store this as a constant somewhere (as a static attribute of the class)
-                other_keys = set(matrix.keys()) - json_definition_keys
-                matrix_dict = {key: matrix[key] for key in other_keys}
-                matrix_dict["json_definition"] = {}
-                for key in json_definition_keys:
-                    if (
-                        key in matrix
-                    ):  # If all keys are mandatory this condition is useless
-                        matrix_dict["json_definition"][key] = matrix[key]
+    def update_risk_matrices(self):
+        for matrix in self.new_matrices:
+            json_definition_keys = {
+                "grid",
+                "probability",
+                "impact",
+                "risk",
+            }  # Store this as a constant somewhere (as a static attribute of the class)
+            other_keys = set(matrix.keys()) - json_definition_keys
+            matrix_dict = {key: matrix[key] for key in other_keys}
+            matrix_dict["json_definition"] = {}
+            for key in json_definition_keys:
+                if key in matrix:  # If all keys are mandatory this condition is useless
+                    matrix_dict["json_definition"][key] = matrix[key]
 
-                RiskMatrix.objects.update_or_create(
-                    urn=matrix["urn"].lower(),
-                    defaults=matrix_dict,
-                    create_defaults={
-                        **referential_object_dict,
-                        **matrix_dict,
-                        "library": self.old_library,
-                    },
+            RiskMatrix.objects.update_or_create(
+                urn=matrix["urn"].lower(),
+                defaults=matrix_dict,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **matrix_dict,
+                    "library": self.old_library,
+                },
+            )
+
+    def udpate_requirement_mapping_sets(self):
+        for requirement_mapping_set in self.new_requirement_mapping_sets:
+            requirement_mapping_set_dict = {
+                key: value
+                for key, value in requirement_mapping_set.items()
+                if key
+                not in [
+                    "requirement_mappings",
+                    "source_framework_urn",
+                    "target_framework_urn",
+                ]
+            }
+
+            normalized_urn = requirement_mapping_set["urn"].lower()
+            queryset = RequirementMappingSet.objects.filter(urn=normalized_urn)
+            if not queryset.exists():
+                # We don't support the creation of new RequirementMappingSet during updates for the moment.
+                continue
+
+            requirement_mapping_set_obj = RequirementMappingSet.objects.get(
+                urn=normalized_urn
+            )
+            source_framework_urn = requirement_mapping_set[
+                "source_framework_urn"
+            ].lower()
+            target_framework_urn = requirement_mapping_set[
+                "target_framework_urn"
+            ].lower()
+            if (
+                requirement_mapping_set_obj.source_framework.urn != source_framework_urn
+                or requirement_mapping_set_obj.target_framework.urn
+                != target_framework_urn
+            ):
+                # We don't allow an update to modify the "source_framework" and "target_framework" of a RequirementMappingSet.
+                return "invalidLibraryUpdate"
+
+            queryset.update(
+                **self.referential_object_dict, **requirement_mapping_set_dict
+            )
+
+            for requirement_mapping in requirement_mapping_set.get(
+                "requirement_mappings", []
+            ):
+                requirement_mapping_dict = {
+                    key: value
+                    for key, value in requirement_mapping.items()
+                    if key
+                    not in [
+                        "source_requirement_urn",
+                        "target_requirement_urn",
+                        "stregth_of_relationship",
+                    ]
+                }
+                requirement_mapping_dict["strength_of_relationship"] = (
+                    requirement_mapping["stregth_of_relationship"]
+                )  # # Fix the typo caused by the convert_library.py code.
+                source_requirement = RequirementNode.objects.get(
+                    urn=requirement_mapping["source_requirement_urn"]
                 )
+                target_requirement = RequirementNode.objects.get(
+                    urn=requirement_mapping["target_requirement_urn"]
+                )
+
+                RequirementMapping.objects.update_or_create(
+                    mapping_set=requirement_mapping_set_obj,
+                    source_requirement=source_requirement,
+                    target_requirement=target_requirement,
+                    defaults=requirement_mapping_dict,
+                    create_defaults=requirement_mapping_dict,
+                )
+
+    # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
+    def update_library(self) -> Union[str, None]:
+        if (error_msg := self.update_dependencies()) is not None:
+            return error_msg
+
+        old_dependencies_urn = {
+            dependency.urn for dependency in self.old_library.dependencies.all()
+        }
+        dependencies_urn = set(self.dependencies)
+        new_dependencies_urn = dependencies_urn - old_dependencies_urn
+
+        if not dependencies_urn.issuperset(old_dependencies_urn):
+            return "invalidLibraryUpdate"
+
+        new_dependencies = []
+        for new_dependency_urn in new_dependencies_urn:
+            try:
+                new_dependency = LoadedLibrary.objects.filter(
+                    urn=new_dependency_urn
+                ).first()  # The locale is not handled by this code
+            except:
+                return "dependencyNotFound"
+            new_dependencies.append(new_dependency)
+        for key, value in [
+            ("name", self.new_library.name),
+            ("version", self.new_library.version),
+            ("provider", self.new_library.provider),
+            (
+                "packager",
+                self.new_library.packager,
+            ),  # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
+            ("publication_date", self.new_library.publication_date),
+            # Should we even update the ref_id ?
+            ("ref_id", self.new_library.ref_id),
+            ("description", self.new_library.description),
+            ("annotation", self.new_library.annotation),
+            ("translations", self.new_library.translations),
+            ("copyright", self.new_library.copyright),
+            ("objects_meta", self.new_library.objects_meta),
+        ]:
+            setattr(self.old_library, key, value)
+        self.old_library.save()
+
+        for new_dependency in new_dependencies:
+            self.old_library.dependencies.add(new_dependency)
+
+        i18n_object_dict = {
+            "locale": self.old_library.locale,
+            "default_locale": self.old_library.default_locale,
+        }
+
+        referential_object_dict = {
+            "provider": self.new_library.provider,
+            "is_published": True,
+        }
+
+        self.update_threats()
+        self.update_reference_controls()
+
+        if self.new_frameworks is not None:
+            self.update_frameworks()
+
+        if self.new_matrices is not None:
+            self.update_risk_matrices()
+
+        if self.new_requirement_mapping_sets is not None:
+            self.udpate_requirement_mapping_sets()
 
 
 class LoadedLibrary(LibraryMixin):
