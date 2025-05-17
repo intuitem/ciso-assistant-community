@@ -8,8 +8,17 @@ import zipfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
-from dateutil import relativedelta
-from django.db.models import F, Count, Q, ExpressionWrapper, FloatField
+from django.db.models import (
+    F,
+    Count,
+    Q,
+    ExpressionWrapper,
+    FloatField,
+    Value,
+)
+from django.db.models.functions import Greatest, Coalesce
+
+
 from collections import defaultdict
 import pytz
 from uuid import UUID
@@ -42,7 +51,6 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
-from django.db.models import F, Q
 
 from django.apps import apps
 from django.contrib.auth.models import Permission
@@ -178,7 +186,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     #         )
     #     return None
 
-    def get_queryset(self):
+    def get_queryset(self) -> models.query.QuerySet:
         """the scope_folder_id query_param allows scoping the objects to retrieve"""
         if not self.model:
             return None
@@ -2466,7 +2474,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.progress
+                sum += audit.get_progress()
             avg_progress = int(sum / audits.count())
 
         controls = (
@@ -2670,7 +2678,7 @@ class FolderViewSet(BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        domain_name = f"DEMO"
+        domain_name = "DEMO"
         try:
             dummy_fixture_path = (
                 Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
@@ -4040,22 +4048,42 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
 
-    def list(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
+    def get_queryset(self):
+        qs = super().get_queryset()
+        ordering = self.request.query_params.get("ordering", "")
 
-        ordering = request.query_params.get("ordering", "")
-        ordering_fields = [field.strip() for field in ordering.split(",") if field]
-
-        if any(field.lstrip("-") == "progress" for field in ordering_fields):
-            reverse = ordering_fields[0].startswith("-")  # use only first 'progress'
-            results = sorted(
-                response.data["results"],  # assumes paginated response
-                key=lambda x: x.get("progress", 0),
-                reverse=reverse,
+        if any(
+            field in ordering
+            for field in (
+                "total_requirements",
+                "assessed_requirements",
+                "progress",
             )
-            response.data["results"] = results
-
-        return response
+        ):
+            qs = qs.annotate(
+                total_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(requirement_assessments__requirement__assessable=True),
+                    distinct=True,
+                ),
+                assessed_requirements=Count(
+                    "requirement_assessments",
+                    filter=Q(
+                        ~Q(
+                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                        ),
+                        requirement_assessments__requirement__assessable=True,
+                    ),
+                    distinct=True,
+                ),
+                progress=ExpressionWrapper(
+                    F("assessed_requirements")
+                    * 1.0
+                    / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
+                    output_field=FloatField(),
+                ),
+            )
+        return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5204,6 +5232,7 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
+    filterset_fields = ["folder", "status", "severity", "qualifications"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
