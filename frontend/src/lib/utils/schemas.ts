@@ -721,6 +721,7 @@ export const TaskTemplateSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
+	findings_assessment: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
 	schedule: z
