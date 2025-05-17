@@ -68,8 +68,8 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
         choices=list(
             zip(
-                LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS,
-                LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
             )
         ),
         method="filter_object_type",
@@ -270,8 +270,8 @@ class LoadedLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
         choices=list(
             zip(
-                LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS,
-                LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
             )
         ),
         method="filter_object_type",

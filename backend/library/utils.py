@@ -464,7 +464,7 @@ class LibraryImporter:
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
         for field in OBJECT_FIELDS
-        if field not in ["risk_matrix", "requirement_mapping_set"]
+        if field not in ["framework", "risk_matrix", "requirement_mapping_set"]
     ]
 
     def __init__(self, library: StoredLibrary):
