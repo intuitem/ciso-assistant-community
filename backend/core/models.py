@@ -4714,6 +4714,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         related_name="task_templates",
     )
 
+    findings_assessment = models.ManyToManyField(
+        FindingsAssessment,
+        verbose_name="Finding assessments",
+        blank=True,
+        help_text="Finding assessments related to the task",
+        related_name="task_templates",
+    )
+
     @property
     def next_occurrence(self):
         today = datetime.today().date()
