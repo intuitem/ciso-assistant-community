@@ -124,6 +124,12 @@ Conventions:
 
 The `prepare_mapping.py` script can be used to create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
 
+To launch it, open a shell in a command line, and type:
+
+```bash
+python prepare_mapping.py source_framework.yaml dest_framework.yaml
+```
+
 ## Considerations for URN selection
 
 The recommended format for URNs is: urn:\<packager\>:risk:\<object\>:\<refid\>
