@@ -4186,7 +4186,7 @@ class ComplianceAssessment(Assessment):
             include_non_assessable=False
         )
         for ra in requirement_assessments:
-            if ra.requirement.question:
+            if ra.requirement.questions:
                 return True
         return False
 
