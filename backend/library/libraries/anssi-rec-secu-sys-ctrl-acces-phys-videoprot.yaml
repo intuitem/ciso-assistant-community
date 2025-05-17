@@ -1,0 +1,2307 @@
+urn: urn:protocolpaladin:risk:library:anssi-rec-secu-sys-ctrl-acces-phys-videoprot
+locale: fr
+ref_id: ANSSI-REC-SECU-SYS-CTRL-PHYS-VDP
+name: "Recommandations sur la s\xE9curisation des syst\xE8mes de contr\xF4le d'acc\xE8\
+  s physique et de vid\xE9oprotection"
+description: "Ce guide d\xE9veloppe les aspects d\u2019architecture et de s\xE9curit\xE9\
+  \ logique propres aux syst\xE8mes de contr\xF4le d\u2019acc\xE8s utilisant des technologies\
+  \ sans contact, et aux syst\xE8mes de vid\xE9oprotection.\n\nhttps://cyber.gouv.fr/sites/default/files/document/Recommandations%20sur%20la%20s%C3%A9curisation%20des%20syst%C3%A8mes%20de%20contr%C3%B4le%20d%27acc%C3%A8s%20physique%20et%20vid%C3%A9oprotection%20-%20v2.1.pdf"
+copyright: "Licence ouverte / Open Licence (\xC9talab - v2.0)"
+version: '1'
+publication_date: 2025-05-03
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-rec-secu-sys-ctrl-acces-phys-videoprot
+    ref_id: ANSSI-REC-SECU-SYS-CTRL-PHYS-VDP
+    name: "Recommandations sur la s\xE9curisation des syst\xE8mes de contr\xF4le d'acc\xE8\
+      s physique et de vid\xE9oprotection"
+    description: "Ce guide d\xE9veloppe les aspects d\u2019architecture et de s\xE9\
+      curit\xE9 logique propres aux syst\xE8mes de contr\xF4le d\u2019acc\xE8s utilisant\
+      \ des technologies sans contact, et aux syst\xE8mes de vid\xE9oprotection.\n\
+      \nhttps://cyber.gouv.fr/sites/default/files/document/Recommandations%20sur%20la%20s%C3%A9curisation%20des%20syst%C3%A8mes%20de%20contr%C3%B4le%20d%27acc%C3%A8s%20physique%20et%20vid%C3%A9oprotection%20-%20v2.1.pdf"
+    implementation_groups_definition:
+    - ref_id: R
+      name: "Recommandation \xE0 l\u2019\xE9tat de l\u2019art"
+      description: "Rx constitue une recommandation \xE0 l\u2019\xE9tat de l\u2019\
+        art"
+    - ref_id: R-
+      name: "Recommandations alternatives \xE0 Rx, d\u2019un niveau de s\xE9curit\xE9\
+        \ moindre et donn\xE9es dans l\u2019ordre d\xE9croissant."
+      description: "Rx - et Rx - - constituent des recommandations alternatives \xE0\
+        \ Rx, d\u2019un niveau de s\xE9curit\xE9 moindre et donn\xE9es dans l\u2019\
+        ordre d\xE9croissant."
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Composants du contr\xF4le d'acc\xE8s et de la vid\xE9oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:2
+      ref_id: '2.4'
+      name: "Produits qualifi\xE9s par l'ANSSI"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:2.4
+      ref_id: R1
+      name: "Privil\xE9gier l\u2019utilisation de produits qualifi\xE9s par l\u2019\
+        ANSSI"
+      description: "D\u2019une mani\xE8re g\xE9n\xE9rale, il est recommand\xE9 que\
+        \ les mat\xE9riels et les logiciels utilis\xE9s pour le contr\xF4le d\u2019\
+        acc\xE8s physique et la vid\xE9oprotection soient qualifi\xE9s par l\u2019\
+        ANSSI au niveau requis par les besoins de s\xE9curit\xE9. \xC0 d\xE9faut,\
+        \ il est recommand\xE9 qu\u2019ils disposent d\u2019un autre Visa de s\xE9\
+        curit\xE9 d\xE9livr\xE9 par l\u2019ANSSI."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "\xC9tapes pr\xE9liminaires \xE0 la mise en place d'un syst\xE8me de contr\xF4\
+        le d'acc\xE8s ou de vid\xE9oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3
+      ref_id: '3.1'
+      name: "Identification des sites \xE0 prot\xE9ger/contr\xF4ler"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.1
+      ref_id: R2
+      name: "Identifier les sites \xE0 prot\xE9ger/contr\xF4ler"
+      description: "Il est n\xE9cessaire de r\xE9f\xE9rencer de mani\xE8re exhaustive\
+        \ les sites \xE0 contr\xF4ler en prenant en compte leurs particularit\xE9\
+        s."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3
+      ref_id: '3.2'
+      name: "Identification des valeurs m\xE9tier et biens supports \xE0 prot\xE9\
+        ger"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r3
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.2
+      ref_id: R3
+      name: "Identifier les valeurs m\xE9tier et les biens supports \xE0 prot\xE9\
+        ger"
+      description: "Il est recommand\xE9 d\u2019identifier, au travers d\u2019une\
+        \ analyse de risque, les valeurs m\xE9tier et les biens supports sur lesquels\
+        \ elles s\u2019appuient, pour d\xE9terminer les ressources qu\u2019il convient\
+        \ de prot\xE9ger, et d\xE9finir le niveau de sensibilit\xE9 associ\xE9 \xE0\
+        \ chaque site r\xE9f\xE9renc\xE9."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3
+      ref_id: '3.3'
+      name: Identification de zones
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r4
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.3
+      ref_id: R4
+      name: "D\xE9finir les zones incluant les syst\xE8mes de contr\xF4le d\u2019\
+        acc\xE8s ou de vid\xE9oprotection au niveau de protection attendu le plus\
+        \ \xE9lev\xE9"
+      description: "Les zones o\xF9 sont situ\xE9s les \xE9l\xE9ments du syst\xE8\
+        me de contr\xF4le d\u2019acc\xE8s ou de vid\xE9oprotection (serveurs du centre\
+        \ de gestion du syst\xE8me, et stations de travail) doivent \xEAtre d\xE9\
+        finies au niveau de protection attendu le plus \xE9lev\xE9."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r5
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.3
+      ref_id: R5
+      name: Identifier les zones avec leurs niveaux de protection attendus
+      description: "Il est recommand\xE9 qu\u2019une \xE9chelle pr\xE9cise et explicite\
+        \ des niveaux de protection attendus avec leurs d\xE9finitions associ\xE9\
+        es soit \xE9tablie. Il est ensuite recommand\xE9 que les sites \xE0 prot\xE9\
+        ger soient d\xE9coup\xE9s en zones class\xE9es par niveau de protection attendu\
+        \ selon cette \xE9chelle."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3
+      ref_id: '3.4'
+      name: "Niveau de s\xFBret\xE9 des \xE9quipements et des installations de contr\xF4\
+        le d'acc\xE8s physique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r6
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.4
+      ref_id: R6
+      name: "Identifier les niveaux de s\xFBret\xE9 adapt\xE9s aux menaces des sites"
+      description: "Il est recommand\xE9 qu\u2019une analyse de risque soit men\xE9\
+        e afin d\u2019identifier, pour chaque site \xE0 contr\xF4ler, les niveaux\
+        \ de s\xFBret\xE9 des \xE9quipements et installations de contr\xF4les d\u2019\
+        acc\xE8s physique n\xE9cessaires."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3
+      ref_id: '3.5'
+      name: Flux de circulation des individus
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r7
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.5
+      ref_id: R7
+      name: Identifier les flux de circulation des individus
+      description: "Dans le but de conna\xEEtre les besoins de chaque point d\u2019\
+        acc\xE8s \xE0 contr\xF4ler, il est recommand\xE9 d\u2019identifier les flux\
+        \ de circulation des individus."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3
+      ref_id: '3.6'
+      name: Identification des acteurs
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r8
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.6
+      ref_id: R8
+      name: Identifier les acteurs
+      description: "Les diff\xE9rents acteurs intervenant dans les processus organisationnels\
+        \ de gestion des acc\xE8s physiques et de vid\xE9oprotection doivent \xEA\
+        tre clairement identifi\xE9s pour que leurs droits d\u2019acc\xE8s soient\
+        \ calcul\xE9s au plus juste. Dans les cas o\xF9 plusieurs r\xF4les sont susceptibles\
+        \ d\u2019\xEAtre assur\xE9s par les m\xEAmes personnes, il faut s\u2019assurer\
+        \ de la pertinence des droits r\xE9sultant de ces cumuls (voir la section\
+        \ 10.4)."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3
+      ref_id: '3.7'
+      name: Processus organisationnels
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r9
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:3.7
+      ref_id: R9
+      name: "D\xE9finir les processus organisationnels li\xE9s \xE0 la gestion des\
+        \ acc\xE8s physiques et de la vid\xE9oprotection"
+      description: "Il est fortement recommand\xE9 que les processus organisationnels\
+        \ d\xE9crivant les \xE9changes entre les acteurs de la gestion des acc\xE8\
+        s physiques et de la vid\xE9oprotection pour la r\xE9alisation d\u2019un objectif\
+        \ particulier soient clairement d\xE9finis et formalis\xE9s."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Architecture d'un syst\xE8me de contr\xF4le d'acc\xE8s et de vid\xE9\
+        oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4
+      ref_id: '4.1'
+      name: "SI de contr\xF4le d'acc\xE8s et de vid\xE9oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r10
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.1
+      ref_id: R10
+      name: "Cloisonner physiquement les SI de contr\xF4le d\u2019acc\xE8s et de vid\xE9\
+        oprotection"
+      description: "Les SI de contr\xF4le d\u2019acc\xE8s et de vid\xE9oprotection\
+        \ doivent \xEAtre cloisonn\xE9s des autres composantes du syst\xE8me d\u2019\
+        information de l\u2019entit\xE9. Il est hautement recommand\xE9 qu\u2019un\
+        \ cloisonnement physique (c\xE2blage et \xE9quipements r\xE9seau d\xE9di\xE9\
+        s) soit privil\xE9gi\xE9 par rapport \xE0 un cloisonnement logique (VLAN par\
+        \ exemple), dont le niveau de robustesse peut \xEAtre insuffisant dans ce\
+        \ contexte."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r10-(-)
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.1
+      ref_id: R10 (-)
+      name: "Cloisonner logiquement les SI de contr\xF4le d\u2019acc\xE8s et de vid\xE9\
+        oprotection"
+      description: "A d\xE9faut d\u2019un cloisonnement physique, il est recommand\xE9\
+        \ de cloisonner logiquement les SI de contr\xF4le d\u2019acc\xE8s et de vid\xE9\
+        oprotection par rapport aux autres composantes du SI de l\u2019entit\xE9 en\
+        \ mettant en \u0153uvre des m\xE9canismes de filtrage, de chiffrement et d\u2019\
+        authentification de r\xE9seau reposant sur le protocole IPsec. La mise en\
+        \ \u0153uvre du protocole IPsec doit \xEAtre conforme aux recommandations\
+        \ du guide de l\u2019ANSSI [Recommandations de s\xE9curit\xE9 relatives \xE0\
+        \ IPsec pour la protection des flux r\xE9seau]."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r11
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.1
+      ref_id: R11
+      name: "D\xE9dier un SI de contr\xF4le d\u2019acc\xE8s ou de vid\xE9oprotection\
+        \ pour chaque niveau de sensibilit\xE9 identifi\xE9"
+      description: "Lorsque l\u2019architecture globale inclut des zones de sensibilit\xE9\
+        s diff\xE9rentes, les zones de m\xEAme sensibilit\xE9 doivent b\xE9n\xE9ficier\
+        \ d\u2019un SI de contr\xF4le d\u2019acc\xE8s ou de vid\xE9oprotection qui\
+        \ leur est d\xE9di\xE9. Il faut dans ce cas consid\xE9rer chaque ensemble\
+        \ de m\xEAme sensibilit\xE9 comme un SI \xE0 part enti\xE8re."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4
+      ref_id: '4.2'
+      name: Liaison filaire
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2
+      ref_id: 4.2.1
+      name: Protection des liaisons filaires
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r12
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2.1
+      ref_id: R12
+      name: "Prot\xE9ger les liaisons filaires"
+      description: "Il est recommand\xE9 que les liaisons filaires ne soient ni apparentes,\
+        \ ni situ\xE9es dans une zone non contr\xF4l\xE9e. Dans le cas des liaisons\
+        \ filaires associ\xE9es aux cam\xE9ras ext\xE9rieures, elles doivent \xEA\
+        tre si possible non apparentes et prot\xE9g\xE9es physiquement (encastr\xE9\
+        es, bien enterr\xE9es, etc.)."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2
+      ref_id: 4.2.2
+      name: "Connexions entre les t\xEAtes de lecture et l'UTL"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r13
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2.2
+      ref_id: R13
+      name: "Privil\xE9gier des connexions point-\xE0-point entre les t\xEAtes de\
+        \ lecture et l\u2019UTL"
+      description: "Il est recommand\xE9 de privil\xE9gier la mise en place de connexions\
+        \ point-\xE0-point 15 sur les liaisons entre les t\xEAtes de lecture et l\u2019\
+        UTL."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r14
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2.2
+      ref_id: R14
+      name: "Respecter l\u2019homog\xE9n\xE9it\xE9 du niveau de protection des zones\
+        \ o\xF9 se trouvent les t\xEAtes de lecture rattach\xE9es \xE0 l\u2019UTL"
+      description: "Une UTL ne doit desservir que des t\xEAtes de lecture contr\xF4\
+        lant l\u2019acc\xE8s \xE0 des zones dont le niveau de protection attendu est\
+        \ identique."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2
+      ref_id: 4.2.3
+      name: "Connectivit\xE9 filaire et connectivit\xE9 sans-fil"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r15
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2.3
+      ref_id: R15
+      name: "Privil\xE9gier une connectivit\xE9 filaire pour les dispositifs de vid\xE9\
+        oprotection et de contr\xF4le d\u2019acc\xE8s physique"
+      description: "Il est fortement recommand\xE9 de privil\xE9gier la connectivit\xE9\
+        \ filaire \xE0 la connectivit\xE9 sans-fil pour les dispositifs de vid\xE9\
+        oprotection comme pour les dispositifs de contr\xF4le d\u2019acc\xE8s physique."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r15-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.2.3
+      ref_id: R15 (-)
+      name: "Activer un deuxi\xE8me chiffrement dans le cas d\u2019une connectivit\xE9\
+        \ sans-fil"
+      description: "Dans le cas o\xF9 le choix de la liaison sans-fil est obligatoire,\
+        \ il est recommand\xE9 de s\u2019orienter vers des solutions proposant un\
+        \ deuxi\xE8me chiffrement, en plus du chiffrement op\xE9r\xE9 par la liaison\
+        \ sans-fil. Les flux doivent \xEAtre authentifi\xE9s, et prot\xE9g\xE9s en\
+        \ confidentialit\xE9 et en int\xE9grit\xE9. Les op\xE9rations de chiffrement\
+        \ et de d\xE9chiffrement doivent s\u2019effectuer en zone contr\xF4l\xE9e.\
+        \ La borne d\u2019acc\xE8s sans-fil doit \xEAtre plac\xE9e \xE0 l\u2019int\xE9\
+        rieur de la zone contr\xF4l\xE9e."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4
+      ref_id: '4.3'
+      name: "R\xE9seau support"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3
+      ref_id: 4.3.1
+      name: "Segmentation au sein du r\xE9seau support"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r16
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.1
+      ref_id: R16
+      name: "Cloisonner logiquement les dispositifs au sein du r\xE9seau support"
+      description: "Il est fortement recommand\xE9 de mettre en \u0153uvre un cloisonnement\
+        \ logique entre les dispositifs au sein du r\xE9seau support. En particulier,\
+        \ dans la mesure o\xF9 les diff\xE9rents dispositifs n\u2019ont pas de raison\
+        \ l\xE9gitime de communiquer entre eux directement, il est recommand\xE9 de\
+        \ configurer les commutateurs r\xE9seau de telle sorte que chaque dispositif\
+        \ ne puisse \xE9tablir de communication qu\u2019avec les serveurs de gestion,\
+        \ et en aucun cas avec les autres dispositifs. Un tel cloisonnement peut par\
+        \ exemple \xEAtre obtenu par la mise en \u0153uvre sur les commutateurs r\xE9\
+        seau d\u2019un m\xE9canisme d\u2019isolation de type PVLAN 18 , emp\xEAchant\
+        \ les communications directes entre dispositifs, voire de VLAN filtr\xE9s\
+        \ et d\xE9di\xE9s \xE0 chaque dispositif s\u2019il s\u2019agit d\u2019une\
+        \ infrastructure de taille limit\xE9e. Des recommandations sur la mise en\
+        \ \u0153uvre de ces cloisonnements sont indiqu\xE9es dans le guide de l\u2019\
+        ANSSI sur la s\xE9curisation d\u2019un commutateur de desserte [Recommandations\
+        \ pour la s\xE9curisation d\u2019un commutateur de desserte]."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3
+      ref_id: 4.3.2
+      name: "Contr\xF4le des acc\xE8s directs au r\xE9seau support"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r17
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.2
+      ref_id: R17
+      name: "Ne pas laisser les points d\u2019acc\xE8s au r\xE9seau apparents"
+      description: "Les points d\u2019acc\xE8s au r\xE9seau des dispositifs comme\
+        \ les UTL ou les cam\xE9ras constituant une vuln\xE9rabilit\xE9, il est recommand\xE9\
+        \ qu\u2019ils ne soient ni apparents ni accessibles facilement."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r18
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.2
+      ref_id: R18
+      name: "D\xE9sactiver les ports inutilis\xE9s sur les commutateurs r\xE9seau"
+      description: "Les ports inutilis\xE9s sur les commutateurs r\xE9seau doivent\
+        \ \xEAtre d\xE9sactiv\xE9s."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r19
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.2
+      ref_id: R19
+      name: "Contr\xF4ler les acc\xE8s aux ports r\xE9seau par authentification"
+      description: "Afin de limiter les possibilit\xE9s d\u2019acc\xE8s ill\xE9gitimes\
+        \ au r\xE9seau via le port d\u2019acc\xE8s d\u2019un \xE9quipement, il est\
+        \ recommand\xE9 de mettre en \u0153uvre une authentification cryptographique\
+        \ des acc\xE8s au r\xE9seau comme le protocole 802.1X, dans la mesure o\xF9\
+        \ les dispositifs connect\xE9s supportent ce protocole. Dans ce cas, il est\
+        \ recommand\xE9 que le d\xE9ploiement du r\xE9seau 802.1X s\u2019appuie sur\
+        \ les recommandations mentionn\xE9es dans le guide de l\u2019ANSSI sur sa\
+        \ mise en \u0153uvre [Recommandations de d\xE9ploiement du protocole 802.1X\
+        \ pour le contr\xF4le d\u2019acc\xE8s \xE0 des r\xE9seaux locaux]."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r19-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.2
+      ref_id: R19 (-)
+      name: "Contr\xF4ler les acc\xE8s aux ports r\xE9seau par v\xE9rification des\
+        \ adresses MAC"
+      description: "Dans le cas o\xF9 les dispositifs ne supportent pas le protocole\
+        \ 802.1X, il est recommand\xE9, par d\xE9faut, que les acc\xE8s aux ports\
+        \ r\xE9seau soient contr\xF4l\xE9s par la v\xE9rification de la l\xE9gitimit\xE9\
+        \ des adresses MAC des dispositifs qui se connectent."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3
+      ref_id: 4.3.3
+      name: "Mutualisation des dispositifs de contr\xF4le d'acc\xE8s physique sur\
+        \ un m\xEAme r\xE9seau support"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r20
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.3
+      ref_id: R20
+      name: "Cloisonner logiquement au sein d\u2019un r\xE9seau support les UTL associ\xE9\
+        es \xE0 des zones de niveaux de protection attendus distincts"
+      description: "Lorsque l\u2019analyse de risque pr\xE9voit la mutualisation au\
+        \ sein d\u2019un m\xEAme r\xE9seau support de dispositifs de contr\xF4le d\u2019\
+        acc\xE8s physique associ\xE9s \xE0 des zones de niveaux de protection attendus\
+        \ distincts, il est recommand\xE9 de mettre en place un cloisonnement logique\
+        \ (ex. : VLAN) entre ces dispositifs."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3
+      ref_id: 4.3.4
+      name: "Mutualisation des dispositifs de contr\xF4le d'acc\xE8s physique et de\
+        \ vid\xE9oprotection sur un m\xEAme r\xE9seau support"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r21
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.4
+      ref_id: R21
+      name: "\xC9viter de mutualiser les dispositifs de contr\xF4le d\u2019acc\xE8\
+        s et de vid\xE9oprotection sur un m\xEAme r\xE9seau support"
+      description: "Il est recommand\xE9 de ne pas mutualiser sur un m\xEAme r\xE9\
+        seau support les dispositifs de contr\xF4le d\u2019acc\xE8s physique et ceux\
+        \ associ\xE9s \xE0 la vid\xE9oprotection."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r21-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.4
+      ref_id: R21 (-)
+      name: "Mettre en place un cloisonnement logique entre les dispositifs de contr\xF4\
+        le d\u2019acc\xE8s et de vid\xE9oprotection mutualis\xE9s sur un m\xEAme r\xE9\
+        seau support"
+      description: "Lorsque la mutualisation de dispositifs de vid\xE9oprotection\
+        \ et de contr\xF4le d\u2019acc\xE8s physique sur des r\xE9seaux support communs\
+        \ s\u2019av\xE8re incontournable et que les zones contr\xF4l\xE9es par ces\
+        \ dispositifs n\xE9cessitent un m\xEAme niveau de protection, il est recommand\xE9\
+        \ de mettre en place un cloisonnement logique (ex. : VLAN) entre ces dispositifs."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3
+      ref_id: 4.3.5
+      name: "R\xE9seau support des cam\xE9ras plac\xE9es \xE0 l'ext\xE9rieur de la\
+        \ zone contr\xF4l\xE9e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r22
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.5
+      ref_id: R22
+      name: "D\xE9dier physiquement un r\xE9seau support pour les cam\xE9ras ext\xE9\
+        rieures"
+      description: "Il est recommand\xE9 de d\xE9ployer les cam\xE9ras situ\xE9es\
+        \ en dehors de la zone contr\xF4l\xE9e sur un r\xE9seau support physiquement\
+        \ d\xE9di\xE9 et distinct des autres r\xE9seaux support incluant les cam\xE9\
+        ras situ\xE9es dans la zone contr\xF4l\xE9e."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r22-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.3.5
+      ref_id: R22 (-)
+      name: "Cloisonner logiquement le r\xE9seau des cam\xE9ras ext\xE9rieures"
+      description: "A d\xE9faut d\u2019un cloisonnement physique, les cam\xE9ras situ\xE9\
+        es en dehors de la zone contr\xF4l\xE9e doivent \xEAtre d\xE9ploy\xE9es sur\
+        \ un r\xE9seau logique d\xE9di\xE9 \xE0 cet usage en mettant en \u0153uvre\
+        \ des m\xE9canismes de cloisonnement logique, de filtrage, de chiffrement\
+        \ et d\u2019authentification de r\xE9seau (IPsec). La mise en \u0153uvre du\
+        \ protocole IPsec doit \xEAtre conforme aux recommandations du guide de l\u2019\
+        ANSSI [Recommandations de s\xE9curit\xE9 relatives \xE0 IPsec pour la protection\
+        \ des flux r\xE9seau]."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4
+      ref_id: '4.4'
+      name: "R\xE9seau f\xE9d\xE9rateur"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4
+      ref_id: 4.4.1
+      name: "Filtrage des flux entre les r\xE9seaux support"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r23
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4.1
+      ref_id: R23
+      name: "Filtrer les flux entre les r\xE9seaux support"
+      description: "Les flux en provenance et \xE0 destination des r\xE9seaux support\
+        \ doivent \xEAtre filtr\xE9s par un ou plusieurs pare-feux. Il est recommand\xE9\
+        \ de bloquer par d\xE9faut tous les flux entre les r\xE9seaux support et de\
+        \ n\u2019autoriser que les flux strictement n\xE9cessaires au fonctionnement\
+        \ du syst\xE8me."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4
+      ref_id: 4.4.2
+      name: "Filtrage des flux entre les r\xE9seaux support et le r\xE9seau du centre\
+        \ de gestion"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r24
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4.2
+      ref_id: R24
+      name: "Filtrer les flux entre les r\xE9seaux support et le r\xE9seau du centre\
+        \ de gestion"
+      description: "Il est recommand\xE9 que les flux \xE9chang\xE9s entre les r\xE9\
+        seaux support et le centre de gestion soient filtr\xE9s par un pare-feu positionn\xE9\
+        \ en amont du centre de gestion. Ce pare-feu doit \xEAtre configur\xE9 pour\
+        \ :"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r24:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r24
+      name: "- s\u2019assurer que les flux \xE9chang\xE9s n\u2019utilisent que les\
+        \ protocoles autoris\xE9s ;\n"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r24:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r24
+      name: "- s\u2019assurer que les flux sont \xE9chang\xE9s uniquement entre \xE9\
+        quipements autoris\xE9s."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4
+      ref_id: 4.4.3
+      name: "Infrastructure r\xE9partie sur plusieurs sites"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r25
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.4.3
+      ref_id: R25
+      name: "Prot\xE9ger les flux de contr\xF4le d\u2019acc\xE8s et de vid\xE9oprotection\
+        \ transitant par un r\xE9seau de transport non ma\xEEtris\xE9"
+      description: "Si les flux de contr\xF4le d\u2019acc\xE8s ou de vid\xE9oprotection\
+        \ en provenance de sites distants circulent sur un r\xE9seau de transport\
+        \ non ma\xEEtris\xE9, ces flux doivent \xEAtre chiffr\xE9s et authentifi\xE9\
+        s depuis le site distant jusqu\u2019au site o\xF9 est localis\xE9 le centre\
+        \ de gestion correspondant. Dans ce cas, un tunnel IPsec entre les sites concern\xE9\
+        s doit \xEAtre \xE9tabli conform\xE9ment aux recommandations du guide de l\u2019\
+        ANSSI [Recommandations de s\xE9curit\xE9 relatives \xE0 IPsec pour la protection\
+        \ des flux r\xE9seau]."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4
+      ref_id: '4.5'
+      name: "Architecture s'appuyant sur un service externalis\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r26
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.5
+      ref_id: R26
+      name: "\xC9viter l\u2019externalisation des services de gestion chez un prestataire\
+        \ de services"
+      description: "Il est recommand\xE9 d\u2019\xE9viter de recourir \xE0 l\u2019\
+        externalisation des services de gestion de contr\xF4le d\u2019acc\xE8s ou\
+        \ de vid\xE9oprotection chez un prestataire de services."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r26-(-)
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.5
+      ref_id: R26 (-)
+      name: "Choisir un prestataire de services qualifi\xE9"
+      description: "Si l\u2019externalisation des services de gestion du contr\xF4\
+        le d\u2019acc\xE8s ou de vid\xE9oprotection sur un service d\u2019informatique\
+        \ en nuage ou chez un prestataire de services s\u2019av\xE8re incontournable,\
+        \ il est recommand\xE9 que le choix du prestataire de services s\u2019oriente\
+        \ vers un prestataire qualifi\xE9 par l\u2019ANSSI selon le r\xE9f\xE9rentiel\
+        \ d\u2019exigences SecNumCloud [Prestataires de services d\u2019informatique\
+        \ en nuage (SecNumCloud)]."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4
+      ref_id: '4.6'
+      name: Interconnexion
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6
+      ref_id: 4.6.1
+      name: "Interconnexion entre un syst\xE8me de contr\xF4le d'acc\xE8s physique\
+        \ et le SI de l'entit\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r27
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6.1
+      ref_id: R27
+      name: "\xC9viter une interconnexion avec le SI de l\u2019entit\xE9"
+      description: "Dans la mesure du possible, il est recommand\xE9 d\u2019\xE9viter\
+        \ d\u2019interconnecter le syst\xE8me de contr\xF4le d\u2019acc\xE8s physique\
+        \ avec le SI de l\u2019entit\xE9."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r27-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6.1
+      ref_id: R27 (-)
+      name: "Filtrer les acc\xE8s au GAC depuis le SI de l\u2019entit\xE9"
+      description: "Dans le cas o\xF9 une interconnexion entre le GAC et un serveur\
+        \ du SI de l\u2019entit\xE9 serait incontournable, il est recommand\xE9 de\
+        \ filtrer tous les acc\xE8s entre le GAC et le SI de l\u2019entit\xE9. Seuls\
+        \ les flux concern\xE9s par le besoin d\u2019interconnexion doivent \xEAtre\
+        \ autoris\xE9s."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r28
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6.1
+      ref_id: R28
+      name: "Prot\xE9ger les flux \xE9chang\xE9s entre le syst\xE8me de contr\xF4\
+        le d\u2019acc\xE8s et le SI de l\u2019entit\xE9"
+      description: "Il est recommand\xE9 que les flux \xE9chang\xE9s entre un syst\xE8\
+        me de contr\xF4le d\u2019acc\xE8s physique et le SI soient prot\xE9g\xE9s\
+        \ en int\xE9grit\xE9, authenticit\xE9 et en confidentialit\xE9 \xE0 l\u2019\
+        aide de protocoles cryptographiques \xE9prouv\xE9s comme TLS ou, mieux, IPsec."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6
+      ref_id: 4.6.2
+      name: "Interconnexion entre un syst\xE8me de contr\xF4le d'acc\xE8s physique\
+        \ et un syst\xE8me de vid\xE9oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r29
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6.2
+      ref_id: R29
+      name: "Privil\xE9gier une solution s\u2019appuyant sur deux centres de gestion\
+        \ distincts"
+      description: "Dans le cas o\xF9 des \xE9changes entre des syst\xE8mes de contr\xF4\
+        le d\u2019acc\xE8s et de vid\xE9oprotection sont n\xE9cessaires, il convient\
+        \ de privil\xE9gier une solution s\u2019appuyant sur deux centres de gestion\
+        \ et deux r\xE9seaux f\xE9d\xE9rateurs distincts avec une interconnexion entre\
+        \ les deux centres de gestion. Il est recommand\xE9 dans ce cas de chiffrer\
+        \ et d\u2019authentifier les flux entre les deux centres de gestion et de\
+        \ n\u2019autoriser que les flux m\xE9tier strictement n\xE9cessaires."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r29-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:4.6.2
+      ref_id: R29 (-)
+      name: "Filtrer les flux entre les r\xE9seaux support et le r\xE9seau du centre\
+        \ de gestion commun"
+      description: "Si l\u2019utilisation d\u2019un centre de gestion commun aux syst\xE8\
+        mes de contr\xF4le d\u2019acc\xE8s et de vid\xE9oprotection s\u2019av\xE8\
+        re incontournable, il faut s\u2019assurer que les recommandations R23 sur\
+        \ le filtrage des flux entre les r\xE9seaux support et R24 sur le filtrage\
+        \ des flux entre les r\xE9seaux support et le r\xE9seau du centre de gestion\
+        \ sont bien appliqu\xE9es."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Cartographie
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:5
+      ref_id: '5.3'
+      name: Vision de l'infrastructure technique
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:5.3
+      ref_id: R30
+      name: "Cartographier les syst\xE8mes de contr\xF4le d\u2019acc\xE8s physique\
+        \ ou de vid\xE9oprotection"
+      description: "Il est hautement recommand\xE9 de cartographier les syst\xE8mes\
+        \ de contr\xF4le d\u2019acc\xE8s physique et de vid\xE9oprotection. Cette\
+        \ cartographie doit contenir au minimum les \xE9l\xE9ments suivants :"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- sch\xE9ma repr\xE9sentant les zones \xE0 prot\xE9ger/contr\xF4ler et\
+        \ leur niveau de protection attendu ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- sch\xE9ma repr\xE9sentant les flux de circulation des individus ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- document d\xE9crivant la liste des acteurs ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:4
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- document d\xE9taillant les processus organisationnels ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:5
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- sch\xE9ma repr\xE9sentant le positionnement des dispositifs (t\xEA\
+        tes de lecture, UTL, cam\xE9ras, centres de gestion, etc.) ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:6
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- sch\xE9ma repr\xE9sentant le cloisonnement physique et logique des\
+        \ r\xE9seaux, les plages d\u2019adresses IP, les fonctions de routage et de\
+        \ filtrage ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:7
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- document d\xE9crivant la liste compl\xE8te des \xE9quipements physiques\
+        \ utilis\xE9s ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:8
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- document d\xE9crivant les composants logiciels ainsi que les flux de\
+        \ donn\xE9es entre ces composants ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30:9
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r30
+      name: "- document r\xE9pertoriant les p\xE9rim\xE8tres et niveaux de privil\xE8\
+        ges des utilisateurs et des administratreurs."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "S\xE9curit\xE9 des \xE9l\xE9ments support d'un syst\xE8me de contr\xF4\
+        le d'acc\xE8s physique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6
+      ref_id: '6.1'
+      name: Badge sur support physique
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r31
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.1
+      ref_id: R31
+      name: "Ne pas stocker d\u2019informations critiques sur le badge"
+      description: "Les donn\xE9es relatives aux droits d\u2019acc\xE8s, aux p\xE9\
+        riodes de validit\xE9 et aux informations d\u2019authentification autres que\
+        \ le num\xE9ro d\u2019identification ne doivent pas \xEAtre stock\xE9es dans\
+        \ le badge. D\xE8s lors il est recommand\xE9 que ces informations soient stock\xE9\
+        es dans la base de donn\xE9es du GAC."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r31-(-)
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.1
+      ref_id: R31 (-)
+      name: "Stocker les gabarits biom\xE9triques sur un badge avec un niveau de r\xE9\
+        sistance minimal aux attaques de niveau AVA_VAN.5"
+      description: "Lorsque la biom\xE9trie est utilis\xE9e comme second facteur d\u2019\
+        authentification, les donn\xE9es relatives aux gabarits biom\xE9triques peuvent\
+        \ \xEAtre stock\xE9es sur le badge s\u2019il r\xE9siste au minimum aux attaques\
+        \ de niveau AVA_VAN.5."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.1
+      ref_id: R32
+      name: "Minimiser les informations pr\xE9sentes sur les badges"
+      description: "Il est recommand\xE9 que les badges soient visuellement les plus\
+        \ neutres possibles. Ils ne doivent notamment pas indiquer :"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32
+      name: "- d\u2019informations sur l\u2019entreprise (nom, adresse)  ;"
+      description: "Si des coordonn\xE9es sont indiqu\xE9es sur le dos du badge pour\
+        \ faciliter sa restitution en cas de perte, elles ne doivent pas mentionner\
+        \ explicitement le nom de l\u2019entit\xE9. Mieux vaut privil\xE9gier dans\
+        \ ce cas l\u2019utilisation d\u2019une bo\xEEte postale."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32
+      name: "- d\u2019informations sur le porteur (nom, pr\xE9nom, poste), en dehors\
+        \ de sa photo ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32
+      name: "- les acc\xE8s autoris\xE9s."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32:4
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r32
+      name: "Un num\xE9ro de tra\xE7abilit\xE9 peut \xEAtre indiqu\xE9 sur le badge\
+        \ \xE0 des fins administratives, mais ce num\xE9ro doit \xEAtre diff\xE9rent\
+        \ du num\xE9ro d\u2019identification."
+      description: "La photographie est tol\xE9r\xE9e car elle permet de v\xE9rifier\
+        \ rapidement que le badge appartient bien au porteur."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r33
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.1
+      ref_id: R33
+      name: "Privil\xE9gier l\u2019utilisation de cartes d\u2019acc\xE8s certifi\xE9\
+        es avec un niveau de r\xE9sistance aux attaques de niveau AVA_VAN.3"
+      description: "Dans la mesure du possible, il faut privil\xE9gier l\u2019emploi\
+        \ de cartes d\u2019acc\xE8s int\xE9grant un composant sous-jacent qui inclut\
+        \ la fonctionnalit\xE9 de communication et qui a \xE9t\xE9 certifi\xE9 Crit\xE8\
+        res Communs avec une r\xE9sistance aux attaques de niveau AVA_VAN.3."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r34
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.1
+      ref_id: R34
+      name: "Garantir l\u2019unicit\xE9 d\u2019un badge"
+      description: "Un badge doit \xEAtre garanti unique. Aucun doublon ne doit \xEA\
+        tre possible sur le m\xEAme syst\xE8me, ni sur un syst\xE8me existant dans\
+        \ l\u2019entit\xE9 ou hors de l\u2019entit\xE9. Un badge doit pouvoir \xEA\
+        tre r\xE9affect\xE9 \xE0 une autre personne sans perte de tra\xE7abilit\xE9\
+        ."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6
+      ref_id: '6.2'
+      name: Badge virtuel sur ordiphone
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r35
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.2
+      ref_id: R35
+      name: "\xC9viter l\u2019usage de badges virtuels sur ordiphone"
+      description: "Il est fortement d\xE9conseill\xE9 de recourir aux technologies\
+        \ de badges virtuels sur ordiphone qui n\u2019offrent aucune garantie quant\
+        \ au stockage s\xE9curis\xE9 des secrets li\xE9s au contr\xF4le d\u2019acc\xE8\
+        s physique. De plus, la port\xE9e de la technologie Bluetooth n\u2019est pas\
+        \ adapt\xE9e au contr\xF4le d\u2019acc\xE8s de locaux, et les multiples usages\
+        \ possibles de la technologie NFC sur l\u2019ordiphone apportent une complexit\xE9\
+        \ suppl\xE9mentaire qui peut s\u2019av\xE9rer d\xE9licate \xE0 g\xE9rer."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6
+      ref_id: '6.3'
+      name: "T\xEAte de lecture : protection des \xE9l\xE9ments chiffr\xE9s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r36
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.3
+      ref_id: R36
+      name: "Prot\xE9ger les acc\xE8s aux t\xEAtes de lecture"
+      description: "Les parties du syst\xE8me situ\xE9es hors de la zone contr\xF4\
+        l\xE9e, incluant les t\xEAtes de lecture, sont potentiellement des sources\
+        \ de vuln\xE9rabilit\xE9s. Il est donc recommand\xE9 d\u2019anonymiser les\
+        \ \xE9l\xE9ments apparents des t\xEAtes de lecture, et de contr\xF4ler minutieusement\
+        \ la liste des personnes habilit\xE9es \xE0 intervenir sur ces dispositifs."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r37
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.3
+      ref_id: R37
+      name: "Prot\xE9ger les flux d\u2019authentification du porteur entre le dispositif\
+        \ associ\xE9 \xE0 la t\xEAte de lecture et l\u2019UTL"
+      description: "Les informations li\xE9es au second facteur d\u2019authentification,\
+        \ \xE9chang\xE9es entre le dispositif rattach\xE9 \xE0 la t\xEAte de lecture\
+        \ et l\u2019UTL, doivent \xEAtre prot\xE9g\xE9es en int\xE9grit\xE9 et en\
+        \ confidentialit\xE9."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6
+      ref_id: '6.4'
+      name: "Unit\xE9 de traitement local : acc\xE8s physique r\xE9serv\xE9 et Secure\
+        \ Access Module"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r38
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.4
+      ref_id: R38
+      name: "Prot\xE9ger l\u2019acc\xE8s physique aux UTL"
+      description: "Il est fortement recommand\xE9 que les UTL soient situ\xE9es \xE0\
+        \ l\u2019int\xE9rieur de la zone contr\xF4l\xE9e dont elles commandent l\u2019\
+        acc\xE8s et ne soient pas accessibles facilement. Id\xE9alement, elles doivent\
+        \ \xEAtre \xE0 l\u2019abri de tout acc\xE8s frauduleux, dans un local technique\
+        \ ferm\xE9 ou tout autre type d\u2019emplacement s\xE9curis\xE9."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r39
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.4
+      ref_id: R39
+      name: "Contr\xF4ler minutieusement les interventions effectu\xE9es sur les UTL"
+      description: "Il est imp\xE9ratif de disposer de la liste des personnes autoris\xE9\
+        es \xE0 acc\xE9der physiquement aux UTL et d\u2019assurer \xE9galement la\
+        \ surveillance des op\xE9rations effectu\xE9es sur ces \xE9quipements."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r40
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.4
+      ref_id: R40
+      name: "Chiffrer et authentifier les flux \xE9mis et re\xE7us par les UTL"
+      description: "Il est fortement recommand\xE9 que les communications entre les\
+        \ UTL ainsi que les communications entre les UTL et le centre de gestion soient\
+        \ prot\xE9g\xE9es en int\xE9grit\xE9 et confidentialit\xE9, et que le m\xE9\
+        canisme de chiffrement soit choisi et impl\xE9ment\xE9 dans le respect des\
+        \ pr\xE9conisations mentionn\xE9es dans le r\xE9f\xE9rentiel g\xE9n\xE9ral\
+        \ de s\xE9curit\xE9 (RGS) [R\xE9f\xE9rentiel g\xE9n\xE9ral de s\xE9curit\xE9\
+        \ (RGS)] publi\xE9 par l\u2019ANSSI."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6
+      ref_id: '6.5'
+      name: Configurations type entre badges et UTL
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r41
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.5
+      ref_id: R41
+      name: "Impl\xE9menter en priorit\xE9 la configuration type n\xB01"
+      description: "La configuration type n\xB01 est hautement recommand\xE9e. Elle\
+        \ reporte n\xE9anmoins le risque de l\u2019exploitation d\u2019une vuln\xE9\
+        rabilit\xE9 de la t\xEAte de lecture sur l\u2019UTL. Ainsi, les mesures de\
+        \ protection concernant l\u2019UTL requi\xE8rent une attention toute particuli\xE8\
+        re, notamment pour la protection des cl\xE9s cryptographiques (voir la recommandation\
+        \ R38). L\u2019impl\xE9mentation de la configuration type n\xB02 est d\xE9\
+        conseill\xE9e car la t\xEAte de lecture, situ\xE9e en zone non contr\xF4l\xE9\
+        e, renferme des \xE9l\xE9ments secrets. Cette impl\xE9mentation ne peut donc\
+        \ s\u2019envisager que si la t\xEAte de lecture a fait l\u2019objet d\u2019\
+        une \xE9tude de s\xE9curit\xE9 approfondie. Les configurations type n\xB0\
+        3 et n\xB04 sont \xE0 proscrire car dans un cas le badge peut \xEAtre clon\xE9\
+        , et dans l\u2019autre cas la liaison filaire n\u2019est pas prot\xE9g\xE9\
+        e."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6
+      ref_id: '6.6'
+      name: "Centre de gestion du syst\xE8me de contr\xF4le d'acc\xE8s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r42
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.6
+      ref_id: R42
+      name: "S\xE9curiser le GAC"
+      description: "Le centre de gestion du contr\xF4le d\u2019acc\xE8s physique doit\
+        \ \xEAtre consid\xE9r\xE9 comme un SI \xE0 part enti\xE8re. \xC0 ce titre,\
+        \ il est primordial de rappeler la n\xE9cessit\xE9 de s\xE9curiser l\u2019\
+        ensemble des \xE9l\xE9ments constituant ce SI. Il est fortement recommand\xE9\
+        \ d\u2019appliquer strictement les r\xE8gles d\u2019hygi\xE8ne informatique\
+        \ telles que d\xE9crites dans le guide de l\u2019ANSSI consacr\xE9 \xE0 ce\
+        \ sujet [Guide d\u2019hygi\xE8ne informatique : renforcer la s\xE9curit\xE9\
+        \ de son syst\xE8me d\u2019information en 42 mesures]."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6
+      ref_id: '6.8'
+      name: "Contr\xF4le d'acc\xE8s physique sans syst\xE8me de gestion centralis\xE9\
+        e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r43
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.8
+      ref_id: R43
+      name: "Utiliser un contr\xF4le d\u2019acc\xE8s physique avec gestion centralis\xE9\
+        e pour la protection p\xE9rim\xE9trique"
+      description: "La mise en \u0153uvre d\u2019un syst\xE8me de contr\xF4le d\u2019\
+        acc\xE8s physique avec gestion centralis\xE9e est n\xE9cessaire pour prot\xE9\
+        ger un p\xE9rim\xE8tre donn\xE9. En compl\xE9ment, et de mani\xE8re optionnelle,\
+        \ un syst\xE8me de contr\xF4le d\u2019acc\xE8s physique sans GAC peut \xEA\
+        tre utilis\xE9 pour contr\xF4ler l\u2019acc\xE8s \xE0 des sous-zones au sein\
+        \ de ce p\xE9rim\xE8tre."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r44
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:6.8
+      ref_id: R44
+      name: "Garantir l\u2019homog\xE9n\xE9it\xE9 du niveau de protection lorsqu\u2019\
+        un syst\xE8me de contr\xF4le d\u2019acc\xE8s physique sans GAC est franchi"
+      description: "Lorsqu\u2019un porteur de badge se pr\xE9sente devant une zone\
+        \ prot\xE9g\xE9e par un syst\xE8me de contr\xF4le d\u2019acc\xE8s physique\
+        \ sans GAC, le niveau de protection de la zone contr\xF4l\xE9e est identique\
+        \ \xE0 celui de la zone o\xF9 se situe la t\xEAte de lecture sur laquelle\
+        \ l\u2019usager a badg\xE9. Le franchissement d\u2019un contr\xF4le d\u2019\
+        acc\xE8s physique sans GAC ne permet pas l\u2019\xE9l\xE9vation du niveau\
+        \ de protection de la zone contr\xF4l\xE9e."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: "S\xE9curit\xE9 des \xE9l\xE9ments support d'un syst\xE8me de vid\xE9\
+        oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7
+      ref_id: '7.1'
+      name: "Cam\xE9ra"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r45
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.1
+      ref_id: R45
+      name: "Chiffrer et authentifier les flux \xE9mis et re\xE7us par les cam\xE9\
+        ras"
+      description: "Les flux \xE9mis et re\xE7us par les cam\xE9ras (images, administration)\
+        \ doivent \xEAtre chiffr\xE9s et authentifi\xE9s par des protocoles tels que\
+        \ TLS ou IPsec."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r46
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.1
+      ref_id: R46
+      name: "D\xE9sactiver les interfaces locales d\u2019administration des cam\xE9\
+        ras"
+      description: "Il est fortement recommand\xE9 de d\xE9sactiver les interfaces\
+        \ locales d\u2019administration des cam\xE9ras d\xE9ploy\xE9es, lorsque de\
+        \ telles interfaces existent."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r47
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.1
+      ref_id: R47
+      name: "Remplacer les mots de passe par d\xE9faut des cam\xE9ras"
+      description: "Les mots de passe par d\xE9faut des cam\xE9ras doivent \xEAtre\
+        \ remplac\xE9s par des mots de passe sp\xE9cifiques, robustes et dans la mesure\
+        \ du possible diff\xE9rents pour chaque \xE9quipement. Des recommandations\
+        \ de s\xE9curit\xE9 relatives aux mots de passe sont d\xE9crites dans un guide\
+        \ de l\u2019ANSSI consacr\xE9 \xE0 ce sujet [Recommandations de s\xE9curit\xE9\
+        \ relatives aux mots de passe]."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r48
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.1
+      ref_id: R48
+      name: "Remplacer les certificats install\xE9s par d\xE9faut dans les \xE9quipements"
+      description: "Il est fortement recommand\xE9 de remplacer les certificats install\xE9\
+        s par d\xE9faut dans les \xE9quipements par des certificats g\xE9n\xE9r\xE9\
+        s par une infrastructure de gestion de cl\xE9s ma\xEEtris\xE9e par l\u2019\
+        entit\xE9, et d\xE9di\xE9e au syst\xE8me de vid\xE9oprotection (cf. R55)."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r49
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.1
+      ref_id: R49
+      name: "D\xE9sactiver les fonctions d\u2019administration non utilis\xE9es"
+      description: "De mani\xE8re g\xE9n\xE9rale, il est recommand\xE9 de d\xE9sactiver\
+        \ les fonctions qui ne sont pas r\xE9ellement utilis\xE9es dans le cadre du\
+        \ d\xE9ploiement consid\xE9r\xE9."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7
+      ref_id: '7.2'
+      name: "Cam\xE9ra ext\xE9rieure et bo\xEEtier de conversion analogique-num\xE9\
+        rique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r50
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.2
+      ref_id: R50
+      name: "Privil\xE9gier des cam\xE9ras analogiques pour la vid\xE9oprotection\
+        \ externe"
+      description: "L\u2019emploi d\u2019\xE9quipements diff\xE9rents au sein des\
+        \ r\xE9seaux de vid\xE9oprotection internes et externes apporte une s\xE9\
+        curit\xE9 suppl\xE9mentaire, en limitant les risques de voir une m\xEAme vuln\xE9\
+        rabilit\xE9 exploit\xE9e sur les deux r\xE9seaux. Il est recommand\xE9 de\
+        \ privil\xE9gier l\u2019usage de technologies analogiques pour les cam\xE9\
+        ras situ\xE9es \xE0 l\u2019ext\xE9rieur de la zone\ncontr\xF4l\xE9e."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r51
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.2
+      ref_id: R51
+      name: "Prot\xE9ger l\u2019acc\xE8s physique aux bo\xEEtiers de conversion analogique-num\xE9\
+        rique"
+      description: "Il est fortement recommand\xE9 que les bo\xEEtiers de conversion\
+        \ analogiques-IP soient plac\xE9s \xE0 l\u2019int\xE9rieur de la zone contr\xF4\
+        l\xE9e, \xE0 l\u2019abri de tout acc\xE8s frauduleux (\xE0 l\u2019instar de\
+        \ la recommandation R38 sur l\u2019emplacement des UTL)."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7
+      ref_id: '7.3'
+      name: "Centre de gestion du syst\xE8me de vid\xE9oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r52
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:7.3
+      ref_id: R52
+      name: "S\xE9curiser le SI de vid\xE9oprotection"
+      description: "Le SI de vid\xE9oprotection doit \xEAtre consid\xE9r\xE9 comme\
+        \ un SI \xE0 part enti\xE8re. \xC0 ce titre, il est primordial de rappeler\
+        \ la n\xE9cessit\xE9 de s\xE9curiser l\u2019ensemble des \xE9l\xE9ments constituant\
+        \ ce SI. Il est fortement recommand\xE9 d\u2019appliquer strictement les r\xE8\
+        gles classiques d\u2019hygi\xE8ne informatique telles que d\xE9crites dans\
+        \ le guide de l\u2019ANSSI consacr\xE9 \xE0 ce sujet [Guide d\u2019hygi\xE8\
+        ne informatique : renforcer la s\xE9curit\xE9 de son syst\xE8me d\u2019information\
+        \ en 42 mesures]."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: "Autres \xE9l\xE9ments de s\xE9curit\xE9 autour des SI de contr\xF4le\
+        \ d'acc\xE8s et de vid\xE9oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8
+      ref_id: '8.1'
+      name: Horodatage
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r53
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8.1
+      ref_id: R53
+      name: "Synchroniser les horloges des \xE9quipements sur une source de temps\
+        \ fiable"
+      description: "Il est fortement recommand\xE9 de synchroniser \xE0 l\u2019aide\
+        \ du protocole NTP les horloges de tous les \xE9quipements qui composent les\
+        \ syst\xE8mes d\u2019information de contr\xF4le d\u2019acc\xE8s physique et\
+        \ de vid\xE9oprotection depuis une source de temps fiable. Dans le cas o\xF9\
+        \ les informations issues d\u2019un syst\xE8me de contr\xF4le d\u2019acc\xE8\
+        s physique sont crois\xE9es avec celles d\u2019autres syst\xE8mes de contr\xF4\
+        le d\u2019acc\xE8s physique ou de vid\xE9oprotection, les sources de temps\
+        \ de ces syst\xE8mes doivent \xEAtre synchronis\xE9es."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8
+      ref_id: '8.2'
+      name: "Continuit\xE9 de service"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r54
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8.2
+      ref_id: R54
+      name: "Mener une r\xE9flexion sur le niveau de continuit\xE9 de service souhait\xE9"
+      description: "Il est fortement recommand\xE9 de mener une r\xE9flexion sur le\
+        \ niveau de continuit\xE9 de service souhait\xE9 et r\xE9alisable d\u2019\
+        un syst\xE8me de contr\xF4le d\u2019acc\xE8s physique ou de vid\xE9oprotection."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8
+      ref_id: '8.4'
+      name: "Infrastructure de gestion de cl\xE9s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r55
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8.4
+      ref_id: R55
+      name: "Mettre en place une infrastructure de gestion de cl\xE9s"
+      description: "La mise en place d\u2019une ou plusieurs infrastructures de gestion\
+        \ de cl\xE9s est recommand\xE9e, dans la mesure o\xF9 cela facilite la gestion\
+        \ des certificats utilis\xE9s par les syst\xE8mes de contr\xF4le d\u2019acc\xE8\
+        s physiques ou de vid\xE9oprotection. Il est pr\xE9conis\xE9 de d\xE9dier\
+        \ des sous-AC (Autorit\xE9 de certification surbordonn\xE9e) pour chaque syst\xE8\
+        me dans le cas de mutualisation d\u2019une infrastructure de gestion de cl\xE9\
+        s entre un syst\xE8me de contr\xF4le d\u2019acc\xE8s physique et un syst\xE8\
+        me de vid\xE9oprotection. Cette recommandation s\u2019applique \xE9galement\
+        \ dans le cas de mutualisation d\u2019une infrastructure de gestion de cl\xE9\
+        s pour plusieurs syst\xE8mes de contr\xF4le d\u2019acc\xE8s physique de sensibilit\xE9\
+        \ diff\xE9rente."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r56
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:8.4
+      ref_id: R56
+      name: "Rendre accessibles les autorit\xE9s de certification"
+      description: "Les autorit\xE9s de certification de l\u2019infrastructure de\
+        \ gestion de cl\xE9s doivent \xEAtre accessibles par tous les dispositifs\
+        \ utilisant des certificats d\xE9livr\xE9s par ces autorit\xE9s, et ce quelle\
+        \ que soit la localisation de ces dispositifs."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: "Principes cryptographiques appliqu\xE9s au contr\xF4le d'acc\xE8s physique\
+        \ et \xE0 la vid\xE9oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9
+      ref_id: '9.1'
+      name: "Cryptographie appliqu\xE9e aux m\xE9canismes d'authentification du badge"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r57
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1
+      ref_id: R57
+      name: "V\xE9rifier la conformit\xE9 des m\xE9canismes cryptographiques aux r\xE8\
+        gles d\xE9crites dans l\u2019annexe B1 du RGS"
+      description: "Il est recommand\xE9 que la mise en \u0153uvre des m\xE9canismes\
+        \ cryptographiques appliqu\xE9s aux m\xE9canismes d\u2019identification et\
+        \ d\u2019authentification des badges soient conformes aux r\xE8gles d\xE9\
+        crites dans l\u2019annexe B1 du r\xE9f\xE9rentiel g\xE9n\xE9ral de s\xE9curit\xE9\
+        \ [RGS Annexe B1 : R\xE8gles et recommandations concernant le choix et le\
+        \ dimensionnement des m\xE9-\ncanismes cryptographiques]."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1
+      ref_id: 9.1.1
+      name: "Cl\xE9 sym\xE9trique unique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r58
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1.1
+      ref_id: R58
+      name: "\xC9viter les solutions reposant sur l\u2019utilisation d\u2019une cl\xE9\
+        \ sym\xE9trique unique"
+      description: "Dans la mesure du possible, il est hautement recommand\xE9 d\u2019\
+        \xE9viter les solutions de contr\xF4le d\u2019acc\xE8s physique reposant uniquement\
+        \ sur une cl\xE9 sym\xE9trique unique."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r58-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1.1
+      ref_id: R58 (-)
+      name: "Utiliser des cl\xE9s diff\xE9rentes en fonction des types d\u2019utilisateur"
+      description: "Dans le cas o\xF9 l\u2019installation d\u2019une solution de contr\xF4\
+        le d\u2019acc\xE8s physique reposant sur un m\xE9canisme de cl\xE9 sym\xE9\
+        trique unique est incontournable, il est fortement recommand\xE9 d\u2019utiliser\
+        \ des cl\xE9s sym\xE9triques distinctes en fonction du type d\u2019utilisateur\
+        \ (salari\xE9s, visiteurs, etc.)."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1
+      ref_id: 9.1.2
+      name: "Cl\xE9 sym\xE9trique d\xE9riv\xE9e d\u2019une cl\xE9 ma\xEEtresse"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r59
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1.2
+      ref_id: R59
+      name: Utiliser un module SAM
+      description: "Dans le cas d\u2019une utilisation de cl\xE9s sym\xE9triques d\xE9\
+        riv\xE9es d\u2019une cl\xE9 ma\xEEtresse, il est hautement recommand\xE9 de\
+        \ recourir \xE0 l\u2019utilisation d\u2019un module Secure Access Module afin\
+        \ de prot\xE9ger la cl\xE9 ma\xEEtresse."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r60
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1.2
+      ref_id: R60
+      name: "Privil\xE9gier la diff\xE9rentiation des cl\xE9s ma\xEEtresses utilis\xE9\
+        es selon le niveau de protection attendu des zones"
+      description: "Il est recommand\xE9 de privil\xE9gier l\u2019usage de cl\xE9\
+        s ma\xEEtresses distinctes pour chaque niveau de protection attendu des zones."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1
+      ref_id: 9.1.3
+      name: "Bi-cl\xE9 asym\xE9trique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r61
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.1.3
+      ref_id: R61
+      name: "Privil\xE9gier les solutions proposant un m\xE9canisme d\u2019authentification\
+        \ des badges reposant sur des bi-cl\xE9s asym\xE9triques"
+      description: "Bien qu\u2019\xE0 la date de r\xE9daction de ce guide, aucune\
+        \ solution de contr\xF4le d\u2019acc\xE8s physique dot\xE9e d\u2019un m\xE9\
+        canisme d\u2019authentification des badges reposant sur des bi-cl\xE9s asym\xE9\
+        triques n\u2019ait \xE9t\xE9 \xE9valu\xE9e par l\u2019ANSSI, il convient de\
+        \ privil\xE9gier ce type de solution plus flexible et plus s\xFBr qu\u2019\
+        une solution reposant sur des cl\xE9s sym\xE9triques."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9
+      ref_id: '9.2'
+      name: "Cryptographie appliqu\xE9e \xE0 la configuration des dispositifs de contr\xF4\
+        le d'acc\xE8s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r62
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.2
+      ref_id: R62
+      name: "Prot\xE9ger les cl\xE9s cryptographiques employ\xE9es dans le syst\xE8\
+        me de contr\xF4le d\u2019acc\xE8s physique"
+      description: "Afin d\u2019assurer la protection des cl\xE9s cryptographiques\
+        \ employ\xE9es dans le syst\xE8me de contr\xF4le d\u2019acc\xE8s physique,\
+        \ il convient d\u2019appliquer les recommandations du r\xE9f\xE9rentiel g\xE9\
+        n\xE9ral de s\xE9curit\xE9 publi\xE9 par l\u2019ANSSI [RGS Annexe B2 : R\xE8\
+        gles et recommandations concernant la gestion des cl\xE9s utilis\xE9es dans\
+        \ les\nm\xE9canismes cryptographiques], notamment celles concernant la gestion\
+        \ des cl\xE9s cryptographiques figurant dans l\u2019annexe B2."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r63
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.2
+      ref_id: R63
+      name: "D\xE9tecter les changements de cl\xE9s d\u2019authentification"
+      description: "Il est fortement recommand\xE9 qu\u2019un \xE9v\xE9nement soit\
+        \ enregistr\xE9 dans le GAC et qu\u2019une alerte soit g\xE9n\xE9r\xE9e lors\
+        \ de tout changement de cl\xE9s d\u2019authentification."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r64
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.2
+      ref_id: R64
+      name: "Anticiper la proc\xE9dure de remplacement de cl\xE9s cryptographiques\
+        \ en cas de compromission"
+      description: "La proc\xE9dure de remplacement de cl\xE9s cryptographiques en\
+        \ cas de compromission d\u2019une cl\xE9 doit \xEAtre la plus transparente\
+        \ possible vis \xE0 vis des utilisateurs, et ne doit pas introduire de nouvelles\
+        \ failles de s\xE9curit\xE9. Cette proc\xE9dure doit \xEAtre anticip\xE9e\
+        \ d\xE8s la phase de conception de l\u2019architecture du syst\xE8me de contr\xF4\
+        le d\u2019acc\xE8s physique et ce, quel que soit le type de cl\xE9 utilis\xE9\
+        ."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9
+      ref_id: '9.3'
+      name: "Chiffrement et authentification des flux en provenance et \xE0 destination\
+        \ des dispositifs de vid\xE9oprotection"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r65
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.3
+      ref_id: R65
+      name: "Privil\xE9gier les solutions d\u2019authentification et de chiffrement\
+        \ non propri\xE9taires"
+      description: "Il est fortement recommand\xE9 de privil\xE9gier les solutions\
+        \ s\u2019appuyant sur des protocoles d\u2019authentification et de chiffrement\
+        \ non propri\xE9taires pour la s\xE9curisation des flux entre les dispositifs\
+        \ et le centre de gestion."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9
+      ref_id: '9.4'
+      name: "Chiffrement des donn\xE9es vid\xE9os sauvegard\xE9es sur disque dur"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r66
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:9.4
+      ref_id: R66
+      name: "Privil\xE9gier les solutions de vid\xE9oprotection proposant un bon niveau\
+        \ de maturit\xE9 en mati\xE8re de s\xE9curit\xE9 num\xE9rique"
+      description: "Il est fortement recommand\xE9 de privil\xE9gier des solutions\
+        \ de vid\xE9oprotection proposant des protocoles standards pour le chiffrement\
+        \ des vid\xE9os sauvegard\xE9es sur disque. La solution choisie doit \xE9\
+        galement offrir la possibilit\xE9 de s\u2019int\xE9grer dans une infrastructure\
+        \ de gestion de cl\xE9s propre \xE0 l\u2019entit\xE9 (voir la section 8.4).\
+        \ Les algorithmes d\u2019int\xE9grit\xE9 et de chiffrement mis en \u0153uvre\
+        \ doivent respecter les pr\xE9conisations mentionn\xE9es dans le r\xE9f\xE9\
+        rentiel g\xE9n\xE9ral de s\xE9curit\xE9 (RGS) [R\xE9f\xE9rentiel g\xE9n\xE9\
+        ral de s\xE9curit\xE9 (RGS)] publi\xE9 par l\u2019ANSSI."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: "Identification, authentification et gestion des droits d'acc\xE8s pour\
+        \ une technologie sans contact"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10
+      ref_id: '10.1'
+      name: Identification
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r67
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.1
+      ref_id: R67
+      name: "Associer un num\xE9ro d\u2019identification unique \xE0 chaque utilisateur"
+      description: "Afin de permettre d\u2019identifier de fa\xE7on univoque toute\
+        \ demande d\u2019acc\xE8s, un num\xE9ro d\u2019identification unique contenu\
+        \ dans un badge doit \xEAtre associ\xE9 \xE0 chaque utilisateur."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10
+      ref_id: '10.2'
+      name: Authentification
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r68
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.2
+      ref_id: R68
+      name: "Privil\xE9gier des solutions de contr\xF4le d\u2019acc\xE8s proposant\
+        \ une authentification multifacteur"
+      description: "Dans la mesure du possible, il est recommand\xE9 de privil\xE9\
+        gier les solutions de contr\xF4le d\u2019acc\xE8s physique proposant une authentification\
+        \ multifacteur [Authentification multifacteurs et mots de passe]. Elles permetttent\
+        \ \xE0 la fois l\u2019authentification du badge et l\u2019authentification\
+        \ du porteur. L\u2019activation de cette double authentification doit \xEA\
+        tre \xE9tudi\xE9e en fonction du niveau de protection attendu associ\xE9 \xE0\
+        \ la zone contr\xF4l\xE9e."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10
+      ref_id: '10.3'
+      name: "Biom\xE9trie"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r69
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.3
+      ref_id: R69
+      name: Opter pour une authentification du porteur reposant sur un mot de passe
+      description: "Dans la mesure du possible, il est recommand\xE9 de privil\xE9\
+        gier une solution de contr\xF4le d\u2019acc\xE8s physique proposant une authentification\
+        \ du porteur par mot de passe. En effet, le mot de passe peut \xEAtre gard\xE9\
+        \ secret, \xEAtre modifi\xE9, et il est surtout r\xE9vocable."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r69-(-)
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.3
+      ref_id: R69 (-)
+      name: "Opter pour une authentification du porteur reposant sur la biom\xE9trie"
+      description: "L\u2019utilisation de la biom\xE9trie pour authentifier le porteur\
+        \ de badge dans une solution de contr\xF4le d\u2019acc\xE8s physique est acceptable\
+        \ dans la mesure o\xF9 les vuln\xE9rabilit\xE9s de cette solution sont bien\
+        \ prises en compte (stockage des \xE9l\xE9ments biom\xE9triques sur le badge,\
+        \ r\xE9vocation entrainant l\u2019impossibilit\xE9 pour le porteur de se voir\
+        \ affecter un nouveau badge avec les m\xEAmes \xE9l\xE9ments biom\xE9triques)."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10
+      ref_id: '10.4'
+      name: "Gestion des droits d'acc\xE8s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4
+      ref_id: 10.4.1
+      name: "Acc\xE8s des utilisateurs permanents"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.1
+      ref_id: 10.4.1.1
+      name: Les collaborateurs
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r70
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.1.1
+      ref_id: R70
+      name: "Programmer une date de fin de validit\xE9 sur les badges de tous les\
+        \ collaborateurs"
+      description: "Il est fortement recommand\xE9 de programmer une date de fin de\
+        \ validit\xE9 d\xE8s la d\xE9livrance d\u2019un badge \xE0 un collaborateur.\
+        \ Dans le cas d\u2019un contrat \xE0 dur\xE9e ind\xE9termin\xE9e, une date\
+        \ de fin de validit\xE9 du badge correspondant \xE0 une dur\xE9e maximum de\
+        \ trois ans devra \xEAtre d\xE9finie, programm\xE9e et renouvel\xE9e \xE0\
+        \ \xE9ch\xE9ance."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r71
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.1.1
+      ref_id: R71
+      name: "Int\xE9grer la gestion des badges des collaborateurs dans le processus\
+        \ de gestion des ressources humaines"
+      description: "Il est fortement recommand\xE9 que la gestion des badges (cr\xE9\
+        ation, restitution) s\u2019int\xE8gre dans le processus de gestion des ressources\
+        \ humaines, notamment dans les circuits d\u2019arriv\xE9e et de d\xE9part.\
+        \ Les droits sp\xE9cifiques du collaborateur doivent \xEAtre accord\xE9s dans\
+        \ la mesure du possible par des responsables de validation ou par d\xE9l\xE9\
+        gation \xE0 des responsables hi\xE9rarchiques, revus lors d\u2019un changement\
+        \ d\u2019affectation, et r\xE9voqu\xE9s au plus t\xF4t en cas de d\xE9part\
+        \ du collaborateur."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.1
+      ref_id: 10.4.1.2
+      name: Les prestataires
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r72
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.1.2
+      ref_id: R72
+      name: "Programmer une date de fin de validit\xE9 sur les badges des prestataires"
+      description: "Il est fortement recommand\xE9 de programmer une date de fin de\
+        \ validit\xE9 d\xE8s la d\xE9livrance d\u2019un badge \xE0 un prestataire.\
+        \ Dans le cas d\u2019une mission de longue dur\xE9e, une date de fin de validit\xE9\
+        \ du badge correspondant \xE0 une dur\xE9e maximum de un an devra \xEAtre\
+        \ d\xE9finie, programm\xE9e et renouvel\xE9e si n\xE9cessaire."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4
+      ref_id: 10.4.2
+      name: "Acc\xE8s des utilisateurs particuliers"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.2.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.2
+      ref_id: 10.4.2.1
+      name: Les visiteurs
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r73
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.2.1
+      ref_id: R73
+      name: "D\xE9finir les proc\xE9dures d\u2019entr\xE9e des visiteurs"
+      description: "Il est fortement recommand\xE9 que des proc\xE9dures d\u2019obtention\
+        \ d\u2019un badge par un visiteur soient d\xE9finies. Ces proc\xE9dures devront\
+        \ notamment indiquer les \xE9l\xE9ments suivants :"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r73:1
+      assessable: true
+      depth: 6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r73
+      name: "- la dur\xE9e de validit\xE9 du badge ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r73:2
+      assessable: true
+      depth: 6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r73
+      name: "- la mise en \u0153uvre \xE9ventuelle de la fonction d\u2019escorte ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r73:3
+      assessable: true
+      depth: 6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r73
+      name: "- le personnel autoris\xE9 \xE0 faire entrer un visiteur."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.2.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.2
+      ref_id: 10.4.2.2
+      name: "Les utilisateurs privil\xE9gi\xE9s, ayant des droits importants"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r74
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.2.2
+      ref_id: R74
+      name: "Limiter le nombre d\u2019utilisateurs ayant des droits importants"
+      description: "Le nombre de porteurs de badge ayant des droits importants doit\
+        \ \xEAtre r\xE9duit au strict n\xE9cessaire. Il est hautement recommand\xE9\
+        \ que leur badge b\xE9n\xE9ficiant de droits importants demeure toujours \xE0\
+        \ l\u2019int\xE9rieur de l\u2019enceinte prot\xE9g\xE9e. Un second badge pourra\
+        \ leur \xEAtre attribu\xE9 pour leur permettre de p\xE9n\xE9trer dans l\u2019\
+        enceinte puis de r\xE9cup\xE9rer le badge b\xE9n\xE9ficiant de droits plus\
+        \ importants."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4
+      ref_id: 10.4.3
+      name: Oubli, perte ou vol de badge
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r75
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.3
+      ref_id: R75
+      name: "D\xE9finir une proc\xE9dure en cas de perte ou de vol d\u2019un badge"
+      description: "En cas de perte ou vol de son badge, le personnel concern\xE9\
+        \ doit le signaler sans d\xE9lai afin de faire invalider son badge. En cas\
+        \ d\u2019oubli d\u2019un badge, le personnel concern\xE9 doit le signaler\
+        \ sans d\xE9lai afin d\u2019invalider temporairement le badge oubli\xE9 et\
+        \ se faire d\xE9livrer un badge d\u2019acc\xE8s provisoire."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4
+      ref_id: 10.4.4
+      name: Badge multi-usages
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r76
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:10.4.4
+      ref_id: R76
+      name: "Cloisonner chaque usage au sein d\u2019un badge multi-usages"
+      description: "Afin de limiter le risque de compromission d\u2019un usage depuis\
+        \ un autre usage d\u2019un m\xEAme badge, il est recommand\xE9 l\u2019emploi\
+        \ de cartes d\u2019acc\xE8s reposant sur une plateforme sous-jacente (ex.\
+        \ : Javacard) qui inclut la fonctionnalit\xE9 de cloisonnement, certifi\xE9\
+        e Crit\xE8res Communs avec une r\xE9sistance aux attaques de niveau AVA_VAN.5."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: Administration
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11
+      ref_id: '11.2'
+      name: "Comptes d'administration technique et m\xE9tier"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r77
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.2
+      ref_id: R77
+      name: "S\xE9curiser les comptes d\u2019administration technique et m\xE9tier"
+      description: "Les recommandations du guide \xAB recommandations relatives \xE0\
+        \ l\u2019administration s\xE9curis\xE9e des SI \xBB [12] doivent \xEAtre appliqu\xE9\
+        es, particuli\xE8rement celles concernant les comptes d\u2019administration\
+        \ (paragraphe 7.1) qu\u2019ils soient technique ou m\xE9tier."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11
+      ref_id: '11.3'
+      name: "Flux d'administration technique et m\xE9tier"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r78
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.3
+      ref_id: R78
+      name: "Chiffrer et authentifier les flux d\u2019administration technique et\
+        \ m\xE9tier"
+      description: "Tous les flux d\u2019administration doivent \xEAtre chiffr\xE9\
+        s et authentifi\xE9s. Cela concerne :"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r78:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r78
+      name: '- les flux entre la station de gestion et les serveurs de gestion ;'
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r78:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r78
+      name: "- les flux entre les serveurs de gestion et les dispositifs administr\xE9\
+        s ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r78:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r78
+      name: "- les flux entre les postes d\u2019administration technique situ\xE9\
+        s sur le r\xE9seau d\u2019administration, et tous les \xE9quipements du centre\
+        \ de gestion."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11
+      ref_id: '11.4'
+      name: "S\xE9curisation des ressources d'administration technique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r79
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.4
+      ref_id: R79
+      name: "Appliquer les recommandations relatives \xE0 l\u2019administration s\xE9\
+        curis\xE9e des SI pour l\u2019administration technique"
+      description: "Il est fortement recommand\xE9 d\u2019appliquer sur les \xE9l\xE9\
+        ments d\u2019infrastructure et les postes d\u2019administration technique,\
+        \ les recommandations d\xE9crites dans le guide de l\u2019ANSSI \xAB Recommandations\
+        \ relatives \xE0 l\u2019administration s\xE9curis\xE9e des SI \xBB [Recommandations\
+        \ relatives \xE0 l\u2019administration s\xE9curis\xE9e des syst\xE8mes d\u2019\
+        information], incluant les particularit\xE9s inh\xE9rentes \xE0 l\u2019administration\
+        \ d\u2019un SI d\xE9connect\xE9 telles que d\xE9crites dans le chapitre 12\
+        \ du guide."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r80
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.4
+      ref_id: R80
+      name: "Mettre en place un r\xE9seau d\u2019administration d\xE9di\xE9 \xE0 l\u2019\
+        administration des \xE9quipements du centre de gestion"
+      description: "Il est recommand\xE9 d\u2019administrer les \xE9quipements des\
+        \ centres de gestion de syst\xE8mes de contr\xF4le d\u2019acc\xE8s ou de vid\xE9\
+        oprotection depuis un r\xE9seau d\u2019administration d\xE9di\xE9 \xE0 cet\
+        \ effet."
+      implementation_groups:
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r80-(-)
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.4
+      ref_id: R80 (-)
+      name: "Mutualiser les ressources d\u2019administration avec le r\xE9seau d\u2019\
+        administration du SI"
+      description: "Dans le cas o\xF9 la mise en place d\u2019un r\xE9seau d\u2019\
+        administration d\xE9di\xE9 \xE0 l\u2019administration des centres de gestion\
+        \ de syst\xE8mes de contr\xF4le d\u2019acc\xE8s ou de vid\xE9oprotection n\u2019\
+        est pas envisageable, il est recommand\xE9 de placer les ressources d\u2019\
+        administration de ces syst\xE8mes dans le r\xE9seau d\u2019administration\
+        \ du SI de l\u2019entit\xE9."
+      implementation_groups:
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11
+      ref_id: '11.5'
+      name: "S\xE9curisation des ressources d'administration m\xE9tier"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r81
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:11.5
+      ref_id: R81
+      name: "Appliquer les mesures de s\xE9curit\xE9 sur les syst\xE8mes de gestion\
+        \ et les stations de gestion"
+      description: "Comme sp\xE9cifi\xE9 dans les recommandations R42 et R52, il est\
+        \ fortement recommand\xE9 d\u2019appliquer sur les syst\xE8mes de gestion\
+        \ et stations de gestion, des mesures de s\xE9curit\xE9 et notamment les recommandations\
+        \ d\xE9crites dans le guide de l\u2019ANSSI \xAB La d\xE9fense en profondeur\
+        \ appliqu\xE9e aux SI \xBB [La d\xE9fense en profondeur appliqu\xE9e aux syst\xE8\
+        mes d\u2019information]."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: Maintenance et exploitation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12
+      ref_id: '12.2'
+      name: "Maintien en condition op\xE9rationnelle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r82
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.2
+      ref_id: R82
+      name: "V\xE9rifier r\xE9guli\xE8rement les batteries des UTL"
+      description: "Dans le cadre de la maintenance globale du syst\xE8me de contr\xF4\
+        le d\u2019acc\xE8s physique, la batterie de l\u2019alimentation de secours\
+        \ de l\u2019UTL doit \xEAtre v\xE9rifi\xE9e au moins une fois par an (Fr\xE9\
+        quence de v\xE9rification minimum mentionn\xE9e par le CNPP dans son r\xE9\
+        f\xE9rentiel APSAD D83 \"Contr\xF4le d\u2019acc\xE8s - Document technique\
+        \ pour la conception et l\u2019installation\") . Le bon fonctionnement de\
+        \ cette alimentation de secours, pr\xE9sente dans chaque UTL, est un gage\
+        \ de r\xE9silience du syst\xE8me."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r83
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.2
+      ref_id: R83
+      name: "Contr\xF4ler minutieusement les dispositifs en panne contenant des \xE9\
+        l\xE9ments cryptographiques avant r\xE9paration ou mise au rebut"
+      description: "Une attention particuli\xE8re doit \xEAtre port\xE9e sur les dispositifs\
+        \ en panne susceptibles de contenir des \xE9l\xE9ments cryptographiques. Il\
+        \ est recommand\xE9, lorsque cela est possible, d\u2019effacer voire de supprimer\
+        \ ces \xE9l\xE9ments cryptographiques avant envoi du dispositif pour r\xE9\
+        paration chez un prestataire. Lors d\u2019une mise au rebut d\u2019un dispositif,\
+        \ il faut s\u2019assurer que ces \xE9l\xE9ments cryptographiques ne pourront\
+        \ pas \xEAtre extraits. Dans le cas o\xF9 ces \xE9l\xE9ments ne peuvent pas\
+        \ \xEAtre effac\xE9s, il convient de proc\xE9der \xE0 la destruction physique\
+        \ du dispositif."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r84
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.2
+      ref_id: R84
+      name: "Effectuer des sauvegardes r\xE9guli\xE8res"
+      description: "Il est hautement recommand\xE9 que des sauvegardes des syst\xE8\
+        mes de gestion soient effectu\xE9es a minima hebdomadairement et journali\xE8\
+        rement en cas d\u2019usage intensif. Il est fortement recommand\xE9 que des\
+        \ tests de restauration associ\xE9s soient men\xE9s r\xE9guli\xE8rement (au\
+        \ minimum une fois par an)."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12
+      ref_id: '12.3'
+      name: "Maintien en condition de s\xE9curit\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r85
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.3
+      ref_id: R85
+      name: "Assurer le maintien en condition de s\xE9curit\xE9"
+      description: "Il est imp\xE9ratif d\u2019assurer un maintien en condition de\
+        \ s\xE9curit\xE9 pour les syst\xE8mes de contr\xF4le d\u2019acc\xE8s physique\
+        \ et de vid\xE9oprotection, au m\xEAme titre que pour tout autre syst\xE8\
+        me d\u2019information."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12
+      ref_id: '12.4'
+      name: "Proc\xE9dures d'exploitation particuli\xE8res des syst\xE8mes de contr\xF4\
+        le d'acc\xE8s physique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.4
+      ref_id: 12.4.1
+      name: "En cas de fonctionnement d\xE9grad\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r86
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.4.1
+      ref_id: R86
+      name: "Privil\xE9gier les UTL disposant d\u2019une copie de la base des droits"
+      description: "Il est recommand\xE9 de privil\xE9gier les UTL disposant d\u2019\
+        une copie de la base des droits afin d\u2019accro\xEEtre la r\xE9silience\
+        \ du syst\xE8me notamment en cas de panne sur le serveur ou logiciel de gestion\
+        \ du syst\xE8me de contr\xF4le d\u2019acc\xE8s physique."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.4
+      ref_id: 12.4.3
+      name: "En cas d\u2019alerte incendie"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r87
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.4.3
+      ref_id: R87
+      name: "Anticiper le retour dans les locaux \xE0 l\u2019issue d\u2019une alerte\
+        \ incendie"
+      description: "Le responsable du site doit d\xE9terminer (et tester) \xE0 l\u2019\
+        avance comment sera assur\xE9 le retour dans les locaux \xE0 l\u2019issue\
+        \ d\u2019une alerte :"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r87:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r87
+      name: "- soit par l\u2019ouverture compl\xE8te des points d\u2019acc\xE8s (avec\
+        \ contr\xF4le humain par\nexemple) ;"
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r87:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r87
+      name: "- soit via le fonctionnement normal du syst\xE8me (il faut alors pouvoir\
+        \ r\xE9initialiser\nle syst\xE8me)."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12
+      ref_id: '12.6'
+      name: "Infog\xE9rance"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6
+      ref_id: 12.6.1
+      name: "Infog\xE9rance reposant sur un service externalis\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r88
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6.1
+      ref_id: R88
+      name: "Ma\xEEtriser les risques de l\u2019infog\xE9rance"
+      description: "Dans le cas d\u2019un recours \xE0 une externalisation de l\u2019\
+        administration d\u2019une solution de contr\xF4le d\u2019acc\xE8s physique\
+        \ ou de vid\xE9oprotection, il est recommand\xE9 de se conformer \xE0 la d\xE9\
+        marche d\xE9crite dans le guide \xAB Ma\xEEtriser les risques de l\u2019infog\xE9\
+        rance \u2013 externalisation des syst\xE8mes d\u2019information \xBB [Ma\xEE\
+        triser les risques de l\u2019infog\xE9rance. Externalisation des syst\xE8\
+        mes d\u2019information] publi\xE9 par l\u2019ANSSI, et de recourir \xE0 un\
+        \ prestataire qualifi\xE9 (voir la recommandation R26-). Une attention particuli\xE8\
+        re doit \xEAtre port\xE9e sur la mise en place de l\u2019interconnexion entre\
+        \ le syst\xE8me de contr\xF4led\u2019acc\xE8s ou de vid\xE9oprotection et\
+        \ le site de l\u2019infog\xE9reur."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6
+      ref_id: 12.6.2
+      name: "Infog\xE9rance reposant sur un service de t\xE9l\xE9maintenance"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r89
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6.2
+      ref_id: R89
+      name: "\xC9viter de mettre en place une solution de t\xE9l\xE9maintenance"
+      description: "Il est fortement d\xE9conseill\xE9 de mettre en place une solution\
+        \ de t\xE9l\xE9maintenance surles ressources locales d\u2019un syst\xE8me\
+        \ de contr\xF4le d\u2019acc\xE8s physique ou de vid\xE9oprotection, cette\
+        \ pratique pouvant engendrer des risques de compromission extr\xEAment \xE9\
+        lev\xE9s."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6
+      ref_id: 12.6.3
+      name: "Infog\xE9rance reposant sur un service d'administration \xE0 distance"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r90
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:12.6.3
+      ref_id: R90
+      name: "S\xE9curiser la mise en \u0153uvre d\u2019une administration \xE0 distance"
+      description: "La mise en \u0153uvre de l\u2019administration \xE0 distance d\u2019\
+        une solution de contr\xF4le d\u2019acc\xE8s physique ou de vid\xE9oprotection\
+        \ doit respecter les r\xE8gles d\xE9crites dans le chapitre 10 du guide \xAB\
+        \ recommandations relatives \xE0 l\u2019administration s\xE9curis\xE9e des\
+        \ SI \xBB [Recommandations relatives \xE0 l\u2019administration s\xE9curis\xE9\
+        e des syst\xE8mes d\u2019information]."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: Journalisation et gestion des alertes
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13
+      ref_id: '13.1'
+      name: "Collecte des \xE9v\xE9nements m\xE9tier"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r91
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13.1
+      ref_id: R91
+      name: "Centraliser les journaux d\u2019\xE9v\xE9nements m\xE9tier des dispositifs\
+        \ sur le centre de gestion"
+      description: "Il convient de s\u2019assurer que les \xE9v\xE9nements m\xE9tier\
+        \ issus des dispositifs de contr\xF4le d\u2019acc\xE8s physique ou de vid\xE9\
+        oprotection sont bien collect\xE9s et remont\xE9s vers le centre de gestion\
+        \ correspondant."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13
+      ref_id: '13.2'
+      name: "Analyse des journaux d'\xE9v\xE9nements m\xE9tier"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r92
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13.2
+      ref_id: R92
+      name: "Surveiller r\xE9guli\xE8rement les rapports g\xE9n\xE9r\xE9s par le GAC"
+      description: "Une surveillance des acc\xE8s et des diff\xE9rents rapports doit\
+        \ \xEAtre effectu\xE9e tr\xE8s r\xE9guli\xE8rement afin de d\xE9tecter rapidement\
+        \ les anomalies et les tentatives d\u2019acc\xE8s frauduleuses."
+      implementation_groups:
+      - R-
+      - R
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13
+      ref_id: '13.3'
+      name: "D\xE9finition d'alertes sp\xE9cifiques"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:r93
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-sys-ctrl-acces-phys-videoprot:13.3
+      ref_id: R93
+      name: "Configurer des alertes en temps r\xE9el"
+      description: "Il est recommand\xE9 de configurer des alertes en temps r\xE9\
+        el pour tout \xE9v\xE9nement d\u2019un niveau de criticit\xE9 important."
+      implementation_groups:
+      - R-
+      - R
