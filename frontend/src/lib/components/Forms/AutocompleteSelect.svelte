@@ -1,14 +1,14 @@
-<!-- @migration-task Error while migrating Svelte code: Can't migrate code with beforeUpdate. Please migrate by hand. -->
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
-	import { beforeUpdate, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { createEventDispatcher } from 'svelte';
-	// import MultiSelect from 'svelte-multiselect';
+	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
+	import { run } from 'svelte/legacy';
 
 	interface Option {
 		label: string;
@@ -18,110 +18,92 @@
 
 	type FieldContext = 'form-input' | 'filter-input';
 
-	export let fieldContext: FieldContext = 'form-input';
+	interface Props {
+		fieldContext?: FieldContext;
+		label?: string | undefined;
+		baseClass?: string;
+		field: string;
+		valuePath?: string; // Default will be handled in destructuring
+		helpText?: string | undefined;
+		form: SuperForm<Record<string, unknown>, any>;
+		resetForm?: boolean;
+		multiple?: boolean;
+		nullable?: boolean;
+		mandatory?: boolean;
+		hidden?: boolean;
+		translateOptions?: boolean;
+		options?: Option[];
+		optionsEndpoint?: string;
+		optionsDetailedUrlParameters?: [string, string][];
+		optionsLabelField?: string;
+		optionsValueField?: string;
+		browserCache?: RequestCache;
+		optionsExtraFields?: [string, string][];
+		optionsSuggestions?: any[];
+		optionsSelf?: any;
+		optionsSelfSelect?: boolean;
+		allowUserOptions?: boolean | 'append';
+		cacheLock?: CacheLock;
+		cachedValue?: any[] | undefined;
+	}
 
-	export let label: string | undefined = undefined;
-	export let baseClass = '';
-	export let field: string;
-	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
-	export let helpText: string | undefined = undefined;
+	let {
+		fieldContext = 'form-input',
+		label = undefined,
+		baseClass = '',
+		field,
+		valuePath = field,
+		helpText = undefined,
+		form,
+		resetForm = false,
+		multiple = false,
+		nullable = false,
+		mandatory = false,
+		hidden = false,
+		translateOptions = true,
+		options = [],
+		optionsEndpoint = '',
+		optionsDetailedUrlParameters = [],
+		optionsLabelField = 'name',
+		optionsValueField = 'id',
+		browserCache = 'default',
+		optionsExtraFields = [],
+		optionsSuggestions = [],
+		optionsSelf = null,
+		optionsSelfSelect = false,
+		allowUserOptions = false,
+		cacheLock = {
+			promise: new Promise((res) => res(null)),
+			resolve: (x: any) => x
+		},
+		cachedValue = $bindable()
+	}: Props = $props();
 
-	export let form: SuperForm<Record<string, unknown>, any>;
-	export let resetForm = false;
-	export let multiple = false;
-	export let nullable = false;
-	export let mandatory = false;
-
-	export let hidden = false;
-	export let translateOptions = true;
-
-	export let options: Option[] = [];
-	/**
-	 * optionsEndpoint to fetch options from
-	 * @example 'users' -> fetches from /users/
-	 */
-	export let optionsEndpoint: string = '';
-
-	/**
-	 * Additional endpoint URL parameters with details (ID, urn, ...)
-	 * @format Array of [parameter, identifier] tuples
-	 * @example [['ebios_rm_studies', 'uuid']] -> <endpointUrl>?...&ebios_rm_studies=uuid"
-	 */
-	export let optionsDetailedUrlParameters: [string, string][] = [];
-
-	/**
-	 * Field path to use for option labels (supports dot notation for nested fields)
-	 * @default 'name'
-	 * @example 'email' -> object.email
-	 * @example 'profile.full_name' -> object.profile.full_name
-	 * @special 'auto' -> combines ref_id with name/description
-	 */
-	export let optionsLabelField: string = 'name';
-
-	/**
-	 * Field path to use for option values (supports dot notation for nested fields)
-	 * @default 'id'
-	 * @example 'uuid' -> object.uuid
-	 * @example 'meta.identifier' -> object.meta.identifier
-	 */
-	export let optionsValueField: string = 'id';
-
-	export let browserCache: RequestCache = 'default';
-
-	/**
-	 * Additional fields to display in labels as prefixes
-	 * @format Array of [fieldPath, type] tuples
-	 * @example [['folder.str', 'string']] -> displays "folder_value/name"
-	 * @example [['department', 'string'], ['team', 'string']] -> "department_value/team_value/name"
-	 */
-	export let optionsExtraFields: [string, string][] = [];
-
-	/**
-	 * Suggested options to highlight (matches by optionsValueField)
-	 * @example [{id: 1, name: 'Suggested'}]
-	 */
-	export let optionsSuggestions: any[] = [];
-
-	/**
-	 * Current user/object to exclude from options (unless optionsSelfSelect=true)
-	 * @example Current user object to prevent self-selection
-	 */
-	export let optionsSelf: any = null;
-
-	/**
-	 * Whether to include the self object in selectable options
-	 * @default false
-	 * @example true -> allows selecting your own user account
-	 */
-	export let optionsSelfSelect: boolean = false;
-	export let allowUserOptions: boolean | 'append' = false;
-
-	export let cacheLock: CacheLock = {
-		promise: new Promise((res) => res(null)),
-		resolve: (x) => x
-	};
-	export let cachedValue: any[] | undefined = undefined;
+	let optionHashmap: Record<string, Option> = {};
+	let disabled = $state(false);
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
-	let selected: (typeof options)[] = [];
-	let selectedValues: (string | undefined)[] = [];
+	let selected: typeof options = $state([]);
+	let selectedValues: (string | undefined)[] = $derived(
+		selected.map((item) => item.value || item.label || item)
+	);
 	let isInternalUpdate = false;
 	let optionsLoaded = Boolean(options.length);
-	const initialValue = resetForm ? undefined : $value; // Store initial value
+	const initialValue = resetForm ? undefined : $value;
 	const default_value = nullable ? null : selectedValues[0];
 
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
 		maxSelect: multiple ? undefined : 1,
-		liSelectedClass: multiple ? '!chip !preset-filled' : 'bg-transparent!',
+		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
 		outerDivClass: '!select',
 		closeDropdownOnSelect: !multiple
 	};
 
 	const dispatch = createEventDispatcher();
-	let isLoading = false;
+	let isLoading = $state(false);
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 	async function fetchOptions() {
 		isLoading = true;
@@ -176,7 +158,7 @@
 	}
 
 	function processOptions(objects: any[]) {
-		const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
+		const append = (x: string, y: string) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 
 		return objects
 			.map((object) => {
@@ -224,11 +206,11 @@
 		dispatch('mount', $value);
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
-			selected = cacheResult.map((value) => optionHashmap[value]).filter(Boolean);
+			selected = cacheResult.map((value: string | number) => optionHashmap[value]).filter(Boolean);
 		}
 	});
 
-	beforeUpdate(() => {
+	$effect(() => {
 		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {
 			selected = options.filter((item) =>
 				Array.isArray($value) ? $value.includes(item.value) : item.value === $value
@@ -240,7 +222,7 @@
 		if (allowUserOptions && selectedValues.length > 0) {
 			for (const val of selectedValues) {
 				if (!options.some((opt) => opt.value === val)) {
-					const newOption: Option = { label: val, value: val };
+					const newOption: Option = { label: val as string, value: val as string };
 					options = [...options, newOption];
 				}
 			}
@@ -274,16 +256,20 @@
 		return true;
 	}
 
-	$: optionHashmap = options.reduce((acc, option) => {
-		acc[option.value] = option;
-		return acc;
-	}, {});
+	run(() => {
+		optionHashmap = options.reduce((acc, option) => {
+			acc[option.value] = option;
+			return acc;
+		}, {});
+	});
 
-	$: cachedValue = selected.map((option) => option.value);
+	run(() => {
+		cachedValue = selected.map((option) => option.value);
+	});
 
-	$: selectedValues = selected.map((item) => item.value || item.label || item);
-
-	$: {
+	run(() => {
+		console.log('selected', selected);
+		console.log('selectedValues', selectedValues);
 		// Only update value after options are loaded
 		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
 			isInternalUpdate = true;
@@ -291,9 +277,11 @@
 			handleSelectChange();
 			isInternalUpdate = false;
 		}
-	}
+	});
 
-	$: disabled = selected.length && options.length === 1 && $constraints?.required;
+	run(() => {
+		disabled = Boolean(selected.length && options.length === 1 && $constraints?.required);
+	});
 
 	onDestroy(() => {
 		if (updateMissingConstraint) {
@@ -330,25 +318,27 @@
 		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
 	>
 		<input type="hidden" name={field} value={$value ? $value : ''} />
-		<!-- <MultiSelect -->
-		<!-- 	bind:selected -->
-		<!-- 	{options} -->
-		<!-- 	{...multiSelectOptions} -->
-		<!-- 	disabled={disabled || $$restProps.disabled} -->
-		<!-- 	allowEmpty={true} -->
-		<!-- 	{...$$restProps} -->
-		<!-- 	let:option -->
-		<!-- 	{allowUserOptions} -->
-		<!-- > -->
-		<!-- 	{#if option.suggested} -->
-		<!-- 		<span class="text-indigo-600">{option.label}</span> -->
-		<!-- 		<span class="text-sm text-gray-500"> (suggested)</span> -->
-		<!-- 	{:else if translateOptions && option.label} -->
-		<!-- 		{m[toCamelCase(option.value)] ? safeTranslate(option.value) : safeTranslate(option.label)} -->
-		<!-- 	{:else} -->
-		<!-- 		{option.label || option} -->
-		<!-- 	{/if} -->
-		<!-- </MultiSelect> -->
+		<MultiSelect
+			bind:selected
+			{options}
+			{...multiSelectOptions}
+			{disabled}
+			allowEmpty={true}
+			{allowUserOptions}
+		>
+			{#snippet children(option)}
+				{#if option.option.suggested}
+					<span class="text-indigo-600">{option.option.label}</span>
+					<span class="text-sm text-gray-500"> (suggested)</span>
+				{:else if translateOptions && option.option.label}
+					{m[toCamelCase(option.option.value)]
+						? safeTranslate(option.option.value)
+						: safeTranslate(option.option.label)}
+				{:else}
+					{option.option.label || option.option}
+				{/if}
+			{/snippet}
+		</MultiSelect>
 		{#if isLoading}
 			<svg
 				class="animate-spin h-5 w-5 text-primary-500"
