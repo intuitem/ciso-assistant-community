@@ -4186,7 +4186,7 @@ class ComplianceAssessment(Assessment):
             include_non_assessable=False
         )
         for ra in requirement_assessments:
-            if ra.requirement.question:
+            if ra.requirement.questions:
                 return True
         return False
 
@@ -4718,6 +4718,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name="Risk assessments",
         blank=True,
         help_text="Risk assessments related to the task",
+        related_name="task_templates",
+    )
+
+    findings_assessment = models.ManyToManyField(
+        FindingsAssessment,
+        verbose_name="Finding assessments",
+        blank=True,
+        help_text="Finding assessments related to the task",
         related_name="task_templates",
     )
 

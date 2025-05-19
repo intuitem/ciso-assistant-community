@@ -1073,7 +1073,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
-			{ field: 'risk_assessments', urlModel: 'risk-assessments' }
+			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'task_template', urlModel: 'task-nodes', disableAddDeleteButtons: true }
