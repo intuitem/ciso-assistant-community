@@ -59,6 +59,7 @@
 	}
 
 	let tabSet = 0;
+	const relatedModelsCount = {};
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -71,9 +72,28 @@
 		}
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		// Add event listener to the document
 		document.addEventListener('keydown', handleKeydown);
+
+		const countPromises = [];
+		for (const [urlmodel, _] of relatedModels) {
+			const field = data.model.reverseForeignKeyFields.find((item) => item.urlModel === urlmodel);
+			const endpoint = new URL(
+				`${urlmodel}/count/?${field.field}=${data.data.id}`,
+				window.location.origin
+			);
+
+			countPromises.push(
+				fetch(endpoint)
+					.then((res) => res.json())
+					.then((resJson) => ({ urlmodel, count: resJson.count }))
+			);
+		}
+		const results = await Promise.all(countPromises);
+		for (const { urlmodel, count } of results) {
+			relatedModelsCount[urlmodel] = count;
+		}
 
 		// Cleanup function to remove event listener
 		return () => {
@@ -494,9 +514,7 @@
 			{#each relatedModels as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
 					{safeTranslate(model.info.localNamePlural)}
-					{#if model.table.body.length > 0}
-						<span class="badge variant-soft-secondary">{model.table.body.length}</span>
-					{/if}
+					<span class="badge variant-soft-secondary">{relatedModelsCount[urlmodel] ?? '-'}</span>
 				</Tab>
 			{/each}
 			<svelte:fragment slot="panel">

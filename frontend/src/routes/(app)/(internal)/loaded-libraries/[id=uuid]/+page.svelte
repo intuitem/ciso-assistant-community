@@ -132,7 +132,7 @@
 				source={riskMatricesTable}
 				displayActions={false}
 				pagination={false}
-				rowCount={false}
+				showRowCount={false}
 				rowsPerPage={false}
 				search={false}
 				interactive={false}
@@ -153,7 +153,7 @@
 				source={referenceControlsTable}
 				displayActions={false}
 				pagination={false}
-				rowCount={false}
+				showRowCount={false}
 				rowsPerPage={false}
 				search={false}
 				interactive={false}
@@ -171,7 +171,7 @@
 				source={threatsTable}
 				displayActions={false}
 				pagination={false}
-				rowCount={false}
+				showRowCount={false}
 				rowsPerPage={false}
 				search={false}
 				interactive={false}
