@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0074_tasktemplate_findings_assessment'),
+        ("core", "0074_tasktemplate_findings_assessment"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='finding',
-            name='evidences',
-            field=models.ManyToManyField(blank=True, help_text='Evidences related to the follow-up', related_name='findings', to='core.evidence'),
+            model_name="finding",
+            name="evidences",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Evidences related to the follow-up",
+                related_name="findings",
+                to="core.evidence",
+            ),
         ),
     ]
