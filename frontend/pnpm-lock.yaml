@@ -54,8 +54,8 @@ importers:
         specifier: ^15.13.0
         version: 15.13.0
       svelte-multiselect:
-        specifier: ^10.3.0
-        version: 10.3.0
+        specifier: ^11.1.0
+        version: 11.1.0(svelte@5.28.6)
       svelte-persisted-store:
         specifier: ^0.11.0
         version: 0.11.0(svelte@5.28.6)
@@ -2230,9 +2230,6 @@ packages:
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.1
 
-  code-red@1.0.4:
-    resolution: {integrity: sha512-7qJWqItLA8/VPVlKJlFXU+NBlo/qyfs39aJcuMT/2ere32ZqvF5OSxgdM5xOfJJ7O429gg2HM47y8v9P+9wrNw==}
-
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
     engines: {node: '>=7.0.0'}
@@ -3580,9 +3577,6 @@ packages:
     resolution: {integrity: sha512-XDF38WCH3z5OV/OVa8GKUNtLAyneuzbCisx7QUCF8Q6Nutx0WnJrQe5O+kOtBlLfRNUws98Y58Lblp+NJG5T4Q==}
     hasBin: true
 
-  periscopic@3.1.0:
-    resolution: {integrity: sha512-vKiQ8RRtkl9P+r/+oefh25C3fhybptkHKCZSPlcXiJux2tJF55GnEj3BVn4A5gKfq9NWWXXrxkHBwVPUfH0opw==}
-
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -3983,8 +3977,10 @@ packages:
       svelte:
         optional: true
 
-  svelte-multiselect@10.3.0:
-    resolution: {integrity: sha512-Pyvlcn4TK3dB2WWo6hDEeNH+x2O/DP82UuUf61PQFX8KMB3cm1Cam+zTKrcrOoRRVI2SwH/8dPF8hSTfJFaMmA==}
+  svelte-multiselect@11.1.0:
+    resolution: {integrity: sha512-D93t6GlOV//gU7upR59uCd755Hq6OWhqv9ddhOXBDN/mEZj5XOAYHwDjUjePUKlE+bI+jry1BlZef8Mof2Y+YA==}
+    peerDependencies:
+      svelte: ^5.8.0
 
   svelte-persisted-store@0.11.0:
     resolution: {integrity: sha512-9RgJ5DrawGyyfK22A80cfu8Jose3CV8YjEZKz9Tn94rQ0tWyEmYr+XI+wrVF6wjRbW99JMDSVcFRiM3XzVJj/w==}
@@ -4039,10 +4035,6 @@ packages:
     peerDependencies:
       svelte: ^3.55 || ^4.0.0-next.0 || ^4.0 || ^5.0.0-next.0
       typescript: ^4.9.4 || ^5.0.0
-
-  svelte@4.2.12:
-    resolution: {integrity: sha512-d8+wsh5TfPwqVzbm4/HCXC783/KPHV60NvwitJnyTA5lWn1elhXMNWhXGCJ7PwPa8qFUnyJNIyuIRt2mT0WMug==}
-    engines: {node: '>=16'}
 
   svelte@5.28.6:
     resolution: {integrity: sha512-9qqr7mw8YR9PAnxGFfzCK6PUlNGtns7wVavrhnxyf3fpB1mP/Ol55Z2UnIapsSzNNl3k9qw7cZ22PdE8+xT/jQ==}
@@ -6632,14 +6624,6 @@ snapshots:
       nanoid: 5.0.9
       svelte: 5.28.6
 
-  code-red@1.0.4:
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.0
-      '@types/estree': 1.0.6
-      acorn: 8.14.0
-      estree-walker: 3.0.3
-      periscopic: 3.1.0
-
   color-convert@2.0.1:
     dependencies:
       color-name: 1.1.4
@@ -8074,12 +8058,6 @@ snapshots:
       ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
 
-  periscopic@3.1.0:
-    dependencies:
-      '@types/estree': 1.0.6
-      estree-walker: 3.0.3
-      is-reference: 3.0.3
-
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
@@ -8493,9 +8471,9 @@ snapshots:
     optionalDependencies:
       svelte: 5.28.6
 
-  svelte-multiselect@10.3.0:
+  svelte-multiselect@11.1.0(svelte@5.28.6):
     dependencies:
-      svelte: 4.2.12
+      svelte: 5.28.6
 
   svelte-persisted-store@0.11.0(svelte@5.28.6):
     dependencies:
@@ -8525,23 +8503,6 @@ snapshots:
       pascal-case: 3.1.2
       svelte: 5.28.6
       typescript: 5.7.2
-
-  svelte@4.2.12:
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@jridgewell/sourcemap-codec': 1.5.0
-      '@jridgewell/trace-mapping': 0.3.25
-      '@types/estree': 1.0.6
-      acorn: 8.14.0
-      aria-query: 5.3.2
-      axobject-query: 4.1.0
-      code-red: 1.0.4
-      css-tree: 2.3.1
-      estree-walker: 3.0.3
-      is-reference: 3.0.3
-      locate-character: 3.0.0
-      magic-string: 0.30.15
-      periscopic: 3.1.0
 
   svelte@5.28.6:
     dependencies:
