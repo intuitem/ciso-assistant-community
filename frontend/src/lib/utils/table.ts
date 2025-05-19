@@ -993,8 +993,26 @@ export const listViewFields = {
 		filters: { filtering_labels: LABELS_FILTER }
 	},
 	incidents: {
-		head: ['ref_id', 'name', 'status', 'severity','detection', 'folder', 'qualifications', 'updated_at'],
-		body: ['ref_id', 'name', 'status', 'severity','detection', 'folder', 'qualifications', 'updated_at'],
+		head: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'detection',
+			'folder',
+			'qualifications',
+			'updated_at'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'status',
+			'severity',
+			'detection',
+			'folder',
+			'qualifications',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			qualifications: QUALIFICATION_FILTER,
