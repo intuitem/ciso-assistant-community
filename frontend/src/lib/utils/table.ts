@@ -151,6 +151,17 @@ const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const INCIDENT_DETECTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'incidents/detection',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'detection',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -982,12 +993,13 @@ export const listViewFields = {
 		filters: { filtering_labels: LABELS_FILTER }
 	},
 	incidents: {
-		head: ['ref_id', 'name', 'status', 'severity', 'folder', 'qualifications', 'updated_at'],
-		body: ['ref_id', 'name', 'status', 'severity', 'folder', 'qualifications', 'updated_at'],
+		head: ['ref_id', 'name', 'status', 'severity','detection', 'folder', 'qualifications', 'updated_at'],
+		body: ['ref_id', 'name', 'status', 'severity','detection', 'folder', 'qualifications', 'updated_at'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			status: INCIDENT_STATUS_FILTER,
+			detection: INCIDENT_DETECTION_FILTER,
 			severity: INCIDENT_SEVERITY_FILTER
 		}
 	},

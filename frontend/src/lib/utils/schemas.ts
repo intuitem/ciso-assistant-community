@@ -685,7 +685,7 @@ export const IncidentSchema = z.object({
 		.optional(),
 	ref_id: z.string().optional(),
 	status: z.string().default('new'),
-	detected_by: z.string().default('internally_detected'),
+	detection: z.string().default('internally_detected'),
 	severity: z.number().default(6),
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),

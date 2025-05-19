@@ -1600,6 +1600,8 @@
 	"reportedAt": "Reported at",
 	"reportedAtHelpText": "Time stamp of the actual reporting",
 	"detectedBy": "Detected By",
+	"internal": "Internal",
+	"external": "External",
 	"internallyDetected": "Internal",
 	"externallyDetected": "External"
 }

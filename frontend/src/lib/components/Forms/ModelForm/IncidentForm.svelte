@@ -37,11 +37,11 @@
 <Select
 	{form}
 	{disableDoubleDash}
-	field="detected_by"
+	field="detection"
 	label={m.detectedBy()}
 	options={model.selectOptions['detection']}
-	cacheLock={cacheLocks['detected_by']}
-	bind:cachedValue={formDataCache['detected_by']}
+	cacheLock={cacheLocks['detection']}
+	bind:cachedValue={formDataCache['detection']}
 />
 <AutocompleteSelect
 	{form}

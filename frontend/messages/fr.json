@@ -1596,6 +1596,8 @@
 	"reportedAt": "Remonté le",
 	"reportedAtHelpText": "Horodatage de la remontée",
 	"detectedBy": "Détécté via",
+	"internal": "Interne",
+	"external": "Externe",
 	"internallyDetected": "Interne",
 	"externallyDetected": "Externe"
 }

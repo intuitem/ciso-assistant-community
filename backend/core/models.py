@@ -2326,7 +2326,7 @@ class Incident(NameDescriptionMixin, FolderMixin):
     reported_at = models.DateTimeField(
         null=True, blank=True, verbose_name="Reported at", default=now
     )
-    detected_by = models.CharField(
+    detection = models.CharField(
         max_length=30,
         null=True,
         blank=True,
