@@ -92,6 +92,15 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
+<TextField
+	type="date"
+	{form}
+	field="eta"
+	label={m.eta()}
+	helpText={m.etaHelpText()}
+	cacheLock={cacheLocks['eta']}
+	bind:cachedValue={formDataCache['eta']}
+/>
 <Select
 	{form}
 	options={model.selectOptions['severity']}
@@ -151,3 +160,12 @@
 		</div>
 	{/if}
 </div>
+<TextField
+	type="date"
+	{form}
+	field="due_date"
+	label={m.dueDate()}
+	helpText={m.dueDateHelpText()}
+	cacheLock={cacheLocks['due_date']}
+	bind:cachedValue={formDataCache['due_date']}
+/>
