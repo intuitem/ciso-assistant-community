@@ -220,6 +220,12 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 12. Framework Nazionale per la Cybersecurity e la Data Protection, ACN Italia 🇮🇹
 13. PSSIE du Bénin, ANSSI Bénin 🇧🇯
 14. IGI 1300 / II 901 - Liste des exigences pour la mise en oeuvre d'un SI classifié (ANSSI) 🇫🇷
+15. Référentiel Général de Sécurité 2.0 - Annexe B2 🇫🇷
+16. Recommandations sur la sécurisation des systèmes de contrôle d'accès physique et de vidéoprotection 🇫🇷
+17. Recommandations pour un usage sécurisé d’(Open)SSH 🇫🇷
+18. Recommandations de sécurité relatives à IPsec pour la protection des flux réseau 🇫🇷
+19. Recommandations relatives à l'interconnexion d'un système d'information à internet 🇫🇷
+20. Guides des mécanismes cryptographiques 🇫🇷
 
 <br/>
 
