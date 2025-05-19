@@ -1598,7 +1598,7 @@
 	"assetClassInvestorRelations": "Investor Relations",
 	"unknownOrDeletedUser": "Unknown or deleted user",
 	"reportedAt": "Reported at",
-	"reportedAtHelpText": "Time stamp of the actual reporting date",
+	"reportedAtHelpText": "Time stamp of the actual reporting",
 	"detectedBy": "Detected By",
 	"internallyDetected": "Internal",
 	"externallyDetected": "External"
