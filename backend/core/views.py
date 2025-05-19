@@ -301,6 +301,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         return Response(serializer_class(super().get_object()).data)
 
+    @action(detail=False, name="Get count only")
+    def count(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        return Response({"count": queryset.count()})
+
 
 # Risk Assessment
 
