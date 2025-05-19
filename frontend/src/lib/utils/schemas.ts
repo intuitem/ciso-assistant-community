@@ -655,7 +655,8 @@ export const FindingSchema = z.object({
 	reference_controls: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string(),
 	severity: z.number().default(-1),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	evidences: z.array(z.string().optional()).optional()
 });
 
 export const FindingsAssessmentSchema = z.object({
@@ -670,8 +671,7 @@ export const FindingsAssessmentSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	category: z.string().default('--'),
-	evidences: z.array(z.string().optional()).optional()
+	category: z.string().default('--')
 });
 
 export const IncidentSchema = z.object({

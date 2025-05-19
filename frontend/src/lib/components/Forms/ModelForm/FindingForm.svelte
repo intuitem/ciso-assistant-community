@@ -128,6 +128,17 @@
 	field="vulnerabilities"
 	label={m.vulnerabilities()}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	field="evidences"
+	label={m.evidences()}
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
+/>
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
 		{#key $page.data}

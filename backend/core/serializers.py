@@ -1254,7 +1254,6 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     owner = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
-    evidences = FieldsRelatedField(many=True)
 
     class Meta:
         model = FindingsAssessment
@@ -1282,6 +1281,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     reference_controls = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
     perimeter = FieldsRelatedField(
         source="findings_assessment.perimeter", fields=["id", "name", "folder"]
     )

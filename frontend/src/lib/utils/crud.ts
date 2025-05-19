@@ -1010,8 +1010,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'evidences', urlModel: 'evidences' }
+			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings' }],
 		selectFields: [{ field: 'status' }, { field: 'category' }]
@@ -1022,7 +1021,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'findings',
 		verboseName: 'Finding',
 		verboseNamePlural: 'Findings',
-		foreignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings-assessments' }],
+		foreignKeyFields: [
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'evidences', urlModel: 'evidences' }
+		],
 		// reverseForeignKeyFields: [
 		// 	{ field: 'findings', urlModel: 'vulnerabilities' },
 		// 	{ field: 'findings', urlModel: 'reference-controls' },
