@@ -126,7 +126,6 @@ ws.append(["tab", "imp_grp", "implementation_groups"])
 
 # ===== Sheet: controls =====
 ws1 = wb_output.create_sheet("controls")
-# ✅ Nouvelle colonne en plus
 ws1.append(["assessable", "depth", "ref_id", "name", "description", "questions", "answer", "implementation_groups"])
 
 for row in output_table:
