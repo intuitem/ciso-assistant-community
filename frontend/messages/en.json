@@ -1596,5 +1596,10 @@
 	"assetClassGovernmentRelations": "Government Relations",
 	"assetClassCommunityRelations": "Community Relations",
 	"assetClassInvestorRelations": "Investor Relations",
-	"unknownOrDeletedUser": "Unknown or deleted user"
+	"unknownOrDeletedUser": "Unknown or deleted user",
+	"reportedAt": "Reported at",
+	"reportedAtHelpText": "Time stamp of the actual reporting date",
+	"detectedBy": "Detected By",
+	"internallyDetected": "Internal",
+	"externallyDetected": "External"
 }

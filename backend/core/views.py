@@ -5255,6 +5255,11 @@ class IncidentViewSet(BaseModelViewSet):
     def severity(self, request):
         return Response(dict(Incident.Severity.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get detection channel choices")
+    def detection(self, request):
+        return Response(dict(Incident.Detection.choices))
+
     def perform_update(self, serializer):
         previous_instance = self.get_object()
         previous_status = previous_instance.status

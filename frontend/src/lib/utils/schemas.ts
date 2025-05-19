@@ -676,8 +676,16 @@ export const FindingsAssessmentSchema = z.object({
 export const IncidentSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
+	reported_at: z
+		.string()
+		.datetime({ local: true })
+		.refine((val) => !val || new Date(val) <= new Date(), {
+			message: m.timestampCannotBeInTheFuture()
+		})
+		.optional(),
 	ref_id: z.string().optional(),
 	status: z.string().default('new'),
+	detected_by: z.string().default('internally_detected'),
 	severity: z.number().default(6),
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),

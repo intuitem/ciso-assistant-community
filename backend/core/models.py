@@ -2281,6 +2281,10 @@ class Incident(NameDescriptionMixin, FolderMixin):
         SEV5 = 5, "Low"
         UNDEFINED = 6, "unknown"
 
+    class Detection(models.TextChoices):
+        INTERNAL = "internally_detected", "Internal"
+        EXTERNAL = "externally_detected", "External"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -2318,6 +2322,18 @@ class Incident(NameDescriptionMixin, FolderMixin):
         verbose_name="Qualifications",
         blank=True,
     )
+
+    reported_at = models.DateTimeField(
+        null=True, blank=True, verbose_name="Reported at", default=now
+    )
+    detected_by = models.CharField(
+        max_length=30,
+        null=True,
+        blank=True,
+        choices=Detection.choices,
+        default=Detection.INTERNAL,
+    )
+
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]

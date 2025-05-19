@@ -1041,7 +1041,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
-		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
+		selectFields: [
+			{ field: 'severity', valueType: 'number' },
+			{ field: 'status' },
+			{ field: 'detection' }
+		]
 	},
 	'timeline-entries': {
 		name: 'timelineentry',

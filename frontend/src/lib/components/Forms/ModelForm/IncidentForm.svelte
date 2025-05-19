@@ -24,7 +24,25 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
+<TextField
+	type="datetime-local"
+	step="1"
+	{form}
+	field="reported_at"
+	label={m.reportedAt()}
+	cacheLock={cacheLocks['reported_at']}
+	bind:cachedValue={formDataCache['reported_at']}
+/>
 
+<Select
+	{form}
+	{disableDoubleDash}
+	field="detected_by"
+	label={m.detectedBy()}
+	options={model.selectOptions['detection']}
+	cacheLock={cacheLocks['detected_by']}
+	bind:cachedValue={formDataCache['detected_by']}
+/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
