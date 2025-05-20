@@ -398,7 +398,7 @@ export const EntitiesSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	mission: z.string().optional(),
-	reference_link: z.string().url().startsWith('http').optional().or(z.literal('')),
+	reference_link: z.string().url().startsWith('http').optional().or(z.literal(''))
 });
 
 export const EntityAssessmentSchema = z.object({
