@@ -22,7 +22,19 @@ env:
 jobs:
   startup-functional-test:
     runs-on: ubuntu-24.04
-
+    env:
+      LOG_LEVEL: DEBUG
+      LOG_OUTFILE: ciso-assistant.log
+      DJANGO_DEBUG: 'True'
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_URL: http://localhost:4173
+      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
         image: postgres:16
@@ -64,56 +76,11 @@ jobs:
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install
-      - name: Create frontend environment variables file
-        working-directory: ${{ env.frontend-directory }}
-        run: |
-          touch .env
-          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          echo LOG_LEVEL=DEBUG >> .env
-          echo LOG_OUTFILE=ciso-assistant.log >> .env
-          echo DJANGO_DEBUG=True >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
-          echo POSTGRES_NAME=postgres >> .env
-          echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=postgres >> .env
-          echo DB_HOST=localhost >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        env:
-          LOG_LEVEL: DEBUG
-          LOG_OUTFILE: ciso-assistant.log
-          DJANGO_DEBUG: 'True'
-          DJANGO_SUPERUSER_EMAIL: admin@tests.com
-          DJANGO_SUPERUSER_PASSWORD: 1234
-          POSTGRES_NAME: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          DB_HOST: localhost
-          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
-          CISO_ASSISTANT_URL: http://localhost:4173
         run: poetry run python manage.py migrate
-
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
-        env:
-          LOG_LEVEL: DEBUG
-          LOG_OUTFILE: ciso-assistant.log
-          DJANGO_DEBUG: 'True'
-          DJANGO_SUPERUSER_EMAIL: admin@tests.com
-          DJANGO_SUPERUSER_PASSWORD: 1234
-          POSTGRES_NAME: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          DB_HOST: localhost
-          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
-          CISO_ASSISTANT_URL: http://localhost:4173
         run: |
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
@@ -182,7 +149,20 @@ jobs:
 
   enterprise-startup-functional-test:
     runs-on: ubuntu-24.04
-
+    env:
+      LOG_LEVEL: DEBUG
+      LOG_OUTFILE: ciso-assistant.log
+      DJANGO_DEBUG: 'True'
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_URL: http://localhost:4173
+      DJANGO_SETTINGS_MODULE: enterprise_core.settings
+      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
         image: postgres:16
@@ -225,59 +205,11 @@ jobs:
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright install
-      - name: Create frontend environment variables file
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: |
-          touch .env
-          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          echo LOG_LEVEL=DEBUG >> .env
-          echo LOG_OUTFILE=ciso-assistant.log >> .env
-          echo DJANGO_DEBUG=True >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
-          echo POSTGRES_NAME=postgres >> .env
-          echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=postgres >> .env
-          echo DB_HOST=localhost >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
-          echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        env:
-          LOG_LEVEL: DEBUG
-          LOG_OUTFILE: ciso-assistant.log
-          DJANGO_DEBUG: 'True'
-          DJANGO_SUPERUSER_EMAIL: admin@tests.com
-          DJANGO_SUPERUSER_PASSWORD: 1234
-          POSTGRES_NAME: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          DB_HOST: localhost
-          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
-          CISO_ASSISTANT_URL: http://localhost:4173
-          DJANGO_SETTINGS_MODULE: enterprise_core.settings
         run: poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
-
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
-        env:
-          LOG_LEVEL: DEBUG
-          LOG_OUTFILE: ciso-assistant.log
-          DJANGO_DEBUG: 'True'
-          DJANGO_SUPERUSER_EMAIL: admin@tests.com
-          DJANGO_SUPERUSER_PASSWORD: 1234
-          POSTGRES_NAME: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          DB_HOST: localhost
-          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
-          CISO_ASSISTANT_URL: http://localhost:4173
-          DJANGO_SETTINGS_MODULE: enterprise_core.settings
         run: |
           poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }}
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
