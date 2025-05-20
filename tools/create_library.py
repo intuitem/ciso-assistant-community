@@ -618,7 +618,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 previous_node_urn = None
                 previous_depth = 0
                 counter = 0
-                counter_fix = 0
+                counter_fix = -1
                 requirement_nodes = []
                 all_urns = set() # to detect duplicates
                 for row in rows[1:]:
@@ -649,7 +649,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                         urn = f"{base_urn}:{ref_id_urn}"
                     else:
                         if data.get("urn_id"):
-                            urn = f"{base_urn}:{data.get("urn_id").strip()}"
+                            urn = f"{base_urn}:{data.get('urn_id').strip()}"
                         elif ref_id:
                             urn = f"{base_urn}:{ref_id.lower().replace(' ', '-')}"
                         else:
