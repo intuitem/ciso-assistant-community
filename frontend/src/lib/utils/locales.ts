@@ -62,6 +62,10 @@ export const LOCALE_MAP = {
 	da: {
 		name: 'danish',
 		flag: '🇩🇰'
+	},
+	hu: {
+		name: 'hungarian',
+		flag: '🇭🇺'
 	}
 };
 

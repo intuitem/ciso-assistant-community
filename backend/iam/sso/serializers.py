@@ -21,6 +21,9 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     is_enabled = serializers.BooleanField(
         required=False,
     )
+    force_sso = serializers.BooleanField(
+        required=False,
+    )
     provider = serializers.CharField(
         required=False,
         allow_blank=True,

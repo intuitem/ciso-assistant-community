@@ -5,6 +5,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 4 }}
+  {{- with .Values.backend.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.backend.replicas }}
   selector:
@@ -14,6 +18,9 @@ spec:
     metadata:
       annotations:
         checksum/secret-backend: {{ include (print $.Template.BasePath "/backend/secret.yaml") . | sha256sum }}
+        {{- with .Values.backend.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "ciso-assistant.labels" (dict "context" . "component" "backend") | nindent 8 }}
     spec:
@@ -99,14 +106,14 @@ spec:
           - name: DEFAULT_FROM_EMAIL
             value: {{ .Values.backend.config.smtp.defaultFrom | quote }}
           - name: EMAIL_HOST
-            value: {{ .Values.backend.config.smtp.primary.host | quote }}
+            value: {{ .Values.backend.config.smtp.host | quote }}
           - name: EMAIL_PORT
-            value: {{ .Values.backend.config.smtp.primary.port | quote }}
+            value: {{ .Values.backend.config.smtp.port | quote }}
           - name: EMAIL_USE_TLS
-            value: {{ ternary "True" "False" .Values.backend.config.smtp.primary.useTls | quote }}
-          {{- if .Values.backend.config.smtp.primary.username }}
+            value: {{ ternary "True" "False" .Values.backend.config.smtp.useTls | quote }}
+          {{- if .Values.backend.config.smtp.username }}
           - name: EMAIL_HOST_USER
-            value: {{ .Values.backend.config.smtp.primary.username | quote }}
+            value: {{ .Values.backend.config.smtp.username | quote }}
           {{- end }}
           {{- if .Values.backend.config.smtp.existingSecret }}
           - name: EMAIL_HOST_PASSWORD
@@ -114,7 +121,7 @@ spec:
               secretKeyRef:
                 name: {{ .Values.backend.config.smtp.existingSecret }}
                 key: email-primary-password
-          {{- else if .Values.backend.config.smtp.primary.password }}
+          {{- else if .Values.backend.config.smtp.password }}
           - name: EMAIL_HOST_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -223,14 +230,14 @@ spec:
           - name: DEFAULT_FROM_EMAIL
             value: {{ .Values.backend.config.smtp.defaultFrom | quote }}
           - name: EMAIL_HOST
-            value: {{ .Values.backend.config.smtp.primary.host | quote }}
+            value: {{ .Values.backend.config.smtp.host | quote }}
           - name: EMAIL_PORT
-            value: {{ .Values.backend.config.smtp.primary.port | quote }}
+            value: {{ .Values.backend.config.smtp.port | quote }}
           - name: EMAIL_USE_TLS
-            value: {{ ternary "True" "False" .Values.backend.config.smtp.primary.useTls | quote }}
-          {{- if .Values.backend.config.smtp.primary.username }}
+            value: {{ ternary "True" "False" .Values.backend.config.smtp.useTls | quote }}
+          {{- if .Values.backend.config.smtp.username }}
           - name: EMAIL_HOST_USER
-            value: {{ .Values.backend.config.smtp.primary.username | quote }}
+            value: {{ .Values.backend.config.smtp.username | quote }}
           {{- end }}
           {{- if .Values.backend.config.smtp.existingSecret }}
           - name: EMAIL_HOST_PASSWORD
@@ -238,7 +245,7 @@ spec:
               secretKeyRef:
                 name: {{ .Values.backend.config.smtp.existingSecret }}
                 key: email-primary-password
-          {{- else if .Values.backend.config.smtp.primary.password }}
+          {{- else if .Values.backend.config.smtp.password }}
           - name: EMAIL_HOST_PASSWORD
             valueFrom:
               secretKeyRef:

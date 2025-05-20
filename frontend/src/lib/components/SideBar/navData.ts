@@ -68,11 +68,6 @@ export const navData = {
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
-				},
-				{
-					name: 'assets',
-					fa_icon: 'fa-solid fa-gem',
-					href: '/assets'
 				}
 			]
 		},
@@ -107,6 +102,26 @@ export const navData = {
 			]
 		},
 		{
+			name: 'assetsManagement',
+			items: [
+				{
+					name: 'assets',
+					fa_icon: 'fa-solid fa-gem',
+					href: '/assets'
+				},
+				{
+					name: 'businessImpactAnalysis',
+					fa_icon: 'fa-solid fa-arrows-to-eye',
+					href: '/business-impact-analysis',
+					permissions: [
+						'view_businessimpactanalysis',
+						'view_assetassessment',
+						'view_escalationthreshold'
+					]
+				}
+			]
+		},
+		{
 			name: 'operations',
 			items: [
 				{
@@ -130,6 +145,11 @@ export const navData = {
 					name: 'incidents',
 					fa_icon: 'fa-solid fa-bug',
 					href: '/incidents'
+				},
+				{
+					name: 'tasks',
+					fa_icon: 'fa-solid fa-note-sticky',
+					href: '/task-templates'
 				}
 			]
 		},
@@ -239,11 +259,6 @@ export const navData = {
 					href: '/entities'
 				},
 				{
-					name: 'entityAssessments',
-					fa_icon: 'fa-solid fa-clipboard-list',
-					href: '/entity-assessments'
-				},
-				{
 					name: 'representatives',
 					fa_icon: 'fa-solid fa-user-tie',
 					href: '/representatives'
@@ -252,6 +267,11 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
+				},
+				{
+					name: 'entityAssessments',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/entity-assessments'
 				}
 			]
 		},
@@ -300,13 +320,19 @@ export const navData = {
 					permissions: ['change_globalsettings']
 				},
 				{
+					name: 'dataWizard',
+					fa_icon: 'fa-solid fa-hat-wizard',
+					href: '/experimental/data-wizard',
+					permissions: ['change_globalsettings']
+				},
+				{
 					name: 'backupRestore',
 					fa_icon: 'fa-solid fa-floppy-disk',
 					href: '/backup-restore',
 					permissions: ['backup']
 				},
 				{
-					name: 'Experimental',
+					name: 'experimental',
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
 					permissions: ['change_globalsettings']

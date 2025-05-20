@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { displayOnlyAssessableNodes } from './store';
 
 	import { onMount } from 'svelte';
 
@@ -38,7 +37,8 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
-	import { expandedNodesState } from '$lib/utils/stores';
+	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
+	import { derived } from 'svelte/store';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { canPerformAction } from '$lib/utils/access-control';
 
@@ -80,7 +80,7 @@
 		if (dialogElement) dialogElement.close();
 	}
 
-	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -134,14 +134,22 @@
 		return resultCounts;
 	};
 
-	let selectedStatus = ['done', 'to_do', 'in_progress', 'in_review'];
-	let selectedResults = [
-		'compliant',
-		'non_compliant',
-		'partially_compliant',
-		'not_assessed',
-		'not_applicable'
-	];
+	let id = $page.params.id;
+
+	// derive the current filters for this audit ID
+	const currentFilters = derived(auditFiltersStore, ($f) => $f[id] ?? {});
+
+	// reactive values that update whenever auditFiltersStore changes
+	let selectedStatus = [];
+	let selectedResults = [];
+	let displayOnlyAssessableNodes = false;
+
+	$: ({
+		selectedStatus = [],
+		selectedResults = [],
+		displayOnlyAssessableNodes = false
+	} = $currentFilters);
+
 	function toggleItem(item, selectedItems) {
 		if (selectedItems.includes(item)) {
 			return selectedItems.filter((s) => s !== item);
@@ -152,25 +160,27 @@
 
 	function toggleStatus(status) {
 		selectedStatus = toggleItem(status, selectedStatus);
+		auditFiltersStore.setStatus(id, selectedStatus);
 	}
 
 	function toggleResult(result) {
 		selectedResults = toggleItem(result, selectedResults);
+		auditFiltersStore.setResults(id, selectedResults);
 	}
 
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 		return (
-			!(!displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
-			((!selectedStatus.includes(node.status) || !selectedResults.includes(node.result)) &&
-				node.assessable)
+			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
+			(node.assessable &&
+				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
+					(selectedResults.length > 0 && !selectedResults.includes(node.result))))
 		);
 	}
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
-			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
-			const hidden = isNodeHidden(node, $displayOnlyAssessableNodes);
+			const hidden = isNodeHidden(node, displayOnlyAssessableNodes);
 
 			return {
 				id: id,
@@ -247,7 +257,53 @@
 		};
 		modalStore.trigger(modal);
 	}
-
+	let syncingToActionsIsLoading = false;
+	async function modalConfirmSyncToActions(
+		id: string,
+		name: string,
+		action: string
+	): Promise<void> {
+		const requirementAssessmentsSync = await fetch(
+			`/compliance-assessments/${$page.params.id}/sync-to-actions`,
+			{ method: 'POST' }
+		).then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error('Failed to fetch requirement assessments sync data');
+			}
+		});
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: data.form,
+				id: id,
+				debug: false,
+				URLModel: 'compliance-assessments',
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: Object.values(requirementAssessmentsSync.changes).map(
+						(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
+					), //feed this
+					message: m.theFollowingChangesWillBeApplied()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.syncToAppliedControls(),
+			body: m.syncToAppliedControlsMessage({
+				count: data.compliance_assessment.framework.reference_controls.length //change this
+			}),
+			response: (r: boolean) => {
+				syncingToActionsIsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
+	}
 	let createAppliedControlsLoading = false;
 
 	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
@@ -281,7 +337,23 @@
 		modalStore.trigger(modal);
 	}
 
-	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
+	$: if (syncingToActionsIsLoading === true && (form || form?.error))
+		syncingToActionsIsLoading = false;
+	$: if (createAppliedControlsLoading === true && (form || form?.error))
+		createAppliedControlsLoading = false;
+	$: if (form?.message?.requirementAssessmentsSync) console.log(form);
+
+	const popupFilter: PopupSettings = {
+		event: 'click',
+		target: 'popupFilter',
+		placement: 'bottom-end',
+		closeQuery: '#will-close'
+	};
+
+	$: filterCount =
+		(selectedStatus.length > 0 ? 1 : 0) +
+		(selectedResults.length > 0 ? 1 : 0) +
+		(displayOnlyAssessableNodes ? 1 : 0);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -439,31 +511,52 @@
 					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
 				>
 			{/if}
-			<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
+			<span class="pt-4 text-sm">{m.powerUps()}</span>
 			{#if !$page.data.user.is_third_party}
 				<Anchor
 					breadcrumbAction="push"
 					href={`${$page.url.pathname}/flash-mode`}
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
+					class="btn text-gray-100 bg-gradient-to-r from-indigo-500 to-violet-500 h-fit"
 					><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</Anchor
 				>
 			{/if}
 			<Anchor
 				breadcrumbAction="push"
 				href={`${$page.url.pathname}/table-mode`}
-				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-yellow-500 h-fit"
+				class="btn text-gray-100 bg-gradient-to-r from-blue-500 to-sky-500 h-fit"
 				><i class="fa-solid fa-table-list mr-2" /> {m.tableMode()}</Anchor
 			>
 			{#if !$page.data.user.is_third_party}
 				<button
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
+					class="btn text-gray-100 bg-gradient-to-r from-teal-500 to-emerald-500 h-fit"
 					on:click={() => modalCreateForm()}
 					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
 				</button>
 			{/if}
+
+			<button
+				class="btn text-gray-100 bg-gradient-to-r from-cyan-500 to-blue-500 h-fit"
+				on:click={async () => {
+					await modalConfirmSyncToActions(
+						data.compliance_assessment.id,
+						data.compliance_assessment.name,
+						'?/syncToActions'
+					);
+				}}
+			>
+				<span class="mr-2">
+					{#if syncingToActionsIsLoading}
+						<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+					{:else}
+						<i class="fa-solid fa-arrows-rotate mr-2"></i>
+					{/if}
+				</span>
+				{m.syncToAppliedControls()}
+			</button>
+
 			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
-					class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+					class="btn text-gray-100 bg-gradient-to-r from-purple-500 to-fuchsia-500 h-fit"
 					on:click={() => {
 						modalConfirmCreateSuggestedControls(
 							data.compliance_assessment.id,
@@ -476,7 +569,7 @@
 						{#if createAppliedControlsLoading}
 							<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
 						{:else}
-							<i class="fa-solid fa-fire-extinguisher" />
+							<i class="fa-solid fa-wand-magic-sparkles"></i>
 						{/if}
 					</span>
 					{m.suggestControls()}
@@ -484,7 +577,7 @@
 			{/if}
 			{#if has_threats}
 				<button
-					class="border rounded-lg btn h-fit bg-gradient-to-r from-yellow-500 to-yellow-300 px-3 py-2"
+					class="btn text-gray-100 bg-gradient-to-r from-amber-500 to-orange-500 h-fit"
 					on:click={openThreatsDialog}
 				>
 					<div class="flex items-center space-x-2">
@@ -497,66 +590,91 @@
 		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<div class=" flex items-center font-semibold">
-			<span class="h4">{m.associatedRequirements()}</span>
-			<span class="badge variant-soft-primary ml-1">
-				{#if treeViewNodes}
-					{assessableNodesCount(treeViewNodes)}
-				{/if}
-			</span>
-			<span class="text-xs ml-2 text-gray-500">{m.filterBy()}</span>
-			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-				{#each Object.entries(complianceStatusColorMap) as [status, color]}
-					<button
-						type="button"
-						on:click={() => toggleStatus(status)}
-						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {selectedStatus.includes(status)
-							? color + '44'
-							: 'grey'}; color: {selectedStatus.includes(status)
-							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.5};"
-					>
-						{safeTranslate(status)}
-					</button>
-				{/each}
-			</div>
-			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-				{#each Object.entries(complianceResultColorMap) as [result, color]}
-					<button
-						type="button"
-						on:click={() => toggleResult(result)}
-						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {selectedResults.includes(result)
-							? color + '44'
-							: 'grey'}; color: {selectedResults.includes(result)
-							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.5};"
-					>
-						{safeTranslate(result)}
-					</button>
-				{/each}
-			</div>
-			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
-				{#if $displayOnlyAssessableNodes}
-					<p class="font-bold">{m.ShowAllNodesMessage()}</p>
-				{:else}
-					<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
-				{/if}
-				<SlideToggle
-					name="questionnaireToggle"
-					class="flex flex-row items-center justify-center"
-					active="bg-primary-500"
-					background="bg-green-500"
-					bind:checked={$displayOnlyAssessableNodes}
-					on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
-				>
-					{#if $displayOnlyAssessableNodes}
-						<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
-					{:else}
-						<p class="font-bold">{m.ShowOnlyAssessable()}</p>
+		<div class="flex flex-row items-center font-semibold justify-between">
+			<div>
+				<span class="h4">{m.associatedRequirements()}</span>
+				<span class="badge variant-soft-primary ml-1">
+					{#if treeViewNodes}
+						{assessableNodesCount(treeViewNodes)}
 					{/if}
-				</SlideToggle>
+				</span>
+			</div>
+			<button
+				use:popup={popupFilter}
+				class="btn variant-filled-primary self-end relative"
+				id="filters"
+			>
+				<i class="fa-solid fa-filter mr-2" />
+				{m.filters()}
+				{#if filterCount}
+					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
+				{/if}
+			</button>
+			<div
+				class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+				data-popup="popupFilter"
+			>
+				<div>
+					<span class="text-sm font-bold">{m.result()}</span>
+					<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+						{#each Object.entries(complianceResultColorMap) as [result, color]}
+							<button
+								type="button"
+								on:click={() => toggleResult(result)}
+								class="px-2 py-1 rounded-md font-bold"
+								style="background-color: {selectedResults.includes(result)
+									? color
+									: 'grey'}; color: {selectedResults.includes(result)
+									? result === 'not_applicable'
+										? 'white'
+										: 'black'
+									: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+							>
+								{safeTranslate(result)}
+							</button>
+						{/each}
+					</div>
+				</div>
+				<div>
+					<span class="text-sm font-bold">{m.status()}</span>
+					<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+						{#each Object.entries(complianceStatusColorMap) as [status, color]}
+							<button
+								type="button"
+								on:click={() => toggleStatus(status)}
+								class="px-2 py-1 rounded-md font-bold"
+								style="background-color: {selectedStatus.includes(status)
+									? color + '44'
+									: 'grey'}; color: {selectedStatus.includes(status)
+									? darkenColor(color, 0.3)
+									: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+							>
+								{safeTranslate(status)}
+							</button>
+						{/each}
+					</div>
+				</div>
+				<div>
+					<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+					<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+						<SlideToggle
+							name="questionnaireToggle"
+							class="flex flex-row items-center justify-center"
+							active="bg-primary-500"
+							bind:checked={displayOnlyAssessableNodes}
+							on:click={() => {
+								displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
+								auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
+							}}
+						>
+							{#if displayOnlyAssessableNodes}
+								<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+							{:else}
+								<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+							{/if}
+						</SlideToggle>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -565,7 +683,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
+			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes
@@ -589,7 +707,7 @@
 		</div>
 
 		<div class="threats-content">
-			<TreeChart tree={data.threats.tree} name="threats_tree" height="h-[600px]" />
+			<ForceCirclePacking data={data.threats.graph} name="threats_graph" height="h-[600px]" />
 		</div>
 	</dialog>
 {/if}

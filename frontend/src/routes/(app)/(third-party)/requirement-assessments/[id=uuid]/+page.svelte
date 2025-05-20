@@ -293,16 +293,11 @@
 			</svelte:fragment>
 		</TabGroup>
 	</div>
-	{#if data.requirementAssessment.answer != null && Object.keys(data.requirementAssessment.answer).length !== 0}
-		<h1 class="font-semibold text-sm">{m.question()}</h1>
-		{#each data.requirementAssessment.answer.questions as question}
+	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
+		<h1 class="font-semibold text-sm">{m.questions()}</h1>
+		{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
 			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
-				{question.text}
-				{#if question.answer}
-					<p class="text-sm font-semibold text-primary-500">{question.answer}</p>
-				{:else}
-					{m.undefined()}
-				{/if}
+				<p>{question.text} ({safeTranslate(question.type)})</p>
 			</li>
 		{/each}
 	{/if}

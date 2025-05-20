@@ -6,8 +6,10 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from icecream import ic
 from auditlog.registry import auditlog
 
+from django.utils.functional import cached_property
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -40,6 +42,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
+from collections import defaultdict
 
 logger = get_logger(__name__)
 
@@ -57,42 +60,20 @@ def match_urn(urn_string):
         return None
 
 
-def transform_question_to_answer(json_data):
+def transform_questions_to_answers(questions):
     """
-    Used during Requirement Assessment creation to create a questionnaire base on
-    the Requirement Node question JSON field
+    Used during Requirement Assessment creation to prepare the answers from the questions
 
     Args:
-        json_data (json): JSON describing a questionnaire from a Requirement Node
+        questions (json): the questions from the requirement
 
     Returns:
-        json: JSON formatted for the frontend to display a form
+        json: the answers formatted as a json
     """
-    question_type = json_data.get("question_type", "")
-    question_choices = json_data.get("question_choices", [])
-    questions = json_data.get("questions", [])
-
-    form_fields = []
-
-    for question in questions:
-        field = {}
-        field["urn"] = question.get("urn", "")
-        field["text"] = question.get("text", "")
-
-        if question_type == "unique_choice":
-            field["type"] = "unique_choice"
-            field["options"] = question_choices
-        elif question_type == "date":
-            field["type"] = "date"
-        else:
-            field["type"] = "text"
-
-        field["answer"] = ""
-
-        form_fields.append(field)
-
-    form_json = {"questions": form_fields}
-    return form_json
+    answers = {}
+    for question_urn, question in questions.items():
+        answers[question_urn] = [] if question["type"] == "multiple_choice" else None
+    return answers
 
 
 ########################### Referential objects #########################
@@ -448,23 +429,19 @@ class LibraryUpdater:
 
         new_dependencies = []
         for new_dependency_urn in new_dependencies_urn:
-            try:
-                new_dependency = LoadedLibrary.objects.filter(
-                    urn=new_dependency_urn
-                ).first()  # The locale is not handled by this code
-            except:
+            new_dependency = LoadedLibrary.objects.filter(
+                urn=new_dependency_urn
+            ).first()
+            if new_dependency is None:
                 return "dependencyNotFound"
             new_dependencies.append(new_dependency)
+
         for key, value in [
             ("name", self.new_library.name),
             ("version", self.new_library.version),
             ("provider", self.new_library.provider),
-            (
-                "packager",
-                self.new_library.packager,
-            ),  # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
+            ("packager", self.new_library.packager),
             ("publication_date", self.new_library.publication_date),
-            # Should we even update the ref_id ?
             ("ref_id", self.new_library.ref_id),
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
@@ -486,8 +463,9 @@ class LibraryUpdater:
         }
 
         for threat in self.threats:
+            normalized_urn = threat["urn"].lower()
             Threat.objects.update_or_create(
-                urn=threat["urn"].lower(),
+                urn=normalized_urn,
                 defaults=threat,
                 create_defaults={
                     **referential_object_dict,
@@ -497,8 +475,9 @@ class LibraryUpdater:
             )
 
         for reference_control in self.reference_controls:
+            normalized_urn = reference_control["urn"].lower()
             ReferenceControl.objects.update_or_create(
-                urn=reference_control["urn"].lower(),
+                urn=normalized_urn,
                 defaults=reference_control,
                 create_defaults={
                     **referential_object_dict,
@@ -508,11 +487,13 @@ class LibraryUpdater:
             )
 
         if self.new_framework is not None:
+            # update or create the framework object itself
             framework_dict = {**self.new_framework}
             del framework_dict["requirement_nodes"]
 
+            normalized_framework_urn = self.new_framework["urn"].lower()
             new_framework, _ = Framework.objects.update_or_create(
-                urn=self.new_framework["urn"],
+                urn=normalized_framework_urn,
                 defaults=framework_dict,
                 create_defaults={
                     **referential_object_dict,
@@ -521,20 +502,22 @@ class LibraryUpdater:
                 },
             )
 
+            # update requirement_nodes
             requirement_node_urns = set(
-                rc.urn for rc in RequirementNode.objects.filter(framework=new_framework)
+                rc.urn.lower()
+                for rc in RequirementNode.objects.filter(framework=new_framework)
             )
-            new_requirement_node_urns = set(
+            requirement_node_object_urns = set(
                 rc["urn"].lower() for rc in self.new_framework["requirement_nodes"]
             )
             deleted_requirement_node_urns = (
-                requirement_node_urns - new_requirement_node_urns
+                requirement_node_urns - requirement_node_object_urns
             )
 
             for requirement_node_urn in deleted_requirement_node_urns:
                 requirement_node = RequirementNode.objects.filter(
                     urn=requirement_node_urn
-                ).first()  # locale is not used, so if there are more than one requirement node with this URN only the first fetched requirement node will be deleted.
+                ).first()
                 if requirement_node is not None:
                     requirement_node.delete()
 
@@ -546,128 +529,207 @@ class LibraryUpdater:
             objects_tracked = {}
 
             for threat in Threat.objects.filter(library__in=involved_libraries):
-                objects_tracked[threat.urn] = threat
+                objects_tracked[threat.urn.lower()] = threat
 
             for rc in ReferenceControl.objects.filter(library__in=involved_libraries):
-                objects_tracked[rc.urn] = rc
+                objects_tracked[rc.urn.lower()] = rc
 
             compliance_assessments = [
                 *ComplianceAssessment.objects.filter(framework=new_framework)
             ]
 
+            existing_requirement_node_objects = {
+                rn.urn.lower(): rn
+                for rn in RequirementNode.objects.filter(framework=new_framework)
+            }
+            existing_requirement_assessment_objects = defaultdict(list)
+            for ra in RequirementAssessment.objects.filter(
+                requirement__framework=new_framework
+            ):
+                existing_requirement_assessment_objects[
+                    ra.requirement.urn.lower()
+                ].append(ra)
+
+            requirement_assessment_objects_to_create = []
+            requirement_assessment_objects_to_update = []
+            requirement_node_objects_to_update = []
             order_id = 0
+            all_fields_to_update = set()
+
+            # main loop by requirement_node
             for requirement_node in requirement_nodes:
-                requirement_node_dict = {**requirement_node}
-                for key in ["depth", "reference_controls", "threats"]:
-                    requirement_node_dict.pop(key, None)
+                urn = requirement_node["urn"].lower()
+                questions = requirement_node.get("questions")
+
+                requirement_node_dict = {
+                    k: v
+                    for k, v in requirement_node.items()
+                    if k not in ["urn", "depth", "reference_controls", "threats"]
+                }
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
+                all_fields_to_update.update(requirement_node_dict.keys())
 
-                (
-                    new_requirement_node,
-                    created,
-                ) = RequirementNode.objects.update_or_create(
-                    urn=requirement_node["urn"].lower(),
-                    defaults=requirement_node_dict,
-                    create_defaults={
+                if urn in existing_requirement_node_objects:
+                    requirement_node_object = existing_requirement_node_objects[urn]
+                    for key, value in requirement_node_dict.items():
+                        setattr(requirement_node_object, key, value)
+                    requirement_node_objects_to_update.append(requirement_node_object)
+                else:
+                    requirement_node_object = RequirementNode.objects.create(
+                        urn=urn,
+                        framework=new_framework,
                         **referential_object_dict,
                         **requirement_node_dict,
-                        "framework": new_framework,
-                    },
+                    )
+                    for ca in compliance_assessments:
+                        requirement_assessment_objects_to_create.append(
+                            RequirementAssessment(
+                                compliance_assessment=ca,
+                                requirement=requirement_node_object,
+                                folder=ca.perimeter.folder,
+                                answers=transform_questions_to_answers(questions)
+                                if questions
+                                else {},
+                            )
+                        )
+
+                # update anwsers for each ra for the current requirement_node, when relevant
+                for ra in existing_requirement_assessment_objects.get(urn, []):
+                    if not questions:
+                        requirement_assessment_objects_to_update.append(ra)
+                        continue
+
+                    answers = ra.answers
+
+                    # Remove answers corresponding to questions that have been removed
+                    for urn in list(answers.keys()):
+                        if urn not in questions:
+                            del answers[urn]
+                    # Add answers corresponding to questions that have been updated/added
+                    for urn, question in questions.items():
+                        # If the question is not present in answers, initialize it
+                        if urn not in answers:
+                            answers[urn] = None
+                            continue
+
+                        answer_val = answers[urn]
+                        type = question.get("type")
+
+                        if type == "multiple_choice":
+                            # Keep only the choices that exist in the question
+                            if isinstance(answer_val, list):
+                                valid_choices = {
+                                    choice["urn"]
+                                    for choice in question.get("choices", [])
+                                }
+                                answers[urn] = [
+                                    choice
+                                    for choice in answer_val
+                                    if choice in valid_choices
+                                ]
+                            else:
+                                answers[urn] = []
+
+                        elif type == "unique_choice":
+                            # If the answer does not match a valid choice, reset it to None
+                            valid_choices = {
+                                choice["urn"] for choice in question.get("choices", [])
+                            }
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val if answer_val in valid_choices else None
+                                )
+
+                        elif type == "text":
+                            # For a text question, simply check that it is a string
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val
+                                    if isinstance(answer_val, str)
+                                    and answer_val.split(":")[0] != "urn"
+                                    else None
+                                )
+
+                        elif type == "date":
+                            # For a date question, check the expected format (e.g., "YYYY-MM-DD")
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                try:
+                                    datetime.strptime(answer_val, "%Y-%m-%d")
+                                    answers[urn] = answer_val
+                                except Exception:
+                                    answers[urn] = None
+
+                    ra.answers = answers
+                    requirement_assessment_objects_to_update.append(ra)
+
+                # update threats linked to the requirement_node
+                for threat_urn in requirement_node.get("threats", []):
+                    normalized_threat_urn = threat_urn.lower()
+                    threat_object = (
+                        objects_tracked.get(normalized_threat_urn)
+                        or Threat.objects.filter(urn=normalized_threat_urn).first()
+                    )
+                    if threat_object:
+                        requirement_node_object.threats.add(threat_object)
+
+                # update reference_controls linked to the requirement_node
+                for rc_urn in requirement_node.get("reference_controls", []):
+                    normalized_rc_urn = rc_urn.lower()
+                    rc_object = (
+                        objects_tracked.get(normalized_rc_urn)
+                        or ReferenceControl.objects.filter(
+                            urn=normalized_rc_urn
+                        ).first()
+                    )
+                    if rc_object:
+                        requirement_node_object.reference_controls.add(rc_object)
+
+            # Fix for the dual bulk_update issue - consolidate into one update
+            if requirement_node_objects_to_update:
+                # Ensure all needed fields are included
+                fields_to_update = sorted(
+                    all_fields_to_update.union(
+                        {"name", "description", "order_id", "questions"}
+                    )
+                )
+                RequirementNode.objects.bulk_update(
+                    requirement_node_objects_to_update,
+                    fields_to_update,
+                    batch_size=200,
                 )
 
-                if created:
-                    for compliance_assessment in compliance_assessments:
-                        ra = RequirementAssessment.objects.create(
-                            compliance_assessment=compliance_assessment,
-                            requirement=new_requirement_node,
-                            folder=compliance_assessment.perimeter.folder,
-                            answer=transform_question_to_answer(
-                                new_requirement_node.question
-                            )
-                            if new_requirement_node.question
-                            else {},
-                        )
-                else:
-                    question = requirement_node.get("question")
-                    question_type = question["question_type"] if question else None
+            if requirement_assessment_objects_to_update:
+                RequirementAssessment.objects.bulk_update(
+                    requirement_assessment_objects_to_update,
+                    ["answers"],
+                    batch_size=100,
+                )
 
-                    for ra in RequirementAssessment.objects.filter(
-                        requirement=new_requirement_node
-                    ):
-                        ra.name = new_requirement_node.name
-                        ra.description = new_requirement_node.description
-                        if not question:
-                            ra.save()
-                            continue
-
-                        answers = ra.answer["questions"]
-                        if any(answer["type"] != question_type for answer in answers):
-                            ra.answer = transform_question_to_answer(
-                                new_requirement_node.question
-                            )
-                            ra.save()
-                            continue
-
-                        if question_type == "unique_choice":
-                            for answer in answers:
-                                if answer["answer"] not in question["question_choices"]:
-                                    answer["answer"] = ""
-
-                        elif question_type not in ["text", "date"]:
-                            raise NotImplementedError(
-                                f"The question type '{question_type}' hasn't been implemented !"
-                            )
-
-                        ra.answer = {"questions": answers}
-                        ra.save()
-
-                for threat_urn in requirement_node_dict.get("threats", []):
-                    thread_to_add = objects_tracked.get(threat_urn)
-                    if thread_to_add is None:  # I am not 100% this condition is usefull
-                        thread_to_add = Threat.objects.filter(
-                            urn=threat_urn
-                        ).first()  # No locale support
-                    if thread_to_add is not None:
-                        new_requirement_node.threats.add(thread_to_add)
-
-                for reference_control_urn in requirement_node.get(
-                    "reference_controls", []
-                ):
-                    reference_control_to_add = objects_tracked.get(
-                        reference_control_urn
-                    )
-                    if (
-                        reference_control_to_add is None
-                    ):  # I am not 100% this condition is useful
-                        reference_control_to_add = ReferenceControl.objects.filter(
-                            urn=reference_control_urn.lower()
-                        ).first()  # No locale support
-
-                    if reference_control_to_add is not None:
-                        new_requirement_node.reference_controls.add(
-                            reference_control_to_add
-                        )
+            if requirement_assessment_objects_to_create:
+                RequirementAssessment.objects.bulk_create(
+                    requirement_assessment_objects_to_create, batch_size=100
+                )
 
         if self.new_matrices is not None:
             for matrix in self.new_matrices:
-                json_definition_keys = {
-                    "grid",
-                    "probability",
-                    "impact",
-                    "risk",
-                }  # Store this as a constant somewhere (as a static attribute of the class)
+                normalized_urn = matrix["urn"].lower()
+                json_definition_keys = {"grid", "probability", "impact", "risk"}
                 other_keys = set(matrix.keys()) - json_definition_keys
                 matrix_dict = {key: matrix[key] for key in other_keys}
                 matrix_dict["json_definition"] = {}
                 for key in json_definition_keys:
-                    if (
-                        key in matrix
-                    ):  # If all keys are mandatory this condition is useless
+                    if key in matrix:
                         matrix_dict["json_definition"][key] = matrix[key]
 
                 RiskMatrix.objects.update_or_create(
-                    urn=matrix["urn"].lower(),
+                    urn=normalized_urn,
                     defaults=matrix_dict,
                     create_defaults={
                         **referential_object_dict,
@@ -925,9 +987,6 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
             "If the risk matrix is set as disabled, it will not be available for selection for new risk assessments."
         ),
     )
-    provider = models.CharField(
-        max_length=200, blank=True, null=True, verbose_name=_("Provider")
-    )
 
     @property
     def is_used(self) -> bool:
@@ -1101,7 +1160,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
-    question = models.JSONField(blank=True, null=True, verbose_name=_("Question"))
+    questions = models.JSONField(blank=True, null=True, verbose_name=_("Questions"))
 
     @property
     def associated_reference_controls(self):
@@ -1535,7 +1594,7 @@ class Asset(
                             "value": {
                                 "type": "integer",
                                 "minimum": 0,
-                                "maximum": 3,
+                                "maximum": 4,
                             },
                             "is_enabled": {
                                 "type": "boolean",
@@ -1574,9 +1633,11 @@ class Asset(
     }
 
     SECURITY_OBJECTIVES_SCALES = {
-        "1-4": range(1, 5),
-        "0-3": range(0, 4),
-        "FIPS-199": ["low", "moderate", "moderate", "high"],
+        "1-4": [1, 2, 3, 4, 4],
+        "1-5": [1, 2, 3, 4, 5],
+        "0-3": [0, 1, 2, 3, 3],
+        "0-4": [0, 1, 2, 3, 4],
+        "FIPS-199": ["low", "moderate", "moderate", "high", "high"],
     }
 
     business_value = models.CharField(
@@ -1625,6 +1686,9 @@ class Asset(
         blank=True,
         verbose_name="Security exceptions",
         related_name="assets",
+    )
+    asset_class = models.ForeignKey(
+        "AssetClass", on_delete=models.SET_NULL, blank=True, null=True
     )
     is_published = models.BooleanField(_("published"), default=True)
 
@@ -1762,7 +1826,7 @@ class Asset(
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
             )
             if content.get("is_enabled", False)
-            and content.get("value", -1) in range(0, 4)
+            and content.get("value", -1) in range(0, 5)
         ]
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
@@ -1798,6 +1862,376 @@ class Asset(
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
         return super().save(*args, **kwargs)
+
+
+class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    parent = models.ForeignKey(
+        "AssetClass", on_delete=models.PROTECT, blank=True, null=True
+    )
+
+    @cached_property
+    def full_path(self):
+        if self.parent is None:
+            return self.name
+        else:
+            return f"{self.parent.full_path}/{self.name}"
+
+    @classmethod
+    def build_tree(cls):
+        all_nodes = list(cls.objects.all())
+        nodes_by_id = {
+            node.id: {"name": node.name, "children": []} for node in all_nodes
+        }
+
+        tree = []
+
+        for node in all_nodes:
+            node_dict = nodes_by_id[node.id]
+
+            if node.parent_id is None:
+                tree.append(node_dict)
+            else:
+                parent_dict = nodes_by_id.get(node.parent_id)
+                if parent_dict:  # Check if parent exists
+                    parent_dict["children"].append(node_dict)
+
+        return tree
+
+    @classmethod
+    def create_hierarchy(cls, hierarchy_data, parent=None):
+        created_nodes = []
+
+        for item in hierarchy_data:
+            # Get or create the asset class
+            asset_class, created = cls.objects.get_or_create(
+                name=item["name"],
+                parent=parent,
+                defaults={
+                    "description": item.get("description", ""),
+                },
+            )
+
+            created_nodes.append(asset_class)
+
+            if "children" in item and item["children"]:
+                cls.create_hierarchy(item["children"], parent=asset_class)
+
+        return created_nodes
+
+    @classmethod
+    def create_default_values(cls):
+        cis_hierarchy = [
+            {
+                "name": "assetClassDevices",
+                "description": "Assets that may exist in physical spaces, virtual infrastructure, or cloud-based environments",
+                "children": [
+                    {
+                        "name": "assetClassEnterpriseAssets",
+                        "description": "Assets with the potential to store or process data",
+                        "children": [
+                            {
+                                "name": "assetClassEndUserDevices",
+                                "description": "IT assets used among members of an enterprise",
+                                "children": [
+                                    {
+                                        "name": "assetClassPortable",
+                                        "description": "Transportable, end-user devices with wireless connectivity capability",
+                                        "children": [
+                                            {
+                                                "name": "assetClassMobile",
+                                                "description": "Small, enterprise-issued end-user devices with intrinsic wireless capability",
+                                            }
+                                        ],
+                                    }
+                                ],
+                            },
+                            {
+                                "name": "assetClassServers",
+                                "description": "Devices or systems that provide resources, data, services, or programs to other devices",
+                            },
+                            {
+                                "name": "assetClassCloudInfrastructure",
+                                "description": "Cloud Infrastructure and resources",
+                            },
+                            {
+                                "name": "assetClassIotAndNonComputingDevices",
+                                "description": "Devices embedded with sensors, software, and other technologies for connecting and exchanging data",
+                            },
+                            {
+                                "name": "assetClassNetworkDevices",
+                                "description": "Electronic devices required for communication and interaction between devices on a network",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassRemovableMedia",
+                        "description": "Storage devices that can be removed from a computer while the system is running",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassSoftware",
+                "description": "Sets of data and instructions used to direct a computer to complete a specific task",
+                "children": [
+                    {
+                        "name": "assetClassApplications",
+                        "description": "Programs running on top of an operating system",
+                        "children": [
+                            {
+                                "name": "assetClassServices",
+                                "description": "Specialized programs that perform well-defined critical tasks",
+                            },
+                            {
+                                "name": "assetClassLibraries",
+                                "description": "Shareable pre-compiled codebase used to develop software programs and applications",
+                            },
+                            {
+                                "name": "assetClassAPIs",
+                                "description": "Set of rules and interfaces for software components to interact with each other",
+                            },
+                            {
+                                "name": "assetClassSaas",
+                                "description": "Software as a Service",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassOperatingSystems",
+                        "description": "Software that manages computer hardware and software resources",
+                        "children": [
+                            {
+                                "name": "assetClassServices",
+                                "description": "Specialized programs that perform well-defined critical tasks",
+                            },
+                            {
+                                "name": "assetClassLibraries",
+                                "description": "Shareable pre-compiled codebase used to develop software programs and applications",
+                            },
+                            {
+                                "name": "assetClassAPIs",
+                                "description": "Set of rules and interfaces for software components to interact with each other",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassFirmware",
+                        "description": "Software stored within a device's non-volatile memory",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassData",
+                "description": "Collection of facts that can be examined, considered, and used for decision-making",
+                "children": [
+                    {
+                        "name": "assetClassSensitiveData",
+                        "description": "Data that must be kept private, accurate, reliable, and available",
+                    },
+                    {
+                        "name": "assetClassLogData",
+                        "description": "Computer-generated data file that records events occurring within the enterprise",
+                    },
+                    {
+                        "name": "assetClassPhysicalData",
+                        "description": "Data stored in physical documents or on physical types of removable devices",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassUsers",
+                "description": "Authorized individuals who access enterprise assets",
+                "children": [
+                    {
+                        "name": "assetClassWorkforce",
+                        "description": "Individuals employed or engaged by an organization with access to its information systems",
+                    },
+                    {
+                        "name": "assetClassServiceProviders",
+                        "description": "Entities that offer platforms, software, and services to other enterprises",
+                    },
+                    {
+                        "name": "assetClassUserAccounts",
+                        "description": "Identity with a set of credentials that defines a user on a computing system",
+                    },
+                    {
+                        "name": "assetClassAdministratorAccounts",
+                        "description": "Accounts for users requiring escalated privileges",
+                    },
+                    {
+                        "name": "assetClassServiceAccounts",
+                        "description": "Accounts created specifically to run applications, services, and automated tasks",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassNetwork",
+                "description": "Group of interconnected devices that exchange data",
+                "children": [
+                    {
+                        "name": "assetClassNetworkInfrastructure",
+                        "description": "Collection of network resources that provide connectivity, management, and communication",
+                    },
+                    {
+                        "name": "assetClassNetworkArchitecture",
+                        "description": "How a network is designed, both physically and logically",
+                    },
+                ],
+            },
+            {
+                "name": "assetClassDocumentation",
+                "description": "Policies, processes, procedures, plans, and other written material",
+                "children": [
+                    {
+                        "name": "assetClassPlans",
+                        "description": "Implements policies and may include groups of policies, processes, and procedures",
+                    },
+                    {
+                        "name": "assetClassPolicies",
+                        "description": "Official governance statements that outline specific objectives of an information security program",
+                    },
+                    {
+                        "name": "assetClassProcesses",
+                        "description": "Set of general tasks and activities to achieve a series of security-related goals",
+                    },
+                    {
+                        "name": "assetClassProcedures",
+                        "description": "Ordered set of steps that must be followed to accomplish a specific task",
+                    },
+                ],
+            },
+        ]
+        extra = [
+            {
+                "name": "assetClassBusinessProcess",
+                "description": "Organized set of activities and related procedures by which an organization operates",
+                "children": [
+                    {
+                        "name": "assetClassCoreOperations",
+                        "description": "Primary processes that directly deliver value to customers",
+                        "children": [
+                            {
+                                "name": "assetClassProductOrServiceDevelopment",
+                                "description": "Processes for designing, creating, and improving products and services",
+                            },
+                            {
+                                "name": "assetClassProductOrServiceDelivery",
+                                "description": "Processes for manufacturing products or delivering services to customers",
+                            },
+                            {
+                                "name": "assetClassSalesAndMarketing",
+                                "description": "Processes for attracting customers and selling products/services",
+                            },
+                            {
+                                "name": "assetClassCustomerService",
+                                "description": "Processes for supporting customers after sales",
+                            },
+                            {
+                                "name": "assetClassSupplyChainManagement",
+                                "description": "Processes for managing the flow of goods, services, and information",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassManagementAndGovernance",
+                        "description": "Processes that provide oversight, direction, and accountability",
+                        "children": [
+                            {
+                                "name": "assetClassStrategicPlanning",
+                                "description": "Processes for defining long-term objectives and allocation of resources",
+                            },
+                            {
+                                "name": "assetClassFinancialManagement",
+                                "description": "Processes for budgeting, accounting, and financial reporting",
+                            },
+                            {
+                                "name": "assetClassRiskManagement",
+                                "description": "Processes for identifying, assessing, and mitigating risks",
+                            },
+                            {
+                                "name": "assetClassComplianceManagement",
+                                "description": "Processes for ensuring adherence to laws, regulations, and policies",
+                            },
+                            {
+                                "name": "assetClassPerformanceManagement",
+                                "description": "Processes for monitoring and improving organizational performance",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassSupportFunctions",
+                        "description": "Processes that enable and facilitate the core business operations",
+                        "children": [
+                            {
+                                "name": "assetClassHumanResources",
+                                "description": "Processes for recruiting, developing, and retaining personnel",
+                            },
+                            {
+                                "name": "assetClassInformationTechnology",
+                                "description": "Processes for managing IT infrastructure, applications, and services",
+                            },
+                            {
+                                "name": "assetClassFacilitiesManagement",
+                                "description": "Processes for maintaining physical infrastructure and workspaces",
+                            },
+                            {
+                                "name": "assetClassProcurement",
+                                "description": "Processes for acquiring goods and services from external suppliers",
+                            },
+                            {
+                                "name": "assetClassLegalServices",
+                                "description": "Processes for managing legal affairs and intellectual property",
+                            },
+                            {
+                                "name": "assetClassAdministrativeServices",
+                                "description": "Processes for general administrative support functions",
+                            },
+                        ],
+                    },
+                    {
+                        "name": "assetClassExternalRelationships",
+                        "description": "Processes for managing relationships outside the organization",
+                        "children": [
+                            {
+                                "name": "assetClassVendorManagement",
+                                "description": "Processes for managing relationships with suppliers and vendors",
+                            },
+                            {
+                                "name": "assetClassPartnerManagement",
+                                "description": "Processes for establishing and maintaining strategic partnerships",
+                            },
+                            {
+                                "name": "assetClassGovernmentRelations",
+                                "description": "Processes for interacting with government entities",
+                            },
+                            {
+                                "name": "assetClassCommunityRelations",
+                                "description": "Processes for engaging with local communities and society",
+                            },
+                            {
+                                "name": "assetClassInvestorRelations",
+                                "description": "Processes for managing relationships with investors and shareholders",
+                            },
+                        ],
+                    },
+                ],
+            }
+        ]
+
+        AssetClass.create_hierarchy(cis_hierarchy)
+        AssetClass.create_hierarchy(extra)
+
+    def __str__(self):
+        return self.full_path
+
+    class Meta:
+        unique_together = ["name", "parent"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name"],
+                condition=models.Q(parent__isnull=True),
+                name="unique_name_for_root_items",
+            )
+        ]
 
 
 class Evidence(
@@ -2205,7 +2639,6 @@ class AppliedControl(
         reqs = 0  # compliance requirements
         scenarios = 0  # risk scenarios
         sh_actions = 0  # stakeholder tprm actions
-
         reqs = RequirementNode.objects.filter(
             requirementassessment__applied_controls=self
         ).count()
@@ -3077,7 +3510,7 @@ class ComplianceAssessment(Assessment):
                 "total": total,
                 "per_status": per_status,
                 "per_result": per_result,
-                "progress_perc": self.progress,
+                "progress_perc": self.get_progress(),
                 "score": self.get_global_score(),
             },
         }
@@ -3118,8 +3551,8 @@ class ComplianceAssessment(Assessment):
                 compliance_assessment=self,
                 requirement=requirement,
                 folder_id=self.folder.id,  # Use foreign key directly
-                answer=transform_question_to_answer(requirement.question)
-                if requirement.question
+                answers=transform_questions_to_answers(requirement.questions)
+                if requirement.questions
                 else {},
             )
             for requirement in requirements
@@ -3180,6 +3613,63 @@ class ComplianceAssessment(Assessment):
                 assessment.applied_controls.set(controls)
 
         return created_assessments
+
+    def sync_to_applied_controls(self, dry_run=True):
+        """
+        the logic is to get the requirement assessments that have applied controls attached
+        then for each:
+        if one applied control attached:
+            if the AC status is active, toggle requirement assessment to compliant
+            if the AC status is in any other status, toggle the requirement assessment to non_compliant
+        if two or more applied controls are attached:
+            if all AC are active, toggle to compliant
+            if at least one AC is active, toggle to partially compliant
+            else toggle to non_compliant
+        """
+
+        def infer_result(applied_controls):
+            if not applied_controls:
+                return RequirementAssessment.Result.NOT_ASSESSED
+
+            if len(applied_controls) == 1:
+                ac_status = applied_controls[0].status
+                if ac_status == AppliedControl.Status.ACTIVE:
+                    return RequirementAssessment.Result.COMPLIANT
+                else:
+                    return RequirementAssessment.Result.NON_COMPLIANT
+
+            statuses = [ac.status for ac in applied_controls]
+
+            if all(status == AppliedControl.Status.ACTIVE for status in statuses):
+                return RequirementAssessment.Result.COMPLIANT
+            elif AppliedControl.Status.ACTIVE in statuses:
+                return RequirementAssessment.Result.PARTIALLY_COMPLIANT
+            else:
+                return RequirementAssessment.Result.NON_COMPLIANT
+
+        changes = dict()
+        requirement_assessments_with_ac = RequirementAssessment.objects.filter(
+            compliance_assessment=self, applied_controls__isnull=False
+        ).distinct()
+        with transaction.atomic():
+            for ra in requirement_assessments_with_ac:
+                ac = AppliedControl.objects.filter(requirement_assessments=ra)
+                ic(ac)
+                new_result = infer_result(ac)
+                if ra.result != new_result:
+                    changes[str(ra.id)] = {
+                        "str": str(ra),
+                        "current": ra.result,
+                        "new": new_result,
+                    }
+                    if not dry_run:
+                        ra.result = new_result
+                        ra.save(update_fields=["result"])
+
+        ic(changes)
+
+        if dry_run:
+            return changes
 
     def get_global_score(self):
         requirement_assessments_scored = (
@@ -3691,8 +4181,7 @@ class ComplianceAssessment(Assessment):
 
         return requirement_assessments
 
-    @property
-    def progress(self) -> int:
+    def get_progress(self) -> int:
         requirement_assessments = list(
             self.get_requirement_assessments(include_non_assessable=False)
         )
@@ -3715,13 +4204,12 @@ class ComplianceAssessment(Assessment):
         answered_questions_count = 0
         for ra in requirement_assessments:
             # if it has question set it should count
-            if ra.requirement.question:
-                answers = ra.answer.get("questions")
+            if ra.requirement.questions:
+                total_questions_count += len(ra.requirement.questions)
+                answers = ra.answers
                 if answers:
-                    total_questions_count += len(answers)
-                    answered_questions_count += sum(
-                        1 for ans in answers if ans.get("answer") != ""
-                    )
+                    for answer in answers.values():
+                        answered_questions_count += 1 if answer else 0
 
         if total_questions_count > 0:
             return int((answered_questions_count / total_questions_count) * 100)
@@ -3734,7 +4222,7 @@ class ComplianceAssessment(Assessment):
             include_non_assessable=False
         )
         for ra in requirement_assessments:
-            if ra.requirement.question:
+            if ra.requirement.questions:
                 return True
         return False
 
@@ -3807,10 +4295,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         default=dict,
         verbose_name=_("Mapping inference"),
     )
-    answer = models.JSONField(
+    answers = models.JSONField(
         blank=True,
         null=True,
-        verbose_name=_("Answer"),
+        verbose_name=_("Answers"),
     )
     security_exceptions = models.ManyToManyField(
         SecurityException,
@@ -4143,6 +4631,223 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
+
+
+# tasks management
+class TaskTemplateManager(models.Manager):
+    def create_task_template(self, **kwargs):
+        return super().create(**kwargs)
+
+
+class TaskTemplate(NameDescriptionMixin, FolderMixin):
+    objects = TaskTemplateManager()
+
+    SCHEDULE_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Schedule Definition",
+        "type": "object",
+        "properties": {
+            "interval": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Number of periods to wait before repeating (e.g., every 2 days, 3 weeks).",
+            },
+            "frequency": {
+                "type": "string",
+                "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+            },
+            "days_of_week": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 7},
+                "description": "Optional. Days of the week (Monday=1, Sunday=7)",
+            },
+            "weeks_of_month": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": -1,
+                    "maximum": 4,
+                },
+                "description": "Optional. for a given weekday, which one in the month (1 for first, -1 for last)",
+            },
+            "months_of_year": {
+                "type": "array",
+                "items": {"type": "integer", "minimum": 1, "maximum": 12},
+                "description": "Optional. Months of the year (1=January, 12=December)",
+            },
+            "end_date": {
+                "type": ["string", "null"],
+                "format": "date",
+                "description": "Optional. Date when recurrence ends.",
+            },
+            "occurrences": {
+                "type": ["integer", "null"],
+                "minimum": 1,
+                "description": "Optional. Number of occurrences before recurrence stops.",
+            },
+            "overdue_behavior": {
+                "type": "string",
+                "enum": ["DELAY_NEXT", "NO_IMPACT"],
+                "default": "NO_IMPACT",
+                "description": "Optional. Behavior when tasks become overdue.",
+            },
+            "exceptions": {
+                "type": ["object", "null"],
+                "description": "Optional. JSON object for future exceptions handling.",
+            },
+        },
+        "required": ["interval", "frequency"],
+        "additionalProperties": False,
+    }
+
+    task_date = models.DateField(null=True, blank=True, verbose_name="Date")
+
+    is_recurrent = models.BooleanField(default=False)
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="reference id"
+    )
+
+    schedule = models.JSONField(
+        verbose_name="Schedule definition",
+        blank=True,
+        null=True,
+        validators=[JSONSchemaInstanceValidator(SCHEDULE_JSONSCHEMA)],
+    )
+    enabled = models.BooleanField(default=True)
+
+    assigned_to = models.ManyToManyField(
+        User,
+        verbose_name="Assigned to",
+        blank=True,
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name="Related assets",
+        blank=True,
+        help_text="Assets related to the task",
+        related_name="task_templates",
+    )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name="Applied controls",
+        blank=True,
+        help_text="Applied controls related to the task",
+        related_name="task_templates",
+    )
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        verbose_name="Compliance assessments",
+        blank=True,
+        help_text="Compliance assessments related to the task",
+        related_name="task_templates",
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        verbose_name="Risk assessments",
+        blank=True,
+        help_text="Risk assessments related to the task",
+        related_name="task_templates",
+    )
+
+    findings_assessment = models.ManyToManyField(
+        FindingsAssessment,
+        verbose_name="Finding assessments",
+        blank=True,
+        help_text="Finding assessments related to the task",
+        related_name="task_templates",
+    )
+
+    @property
+    def next_occurrence(self):
+        today = datetime.today().date()
+        task_nodes = TaskNode.objects.filter(
+            task_template=self, due_date__gte=today
+        ).order_by("due_date")
+        return task_nodes.first().due_date if task_nodes.exists() else None
+
+    @property
+    def last_occurrence_status(self):
+        today = datetime.today().date()
+        task_nodes = TaskNode.objects.filter(
+            task_template=self, due_date__lte=today
+        ).order_by("-due_date")
+        return task_nodes[0].status if task_nodes.exists() else None
+
+    class Meta:
+        verbose_name = "Task template"
+        verbose_name_plural = "Task templates"
+
+    def save(self, *args, **kwargs):
+        if self.schedule and "days_of_week" in self.schedule:
+            # Only modify values that are not already in range 0-6
+            self.schedule["days_of_week"] = [
+                day % 7 if day > 6 else day for day in self.schedule["days_of_week"]
+            ]
+
+        # Check if there are any TaskNode instances that are not within the date range
+        if self.schedule and "end_date" in self.schedule:
+            end_date = self.schedule["end_date"]
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+            # Delete TaskNode instances that have a due date after the end date
+            TaskNode.objects.filter(task_template=self, due_date__gt=end_date).delete()
+        super().save(*args, **kwargs)
+
+
+class TaskNode(AbstractBaseModel, FolderMixin):
+    TASK_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+
+    status = models.CharField(
+        max_length=50, default="pending", choices=TASK_STATUS_CHOICES
+    )
+
+    observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+    task_template = models.ForeignKey(
+        "TaskTemplate",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        help_text="Evidences related to the task",
+        related_name="task_nodes",
+    )
+
+    to_delete = models.BooleanField(default=False)
+
+    @property
+    def assigned_to(self):
+        return self.task_template.assigned_to
+
+    @property
+    def assets(self):
+        return self.task_template.assets.all()
+
+    @property
+    def applied_controls(self):
+        return self.task_template.applied_controls.all()
+
+    @property
+    def compliance_assessments(self):
+        return self.task_template.compliance_assessments.all()
+
+    @property
+    def risk_assessments(self):
+        return self.task_template.risk_assessments.all()
+
+    class Meta:
+        verbose_name = "Task node"
+        verbose_name_plural = "Task nodes"
 
 
 common_exclude = ["created_at", "updated_at"]

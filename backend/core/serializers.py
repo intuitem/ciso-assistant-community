@@ -347,6 +347,8 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
 
+    asset_class = FieldsRelatedField(["name"])
+
 
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -366,6 +368,21 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class AssetClassReadSerializer(BaseModelSerializer):
+    parent = FieldsRelatedField()
+    full_path = serializers.CharField()
+
+    class Meta:
+        model = AssetClass
+        exclude = ["created_at", "updated_at", "folder", "is_published"]
+
+
+class AssetClassWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = AssetClass
+        exclude = ["created_at", "updated_at", "folder", "is_published"]
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
@@ -707,12 +724,14 @@ class UserReadSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
-            "is_sso",
+            "keep_local_login",
             "is_third_party",
         ]
 
 
 class UserWriteSerializer(BaseModelSerializer):
+    is_local = serializers.BooleanField(required=False)
+
     class Meta:
         model = User
         fields = [
@@ -723,7 +742,9 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "keep_local_login",
             "is_third_party",
+            "is_local",
         ]
 
     def validate_email(self, email):
@@ -988,7 +1009,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
-    progress = serializers.ReadOnlyField()
+    progress = serializers.ReadOnlyField(source="get_progress")
     assets = FieldsRelatedField(many=True)
 
     class Meta:
@@ -1067,6 +1088,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "associated_reference_controls",
                 "associated_threats",
                 "parent_requirement",
+                "questions",
             ]
 
     name = serializers.CharField(source="__str__")
@@ -1156,7 +1178,7 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "requirement",
             "selected",
             "mapping_inference",
-            "answer",
+            "answers",
             "evidences",
             "applied_controls",
         ]
@@ -1241,7 +1263,15 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
 class FindingWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Finding
-        exclude = ["created_at", "updated_at"]
+        exclude = ["created_at", "updated_at", "folder"]
+
+    def create(self, validated_data):
+        findings_assessment = validated_data.get("findings_assessment")
+        if not findings_assessment:
+            raise serializers.ValidationError({"findings_assessment": "mandatory"})
+        validated_data["folder"] = findings_assessment.folder
+
+        return super().create(validated_data)
 
 
 class FindingReadSerializer(FindingWriteSerializer):
@@ -1251,6 +1281,9 @@ class FindingReadSerializer(FindingWriteSerializer):
     reference_controls = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
+    perimeter = FieldsRelatedField(
+        source="findings_assessment.perimeter", fields=["id", "name", "folder"]
+    )
     folder = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
 
@@ -1283,6 +1316,7 @@ class QuickStartSerializer(serializers.Serializer):
             if not folder_serializer.is_valid(raise_exception=True):
                 return None
             folder = folder_serializer.save()
+            Folder.create_default_ug_and_ra(folder)
 
         perimeter_data = {
             "folder": folder.id,
@@ -1403,3 +1437,171 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     def get_timeline_entries(self, obj):
         """Returns a serialized list of timeline entries related to the incident."""
         return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data
+
+
+class TaskTemplateReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assets = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
+    compliance_assessments = FieldsRelatedField(many=True)
+    risk_assessments = FieldsRelatedField(many=True)
+    assigned_to = FieldsRelatedField(many=True)
+    findings_assessment = FieldsRelatedField(many=True)
+
+    next_occurrence = serializers.DateField(read_only=True)
+    last_occurrence_status = serializers.CharField(read_only=True)
+
+    # Expose task_node fields directly
+    status = serializers.SerializerMethodField()
+    observation = serializers.SerializerMethodField()
+    evidences = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TaskTemplate
+        exclude = ["schedule"]
+
+    def get_task_node(self, obj):
+        """
+        Helper to fetch the related TaskNode for non-recurrent templates.
+        """
+        if obj.is_recurrent:
+            return None
+        return TaskNode.objects.filter(task_template=obj).order_by("due_date").first()
+
+    def get_status(self, obj):
+        task_node = self.get_task_node(obj)
+        return task_node.status if task_node else None
+
+    def get_observation(self, obj):
+        task_node = self.get_task_node(obj)
+        return task_node.observation if task_node else ""
+
+    def get_evidences(self, obj):
+        task_node = self.get_task_node(obj)
+        if task_node:
+            return [{"id": e.id, "str": e.name} for e in task_node.evidences.all()]
+        return []
+
+
+class TaskTemplateWriteSerializer(BaseModelSerializer):
+    status = serializers.CharField(required=False)
+    observation = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
+    evidences = serializers.PrimaryKeyRelatedField(
+        queryset=Evidence.objects.all(), many=True, required=False
+    )
+
+    class Meta:
+        model = TaskTemplate
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if not instance.is_recurrent:
+            task_node = (
+                TaskNode.objects.filter(task_template=instance)
+                .order_by("due_date")
+                .first()
+            )
+            if task_node:
+                data["status"] = task_node.status
+                data["observation"] = task_node.observation
+                data["evidences"] = [e.id for e in task_node.evidences.all()]
+            else:
+                data["status"] = None
+                data["observation"] = ""
+                data["evidences"] = []
+        return data
+
+    def create(self, validated_data):
+        tasknode_data = self._extract_tasknode_fields(validated_data)
+        instance = super().create(validated_data)
+        self._sync_task_node(instance, tasknode_data, False, False)
+        return instance
+
+    def update(self, instance, validated_data):
+        was_recurrent = instance.is_recurrent  # Store the previous state
+        tasknode_data = self._extract_tasknode_fields(validated_data)
+        instance = super().update(instance, validated_data)
+        now_recurrent = instance.is_recurrent
+        self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+        return instance
+
+    def _extract_tasknode_fields(self, validated_data):
+        """
+        Separate the TaskNode-specific fields from validated_data.
+        """
+        return {
+            "status": validated_data.pop("status", None),
+            "observation": validated_data.pop("observation", None),
+            "evidences": validated_data.pop("evidences", []),
+        }
+
+    def _sync_task_node(
+        self, task_template, tasknode_data, was_recurrent, now_recurrent
+    ):
+        """
+        Synchronize or create the TaskNode linked to a non-recurrent TaskTemplate.
+        """
+        if now_recurrent:
+            return  # Only sync for non-recurrent templates
+
+        task_nodes = TaskNode.objects.filter(task_template=task_template)
+        if was_recurrent:
+            # Was recurrent, now non-recurrent: must clean
+            task_nodes.delete()
+            task_node = TaskNode.objects.create(
+                task_template=task_template,
+                due_date=task_template.task_date,
+                folder=task_template.folder,
+            )
+        else:
+            # Was already non-recurrent: reuse if possible
+            if task_nodes.count() == 1:
+                task_node = task_nodes.first()
+            else:
+                task_nodes.delete()
+                task_node = TaskNode.objects.create(
+                    task_template=task_template,
+                    due_date=task_template.task_date,
+                    folder=task_template.folder,
+                )
+
+        task_node.to_delete = False
+        task_node.due_date = task_template.task_date
+        if tasknode_data.get("status") is not None:
+            task_node.status = tasknode_data["status"]
+        if tasknode_data.get("observation") is not None:
+            task_node.observation = tasknode_data["observation"]
+        task_node.save()
+
+        evidences = tasknode_data.get("evidences")
+        if evidences is not None:
+            task_node.evidences.set(evidences)
+
+
+class TaskNodeReadSerializer(BaseModelSerializer):
+    task_template = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    name = serializers.SerializerMethodField()
+    assigned_to = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
+    is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
+    applied_controls = FieldsRelatedField(many=True)
+    compliance_assessments = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
+    risk_assessments = FieldsRelatedField(many=True)
+
+    def get_name(self, obj):
+        return obj.task_template.name if obj.task_template else ""
+
+    class Meta:
+        model = TaskNode
+        exclude = ["to_delete"]
+
+
+class TaskNodeWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = TaskNode
+        exclude = ["task_template"]

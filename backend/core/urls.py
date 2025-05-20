@@ -36,6 +36,7 @@ router.register(
     r"reference-controls", ReferenceControlViewSet, basename="reference-controls"
 )
 router.register(r"assets", AssetViewSet, basename="assets")
+router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
 
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
@@ -82,6 +83,8 @@ router.register(
 router.register(r"findings", FindingViewSet, basename="findings")
 router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
+router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
+router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -94,6 +97,7 @@ for route in ROUTES:
         basename=ROUTES[route].get("basename"),
     )
 
+
 urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
@@ -103,6 +107,7 @@ urlpatterns = [
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("ebios-rm/", include("ebios_rm.urls")),
     path("privacy/", include("privacy.urls")),
+    path("resilience/", include("resilience.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),

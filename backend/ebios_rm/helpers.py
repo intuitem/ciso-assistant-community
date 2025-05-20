@@ -2,6 +2,18 @@ from django.db.models.query import QuerySet
 import math
 import random
 from global_settings.models import GlobalSettings
+from .models import (
+    AttackPath,
+    EbiosRMStudy,
+    FearedEvent,
+    OperationalScenario,
+    RoTo,
+    Stakeholder,
+    StrategicScenario,
+)
+from core.models import Asset
+
+import textwrap
 
 
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
@@ -91,3 +103,190 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
         r_data[cluser_id].append(vector)
 
     return {"current": c_data, "residual": r_data}
+
+
+def wrap_text(text, width=30):
+    return textwrap.fill(text, width=width)
+
+
+def ebios_rm_visual_analysis(study):
+    tree = list()  # list of dict with strucuted data
+    rotos = (
+        RoTo.objects.filter(ebios_rm_study=study)
+        .prefetch_related("feared_events__assets")
+        .distinct()
+    )
+    nodes = []
+    links = []
+    nodes_idx = dict()
+    N = 0
+    categories = [
+        {"name": "Asset"},
+        {"name": "Feared Event"},
+        {"name": "Risk Origin"},
+        {"name": "Target Objective"},
+        {"name": "Ecosystem entity"},
+        {"name": "Strategic scenario"},
+        {"name": "Attack Path"},
+        {"name": "Operational scenario"},
+        {"name": "Techniques/Unitary actions"},
+    ]
+    feared_events = FearedEvent.objects.filter(ebios_rm_study=study).distinct()
+    assets = study.assets.all()
+    stakeholders = Stakeholder.objects.filter(ebios_rm_study=study).distinct()
+    for a in assets:
+        nodes.append(
+            {"name": a.name, "category": 0, "symbol": "diamond", "symbolSize": 40}
+        )
+        nodes_idx[f"{a.id}-AS"] = N
+        N += 1
+    for fe in feared_events:
+        nodes.append(
+            {
+                "name": wrap_text(f"({fe.get_gravity_display()['name']}) {fe.name}"),
+                "category": 1,
+            }
+        )
+        nodes_idx[f"{fe.id}-FE"] = N
+        N += 1
+    for ro_to in rotos:
+        nodes.append(
+            {
+                "name": ro_to.risk_origin,
+                "category": 2,
+                "symbolSize": 25,
+            }
+        )
+        nodes_idx[f"{ro_to.id}-RO"] = N
+        N += 1
+        nodes.append(
+            {
+                "name": wrap_text(ro_to.target_objective),
+                "category": 3,
+            }
+        )
+        nodes_idx[f"{ro_to.id}-TO"] = N
+        N += 1
+        links.append(
+            {
+                "source": nodes_idx[f"{ro_to.id}-RO"],
+                "target": nodes_idx[f"{ro_to.id}-TO"],
+                "value": "aims",
+                "lineStyle": {"type": "dotted"},
+            }
+        )
+        entry = {
+            "ro": ro_to.risk_origin,
+            "to": ro_to.target_objective,
+            "feared_events": [
+                {"name": fe.name, "assets": [a.name for a in fe.assets.all()]}
+                for fe in ro_to.feared_events.all()
+            ],
+        }
+        for fe in ro_to.feared_events.all():
+            links.append(
+                {
+                    "source": nodes_idx[f"{ro_to.id}-RO"],
+                    "target": nodes_idx[f"{fe.id}-FE"],
+                    "value": "generates",
+                }
+            )
+            for a in fe.assets.all():
+                links.append(
+                    {
+                        "source": nodes_idx[f"{fe.id}-FE"],
+                        "target": nodes_idx[f"{a.id}-AS"],
+                        "value": "concerns",
+                    }
+                )
+        tree.append(entry)
+    for stakeholder in stakeholders:
+        nodes.append({"name": str(stakeholder), "category": 4, "symbol": "square"})
+        nodes_idx[f"{stakeholder.id}-SH"] = N
+        N += 1
+    strategic_scenarios = StrategicScenario.objects.filter(
+        ebios_rm_study=study
+    ).prefetch_related("attack_paths__stakeholders")
+    for ss in strategic_scenarios:
+        nodes.append(
+            {
+                "name": f"{ss.name}",
+                "symbol": "roundRect",
+                "category": 5,
+                "symbolSize": 25,
+            }
+        )
+        nodes_idx[f"{ss.id}-SS"] = N
+        N += 1
+
+        # link to ss.ro_to_couple
+        links.append(
+            {
+                "source": nodes_idx[f"{ss.id}-SS"],
+                "target": nodes_idx[f"{ss.ro_to_couple.id}-RO"],
+                "value": "through",
+            }
+        )
+        for ap in AttackPath.objects.filter(strategic_scenario=ss):
+            nodes.append(
+                {
+                    "name": ap.name,
+                    "category": 6,
+                }
+            )
+            nodes_idx[f"{ap.id}-AP"] = N
+            N += 1
+
+            links.append(
+                {
+                    "source": nodes_idx[f"{ap.id}-AP"],
+                    "target": nodes_idx[f"{ss.id}-SS"],
+                    "value": "used in",
+                }
+            )
+
+            for sh in ap.stakeholders.all():
+                links.append(
+                    {
+                        "source": nodes_idx[f"{ap.id}-AP"],
+                        "target": nodes_idx[f"{sh.id}-SH"],
+                        "lineStyle": {"type": "dashed"},
+                        "value": "involves",
+                    }
+                )
+    operational_scenarios = OperationalScenario.objects.filter(
+        ebios_rm_study=study
+    ).prefetch_related("threats", "attack_path")
+    for os in operational_scenarios:
+        nodes.append(
+            {
+                "name": f"{wrap_text(os.operating_modes_description)}",
+                "category": 7,
+            }
+        )
+        nodes_idx[f"{os.id}-OS"] = N
+        N += 1
+        links.append(
+            {
+                "source": nodes_idx[f"{os.id}-OS"],
+                "target": nodes_idx[f"{os.attack_path.id}-AP"],
+                "value": "involves",
+            }
+        )
+        for ua in os.threats.all().distinct():
+            if nodes_idx.get(f"{ua.id}-UA") is None:
+                nodes.append({"name": ua.name, "category": 8, "symbol": "triangle"})
+                nodes_idx[f"{ua.id}-UA"] = N
+                N += 1
+            links.append(
+                {
+                    "source": nodes_idx[f"{os.id}-OS"],
+                    "target": nodes_idx[f"{ua.id}-UA"],
+                    "value": "exploits",
+                }
+            )
+
+    return {
+        "tree": tree,
+        "graph": {"nodes": nodes, "links": links, "categories": categories},
+    }

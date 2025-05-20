@@ -16,6 +16,18 @@ export const navData = {
 					]
 				},
 				{
+					name: 'domainAnalytics',
+					fa_icon: 'fa-solid fa-folder-tree',
+					href: '/domain-analytics',
+					permissions: [
+						'view_perimeter',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_assessment',
+						'view_riskassessment'
+					]
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -99,11 +111,6 @@ export const navData = {
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
 				},
-				{
-					name: 'assets',
-					fa_icon: 'fa-solid fa-gem',
-					href: '/assets'
-				}
 			]
 		},
 		{
@@ -137,6 +144,21 @@ export const navData = {
 			]
 		},
 		{
+			name: 'assetsManagement',
+			items: [
+				{
+					name: 'assets',
+					fa_icon: 'fa-solid fa-gem',
+					href: '/assets'
+				},
+				{
+					name: 'businessImpactAnalysis',
+					fa_icon: 'fa-solid fa-arrows-to-eye',
+					href: '/business-impact-analysis',
+				}
+			]
+		},
+		{
 			name: 'operations',
 			items: [
 				{
@@ -160,6 +182,11 @@ export const navData = {
 					name: 'incidents',
 					fa_icon: 'fa-solid fa-bug',
 					href: '/incidents'
+				},
+				{
+					name: 'tasks',
+					fa_icon: 'fa-solid fa-note-sticky',
+					href: '/task-templates'
 				}
 			]
 		},
@@ -337,7 +364,7 @@ export const navData = {
 					permissions: ['backup']
 				},
 				{
-					name: 'Experimental',
+					name: 'experimental',
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
 					permissions: ['change_globalsettings']

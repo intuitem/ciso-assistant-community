@@ -21,6 +21,7 @@ from core.serializers import (
     RequirementAssessmentWriteSerializer,
     FindingsAssessmentWriteSerializer,
     FindingWriteSerializer,
+    UserWriteSerializer,
 )
 from iam.models import RoleAssignment
 
@@ -99,6 +100,8 @@ class LoadFileView(APIView):
             )
         elif model_type == "Perimeter":
             return self._process_perimeters(request, records, folders_map, folder_id)
+        elif model_type == "User":
+            return self._process_users(request, records)
         elif model_type == "ComplianceAssessment":
             return self._process_compliance_assessment(
                 request, records, folder_id, perimeter_id, framework_id
@@ -116,6 +119,44 @@ class LoadFileView(APIView):
                 "failed": 0,
                 "errors": [{"error": f"Unknown model type: {model_type}"}],
             }
+
+    def _process_users(self, request, records):
+        results = {"successful": 0, "failed": 0, "errors": []}
+        for record in records:
+            # check if the email is available
+            if not record.get("email"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "email field is mandatory"}
+                )
+                continue
+            # Prepare data for serializer
+            user_data = {
+                "email": record.get("email"),  # Email is mandatory
+                "first_name": record.get("first_name"),
+                "last_name": record.get("last_name"),
+            }
+            # Use the serializer for validation and saving
+            serializer = UserWriteSerializer(
+                data=user_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(f"Error creating user {record.get('email')}: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+        logger.info(
+            f"User import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
 
     def _process_assets(self, request, records, folders_map, folder_id):
         # Collection to track successes and errors
@@ -192,6 +233,8 @@ class LoadFileView(APIView):
             control_data = {
                 "ref_id": record.get("ref_id", ""),
                 "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
+                "category": record.get("category", ""),
                 "folder": domain,
                 "status": record.get("status", "to_do"),
                 "priority": priority,
@@ -422,7 +465,7 @@ class LoadFileView(APIView):
                                     .first()
                                 )
                             else:
-                                logger.warn("Import attempt: unknown ref_id ")
+                                logger.warning("Import attempt: unknown ref_id ")
                         elif urn:
                             ReqNode = RequirementNode.objects.filter(
                                 framework__id=framework_id, urn=urn

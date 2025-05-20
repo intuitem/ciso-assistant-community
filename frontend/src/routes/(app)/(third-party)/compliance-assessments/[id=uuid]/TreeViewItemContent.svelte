@@ -8,7 +8,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
 	import { m } from '$paraglide/messages';
-	import { displayOnlyAssessableNodes } from './store';
+	import { auditFiltersStore } from '$lib/utils/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	export let ref_id: string;
@@ -46,6 +46,9 @@
 		pattern == 3 ? `${ref_id} - ${name}` : pattern == 2 ? ref_id : pattern == 1 ? name : '';
 
 	let showInfo = false;
+
+	let id = $page.params.id;
+	$: displayOnlyAssessableNodes = $auditFiltersStore[id]?.displayOnlyAssessableNodes ?? false;
 
 	const getAssessableNodes = (
 		startNode: TreeViewItemNode,
@@ -105,7 +108,7 @@
 	$: classesPercentText = (resultColor: string) => (resultColor === '#000000' ? 'text-white' : '');
 </script>
 
-{#if !$displayOnlyAssessableNodes || assessable || hasAssessableChildren}
+{#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
 	<div class="flex flex-row justify-between space-x-8">
 		<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
 			<div class="flex flex-row space-x-2" style="font-weight: 300;">
@@ -124,9 +127,9 @@
 										{#if description}
 											<p>{description}</p>
 										{/if}
-									{:else if node.question && node.question.questions && node.question.questions[0]}
-										<!-- This only displays the first question -->
-										{node.question.questions[0].text}
+									{:else if Object.keys(node.questions).length > 0}
+										<!-- This displays the first question's text -->
+										{Object.entries(node.questions)[0][1].text}
 									{/if}
 								</Anchor>
 							{:else}
@@ -157,7 +160,7 @@
 				<div>
 					{#if hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}
-							{#if resultCounts[status] && selectedStatus.includes(status)}
+							{#if resultCounts[status] && (selectedStatus.includes(status) || selectedStatus.length === 0)}
 								<span
 									class="badge mr-1"
 									style="background-color: {color + '44'}; color: {darkenColor(color, 0.3)}"
@@ -168,18 +171,18 @@
 							{/if}
 						{/each}
 					{/if}
-					{#if node.question && node.question.questions}
-						{#if node.question.questions.length > 1}
+					{#if node.questions}
+						{#if Object.keys(node.questions).length > 1}
 							<span
 								class="badge"
 								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{node.question.questions.length} {m.questionPlural()}</span
+								>{Object.keys(node.questions).length} {m.questionPlural()}</span
 							>
 						{:else}
 							<span
 								class="badge"
 								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{node.question.questions.length} {m.questionSingular()}</span
+								>{Object.keys(node.questions).length} {m.questionSingular()}</span
 							>
 						{/if}
 					{/if}

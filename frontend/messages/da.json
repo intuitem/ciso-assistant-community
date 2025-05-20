@@ -274,7 +274,6 @@
 	"cancel": "Annuller",
 	"save": "Gem",
 	"assetsImpactedByTheRiskScenario": "Aktiver påvirket af risikoscenariet",
-	"ecistingMeasures": "Eksisterende kontroller",
 	"theExistingAppliedControlsToManageThisRisk": "De eksisterende kontroller til at håndtere denne risiko",
 	"currentRiskLevelGivenCurrentMeasures": "Nuværende risikoniveau givet de nuværende foranstaltninger",
 	"riskLevelWhenAllExtraMeasuresDone": "Risikoniveau når alle ekstra tiltag er gennemført",
@@ -730,7 +729,7 @@
 	"addRepresentative": "Tilføj repræsentant",
 	"phone": "Telefon",
 	"role": "Rolle",
-	"question": "Spørgsmål",
+	"questions": "Spørgsmål",
 	"recipientEntity": "Modtagerenhed",
 	"financial": "Finansiel",
 	"legal": "Juridisk",
@@ -1196,5 +1195,14 @@
 	"requirementsProgressionSemiColon": "Kravfremskridt:",
 	"noRequirementFound": "Ingen kravvurdering fundet",
 	"noAuditForTheFramework": "Der er ingen revision for dette rammeværk",
-	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom"
+	"reauthenticateForSensitiveAction": "Handlingen kræver genautentificering, da den er følsom",
+	"failedToContactProvider": "Fejl ved kontakt til udbyderen",
+	"userIsNotSSO": "SSO-login er i øjeblikket deaktiveret for din konto.",
+	"enableSSOHelpText": "Aktivér SSO som en loginmulighed for alle brugere.",
+	"keepLocalLogin": "Udeluk fra tvungen SSO",
+	"keepLocalLoginHelpText": "Når global 'Tvungen SSO' er aktiveret, tillader dette brugeren at omgå det og logge ind med en lokalt administreret adgangskode, hvis nødvendigt.",
+	"forceSSOLogin": "Tving SSO-login",
+	"forceSSOLoginHelpText": "Kræv SSO for alle brugere og nulstil alle gemte adgangskoder. Brugere med 'Udeluk fra tvungen SSO' aktiveret vil bevare adgang med adgangskode som en fallback.",
+	"forceSSOLoginHelpText2": "Sørg for, at din SSO fungerer, eller at du har en fallback-konto, før du aktiverer denne mulighed.",
+	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet"
 }

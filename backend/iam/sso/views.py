@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from structlog import get_logger
 
 from .models import SSOSettings
+from iam.models import User
 from .serializers import SSOSettingsWriteSerializer
 
 logger = get_logger(__name__)
@@ -54,9 +55,19 @@ class SSOSettingsViewSet(BaseModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        is_enabled = serializer.validated_data.get("is_enabled", False)
+        force_sso = serializer.validated_data.get("force_sso", False)
+
+        if is_enabled and force_sso:
+            for user in User.objects.all():
+                if not user.keep_local_login:
+                    user.set_unusable_password()
+
         return Response(serializer.data)
 
     @action(detail=True, name="Get provider choices")

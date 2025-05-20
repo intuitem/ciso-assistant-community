@@ -22,7 +22,7 @@ erDiagram
 
     USER {
         string  email
-        boolean is_sso
+        boolean keep_local_login
     }
 
     USER_GROUP {
@@ -602,9 +602,11 @@ Security objectives are measured using a specifc scale. For now, the following s
 
 - 0-3: coded as 0-3
 - 1-4: coded as 0-3
+- 0-4: coded as 0-4
+- 1-5: coded as 0-4
 - FIPS-199: coded as 0-3
 
-There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "discrete scales"):
+There is a correspondance between the 0-3, 1-4, 0,4, 1-5 and FIPS-199 scales (called "discrete scales"):
 
 | scale    | internal value | scale value |
 | -------- | -------------- | ----------- |
@@ -612,14 +614,27 @@ There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "disc
 | 0-3      | 1              | 1           |
 | 0-3      | 2              | 2           |
 | 0-3      | 3              | 3           |
+| 0-3      | 4              | 3           |
 | 1-4      | 0              | 1           |
 | 1-4      | 1              | 2           |
 | 1-4      | 2              | 3           |
 | 1-4      | 3              | 4           |
+| 1-4      | 4              | 4           |
 | FIPS-199 | 0              | low         |
 | FIPS-199 | 1              | moderate    |
 | FIPS-199 | 2              | moderate    |
 | FIPS-199 | 3              | high        |
+| FIPS-199 | 4              | high        |
+| 0-4      | 0              | 0           |
+| 0-4      | 1              | 1           |
+| 0-4      | 2              | 2           |
+| 0-4      | 3              | 3           |
+| 0-4      | 4              | 4           |
+| 1-5      | 0              | 1           |
+| 1-5      | 1              | 2           |
+| 1-5      | 2              | 3           |
+| 1-5      | 3              | 4           |
+| 1-5      | 4              | 5           |
 
 THe scale to use is a global parameter. It has no impact on the encoding in the database, which always uses the internal value.
 
@@ -1121,9 +1136,16 @@ Names of built-in objects can be internationalized.
 
 ## SSO
 
-A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
+Global SSO settings for the instance are defined in a dedicated object SSO_SETTINGS.
 
-SSO Settings are defined in a dedicated object SSO_SETTINGS.
+A user can be authenticated either locally or with SSO.
+
+When SSO is activated, all users can use SSO.
+
+When the force_sso global flag is set, all users without keep_local_login:
+- have their password disabled, 
+- cannot ask for a password reset,
+- cannot have their password changed by an administrator.
 
 ## TPRM evolution
 
@@ -1142,7 +1164,7 @@ The following approach has been retained:
 - This compliance assessment is reviewed by the client, requirement by requirement.
 - An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
 - Review features are added to compliance assessment to enable this workflow in a generic way.
-- A requirement node can include a question (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
+- A requirement node can include questions (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
 
 ### Entity-relationship diagram
 
@@ -1282,22 +1304,22 @@ There is no link between representatives (modeling of the ecosystem) and users o
 
 - add field observation
 
-#### Requirement assessment
+### Requirement assessment
 
 - add the following fields:
-  - answer: a json corresponding to the optional question of the requirement node.
+  - answers: a json corresponding to the answers of the requirement node questions.
 
-#### Compliance assessment
+### Compliance assessment
 
 - add the following fields:
   - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
 
-#### Requirement node
+### Requirement node
 
 - Add the following fields:
-  - question: a json field describing a form.
+  - questions: a json corresponding to the optional questions of the requirement node.
 
-#### Applied control
+### Applied control
 
 - Add a "contract" category
 - Add a foreign key "contract" to point to a contract
@@ -1308,16 +1330,46 @@ Note: in the future, we will use the same approach for policies.
 
 ### Question and answer format
 
-The format for question and answer json fields will evolve over time. The initial format is the following:
+The format for questions and answers json fields will evolve over time. The initial format is the following:
 
-- question:
+- questions:
 
 ```json
 {
-    "question": {
-        "version": 1
-        "schema": {...}
+    "urn:intuitem:risk:req_node:example:a.1:question:1": {
+        "type": "unique_choice",
+        "choices": [
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
+                "value": "yes"
+            },
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
+                "value": "no"
+            },
+            {
+                "urn": "urn:intuitem:risk:framework:example:answer01:choice:3",
+                "value": "n/a"
+            }
+        ],
+        "text": "Question title",
+    },
+    "urn:intuitem:risk:req_node:example:a.1:question:2": {
+    ...
     }
+}
+```
+
+- answers:
+
+```json
+{
+    "urn:intuitem:risk:req_node:example:a.1:question:1": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1",
+        "urn:intuitem:risk:framework:example:answer01:choice:2"
+    ],
+    "urn:intuitem:risk:req_node:example:a.1:question:2": "yes",
+    ...
 }
 ```
 
@@ -1560,7 +1612,6 @@ erDiagram
 ### Implementation
 
 - EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
-- There is no object for "strategic scenarios", as they result directly from attack paths and corresponding feared event (which is the title of the strategic scenario).
 - the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
 
 ## Domain import/export
@@ -1591,33 +1642,124 @@ This new type of assessments is intended to gather and manage findinds. The sect
 A findings assessment has the following specific fields:
 - category: --/pentest/audit/internal
 
-A finding ("constat" has the following fields:
+A finding ("constat") has the following fields:
 - ref_id/name/description
 - severity, like for vulnerabilities
 - a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
 
 A finding can have related reference controls, applied controls, vulnerabilities.
 
-
-## Asset compliance (draft)
+## Tasks
 
 ```mermaid
 erDiagram
 
-    COMPLIANCE_INDICATOR          }o--o{ ASSET                : applies_to
-    OBSERVATION                   }o--|| ASSET                : applies_to
-    OBSERVATION                   }o--|| COMPLIANCE_INDICATOR : corresponds_to
- 
-    COMPLIANCE_INDICATOR {
-        string ref_id
-        string name
-        string description
-        json   tracker_metadata
-    }
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_TEMPLATE         : contains
+ROOT_FOLDER_OR_DOMAIN ||--o{ TASK_NODE             : contains
+TASK_TEMPLATE         |o--o{ TASK_NODE             : generates
+USER                  }o--o{ TASK_TEMPLATE         : owns
+TASK_TEMPLATE         }o--o| TASK_TEMPLATE         : is_subtask_of
+TASK_TEMPLATE         }o--o{ ASSET                 : relates_to
+TASK_TEMPLATE         }o--o{ APPLIED_CONTROL       : relates_to
+TASK_TEMPLATE         }o--o{ COMPLIANCE_ASSESSMENT : relates_to
+TASK_TEMPLATE         }o--o{ RISK_ASSESSMENT       : relates_to
+TASK_NODE             }o--o{ EVIDENCE              : contains
 
-    OBSERVATION {
-        datetime when
-        json     tracked_data
-        boolean  compliance_status
-    }
+TASK_TEMPLATE {
+    string ref_id
+    string name
+    string description
+
+    date   task_date
+    json   schedule_definition
+    bool   enabled
+}
+
+TASK_NODE {
+    date   due_date
+    enum   status "pending, in progress, completed, cancelled"
+    string observation
+}
 ```
+
+The schedule_definition contains the following fields:
+
+```json
+SCHEDULE_JSONSCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Schedule Definition",
+    "type": "object",
+    "properties": {
+        "interval": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of periods to wait before repeating (e.g., every 2 days, 3 weeks).",
+        },
+        "frequency": {
+            "type": "string",
+            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+        },
+        "days_of_week": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 7},
+            "description": "Optional. Days of the week (0=Sunday, 6=Saturday)",
+        },
+        "weeks_of_month": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 4,
+            },
+            "description": "Optional. for a given weekday, which one in the month (1 for first, -1 for last)",
+        },
+        "months_of_year": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 12},
+            "description": "Optional. Months of the year (1=January, 12=December)",
+        },
+        "start_date": {
+            "type": ["string"],
+            "format": "date",
+            "description": "Date when recurrence begins.",
+        },
+        "end_date": {
+            "type": ["string"],
+            "format": "date",
+            "description": "Date when recurrence ends.",
+        },
+        "occurrences": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "description": "Optional. Number of occurrences before recurrence stops.",
+        },
+        "overdue_behavior": {
+            "type": "string",
+            "enum": ["DELAY_NEXT", "NO_IMPACT"],
+            "default": "NO_IMPACT",
+            "description": "Optional. Behavior when tasks become overdue.",
+        },
+    },
+    "required": ["interval", "frequency", "start_date", "end_date"],
+    "additionalProperties": False,
+}
+```
+
+The task_date is copied in the start_date of the schedule for recurring tasks.
+
+The task_date is copied in the due_date of the task_node for a non-recurring task.
+
+When enabled is set to False, the schedule is suspended (for recurring task), and generated tasks are hidden (past and future).
+
+The following concepts will not be included in the MVP:
+- subtasks
+- exceptions
+- overdue_behavior (will be NO_IMPACT)
+
+### Implementation
+
+Future task_nodes are generated partially in advance at creation/update of a task_template and with a daily refresh done with huey. This shall take in account end_date, and the following limits:
+- 5 years for yearly frequency
+- 24 months for monthly frequency
+- 53 weeks for weekly frequency
+- 63 days for daily frequency

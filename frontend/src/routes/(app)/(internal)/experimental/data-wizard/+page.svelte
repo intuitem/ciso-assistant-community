@@ -26,7 +26,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: 'Caution',
-			body: 'The following will create multiple objects in batch mode and possibly on differnt domains. This operation cannot be undone and you will need to do the clean up in case of an issue.',
+			body: 'The following will create multiple objects in batch mode and possibly on different domains. This operation cannot be undone and you will need to do the clean up in case of an issue.',
 			response: (r: boolean) => {
 				if (r) formElement.requestSubmit();
 			}
@@ -109,6 +109,25 @@
 						</label>
 					</div>
 
+					<div>
+						<label
+							for="User"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-xs hover:border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:ring-1 has-[:checked]:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.users()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="User"
+								id="User"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
 					<div>
 						<label
 							for="AppliedControl"
