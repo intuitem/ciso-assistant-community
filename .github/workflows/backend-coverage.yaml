@@ -1,25 +1,33 @@
 name: Backend code coverage
 permissions:
   contents: read
-
 on:
   pull_request:
     branches: ["main"]
     paths:
       - "backend/**"
-
 env:
   GITHUB_WORKFLOW: github_actions
   POSTGRES_VERSION: "16"
   UBUNTU_VERSION: "ubuntu-24.04"
   PYTHON_VERSION: "3.12"
-
 jobs:
   build:
     runs-on: ubuntu-24.04
     env:
       backend-directory: ./backend
-
+      DJANGO_DEBUG: 'True'
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      EMAIL_HOST: localhost
+      EMAIL_PORT: 1025
+      EMAIL_HOST_USER: ''
+      EMAIL_HOST_PASSWORD: ''
+      DEFAULT_FROM_EMAIL: 'ciso-assistant@alsigo.net'
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_URL: http://127.0.0.1:5173
     services:
       postgres:
         image: postgres:16
@@ -29,12 +37,10 @@ jobs:
           POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     strategy:
       max-parallel: 4
       matrix:
         python-version: ["3.12"]
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up python ${{ matrix.python-version }}
@@ -50,37 +56,16 @@ jobs:
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
-      - name: Create environment variables file
-        working-directory: ${{env.backend-directory}}
-        run: |
-          touch .env
-          echo DJANGO_DEBUG='True' >> .env
-          echo POSTGRES_NAME=postgres >> .env
-          echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=postgres >> .env
-          echo DB_HOST=localhost >> .env
-          echo EMAIL_HOST=localhost >> .env
-          echo EMAIL_PORT=1025 >> .env
-          echo EMAIL_HOST_USER='' >> .env
-          echo EMAIL_HOST_PASSWORD='' >> .env
-          #echo EMAIL_USE_TLS=False >> .env
-          echo DEFAULT_FROM_EMAIL='ciso-assistant@alsigo.net' >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://127.0.0.1:5173 >> .env
       - name: Run migrations
-        working-directory: ${{env.backend-directory}}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py migrate
+        working-directory: ${{ env.backend-directory }}
+        run: poetry run python manage.py migrate
       - name: Run coverage
-        working-directory: ${{env.backend-directory}}
+        working-directory: ${{ env.backend-directory }}
         env:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          find . -path '*/tests/*' -and -name 'test*.py' -and -not -path "./venv/*" | xargs coverage run -m pytest
+        run: find . -path '*/tests/*' -and -name 'test*.py' -and -not -path "./venv/*" | xargs coverage run -m pytest
       - name: Display coverage report
-        working-directory: ${{env.backend-directory}}
+        working-directory: ${{ env.backend-directory }}
         env:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: coverage report
