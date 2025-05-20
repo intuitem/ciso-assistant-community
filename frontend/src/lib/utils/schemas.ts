@@ -232,7 +232,7 @@ export const AssetSchema = z.object({
 				.optional()
 		})
 		.optional(),
-	reference_link: z.string().url().optional().or(z.literal('')),
+	reference_link: z.string().url().startsWith('http').optional().or(z.literal('')),
 	owner: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
@@ -316,7 +316,7 @@ export const EvidenceSchema = z.object({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().optional().nullable(),
+	link: z.string().url().startsWith('http').optional().or(z.literal('')),,
 	filtering_labels: z.string().optional().array().optional()
 });
 
@@ -398,7 +398,7 @@ export const EntitiesSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	mission: z.string().optional(),
-	reference_link: z.string().url().optional().or(z.literal(''))
+	reference_link: z.string().url().startsWith('http').optional().or(z.literal('')),
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -526,7 +526,7 @@ export const dataContractorSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	relationship_type: z.string(),
 	country: z.string(),
-	documentation_link: z.string().optional(),
+	documentation_link: z.string().url().startsWith('http').optional().or(z.literal('')),
 	processing: z.string(),
 	entity: z.string().optional()
 });
@@ -534,7 +534,7 @@ export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
-	documentation_link: z.string().optional(),
+	documentation_link: z.string().url().startsWith('http').optional().or(z.literal('')),
 	legal_basis: z.string(),
 	guarantees: z.string().optional(),
 	processing: z.string(),
