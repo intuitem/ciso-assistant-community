@@ -58,14 +58,31 @@ jobs:
           echo CISO_ASSISTANT_URL=http://127.0.0.1:5173 >> .env
       - name: Run migrations
         working-directory: ${{env.backend-directory}}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py migrate
+        env:
+          DJANGO_DEBUG: 'True'
+          DB_HOST: localhost
+          EMAIL_HOST: localhost
+          EMAIL_PORT: 1025
+          EMAIL_HOST_USER: ''
+          EMAIL_HOST_PASSWORD: ''
+          DEFAULT_FROM_EMAIL: 'ciso-assistant@alsigo.net'
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://127.0.0.1:5173
+        run: poetry run python manage.py migrate
+
       - name: Run API tests
         working-directory: ${{env.backend-directory}}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run pytest app_tests/api --html=pytest-report.html --self-contained-html
+        env:
+          DJANGO_DEBUG: 'True'
+          DB_HOST: localhost
+          EMAIL_HOST: localhost
+          EMAIL_PORT: 1025
+          EMAIL_HOST_USER: ''
+          EMAIL_HOST_PASSWORD: ''
+          DEFAULT_FROM_EMAIL: 'ciso-assistant@alsigo.net'
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://127.0.0.1:5173
+        run: poetry run pytest app_tests/api --html=pytest-report.html --self-contained-html
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
