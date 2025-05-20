@@ -86,13 +86,35 @@ jobs:
           echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py migrate
+        env:
+          LOG_LEVEL: DEBUG
+          LOG_OUTFILE: ciso-assistant.log
+          DJANGO_DEBUG: 'True'
+          DJANGO_SUPERUSER_EMAIL: admin@tests.com
+          DJANGO_SUPERUSER_PASSWORD: 1234
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DB_HOST: localhost
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://localhost:4173
+        run: poetry run python manage.py migrate
+
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
+        env:
+          LOG_LEVEL: DEBUG
+          LOG_OUTFILE: ciso-assistant.log
+          DJANGO_DEBUG: 'True'
+          DJANGO_SUPERUSER_EMAIL: admin@tests.com
+          DJANGO_SUPERUSER_PASSWORD: 1234
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DB_HOST: localhost
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://localhost:4173
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
       - name: Build frontend
@@ -138,11 +160,6 @@ jobs:
           rm -rf db
           mkdir db
           docker compose -f docker-compose-build.yml up -d
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
           sleep 120 # give the migrations time to finish (included in the up on the previous step)
@@ -231,13 +248,37 @@ jobs:
           echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+        env:
+          LOG_LEVEL: DEBUG
+          LOG_OUTFILE: ciso-assistant.log
+          DJANGO_DEBUG: 'True'
+          DJANGO_SUPERUSER_EMAIL: admin@tests.com
+          DJANGO_SUPERUSER_PASSWORD: 1234
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DB_HOST: localhost
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://localhost:4173
+          DJANGO_SETTINGS_MODULE: enterprise_core.settings
+        run: poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
+        env:
+          LOG_LEVEL: DEBUG
+          LOG_OUTFILE: ciso-assistant.log
+          DJANGO_DEBUG: 'True'
+          DJANGO_SUPERUSER_EMAIL: admin@tests.com
+          DJANGO_SUPERUSER_PASSWORD: 1234
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DB_HOST: localhost
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://localhost:4173
+          DJANGO_SETTINGS_MODULE: enterprise_core.settings
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }}
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests
@@ -273,11 +314,6 @@ jobs:
         run: pnpm exec playwright install
       - name: Build the Docker app
         run: docker compose -f enterprise/docker-compose-build.yml up -d
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
           sleep 120 # give the migrations time to finish (included in the up on the previous step)
