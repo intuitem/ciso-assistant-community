@@ -110,9 +110,8 @@ jobs:
         working-directory: ${{ env.frontend-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
-        env:
           CI: true
+        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
@@ -219,9 +218,8 @@ jobs:
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
-        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
-        env:
           CI: true
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
