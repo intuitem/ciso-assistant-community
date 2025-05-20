@@ -26,7 +26,26 @@ env:
 jobs:
   functional-tests:
     runs-on: ubuntu-24.04
-
+    env:
+      LOG_LEVEL: DEBUG
+      LOG_OUTFILE: ciso-assistant.log
+      DJANGO_DEBUG: True
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_URL: http://localhost:4173
+      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      EMAIL_HOST: localhost
+      EMAIL_HOST_USER: user@tests.com
+      EMAIL_HOST_PASSWORD: password
+      EMAIL_PORT: 1025
+      CISO_ASSISTANT_VERSION: v4.2.0
+      CISO_ASSISTANT_BUILD: ${{ github.sha }}
+      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
         image: postgres:16
@@ -72,43 +91,14 @@ jobs:
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install --with-deps ${{ matrix.playwright-browser }}
-      - name: Create frontend environment variables file
-        working-directory: ${{ env.frontend-directory }}
-        run: |
-          touch .env
-          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          echo LOG_LEVEL=DEBUG >> .env
-          echo LOG_OUTFILE=ciso-assistant.log >> .env
-          echo DJANGO_DEBUG=True >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
-          echo POSTGRES_NAME=postgres >> .env
-          echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=postgres >> .env
-          echo DB_HOST=localhost >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
-          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
-          echo EMAIL_HOST=localhost >> .env
-          echo EMAIL_HOST_USER=user@tests.com >> .env
-          echo EMAIL_HOST_PASSWORD=password >> .env
-          echo EMAIL_PORT=1025 >> .env
-          echo CISO_ASSISTANT_VERSION=v4.2.0 >> .env
-          echo CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD) >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py makemigrations
           poetry run python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
       - name: Build frontend
@@ -124,7 +114,9 @@ jobs:
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
         if: ${{ !cancelled() }}
-        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
+        run: |
+          SAFE_NAME=$(echo '${{ env.BRANCH_NAME }}' | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
@@ -137,7 +129,28 @@ jobs:
 
   enterprise-functional-tests:
     runs-on: ubuntu-24.04
-
+    env:
+      LOG_LEVEL: DEBUG
+      LOG_OUTFILE: ciso-assistant.log
+      DJANGO_DEBUG: True
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_URL: http://localhost:4173
+      DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+      EMAIL_HOST: localhost
+      EMAIL_HOST_USER: user@tests.com
+      EMAIL_HOST_PASSWORD: password
+      EMAIL_PORT: 1025
+      CISO_ASSISTANT_VERSION: v4.2.0
+      CISO_ASSISTANT_BUILD: ${{ github.sha }}
+      DJANGO_SETTINGS_MODULE: enterprise_core.settings
+      LICENSE_SEATS: 999
+      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
         image: postgres:16
@@ -184,45 +197,14 @@ jobs:
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright install --with-deps ${{ matrix.playwright-browser }}
-      - name: Create frontend environment variables file
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: |
-          touch .env
-          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          echo LOG_LEVEL=DEBUG >> .env
-          echo LOG_OUTFILE=ciso-assistant.log >> .env
-          echo DJANGO_DEBUG=True >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
-          echo POSTGRES_NAME=postgres >> .env
-          echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=postgres >> .env
-          echo DB_HOST=localhost >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
-          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
-          echo EMAIL_HOST=localhost >> .env
-          echo EMAIL_HOST_USER=user@tests.com >> .env
-          echo EMAIL_HOST_PASSWORD=password >> .env
-          echo EMAIL_PORT=1025 >> .env
-          echo CISO_ASSISTANT_VERSION=v4.2.0 >> .env
-          echo CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD) >> .env
-          echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
-          echo LICENSE_SEATS=999 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py createsuperuser  --noinput --settings=${{ env.enterprise-backend-settings-module }}
+          poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }}
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
@@ -234,7 +216,9 @@ jobs:
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
         if: ${{ !cancelled() }}
-        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
+        run: |
+          SAFE_NAME=$(echo '${{ env.BRANCH_NAME }}' | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
