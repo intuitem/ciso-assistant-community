@@ -101,14 +101,51 @@ jobs:
           echo CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD) >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
+        env:
+          LOG_LEVEL: DEBUG
+          LOG_OUTFILE: ciso-assistant.log
+          DJANGO_DEBUG: True
+          DJANGO_SUPERUSER_EMAIL: admin@tests.com
+          DJANGO_SUPERUSER_PASSWORD: 1234
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DB_HOST: localhost
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://localhost:4173
+          DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+          EMAIL_HOST: localhost
+          EMAIL_HOST_USER: user@tests.com
+          EMAIL_HOST_PASSWORD: password
+          EMAIL_PORT: 1025
+          CISO_ASSISTANT_VERSION: v4.2.0
+          CISO_ASSISTANT_BUILD: ${{ github.sha }}
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py makemigrations
           poetry run python manage.py migrate
+
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
+        env:
+          LOG_LEVEL: DEBUG
+          LOG_OUTFILE: ciso-assistant.log
+          DJANGO_DEBUG: True
+          DJANGO_SUPERUSER_EMAIL: admin@tests.com
+          DJANGO_SUPERUSER_PASSWORD: 1234
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DB_HOST: localhost
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://localhost:4173
+          DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+          EMAIL_HOST: localhost
+          EMAIL_HOST_USER: user@tests.com
+          EMAIL_HOST_PASSWORD: password
+          EMAIL_PORT: 1025
+          CISO_ASSISTANT_VERSION: v4.2.0
+          CISO_ASSISTANT_BUILD: ${{ github.sha }}
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
       - name: Build frontend
@@ -215,14 +252,55 @@ jobs:
           echo LICENSE_SEATS=999 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
+        env:
+          LOG_LEVEL: DEBUG
+          LOG_OUTFILE: ciso-assistant.log
+          DJANGO_DEBUG: True
+          DJANGO_SUPERUSER_EMAIL: admin@tests.com
+          DJANGO_SUPERUSER_PASSWORD: 1234
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DB_HOST: localhost
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://localhost:4173
+          DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+          EMAIL_HOST: localhost
+          EMAIL_HOST_USER: user@tests.com
+          EMAIL_HOST_PASSWORD: password
+          EMAIL_PORT: 1025
+          CISO_ASSISTANT_VERSION: v4.2.0
+          CISO_ASSISTANT_BUILD: ${{ github.sha }}
+          DJANGO_SETTINGS_MODULE: enterprise_core.settings
+          LICENSE_SEATS: 999
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
+        env:
+          LOG_LEVEL: DEBUG
+          LOG_OUTFILE: ciso-assistant.log
+          DJANGO_DEBUG: True
+          DJANGO_SUPERUSER_EMAIL: admin@tests.com
+          DJANGO_SUPERUSER_PASSWORD: 1234
+          POSTGRES_NAME: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DB_HOST: localhost
+          CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+          CISO_ASSISTANT_URL: http://localhost:4173
+          DEFAULT_FROM_EMAIL: 'ciso-assistant@tests.net'
+          EMAIL_HOST: localhost
+          EMAIL_HOST_USER: user@tests.com
+          EMAIL_HOST_PASSWORD: password
+          EMAIL_PORT: 1025
+          CISO_ASSISTANT_VERSION: v4.2.0
+          CISO_ASSISTANT_BUILD: ${{ github.sha }}
+          DJANGO_SETTINGS_MODULE: enterprise_core.settings
+          LICENSE_SEATS: 999
         run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py createsuperuser  --noinput --settings=${{ env.enterprise-backend-settings-module }}
+          poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }}
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
