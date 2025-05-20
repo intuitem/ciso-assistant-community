@@ -96,7 +96,7 @@ jobs:
       - name: Sanitize branch name
         if: ${{ !cancelled() }}
         run: |
-          SAFE_NAME=$(echo '${{ env.BRANCH_NAME }}' | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -209,12 +209,16 @@ jobs:
         run: pnpm exec playwright install
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
+        run: poetry run python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }}
-          nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
+          poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
+          nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
       - name: Run tests
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright test tests/functional/startup.test.ts
@@ -222,7 +226,7 @@ jobs:
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
         run: |
-          SAFE_NAME=$(echo '${{ env.BRANCH_NAME }}' | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -251,9 +255,11 @@ jobs:
       - name: Build the Docker app
         run: docker compose -f enterprise/docker-compose-build.yml up -d
       - name: Config the Docker app
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
           sleep 120 # give the migrations time to finish (included in the up on the previous step)
-          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }} && exit 0"
+          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE" && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: |

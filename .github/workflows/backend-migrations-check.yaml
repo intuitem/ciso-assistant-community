@@ -98,6 +98,8 @@ jobs:
         run: poetry install
       - name: Check that migrations were made
         working-directory: ${{ env.backend-directory }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          poetry run python manage.py makemigrations --check --dry-run --verbosity=3 --settings=${{ env.enterprise-backend-settings-module }}
+          poetry run python manage.py makemigrations --check --dry-run --verbosity=3 --settings="$SETTINGS_MODULE"
           if [ $? -ne 0 ]; then echo "::error Migrations were not made, please run the makemigrations command." && exit 1; fi

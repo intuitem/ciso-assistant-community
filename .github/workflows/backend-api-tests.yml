@@ -59,7 +59,7 @@ jobs:
       - name: Sanitize branch name
         if: ${{ !cancelled() }}
         run: |
-          SAFE_NAME=$(echo '${{ env.BRANCH_NAME }}' | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
