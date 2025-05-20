@@ -9,6 +9,9 @@ Usage:
 
 Arguments:
     --compat  Use legacy URN fallback logic (for requirements without ref_id)
+
+Note: the urn_id column can be defined to force an urn suffix. This can be useful to fix ref_id errors
+    
 """
 
 import argparse
@@ -330,6 +333,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
     wb = openpyxl.load_workbook(input_file)
     sheets = wb.sheetnames
     object_blocks = {}
+    
 
     # Step 1: Load library_meta
     if "library_meta" not in sheets:
@@ -614,15 +618,18 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 previous_node_urn = None
                 previous_depth = 0
                 counter = 0
-                counter_fix = 0
+                counter_fix = -1
                 requirement_nodes = []
+                all_urns = set() # to detect duplicates
                 for row in rows[1:]:
                     counter += 1
                     data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
                     depth = int(data.get("depth", 1))
-                    ref_id = str(data.get("ref_id", "")).strip() or None
-                    name = str(data.get("name", "")).strip() or None
-
+                    ref_id = data.get("ref_id")
+                    ref_id = str(ref_id).strip() if ref_id is not None else None
+                    name = data.get("name")
+                    name = str(name).strip() if name is not None else None
+ 
                     if depth == previous_depth + 1:
                         parent_for_depth[depth] = previous_node_urn
                         count_for_depth[depth] = 1
@@ -631,6 +638,7 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                     else:
                         raise ValueError(f"Invalid depth jump from {previous_depth} to {depth} at row {counter}")
 
+                    # calculate urn
                     if compat:
                         skip_count = str(data.get("skip_count", "")).strip().lower() in ("1", "true", "yes", "x")
                         if skip_count:
@@ -640,17 +648,23 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                             ref_id_urn = ref_id.lower().replace(" ", "-") if ref_id else f"node{counter - counter_fix}"
                         urn = f"{base_urn}:{ref_id_urn}"
                     else:
-                        if ref_id:
+                        if data.get("urn_id"):
+                            urn = f"{base_urn}:{data.get('urn_id').strip()}"
+                        elif ref_id:
                             urn = f"{base_urn}:{ref_id.lower().replace(' ', '-')}"
                         else:
                             p = parent_for_depth.get(depth)
                             c = count_for_depth.get(depth, 1)
-                            urn = f"{p}:{c}" if p else f"{base_urn}:node{c}"
+                            if p:
+                                urn = f"{p}:{c}" if p else f"{base_urn}:{c}"
+                            elif name:
+                                urn = f"{base_urn}:{name.lower().replace(' ', '-')}"
+                            else:
+                                urn = f"{base_urn}:node{c}"
                             count_for_depth[depth] = c + 1
                     previous_node_urn = urn
                     previous_depth = depth
                     parent_urn = parent_for_depth.get(depth)
-
                     node = {
                         "urn": urn,
                         "assessable": bool(data.get("assessable")),
@@ -690,6 +704,9 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                     translations = extract_translations_from_row(header, row)
                     if translations:
                         node["translations"] = translations
+                    if node.get('urn') in all_urns:
+                        raise ValueError(f"urn already used: {node.get('urn')}")
+                    all_urns.add(node.get('urn'))
                     requirement_nodes.append(node)
 
                 framework["requirement_nodes"] = requirement_nodes
