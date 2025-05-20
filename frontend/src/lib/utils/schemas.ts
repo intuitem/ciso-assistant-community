@@ -316,7 +316,7 @@ export const EvidenceSchema = z.object({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().url().startsWith('http').optional().or(z.literal('')),,
+	link: z.string().url().startsWith('http').optional().or(z.literal('')),
 	filtering_labels: z.string().optional().array().optional()
 });
 
