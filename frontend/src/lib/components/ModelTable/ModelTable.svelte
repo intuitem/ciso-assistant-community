@@ -149,7 +149,12 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type);
 
-	const filterInitialData = $page.url.searchParams.entries();
+	const filterInitialData: Record<string, string[]> = {};
+	// convert URL search params to filter initial data
+	for (const [key, value] of $page.url.searchParams) {
+		filterInitialData[key] ??= [];
+		filterInitialData[key].push(value);
+	}
 
 	const _form = superForm(defaults(filterInitialData, zod(z.object({}))), {
 		SPA: true,
