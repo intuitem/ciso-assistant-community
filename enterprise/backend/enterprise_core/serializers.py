@@ -82,6 +82,18 @@ class ClientSettingsWriteSerializer(BaseModelSerializer):
 class ClientSettingsReadSerializer(BaseModelSerializer):
     logo_hash = serializers.CharField()
     favicon_hash = serializers.CharField()
+    logo = serializers.SerializerMethodField()
+    favicon = serializers.SerializerMethodField()
+    
+    def get_logo(self, obj):
+        if obj.logo:
+            return obj.logo.name.split("/")[-1]
+        return None
+    
+    def get_favicon(self, obj):
+        if obj.favicon:
+            return obj.favicon.name.split("/")[-1]
+        return None
 
     class Meta:
         model = ClientSettings
