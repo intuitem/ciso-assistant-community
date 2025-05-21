@@ -21,9 +21,10 @@
 	import { run } from 'svelte/legacy';
 
 	import { flip } from 'svelte/animate';
+	import { getToastStore } from './stores';
 
 	// Stores
-	// const toastStore = getToastStore();
+	const toastStore = getToastStore();
 
 	interface Props {
 		// Props
@@ -127,22 +128,22 @@
 	}
 
 	function onAction(index: number): void {
-		// $toastStore[index]?.action?.response();
-		// toastStore.close($toastStore[index].id);
+		$toastStore[index]?.action?.response();
+		toastStore.close($toastStore[index].id);
 	}
 
 	function onMouseEnter(index: number): void {
-		// if ($toastStore[index]?.hoverable) {
-		// 	toastStore.freeze(index);
-		// 	classesSnackbar += ' scale-[105%]';
-		// }
+		if ($toastStore[index]?.hoverable) {
+			toastStore.freeze(index);
+			classesSnackbar += ' scale-[105%]';
+		}
 	}
 
 	function onMouseLeave(index: number): void {
-		// if ($toastStore[index]?.hoverable) {
-		// 	toastStore.unfreeze(index);
-		// 	classesSnackbar = classesSnackbar.replace(' scale-[105%]', '');
-		// }
+		if ($toastStore[index]?.hoverable) {
+			toastStore.unfreeze(index);
+			classesSnackbar = classesSnackbar.replace(' scale-[105%]', '');
+		}
 	}
 
 	let wrapperVisible = $state(false);
@@ -155,66 +156,65 @@
 		`${cToast} ${width} ${color} ${padding} ${spacing} ${rounded} ${shadow}`
 	);
 	// Filtered Toast Store
-	// let filteredToasts = $derived(Array.from($toastStore).slice(0, max));
+	let filteredToasts = $derived(Array.from($toastStore).slice(0, max));
 
 	run(() => {
-		// if (filteredToasts.length) {
-		// 	wrapperVisible = true;
-		// }
+		if (filteredToasts.length) {
+			wrapperVisible = true;
+		}
 	});
 </script>
 
-<!---->
-<!-- {#if filteredToasts.length > 0 || wrapperVisible} -->
-<!-- 	<!-- Wrapper -->
-<!-- 	<div class="snackbar-wrapper {classesWrapper}" data-testid="snackbar-wrapper"> -->
-<!-- 		<!-- List -->
-<!-- 		<div class="snackbar {classesSnackbar}"> -->
-<!-- 			{#each filteredToasts as t, i (t)} -->
-<!-- 				<div -->
-<!-- 					animate:flip={{ duration: transitions ? 250 : 0 }} -->
-<!-- 					in:dynamicTransition|global={{ -->
-<!-- 						transition: transitionIn, -->
-<!-- 						params: { x: animAxis.x, y: animAxis.y, ...transitionInParams }, -->
-<!-- 						enabled: transitions -->
-<!-- 					}} -->
-<!-- 					out:dynamicTransition|global={{ -->
-<!-- 						transition: transitionOut, -->
-<!-- 						params: { x: animAxis.x, y: animAxis.y, ...transitionOutParams }, -->
-<!-- 						enabled: transitions -->
-<!-- 					}} -->
-<!-- 					onoutroend={() => { -->
-<!-- 						const outroFinishedForLastToastOnQueue = filteredToasts.length === 0; -->
-<!-- 						if (outroFinishedForLastToastOnQueue) wrapperVisible = false; -->
-<!-- 					}} -->
-<!-- 					onmouseenter={() => onMouseEnter(i)} -->
-<!-- 					onmouseleave={() => onMouseLeave(i)} -->
-<!-- 					role={t.hideDismiss ? 'alert' : 'alertdialog'} -->
-<!-- 					aria-live="polite" -->
-<!-- 				> -->
-<!-- 					<!-- Toast -->
-<!-- 					<div -->
-<!-- 						class="toast {classesToast} {t.background ?? background} {t.classes ?? ''}" -->
-<!-- 						data-testid="toast" -->
-<!-- 					> -->
-<!-- 						<div class="text-base">{t.message}</div> -->
-<!-- 						{#if t.action || !t.hideDismiss} -->
-<!-- 							<div class="toast-actions {cToastActions}"> -->
-<!-- 								{#if t.action} -->
-<!-- 									<button class={buttonAction} onclick={() => onAction(i)}>{t.action.label}</button> -->
-<!-- 								{/if} -->
-<!-- 								{#if !t.hideDismiss} -->
-<!-- 									<button -->
-<!-- 										class={buttonDismiss} -->
-<!-- 										aria-label="Dismiss toast" -->
-<!-- 										onclick={() => toastStore.close(t.id)}>{buttonDismissLabel}</button -->
-<!-- 									> -->
-<!-- 								{/if} -->
-<!-- 							</div> -->
-<!-- 						{/if} -->
-<!-- 					</div> -->
-<!-- 				</div> -->
-<!-- 			{/each} -->
-<!-- 		</div> -->
-<!-- 	</div> -->
-<!-- {/if} -->
+{#if filteredToasts.length > 0 || wrapperVisible}
+	<!-- Wrapper -->
+	<div class="snackbar-wrapper {classesWrapper}" data-testid="snackbar-wrapper">
+		<!-- List -->
+		<div class="snackbar {classesSnackbar}">
+			{#each filteredToasts as t, i (t)}
+				<div
+					animate:flip={{ duration: transitions ? 250 : 0 }}
+					in:dynamicTransition|global={{
+						transition: transitionIn,
+						params: { x: animAxis.x, y: animAxis.y, ...transitionInParams },
+						enabled: transitions
+					}}
+					out:dynamicTransition|global={{
+						transition: transitionOut,
+						params: { x: animAxis.x, y: animAxis.y, ...transitionOutParams },
+						enabled: transitions
+					}}
+					onoutroend={() => {
+						const outroFinishedForLastToastOnQueue = filteredToasts.length === 0;
+						if (outroFinishedForLastToastOnQueue) wrapperVisible = false;
+					}}
+					onmouseenter={() => onMouseEnter(i)}
+					onmouseleave={() => onMouseLeave(i)}
+					role={t.hideDismiss ? 'alert' : 'alertdialog'}
+					aria-live="polite"
+				>
+					<!-- Toast -->
+					<div
+						class="toast {classesToast} {t.background ?? background} {t.classes ?? ''}"
+						data-testid="toast"
+					>
+						<div class="text-base">{t.message}</div>
+						{#if t.action || !t.hideDismiss}
+							<div class="toast-actions {cToastActions}">
+								{#if t.action}
+									<button class={buttonAction} onclick={() => onAction(i)}>{t.action.label}</button>
+								{/if}
+								{#if !t.hideDismiss}
+									<button
+										class={buttonDismiss}
+										aria-label="Dismiss toast"
+										onclick={() => toastStore.close(t.id)}>{buttonDismissLabel}</button
+									>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				</div>
+			{/each}
+		</div>
+	</div>
+{/if}
