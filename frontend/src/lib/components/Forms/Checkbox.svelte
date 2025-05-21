@@ -44,14 +44,6 @@
 		dispatch('change', $value);
 	}
 
-	run(() => {
-		if (cachedValue !== undefined) {
-			value.set(cachedValue);
-		} else {
-			cachedValue = $value;
-		}
-	});
-
 	let classesHidden = $derived((h: boolean) => (h ? 'hidden' : ''));
 	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
 </script>
@@ -77,7 +69,7 @@
 					type="checkbox"
 					class="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"
-					bind:checked={cachedValue}
+					bind:checked={$value}
 					onchange={handleChange}
 					{...$constraints}
 					{...rest}
@@ -86,10 +78,10 @@
 			{:else if checkboxComponent === 'switch'}
 				<Switch
 					name={field}
-					type="checkbox"
 					data-testid="form-input-{field.replaceAll('_', '-')}"
-					bind:checked={cachedValue}
-					on:change={handleChange}
+					checked={Boolean($value)}
+					onCheckedChange={(e) => ($value = e.checked)}
+					onchange={handleChange}
 					{...$constraints}
 					{...rest}
 					{disabled}
