@@ -9,7 +9,8 @@ export function formatStringToDate(inputString: string, locale = 'en') {
 
 export const isURL = (url: string) => {
 	try {
-		new URL(url);
+		const urlToCheck = new URL(url);
+		if (urlToCheck.protocol !== 'http:' && urlToCheck.protocol !== 'https:') return false;
 		return true;
 	} catch (e) {
 		return false;
