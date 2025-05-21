@@ -67,13 +67,11 @@ def get_config():
 
     if config["proxy"] == "bunkerweb":
         config["bunkerweb"] = {
-            "db_name": questionary.text(
-                "BunkerWeb DB name: ", default="db"
-            ).ask(),
+            "db_name": questionary.text("BunkerWeb DB name: ", default="db").ask(),
             "db_username": questionary.text(
                 "BunkerWeb DB username: ", default="bunkerweb"
             ).ask(),
-            "db_password": questionary.text(
+            "db_password": questionary.password(
                 "BunkerWeb DB password: ", default="changeme"
             ).ask(),
             "use_ui": questionary.confirm(
@@ -84,12 +82,13 @@ def get_config():
         if config["bunkerweb"]["use_ui"]:
             if config["mode"] == "VM/Remote":
                 config["bunkerweb"]["ui_fqdn"] = questionary.text(
-                    "Please enter your BunkerWeb UI FQDN/hostname (must be different from CISO FQDN/hostname): ", default="bw.example.com"
+                    "Please enter your BunkerWeb UI FQDN/hostname (must be different from CISO FQDN/hostname): ",
+                    default="bw.example.com",
                 ).ask()
             config["bunkerweb"]["ui_username"] = questionary.text(
                 "BunkerWeb UI username: ", default="admin"
             ).ask()
-            config["bunkerweb"]["ui_password"] = questionary.text(
+            config["bunkerweb"]["ui_password"] = questionary.password(
                 "BunkerWeb UI password: ", default="ChangeMe123!"
             ).ask()
 
@@ -279,7 +278,9 @@ def main():
         print(f"   - Certificate: {config['cert_config']['cert_path']}")
         print(f"   - Private key: {config['cert_config']['key_path']}")
         if config["proxy"] == "bunkerweb":
-            print(f"   - You will need to adjust the ownership of the files to the user running the BunkerWeb container: chown 101:101 {config['cert_config']['cert_path']} {config['cert_config']['key_path']}")
+            print(
+                f"   - You will need to adjust the ownership of the files to the user running the BunkerWeb container: chown 101:101 {config['cert_config']['cert_path']} {config['cert_config']['key_path']}"
+            )
     if config["db"] == "postgresql":
         print("3. Make sure PostgreSQL passwords are properly set")
     if config["need_mailer"]:
