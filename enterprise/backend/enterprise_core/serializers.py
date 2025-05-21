@@ -27,8 +27,13 @@ class FolderWriteSerializer(BaseModelSerializer):
         if not self.instance:
             return parent_folder
         if parent_folder:
-            if parent_folder == self.instance or parent_folder in self.instance.get_sub_folders():
-                raise serializers.ValidationError("errorFolderGraphMustNotContainCycles")
+            if (
+                parent_folder == self.instance
+                or parent_folder in self.instance.get_sub_folders()
+            ):
+                raise serializers.ValidationError(
+                    "errorFolderGraphMustNotContainCycles"
+                )
         return parent_folder
 
 
@@ -84,12 +89,12 @@ class ClientSettingsReadSerializer(BaseModelSerializer):
     favicon_hash = serializers.CharField()
     logo = serializers.SerializerMethodField()
     favicon = serializers.SerializerMethodField()
-    
+
     def get_logo(self, obj):
         if obj.logo:
             return obj.logo.name.split("/")[-1]
         return None
-    
+
     def get_favicon(self, obj):
         if obj.favicon:
             return obj.favicon.name.split("/")[-1]
