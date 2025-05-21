@@ -37,7 +37,11 @@
 		placement: 'left'
 	};
 
-	const DATE_FIELD_NAMES = [
+	export let data;
+	export let mailing = false;
+	export let fields: string[] = [];
+	export let exclude: string[] = [];
+	export let dateFieldsToFormat: string[] = [
 		'created_at',
 		'updated_at',
 		'expiry_date',
@@ -47,13 +51,9 @@
 		'eta',
 		'expiration_date',
 		'timestamp',
-		'reported_at'
+		'reported_at',
+		'due_date'
 	];
-
-	export let data;
-	export let mailing = false;
-	export let fields: string[] = [];
-	export let exclude: string[] = [];
 	export let displayModelTable = true;
 
 	exclude = [...exclude, ...defaultExcludes];
@@ -391,7 +391,7 @@
 												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 													>{value}</Anchor
 												>
-											{:else if ISO_8601_REGEX.test(value) && DATE_FIELD_NAMES.includes(key)}
+											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
