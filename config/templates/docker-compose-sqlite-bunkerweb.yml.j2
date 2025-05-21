@@ -115,7 +115,7 @@ services:
       {% if bunkerweb.use_ui and mode == "VM/Remote" %}- {{ bunkerweb.ui_fqdn }}_USE_TEMPLATE=ui
       - {{ bunkerweb.ui_fqdn }}_USE_REVERSE_PROXY=yes
       - {{ bunkerweb.ui_fqdn }}_REVERSE_PROXY_URL=/
-      - {{ bunkerweb.ui_fqdn }}_REVERSE_PROXY_HOST=http://bw-ui:7010
+      - {{ bunkerweb.ui_fqdn }}_REVERSE_PROXY_HOST=http://bw-ui:7000
       {% if can_do_tls %}- {{ bunkerweb.ui_fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
       - {{ bunkerweb.ui_fqdn }}_USE_CUSTOM_SSL=yes
       - {{ bunkerweb.ui_fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem

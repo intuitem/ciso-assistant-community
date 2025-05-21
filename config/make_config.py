@@ -296,7 +296,7 @@ def main():
             )
         else:
             print(
-                f"7. Access the BunkerWeb UI at http://{config['fqdn']}:7000 with credentials {config['bunkerweb']['ui_username']}:{config['bunkerweb']['ui_password']}"
+                f"7. Access the BunkerWeb UI at http://{config['fqdn']}:7010 with credentials {config['bunkerweb']['ui_username']}:{config['bunkerweb']['ui_password']}"
             )
 
 
