@@ -90,10 +90,11 @@ services:
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.1
     environment:
+      - "DATABASE_URI=mariadb+pymysql://{{ bunkerweb.db_username }}:{{ bunkerweb.db_password }}@bw-db:3306/{{ bunkerweb.db_name }}"
       - "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24"
       - MULTISITE=yes
       - BUNKERWEB_INSTANCES=bunkerweb
-      - SERVER_NAME={{ fqdn }}
+      - "SERVER_NAME={{ fqdn }}{% if bunkerweb.use_ui and mode == 'VM/Remote' %} {{ bunkerweb.ui_fqdn }}{% endif %}"
       - {{ fqdn }}_PROXY_BUFFER_SIZE=16k
       - {{ fqdn }}_PROXY_BUFFERS=8 16k
       - {{ fqdn }}_USE_TEMPLATE=low
@@ -108,6 +109,17 @@ services:
       - {{ fqdn }}_CUSTOM_SSL_KEY=/etc/bunkerweb/key.pem{% else %}
       - {{ fqdn }}_GENERATE_SELF_SIGNED_SSL=yes
       {% endif %}
+      {% if bunkerweb.use_ui and mode == "VM/Remote" %}- {{ bunkerweb.ui_fqdn }}_USE_TEMPLATE=ui
+      - {{ bunkerweb.ui_fqdn }}_USE_REVERSE_PROXY=yes
+      - {{ bunkerweb.ui_fqdn }}_REVERSE_PROXY_URL=/
+      - {{ bunkerweb.ui_fqdn }}_REVERSE_PROXY_HOST=http://bw-ui:7000
+      {% if can_do_tls %}- {{ bunkerweb.ui_fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
+      - {{ bunkerweb.ui_fqdn }}_USE_CUSTOM_SSL=yes
+      - {{ bunkerweb.ui_fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem
+      - {{ bunkerweb.ui_fqdn }}_CUSTOM_SSL_KEY=/etc/bunkerweb/key.pem{% else %}
+      - {{ bunkerweb.ui_fqdn }}_GENERATE_SELF_SIGNED_SSL=yes
+      {% endif %}
+      {% endif %}
     volumes:
       - bw-storage:/data # This is used to persist the cache and other data like the backups
       {% if use_custom_cert %}- {{ cert_config.cert_path }}:/etc/bunkerweb/cert.pem:ro
@@ -115,6 +127,34 @@ services:
     restart: unless-stopped
     networks:
       - bw-universe
+      - bw-db
+
+  bw-db:
+    image: mariadb:11
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "{{ bunkerweb.db_name }}"
+      MYSQL_USER: "{{ bunkerweb.db_username }}"
+      MYSQL_PASSWORD: "{{ bunkerweb.db_password }}" # Remember to set a stronger password for the database
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - bw-db
+
+  {% if bunkerweb.use_ui %}bw-ui:
+    image: bunkerity/bunkerweb-ui:1.6.1
+    {% if mode == "local" %}ports:
+      - 7000:7000{% endif %}
+    environment:
+      - "DATABASE_URI=mariadb+pymysql://{{ bunkerweb.db_username }}:{{ bunkerweb.db_password }}@bw-db:3306/{{ bunkerweb.db_name }}"
+      - "ADMIN_USERNAME={{ bunkerweb.ui_username }}"
+      - "ADMIN_PASSWORD={{ bunkerweb.ui_password }}"
+    restart: unless-stopped
+    networks:
+      - bw-universe
+      - bw-db{% endif %}
+
 
   {% if kafka_dispatcher.enabled %}
   dispatcher:
@@ -155,6 +195,7 @@ services:
 
 volumes:
   bw-storage:
+  bw-data:
 
 networks:
   bw-universe:
@@ -165,3 +206,5 @@ networks:
         - subnet: 10.20.30.0/24 # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
   bw-services:
     name: bw-services
+  bw-db:
+    name: bw-db
