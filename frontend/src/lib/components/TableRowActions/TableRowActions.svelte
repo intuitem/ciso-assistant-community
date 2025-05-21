@@ -106,8 +106,8 @@
 				: (row.name ?? Object.values(row)[0]);
 		const body =
 			URLModel === 'users'
-				? m.deleteUserMessage({ name: name })
-				: m.deleteModalMessage({ name: name });
+				? m.deleteUserMessage({ name: name as string })
+				: m.deleteModalMessage({ name: name as string });
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
