@@ -90,7 +90,9 @@ jobs:
           pnpm i --frozen-lockfile
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
-        run: pnpm exec playwright install --with-deps ${{ matrix.playwright-browser }}
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -106,16 +108,17 @@ jobs:
         run: pnpm run build
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
-        run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           CI: true
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
         if: ${{ !cancelled() }}
         run: |
-          SAFE_NAME=$(echo '${{ env.BRANCH_NAME }}' | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -196,28 +199,34 @@ jobs:
         run: make
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright install --with-deps ${{ matrix.playwright-browser }}
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
+        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: |
-          poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
+        run: poetry run python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }}
-          nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
+          poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
+          nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           CI: true
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
         if: ${{ !cancelled() }}
         run: |
-          SAFE_NAME=$(echo '${{ env.BRANCH_NAME }}' | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
