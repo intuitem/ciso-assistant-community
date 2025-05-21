@@ -2691,9 +2691,7 @@ class FolderViewSet(BaseModelViewSet):
     def import_dummy_domain(self, request):
         domain_name = "DEMO"
         try:
-            dummy_fixture_path = (
-                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
-            )
+            dummy_fixture_path = Path("fixtures/dummy-domain.bak")
             if not dummy_fixture_path.exists():
                 logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
                 return Response(
@@ -5243,7 +5241,7 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = ["folder", "status", "severity", "qualifications"]
+    filterset_fields = ["folder", "status", "severity", "qualifications", "detection"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5254,6 +5252,11 @@ class IncidentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Incident.Severity.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get detection channel choices")
+    def detection(self, request):
+        return Response(dict(Incident.Detection.choices))
 
     def perform_update(self, serializer):
         previous_instance = self.get_object()

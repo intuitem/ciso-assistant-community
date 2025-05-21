@@ -51,6 +51,7 @@
 		'eta',
 		'expiration_date',
 		'timestamp',
+		'reported_at',
 		'due_date'
 	];
 	export let displayModelTable = true;
