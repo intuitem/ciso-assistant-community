@@ -4493,7 +4493,7 @@ class FindingsAssessment(Assessment):
         }
 
 
-class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
         IDENTIFIED = "identified", _("Identified")
