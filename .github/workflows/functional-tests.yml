@@ -111,7 +111,7 @@ jobs:
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
           CI: true
-        run: pnpm exec playwright install --with-deps "$PLAYWRIGHT_BROWSER"
+        run: pnpm exec playwright test --project="$PLAYWRIGHT_BROWSER"
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
