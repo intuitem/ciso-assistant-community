@@ -2,7 +2,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from urllib.parse import urlparse
 
 
-class RelativePathPagination(LimitOffsetPagination):
+class CustomLimitOffsetPagination(LimitOffsetPagination):
     def get_next_link(self):
         next_link = super().get_next_link()
         if next_link is None:
