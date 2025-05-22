@@ -178,6 +178,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.forms",
     "django_structlog",
+    "auditlog",
     "tailwind",
     "iam",
     "global_settings",
@@ -200,7 +201,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
     "huey.contrib.djhuey",
-    "auditlog",
     "storages",
 ]
 
