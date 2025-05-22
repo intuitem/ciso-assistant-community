@@ -1254,6 +1254,7 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     owner = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
+    evidences = FieldsRelatedField(many=True)
 
     class Meta:
         model = FindingsAssessment
