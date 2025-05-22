@@ -4,6 +4,7 @@ from django.utils.formats import date_format
 import magic
 import structlog
 from core.views import BaseModelViewSet
+from core.permissions import IsAdministrator
 from django.conf import settings
 from iam.models import User
 from rest_framework import status
@@ -16,6 +17,9 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import mixins, viewsets, filters
+
+from django_filters.rest_framework import DjangoFilterBackend
 
 from django.conf import settings
 
@@ -33,7 +37,9 @@ from pathlib import Path
 import humanize
 
 from .models import ClientSettings
-from .serializers import ClientSettingsReadSerializer
+from .serializers import ClientSettingsReadSerializer, LogEntrySerializer
+
+from auditlog.models import LogEntry
 
 logger = structlog.get_logger(__name__)
 
@@ -290,7 +296,7 @@ def get_build(request):
         total, used, free = disk_info
         disk_response = {
             "Disk space": f"{humanize.naturalsize(total)}",
-            "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
+            "Used": f"{humanize.naturalsize(used)} ({int((used / total) * 100)} %)",
         }
     else:
         disk_response = {
@@ -307,3 +313,27 @@ def get_build(request):
             **disk_response,
         }
     )
+
+
+class LogEntryViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    ordering = ["-timestamp"]
+    ordering_fields = "__all__"
+    search_fields = [
+        "content_type__model",
+        "action",
+        "actor__email",
+        "actor__first_name",
+        "actor__last_name",
+    ]
+    filterset_fields = ["action", "actor", "content_type__model"]
+
+    permission_classes = (IsAdministrator,)
+    serializer_class = LogEntrySerializer
+    queryset = LogEntry.objects.all()
