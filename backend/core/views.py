@@ -1897,6 +1897,7 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
         "findings": ["exact"],
         "eta": ["exact", "lte", "gte", "lt", "gt"],
     }
+    search_fields = ["name", "description", "ref_id"]
 
     serializer_class = ComplianceAssessmentActionPlanSerializer
     filter_backends = [
