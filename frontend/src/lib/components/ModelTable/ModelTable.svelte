@@ -180,7 +180,7 @@
 
 	const zodFiltersObject = {};
 	Object.keys(filters).forEach((k) => {
-		zodFiltersObject[k] = z.array(z.string());
+		zodFiltersObject[k] = z.array(z.string()).default([]);
 	});
 	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
 		SPA: true,
@@ -278,7 +278,7 @@
 				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				data-popup="popupFilter"
 			>
-				<SuperForm {_form} validators={zod(z.object({}))} let:form>
+				<SuperForm {_form} let:form>
 					{#each filteredFields as field}
 						{#if filters[field]?.component}
 							<svelte:component
