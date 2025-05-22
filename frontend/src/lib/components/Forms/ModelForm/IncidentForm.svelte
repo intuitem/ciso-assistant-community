@@ -84,6 +84,14 @@
 	field="qualifications"
 	label={m.qualifications()}
 />
+<TextField
+	{form}
+	field="link"
+	label={m.link()}
+	helpText={m.linkHelpText()}
+	cacheLock={cacheLocks['link']}
+	bind:cachedValue={formDataCache['link']}
+/>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
 		multiple
