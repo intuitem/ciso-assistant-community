@@ -1614,5 +1614,7 @@
 	"internal": "Internal",
 	"external": "External",
 	"internallyDetected": "Internal",
-	"externallyDetected": "External"
+	"externallyDetected": "External",
+	"errorCreatingPersonalAccessToken": "An error occurred while creating the personal access token.",
+	"errorMaxPatAmountExceeded": "Maximum amount of tokens allowed exceeded for this user."
 }

@@ -161,6 +161,13 @@ export const actions: Actions = {
 
 		if (!response.ok) {
 			console.error('Could not create PAT');
+			try {
+				const errorResponse = await response.json();
+				const errorMessage = errorResponse?.error || m.errorCreatingPersonalAccessToken();
+				setFlash({ type: 'error', message: safeTranslate(errorMessage) }, event);
+			} catch (e) {
+				setFlash({ type: 'error', message: m.errorCreatingPersonalAccessToken() }, event);
+			}
 			return fail(response.status, { form });
 		}
 

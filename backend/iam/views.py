@@ -141,7 +141,7 @@ class PersonalAccessTokenViewSet(views.APIView):
             )
             if token.count() >= token_limit_per_user:
                 return Response(
-                    {"error": "Maximum amount of tokens allowed per user exceeded."},
+                    {"error": "errorMaxPatAmountExceeded"},
                     status=status.HTTP_403_FORBIDDEN,
                 )
         instance, token = self.create_token(timedelta(days=int(expiry_days)))
