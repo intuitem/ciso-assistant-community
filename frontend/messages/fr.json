@@ -1592,5 +1592,12 @@
 	"assetClassGovernmentRelations": "Relations Gouvernementales",
 	"assetClassCommunityRelations": "Relations Communautaires",
 	"assetClassInvestorRelations": "Relations avec les Investisseurs",
-	"unknownOrDeletedUser": "Utilisateur inconnu ou supprimé"
+	"unknownOrDeletedUser": "Utilisateur inconnu ou supprimé",
+	"reportedAt": "Remonté le",
+	"reportedAtHelpText": "Horodatage de la remontée",
+	"detectedBy": "Détécté via",
+	"internal": "Interne",
+	"external": "Externe",
+	"internallyDetected": "Interne",
+	"externallyDetected": "Externe"
 }
