@@ -469,7 +469,7 @@
 	"etaHelpText": "Estimated time of arrival",
 	"dueDateHelpText": "Date by which the assessment must be completed",
 	"expiryDateHelpText": "Date by which the object is no longer valid",
-	"linkHelpText": "External URL for tracking or reference (e.g. sharepoint, jira, etc.)",
+	"linkHelpText": "External URL for tracking or reference (e.g. ITSM, sharepoint, jira, etc.)",
 	"effortHelpText": "The effort required to implement the applied control",
 	"costHelpText": "The cost required to implement the applied control",
 	"riskAcceptanceJusitficationHelpText": "Justification for the risk acceptance. Only the approver can edit this field.",
