@@ -790,7 +790,7 @@ export const TaskNodeSchema = z.object({
 
 export const AuthTokenCreateSchema = z.object({
 	name: z.string().min(1),
-	expiry: z.number().positive().optional()
+	expiry: z.number().positive().min(1).max(365).default(30).optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
