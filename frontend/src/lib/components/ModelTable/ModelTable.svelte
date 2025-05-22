@@ -180,7 +180,7 @@
 
 	const zodFiltersObject = {};
 	Object.keys(filters).forEach((k) => {
-		zodFiltersObject[k] = z.array(z.string()).default([]);
+		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
 	});
 	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
 		SPA: true,
