@@ -1535,7 +1535,6 @@
 	"update": "Update",
 	"delete": "Delete",
 	"changeStatus": "Change status",
-	"errorUpdatungObject": "An error occurred while updating the {object} object.",
 	"logEntryRepr": "{timestamp} - {actor} - {action} - {object}",
 	"auditLog": "Audit log",
 	"actor": "Actor",
