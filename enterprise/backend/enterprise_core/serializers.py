@@ -27,8 +27,13 @@ class FolderWriteSerializer(BaseModelSerializer):
         if not self.instance:
             return parent_folder
         if parent_folder:
-            if parent_folder == self.instance or parent_folder in self.instance.get_sub_folders():
-                raise serializers.ValidationError("errorFolderGraphMustNotContainCycles")
+            if (
+                parent_folder == self.instance
+                or parent_folder in self.instance.get_sub_folders()
+            ):
+                raise serializers.ValidationError(
+                    "errorFolderGraphMustNotContainCycles"
+                )
         return parent_folder
 
 

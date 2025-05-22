@@ -290,7 +290,7 @@ def get_build(request):
         total, used, free = disk_info
         disk_response = {
             "Disk space": f"{humanize.naturalsize(total)}",
-            "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
+            "Used": f"{humanize.naturalsize(used)} ({int((used / total) * 100)} %)",
         }
     else:
         disk_response = {
