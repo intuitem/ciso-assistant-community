@@ -95,7 +95,7 @@ class PersonalAccessTokenViewSet(views.APIView):
         return knox_settings.TOKEN_PREFIX
 
     def get_token_limit_per_user(self):
-        return knox_settings.TOKEN_LIMIT_PER_USER
+        return 5
 
     def get_expiry_datetime_format(self):
         return knox_settings.EXPIRY_DATETIME_FORMAT
@@ -136,7 +136,9 @@ class PersonalAccessTokenViewSet(views.APIView):
             )
         if token_limit_per_user is not None:
             now = timezone.now()
-            token = request.user.auth_token_set.filter(expiry__gt=now)
+            token = request.user.auth_token_set.filter(expiry__gt=now).filter(
+                personalaccesstoken__isnull=False
+            )
             if token.count() >= token_limit_per_user:
                 return Response(
                     {"error": "Maximum amount of tokens allowed per user exceeded."},
