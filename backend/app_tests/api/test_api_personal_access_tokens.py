@@ -104,25 +104,20 @@ class TestPersonalAccessTokenViewSet:
     @pytest.mark.django_db
     def test_token_limit_per_user(self, authenticated_client, monkeypatch, user):
         """Test that users cannot exceed their token limit."""
-        # Set token limit for test
-        monkeypatch.setattr(knox_settings, "TOKEN_LIMIT_PER_USER", 2)
-
         url = "/api/iam/auth-tokens/"
 
-        # Create first token
         authenticated_client.post(url, {"name": "Token 1", "expiry": 30})
-
-        # Create second token
         authenticated_client.post(url, {"name": "Token 2", "expiry": 30})
+        authenticated_client.post(url, {"name": "Token 3", "expiry": 30})
+        authenticated_client.post(url, {"name": "Token 4", "expiry": 30})
+        authenticated_client.post(url, {"name": "Token 5", "expiry": 30})
 
-        # Try to create a third token - should fail
-        response = authenticated_client.post(url, {"name": "Token 3", "expiry": 30})
+        response = authenticated_client.post(url, {"name": "Token 6", "expiry": 30})
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert "Maximum amount of tokens allowed" in response.data["error"]
 
-        # Verify only 2 tokens were created
-        assert PersonalAccessToken.objects.filter(auth_token__user=user).count() == 2
+        assert PersonalAccessToken.objects.filter(auth_token__user=user).count() == 5
 
     @pytest.mark.django_db
     def test_get_tokens(self, authenticated_client, personal_access_token):
