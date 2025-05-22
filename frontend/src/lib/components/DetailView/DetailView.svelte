@@ -41,6 +41,19 @@
 	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
+	export let dateFieldsToFormat: string[] = [
+		'created_at',
+		'updated_at',
+		'expiry_date',
+		'accepted_at',
+		'rejected_at',
+		'revoked_at',
+		'eta',
+		'expiration_date',
+		'timestamp',
+		'reported_at',
+		'due_date'
+	];
 	export let displayModelTable = true;
 
 	exclude = [...exclude, ...defaultExcludes];
@@ -378,7 +391,7 @@
 												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 													>{value}</Anchor
 												>
-											{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date' || key === 'timestamp')}
+											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}

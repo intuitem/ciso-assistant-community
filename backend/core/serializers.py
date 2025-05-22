@@ -1009,7 +1009,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
-    progress = serializers.ReadOnlyField()
+    progress = serializers.ReadOnlyField(source="get_progress")
     assets = FieldsRelatedField(many=True)
 
     class Meta:
@@ -1428,6 +1428,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     qualifications = FieldsRelatedField(["name"], many=True)
     severity = serializers.CharField(source="get_severity_display", read_only=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
+    detection = serializers.CharField(source="get_detection_display", read_only=True)
     folder = FieldsRelatedField()
 
     class Meta:
@@ -1446,6 +1447,7 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     assigned_to = FieldsRelatedField(many=True)
+    findings_assessment = FieldsRelatedField(many=True)
 
     next_occurrence = serializers.DateField(read_only=True)
     last_occurrence_status = serializers.CharField(read_only=True)

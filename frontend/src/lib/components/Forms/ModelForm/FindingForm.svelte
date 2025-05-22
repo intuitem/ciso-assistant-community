@@ -12,7 +12,6 @@
 	import { AppliedControlSchema } from '$lib/utils/schemas';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 
 	export let form: SuperForm<any>;
@@ -24,18 +23,7 @@
 
 	const modalStore = getModalStore();
 
-	let appliedControlModel: ModelInfo;
-	onMount(async () => {
-		appliedControlModel = getModelInfo('applied-controls');
-		const selectOptions = {
-			status: await fetch('/applied-controls/status').then((r) => r.json()),
-			priority: await fetch('/applied-controls/priority').then((r) => r.json()),
-			category: await fetch('/applied-controls/category').then((r) => r.json()),
-			csf_function: await fetch('/applied-controls/csf_function').then((r) => r.json()),
-			effort: await fetch('/applied-controls/effort').then((r) => r.json())
-		};
-		appliedControlModel.selectOptions = selectOptions;
-	});
+	const appliedControlModel = getModelInfo('applied-controls');
 
 	function modalAppliedControlCreateForm(field: string): void {
 		const modalComponent: ModalComponent = {
@@ -91,6 +79,15 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="eta"
+	label={m.eta()}
+	helpText={m.etaHelpText()}
+	cacheLock={cacheLocks['eta']}
+	bind:cachedValue={formDataCache['eta']}
 />
 <Select
 	{form}
@@ -151,3 +148,12 @@
 		</div>
 	{/if}
 </div>
+<TextField
+	type="date"
+	{form}
+	field="due_date"
+	label={m.dueDate()}
+	helpText={m.dueDateHelpText()}
+	cacheLock={cacheLocks['due_date']}
+	bind:cachedValue={formDataCache['due_date']}
+/>

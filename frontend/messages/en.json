@@ -762,7 +762,7 @@
 	"addRepresentative": "Add representative",
 	"phone": "Phone",
 	"role": "Role",
-	"question": "Question",
+	"questions": "Questions",
 	"recipientEntity": "Recipient entity",
 	"financial": "Financial",
 	"legal": "Legal",
@@ -1607,5 +1607,12 @@
 	"assetClassGovernmentRelations": "Government Relations",
 	"assetClassCommunityRelations": "Community Relations",
 	"assetClassInvestorRelations": "Investor Relations",
-	"unknownOrDeletedUser": "Unknown or deleted user"
+	"unknownOrDeletedUser": "Unknown or deleted user",
+	"reportedAt": "Reported at",
+	"reportedAtHelpText": "Time stamp of the actual reporting",
+	"detectedBy": "Detected By",
+	"internal": "Internal",
+	"external": "External",
+	"internallyDetected": "Internal",
+	"externallyDetected": "External"
 }

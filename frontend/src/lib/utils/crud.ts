@@ -1041,7 +1041,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
-		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
+		selectFields: [
+			{ field: 'severity', valueType: 'number' },
+			{ field: 'status' },
+			{ field: 'detection' }
+		]
 	},
 	'timeline-entries': {
 		name: 'timelineentry',
@@ -1070,7 +1074,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
-			{ field: 'risk_assessments', urlModel: 'risk-assessments' }
+			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'task_template', urlModel: 'task-nodes', disableAddDeleteButtons: true }
