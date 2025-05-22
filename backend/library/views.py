@@ -19,7 +19,7 @@ from django.http import HttpResponse
 
 import django_filters as df
 from core.helpers import get_sorted_requirement_nodes
-from core.models import StoredLibrary, LoadedLibrary
+from core.models import StoredLibrary, LoadedLibrary, Framework
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
@@ -69,6 +69,40 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
         choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
         method="filter_object_type",
     )
+    mapping_suggested = df.BooleanFilter(
+        method="filter_mapping_suggested",
+    )
+    
+    def filter_mapping_suggested(self, queryset, name, value):
+        """
+        Returns StoredLibraries containing at least one mapping with a source framework already loaded
+        """
+        if value:
+            # Get all loaded framework URNs
+            loaded_framework_urns = Framework.objects.values_list("urn", flat=True)
+                    
+            # Filter queryset to only include libraries with requirement mappings
+            queryset = queryset.filter(content__requirement_mapping_set__isnull=False)
+            
+            # Filter to only include libraries where at least one mapping has a source framework that's loaded
+            filtered_libraries = []
+            for library in queryset:
+                requirement_mapping_set = library.content.get("requirement_mapping_set", [])
+                # Handle both single mapping dict and list of mappings
+                if isinstance(requirement_mapping_set, dict):
+                    requirement_mapping_set = [requirement_mapping_set]
+                
+                for mapping in requirement_mapping_set:
+                    source_framework_urn = mapping.get("source_framework_urn")
+                    if source_framework_urn in loaded_framework_urns:
+                        filtered_libraries.append(library.pk)
+                        break  # Found at least one matching mapping, no need to check others
+            
+            # Filter queryset to only include libraries with matching mappings
+            queryset = queryset.filter(pk__in=filtered_libraries)
+            
+            return queryset
+        return queryset
 
     def filter_object_type(self, queryset, name, value: list[str]):
         union_qs = Q()
