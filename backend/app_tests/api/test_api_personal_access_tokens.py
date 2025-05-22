@@ -115,7 +115,7 @@ class TestPersonalAccessTokenViewSet:
         response = authenticated_client.post(url, {"name": "Token 6", "expiry": 30})
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert "Maximum amount of tokens allowed" in response.data["error"]
+        assert "errorMaxPatAmountExceeded" in response.data["error"]
 
         assert PersonalAccessToken.objects.filter(auth_token__user=user).count() == 5
 
