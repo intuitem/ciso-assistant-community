@@ -4,20 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0076_finding_due_date_finding_eta'),
+        ("core", "0076_finding_due_date_finding_eta"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='finding',
-            name='evidences',
-            field=models.ManyToManyField(blank=True, help_text='Evidences related to the follow-up', related_name='findings', to='core.evidence'),
+            model_name="finding",
+            name="evidences",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Evidences related to the follow-up",
+                related_name="findings",
+                to="core.evidence",
+            ),
         ),
         migrations.AddField(
-            model_name='findingsassessment',
-            name='evidences',
-            field=models.ManyToManyField(blank=True, help_text='Evidences related to the follow-up', related_name='findings_assessments', to='core.evidence'),
+            model_name="findingsassessment",
+            name="evidences",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Evidences related to the follow-up",
+                related_name="findings_assessments",
+                to="core.evidence",
+            ),
         ),
     ]
