@@ -45,8 +45,6 @@
 	const cBase = 'card p-4 w-fit shadow-xl space-y-4 max-w-[80ch]';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
-
-	$: console.log('toto', $page.form?.form?.message?.data?.token);
 </script>
 
 {#if $modalStore[0]}
