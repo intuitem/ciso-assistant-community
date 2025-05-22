@@ -720,6 +720,12 @@ export const IncidentSchema = z.object({
 	status: z.string().default('new'),
 	detection: z.string().default('internally_detected'),
 	severity: z.number().default(6),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
