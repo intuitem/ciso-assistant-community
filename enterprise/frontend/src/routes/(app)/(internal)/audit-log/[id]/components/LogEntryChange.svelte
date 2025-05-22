@@ -15,13 +15,13 @@
   >
     {safeTranslate(field)}
   </dt>
-  <dd class="text-gray-700 col-span-2 whitespace-pre-line">
+  <dd class="px-2 text-gray-700 col-span-2 whitespace-pre-line">
       <span>
         {before}
       </span>
   </dd>
   <i class="fa-solid fa-arrow-right my-auto" />
-  <dd class="text-gray-700 col-span-2 whitespace-pre-line">
+  <dd class="px-2 text-gray-700 col-span-2 whitespace-pre-line">
       <span>
         {after}
       </span>
