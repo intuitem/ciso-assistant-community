@@ -370,7 +370,6 @@ class LibraryUpdater:
         if self.dependencies is None:
             self.dependencies = []
         self.new_framework = new_library_content.get("framework")
-        self.new_mapping = new_library_content.get("requirement_mapping_set")
         self.new_matrices = new_library_content.get("risk_matrix")
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
@@ -485,10 +484,6 @@ class LibraryUpdater:
                     "library": self.old_library,
                 },
             )
-        
-        if self.new_mapping is not None:
-            self.old_library.delete()
-            self.new_library.load()
 
         if self.new_framework is not None:
             # update or create the framework object itself
