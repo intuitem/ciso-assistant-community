@@ -150,19 +150,6 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type);
 
-	const filterInitialData = $page.url.searchParams.entries();
-
-	const _form = superForm(defaults(filterInitialData, zod(z.object({}))), {
-		SPA: true,
-		validators: zod(z.object({})),
-		dataType: 'json',
-		invalidateAll: false,
-		applyAction: false,
-		resetForm: false,
-		taintedMessage: false,
-		validationMethod: 'auto'
-	});
-
 	const popupFilter: PopupSettings = {
 		event: 'click',
 		target: 'popupFilter',
@@ -186,6 +173,28 @@
 	// Initialize filter values from URL search params
 	for (const field of filteredFields)
 		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
+
+	const filterInitialData: Record<string, string[]> = {};
+	// convert URL search params to filter initial data
+	for (const [key, value] of $page.url.searchParams) {
+		filterInitialData[key] ??= [];
+		filterInitialData[key].push(value);
+	}
+
+	const zodFiltersObject = {};
+	Object.keys(filters).forEach((k) => {
+		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
+	});
+	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
+		SPA: true,
+		validators: zod(z.object(zodFiltersObject)),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
 
 	$: hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
 
@@ -272,7 +281,7 @@
 				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				data-popup="popupFilter"
 			>
-				<SuperForm {_form} validators={zod(z.object({}))} let:form>
+				<SuperForm {_form} let:form>
 					{#each filteredFields as field}
 						{#if filters[field]?.component}
 							<svelte:component
