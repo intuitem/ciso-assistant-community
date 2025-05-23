@@ -19,13 +19,17 @@ export const load = (async ({ fetch }) => {
 	const updatableLibrariesEndpoint = `${loadedLibrariesEndpoint}available-updates/`;
 	const mappingSuggestedEndpoint = `${storedLibrariesEndpoint}?mapping_suggested=true`;
 
-	const [storedLibrariesResponse, loadedLibrariesResponse, updatableLibrariesResponse, mappingSuggestedResponse] =
-		await Promise.all([
-			fetch(storedLibrariesEndpoint),
-			fetch(loadedLibrariesEndpoint),
-			fetch(updatableLibrariesEndpoint),
-			fetch(mappingSuggestedEndpoint)
-		]);
+	const [
+		storedLibrariesResponse,
+		loadedLibrariesResponse,
+		updatableLibrariesResponse,
+		mappingSuggestedResponse
+	] = await Promise.all([
+		fetch(storedLibrariesEndpoint),
+		fetch(loadedLibrariesEndpoint),
+		fetch(updatableLibrariesEndpoint),
+		fetch(mappingSuggestedEndpoint)
+	]);
 
 	const storedLibraries = await storedLibrariesResponse.json();
 	const loadedLibraries = await loadedLibrariesResponse.json();

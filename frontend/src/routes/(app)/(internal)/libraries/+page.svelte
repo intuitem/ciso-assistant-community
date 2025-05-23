@@ -30,13 +30,11 @@
 				>{m.librariesStore()}
 				<span class="badge variant-soft-primary">{data.storedLibrariesTable.meta.count}</span>
 				{#if mappingSuggestedCount > 0}
-					<span class="badge variant-soft-secondary"
-						title="{m.mappingSuggestedHelpText()}"
+					<span class="badge variant-soft-secondary" title={m.mappingSuggestedHelpText()}
 						>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1" /></span
 					>
 				{/if}
-			</Tab
-			>
+			</Tab>
 			<Tab bind:group={tabSet} value={1}
 				>{m.loadedLibraries()}
 				<span class="badge variant-soft-primary">{data.loadedLibrariesTable.meta.count}</span>
@@ -57,9 +55,10 @@
 			{#if tabSet === 0}
 				<!-- start of mapping suggestions teasing -->
 				{#if mappingSuggestedCount > 0}
-					<div class="flex items-center justify-center w-full -mt-4 p-2 variant-soft-secondary text-sm">
-						<span class="badge variant-soft-secondary mr-1"
-							title="{m.mappingSuggestedHelpText()}"
+					<div
+						class="flex items-center justify-center w-full -mt-4 p-2 variant-soft-secondary text-sm"
+					>
+						<span class="badge variant-soft-secondary mr-1" title={m.mappingSuggestedHelpText()}
 							>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1" /></span
 						><span class="">{m.mappingSuggestionTeasing()}</span>
 					</div>

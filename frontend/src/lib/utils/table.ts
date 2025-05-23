@@ -27,9 +27,7 @@ const YES_NO_OPTIONS = [
 	{ label: 'no', value: 'false' }
 ];
 
-const YES_OPTION = [
-	{ label: 'yes', value: 'true' }
-];
+const YES_OPTION = [{ label: 'yes', value: 'true' }];
 
 const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
@@ -788,7 +786,7 @@ export const listViewFields = {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
 			object_type: LIBRARY_TYPE_FILTER,
-			mapping_suggested: MAPPING_SUGGESTED_FILTER,
+			mapping_suggested: MAPPING_SUGGESTED_FILTER
 		}
 	},
 	'loaded-libraries': {
