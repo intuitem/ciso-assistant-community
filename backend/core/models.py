@@ -2367,6 +2367,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
         default=Detection.INTERNAL,
     )
 
+    link = models.CharField(
+        null=True,
+        blank=True,
+        max_length=2048,
+        verbose_name=_("Link"),
+    )
+
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]

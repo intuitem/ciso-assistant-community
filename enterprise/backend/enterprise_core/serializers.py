@@ -4,9 +4,12 @@ from core.serializers import (
     BaseModelSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
+from core.serializer_fields import FieldsRelatedField
 from iam.models import Folder, User
 
 from .models import ClientSettings
+from auditlog.models import LogEntry
+
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -103,3 +106,21 @@ class ClientSettingsReadSerializer(BaseModelSerializer):
     class Meta:
         model = ClientSettings
         exclude = ["is_published", "folder"]
+
+
+class LogEntrySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the LogEntry model.
+    """
+
+    actor = FieldsRelatedField()
+    action = serializers.CharField(source="get_action_display")
+    content_type = serializers.SerializerMethodField(method_name="get_content_type")
+
+    def get_content_type(self, obj):
+        return obj.content_type.name
+
+    class Meta:
+        model = LogEntry
+        fields = "__all__"
+        read_only_fields = ["id", "timestamp", "actor", "action", "changes_text"]

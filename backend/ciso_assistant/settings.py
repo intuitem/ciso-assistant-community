@@ -178,6 +178,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.forms",
     "django_structlog",
+    "auditlog",
     "tailwind",
     "iam",
     "global_settings",
@@ -200,7 +201,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
     "huey.contrib.djhuey",
-    "auditlog",
     "storages",
 ]
 
@@ -280,6 +280,7 @@ REST_KNOX = {
     "MIN_REFRESH_INTERVAL": 60,
 }
 
+KNOX_TOKEN_MODEL = "knox.AuthToken"
 
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
