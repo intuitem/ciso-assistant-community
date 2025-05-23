@@ -42,6 +42,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
+from collections import defaultdict
 
 logger = get_logger(__name__)
 
@@ -425,8 +426,9 @@ class LibraryUpdater:
 
     def update_threats(self):
         for threat in self.threats:
+            normalized_urn = threat["urn"].lower()
             Threat.objects.update_or_create(
-                urn=threat["urn"].lower(),
+                urn=normalized_urn,
                 defaults=threat,
                 create_defaults={
                     **self.referential_object_dict,
@@ -438,8 +440,9 @@ class LibraryUpdater:
 
     def update_reference_controls(self):
         for reference_control in self.reference_controls:
+            normalized_urn = reference_control["urn"].lower()
             ReferenceControl.objects.update_or_create(
-                urn=reference_control["urn"].lower(),
+                urn=normalized_urn,
                 defaults=reference_control,
                 create_defaults={
                     **self.referential_object_dict,
@@ -466,8 +469,10 @@ class LibraryUpdater:
                 },
             )
 
+            # update requirement_nodes
             requirement_node_urns = set(
-                rc.urn for rc in RequirementNode.objects.filter(framework=new_framework)
+                rc.urn.lower()
+                for rc in RequirementNode.objects.filter(framework=new_framework)
             )
             new_requirement_node_urns = set(
                 rc["urn"].lower() for rc in requirement_nodes
@@ -479,7 +484,7 @@ class LibraryUpdater:
             for requirement_node_urn in deleted_requirement_node_urns:
                 requirement_node = RequirementNode.objects.filter(
                     urn=requirement_node_urn
-                ).first()  # locale is not used, so if there are more than one requirement node with this URN only the first fetched requirement node will be deleted.
+                ).first()
                 if requirement_node is not None:
                     requirement_node.delete()
 
@@ -490,158 +495,193 @@ class LibraryUpdater:
             objects_tracked = {}
 
             for threat in Threat.objects.filter(library__in=involved_libraries):
-                objects_tracked[threat.urn] = threat
+                objects_tracked[threat.urn.lower()] = threat
 
             for rc in ReferenceControl.objects.filter(library__in=involved_libraries):
-                objects_tracked[rc.urn] = rc
+                objects_tracked[rc.urn.lower()] = rc
 
             compliance_assessments = [
                 *ComplianceAssessment.objects.filter(framework=new_framework)
             ]
 
+            existing_requirement_node_objects = {
+                rn.urn.lower(): rn
+                for rn in RequirementNode.objects.filter(framework=new_framework)
+            }
+            existing_requirement_assessment_objects = defaultdict(list)
+            for ra in RequirementAssessment.objects.filter(
+                requirement__framework=new_framework
+            ):
+                existing_requirement_assessment_objects[
+                    ra.requirement.urn.lower()
+                ].append(ra)
+
+            requirement_assessment_objects_to_create = []
+            requirement_assessment_objects_to_update = []
+            requirement_node_objects_to_update = []
             order_id = 0
+            all_fields_to_update = set()
+
+            # main loop by requirement_node
             for requirement_node in requirement_nodes:
-                requirement_node_dict = {**requirement_node}
-                for key in ["depth", "reference_controls", "threats"]:
-                    requirement_node_dict.pop(key, None)
+                urn = requirement_node["urn"].lower()
+                questions = requirement_node.get("questions")
+
+                requirement_node_dict = {
+                    k: v
+                    for k, v in requirement_node.items()
+                    if k not in ["urn", "depth", "reference_controls", "threats"]
+                }
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
+                all_fields_to_update.update(requirement_node_dict.keys())
 
-                (
-                    new_requirement_node,
-                    created,
-                ) = RequirementNode.objects.update_or_create(
-                    urn=requirement_node["urn"].lower(),
-                    defaults=requirement_node_dict,
-                    create_defaults={
-                        **self.referential_object_dict,
-                        **self.i18n_object_dict,
-                        **requirement_node_dict,
-                        "framework": new_framework,
-                    },
-                )
-
-                if created:
-                    for compliance_assessment in compliance_assessments:
-                        ra = RequirementAssessment.objects.create(
-                            compliance_assessment=compliance_assessment,
-                            requirement=new_requirement_node,
-                            folder=compliance_assessment.perimeter.folder,
-                            answers=transform_questions_to_answers(
-                                new_requirement_node.questions
-                            )
-                            if new_requirement_node.questions
-                            else {},
-                        )
+                if urn in existing_requirement_node_objects:
+                    requirement_node_object = existing_requirement_node_objects[urn]
+                    for key, value in requirement_node_dict.items():
+                        setattr(requirement_node_object, key, value)
+                    requirement_node_objects_to_update.append(requirement_node_object)
                 else:
-                    questions = requirement_node.get("questions")
+                    requirement_node_object = RequirementNode.objects.create(
+                        urn=urn,
+                        framework=new_framework,
+                        **self.referential_object_dict,
+                        **requirement_node_dict,
+                    )
+                    for ca in compliance_assessments:
+                        requirement_assessment_objects_to_create.append(
+                            RequirementAssessment(
+                                compliance_assessment=ca,
+                                requirement=requirement_node_object,
+                                folder=ca.perimeter.folder,
+                                answers=transform_questions_to_answers(questions)
+                                if questions
+                                else {},
+                            )
+                        )
 
-                    for ra in RequirementAssessment.objects.filter(
-                        requirement=new_requirement_node
-                    ):
-                        ra.name = new_requirement_node.name
-                        ra.description = new_requirement_node.description
-                        if not questions:
-                            ra.save()
+                # update anwsers for each ra for the current requirement_node, when relevant
+                for ra in existing_requirement_assessment_objects.get(urn, []):
+                    if not questions:
+                        requirement_assessment_objects_to_update.append(ra)
+                        continue
+
+                    answers = ra.answers
+
+                    # Remove answers corresponding to questions that have been removed
+                    for urn in list(answers.keys()):
+                        if urn not in questions:
+                            del answers[urn]
+                    # Add answers corresponding to questions that have been updated/added
+                    for urn, question in questions.items():
+                        # If the question is not present in answers, initialize it
+                        if urn not in answers:
+                            answers[urn] = None
                             continue
 
-                        answers = ra.answers or {}
+                        answer_val = answers[urn]
+                        type = question.get("type")
 
-                        # Remove answers corresponding to questions that have been removed
-                        for urn in list(answers.keys()):
-                            if urn not in questions:
-                                del answers[urn]
-                        # Add answers corresponding to questions that have been updated/added
-                        for urn, question in questions.items():
-                            # If the question is not present in answers, initialize it
-                            if urn not in answers:
-                                answers[urn] = None
-                                continue
-
-                            answer_val = answers[urn]
-                            type = question.get("type")
-
-                            if type == "multiple_choice":
-                                # Keep only the choices that exist in the question
-                                if isinstance(answer_val, list):
-                                    valid_choices = {
-                                        choice["urn"]
-                                        for choice in question.get("choices", [])
-                                    }
-                                    answers[urn] = [
-                                        choice
-                                        for choice in answer_val
-                                        if choice in valid_choices
-                                    ]
-                                else:
-                                    answers[urn] = []
-
-                            elif type == "unique_choice":
-                                # If the answer does not match a valid choice, reset it to None
+                        if type == "multiple_choice":
+                            # Keep only the choices that exist in the question
+                            if isinstance(answer_val, list):
                                 valid_choices = {
                                     choice["urn"]
                                     for choice in question.get("choices", [])
                                 }
-                                if isinstance(answer_val, list):
+                                answers[urn] = [
+                                    choice
+                                    for choice in answer_val
+                                    if choice in valid_choices
+                                ]
+                            else:
+                                answers[urn] = []
+
+                        elif type == "unique_choice":
+                            # If the answer does not match a valid choice, reset it to None
+                            valid_choices = {
+                                choice["urn"] for choice in question.get("choices", [])
+                            }
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val if answer_val in valid_choices else None
+                                )
+
+                        elif type == "text":
+                            # For a text question, simply check that it is a string
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                answers[urn] = (
+                                    answer_val
+                                    if isinstance(answer_val, str)
+                                    and answer_val.split(":")[0] != "urn"
+                                    else None
+                                )
+
+                        elif type == "date":
+                            # For a date question, check the expected format (e.g., "YYYY-MM-DD")
+                            if isinstance(answer_val, list):
+                                answers[urn] = None
+                            else:
+                                try:
+                                    datetime.strptime(answer_val, "%Y-%m-%d")
+                                    answers[urn] = answer_val
+                                except Exception:
                                     answers[urn] = None
-                                else:
-                                    answers[urn] = (
-                                        answer_val
-                                        if answer_val in valid_choices
-                                        else None
-                                    )
 
-                            elif type == "text":
-                                # For a text question, simply check that it is a string
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    answers[urn] = (
-                                        answer_val
-                                        if isinstance(answer_val, str)
-                                        and answer_val.split(":")[0] != "urn"
-                                        else None
-                                    )
+                    ra.answers = answers
+                    requirement_assessment_objects_to_update.append(ra)
 
-                            elif type == "date":
-                                # For a date question, check the expected format (e.g., "YYYY-MM-DD")
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    try:
-                                        datetime.strptime(answer_val, "%Y-%m-%d")
-                                        answers[urn] = answer_val
-                                    except Exception:
-                                        answers[urn] = None
-                        ra.answers = answers
-                        ra.save()
-
-                for threat_urn in requirement_node_dict.get("threats", []):
-                    thread_to_add = objects_tracked.get(threat_urn)
-                    if thread_to_add is None:  # I am not 100% this condition is usefull
-                        thread_to_add = Threat.objects.filter(
-                            urn=threat_urn
-                        ).first()  # No locale support
-                    if thread_to_add is not None:
-                        new_requirement_node.threats.add(thread_to_add)
-
-                for reference_control_urn in requirement_node.get(
-                    "reference_controls", []
-                ):
-                    reference_control_to_add = objects_tracked.get(
-                        reference_control_urn
+                # update threats linked to the requirement_node
+                for threat_urn in requirement_node.get("threats", []):
+                    normalized_threat_urn = threat_urn.lower()
+                    threat_object = (
+                        objects_tracked.get(normalized_threat_urn)
+                        or Threat.objects.filter(urn=normalized_threat_urn).first()
                     )
-                    if (
-                        reference_control_to_add is None
-                    ):  # I am not 100% this condition is useful
-                        reference_control_to_add = ReferenceControl.objects.filter(
-                            urn=reference_control_urn.lower()
-                        ).first()  # No locale support
+                    if threat_object:
+                        requirement_node_object.threats.add(threat_object)
 
-                    if reference_control_to_add is not None:
-                        new_requirement_node.reference_controls.add(
-                            reference_control_to_add
-                        )
+                # update reference_controls linked to the requirement_node
+                for rc_urn in requirement_node.get("reference_controls", []):
+                    normalized_rc_urn = rc_urn.lower()
+                    rc_object = (
+                        objects_tracked.get(normalized_rc_urn)
+                        or ReferenceControl.objects.filter(
+                            urn=normalized_rc_urn
+                        ).first()
+                    )
+                    if rc_object:
+                        requirement_node_object.reference_controls.add(rc_object)
+
+            # Fix for the dual bulk_update issue - consolidate into one update
+            if requirement_node_objects_to_update:
+                # Ensure all needed fields are included
+                fields_to_update = sorted(
+                    all_fields_to_update.union(
+                        {"name", "description", "order_id", "questions"}
+                    )
+                )
+                RequirementNode.objects.bulk_update(
+                    requirement_node_objects_to_update,
+                    fields_to_update,
+                    batch_size=200,
+                )
+
+            if requirement_assessment_objects_to_update:
+                RequirementAssessment.objects.bulk_update(
+                    requirement_assessment_objects_to_update,
+                    ["answers"],
+                    batch_size=100,
+                )
+
+            if requirement_assessment_objects_to_create:
+                RequirementAssessment.objects.bulk_create(
+                    requirement_assessment_objects_to_create, batch_size=100
+                )
 
     def update_risk_matrices(self):
         for matrix in self.new_matrices:
@@ -2384,6 +2424,10 @@ class Incident(NameDescriptionMixin, FolderMixin):
         SEV5 = 5, "Low"
         UNDEFINED = 6, "unknown"
 
+    class Detection(models.TextChoices):
+        INTERNAL = "internally_detected", "Internal"
+        EXTERNAL = "externally_detected", "External"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -2421,6 +2465,25 @@ class Incident(NameDescriptionMixin, FolderMixin):
         verbose_name="Qualifications",
         blank=True,
     )
+
+    reported_at = models.DateTimeField(
+        null=True, blank=True, verbose_name="Reported at", default=now
+    )
+    detection = models.CharField(
+        max_length=30,
+        null=True,
+        blank=True,
+        choices=Detection.choices,
+        default=Detection.INTERNAL,
+    )
+
+    link = models.CharField(
+        null=True,
+        blank=True,
+        max_length=2048,
+        verbose_name=_("Link"),
+    )
+
     is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
@@ -4289,7 +4352,7 @@ class ComplianceAssessment(Assessment):
             include_non_assessable=False
         )
         for ra in requirement_assessments:
-            if ra.requirement.question:
+            if ra.requirement.questions:
                 return True
         return False
 
@@ -4547,7 +4610,7 @@ class FindingsAssessment(Assessment):
         }
 
 
-class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
         IDENTIFIED = "identified", _("Identified")
@@ -4814,6 +4877,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name="Risk assessments",
         blank=True,
         help_text="Risk assessments related to the task",
+        related_name="task_templates",
+    )
+
+    findings_assessment = models.ManyToManyField(
+        FindingsAssessment,
+        verbose_name="Finding assessments",
+        blank=True,
+        help_text="Finding assessments related to the task",
         related_name="task_templates",
     )
 

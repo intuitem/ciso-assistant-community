@@ -137,7 +137,7 @@ There are currently two modes of authentication supported by the dispatcher:
 > [!IMPORTANT]
 > Whichever mode you choose, it is tied to a CISO Assistant user and will inherit their permissions.
 
-#### Token-based authentication (soon to be released)
+#### Token-based authentication
 
 This is done using a Personal Access Token (PAT) that you can generate in CISO Assistant.
 To use token-based authentication, you need to set the `USER_TOKEN` environment variable or specify it in the configuration file or during interactive configuration definition using the `init-config` with the `-i` flag enabled.

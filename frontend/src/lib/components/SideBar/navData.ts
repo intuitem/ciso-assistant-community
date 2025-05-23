@@ -259,11 +259,6 @@ export const navData = {
 					href: '/entities'
 				},
 				{
-					name: 'entityAssessments',
-					fa_icon: 'fa-solid fa-clipboard-list',
-					href: '/entity-assessments'
-				},
-				{
 					name: 'representatives',
 					fa_icon: 'fa-solid fa-user-tie',
 					href: '/representatives'
@@ -272,6 +267,11 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
+				},
+				{
+					name: 'entityAssessments',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/entity-assessments'
 				}
 			]
 		},

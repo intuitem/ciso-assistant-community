@@ -6,7 +6,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { URL_MODEL_MAP, type ModelMapEntry } from '$lib/utils/crud';
+	import { type ModelMapEntry } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
@@ -41,6 +41,19 @@
 	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
+	export let dateFieldsToFormat: string[] = [
+		'created_at',
+		'updated_at',
+		'expiry_date',
+		'accepted_at',
+		'rejected_at',
+		'revoked_at',
+		'eta',
+		'expiration_date',
+		'timestamp',
+		'reported_at',
+		'due_date'
+	];
 	export let displayModelTable = true;
 
 	exclude = [...exclude, ...defaultExcludes];
@@ -189,7 +202,7 @@
 		);
 	};
 
-	$: relatedModels = Object.entries(data.relatedModels).sort(
+	$: relatedModels = Object.entries(data?.relatedModels ?? {}).sort(
 		(a: [string, any], b: [string, any]) => {
 			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
 		}
@@ -301,9 +314,8 @@
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
 																{#if val.str && val.id}
 																	{@const itemHref = `/${
-																		URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																			(item) => item.field === key
-																		)?.urlModel
+																		data.model?.foreignKeyFields?.find((item) => item.field === key)
+																			?.urlModel
 																	}/${val.id}`}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
 																		{truncateString(val.str)}</Anchor
@@ -326,9 +338,8 @@
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
 																{#if val.str && val.id}
 																	{@const itemHref = `/${
-																		URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																			(item) => item.field === key
-																		)?.urlModel
+																		data.model?.foreignKeyFields?.find((item) => item.field === key)
+																			?.urlModel
 																	}/${val.id}`}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 																		>{val.str}</Anchor
@@ -346,9 +357,7 @@
 												{/if}
 											{:else if value.id && !value.hexcolor}
 												{@const itemHref = `/${
-													URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-														(item) => item.field === key
-													)?.urlModel
+													data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel
 												}/${value.id}`}
 												{#if key === 'ro_to_couple'}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
@@ -378,7 +387,7 @@
 												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
 													>{value}</Anchor
 												>
-											{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'expiration_date' || key === 'timestamp')}
+											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}

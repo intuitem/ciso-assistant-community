@@ -745,7 +745,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
         undefined = {-1: "--"}
-        options = []
+        options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
             _choices = {
                 i: name
@@ -753,11 +753,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
                     x["name"] for x in matrix.json_definition["risk"]
                 )
             }
-            choices = undefined | _choices
-            options = options | choices.items()
-        return Response(
-            [{k: v for k, v in zip(("value", "label"), o)} for o in options]
-        )
+            options = options | _choices
+        res = [{"value": k, "label": v} for k, v in options.items()]
+        return Response(res)
 
     @action(detail=False, name="Get impact choices")
     def impact(self, request):
@@ -1899,6 +1897,7 @@ class ComplianceAssessmentActionPlanList(generics.ListAPIView):
         "findings": ["exact"],
         "eta": ["exact", "lte", "gte", "lt", "gt"],
     }
+    search_fields = ["name", "description", "ref_id"]
 
     serializer_class = ComplianceAssessmentActionPlanSerializer
     filter_backends = [
@@ -1946,28 +1945,41 @@ class PolicyViewSet(AppliedControlViewSet):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
+class RiskScenarioFilter(df.FilterSet):
+    # Aliased filters for user-friendly query params
+    folder = df.UUIDFilter(
+        field_name="risk_assessment__perimeter__folder", label="Folder ID"
+    )
+    perimeter = df.UUIDFilter(
+        field_name="risk_assessment__perimeter", label="Perimeter ID"
+    )
+
+    class Meta:
+        model = RiskScenario
+        # Only include actual model fields here
+        fields = {
+            "risk_assessment": ["exact"],
+            "current_impact": ["exact"],
+            "current_proba": ["exact"],
+            "current_level": ["exact"],
+            "residual_impact": ["exact"],
+            "residual_proba": ["exact"],
+            "residual_level": ["exact"],
+            "treatment": ["exact"],
+            "threats": ["exact"],
+            "assets": ["exact"],
+            "applied_controls": ["exact"],
+            "security_exceptions": ["exact"],
+        }
+
+
 class RiskScenarioViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk scenarios to be viewed or edited.
     """
 
     model = RiskScenario
-    filterset_fields = [
-        "risk_assessment",
-        "risk_assessment__perimeter",
-        "risk_assessment__perimeter__folder",
-        "current_impact",
-        "current_proba",
-        "current_level",
-        "residual_impact",
-        "residual_proba",
-        "residual_level",
-        "treatment",
-        "threats",
-        "assets",
-        "applied_controls",
-        "security_exceptions",
-    ]
+    filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
 
@@ -2680,9 +2692,8 @@ class FolderViewSet(BaseModelViewSet):
     def import_dummy_domain(self, request):
         domain_name = "DEMO"
         try:
-            dummy_fixture_path = (
-                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
-            )
+            PROJECT_DIR = Path(__file__).resolve().parent.parent
+            dummy_fixture_path = PROJECT_DIR / "fixtures" / "dummy-domain.bak"
             if not dummy_fixture_path.exists():
                 logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
                 return Response(
@@ -5232,7 +5243,7 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = ["folder", "status", "severity", "qualifications"]
+    filterset_fields = ["folder", "status", "severity", "qualifications", "detection"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5243,6 +5254,11 @@ class IncidentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Incident.Severity.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get detection channel choices")
+    def detection(self, request):
+        return Response(dict(Incident.Detection.choices))
 
     def perform_update(self, serializer):
         previous_instance = self.get_object()
