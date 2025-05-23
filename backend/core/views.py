@@ -4147,6 +4147,120 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
+    @action(detail=True, methods=["get"], name="Audit as an Excel")
+    def xlsx(self, request, pk):
+        # (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+        #     Folder.get_root_folder(), request.user, ComplianceAssessment
+        # )
+        #
+        # if UUID(pk) in viewable_objects:
+        #     writer = csv.writer(response, delimiter=";")
+        #     columns = [
+        #         "urn",
+        #         "ref_id",
+        #         "name",
+        #         "description",
+        #         "compliance_result",
+        #         "requirement_progress",
+        #         "score",
+        #         "observations",
+        #     ]
+        #     writer.writerow(columns)
+        #
+        #     for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+        #         req_node = RequirementNode.objects.get(pk=req.requirement.id)
+        #         row = [
+        #             req_node.urn,
+        #             req_node.ref_id,
+        #             req_node.get_name_translated,
+        #             req_node.get_description_translated,
+        #         ]
+        #         if req_node.assessable:
+        #             row += [
+        #                 req.result,
+        #                 req.status,
+        #                 req.score,
+        #                 req.observation,
+        #             ]
+        #         writer.writerow(row)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        audit = ComplianceAssessment.objects.get(id=pk)
+        req_nodes = RequirementNode.objects.filter(framework=audit.framework)
+        ic(req_nodes)
+        entries = []
+        for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+            req_node = RequirementNode.objects.get(pk=req.requirement.id)
+            entry = {
+                "urn": req_node.urn,
+                "assessable": req_node.assessable,
+                "ref_id": req_node.ref_id,
+                "name": req_node.name,
+                "description": req_node.description,
+                "compliance_result": req.result,
+                "requirement_progress": req.status,
+                "score": req.score,
+                "observations": req.observation,
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+
+        buffer = io.BytesIO()
+
+        # Create ExcelWriter with openpyxl engine
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+
+            # Get the worksheet
+            worksheet = writer.sheets["Sheet1"]
+
+            # For text wrapping, we need to define which columns need wrapping
+            # Assuming 'description' and 'observations' columns need text wrapping
+            wrap_columns = ["name", "description", "observations"]
+
+            # Find the indices of the columns that need wrapping
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            # Apply text wrapping to those columns
+            from openpyxl.styles import Alignment
+
+            for col_idx in wrap_indices:
+                for row_idx in range(
+                    2, len(df) + 2
+                ):  # +2 because of header row and 1-indexing
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            # Adjust column widths for better readability
+            for idx, col in enumerate(df.columns):
+                column_width = 40  # default width
+                if col in wrap_columns:
+                    column_width = 60  # wider for wrapped text columns
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        # Get the value of the buffer and return as response
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="{slugify(audit.name)}.xlsx"'
+        )
+
+        return response
+
     @action(detail=True, methods=["get"])
     def word_report(self, request, pk):
         """
@@ -4185,7 +4299,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             FileWrapper(buffer_doc),
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
-        response["Content-Disposition"] = "attachment; filename=sales_report.docx"
+        response["Content-Disposition"] = "attachment; filename=exec_report.docx"
 
         return response
 

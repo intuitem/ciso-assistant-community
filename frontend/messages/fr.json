@@ -267,6 +267,7 @@
 	"plan": "Plan",
 	"asPDF": "en PDF",
 	"asCSV": "en CSV",
+	"asXLSX": "en XLSX",
 	"asWord": "en Word",
 	"draft": "Brouillon",
 	"riskMatrixView": "Vue matricielle",
