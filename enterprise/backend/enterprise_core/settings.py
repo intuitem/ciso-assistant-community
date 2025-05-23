@@ -278,6 +278,8 @@ REST_KNOX = {
     "MIN_REFRESH_INTERVAL": 60,
 }
 
+KNOX_TOKEN_MODEL = "knox.AuthToken"
+
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
 
