@@ -4157,8 +4157,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
         audit = ComplianceAssessment.objects.get(id=pk)
-        req_nodes = RequirementNode.objects.filter(framework=audit.framework)
-        ic(req_nodes)
         entries = []
         for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
             req_node = RequirementNode.objects.get(pk=req.requirement.id)
