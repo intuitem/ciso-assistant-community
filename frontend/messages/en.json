@@ -1606,5 +1606,5 @@
 	"externallyDetected": "External",
 	"mappingSuggested": "Mapping suggested",
 	"mappingSuggestedHelpText": "Mapping suggestions based on loaded frameworks",
-	"mappingSuggestionTeasing": "Suggested mappings are now available! Use the filters to explore suggestions based on the loaded frameworks."
+	"mappingSuggestionTeasing": "Mappings are now suggested! You can use the filters to explore suggestions based on loaded frameworks."
 }
