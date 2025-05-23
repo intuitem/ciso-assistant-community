@@ -30,12 +30,13 @@
 			};
 			model.selectOptions = selectOptions;
 		}
-		if (model?.selectOptions?.priority) {
-			model.selectOptions.priority.forEach((element) => {
-				element.value = parseInt(element.value);
-			});
-		}
 	});
+
+	$: if (model?.selectOptions?.priority) {
+		model.selectOptions.priority.forEach((element) => {
+			element.value = parseInt(element.value);
+		});
+	}
 </script>
 
 {#if !duplicate}
