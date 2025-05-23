@@ -748,7 +748,7 @@ class LibraryUpdater:
             queryset.update(
                 **self.referential_object_dict, **requirement_mapping_set_dict
             )
-            
+
             # Delete existing RequirementMapping objects for the given mapping_set
             RequirementMapping.objects.filter(
                 mapping_set=requirement_mapping_set_obj
@@ -782,7 +782,7 @@ class LibraryUpdater:
                     mapping_set=requirement_mapping_set_obj,
                     source_requirement=source_requirement,
                     target_requirement=target_requirement,
-                    **requirement_mapping_dict
+                    **requirement_mapping_dict,
                 )
 
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
