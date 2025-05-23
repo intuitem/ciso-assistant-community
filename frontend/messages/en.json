@@ -1603,5 +1603,8 @@
 	"internal": "Internal",
 	"external": "External",
 	"internallyDetected": "Internal",
-	"externallyDetected": "External"
+	"externallyDetected": "External",
+	"mappingSuggested": "Mapping suggested",
+	"mappingSuggestedHelpText": "Mapping suggestions based on loaded frameworks",
+	"mappingSuggestionTeasing": "Suggested mappings are now available! Use the filters to explore suggestions based on the loaded frameworks."
 }

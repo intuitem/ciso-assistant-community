@@ -17,17 +17,20 @@ export const load = (async ({ fetch }) => {
 	const storedLibrariesEndpoint = `${BASE_API_URL}/stored-libraries/`;
 	const loadedLibrariesEndpoint = `${BASE_API_URL}/loaded-libraries/`;
 	const updatableLibrariesEndpoint = `${loadedLibrariesEndpoint}available-updates/`;
+	const mappingSuggestedEndpoint = `${storedLibrariesEndpoint}?mapping_suggested=true`;
 
-	const [storedLibrariesResponse, loadedLibrariesResponse, updatableLibrariesResponse] =
+	const [storedLibrariesResponse, loadedLibrariesResponse, updatableLibrariesResponse, mappingSuggestedResponse] =
 		await Promise.all([
 			fetch(storedLibrariesEndpoint),
 			fetch(loadedLibrariesEndpoint),
-			fetch(updatableLibrariesEndpoint)
+			fetch(updatableLibrariesEndpoint),
+			fetch(mappingSuggestedEndpoint)
 		]);
 
 	const storedLibraries = await storedLibrariesResponse.json();
 	const loadedLibraries = await loadedLibrariesResponse.json();
 	const updatableLibraries = await updatableLibrariesResponse.json();
+	const mappingSuggested = await mappingSuggestedResponse.json().then((res) => res.results);
 
 	const prepareRow = (row: Record<string, any>) => {
 		row.overview = [
@@ -70,6 +73,7 @@ export const load = (async ({ fetch }) => {
 		storedLibrariesTable,
 		loadedLibrariesTable,
 		updatableLibraries,
+		mappingSuggested,
 		deleteForm,
 		title: m.libraries()
 	};
