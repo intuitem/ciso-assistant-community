@@ -86,6 +86,7 @@
 		}
 	);
 	const rows = handler.getRows();
+	const rowCount = handler.getRowCount();
 	const field = data.model.reverseForeignKeyFields.find(
 		(item) => item.urlModel === 'timeline-entries'
 	);
@@ -318,7 +319,7 @@
 		</ol>
 		<footer class="flex justify-between items-center space-x-8 p-2">
 			{#if pagination}
-				<RowCount {handler} />
+				<RowCount {rowCount} />
 			{/if}
 			{#if pagination}
 				<Pagination {handler} />

@@ -3,6 +3,7 @@ import { browser } from '$app/environment';
 import { persisted } from 'svelte-persisted-store';
 import type { TreeViewNode } from '@skeletonlabs/skeleton';
 import type { Driver } from 'driver.js';
+import type { DataHandler } from '@vincjo/datatables/remote';
 
 export const showNotification = writable(
 	(browser && localStorage.getItem('showNotification')) || 'false'

@@ -1,8 +1,6 @@
 <script lang="ts">
-	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { m } from '$paraglide/messages';
-	export let handler: DataHandler;
-	const rowCount = handler.getRowCount();
+	export let rowCount;
 </script>
 
 {#if $rowCount === undefined}
