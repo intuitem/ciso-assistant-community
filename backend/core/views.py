@@ -5127,6 +5127,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "folder",
         "authors",
         "status",
+        "evidences",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -5228,6 +5229,7 @@ class FindingViewSet(BaseModelViewSet):
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
+        "evidences",
     ]
 
     @action(detail=False, name="Get status choices")
