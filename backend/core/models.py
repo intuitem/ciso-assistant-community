@@ -759,11 +759,11 @@ class LibraryUpdater:
                     not in [
                         "source_requirement_urn",
                         "target_requirement_urn",
-                        "stregth_of_relationship",
+                        "strength_of_relationship",
                     ]
                 }
                 requirement_mapping_dict["strength_of_relationship"] = (
-                    requirement_mapping["stregth_of_relationship"]
+                    requirement_mapping.get("strength_of_relationship")
                 )  # # Fix the typo caused by the convert_library.py code.
                 source_requirement = RequirementNode.objects.get(
                     urn=requirement_mapping["source_requirement_urn"]
