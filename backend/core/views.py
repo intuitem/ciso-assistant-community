@@ -4113,10 +4113,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if UUID(pk) in viewable_objects:
             writer = csv.writer(response, delimiter=";")
             columns = [
+                "urn",
                 "ref_id",
+                "name",
                 "description",
                 "compliance_result",
-                "progress",
+                "requirement_progress",
                 "score",
                 "observations",
             ]
@@ -4124,14 +4126,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
                 req_node = RequirementNode.objects.get(pk=req.requirement.id)
-                req_text = (
-                    req_node.get_description_translated
-                    if req_node.description
-                    else req_node.get_name_translated
-                )
                 row = [
+                    req_node.urn,
                     req_node.ref_id,
-                    req_text,
+                    req_node.get_name_translated,
+                    req_node.get_description_translated,
                 ]
                 if req_node.assessable:
                     row += [
