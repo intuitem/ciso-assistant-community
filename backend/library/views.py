@@ -77,32 +77,51 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
         """
         Returns StoredLibraries containing at least one mapping with a source framework already loaded
         """
-        if value:
-            # Get all loaded framework URNs
-            loaded_framework_urns = Framework.objects.values_list("urn", flat=True)
-                    
-            # Filter queryset to only include libraries with requirement mappings
-            queryset = queryset.filter(content__requirement_mapping_set__isnull=False)
+        def _extract_requirement_mappings(content):
+            """Extract requirement mappings from library content, handling both dict and list formats."""
+            mapping_set = content.get("requirement_mapping_set") or content.get("requirement_mapping_sets", [])
             
-            # Filter to only include libraries where at least one mapping has a source framework that's loaded
-            filtered_libraries = []
-            for library in queryset:
-                requirement_mapping_set = library.content.get("requirement_mapping_set", [])
-                # Handle both single mapping dict and list of mappings
-                if isinstance(requirement_mapping_set, dict):
-                    requirement_mapping_set = [requirement_mapping_set]
-                
-                for mapping in requirement_mapping_set:
-                    source_framework_urn = mapping.get("source_framework_urn")
-                    if source_framework_urn in loaded_framework_urns and library.urn not in LoadedLibrary.objects.values_list("urn", flat=True):
-                        filtered_libraries.append(library.pk)
-                        break  # Found at least one matching mapping, no need to check others
-            
-            # Filter queryset to only include libraries with matching mappings
-            queryset = queryset.filter(pk__in=filtered_libraries)
-            
+            if isinstance(mapping_set, dict):
+                return [mapping_set]
+            elif isinstance(mapping_set, list):
+                return mapping_set
+            else:
+                return []
+
+        def _has_matching_source_framework(requirement_mappings, loaded_framework_urns):
+            """Check if any mapping has a source framework that's loaded."""
+            return any(
+                mapping.get("source_framework_urn") in loaded_framework_urns
+                for mapping in requirement_mappings
+            )
+        
+        if not value:
             return queryset
-        return queryset
+        
+        # Get all loaded framework URNs and library URNs in single queries
+        loaded_framework_urns = set(Framework.objects.values_list("urn", flat=True))
+        loaded_library_urns = set(LoadedLibrary.objects.values_list("urn", flat=True))
+        
+        # Early return if no loaded frameworks
+        if not loaded_framework_urns:
+            return queryset.none()
+        
+        # Filter to libraries that have requirement mappings
+        queryset_with_mappings = queryset.filter(
+            Q(content__requirement_mapping_set__isnull=False) |
+            Q(content__requirement_mapping_sets__isnull=False)
+        ).exclude(urn__in=loaded_library_urns)
+        
+        # Extract libraries with matching source frameworks
+        matching_library_pks = []
+        
+        for library in queryset_with_mappings.iterator():  # Use iterator for memory efficiency
+            requirement_mappings = _extract_requirement_mappings(library.content)
+            
+            if _has_matching_source_framework(requirement_mappings, loaded_framework_urns):
+                matching_library_pks.append(library.pk)
+        
+        return queryset.filter(pk__in=matching_library_pks)
 
     def filter_object_type(self, queryset, name, value: list[str]):
         union_qs = Q()
