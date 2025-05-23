@@ -94,7 +94,7 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
                 
                 for mapping in requirement_mapping_set:
                     source_framework_urn = mapping.get("source_framework_urn")
-                    if source_framework_urn in loaded_framework_urns:
+                    if source_framework_urn in loaded_framework_urns and library.urn not in LoadedLibrary.objects.values_list("urn", flat=True):
                         filtered_libraries.append(library.pk)
                         break  # Found at least one matching mapping, no need to check others
             
