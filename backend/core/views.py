@@ -2692,9 +2692,8 @@ class FolderViewSet(BaseModelViewSet):
     def import_dummy_domain(self, request):
         domain_name = "DEMO"
         try:
-            dummy_fixture_path = (
-                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
-            )
+            PROJECT_DIR = Path(__file__).resolve().parent.parent
+            dummy_fixture_path = PROJECT_DIR / "fixtures" / "dummy-domain.bak"
             if not dummy_fixture_path.exists():
                 logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
                 return Response(
