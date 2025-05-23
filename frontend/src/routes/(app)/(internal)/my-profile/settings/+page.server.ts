@@ -76,8 +76,6 @@ export const actions: Actions = {
 			body: JSON.stringify(form.data)
 		};
 
-		console.debug('requestInitOptions', requestInitOptions);
-
 		const response = await event.fetch(endpoint, requestInitOptions);
 		const data = await response.json();
 
@@ -92,7 +90,6 @@ export const actions: Actions = {
 			return fail(data.status, { form });
 		}
 
-		console.debug('Activated TOTP', data);
 		setFlash({ type: 'success', message: m.successfullyActivatedTOTP() }, event);
 		return { form };
 	},
@@ -120,7 +117,6 @@ export const actions: Actions = {
 			return fail(response.status, { error: 'Could not deactivate TOTP' });
 		}
 
-		console.debug('Deactivated TOTP', response);
 		setFlash({ type: 'success', message: m.successfullyDeactivatedTOTP() }, event);
 		return { form };
 	},
@@ -155,8 +151,6 @@ export const actions: Actions = {
 			body: JSON.stringify(form.data)
 		};
 
-		console.debug('requestInitOptions', requestInitOptions);
-
 		const response = await event.fetch(endpoint, requestInitOptions);
 
 		if (!response.ok) {
@@ -172,12 +166,9 @@ export const actions: Actions = {
 		}
 
 		const data = await response.json();
-
-		console.debug('Created PAT', data);
 		return message(form, { status: response.status, data });
 	},
 	deletePAT: async (event) => {
-		console.debug('deletePAT 1');
 		const formData = await event.request.formData();
 		if (!formData) return fail(400, { error: 'No form data' });
 
@@ -189,8 +180,6 @@ export const actions: Actions = {
 			method: 'DELETE'
 		};
 
-		console.debug('requestInitOptions', requestInitOptions);
-
 		const response = await event.fetch(endpoint, requestInitOptions);
 
 		if (!response.ok) {
@@ -198,7 +187,6 @@ export const actions: Actions = {
 			return fail(response.status, { form });
 		}
 
-		console.debug('Deleted PAT');
 		setFlash({ type: 'success', message: m.successfullyDeletedPersonalAccessToken() }, event);
 		return message(form, { status: response.status });
 	}
