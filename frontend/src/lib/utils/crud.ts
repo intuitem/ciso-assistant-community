@@ -1021,12 +1021,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'findings',
 		verboseName: 'Finding',
 		verboseNamePlural: 'Findings',
-		foreignKeyFields: [{ field: 'findings_assessment', urlModel: 'findings-assessments' }],
-		// reverseForeignKeyFields: [
-		// 	{ field: 'findings', urlModel: 'vulnerabilities' },
-		// 	{ field: 'findings', urlModel: 'reference-controls' },
-		// 	{ field: 'findings', urlModel: 'applied-controls' }
-		// ],
+		foreignKeyFields: [
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' }
+		],
+		reverseForeignKeyFields: [
+			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
+			// 	{ field: 'findings', urlModel: 'reference-controls' },
+			{ field: 'findings', urlModel: 'applied-controls' }
+		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
 	},
 	incidents: {

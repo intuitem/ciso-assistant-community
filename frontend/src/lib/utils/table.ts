@@ -980,13 +980,13 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'category', 'findings_count', 'perimeter']
 	},
 	findings: {
-		head: ['ref_id', 'name', 'description', 'findings_assessment', 'severity', 'status', 'labels'],
+		head: ['ref_id', 'name', 'findings_assessment', 'severity', 'owner', 'status', 'labels'],
 		body: [
 			'ref_id',
 			'name',
-			'description',
 			'findings_assessment',
 			'severity',
+			'owner',
 			'status',
 			'filtering_labels'
 		],

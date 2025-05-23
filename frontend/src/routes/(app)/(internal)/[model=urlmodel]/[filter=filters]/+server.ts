@@ -15,12 +15,10 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 
 	const options =
 		typeof Object.values(optionsResponse)[0] === 'string'
-			? Object.keys(optionsResponse)
-					.map((key) => ({
-						label: optionsResponse[key],
-						value: key
-					}))
-					.sort((a, b) => a.label.localeCompare(b.label))
+			? Object.keys(optionsResponse).map((key) => ({
+					label: optionsResponse[key],
+					value: key
+				}))
 			: optionsResponse;
 
 	return new Response(JSON.stringify(options), {
