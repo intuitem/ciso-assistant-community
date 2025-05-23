@@ -19,6 +19,7 @@
 	export let formAction: string;
 	export let bodyComponent: ComponentType | undefined;
 	export let bodyProps: Record<string, unknown> = {};
+	export let schema: any;
 
 	import { superForm } from 'sveltekit-superforms';
 
@@ -49,7 +50,13 @@
 			</div>
 		{/if}
 		<!-- Enable for debugging: -->
-		<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
+		<SuperForm
+			dataType="json"
+			action={formAction}
+			data={_form}
+			class="modal-form {cForm}"
+			validators={schema}
+		>
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
         <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{m.cancel()}</button>
