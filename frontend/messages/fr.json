@@ -885,7 +885,7 @@
 	"step": "Étape {number}",
 	"critical": "Critique",
 	"vulnerabilities": "Vulnérabilités",
-	"severity": "Gravité",
+	"severity": "Niveau de gravité",
 	"potential": "Potentielle",
 	"exploitable": "Exploitable",
 	"mitigated": "Atténuée",
