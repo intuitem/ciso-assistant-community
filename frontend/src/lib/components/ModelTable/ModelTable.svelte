@@ -69,6 +69,7 @@
 	export let identifierField = 'id';
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
+	export let _model = URLModel ? URL_MODEL_MAP[URLModel] : undefined;
 	export let baseEndpoint: string = `/${URLModel}`;
 	export let detailQueryParameter: string | undefined = undefined;
 	export let fields: string[] = [];
@@ -124,7 +125,7 @@
 		}),
 		{
 			rowsPerPage: pagination ? numberRowsPerPage : undefined,
-			totalRows: source.meta.count
+			totalRows: source?.meta?.count
 		}
 	);
 	const rows = handler.getRows();
@@ -149,19 +150,6 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type);
 
-	const filterInitialData = $page.url.searchParams.entries();
-
-	const _form = superForm(defaults(filterInitialData, zod(z.object({}))), {
-		SPA: true,
-		validators: zod(z.object({})),
-		dataType: 'json',
-		invalidateAll: false,
-		applyAction: false,
-		resetForm: false,
-		taintedMessage: false,
-		validationMethod: 'auto'
-	});
-
 	const popupFilter: PopupSettings = {
 		event: 'click',
 		target: 'popupFilter',
@@ -173,7 +161,9 @@
 	let contextMenuOpenRow: TableSource | undefined = undefined;
 
 	const filters =
-		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+		tableURLModel &&
+		listViewFields[tableURLModel] &&
+		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
 			: {};
 
@@ -183,6 +173,28 @@
 	// Initialize filter values from URL search params
 	for (const field of filteredFields)
 		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
+
+	const filterInitialData: Record<string, string[]> = {};
+	// convert URL search params to filter initial data
+	for (const [key, value] of $page.url.searchParams) {
+		filterInitialData[key] ??= [];
+		filterInitialData[key].push(value);
+	}
+
+	const zodFiltersObject = {};
+	Object.keys(filters).forEach((k) => {
+		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
+	});
+	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
+		SPA: true,
+		validators: zod(z.object(zodFiltersObject)),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
 
 	$: hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
 
@@ -207,7 +219,7 @@
 	}
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-	$: model = URL_MODEL_MAP[URLModel];
+	$: model = _model ?? URL_MODEL_MAP[URLModel];
 	$: canCreateObject = model
 		? $page.params.id
 			? canPerformAction({
@@ -269,7 +281,7 @@
 				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				data-popup="popupFilter"
 			>
-				<SuperForm {_form} validators={zod(z.object({}))} let:form>
+				<SuperForm {_form} let:form>
 					{#each filteredFields as field}
 						{#if filters[field]?.component}
 							<svelte:component
@@ -353,7 +365,7 @@
 														{#each value as val}
 															<li>
 																{#if val.str && val.id}
-																	{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																	{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
 																	<Anchor href={itemHref} class="anchor" stopPropagation
 																		>{val.str}</Anchor
 																	>
@@ -372,7 +384,7 @@
 													</ul>
 												{:else if value && value.str}
 													{#if value.id}
-														{@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+														{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
 														{#if key === 'ro_to_couple'}
 															<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
 																>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
