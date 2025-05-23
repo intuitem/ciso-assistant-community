@@ -3679,7 +3679,7 @@ class FrameworkViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], name="Framework as an Excel template")
     def excel_template(self, request, pk):
         fwk = Framework.objects.get(id=pk)
-        req_nodes = RequirementNode.objects.filter(framework=fwk)
+        req_nodes = RequirementNode.objects.filter(framework=fwk).order_by("urn")
         entries = []
         for rn in req_nodes:
             entry = {
@@ -4149,40 +4149,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Audit as an Excel")
     def xlsx(self, request, pk):
-        # (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-        #     Folder.get_root_folder(), request.user, ComplianceAssessment
-        # )
-        #
-        # if UUID(pk) in viewable_objects:
-        #     writer = csv.writer(response, delimiter=";")
-        #     columns = [
-        #         "urn",
-        #         "ref_id",
-        #         "name",
-        #         "description",
-        #         "compliance_result",
-        #         "requirement_progress",
-        #         "score",
-        #         "observations",
-        #     ]
-        #     writer.writerow(columns)
-        #
-        #     for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
-        #         req_node = RequirementNode.objects.get(pk=req.requirement.id)
-        #         row = [
-        #             req_node.urn,
-        #             req_node.ref_id,
-        #             req_node.get_name_translated,
-        #             req_node.get_description_translated,
-        #         ]
-        #         if req_node.assessable:
-        #             row += [
-        #                 req.result,
-        #                 req.status,
-        #                 req.score,
-        #                 req.observation,
-        #             ]
-        #         writer.writerow(row)
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
@@ -4255,9 +4221,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             buffer.getvalue(),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = (
-            f'attachment; filename="{slugify(audit.name)}.xlsx"'
-        )
+        response["Content-Disposition"] = f'attachment; filename="{audit.name}.xlsx"'
 
         return response
 

@@ -1,4 +1,3 @@
-
 import { BASE_API_URL } from '$lib/utils/constants';
 
 import { error } from '@sveltejs/kit';
@@ -12,12 +11,12 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 		error(400, 'Error fetching the Excel file');
 	}
 
-	const fileName = `audit-${params.id}-.xlsx`;
+	const fileName = `audit-${params.id}.xlsx`;
 
 	return new Response(await res.blob(), {
 		headers: {
 			'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-			'Content-Disposition': `attachment`
+			'Content-Disposition': `attachment; filename="${fileName}"`
 		}
 	});
 };
