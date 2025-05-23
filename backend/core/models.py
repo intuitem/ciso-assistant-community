@@ -362,7 +362,6 @@ class LibraryUpdater:
         self.old_objects = [
             *old_library.threats.all(),
             *old_library.reference_controls.all(),
-            *old_library.threats.all(),
             *old_library.risk_matrices.all(),
         ]
         self.new_library = new_library
