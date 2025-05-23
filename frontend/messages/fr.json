@@ -175,7 +175,7 @@
 	"lcStatus": "Statut",
 	"internalReference": "Référence interne",
 	"isActive": "Actif",
-	"isThirdParty": "Identitié d'un tiers",
+	"isThirdParty": "Identité d'un tiers",
 	"dateJoined": "Date d'activation",
 	"version": "Version",
 	"versionColon": "Version :",
