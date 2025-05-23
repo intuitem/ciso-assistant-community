@@ -31,7 +31,6 @@ from ciso_assistant.settings import (
 
 import shutil
 from pathlib import Path
-from fixtures import get_resource_path
 import humanize
 
 from wsgiref.util import FileWrapper
@@ -131,8 +130,6 @@ from serdes.utils import (
     sort_objects_by_self_reference,
 )
 from serdes.serializers import ExportSerializer
-
-import importlib.resources
 
 import structlog
 
@@ -2695,54 +2692,21 @@ class FolderViewSet(BaseModelViewSet):
     def import_dummy_domain(self, request):
         domain_name = "DEMO"
         try:
-            dummy_fixture_resource = get_resource_path("dummy-domain.bak")
-
-            if not dummy_fixture_resource.is_file():
-                logger.error(
-                    "Dummy domain fixture not found or is not a file.",
-                    resource_name=str(dummy_fixture_resource),
-                )
+            dummy_fixture_path = (
+                Path(settings.BASE_DIR) / "fixtures" / "dummy-domain.bak"
+            )
+            if not dummy_fixture_path.exists():
+                logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
                 return Response(
                     {"error": "dummyDomainFixtureNotFound"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            try:
-                with importlib.resources.as_file(
-                    dummy_fixture_resource
-                ) as concrete_dummy_path:
-                    parsed_data = self._process_uploaded_file(concrete_dummy_path)
-
-                    result = self._import_objects(
-                        parsed_data,
-                        domain_name,
-                        load_missing_libraries=True,
-                        user=request.user,
-                    )
-
-                logger.info(
-                    "Dummy domain imported successfully", domain_name=domain_name
-                )
-                return Response(result, status=status.HTTP_200_OK)
-
-            except FileNotFoundError:
-                logger.error(
-                    "Dummy domain fixture could not be accessed as a file on the filesystem.",
-                    resource_name=dummy_fixture_resource.name,
-                )
-                return Response(
-                    {"error": "dummyDomainFixtureAccessError"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
-            except Exception:
-                logger.exception(
-                    "An unexpected error occurred while processing the dummy domain fixture.",
-                    resource_name=dummy_fixture_resource.name,
-                    exc_info=True,
-                )
-                return Response(
-                    {"error": "dummyDomainProcessingError"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
+            parsed_data = self._process_uploaded_file(dummy_fixture_path)
+            result = self._import_objects(
+                parsed_data, domain_name, load_missing_libraries=True, user=request.user
+            )
+            logger.info("Dummy domain imported successfully", domain_name=domain_name)
+            return Response(result, status=status.HTTP_200_OK)
 
         except json.JSONDecodeError:
             logger.error("Invalid JSON format in dummy fixture file")
