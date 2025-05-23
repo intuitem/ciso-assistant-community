@@ -20,14 +20,16 @@
 	export let initialData: Record<string, any> = {};
 
 	onMount(async () => {
-		const selectOptions = {
-			status: await fetch('/applied-controls/status').then((r) => r.json()),
-			priority: await fetch('/applied-controls/priority').then((r) => r.json()),
-			category: await fetch('/applied-controls/category').then((r) => r.json()),
-			csf_function: await fetch('/applied-controls/csf_function').then((r) => r.json()),
-			effort: await fetch('/applied-controls/effort').then((r) => r.json())
-		};
-		model.selectOptions = selectOptions;
+		if (!model.selectOptions) {
+			const selectOptions = {
+				status: await fetch('/applied-controls/status').then((r) => r.json()),
+				priority: await fetch('/applied-controls/priority').then((r) => r.json()),
+				category: await fetch('/applied-controls/category').then((r) => r.json()),
+				csf_function: await fetch('/applied-controls/csf_function').then((r) => r.json()),
+				effort: await fetch('/applied-controls/effort').then((r) => r.json())
+			};
+			model.selectOptions = selectOptions;
+		}
 		if (model.selectOptions && 'priority' in model.selectOptions) {
 			model.selectOptions['priority'].forEach((element) => {
 				element.value = parseInt(element.value);
