@@ -30,8 +30,8 @@
 			};
 			model.selectOptions = selectOptions;
 		}
-		if (model.selectOptions && 'priority' in model.selectOptions) {
-			model.selectOptions['priority'].forEach((element) => {
+		if (model?.selectOptions?.priority) {
+			model.selectOptions.priority.forEach((element) => {
 				element.value = parseInt(element.value);
 			});
 		}
