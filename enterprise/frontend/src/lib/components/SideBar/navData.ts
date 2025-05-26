@@ -358,6 +358,12 @@ export const navData = {
 					permissions: ['change_globalsettings']
 				},
 				{
+					name: 'dataWizard',
+					fa_icon: 'fa-solid fa-hat-wizard',
+					href: '/extra/data-wizard',
+					permissions: ['change_globalsettings']
+				},
+				{
 					name: 'backupRestore',
 					fa_icon: 'fa-solid fa-floppy-disk',
 					href: '/backup-restore',

@@ -474,6 +474,10 @@
 							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
 						>
 						<a
+							href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
+							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asXLSX()}</a
+						>
+						<a
 							href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
 							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asWord()}</a
 						>
