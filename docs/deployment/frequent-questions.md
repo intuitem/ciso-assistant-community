@@ -2,6 +2,28 @@
 
 
 
+### Stop and restart
+
+`docker compose down`
+
+`docker compose up -d`&#x20;
+
+
+
+### Getting the logs
+
+
+
+All services logs combined:
+
+`docker compose logs`&#x20;
+
+
+
+Specific service:
+
+`docker compose logs backend`
+
 ### Didn't get the prompt for the first user
 
 If you didn't get the prompt to create the first user, or lost the password but you still have access to the infra level, you can trigger the `createsuperuser` command to fix that.
