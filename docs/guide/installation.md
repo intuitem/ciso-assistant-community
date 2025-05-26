@@ -37,6 +37,10 @@ Make sure to have Docker and Docker Compose installed on your system.
 
 you can also find other variants for different setups as a starting point for your specific needs.
 
+[remote-virtualization.md](../deployment/remote-virtualization.md "mention")
+
+[deploy-on-a-vps.md](../deployment/deploy-on-a-vps.md "mention")
+
 ## Helm chart
 
 
