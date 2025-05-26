@@ -8,7 +8,7 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { type PopupSettings } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		title?: string;
@@ -36,6 +36,9 @@
 
 	let workshopStatus = $state('to_do');
 
+	let open = $state(Array(meta.length).fill(false));
+	let actionsOpen = $state(Array(meta.length).fill(false));
+
 	run(() => {
 		workshopStatus = meta.every((step) => step.status === 'done')
 			? 'done'
@@ -44,15 +47,6 @@
 				: 'to_do';
 		if (browser) invalidateAll();
 	});
-
-	let popupHover: PopupSettings[] = [];
-	for (let i = 0; i < meta.length; i++) {
-		popupHover.push({
-			event: 'hover',
-			target: 'popup' + workshop + i,
-			placement: 'top'
-		});
-	}
 </script>
 
 <div class="p-5 {accent_color}">
@@ -102,64 +96,77 @@
 										<p class="text-sm">{step.title}</p>
 									</Anchor>
 								{:else}
-									<div class="text-gray-300 *:pointer-events-none" use:popup={popupHover[i]}>
-										<div
-											class="transition card bg-white shadow-lg p-4 z-20 duration-300"
-											data-popup={'popup' + workshop + i}
-										>
-											<p
-												data-testid="activity-tooltip"
-												class="border-l-4 {borderColor} text-gray-500 p-2"
+									<Tooltip
+										open={open[i]}
+										onOpenChange={(e) => (open[i] = e.open)}
+										openDelay={0}
+										zIndex="100"
+									>
+										{#snippet trigger()}
+											<div class="text-gray-300 *:pointer-events-none">
+												<span
+													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+												>
+													<i class="fa-solid fa-clipboard-check"></i>
+												</span>
+												<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
+												<p class="text-sm">{step.title}</p>
+											</div>
+										{/snippet}
+										{#snippet content()}
+											<div
+												class="transition card bg-white shadow-lg p-4 z-20 duration-300"
+												data-popup={'popup' + workshop + i}
 											>
-												{step.tooltip}
-											</p>
-											<div class="arrow bg-white"></div>
-										</div>
-										<span
-											class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
-										>
-											<i class="fa-solid fa-clipboard-check"></i>
-										</span>
-										<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
-										<p class="text-sm">{step.title}</p>
-									</div>
+												<p
+													data-testid="activity-tooltip"
+													class="border-l-4 {borderColor} text-gray-500 p-2"
+												>
+													{step.tooltip}
+												</p>
+												<div class="arrow bg-white"></div>
+											</div>
+										{/snippet}
+									</Tooltip>
 								{/if}
 								{#if !step.disabled}
-									<button
-										class="btn bg-initial"
-										data-testid="sidebar-more-btn"
-										use:popup={{
-											event: 'click',
-											target: `popupStep-${workshop}.${i + 1}`,
-											placement: 'top'
-										}}><i class="fa-solid fa-ellipsis-vertical"></i></button
-									>
-									<div
-										class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-										data-testid="sidebar-more-panel"
-										data-popup="popupStep-{workshop}.{i + 1}"
-									>
-										<form
-											action="/ebios-rm/{page.params.id}?/changeStepState"
-											method="POST"
-											use:enhance={() => {
-												return async () => {
-													if (step.status !== 'done') step.status = 'done';
-													else step.status = 'in_progress';
-												};
-											}}
-										>
-											<input type="hidden" name="workshop" value={workshop} />
-											<input type="hidden" name="step" value={i + 1} />
-											{#if step.status === 'done'}
-												<input type="hidden" name="status" value="in_progress" />
-												<button type="submit" class="btn bg-initial">{m.markAsInProgress()}</button>
-											{:else}
-												<input type="hidden" name="status" value="done" />
-												<button type="submit" class="btn bg-initial">{m.markAsDone()}</button>
-											{/if}
-										</form>
-									</div>
+									<Popover open={actionsOpen[i]} onOpenChange={(e) => (actionsOpen[i] = e.open)}>
+										{#snippet trigger()}
+											<button class="btn bg-initial" data-testid="sidebar-more-btn"
+												><i class="fa-solid fa-ellipsis-vertical"></i></button
+											>
+										{/snippet}
+										{#snippet content()}
+											<div
+												class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+												data-testid="sidebar-more-panel"
+												data-popup="popupStep-{workshop}.{i + 1}"
+											>
+												<form
+													action="/ebios-rm/{page.params.id}?/changeStepState"
+													method="POST"
+													use:enhance={() => {
+														return async () => {
+															if (step.status !== 'done') step.status = 'done';
+															else step.status = 'in_progress';
+														};
+													}}
+												>
+													<input type="hidden" name="workshop" value={workshop} />
+													<input type="hidden" name="step" value={i + 1} />
+													{#if step.status === 'done'}
+														<input type="hidden" name="status" value="in_progress" />
+														<button type="submit" class="btn bg-initial"
+															>{m.markAsInProgress()}</button
+														>
+													{:else}
+														<input type="hidden" name="status" value="done" />
+														<button type="submit" class="btn bg-initial">{m.markAsDone()}</button>
+													{/if}
+												</form>
+											</div>
+										{/snippet}
+									</Popover>
 								{/if}
 							</li>
 						{/each}
