@@ -98,6 +98,13 @@
 	onMount(() => {
 		mounted = true;
 	});
+
+	$effect(() => {
+		console.log('RecursiveTreeView', {
+			nodes,
+			expandedNodes
+		});
+	});
 </script>
 
 <div

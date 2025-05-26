@@ -1,7 +1,7 @@
 <script lang="ts">
 	import TreeViewItem from './TreeViewItem.svelte';
 	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
+	import type { TreeViewNode } from './types';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 
 	// this can't be passed using context, since we have to pass it to recursive children.
@@ -131,7 +131,8 @@
 		indeterminateNodes = $bindable([]),
 		treeItems = $bindable([])
 	}: Props = $props();
-	let children: TreeViewItem[][] = $state([]);
+	let childrenNodes: TreeViewItem[][] = $state(Array(nodes.length).fill([]));
+	let rnodes = $state(nodes);
 
 	function hasMappingInference(node: TreeViewNode) {
 		const length = Object.keys(node.contentProps?.mapping_inference ?? {}).length;
@@ -147,17 +148,26 @@
 			(child) => child.contentProps.hidden || areAllChildrenHiddenRecursive(child)
 		);
 	}
+
+	$effect(() => {
+		console.debug('RecursiveTreeViewItem', {
+			nodes,
+			treeItems,
+			childrenNodes,
+			rnodes
+		});
+	});
 </script>
 
 {#if nodes && nodes.length > 0}
-	{#each nodes as node, i}
+	{#each rnodes as node, i}
 		<TreeViewItem
 			bind:this={treeItems[i]}
-			bind:children={children[i]}
+			bind:childrenProp={childrenNodes[i]}
 			bind:group
 			bind:name
 			bind:value={node.id}
-			classProp={node.contentProps.hidden === true || areAllChildrenHiddenRecursive(node)
+			classProp={node?.contentProps?.hidden === true || areAllChildrenHiddenRecursive(node)
 				? 'hidden'
 				: ''}
 			mappingInference={hasMappingInference(node)}
@@ -191,15 +201,14 @@
 					<node.lead {...node.leadProps} />
 				{/if}
 			{/snippet}
-			<!-- @migration-task: migrate this slot by hand, `children` would shadow a prop on the parent component -->
-			<svelte:fragment slot="children">
+			{#snippet childrenSlot()}
 				<RecursiveTreeViewItem
 					nodes={node.children}
 					bind:expandedNodes
 					bind:disabledNodes
 					bind:checkedNodes
 					bind:indeterminateNodes
-					bind:treeItems={children[i]}
+					bind:treeItems={childrenNodes[i]}
 					on:click={(e) =>
 						dispatch('click', {
 							id: e.detail.id
@@ -209,7 +218,7 @@
 							id: e.detail.id
 						})}
 				/>
-			</svelte:fragment>
+			{/snippet}
 		</TreeViewItem>
 	{/each}
 {/if}
