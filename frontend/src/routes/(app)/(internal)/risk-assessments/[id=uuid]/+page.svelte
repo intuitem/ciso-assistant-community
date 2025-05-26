@@ -5,12 +5,6 @@
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-		PopupSettings
-	} from '@skeletonlabs/skeleton-svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -18,8 +12,18 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { getLocale } from '$paraglide/runtime';
 	import { listViewFields } from '$lib/utils/table';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
 	let { data } = $props();
+
+	let exportPopupOpen = $state(false);
+
 	const showRisks = true;
 	const useBubbles = data.useBubbles;
 	const risk_assessment = data.risk_assessment;
@@ -101,7 +105,7 @@
 		'residual'
 	);
 
-	const popupDownload: PopupSettings = {
+	const popupDownload = {
 		event: 'click',
 		target: 'popupDownload',
 		placement: 'bottom'
@@ -177,34 +181,40 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<button class="btn preset-filled-primary-500 w-full" use:popup={popupDownload}
-						><i class="fa-solid fa-download mr-2"></i>{m.exportButton()}</button
-					>
-					<div
-						class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-						data-popup="popupDownload"
-					>
-						<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
-						<a
-							href="/risk-assessments/{risk_assessment.id}/export/pdf"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-						>
-						<a
-							href="/risk-assessments/{risk_assessment.id}/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-							>... {m.asCSV()}</a
-						>
-						<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
-						<a
-							href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/pdf"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-						>
-						<a
-							href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-							>... {m.asCSV()}</a
-						>
-					</div>
+					<Popover open={exportPopupOpen} onOpenChange={(e) => (exportPopupOpen = e.open)}>
+						{#snippet trigger()}
+							<button class="btn preset-filled-primary-500 w-full"
+								><i class="fa-solid fa-download mr-2"></i>{m.exportButton()}</button
+							>
+						{/snippet}
+						{#snippet content()}
+							<div
+								class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+								data-popup="popupDownload"
+							>
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/export/pdf"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+									>... {m.asCSV()}</a
+								>
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/pdf"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+									>... {m.asCSV()}</a
+								>
+							</div>
+						{/snippet}
+					</Popover>
 					{#if canEditObject}
 						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
