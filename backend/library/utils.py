@@ -129,17 +129,19 @@ class RequirementMappingImporter:
                 urn=self.data["target_requirement_urn"].lower(), default_locale=True
             )
         except RequirementNode.DoesNotExist:
-            error_msg = f"ERROR: target requirement with URN {self.data['target_requirement_urn']} does not exist"
-            print(error_msg)
-            raise Http404(error_msg)
+            logger.error(
+                "Target requirement does not exist",
+                error=self.data["target_requirement_urn"],
+            )
         try:
             source_requirement = RequirementNode.objects.get(
                 urn=self.data["source_requirement_urn"].lower(), default_locale=True
             )
         except RequirementNode.DoesNotExist:
-            error_msg = f"ERROR: source requirement with URN {self.data['source_requirement_urn']} does not exist"
-            print(error_msg)
-            raise Http404(error_msg)
+            logger.error(
+                "Source requirement does not exist",
+                error=self.data["source_requirement_urn"],
+            )
         return RequirementMapping.objects.create(
             mapping_set=mapping_set,
             target_requirement=target_requirement,
@@ -633,10 +635,7 @@ class LibraryImporter:
             if (
                 framework_import_error := self.init_framework(framework_data)
             ) is not None:
-                print(
-                    "framework_import_error",
-                    framework_import_error,
-                )
+                logger.error("Framework import error", error=framework_import_error)
                 return framework_import_error
 
         if (
@@ -658,16 +657,16 @@ class LibraryImporter:
                 requirement_mapping_set_import_error
                 := self.init_requirement_mapping_set(requirement_mapping_set_data)
             ) is not None:
-                print(
-                    "requirement_mapping_set_import_error",
-                    requirement_mapping_set_import_error,
+                logger.error(
+                    "Requirement mapping set import error",
+                    error=requirement_mapping_set_import_error,
                 )
                 return requirement_mapping_set_import_error
 
         if "threats" in library_objects:
             threat_data = library_objects["threats"]
             if (threat_import_error := self.init_threats(threat_data)) is not None:
-                print("threat errors", threat_import_error)
+                logger.error("Threat import error", error=threat_import_error)
                 return threat_import_error
 
         if "risk_matrix" in library_objects and "risk_matrices" in library_objects:
@@ -799,6 +798,5 @@ class LibraryImporter:
                 else:
                     raise e
             except Exception as e:
-                print("Library import error", e)
                 logger.error("Library import error", error=e, library=self._library)
                 raise e

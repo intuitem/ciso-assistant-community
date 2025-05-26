@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Type, Union, List
+from typing import Self, Union, List
 
 from icecream import ic
 from auditlog.registry import auditlog
@@ -709,7 +709,7 @@ class LibraryUpdater:
                 },
             )
 
-    def udpate_requirement_mapping_sets(self):
+    def update_requirement_mapping_sets(self):
         for requirement_mapping_set in self.new_requirement_mapping_sets:
             requirement_mapping_set_dict = {
                 key: value
@@ -805,7 +805,7 @@ class LibraryUpdater:
                 new_dependency = LoadedLibrary.objects.filter(
                     urn=new_dependency_urn
                 ).first()  # The locale is not handled by this code
-            except:
+            except ValueError:
                 return "dependencyNotFound"
             new_dependencies.append(new_dependency)
         for key, value in [
@@ -831,16 +831,6 @@ class LibraryUpdater:
         for new_dependency in new_dependencies:
             self.old_library.dependencies.add(new_dependency)
 
-        i18n_object_dict = {
-            "locale": self.old_library.locale,
-            "default_locale": self.old_library.default_locale,
-        }
-
-        referential_object_dict = {
-            "provider": self.new_library.provider,
-            "is_published": True,
-        }
-
         self.update_threats()
         self.update_reference_controls()
 
@@ -851,7 +841,7 @@ class LibraryUpdater:
             self.update_risk_matrices()
 
         if self.new_requirement_mapping_sets is not None:
-            self.udpate_requirement_mapping_sets()
+            self.update_requirement_mapping_sets()
 
 
 class LoadedLibrary(LibraryMixin):
