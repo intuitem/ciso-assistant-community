@@ -3,12 +3,17 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import Tile from './Tile.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	interface Props {
 		data: PageData;
@@ -147,7 +152,7 @@
 			// Data
 			title: safeTranslate('add-' + data.riskModel.localName)
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 </script>
 
