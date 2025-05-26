@@ -595,10 +595,10 @@ class LibraryImporter:
 
         if import_errors:
             invalid_framework_index, invalid_framework_error = import_errors[0]
-            return "[FRAMEWORK_ERROR] {} invaldi framework{} detected, the {}{} framework has the following error : {}".format(
+            return "[FRAMEWORK_ERROR] {} invalid framework{} detected, the {}{} framework has the following error : {}".format(
                 len(import_errors),
                 "s" if len(import_errors) > 1 else "",
-                invalid_framework_index,
+                invalid_framework_index + 1,
                 {1: "st", 2: "nd", 3: "rd"}.get(invalid_framework_index + 1, "th"),
                 invalid_framework_error,
             )
