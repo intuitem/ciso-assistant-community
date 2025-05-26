@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount, setContext } from 'svelte';
 
-	// Types
 	import RecursiveTreeViewItem from '$lib/components/TreeView/RecursiveTreeViewItem.svelte';
-	import type { CssClasses, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
+	import type { TreeViewNode } from './types';
 
 	interface Props {
 		// Props (parent)
@@ -15,23 +14,23 @@
 		disabledNodes?: string[];
 		checkedNodes?: string[];
 		indeterminateNodes?: string[];
-		width?: CssClasses;
-		spacing?: CssClasses;
+		width?: string;
+		spacing?: string;
 		// Props (children)
 		open?: boolean;
 		disabled?: boolean;
-		padding?: CssClasses;
-		indent?: CssClasses;
-		hover?: CssClasses;
-		rounded?: CssClasses;
+		padding?: string;
+		indent?: string;
+		hover?: string;
+		rounded?: string;
 		// Props (symbols)
-		caretOpen?: CssClasses;
-		caretClosed?: CssClasses;
-		hyphenOpacity?: CssClasses;
+		caretOpen?: string;
+		caretClosed?: string;
+		hyphenOpacity?: string;
 		// Props (regions)
-		regionSummary?: CssClasses;
-		regionSymbol?: CssClasses;
-		regionChildren?: CssClasses;
+		regionSummary?: string;
+		regionSymbol?: string;
+		regionChildren?: string;
 		// Props A11y
 		labelledby?: string;
 	}
@@ -97,13 +96,6 @@
 	let mounted = $state(false);
 	onMount(() => {
 		mounted = true;
-	});
-
-	$effect(() => {
-		console.log('RecursiveTreeView', {
-			nodes,
-			expandedNodes
-		});
 	});
 </script>
 

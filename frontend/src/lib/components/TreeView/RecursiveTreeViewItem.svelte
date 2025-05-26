@@ -1,10 +1,56 @@
 <script lang="ts">
-	import TreeViewItem from './TreeViewItem.svelte';
-	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
-	import type { TreeViewNode } from './types';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
+	import TreeViewItem from './TreeViewItem.svelte';
+	import type { TreeViewNode } from './types';
 
-	// this can't be passed using context, since we have to pass it to recursive children.
+	onMount(async () => {
+		if (selection) {
+			// random number as name
+			name = String(Math.random());
+
+			// remove relational links
+			if (!relational) treeItems = [];
+		}
+	});
+
+	interface Props {
+		/** Provide data-driven nodes. */
+		nodes?: TreeViewNode[];
+		/**
+		 * provides id's of expanded nodes
+		 * @type {string[]}
+		 */
+		expandedNodes?: string[];
+		/**
+		 * provides id's of disabled nodes
+		 * @type {string[]}
+		 */
+		disabledNodes?: string[];
+		/**
+		 * provides id's of checked nodes
+		 * @type {string[]}
+		 */
+		checkedNodes?: string[];
+		/**
+		 * provides id's of indeterminate nodes
+		 * @type {string[]}
+		 */
+		indeterminateNodes?: string[];
+		// important to pass children up to items (recursively)
+		treeItems?: TreeViewItem[];
+	}
+
+	let {
+		nodes = [],
+		expandedNodes = $bindable([]),
+		disabledNodes = $bindable([]),
+		checkedNodes = $bindable([]),
+		indeterminateNodes = $bindable([]),
+		treeItems = $bindable([])
+	}: Props = $props();
+	let childrenNodes: TreeViewItem[][] = $state(Array(nodes.length).fill([]));
+	let rnodes = $state(nodes);
 
 	// Context API
 	let selection: boolean = getContext('selection');
@@ -86,54 +132,6 @@
 		}
 	}
 
-	onMount(async () => {
-		if (selection) {
-			// random number as name
-			name = String(Math.random());
-
-			// remove relational links
-			if (!relational) treeItems = [];
-		}
-	});
-
-	interface Props {
-		/** Provide data-driven nodes. */
-		nodes?: TreeViewNode[];
-		/**
-		 * provides id's of expanded nodes
-		 * @type {string[]}
-		 */
-		expandedNodes?: string[];
-		/**
-		 * provides id's of disabled nodes
-		 * @type {string[]}
-		 */
-		disabledNodes?: string[];
-		/**
-		 * provides id's of checked nodes
-		 * @type {string[]}
-		 */
-		checkedNodes?: string[];
-		/**
-		 * provides id's of indeterminate nodes
-		 * @type {string[]}
-		 */
-		indeterminateNodes?: string[];
-		// important to pass children up to items (recursively)
-		treeItems?: TreeViewItem[];
-	}
-
-	let {
-		nodes = [],
-		expandedNodes = $bindable([]),
-		disabledNodes = $bindable([]),
-		checkedNodes = $bindable([]),
-		indeterminateNodes = $bindable([]),
-		treeItems = $bindable([])
-	}: Props = $props();
-	let childrenNodes: TreeViewItem[][] = $state(Array(nodes.length).fill([]));
-	let rnodes = $state(nodes);
-
 	function hasMappingInference(node: TreeViewNode) {
 		const length = Object.keys(node.contentProps?.mapping_inference ?? {}).length;
 		if (length > 0) {
@@ -148,15 +146,6 @@
 			(child) => child.contentProps.hidden || areAllChildrenHiddenRecursive(child)
 		);
 	}
-
-	$effect(() => {
-		console.debug('RecursiveTreeViewItem', {
-			nodes,
-			treeItems,
-			childrenNodes,
-			rnodes
-		});
-	});
 </script>
 
 {#if nodes && nodes.length > 0}

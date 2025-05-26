@@ -5,12 +5,95 @@
 
 	import { run } from 'svelte/legacy';
 
-	import { getContext, createEventDispatcher, onMount, mount } from 'svelte';
+	import { createEventDispatcher, getContext, mount } from 'svelte';
 	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
+
+	interface Props {
+		// Props (state)
+		group?: unknown;
+		name?: string | undefined;
+		value?: unknown;
+		checked?: boolean;
+		childrenProp?: any;
+		mappingInference?: unknown;
+		// Props (styles)
+		spacing?: string;
+		// Context API
+		open?: boolean;
+		selection?: boolean;
+		multiple?: boolean;
+		disabled?: boolean;
+		indeterminate?: boolean;
+		padding?: string;
+		indent?: string;
+		hover?: string;
+		rounded?: string;
+		caretOpen?: string;
+		caretClosed?: string;
+		hyphenOpacity?: string;
+		regionSummary?: string;
+		regionSymbol?: string;
+		regionChildren?: string;
+		// Props (work-around)
+		hideLead?: boolean;
+		hideChildren?: boolean;
+		classProp?: string; // Replacing $$props.class
+		children?: import('svelte').Snippet;
+		lead?: import('svelte').Snippet;
+		childrenSlot?: import('svelte').Snippet;
+	}
+
+	let {
+		group = $bindable(undefined),
+		name = $bindable(undefined),
+		value = $bindable(undefined),
+		checked = $bindable(false),
+		childrenProp = $bindable(),
+		mappingInference = undefined,
+		spacing = 'space-x-4',
+		open = $bindable(getContext('open')),
+		selection = getContext('selection'),
+		multiple = getContext('multiple'),
+		disabled = getContext('disabled'),
+		indeterminate = $bindable(false),
+		padding = getContext('padding'),
+		indent = getContext('indent'),
+		hover = getContext('hover'),
+		rounded = getContext('rounded-sm'),
+		caretOpen = getContext('caretOpen'),
+		caretClosed = getContext('caretClosed'),
+		hyphenOpacity = getContext('hyphenOpacity'),
+		regionSummary = getContext('regionSummary'),
+		regionSymbol = getContext('regionSymbol'),
+		regionChildren = getContext('regionChildren'),
+		hideLead = false,
+		hideChildren = false,
+		children,
+		classProp = '',
+		lead,
+		childrenSlot
+	}: Props = $props();
 
 	// Locals
 	let treeItem: HTMLDetailsElement = $state();
 	let childrenDiv: HTMLDivElement = $state();
+
+	const cBase = 'space-y-1';
+	const cSummary = 'list-none [&::-webkit-details-marker]:hidden items-center cursor-pointer flex';
+	const cSymbol = 'fill-current w-3 text-center transition-transform duration-200';
+	const cChildren = 'space-y-1';
+	const cDisabled = 'opacity-50 cursor-not-allowed!';
+
+	let classesCaretState = $derived(open && childrenProp && !hideChildren ? caretOpen : caretClosed);
+	let classesDisabled = $derived(disabled ? cDisabled : '');
+	let classesBase = $derived(`${cBase} ${classProp}`);
+	let classesSummary = $derived(
+		`${cSummary} ${classesDisabled} ${spacing} ${rounded} ${padding} ${hover} ${regionSummary}`
+	);
+	let classesCaret = $derived(`${classesCaretState}`);
+	let classesSymbol = $derived(`${cSymbol} ${classesCaret} ${regionSymbol}`);
+	let classesHyphen = $derived(`${hyphenOpacity}`);
+	let classesChildren = $derived(`${cChildren} ${indent} ${regionChildren}`);
 
 	// Functionality
 	function onSummaryClick(event: MouseEvent) {
@@ -187,77 +270,6 @@
 		}
 	}
 
-	const cBase = 'space-y-1';
-	const cSummary = 'list-none [&::-webkit-details-marker]:hidden items-center cursor-pointer flex';
-	const cSymbol = 'fill-current w-3 text-center transition-transform duration-200';
-	const cChildren = 'space-y-1';
-	const cDisabled = 'opacity-50 cursor-not-allowed!';
-
-	interface Props {
-		// Props (state)
-		group?: unknown;
-		name?: string | undefined;
-		value?: unknown;
-		checked?: boolean;
-		childrenProp?: any;
-		mappingInference?: unknown;
-		// Props (styles)
-		spacing?: string;
-		// Context API
-		open?: boolean;
-		selection?: boolean;
-		multiple?: boolean;
-		disabled?: boolean;
-		indeterminate?: boolean;
-		padding?: string;
-		indent?: string;
-		hover?: string;
-		rounded?: string;
-		caretOpen?: string;
-		caretClosed?: string;
-		hyphenOpacity?: string;
-		regionSummary?: string;
-		regionSymbol?: string;
-		regionChildren?: string;
-		// Props (work-around)
-		hideLead?: boolean;
-		hideChildren?: boolean;
-		classProp?: string; // Replacing $$props.class
-		children?: import('svelte').Snippet;
-		lead?: import('svelte').Snippet;
-		childrenSlot?: import('svelte').Snippet;
-	}
-
-	let {
-		group = $bindable(undefined),
-		name = $bindable(undefined),
-		value = $bindable(undefined),
-		checked = $bindable(false),
-		childrenProp = $bindable(),
-		mappingInference = undefined,
-		spacing = 'space-x-4',
-		open = $bindable(getContext('open')),
-		selection = getContext('selection'),
-		multiple = getContext('multiple'),
-		disabled = getContext('disabled'),
-		indeterminate = $bindable(false),
-		padding = getContext('padding'),
-		indent = getContext('indent'),
-		hover = getContext('hover'),
-		rounded = getContext('rounded-sm'),
-		caretOpen = getContext('caretOpen'),
-		caretClosed = getContext('caretClosed'),
-		hyphenOpacity = getContext('hyphenOpacity'),
-		regionSummary = getContext('regionSummary'),
-		regionSymbol = getContext('regionSymbol'),
-		regionChildren = getContext('regionChildren'),
-		hideLead = false,
-		hideChildren = false,
-		children,
-		classProp = '',
-		lead,
-		childrenSlot
-	}: Props = $props();
 	run(() => {
 		if (multiple) updateCheckbox(group, indeterminate);
 	});
@@ -291,16 +303,6 @@
 				});
 		});
 	});
-	let classesCaretState = $derived(open && childrenProp && !hideChildren ? caretOpen : caretClosed);
-	let classesDisabled = $derived(disabled ? cDisabled : '');
-	let classesBase = $derived(`${cBase} ${classProp}`);
-	let classesSummary = $derived(
-		`${cSummary} ${classesDisabled} ${spacing} ${rounded} ${padding} ${hover} ${regionSummary}`
-	);
-	let classesCaret = $derived(`${classesCaretState}`);
-	let classesSymbol = $derived(`${cSymbol} ${classesCaret} ${regionSymbol}`);
-	let classesHyphen = $derived(`${hyphenOpacity}`);
-	let classesChildren = $derived(`${cChildren} ${indent} ${regionChildren}`);
 
 	export {
 		group,
@@ -329,10 +331,6 @@
 		hideChildren,
 		classProp
 	};
-
-	$effect(() => {
-		console.log('TreeViewItem', { open, children, childrenProp, childrenSlot });
-	});
 </script>
 
 <details
