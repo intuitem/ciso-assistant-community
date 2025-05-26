@@ -658,11 +658,11 @@
 		</div>
 		{#key data}
 			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
-				<!-- <RecursiveTreeView -->
-				<!-- 	nodes={transformToTreeView(Object.entries(tree))} -->
-				<!-- 	bind:expandedNodes -->
-				<!-- 	hover="hover:bg-initial" -->
-				<!-- /> -->
+				<RecursiveTreeView
+					nodes={transformToTreeView(Object.entries(tree))}
+					bind:expandedNodes
+					hover="hover:bg-initial"
+				/>
 			{/key}
 		{/key}
 	</div>
