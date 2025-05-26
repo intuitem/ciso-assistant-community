@@ -5,7 +5,8 @@
 
 	import { run } from 'svelte/legacy';
 
-	import { getContext, createEventDispatcher, onMount } from 'svelte';
+	import { getContext, createEventDispatcher, onMount, mount } from 'svelte';
+	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
 
 	// Locals
 	let treeItem: HTMLDetailsElement = $state();
@@ -283,7 +284,11 @@
 	});
 	run(() => {
 		childrenProp?.forEach((child) => {
-			if (child) child.$on('childChange', onChildValueChange);
+			if (child)
+				mount(RecursiveTreeViewItem, {
+					target: treeItem,
+					events: { childChange: () => onChildValueChange() }
+				});
 		});
 	});
 	let classesCaretState = $derived(open && childrenProp && !hideChildren ? caretOpen : caretClosed);
