@@ -10,6 +10,11 @@ from global_settings.models import GlobalSettings
 import logging.config
 import structlog
 
+import uuid
+from datetime import datetime
+
+from .helpers import parse_and_pass
+from icecream import ic
 
 from django.core.management import call_command
 
@@ -158,3 +163,30 @@ def auditlog_prune():
         logger.info("Successfully pruned audit logs")
     except Exception as e:
         logger.error(f"Failed to prune the audit logs: {str(e)}")
+
+
+def gen_filename():
+    """Generate a unique filename for prowler output"""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_id = str(uuid.uuid4())[:8]  # First 8 chars of UUID
+    return f"prowler_k8s_{timestamp}_{unique_id}"
+
+
+@periodic_task(crontab(minute="*/1"))
+def prowler_scan():
+    filname = gen_filename()
+    try:
+        res = call_command(
+            "prowler",
+            "kubernetes",  # provider
+            "--kubeconfig-file=/Users/abder/.kube/kubeconfig-k8s-ciso-assistant-demo.yaml",
+            f"--output-filename={filname}",
+            "--output-directory=/tmp",
+            "--output-formats=csv",
+        )
+        logger.info("Successfully triggered prowler scan")
+        data = parse_and_pass(f"/tmp/{filname}.csv")
+        ic(data)
+
+    except Exception as e:
+        logger.error(f"Failed to trigger prowler scan: {str(e)}")

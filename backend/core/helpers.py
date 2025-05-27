@@ -3,6 +3,7 @@ from collections.abc import MutableMapping
 from datetime import date, timedelta
 from typing import Optional
 from typing import Dict, List
+import pandas as pd
 
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
@@ -1350,3 +1351,137 @@ def duplicate_related_objects(
             field_name,
             model_class,
         )
+
+
+def parse_and_pass(filename):
+    """
+    Parse Prowler CSV output and create nested dictionary structure
+
+    Args:
+        filename (str): Path to the CSV file
+
+    Returns:
+        dict: Nested dictionary with framework compliance data
+    """
+    try:
+        # Read CSV file
+        df = pd.read_csv(filename, sep=";")
+
+        # Keep only required columns
+        required_columns = ["CHECK_ID", "STATUS", "COMPLIANCE", "CATEGORIES"]
+
+        # Check if all required columns exist
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            logger.error(f"Missing columns in CSV: {missing_columns}")
+            return {}
+
+        # Filter to keep only required columns
+        df = df[required_columns]
+
+        # Remove rows where COMPLIANCE is null/empty
+        df = df.dropna(subset=["COMPLIANCE"])
+        df = df[df["COMPLIANCE"].str.strip() != ""]
+
+        # Initialize the result dictionary
+        result = defaultdict(
+            lambda: defaultdict(lambda: {"aggregated_status": None, "checks": {}})
+        )
+
+        # Process each row
+        for _, row in df.iterrows():
+            check_id = row["CHECK_ID"]
+            status = row["STATUS"]
+            compliance_str = row["COMPLIANCE"]
+
+            # Parse COMPLIANCE field - split by '|'
+            compliance_items = [
+                item.strip() for item in compliance_str.split("|") if item.strip()
+            ]
+
+            for compliance_item in compliance_items:
+                # Parse "framework: requirement_ref_id" format
+                if ":" in compliance_item:
+                    framework, requirement_refs = compliance_item.split(":", 1)
+                    framework = framework.strip()
+                    requirement_refs = requirement_refs.strip()
+
+                    # Split multiple requirements (separated by commas)
+                    individual_requirements = [
+                        req.strip()
+                        for req in requirement_refs.split(",")
+                        if req.strip()
+                    ]
+
+                    # Add check to each individual requirement
+                    for requirement_ref in individual_requirements:
+                        # Add check to the framework/requirement
+                        result[framework][requirement_ref]["checks"][check_id] = status
+
+                        # Update aggregated status
+                        current_checks = result[framework][requirement_ref]["checks"]
+
+                        # Determine aggregated status based on all checks for this requirement
+                        statuses = list(current_checks.values())
+                        aggregated_status = calculate_aggregated_status(statuses)
+
+                        result[framework][requirement_ref]["aggregated_status"] = (
+                            aggregated_status
+                        )
+                else:
+                    logger.warning(f"Invalid compliance format: {compliance_item}")
+
+        # Convert defaultdict to regular dict for cleaner output
+        final_result = {}
+        for framework, requirements in result.items():
+            final_result[framework] = {}
+            for req_ref, data in requirements.items():
+                final_result[framework][req_ref] = dict(data)
+
+        logger.info(
+            f"Successfully parsed {len(df)} checks across {len(final_result)} frameworks"
+        )
+        return final_result
+
+    except FileNotFoundError:
+        logger.error(f"CSV file not found: {filename}")
+        return {}
+    except pd.errors.EmptyDataError:
+        logger.error(f"CSV file is empty: {filename}")
+        return {}
+    except Exception as e:
+        logger.error(f"Error parsing CSV file {filename}: {str(e)}")
+        return {}
+
+
+def calculate_aggregated_status(statuses):
+    """
+    Calculate aggregated status based on individual check statuses
+
+    Args:
+        statuses (list): List of individual check statuses
+
+    Returns:
+        str: Aggregated status (PASS, FAIL, UNKNOWN, PARTIAL)
+    """
+    if not statuses:
+        return "UNKNOWN"
+
+    # If only one check and it's MANUAL, return UNKNOWN
+    if len(statuses) == 1 and statuses[0] == "MANUAL":
+        return "UNKNOWN"
+
+    # Count different status types
+    unique_statuses = set(statuses)
+
+    # If any check failed, overall status is FAIL
+    if "FAIL" in unique_statuses:
+        return "FAIL"
+
+    # If all checks passed, overall status is PASS
+    if len(unique_statuses) == 1 and "PASS" in unique_statuses:
+        return "PASS"
+
+    # If we have a mix of statuses or only non-PASS/non-FAIL statuses
+    # (like MANUAL, INFO, etc.), it's PARTIAL
+    return "PARTIAL"
