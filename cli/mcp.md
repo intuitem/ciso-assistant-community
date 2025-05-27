@@ -16,8 +16,7 @@ Note: MCP technology is still maturing so the instructions might vary.
 3. Update the settings of mcpServers of your Claude Desktop app. The path will vary depending on your OS. On MacOS it's under `~/Library/Application\ Support/Claude/claude_desktop_config.json`. Make sure to put the **full absolute paths** for `uv` binary and the `cli` folder of your cloned repo
 
 Here is a sample:
-```json
-```
+
 ```json
 {
   "mcpServers": {
