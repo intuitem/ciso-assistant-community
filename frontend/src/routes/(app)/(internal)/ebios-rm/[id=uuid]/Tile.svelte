@@ -34,19 +34,18 @@
 		addRiskAnalysis
 	}: Props = $props();
 
-	let workshopStatus = $state('to_do');
-
 	let open = $state(Array(meta.length).fill(false));
 	let actionsOpen = $state(Array(meta.length).fill(false));
 
-	run(() => {
-		workshopStatus = meta.every((step) => step.status === 'done')
+	let steps = $state(meta);
+
+	let workshopStatus = $derived(
+		meta.every((step) => step.status === 'done')
 			? 'done'
 			: meta.some((step) => step.status === 'done')
 				? 'in_progress'
-				: 'to_do';
-		if (browser) invalidateAll();
-	});
+				: 'to_do'
+	);
 </script>
 
 <div class="p-5 {accent_color}">
@@ -68,7 +67,7 @@
 			<div class="flex mx-auto">
 				<div>
 					<ol class="relative text-gray-500 border-s border-gray-200">
-						{#each meta as step, i}
+						{#each steps as step, i}
 							<li class="flex flex-row justify-between mb-10 ms-6">
 								{#if createRiskAnalysis && i == 0}
 									{@render addRiskAnalysis?.()}
@@ -109,8 +108,8 @@
 												>
 													<i class="fa-solid fa-clipboard-check"></i>
 												</span>
-												<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
-												<p class="text-sm">{step.title}</p>
+												<h3 class="font-medium leading-tight text-start">{m.activity()} {i + 1}</h3>
+												<p class="text-sm text-start">{step.title}</p>
 											</div>
 										{/snippet}
 										{#snippet content()}
