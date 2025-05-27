@@ -1364,26 +1364,21 @@ def parse_and_pass(filename):
         dict: Nested dictionary with framework compliance data
     """
     try:
-        # Read CSV file
         df = pd.read_csv(filename, sep=";")
 
-        # Keep only required columns
         required_columns = ["CHECK_ID", "STATUS", "COMPLIANCE", "CATEGORIES"]
 
-        # Check if all required columns exist
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
             logger.error(f"Missing columns in CSV: {missing_columns}")
             return {}
 
-        # Filter to keep only required columns
         df = df[required_columns]
 
         # Remove rows where COMPLIANCE is null/empty
         df = df.dropna(subset=["COMPLIANCE"])
         df = df[df["COMPLIANCE"].str.strip() != ""]
 
-        # Initialize the result dictionary
         result = defaultdict(
             lambda: defaultdict(lambda: {"aggregated_status": None, "checks": {}})
         )
@@ -1394,7 +1389,6 @@ def parse_and_pass(filename):
             status = row["STATUS"]
             compliance_str = row["COMPLIANCE"]
 
-            # Parse COMPLIANCE field - split by '|'
             compliance_items = [
                 item.strip() for item in compliance_str.split("|") if item.strip()
             ]
@@ -1413,12 +1407,8 @@ def parse_and_pass(filename):
                         if req.strip()
                     ]
 
-                    # Add check to each individual requirement
                     for requirement_ref in individual_requirements:
-                        # Add check to the framework/requirement
                         result[framework][requirement_ref]["checks"][check_id] = status
-
-                        # Update aggregated status
                         current_checks = result[framework][requirement_ref]["checks"]
 
                         # Determine aggregated status based on all checks for this requirement
@@ -1431,7 +1421,6 @@ def parse_and_pass(filename):
                 else:
                     logger.warning(f"Invalid compliance format: {compliance_item}")
 
-        # Convert defaultdict to regular dict for cleaner output
         final_result = {}
         for framework, requirements in result.items():
             final_result[framework] = {}
@@ -1455,15 +1444,6 @@ def parse_and_pass(filename):
 
 
 def calculate_aggregated_status(statuses):
-    """
-    Calculate aggregated status based on individual check statuses
-
-    Args:
-        statuses (list): List of individual check statuses
-
-    Returns:
-        str: Aggregated status (PASS, FAIL, UNKNOWN, PARTIAL)
-    """
     if not statuses:
         return "UNKNOWN"
 
@@ -1510,6 +1490,14 @@ def update_audit(audit_id, framework, data, mode="strict"):
     )
     for ref_id, ref_data in s_data.items():
         status = ref_data["aggregated_status"]
+        checks = ref_data["checks"]
+        observation = "\n".join(
+            [
+                f"\t{check_id}: {check_status}"
+                for check_id, check_status in checks.items()
+            ]
+        )
         result = decision_mapping[status]
         ra = requirements_assessments.filter(requirement__ref_id=ref_id)
-        ra.update(result=result)
+        observation = "Checks:\n" + observation
+        ra.update(result=result, observation=observation)

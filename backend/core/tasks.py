@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
-from core.models import AppliedControl, Framework
+from core.models import AppliedControl
 from django.core.mail import send_mail
 from django.conf import settings
 import logging
