@@ -10,11 +10,6 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
-	import {
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore
-	} from '@skeletonlabs/skeleton-svelte';
 	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
 
@@ -26,6 +21,12 @@
 	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
