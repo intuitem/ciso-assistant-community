@@ -1,19 +1,29 @@
 """
 Merge 2 mappings together
 
-In order to do that, you must set an Excel A -> B mapping and a B -> C mapping in the script's input parameters.
-This will produce an Excel A -> C mapping on output.
+In order to do that, you must set an Excel A -> B mapping (File 1) and a B -> C mapping (File 2) in the script's input parameters.
+This will produce an Excel A -> C mapping (File 3) on output.
+
+Select the tab containing the mapping table in "File 1" by modifying "A_TO_B_MAPPING_TAB_NAME".
+Select the tab containing the mapping table in "File 2" by modifying "B_TO_C_MAPPING_TAB_NAME".
 
 Please note that you can't use the output Excel file as is to convert it to a YAML file.
 
-Tested with v1 mappings only.
+Tested with v1 & v2 mappings.
 """
+
+
+A_TO_B_MAPPING_TAB_NAME = "mappings_content"
+B_TO_C_MAPPING_TAB_NAME = "mappings"
+
 
 import pandas as pd
 import sys
 import os
 from openpyxl import load_workbook
 from openpyxl.styles import Font
+
+SCRIPT_VERSION = '1.1'
 
 # Validate arguments
 if len(sys.argv) < 3 or len(sys.argv) > 4:
@@ -24,12 +34,26 @@ file1_path = sys.argv[1]
 file2_path = sys.argv[2]
 output_path = sys.argv[3] if len(sys.argv) == 4 else "merged_output.xlsx"
 
+# Check if the required sheets exist before loading them
+try:
+    sheet_names1 = pd.ExcelFile(file1_path).sheet_names
+    if A_TO_B_MAPPING_TAB_NAME not in sheet_names1:
+        raise ValueError(f"❌ Sheet {A_TO_B_MAPPING_TAB_NAME} not found in \"{file1_path}\"")
+
+    sheet_names2 = pd.ExcelFile(file2_path).sheet_names
+    if B_TO_C_MAPPING_TAB_NAME not in sheet_names2:
+        raise ValueError(f"❌ Sheet {B_TO_C_MAPPING_TAB_NAME} not found in \"{file2_path}\"")
+except Exception as e:
+    print(str(e))
+    sys.exit(1)
+
+
 # Load and clean file 1 (A -> B)
-df1 = pd.read_excel(file1_path, sheet_name="mappings")
+df1 = pd.read_excel(file1_path, sheet_name=A_TO_B_MAPPING_TAB_NAME)
 df1.columns = df1.columns.str.strip()
 
 # Load and clean file 2 (B -> C)
-df2 = pd.read_excel(file2_path, sheet_name="ref")
+df2 = pd.read_excel(file2_path, sheet_name=B_TO_C_MAPPING_TAB_NAME)
 df2.columns = df2.columns.str.strip()
 
 # Merge A -> B -> C
@@ -76,7 +100,6 @@ merged_df["rationale"] = merged_df["rationale"].fillna("")
 
 # Export to Excel
 merged_df.to_excel(output_path, sheet_name="merged", index=False)
-print(f"✅ Output written to \"{output_path}\"")
 
 
 wb = load_workbook(output_path)
@@ -92,7 +115,7 @@ ws_info.delete_cols(1, ws_info.max_column)
 ws_info.delete_rows(1, ws_info.max_row)
 
 # Write texts with formatting
-ws_info["A1"] = "Mapping Merger v1"
+ws_info["A1"] = "Mapping Merger v" + SCRIPT_VERSION
 ws_info["A1"].font = Font(size=48, bold=True)
 
 source_file_name = os.path.basename(file1_path)
@@ -109,4 +132,4 @@ ws_info["A4"].font = Font(size=20)
 # Save the modified workbook
 wb.save(output_path)
 
-print(f"✅ 'info' sheet added to output \"{output_path}\"")
+print(f"✅ Output written to \"{output_path}\"")
