@@ -35,4 +35,8 @@ Here is a sample:
 
 4. make sure to kill and restart Claude Desktop app to apply the settings
 5. Start a new chat and if the settings are correct, you should see `ciso-assistant` under the chat extensions. You will see a count of the supported `tools` which reflect the currently supported data feeds from the app.
+
+<img width="1538" alt="image" src="https://github.com/user-attachments/assets/1345eb19-3f5e-4a0c-8abe-dae5a86dd59a" />
+
+
 6. You can now chat with your data, either by mentioning some keywords like applied controls or risks, or explicitly asking about ciso assistant.
