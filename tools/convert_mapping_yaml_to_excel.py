@@ -1,9 +1,10 @@
 """
 Convert a YAML mapping into an Excel mapping
+Version 1.1
 
 Please note that this script doesn't replace "prepare_mapping.py".
 
-Tested with v1 mappings only.
+Tested with v1 & v2 mappings.
 """
 
 import yaml
@@ -13,50 +14,69 @@ import os
 from openpyxl import load_workbook
 from openpyxl.styles import Font
 
+SCRIPT_VERSION = '1.1'
+
+
 def extract_last_segment(urn: str) -> str:
     return urn.split(':')[-1] if urn else ''
+
+def get_requirement_mappings(data: dict) -> list:
+    objects = data.get("objects", {})
+
+    # Version 1
+    if "requirement_mapping_set" in objects:
+        return objects["requirement_mapping_set"].get("requirement_mappings", [])
+
+    # Version 2
+    elif "requirement_mapping_sets" in objects:
+        sets = objects["requirement_mapping_sets"]
+        if isinstance(sets, list) and sets:
+            return sets[0].get("requirement_mappings", [])
+
+    return []
 
 def convert_yaml_to_excel(yaml_file: str, excel_file: str):
     # Load YAML file
     with open(yaml_file, 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
 
-    # Get mappings
-    mappings = data.get("objects", {}) \
-                   .get("requirement_mapping_set", {}) \
-                   .get("requirement_mappings", [])
+    # Get list of mappings
+    mappings = get_requirement_mappings(data)
 
-    # Extract rows
+    # Transform data
     rows = []
     for item in mappings:
         row = {
             "source_requirement_urn": extract_last_segment(item.get("source_requirement_urn", "")),
             "target_requirement_urn": extract_last_segment(item.get("target_requirement_urn", "")),
             "relationship": item.get("relationship", ""),
-            "rationale": item.get("rationale", ""),
-            "annotation": item.get("annotation", "")
+            "rationale": item.get("rationale", ""),                                 # Optional
+            "strength_of_relationship": item.get("strength_of_relationship", ""),   # Optional
+            "annotation": item.get("annotation", "")                                # Optional
         }
         rows.append(row)
 
-    # Create dataframe
-    df = pd.DataFrame(rows, columns=[
+    # Create DataFrame
+    df = pd.DataFrame(rows)[[
         "source_requirement_urn",
         "target_requirement_urn",
         "relationship",
         "rationale",
+        "strength_of_relationship",
         "annotation"
-    ])
+    ]]
 
-    # Write to Excel (to a sheet named "mappings")
+    # Write to Excel
     with pd.ExcelWriter(excel_file, engine='openpyxl') as writer:
+        # Sheet 2: mappings
         df.to_excel(writer, sheet_name="mappings", index=False)
 
-        # Add "info" sheet manually
+        # Sheet 1: info
         workbook = writer.book
         info_sheet = workbook.create_sheet(title="info", index=0)
 
         # Row 1: Title
-        info_sheet["A1"] = "YAML to Excel Mapping Converter v1"
+        info_sheet["A1"] = "YAML to Excel Mapping Converter v" + SCRIPT_VERSION 
         info_sheet["A1"].font = Font(size=48, bold=True)
 
         # Row 2: Source file
@@ -69,13 +89,24 @@ def convert_yaml_to_excel(yaml_file: str, excel_file: str):
 
     print(f"✅ Conversion completed: \"{excel_file}\"")
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python yaml_to_excel.py <yaml_file> [excel_file]")
         sys.exit(1)
 
     yaml_input = sys.argv[1]
-    excel_output = sys.argv[2] if len(sys.argv) > 2 else os.path.splitext(yaml_input)[0] + ".xlsx"
+
+    # Determine output filename
+    if len(sys.argv) > 2:
+        excel_output = sys.argv[2]
+        # Add .xlsx if missing
+        if not excel_output.lower().endswith(".xlsx"):
+            excel_output += ".xlsx"
+    else:
+        yaml_basename = os.path.basename(os.path.splitext(yaml_input)[0])
+        yaml_dir = os.path.dirname(yaml_input)
+        excel_output = os.path.join(yaml_dir, f"conv_{yaml_basename}.xlsx")
 
     convert_yaml_to_excel(yaml_input, excel_output)
 
