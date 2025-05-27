@@ -14,6 +14,9 @@ importers:
       '@fortawesome/fontawesome-free':
         specifier: ^6.7.1
         version: 6.7.1
+      '@tabler/icons-svelte':
+        specifier: ^3.33.0
+        version: 3.33.0(svelte@4.2.19)
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.18.0
         version: 8.18.0(@typescript-eslint/parser@8.18.0(eslint@9.16.0(jiti@1.21.6))(typescript@5.7.2))(eslint@9.16.0(jiti@1.21.6))(typescript@5.7.2)
@@ -1461,6 +1464,14 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tabler/icons-svelte@3.33.0':
+    resolution: {integrity: sha512-jJubcZKH4db4aw6dME1BdDMDAO0jEiSiqxLota+HrOqWQO0IFVx9ojEA6utN16JeqZkxX3QIt/0sNWkNWGq5uw==}
+    peerDependencies:
+      svelte: '>=3 <6 || >=5.0.0-next.0'
+
+  '@tabler/icons@3.33.0':
+    resolution: {integrity: sha512-NZeFfzcYe7xcBHR3zKoCSrw/cFWvfj6LjenPQ48yVMTGdX854HH9nH44ZfMH8rrDzHBllfjwl4CIX6Vh2tyN0Q==}
 
   '@tailwindcss/forms@0.5.9':
     resolution: {integrity: sha512-tM4XVr2+UVTxXJzey9Twx48c1gcxFStqn1pQz0tRsX8o3DvxhN5oY5pvyAbUx7VTaZxpej4Zzvc6h+1RJBzpIg==}
@@ -5409,6 +5420,13 @@ snapshots:
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@tabler/icons-svelte@3.33.0(svelte@4.2.19)':
+    dependencies:
+      '@tabler/icons': 3.33.0
+      svelte: 4.2.19
+
+  '@tabler/icons@3.33.0': {}
 
   '@tailwindcss/forms@0.5.9(tailwindcss@3.4.16)':
     dependencies:
