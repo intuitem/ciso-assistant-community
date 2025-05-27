@@ -1,5 +1,6 @@
 """
 Merge 2 mappings together
+Version 1.1
 
 In order to do that, you must set an Excel A -> B mapping (File 1) and a B -> C mapping (File 2) in the script's input parameters.
 This will produce an Excel A -> C mapping (File 3) on output.
