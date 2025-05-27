@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
-from core.models import AppliedControl
+from core.models import AppliedControl, Framework
 from django.core.mail import send_mail
 from django.conf import settings
 import logging
@@ -13,7 +13,7 @@ import structlog
 import uuid
 from datetime import datetime
 
-from .helpers import parse_and_pass
+from .helpers import parse_and_pass, update_audit
 from icecream import ic
 
 from django.core.management import call_command
@@ -176,7 +176,7 @@ def gen_filename():
 def prowler_scan():
     filname = gen_filename()
     try:
-        res = call_command(
+        call_command(
             "prowler",
             "kubernetes",  # provider
             "--kubeconfig-file=/Users/abder/.kube/kubeconfig-k8s-ciso-assistant-demo.yaml",
@@ -187,6 +187,15 @@ def prowler_scan():
         logger.info("Successfully triggered prowler scan")
         data = parse_and_pass(f"/tmp/{filname}.csv")
         ic(data)
+        audit_id = "ab59f588-bc60-4e0e-a10c-85cda031b7cd"
+        res = update_audit(
+            audit_id=audit_id, framework="ISO27001-2022", data=data, mode="lax"
+        )
+
+        audit_id = "8e7fdeb2-4424-4438-b780-a66fd172497a"
+        res = update_audit(
+            audit_id=audit_id, framework="CIS-1.10", data=data, mode="lax"
+        )
 
     except Exception as e:
         logger.error(f"Failed to trigger prowler scan: {str(e)}")

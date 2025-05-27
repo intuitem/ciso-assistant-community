@@ -1485,3 +1485,31 @@ def calculate_aggregated_status(statuses):
     # If we have a mix of statuses or only non-PASS/non-FAIL statuses
     # (like MANUAL, INFO, etc.), it's PARTIAL
     return "PARTIAL"
+
+
+def update_audit(audit_id, framework, data, mode="strict"):
+    decision_mapping = {
+        "UNKNOWN": "not_assessed",
+        "PASS": "partially_compliant",
+        "FAIL": "non_compliant",
+        "PARTIAL": "partially_compliant",
+    }
+
+    if mode == "lax":
+        decision_mapping = {
+            "UNKNOWN": "not_assessed",
+            "PASS": "compliant",
+            "FAIL": "non_compliant",
+            "PARTIAL": "partially_compliant",
+        }
+    s_data = data.get(framework)  # scan data
+
+    audit = ComplianceAssessment.objects.get(id=audit_id)
+    requirements_assessments = RequirementAssessment.objects.filter(
+        compliance_assessment=audit
+    )
+    for ref_id, ref_data in s_data.items():
+        status = ref_data["aggregated_status"]
+        result = decision_mapping[status]
+        ra = requirements_assessments.filter(requirement__ref_id=ref_id)
+        ra.update(result=result)
