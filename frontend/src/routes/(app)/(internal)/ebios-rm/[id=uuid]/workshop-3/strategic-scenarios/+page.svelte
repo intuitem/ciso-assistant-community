@@ -2,10 +2,15 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	const modalStore: ModalStore = getModalStore();
 

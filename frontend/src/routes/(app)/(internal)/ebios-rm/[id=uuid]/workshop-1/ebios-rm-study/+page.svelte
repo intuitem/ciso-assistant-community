@@ -6,16 +6,17 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '$lib/utils/access-control';
 	import {
-		Tabs,
+		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '@skeletonlabs/skeleton-svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	} from '$lib/components/Modals/stores';
 
-	// const modalStore: ModalStore = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 
 	const statusMap = {
 		planned: 'bg-indigo-300 text-indigo-800',
@@ -48,7 +49,7 @@
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	let activeActivity: string | null = $state(null);
@@ -77,7 +78,7 @@
 			// Data
 			title: m.selectAsset()
 		};
-		// modalStore.trigger(modal);
+		modalStore.trigger(modal);
 	}
 
 	let group = $state(Object.keys(data.relatedModels)[0]);
