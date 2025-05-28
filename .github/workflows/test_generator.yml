@@ -22,7 +22,7 @@ jobs:
   Test-Generator-AI-Call:
     runs-on: ubuntu-latest
     steps:
-      - uses: Poulereaper/ai-pr-test-generator@v0.2.4
+      - uses: Poulereaper/ai-pr-test-generator@v0.2.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MISTRAL_API_KEY: 'testapikeyre'
