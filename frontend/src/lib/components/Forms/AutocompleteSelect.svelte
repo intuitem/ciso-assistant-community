@@ -8,6 +8,7 @@
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
+	import { browser } from '$app/environment';
 
 	interface Option {
 		label: string;
@@ -219,13 +220,24 @@
 	}
 
 	onMount(async () => {
-		await fetchOptions();
-		dispatch('mount', $value);
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
 			selected = cacheResult.map((value) => optionHashmap[value]).filter(Boolean);
 		}
 	});
+
+	let isMounted = false;
+	let lastOptionsEndpoint: string | null = null;
+	$: if (browser && optionsEndpoint !== lastOptionsEndpoint) {
+		fetchOptions().then(() => {
+			lastOptionsEndpoint = optionsEndpoint;
+			if (isMounted) {
+				return;
+			}
+			dispatch('mount', $value);
+			isMounted = true;
+		});
+	}
 
 	beforeUpdate(() => {
 		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {

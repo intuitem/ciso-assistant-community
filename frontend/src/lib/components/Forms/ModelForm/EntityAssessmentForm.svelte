@@ -17,6 +17,8 @@
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
 	export let data: Record<string, any> = {};
+
+	$: solutionOptionsEndpoint = 'solutions' + (data.entity ? `?provider_entity=${data.entity}` : '');
 </script>
 
 <AutocompleteSelect
@@ -84,7 +86,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="solutions"
+	optionsEndpoint={solutionOptionsEndpoint}
 	field="solutions"
 	cacheLock={cacheLocks['solutions']}
 	bind:cachedValue={formDataCache['solutions']}
