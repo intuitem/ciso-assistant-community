@@ -1,11 +1,11 @@
 """
-create_library.py — Build a CISO Assistant YAML library from a v2 Excel file
+convert@_library_v2.py — Build a CISO Assistant YAML library from a v2 Excel file
 
 This script processes an Excel file in v2 format (with *_meta and *_content tabs),
 extracts all declared objects, and generates a fully structured YAML library.
 
 Usage:
-    python create_library.py path/to/library.xlsx [--compat]
+    python convert_library_v2.py path/to/library.xlsx [--compat]
 
 Arguments:
     --compat  Use legacy URN fallback logic (for requirements without ref_id)
