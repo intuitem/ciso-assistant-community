@@ -1,0 +1,36 @@
+name: Code Tester
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  
+concurrency:
+  group:
+    ${{ github.repository }}-${{ github.event.number || github.head_ref ||
+    github.sha }}-${{ github.workflow }}-${{ github.event_name =='pull_request_review_comment' && 'pr_comment' || 'pr' }}
+  cancel-in-progress: ${{ github.event_name != 'pull_request_review_comment' }}
+
+jobs:
+  Test-Generator-AI-Call:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Poulereaper/ai-pr-test-generator@v0.1.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MISTRAL_API_KEY: 'testapikeyre'
+          
+        with:
+          debug: true
+          review_simple_changes: false
+          review_comment_lgtm: false
+          ai_api: 'mistral'
+          ai_api_base_url: ''
+          your_test_gen_bot_name: 'CISO Test Generator'

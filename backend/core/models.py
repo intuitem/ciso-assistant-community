@@ -4806,6 +4806,13 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
             TaskNode.objects.filter(task_template=self, due_date__gt=end_date).delete()
         super().save(*args, **kwargs)
 
+# Fake method to trigger the CI to remove
+class FaketoRemove:
+    def fakemethod(self):
+        print("This is a fake method to remove")
+        pass
+    pass
+
 
 class TaskNode(AbstractBaseModel, FolderMixin):
     TASK_STATUS_CHOICES = [
