@@ -40,21 +40,23 @@
 		};
 		modalStore.trigger(modal);
 	}
+	let value = $state(['']);
 </script>
 
 <div class="space-y-2">
 	<Accordion
 		class="bg-white rounded-md border hover:text-primary-700 text-gray-800"
+		{value}
+		onValueChange={(e) => (value = e.value)}
 		hover="bg-white"
+		collapsible
 	>
-		<Accordion.Item>
-			{#snippet lead()}
+		<Accordion.Item value="summary">
+			{#snippet control()}
 				<i class="fa-solid fa-bullseye"></i>
-			{/snippet}
-			{#snippet summary()}
 				{m.ecosystemRadar()}
 			{/snippet}
-			{#snippet content()}
+			{#snippet panel()}
 				<div class="bg-white flex">
 					<div class="flex w-full h-fit">
 						<EcosystemRadarChart
