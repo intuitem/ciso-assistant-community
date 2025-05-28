@@ -3,10 +3,15 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { Popover, type PopupSettings } from '@skeletonlabs/skeleton-svelte';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
+
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	const operationalScenario = data.data;
 
@@ -29,11 +34,6 @@
 
 	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	interface Props {
-		data: PageData;
-	}
-
-	let { data }: Props = $props();
 	const model = URL_MODEL_MAP['operational-scenarios'];
 	const canEditObject = (operational_scenarios): boolean =>
 		canPerformAction({
