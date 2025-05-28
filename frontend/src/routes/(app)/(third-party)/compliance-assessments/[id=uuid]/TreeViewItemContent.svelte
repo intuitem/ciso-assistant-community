@@ -299,11 +299,9 @@
 				{#if nodeScore() !== null}
 					<span>
 						<ProgressRing
-							stroke={100}
-							meter={displayScoreColor(nodeScore(), node.max_score)}
-							font={150}
 							value={formatScoreValue(nodeScore(), node.max_score)}
-							width={'w-10'}>{nodeScore()}</ProgressRing
+							meterStroke={displayScoreColor(nodeScore(), node.max_score)}
+							size="size-12"><p class="font-semibold text-xs">{nodeScore()}</p></ProgressRing
 						>
 					</span>
 				{/if}
