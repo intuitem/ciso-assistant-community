@@ -105,13 +105,14 @@
 				value={$value}
 				label={$value}
 				onValueChange={(e) => ($value = e.value)}
-				classes="shrink-0 w-12"
+				classes="shrink-0"
+				size="size-12"
 				min={min_score}
 				max={max_score}
-				showLabel
-			/>
+				>{$value}
+			</ProgressRing>
 		</div>
-		<div class="flex w-full items-center -mt-8">
+		<div class="flex w-full items-center">
 			<div class="flex space-x-8 w-full justify-center">
 				<div class="w-full max-w-[80ch] justify-center text-center whitespace-pre-wrap">
 					{#if !disabled && scores_definition && $value !== null}
