@@ -620,6 +620,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_tasknode",
     "change_tasknode",
     "delete_tasknode",
+    "view_logentry",
     # resilience,
     "add_businessimpactanalysis",
     "view_businessimpactanalysis",

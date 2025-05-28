@@ -12,8 +12,13 @@
 
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { defaults } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';
+	import CreatePatModal from './pat/components/CreatePATModal.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -69,6 +74,43 @@
 			body: m.listRecoveryCodesHelpText()
 		};
 		modalStore.trigger(recoveryCodesModal);
+	}
+
+	function modalPATCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreatePatModal,
+			props: {
+				form: data.personalAccessTokenCreateForm
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.generateNewPersonalAccessToken()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalConfirmPATDelete(id: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: defaults({ id }, zod(z.object({ id: z.string() }))),
+				schema: zod(z.object({ id: z.string() })),
+				id: id,
+				debug: false,
+				formAction: '?/deletePAT'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: m.personalAccessTokenDeleteConfirm()
+		};
+		modalStore.trigger(modal);
 	}
 
 	let tabSet = 0;
@@ -129,6 +171,64 @@
 										on:click={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
 									>
 								{/if}
+							</div>
+						</div>
+					</dd>
+				</div>
+			</dl>
+			<dl class="-my-3 divide-y divide-surface-100 text-sm">
+				<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+					<dt class="font-medium">{m.personalAccessTokens()}</dt>
+					<dd class="text-surface-900 sm:col-span-2">
+						<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
+							<div class="flex flex-col space-y-2">
+								<span class="flex flex-row justify-between text-xl">
+									<i class="fa-solid fa-key"></i>
+									{#if hasTOTP}
+										<i class="fa-solid fa-circle-check text-success-500-400-token"></i>
+									{/if}
+								</span>
+								<span class="flex flex-row space-x-2">
+									<h6 class="h6 text-token">{m.personalAccessTokens()}</h6>
+								</span>
+								<p class="text-sm text-surface-800 max-w-[65ch]">
+									{m.personalAccessTokensDescription()}
+								</p>
+								<div class="card p-4 variant-ghost-warning max-w-[65ch]">
+									<i class="fa-solid fa-warning mr-2 text-warning-900" />
+									{m.personalAccessTokenCreateWarning()}
+								</div>
+							</div>
+							<div class="flex flex-col gap-2">
+								<ul class="max-h-72 overflow-y-scroll">
+									{#each data.personalAccessTokens as pat}
+										<li class="flex flex-row justify-between card p-4 bg-inherit">
+											<span class="grid grid-rows-1 grid-cols-2 w-full">
+												<p>
+													{pat.name}
+												</p>
+												<p>
+													{m.expiresOn({
+														date: new Date(pat.expiry).toLocaleDateString(getLocale())
+													})}
+												</p>
+											</span>
+											<button
+												on:click={(_) => {
+													modalConfirmPATDelete(pat.digest);
+												}}
+												on:keydown={() => modalConfirmPATDelete(pat.digest)}
+												class="cursor-pointer hover:text-primary-500"
+												data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
+											>
+										</li>
+									{/each}
+								</ul>
+								<button
+									class="btn variant-ringed-surface w-fit"
+									on:click={(_) => modalPATCreateForm()}
+									>{m.generateNewPersonalAccessToken()}</button
+								>
 							</div>
 						</div>
 					</dd>
