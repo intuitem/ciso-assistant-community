@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { type PopupSettings } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, type PopupSettings } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
 
@@ -23,21 +23,9 @@
 		}
 	});
 
-	const popupLikelihood: PopupSettings = {
-		event: 'click',
-		target: 'popupLikelihood',
-		placement: 'bottom'
-	};
-	const popupGravity: PopupSettings = {
-		event: 'click',
-		target: 'popupGravity',
-		placement: 'bottom'
-	};
-	const popupRiskLevel: PopupSettings = {
-		event: 'click',
-		target: 'popupRiskLevel',
-		placement: 'bottom'
-	};
+	let likelihoodPopupOpen = $state(false);
+	let gravityPopupOpen = $state(false);
+	let riskLevelPopupOpen = $state(false);
 
 	const user = page.data.user;
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
@@ -199,75 +187,102 @@
 					style="background-color: {operationalScenario.likelihood.hexcolor}"
 					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
 				>
-					<div
-						class="card bg-black text-gray-200 p-4 z-20"
-						style="color: {operationalScenario.likelihood.hexcolor}"
-						data-popup={'popupLikelihood'}
+					<Popover
+						open={likelihoodPopupOpen}
+						onOpenChange={(e) => (likelihoodPopupOpen = e.open)}
+						positioning={{ placement: 'bottom' }}
+						zIndex="100"
+						contentBase="max-w-sm"
 					>
-						<p data-testid="likelihood-description" class="font-semibold">
-							{operationalScenario.likelihood.description}
-						</p>
-						<div class="arrow bg-black"></div>
-					</div>
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-dice text-black opacity-75"></i>
-						<span>{m.likelihood()}</span>
-					</h3>
-					<span>{operationalScenario.likelihood.name}</span>
-					<i
-						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
-						use:popup={popupLikelihood}
-					></i>
+						{#snippet trigger()}
+							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+								<i class="fa-solid fa-dice text-black opacity-75"></i>
+								<span>{m.likelihood()}</span>
+							</h3>
+							<span>{operationalScenario.likelihood.name}</span>
+							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
+						{/snippet}
+						{#snippet content()}
+							<div
+								class="card bg-black text-gray-200 p-4 z-20"
+								style="color: {operationalScenario.likelihood.hexcolor}"
+								data-popup={'popupLikelihood'}
+							>
+								<p data-testid="likelihood-description" class="font-semibold">
+									{operationalScenario.likelihood.description}
+								</p>
+								<div class="arrow bg-black"></div>
+							</div>
+						{/snippet}
+					</Popover>
 				</div>
 				<i class="fa-solid fa-xmark"></i>
 				<div
 					style="background-color: {operationalScenario.gravity.hexcolor}"
 					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
 				>
-					<div
-						class="card bg-black text-gray-200 p-4 z-20"
-						style="color: {operationalScenario.gravity.hexcolor}"
-						data-popup={'popupGravity'}
+					<Popover
+						open={gravityPopupOpen}
+						onOpenChange={(e) => (gravityPopupOpen = e.open)}
+						positioning={{ placement: 'bottom' }}
+						zIndex="100"
+						contentBase="max-w-sm"
 					>
-						<p data-testid="gravity-description" class="font-semibold">
-							{operationalScenario.gravity.description}
-						</p>
-						<div class="arrow bg-black"></div>
-					</div>
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-bomb text-black opacity-75"></i>
-						<span>{m.gravity()}</span>
-					</h3>
-					<span>{operationalScenario.gravity.name}</span>
-					<i
-						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
-						use:popup={popupGravity}
-					></i>
+						{#snippet trigger()}
+							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+								<i class="fa-solid fa-bomb text-black opacity-75"></i>
+								<span>{m.gravity()}</span>
+							</h3>
+							<span>{operationalScenario.gravity.name}</span>
+							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
+						{/snippet}
+						{#snippet content()}
+							<div
+								class="card bg-black text-gray-200 p-4 z-20"
+								style="color: {operationalScenario.gravity.hexcolor}"
+								data-popup={'popupGravity'}
+							>
+								<p data-testid="gravity-description" class="font-semibold">
+									{operationalScenario.gravity.description}
+								</p>
+								<div class="arrow bg-black"></div>
+							</div>
+						{/snippet}
+					</Popover>
 				</div>
 				<i class="fa-solid fa-equals"></i>
 				<div
 					style="background-color: {operationalScenario.risk_level.hexcolor}"
 					class="flex flex-col items-center justify-center border rounded-md p-4 font-semibold w-full"
 				>
-					<div
-						class="card bg-black text-gray-200 p-4 z-20"
-						style="color: {operationalScenario.risk_level.hexcolor}"
-						data-popup={'popupRiskLevel'}
+					<Popover
+						open={riskLevelPopupOpen}
+						onOpenChange={(e) => (riskLevelPopupOpen = e.open)}
+						positioning={{ placement: 'bottom' }}
+						zIndex="100"
+						contentBase="max-w-sm"
 					>
-						<p data-testid="risk-level-description" class="font-semibold">
-							{operationalScenario.risk_level.description}
-						</p>
-						<div class="arrow bg-black"></div>
-					</div>
-					<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-						<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
-						<span>{m.riskLevel()}</span>
-					</h3>
-					<span>{operationalScenario.risk_level.name}</span>
-					<i
-						class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"
-						use:popup={popupRiskLevel}
-					></i>
+						{#snippet trigger()}
+							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
+								<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+								<span>{m.riskLevel()}</span>
+							</h3>
+							<span>{operationalScenario.risk_level.name}</span>
+							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
+						{/snippet}
+						{#snippet content()}
+							<div
+								class="card bg-black text-gray-200 p-4 z-20"
+								style="color: {operationalScenario.risk_level.hexcolor}"
+								data-popup={'popupriskLevel'}
+							>
+								<p data-testid="riskLevel-description" class="font-semibold">
+									{operationalScenario.risk_level.description}
+								</p>
+								<div class="arrow bg-black"></div>
+							</div>
+						{/snippet}
+					</Popover>
 				</div>
 			</div>
 			<div class="w-full p-4 bg-gray-50 border rounded-md shadow-xs">
