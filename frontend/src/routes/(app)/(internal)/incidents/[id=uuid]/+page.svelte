@@ -27,16 +27,16 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import {
-		type TableSource,
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore
-	} from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
 	import { canPerformAction } from '$lib/utils/access-control';
-	import { getModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 
 	interface Props {
 		data: PageData;
@@ -45,19 +45,19 @@
 		[key: string]: any;
 	}
 
-	let { ...props }: Props = $props();
+	let { data, form }: Props = $props();
 
 	const invalidateAll = true;
 	const formAction = '?/create';
-	const timelineForm = props.data.relatedModels['timeline-entries'].createForm;
-	const model = props.data.relatedModels['timeline-entries'];
+	const timelineForm = data.relatedModels['timeline-entries'].createForm;
+	const model = data.relatedModels['timeline-entries'];
 	const schema = modelSchema('timeline-entries');
 
 	const _form = superForm(timelineForm, {
 		dataType: 'json',
 		enctype: 'application/x-www-form-urlencoded',
 		invalidateAll,
-		applyAction: props.applyAction ?? true,
+		applyAction: true,
 		resetForm: true,
 		validators: zod(schema),
 		taintedMessage: false,
@@ -73,7 +73,7 @@
 		}
 	});
 
-	const source = props.data.relatedModels['timeline-entries'].table;
+	const source = data.relatedModels['timeline-entries'].table;
 	const pagination = true;
 	const numberRowsPerPage = 10;
 
@@ -94,26 +94,28 @@
 		}
 	);
 	const rows = handler.getRows();
-	const field = props.data.model.reverseForeignKeyFields.find(
+	const field = data.model.reverseForeignKeyFields.find(
 		(item) => item.urlModel === 'timeline-entries'
 	);
 	handler.onChange((state: State) =>
 		loadTableData({
 			state,
 			URLModel: 'timeline-entries',
-			endpoint: `/timeline-entries?incident=${props.data.data.id}`,
+			endpoint: `/timeline-entries?incident=${data.data.id}`,
 			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field)
 		})
 	);
 
 	let invalidateTable = $state(false);
-	run(() => {
-		if (browser || invalidateTable) {
-			handler.invalidate();
-			_goto(page.url);
-			invalidateTable = false;
-		}
-	});
+
+	// TODO: fix handler invalidation reactivity
+	// run(() => {
+	// 	if (browser || invalidateTable) {
+	// 		handler.invalidate();
+	// 		_goto(page.url);
+	// 		invalidateTable = false;
+	// 	}
+	// });
 
 	const preventDelete = (row: TableSource) =>
 		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
@@ -124,9 +126,9 @@
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: props.data.evidenceCreateForm,
+				form: data.evidenceCreateForm,
 				formAction: '?/createEvidence',
-				model: props.data.evidenceModel,
+				model: data.evidenceModel,
 				debug: false
 			}
 		};
@@ -134,7 +136,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add-' + props.data.evidenceModel.localName)
+			title: safeTranslate('add-' + data.evidenceModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -149,15 +151,15 @@
 	let formStore = $derived(_form.form);
 
 	run(() => {
-		if (props.form?.newEvidence) {
+		if (form?.newEvidence) {
 			refreshKey = !refreshKey;
 			resetForm = false;
 			_form.form.update(
 				(current: Record<string, any>) => ({
 					...current,
 					evidences: current.evidences
-						? [...current.evidences, props.form?.newEvidence]
-						: [props.form?.newEvidence]
+						? [...current.evidences, form?.newEvidence]
+						: [form?.newEvidence]
 				}),
 				{ taint: false }
 			);
@@ -169,11 +171,11 @@
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
-		model: props.data.model.name,
+		model: data.model.name,
 		domain:
-			props.data.model.name === 'folder'
-				? props.data.data.id
-				: (props.data.data.folder?.id ?? props.data.data.folder ?? user.root_folder_id)
+			data.model.name === 'folder'
+				? data.data.id
+				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
 </script>
 
@@ -196,7 +198,6 @@
 						{_form}
 						{invalidateAll}
 						validators={zod(schema)}
-						{...props}
 					>
 						{#snippet children({ form, data, initialData })}
 							<AutocompleteSelect
@@ -297,13 +298,13 @@
 							>
 							<TableRowActions
 								baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
-								deleteForm={props.data.relatedModels['timeline-entries'].deleteForm}
+								deleteForm={data.relatedModels['timeline-entries'].deleteForm}
 								model={model.info}
 								URLModel={actionsURLModel}
 								detailURL={`/${actionsURLModel}/${meta.id}`}
 								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
 								{row}
-								hasBody={props.actionsBody}
+								hasBody={actionsBody}
 								identifierField={'id'}
 								preventDelete={preventDelete(row)}
 							></TableRowActions>
