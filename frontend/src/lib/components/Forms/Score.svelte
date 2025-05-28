@@ -39,7 +39,7 @@
 		styles = '',
 		min_score = 0,
 		max_score = 100,
-		score_step = $bindable(1),
+		score_step = $bindable(max_score === 100 ? 5 : 1),
 		helpText = undefined,
 		disabled = false,
 		scores_definition = [],
@@ -52,22 +52,13 @@
 	const dispatch = createEventDispatcher();
 	let previous = $state([$value]);
 
-	let sliderValue = $state([$value]);
-
-	run(() => {
-		$value = sliderValue;
-		score = $value;
-	});
+	$effect(() => (score = $value));
 
 	run(() => {
 		if (previous[0] !== $value && previous[0] !== undefined) {
 			dispatch('change', { score: $value });
 		}
 		previous = [$value];
-	});
-
-	run(() => {
-		if (max_score === 100) score_step = 5;
 	});
 
 	run(() => {
@@ -86,56 +77,56 @@
 			</div>
 		{/if}
 		<div class="flex flex-row w-full items-center justify-evenly space-x-4">
-			<div class="flex w-full items-center justify-center border-2 rounded-lg p-2">
-				<Slider
-					class="w-full"
+			<div class="flex flex-col w-full align-top">
+				{#if label !== undefined}
+					{#if $constraints?.required}
+						<label class="text-sm font-semibold" for={field}
+							>{label} <span class="text-red-500">*</span></label
+						>
+					{:else}
+						<label class="text-sm font-semibold" for={field}>{label}</label>
+					{/if}
+				{/if}
+				<input
 					data-testid="range-slider-input"
-					name="range-slider"
-					value={sliderValue}
+					name={field}
+					type="range"
+					class="input"
+					bind:value={$value}
 					min={min_score}
 					max={max_score}
 					step={score_step}
-					ticked
 					{disabled}
-				>
-					<div class="flex justify-between space-x-8 w-full items-start">
-						{#if label !== undefined}
-							{#if $constraints?.required}
-								<label class="text-sm font-semibold" for={field}
-									>{label} <span class="text-red-500">*</span></label
-								>
-							{:else}
-								<label class="text-sm font-semibold" for={field}>{label}</label>
-							{/if}
-						{/if}
-
-						<div class="flex space-x-8 w-full justify-center">
-							<p class="w-full max-w-[80ch] justify-center text-center whitespace-pre-wrap">
-								{#if !disabled && scores_definition && $value !== null}
-									{#each scores_definition as definition}
-										{#if definition.score === $value}
-											<p class="font-bold">{definition.name}</p>
-											{#if isDoc && definition.description_doc}
-												{definition.description_doc}
-											{:else if definition.description}
-												{definition.description}
-											{/if}
-										{/if}
-									{/each}
+					{...constraints}
+				/>
+			</div>
+			<ProgressRing
+				meterStroke={displayScoreColor($value, max_score, inversedColors)}
+				value={$value}
+				label={$value}
+				onValueChange={(e) => ($value = e.value)}
+				classes="shrink-0 w-12"
+				min={min_score}
+				max={max_score}
+				showLabel
+			/>
+		</div>
+		<div class="flex w-full items-center -mt-8">
+			<div class="flex space-x-8 w-full justify-center">
+				<div class="w-full max-w-[80ch] justify-center text-center whitespace-pre-wrap">
+					{#if !disabled && scores_definition && $value !== null}
+						{#each scores_definition as definition}
+							{#if definition.score === $value}
+								<p class="font-bold">{definition.name}</p>
+								{#if isDoc && definition.description_doc}
+									{definition.description_doc}
+								{:else if definition.description}
+									{definition.description}
 								{/if}
-							</p>
-						</div>
-						<ProgressRing
-							stroke={100}
-							meter={displayScoreColor($value, max_score, inversedColors)}
-							value={!disabled ? formatScoreValue($value, max_score, fullDonut) : min_score}
-							font={150}
-							class="shrink-0"
-							border-4
-							width={'w-12'}>{!disabled ? $value : '--'}</ProgressRing
-						>
-					</div>
-				</Slider>
+							{/if}
+						{/each}
+					{/if}
+				</div>
 			</div>
 		</div>
 		{#if helpText}
