@@ -22,7 +22,7 @@
 
 	let availableUpdatesCount = $derived(data?.updatableLibraries?.length);
 
-	run(() => {
+	$effect(() => {
 		if (data.loadedLibrariesTable.meta.count === 0) group = 'stored';
 	});
 </script>
