@@ -5,15 +5,6 @@
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
 	import type { ActionData, PageData } from './$types';
 
-	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
-	const reference_controls =
-		data.requirementAssessment.requirement.associated_reference_controls ?? [];
-	const annotation = data.requirement.annotation;
-	const typical_evidence = data.requirement.typical_evidence;
-
-	const has_threats = threats.length > 0;
-	const has_reference_controls = reference_controls.length > 0;
-
 	import { page } from '$app/state';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -24,14 +15,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-	import {
-		Tab,
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore,
-		ProgressRing,
-		Tabs
-	} from '@skeletonlabs/skeleton-svelte';
+	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -43,6 +27,13 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { superForm } from 'sveltekit-superforms';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+
 	interface Props {
 		data: PageData;
 		form: ActionData;
@@ -50,6 +41,15 @@
 	}
 
 	let { data, form, ...rest }: Props = $props();
+
+	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
+	const reference_controls =
+		data.requirementAssessment.requirement.associated_reference_controls ?? [];
+	const annotation = data.requirement.annotation;
+	const typical_evidence = data.requirement.typical_evidence;
+
+	const has_threats = threats.length > 0;
+	const has_reference_controls = reference_controls.length > 0;
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -199,7 +199,7 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
 	);
 
-	let tabSet = $state(page.data.user.is_third_party ? 1 : 0);
+	let group = $state(page.data.user.is_third_party ? 'evidences' : 'applied_controls');
 
 	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = $state(false);
@@ -410,14 +410,21 @@
 		>
 			{#snippet children({ form, data })}
 				<div class="card shadow-lg bg-white">
-					<Tabs>
-						{#if !page.data.user.is_third_party}
-							<Tabs.Control value="compliance_assessments_tab">{m.appliedControls()}</Tabs.Control>
-						{/if}
-						<Tabs.Controls.Control value="evidences_tab">{m.evidences()}</Tabs.Controls.Control>
-						<Tabs.Control value="security_exceptions_tab">{m.securityExceptions()}</Tabs.Control>
-						{#snippet panel()}
-							{#if tabSet === 0 && !page.data.user.is_third_party}
+					<Tabs
+						value={group}
+						onValueChange={(e) => {
+							group = e.value;
+						}}
+					>
+						{#snippet list()}
+							{#if !page.data.user.is_third_party}
+								<Tabs.Control value="applied_controls">{m.appliedControls()}</Tabs.Control>
+							{/if}
+							<Tabs.Control value="evidences">{m.evidences()}</Tabs.Control>
+							<Tabs.Control value="security_exceptions">{m.securityExceptions()}</Tabs.Control>
+						{/snippet}
+						{#snippet content()}
+							<Tabs.Panel value="applied_controls">
 								<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 									<i class="fa-solid fa-info-circle"></i>
 									<p>{m.requirementAppliedControlHelpText()}</p>
@@ -480,8 +487,8 @@
 										URLModel="applied-controls"
 									/>
 								</div>
-							{/if}
-							{#if tabSet === 1}
+							</Tabs.Panel>
+							<Tabs.Panel value="evidences">
 								<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 									<i class="fa-solid fa-info-circle"></i>
 									<p>{m.requirementEvidenceHelpText()}</p>
@@ -516,8 +523,8 @@
 											.requirementAssessment.id}"
 									/>
 								</div>
-							{/if}
-							{#if tabSet === 2 && !page.data.user.is_third_party}
+							</Tabs.Panel>
+							<Tabs.Panel value="security_exceptions">
 								<div
 									class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container p-4"
 								>
@@ -546,7 +553,7 @@
 											.requirementAssessment.id}"
 									/>
 								</div>
-							{/if}
+							</Tabs.Panel>
 						{/snippet}
 					</Tabs>
 				</div>
