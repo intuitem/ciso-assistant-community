@@ -1,189 +1,140 @@
-"""
-Simple script to convert VCSA v1.1 excel in a CISO Assistant Excel file
-Source:  https://enx.com/en-US/VCS/downloads/
-
-Known issue : There might be a typo in the Official document because "3.1.i" appears
-twice in the original Excel file, causing a bug when converting from Excel to YAML
-due to the lack of uniqueness of the ref_id. Consider changing the name of the extra
-"3.1.i" (more precisely "3.1.i-s") by renaming it "3.1.i-s_bis" manually after conversion 
-"""
-
-
-import pandas as pd
 import re
-from openpyxl import load_workbook
-from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl import Workbook
+from openpyxl import load_workbook, Workbook
 
-# Charger le fichier source
-df = pd.read_excel("ENX_VCSA_1_1_EN.xlsx", sheet_name="Vehicle CyberSecurity", header=2)
-
-# Fonction pour filtrer le texte non vide
+# === Utility functions ===
 def has_text(cell):
     return isinstance(cell, str) and cell.strip() != ""
 
-# Construire les lignes pour la feuille vcsa
-output_rows = []
+def build_annotation(ref, fi):
+    parts = []
+    if has_text(ref):
+        parts.append(f"Reference: {ref.strip()}")
+    if has_text(fi):
+        parts.append(fi.strip())
+    return "\n\n".join(parts)
 
-for _, row in df.iterrows():
-    vcs = str(row.get("VCS", "")).strip()
-    control_question = str(row.get("Control question", "")).strip()
-    objective = row.get("Objective", "")
+# === Load source Excel ===
+source_file = "ENX_VCSA_1_1_EN.xlsx"  # Must exist in working directory
+source_wb = load_workbook(filename=source_file, data_only=True)
+source_ws = source_wb["Vehicle CyberSecurity"]
+
+# === Header indexing ===
+header_row_index = 3
+headers = [cell.value for cell in source_ws[header_row_index]]
+col_map = {header: idx for idx, header in enumerate(headers)}
+
+# === Extract vcsa_content rows ===
+vcsa_content_rows = []
+seen_leaf_ids = {}
+
+for row in source_ws.iter_rows(min_row=header_row_index + 1, values_only=True):
+    vcs = str(row[col_map.get("VCS", 0)] or "").strip()
+    control_question = str(row[col_map.get("Control question", 0)] or "").strip()
+    objective = row[col_map.get("Objective", 0)] or ""
 
     if re.fullmatch(r"\d+", vcs):
-        output_rows.append({
-            "assessable": "",
-            "depth": 1,
-            "ref_id": vcs,
-            "name": control_question,
-            "description": "",
-            "implementation_groups": ""
-        })
-
+        vcsa_content_rows.append(["", 1, vcs, control_question or f"Section {vcs}", "", "", "", ""])
     elif re.fullmatch(r"\d+\.\d+", vcs):
-        if has_text(objective):
-            output_rows.append({
-                "assessable": "",
-                "depth": 2,
-                "ref_id": vcs,
-                "name": control_question,
-                "description": str(objective).strip(),
-                "implementation_groups": ""
-            })
+        vcsa_content_rows.append(["", 2, vcs, control_question, str(objective).strip(), "", "", ""])
+    elif re.fullmatch(r"\d+\.\d+\.[A-Za-z]+", vcs):
+        if vcs == "3.1.i":
+            count = seen_leaf_ids.get(vcs, 0)
+            if count == 1:
+                vcs = "3.1.ii"
+            seen_leaf_ids["3.1.i"] = count + 1
 
-    elif re.fullmatch(r"\d+\.\d+\.[A-Za-z]", vcs):
         x_y_z = vcs
+        must_text = row[col_map.get("Requirements (must)", 0)] or ""
+        must_ref = row[col_map.get("Reference (must)", 0)] or ""
+        should_text = row[col_map.get("Requirements (should)", 0)] or ""
+        should_ref = row[col_map.get("Reference (should)", 0)] or ""
+        further_info = row[col_map.get("Further information", 0)] or ""
+        possible_evidence = row[col_map.get("Possible evidence (not mandatory)", 0)] or ""
 
-        # Requirements (must)
-        must_text = row.get("Requirements (must)", "")
         if has_text(must_text):
-            output_rows.append({
-                "assessable": "x",
-                "depth": 3,
-                "ref_id": f"{x_y_z}-m",
-                "name": "(must)",
-                "description": must_text.strip(),
-                "implementation_groups": "must"
-            })
-
-        # Requirements (should)
-        should_text = row.get("Requirements (should)", "")
+            vcsa_content_rows.append([
+                "x", 3, f"{x_y_z}-must", "", must_text.strip(),
+                "must",
+                build_annotation(must_ref, further_info),
+                possible_evidence.strip() if has_text(possible_evidence) else ""
+            ])
         if has_text(should_text):
-            output_rows.append({
-                "assessable": "x",
-                "depth": 3,
-                "ref_id": f"{x_y_z}-s",
-                "name": "(should)",
-                "description": should_text.strip(),
-                "implementation_groups": "should"
-            })
+            vcsa_content_rows.append([
+                "x", 3, f"{x_y_z}-should", "", should_text.strip(),
+                "should",
+                build_annotation(should_ref, further_info),
+                possible_evidence.strip() if has_text(possible_evidence) else ""
+            ])
 
-        # Further information
-        further_info = row.get("Further information", "")
-        if has_text(further_info):
-            output_rows.append({
-                "assessable": "",
-                "depth": 3,
-                "ref_id": f"{x_y_z}-fi",
-                "name": "Further information",
-                "description": further_info.strip(),
-                "implementation_groups": "fi"
-            })
+# === Create new workbook ===
+wb = Workbook()
+wb.remove(wb.active)
 
-        # Possible evidence
-        possible_evidence = row.get("Possible evidence (not mandatory)", "")
-        if has_text(possible_evidence):
-            output_rows.append({
-                "assessable": "",
-                "depth": 3,
-                "ref_id": f"{x_y_z}-pe",
-                "name": "Possible evidence (not mandatory)",
-                "description": possible_evidence.strip(),
-                "implementation_groups": "pe"
-            })
-
-# Créer les DataFrames
-vcsa_df = pd.DataFrame(output_rows, columns=[
-    "assessable", "depth", "ref_id", "name", "description", "implementation_groups"
-])
-
-# Données de library_content
-library_content = [
-    ["library_urn", "urn:intuitem:risk:library:vcsa-v1.1"],
-    ["library_version", "1"],
-    ["library_locale", "en"],
-    ["library_ref_id", "vcsa-v1.1"],
-    ["library_name", "Vehicle CyberSecurity Audit (VCSA) v1.1"],
-    ["library_description", """The VCSA serves as the basis for 
+# === Meta sheets ===
+meta_data = {
+    "library_meta": [
+        ["type", "library"],
+        ["urn", "urn:intuitem:risk:library:vcsa-v1.1"],
+        ["version", "1"],
+        ["locale", "en"],
+        ["ref_id", "vcsa-v1.1"],
+        ["name", "Vehicle CyberSecurity Audit (VCSA) v1.1"],
+        ["description", """The VCSA serves as the basis for 
 - a self assessment to determine the state of vehicle cybersecurity within the organization (e.g. company)
 - audits performed by internal departments (e.g. Internal Audit, Quality Management, Information Security, Cybersecurity)
 - an audit in accordance with ENX 3rd party audit management framework
-Source: https://enx.com/en-US/VCS/downloads/
-"""],
-    ["library_copyright", """© 2023 ENX Association
+Source: https://enx.com/en-US/VCS/downloads/"""],
+        ["copyright", """© 2023 ENX Association
 Contact: vcs@enx.com +49 69 9866927-71
 www.enx.com
-This work has been licensed under the Creative Commons Attribution - NoDerivs 4.0 International Public License. In addition, You are granted the right to distribute derivatives under certain terms. The complete and valid text of the license is to be found in line 17ff.
-"""],
-    ["library_provider", "ENX"],
-    ["library_packager", "intuitem"],
-    ["framework_urn", "urn:intuitem:risk:framework:vcsa-v1.1"],
-    ["framework_ref_id", "vcsa-v1.1"],
-    ["framework_name", "Vehicle CyberSecurity Audit (VCSA) v1.1"],
-    ["framework_description", """The VCSA serves as the basis for 
+This work has been licensed under the Creative Commons Attribution - NoDerivs 4.0 International Public License. In addition, You are granted the right to distribute derivatives under certain terms. The complete and valid text of the license is to be found in line 17ff."""],
+        ["provider", "ENX"],
+        ["packager", "intuitem"]
+    ],
+    "vcsa_meta": [
+        ["type", "framework"],
+        ["base_urn", "urn:intuitem:risk:req_node:vcsa-v1.1"],
+        ["urn", "urn:intuitem:risk:framework:vcsa-v1.1"],
+        ["ref_id", "vcsa-v1.1"],
+        ["name", "Vehicle CyberSecurity Audit (VCSA) v1.1"],
+        ["description", """The VCSA serves as the basis for 
 - a self assessment to determine the state of vehicle cybersecurity within the organization (e.g. company)
 - audits performed by internal departments (e.g. Internal Audit, Quality Management, Information Security, Cybersecurity)
 - an audit in accordance with ENX 3rd party audit management framework
-Source: https://enx.com/en-US/VCS/downloads/
-"""],
-    ["tab", "vcsa", "requirements"],
-    ["tab", "implementation_groups", "implementation_groups"]
-]
+Source: https://enx.com/en-US/VCS/downloads/"""],
+        ["implementation_groups_definition", "implementation_groups"]
+    ],
+    "implementation_groups_meta": [
+        ["type", "implementation_groups"],
+        ["name", "implementation_groups"]
+    ]
+}
+for sheet_name, rows in meta_data.items():
+    ws = wb.create_sheet(sheet_name)
+    for row in rows:
+        ws.append(row)
 
-# Données pour la feuille "implementation_groups"
-implementation_df = pd.DataFrame([
-    {
-        "ref_id": "must",
-        "name": "Requirements (must)",
-        "description": "The requirements indicated in this column are strict requirements without any exemptions. They are defined abstractly enough to encompass all VCS supplier types"
-    },
-    {
-        "ref_id": "should",
-        "name": "Requirements (should)",
-        "description": "The requirements indicated in this column are principally to be implemented by the organization. These requirements go into granular detail. However, for certain supplier types, there may be a valid justification for non-compliance with these requirements. In case of any deviation, its effects must be understood by the supplier organization and it must be plausibly justified"
-    },
-    {
-        "ref_id": "fi",
-        "name": "Further information",
-        "description": ""
-    },
-    {
-        "ref_id": "pe",
-        "name": "Possible evidence (not mandatory)",
-        "description": ""
-    }
+# === implementation_groups_content ===
+ws_impl = wb.create_sheet("implementation_groups_content")
+ws_impl.append(["ref_id", "name", "description"])
+ws_impl.append([
+    "must", "Requirements (must)",
+    "The requirements indicated in this column are strict requirements without any exemptions. They are defined abstractly enough to encompass all VCS supplier types"
+])
+ws_impl.append([
+    "should", "Requirements (should)",
+    "The requirements indicated in this column are principally to be implemented by the organization. These requirements go into granular detail. However, for certain supplier types, there may be a valid justification for non-compliance with these requirements. In case of any deviation, its effects must be understood by the supplier organization and it must be plausibly justified"
 ])
 
-# Création du fichier Excel avec openpyxl
-wb = Workbook()
+# === vcsa_content ===
+ws_vcsa = wb.create_sheet("vcsa_content")
+ws_vcsa.append([
+    "assessable", "depth", "ref_id", "name", "description",
+    "implementation_groups", "annotation", "typical_evidence"
+])
+for row in vcsa_content_rows:
+    ws_vcsa.append(row)
 
-# Feuille "library_content"
-ws_library = wb.active
-ws_library.title = "library_content"
-for row in library_content:
-    ws_library.append(row)
-
-# Feuille "vcsa"
-ws_vcsa = wb.create_sheet(title="vcsa")
-for r in dataframe_to_rows(vcsa_df, index=False, header=True):
-    ws_vcsa.append(r)
-
-# Feuille "implementation_groups"
-ws_impl = wb.create_sheet(title="implementation_groups")
-for r in dataframe_to_rows(implementation_df, index=False, header=True):
-    ws_impl.append(r)
-
-# Enregistrement du fichier final
+# === Save final Excel ===
 wb.save("vcsa-v1.1.xlsx")
-print(f"✅ Conversion complete: \"vcsa-v1.1.xlsx\"")
-
+print("✅ Export complete: vcsa-v1.1.xlsx")
