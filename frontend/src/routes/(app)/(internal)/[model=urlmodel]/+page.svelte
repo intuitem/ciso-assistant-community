@@ -147,7 +147,7 @@
 							{/if}
 						{:else if URLModel === 'risk-matrices'}
 							<a
-								href="/libraries?object_type=risk_matrix"
+								href="/libraries?object_type=risk_matrices"
 								on:click={handleClickForGT}
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
@@ -156,7 +156,7 @@
 							>
 						{:else if URLModel === 'frameworks'}
 							<a
-								href="/libraries?object_type=framework"
+								href="/libraries?object_type=frameworks"
 								on:click={handleClickForGT}
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
@@ -165,7 +165,7 @@
 							>
 						{:else if URLModel === 'requirement-mapping-sets'}
 							<a
-								href="/libraries?object_type=requirement_mapping_set"
+								href="/libraries?object_type=requirement_mapping_sets"
 								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"
