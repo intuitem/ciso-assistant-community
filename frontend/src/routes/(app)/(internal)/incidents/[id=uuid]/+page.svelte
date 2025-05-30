@@ -108,14 +108,19 @@
 
 	let invalidateTable = $state(false);
 
-	// TODO: fix handler invalidation reactivity
-	// run(() => {
-	// 	if (browser || invalidateTable) {
-	// 		handler.invalidate();
-	// 		_goto(page.url);
-	// 		invalidateTable = false;
-	// 	}
-	// });
+	$effect(() => {
+		if (page.form?.form?.posted && page.form?.form?.valid) {
+			handler.invalidate();
+		}
+	});
+
+	$effect(() => {
+		if (invalidateTable) {
+			handler.invalidate();
+			_goto(page.url);
+			invalidateTable = false;
+		}
+	});
 
 	const preventDelete = (row: TableSource) =>
 		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
@@ -142,9 +147,6 @@
 	}
 
 	let refreshKey = $state(false);
-	function forceRefresh() {
-		refreshKey = !refreshKey;
-	}
 
 	let resetForm = $state(true);
 

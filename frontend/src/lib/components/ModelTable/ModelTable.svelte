@@ -204,12 +204,6 @@
 		validationMethod: 'auto'
 	});
 
-	const popupFilter: PopupSettings = {
-		event: 'click',
-		target: 'popupFilter',
-		placement: 'bottom-start'
-	};
-
 	const tableURLModel = URLModel;
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
@@ -244,6 +238,13 @@
 			}
 		}
 	});
+
+	$effect(() => {
+		if (page.form?.form?.posted && page.form?.form?.valid) {
+			handler.invalidate();
+		}
+	});
+
 	$effect(() => {
 		if (invalidateTable) {
 			handler.invalidate();
