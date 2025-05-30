@@ -925,5 +925,8 @@
 	"forceSSOLogin": "SSO-Anmeldung erzwingen",
 	"forceSSOLoginHelpText": "SSO für alle Benutzer erforderlich machen und gespeicherte Passwörter zurücksetzen. Benutzer mit aktiviertem 'Von erzwungenem SSO ausschließen' behalten den passwortbasierten Fallback-Zugang.",
 	"forceSSOLoginHelpText2": "Stellen Sie sicher, dass Ihr SSO funktioniert oder dass Sie ein Fallback-Konto haben, bevor Sie diese Option aktivieren.",
-	"taskScheduleWarning": "Alle Aufgaben, die nicht Teil des neuen Zeitplans sind, werden dauerhaft gelöscht"
+	"taskScheduleWarning": "Alle Aufgaben, die nicht Teil des neuen Zeitplans sind, werden dauerhaft gelöscht",
+	"mappingSuggested": "Vorgeschlagene Zuordnung",
+	"mappingSuggestedHelpText": "Vorschläge zur Zuordnung basierend auf geladenen Frameworks",
+	"mappingSuggestionTeasing": "Zuordnungen werden nun vorgeschlagen! Sie können die Filter verwenden, um Vorschläge basierend auf geladenen Frameworks zu erkunden."
 }
