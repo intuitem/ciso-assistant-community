@@ -127,6 +127,7 @@ erDiagram
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
     COMPLIANCE_ASSESSMENT        }o--o{ ASSET                 : relates_to
+    COMPLIANCE_ASSESSMENT        }o--o{ EVIDENCE              : contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
@@ -481,7 +482,7 @@ Labels are attached to the root folder. They can be read by everyone, added by a
 ```mermaid
 erDiagram
     ANY_USER_DEFINED_OBJECT   }o--o{ LABEL : has_label
- 
+
     LABEL {
         string  label
     }
@@ -681,9 +682,9 @@ Vulnerabilities are used to clarify a risk scenario and to follow remediations, 
 
 Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed.
 
-The format of the references field is list of the following objects (* for mandatory):
+The format of the references field is list of the following objects (\* for mandatory):
 
-- string ref_id (*)
+- string ref_id (\*)
 - url reference_link
 - boolean is_cve
 - boolean is_kev
@@ -906,6 +907,7 @@ The performance of the UX shall be optimized, by avoiding to preload all possibl
 ## Incidents
 
 Significant security incidents can be traced in CISO Assistant. An incident object has the following fields:
+
 - ref_id/name/description
 - qualifications
 - severity (like security exceptions)
@@ -916,6 +918,7 @@ Incidents can be linked to threats, assets, owners.
 Incidents contain a table of timeline_entry objects.
 
 Timeline_entry objects have the following fields:
+
 - entry (a string to describe the entry)
 - entry_type within detection/mitigation/observation/status_changed/severity_changed
 - observation
@@ -1143,7 +1146,8 @@ A user can be authenticated either locally or with SSO.
 When SSO is activated, all users can use SSO.
 
 When the force_sso global flag is set, all users without keep_local_login:
-- have their password disabled, 
+
+- have their password disabled,
 - cannot ask for a password reset,
 - cannot have their password changed by an administrator.
 
@@ -1392,23 +1396,23 @@ The objects manipulated by the third party (compliance assessment and evidences)
 
 ### Mapping of essential concepts
 
-| EBIOS-RM (english)    | EBIOS-RM (french)         | CISO Assistant                                            |
-| --------------------- | ------------------------- | --------------------------------------------------------- |
-| Study                 | Etude                     | Study                                                     |
-| Studied object        | Objet de l'étude         | Description of the Study                                  |
-| Mission               | Mission                   | Mission of the reference entity added to the Study        |
-| Business asset        | Valeurs métier           | Primary asset                                             |
-| Supporting asset      | Bien support              | Supporting asset                                          |
+| EBIOS-RM (english)    | EBIOS-RM (french)       | CISO Assistant                                            |
+| --------------------- | ----------------------- | --------------------------------------------------------- |
+| Study                 | Etude                   | Study                                                     |
+| Studied object        | Objet de l'étude        | Description of the Study                                  |
+| Mission               | Mission                 | Mission of the reference entity added to the Study        |
+| Business asset        | Valeurs métier          | Primary asset                                             |
+| Supporting asset      | Bien support            | Supporting asset                                          |
 | Feared event          | Evénement redouté       | Risk analysis at asset level                              |
-| Impact                | Impact                    | Impact in a risk analysis                                 |
+| Impact                | Impact                  | Impact in a risk analysis                                 |
 | Security baseline     | Socle de sécurité       | Compliance frameworks and audits                          |
-| Risk origins          | Sources de risque         | RoTo                                                      |
-| Target objectives     | Objectifs visés          | RoTo                                                      |
-| Ecosystem             | Ecosystème               | Third Party Risk Management                               |
+| Risk origins          | Sources de risque       | RoTo                                                      |
+| Target objectives     | Objectifs visés         | RoTo                                                      |
+| Ecosystem             | Ecosystème              | Third Party Risk Management                               |
 | Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)        |
 | Security controls     | Mesures de sécurité     | Reference/applied controls                                |
 | Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability) |
-| Risk treatment        | Traitement du risque      | Applied controls in a risk analysis                       |
+| Risk treatment        | Traitement du risque    | Applied controls in a risk analysis                       |
 
 ### EBIOS-RM study
 
@@ -1632,7 +1636,7 @@ erDiagram
 ### Additional features
 
 - It shall be possible to see the list of objects that would be exported, and to select/deselect some of them while keeping consistency. This should include evidences with their size.
-- It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency.  This should include evidences with their size.
+- It shall be possible to visualize objects that would be imported, and to select/deselect some of them while keeping consistency. This should include evidences with their size.
 - It shall be possible to optionally export subdomains along with the domain. The import shall be flattened if the target is not a PRO version.
 
 ## Findings assessments
@@ -1640,9 +1644,11 @@ erDiagram
 This new type of assessments is intended to gather and manage findinds. The section is present in governance with the name "follow-up"/"Suivi".
 
 A findings assessment has the following specific fields:
+
 - category: --/pentest/audit/internal
 
 A finding ("constat") has the following fields:
+
 - ref_id/name/description
 - severity, like for vulnerabilities
 - a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
@@ -1752,6 +1758,7 @@ The task_date is copied in the due_date of the task_node for a non-recurring tas
 When enabled is set to False, the schedule is suspended (for recurring task), and generated tasks are hidden (past and future).
 
 The following concepts will not be included in the MVP:
+
 - subtasks
 - exceptions
 - overdue_behavior (will be NO_IMPACT)
@@ -1759,6 +1766,7 @@ The following concepts will not be included in the MVP:
 ### Implementation
 
 Future task_nodes are generated partially in advance at creation/update of a task_template and with a daily refresh done with huey. This shall take in account end_date, and the following limits:
+
 - 5 years for yearly frequency
 - 24 months for monthly frequency
 - 53 weeks for weekly frequency
