@@ -408,6 +408,7 @@
 								}}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
+								class="hover:preset-tonal-surface"
 							>
 								{#each Object.entries(row) as [key, value]}
 									{#if key !== 'meta'}
