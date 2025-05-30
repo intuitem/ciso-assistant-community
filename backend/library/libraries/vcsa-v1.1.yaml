@@ -1,0 +1,2174 @@
+urn: urn:intuitem:risk:library:vcsa-v1.1
+locale: en
+ref_id: vcsa-v1.1
+name: Vehicle CyberSecurity Audit (VCSA) v1.1
+description: "The VCSA serves as the basis for \n- a self assessment to determine\
+  \ the state of vehicle cybersecurity within the organization (e.g. company)\n- audits\
+  \ performed by internal departments (e.g. Internal Audit, Quality Management, Information\
+  \ Security, Cybersecurity)\n- an audit in accordance with ENX 3rd party audit management\
+  \ framework\nSource: https://enx.com/en-US/VCS/downloads/"
+copyright: "\xA9 2023 ENX Association\nContact: vcs@enx.com +49 69 9866927-71\nwww.enx.com\n\
+  This work has been licensed under the Creative Commons Attribution - NoDerivs 4.0\
+  \ International Public License. In addition, You are granted the right to distribute\
+  \ derivatives under certain terms. The complete and valid text of the license is\
+  \ to be found in line 17ff."
+version: 1
+publication_date: 2025-05-30
+provider: ENX
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:vcsa-v1.1
+    ref_id: vcsa-v1.1
+    name: Vehicle CyberSecurity Audit (VCSA) v1.1
+    description: "The VCSA serves as the basis for \n- a self assessment to determine\
+      \ the state of vehicle cybersecurity within the organization (e.g. company)\n\
+      - audits performed by internal departments (e.g. Internal Audit, Quality Management,\
+      \ Information Security, Cybersecurity)\n- an audit in accordance with ENX 3rd\
+      \ party audit management framework\nSource: https://enx.com/en-US/VCS/downloads/"
+    implementation_groups_definition:
+    - ref_id: must
+      name: Requirements (must)
+      description: The requirements indicated in this column are strict requirements
+        without any exemptions. They are defined abstractly enough to encompass all
+        VCS supplier types
+    - ref_id: should
+      name: Requirements (should)
+      description: The requirements indicated in this column are principally to be
+        implemented by the organization. These requirements go into granular detail.
+        However, for certain supplier types, there may be a valid justification for
+        non-compliance with these requirements. In case of any deviation, its effects
+        must be understood by the supplier organization and it must be plausibly justified
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Organizational Cybersecurity
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1
+      ref_id: '1.1'
+      name: Are cybersecurity policies managed?
+      description: The organization needs a cybersecurity policy that is adapted to
+        the organization depending on the size and structure.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1
+      ref_id: 1.1.a-must
+      description: '+ A cybersecurity policy related to road vehicle cybersecurity
+        risks is defined and documented
+
+        - It includes road vehicle cybersecurity related objectives and rules
+
+        - It is linked to the organizations relevant objectives and other policies
+
+        - It is commissioned and approved by the organizations management in alignment
+        with the strategic direction of the organization (also includes creation and
+        release of policy documentation)
+
+        - It includes managements commitment to manage vehicle cybersecurity risks
+        related to the items or components supplied by the organization
+
+        - It enables the establishment of rules and processes to fulfil the relevant
+        requirements of this questionnaire'
+      annotation: "Reference: [RQ-05-01]\n[ISO 19011 \xA75.2]"
+      typical_evidence: '+ [WP-05-01] Cybersecurity policy, rules and processes
+
+        - Proof of commitment from management
+
+        - Policy handbook for cybersecurity management
+
+        - Proof of ISMS certification'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1
+      ref_id: 1.1.a-should
+      description: + Further relevant policies are prepared and linked to cybersecurity
+        policy
+      annotation: 'Reference: [ISA 5.0 Q1.1.1]'
+      typical_evidence: '+ [WP-05-01] Cybersecurity policy, rules and processes
+
+        - Proof of commitment from management
+
+        - Policy handbook for cybersecurity management
+
+        - Proof of ISMS certification'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1
+      ref_id: 1.1.b-must
+      description: + Periodic review and, if required, revision of the policies are
+        established
+      annotation: 'Reference: [RQ-05-08]
+
+
+        + Guidelines to communicate cybersecurity Policy to relevant stakeholders'
+      typical_evidence: + P-D-C-A processes established
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1.b-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1
+      ref_id: 1.1.b-should
+      description: + The policies are made available to employees in a suitable form
+        (e.g. intranet)
+      annotation: 'Reference: [RQ-07-04d]
+
+
+        + Guidelines to communicate cybersecurity Policy to relevant stakeholders'
+      typical_evidence: + P-D-C-A processes established
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1.c-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1
+      ref_id: 1.1.c-should
+      description: + Relevant policies (or extracts thereof) are provided to external
+        business partners depending on the respective case
+      annotation: 'Reference: [VDA Q1.1 Ex]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1.d-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.1
+      ref_id: 1.1.d-should
+      description: + Employees and external business partners are informed of any
+        changes relevant to them
+      annotation: 'Reference: [RQ-05-09]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1
+      ref_id: '1.2'
+      name: Are vehicle related cybersecurity processes managed within the organization?
+      description: Cybersecurity can only be implemented sustainably in an organization
+        if it is anchored in its strategic goals.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.a-must
+      description: + The scope of the CSMS is defined and managed
+      annotation: "Reference: [ISO/PAS 5112 \xA75.5.2]\n\n+ Inter-disciplinary exchange\
+        \ of information could include:\n- TARA and HARA\n- Goals: cybersecurity and\
+        \ safety\n- Conflicting cybersecurity requirements with functional requirements"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.a-should
+      description: + Disciplines related to or interacting with cybersecurity are
+        identified (e.g., IT security, functional safety, privacy)
+      annotation: 'Reference: [RQ-05-05]
+
+        [RQ-05-05a]
+
+        [RQ-05-05b]
+
+        [RQ-05-14]
+
+
+        + Inter-disciplinary exchange of information could include:
+
+        - TARA and HARA
+
+        - Goals: cybersecurity and safety
+
+        - Conflicting cybersecurity requirements with functional requirements'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.b-must
+      description: '+ The effectiveness of the CSMS is regularly reviewed by the management
+
+        - The CSMS provides the organizational management with suitable monitoring
+        and control means (e.g. management review)'
+      annotation: "Reference: [ISO 19011 \xA75.5.2 c]\n\n+ Tool management can be\
+        \ established by\n- Application of the user manual with errata\n- Protection\
+        \ against unintended usage or action\n- Access control for the Tool users\
+        \ and/or\n- Authentication of the Tool"
+      typical_evidence: + ISMS or CSMS manual
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.b-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.b-should
+      description: '+ Inter-disciplinary communication channels are established in
+        order to:
+
+        - Integrate cybersecurity into organization''s existing process landscape
+
+        - Define the circumstances and coordinate exchange of relevant information
+        within and outside of the organization'
+      annotation: 'Reference: [RQ-05-05]
+
+
+        + Tool management can be established by
+
+        - Application of the user manual with errata
+
+        - Protection against unintended usage or action
+
+        - Access control for the Tool users and/or
+
+        - Authentication of the Tool'
+      typical_evidence: + ISMS or CSMS manual
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.c-must
+      description: + Applicable controls from this catalog have been determined (e.g.,
+        completed VCSA self-assessment)
+      annotation: 'Reference: [ISA 1.2.1]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.c-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.c-should
+      description: + The organization has instituted and maintained a quality management
+        system in accordance with international standards, or equivalent, to support
+        cybersecurity engineering
+      annotation: 'Reference: [RQ-05-11]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.d-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.d-must
+      description: '+ Rules and processes are established and maintained to support
+        execution of relevant cybersecurity activities
+
+        - Activities include concept, product development, production, operation,
+        maintenance, and decommissioning, including TARA methods, information sharing,
+        cybersecurity monitoring, cybersecurity incident response, and triggers'
+      annotation: 'Reference: [RQ-05-02b]'
+      typical_evidence: + Process standards and documentation of defined processes,
+        including cybersecurity aspects available for all relevant roles(VDA Red Book)
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.e-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.e-must
+      description: + Cybersecurity related information sharing and communication with
+        stakeholders (internal or external) is established
+      annotation: 'Reference: [RQ-05-09]'
+      typical_evidence: "+ [WP-05-01] Cybersecurity policy, rules and processes\n\
+        + [WP-05-03] Evidence of organization\u2019s management systems\n+ [WP-05-04]\
+        \ Evidence of tool management"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2.f-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.2
+      ref_id: 1.2.f-must
+      description: + Tools are managed such that they do not adversely affect the
+        cybersecurity of the item or component
+      annotation: 'Reference: [RQ-05-14]'
+      typical_evidence: + List of cybersecurity-related tools and impact analysis
+        protocol
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1
+      ref_id: '1.3'
+      name: Are processes established to organize cybersecurity responsibilities?
+      description: CSMS can be successfully managed when responsibilities are clearly
+        assigned and delegated within the organization.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3
+      ref_id: 1.3.a-must
+      description: + Responsibilities for vehicle cybersecurity within the organization
+        are defined, documented, assigned and communicated
+      annotation: 'Reference: [RQ-05-03]
+
+
+        + Resources include the persons responsible for cybersecurity risk management,
+        development and incident management [RQ-05-04]'
+      typical_evidence: + DIA, RASIC Chart and Org Chart with reporting and escalation
+        mechanisms (cybersecurity relevant)
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3
+      ref_id: 1.3.a-should
+      description: None
+      annotation: + Resources include the persons responsible for cybersecurity risk
+        management, development and incident management [RQ-05-04]
+      typical_evidence: + DIA, RASIC Chart and Org Chart with reporting and escalation
+        mechanisms (cybersecurity relevant)
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3
+      ref_id: 1.3.b-must
+      description: + The contact persons are communicated within the organization
+        and to relevant business partners
+      annotation: 'Reference: [VDA Q1.2]
+
+
+        + The resources mentioned need to demonstrate competence
+
+        - Proof of education or training in area of automotive cybersecurity OR proof
+        of work experience (no. of hours) in the relevant areas of vehicle cybersecurity
+        incl. necessary tools needed'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3
+      ref_id: 1.3.c-must
+      description: '+ Responsible personnel are delegated the necessary authority
+
+        - In accordance with the product portfolio for the relevant phases of the
+        product lifecycle'
+      annotation: 'Reference: [VDA Q1.2]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3.e-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.3
+      ref_id: 1.3.e-must
+      description: + The required resources (e.g. personnel, time, budget, tools)
+        to adequately fulfil the assigned responsibilities are available
+      annotation: 'Reference: [RQ-05-04]
+
+        [VDA Q1.2]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1
+      ref_id: '1.4'
+      name: Are processes established to manage project dependent cybersecurity?
+      description: During project lifecycle, it is necessary to consider project dependent
+        cybersecurity procedures of the organisation.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.a-must
+      description: + Responsibilities regarding the projects cybersecurity activities
+        are assigned and communicated
+      annotation: 'Reference: [RQ-06-01]
+
+        [RQ-06-04]
+
+
+        + A cybersecurity plan includes
+
+        - Objective of an activity
+
+        - Dependency to other activities
+
+        - Responsible people and required resources
+
+        - Start point, end point and duration of activity
+
+        - Expected results from the cybersecurity activity [RQ-06-03]'
+      typical_evidence: '+ Documentation requirements management
+
+        - [WP-06-01] Cybersecurity plan
+
+        - [WP-06-02] Cybersecurity case
+
+        - [WP-06-03] Cybersecurity assessment report'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.a-should
+      description: "+ The cybersecurity requirements are derived based on the context\
+        \ of the components developed, which are based on\n- Reuse component with\
+        \ design or implementation modifications or both or reused in a different\
+        \ environment\n- Processes for evaluation and analysis of reuse components\
+        \ are established\n- Out-of-context component with documented assumptions\
+        \ on intended use and context \n- at integration of out-of-context component,\
+        \ the cybersecurity claims and assumptions shall be validated.\n- Off-the-shelf\
+        \ component is checked for fulfilment of security requirements else new requirements\
+        \ are formulated"
+      annotation: 'Reference: [RQ-06-15]
+
+        [RQ-06-16]
+
+        [RQ-06-17]
+
+        [RQ-06-18]
+
+        [RQ-06-19]
+
+        [RQ-06-20]
+
+        [RQ-06-21]
+
+
+        + A cybersecurity plan includes
+
+        - Objective of an activity
+
+        - Dependency to other activities
+
+        - Responsible people and required resources
+
+        - Start point, end point and duration of activity
+
+        - Expected results from the cybersecurity activity [RQ-06-03]'
+      typical_evidence: '+ Documentation requirements management
+
+        - [WP-06-01] Cybersecurity plan
+
+        - [WP-06-02] Cybersecurity case
+
+        - [WP-06-03] Cybersecurity assessment report'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.b-must
+      description: + Customer cybersecurity requirements are identified and a cybersecurity
+        plan is created and linked to the larger project plan
+      annotation: 'Reference: [RQ-06-03]
+
+        [RQ-06-05]
+
+
+        + Modifications can include design modifications and/or implementation modifications
+        where:
+
+        - design modifications can result from requirement modifications, e.g. functional
+        or performance enhancement;
+
+        - implementation modifications can result from corrections to software, or
+        the use of new production or maintenance tools, e.g. model-based development.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.c-must
+      description: + Activities derived from cybersecurity requirements in the concept
+        and product development phases are specified
+      annotation: 'Reference: [RQ-06-06]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.d-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.d-must
+      description: '+ An updated (at least at relevant project milestones) cybersecurity
+        plan exists and is verified for each project
+
+        - is subject to configuration management and documentation management'
+      annotation: 'Reference: [RQ-06-03]
+
+        [RQ-06-07]
+
+        [RQ-06-11]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.d-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.d-should
+      description: '+ The work products identified in the cybersecurity plan are
+
+        - updated and maintained
+
+        - subject to configuration management, change management, requirements management,
+        and documentation management'
+      annotation: 'Reference: [RQ-06-09]
+
+        [RQ-06-12]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.e-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.e-must
+      description: + A cybersecurity case is created to provide the argument for cybersecurity
+        of the item or component, supported by work products
+      annotation: 'Reference: [RQ-06-23]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.f-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.f-must
+      description: '+ Decision whether to perform a cybersecurity assessment for an
+        item or component is made supported by a rationale applying a risk-based approach
+
+        - The rationale is documented in the cybersecurity case'
+      annotation: 'Reference: [RQ-06-24]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4.f-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:1.4
+      ref_id: 1.4.f-should
+      description: "+ The cybersecurity assessment has been performed to ascertain\
+        \ that item/component has met the cybersecurity objectives defined in the\
+        \ cybersecurity plan\n - Risk analysis and treatment such as TARA\n - Performed\
+        \ by independent department such as Quality Assurance\n - Evidence exists\
+        \ that prove that cybersecurity objectives have been met"
+      annotation: 'Reference: [RQ-06-26]
+
+        [PM-06-29]
+
+        [RQ-06-30]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Human Resources - Cybersecurity Culture
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:2
+      ref_id: '2.1'
+      name: Are cybersecurity culture and cybersecurity awareness established, implemented,
+        and maintained?
+      description: Institute and maintain a cybersecurity culture, including competence
+        management, awareness management and continuous improvement
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1
+      ref_id: 2.1.a-must
+      description: + Sensitive work fields and job roles are determined
+      annotation: "Reference: [ISO/PAS 5112 Q1.3]\n\n+ ISO 10015:2019(en) Quality\
+        \ management \u2014 Guidelines for competence management and people development"
+      typical_evidence: '+ [WP-05-02] Evidence of competence management
+
+        + Competence profile and qualification landscape (roles, training, competence
+        level)'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1
+      ref_id: 2.1.a-should
+      description: + The personal suitability of potential employees is verified by
+        means of appropriate methods (e.g. job interview/assessment)
+      annotation: "Reference: [VDA Q1.3 Ex]\n\n+ ISO 10015:2019(en) Quality management\
+        \ \u2014 Guidelines for competence management and people development"
+      typical_evidence: '+ [WP-05-02] Evidence of competence management
+
+        + Competence profile and qualification landscape (roles, training, competence
+        level)'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1
+      ref_id: 2.1.b-must
+      description: + The requirements for employees with respect to their job profiles
+        are determined and fulfilled
+      annotation: 'Reference: [ISO/PAS 5112 Q1.3]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1.b-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1
+      ref_id: 2.1.b-should
+      description: + An extended suitability verification depending on the respective
+        work field and job is conducted. (e.g., competence management, evaluation
+        of competence profile)
+      annotation: 'Reference: [VDA Q1.3 Ex]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1
+      ref_id: 2.1.c-must
+      description: + Employees are trained and made aware of the necessity of internalising
+        cybersecurity work practices
+      annotation: "Reference: [RQ-05-07]\n[RQ-05-08]\n\n+ Online tutorials for cybersecurity\
+        \ including\n- Cybersecurity policy\n- Monitoring, categorising, handling\
+        \ and reporting cybersecurity events and incidents \n- Managing vulnerabilities\
+        \ during relevant phases of the project lifecycle\n+ Training program for\
+        \ entire organization, incl. documentation to ascertain training performance\n\
+        + Obligatory cybersecurity training for developers and incident response managers"
+      typical_evidence: + [WP-05-02] Evidence of awareness and training management
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1.c-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1
+      ref_id: 2.1.c-should
+      description: + Target groups for training and awareness measures (e.g. new employees,
+        developers, incident managers, employees having access to customer networks)
+        are identified and taken into account in a training concept
+      annotation: "Reference: [VDA Q1.3 Ex]\n\n+ Online tutorials for cybersecurity\
+        \ including\n- Cybersecurity policy\n- Monitoring, categorising, handling\
+        \ and reporting cybersecurity events and incidents \n- Managing vulnerabilities\
+        \ during relevant phases of the project lifecycle\n+ Training program for\
+        \ entire organization, incl. documentation to ascertain training performance\n\
+        + Obligatory cybersecurity training for developers and incident response managers"
+      typical_evidence: + [WP-05-02] Evidence of awareness and training management
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1.d-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:2.1
+      ref_id: 2.1.d-should
+      description: + Continuous improvement of cybersecurity processes are in place
+      annotation: 'Reference: [RQ-05-08]
+
+
+        + Examples of continuous improvement include:
+
+        - Learning from cybersecurity experiences of current and previous services/
+        products, including experiences gathered by field monitoring and observation
+        of internal and external information
+
+        - Learning from information obtained regarding services/products of similar
+        application or technical characteristics in the field
+
+        - Deriving improvements to be applied during subsequent cybersecurity activities
+
+        - Communicating lessons learned about cybersecurity to the appropriate persons
+
+        - Checking the adequacy of its organisation-wide cybersecurity rules and processes'
+      typical_evidence: + [WP-05-02] Evidence of continuous improvement
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Risk Management
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3
+      ref_id: '3.1'
+      name: Are processes and methods established to perform threat analysis and risk
+        assessment (TARA) to determine cybersecurity risks for an item/components
+        across the vehicle lifecycle?
+      description: The first stage of cybersecurity risk management is to identify
+        and determine threat scenarios that could impact the cybersecurity of the
+        item/component
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.a-must
+      description: + Relevant stakeholders are involved in the threat analysis and
+        risk assessment
+      annotation: 'Reference: [VDA Q2.1Ex]
+
+
+        + Guideline for cybersecurity risk assessment and categorisation that covers
+        all phases of product lifecycle, including:
+
+        - Risk level matrix/categorisation
+
+        - List of criteria for rating the impact of the identified damage scenarios
+
+        - Method for rating the attack feasibility for identified attack paths
+
+        - Processes supported by tool-based workflows [VDA Ex Q3.1]'
+      typical_evidence: + List of relevant threats as per UN R155 Annex 5 Part A
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.a-should
+      description: + Cybersecurity risk identification covers the entire life cycle
+        of items and components (including maintenance, software updates, end of support
+        for cybersecurity relevant functions, decommissioning, etc.)
+      annotation: 'Reference: [VDA Q2.1]
+
+
+        + Guideline for cybersecurity risk assessment and categorisation that covers
+        all phases of product lifecycle, including:
+
+        - Risk level matrix/categorisation
+
+        - List of criteria for rating the impact of the identified damage scenarios
+
+        - Method for rating the attack feasibility for identified attack paths
+
+        - Processes supported by tool-based workflows [VDA Ex Q3.1]'
+      typical_evidence: + List of relevant threats as per UN R155 Annex 5 Part A
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.b-must
+      description: + item and components relevant to cybersecurity are identified
+        and documented
+      annotation: 'Reference: [RQ-09-01]
+
+        [RQ-09-07a]
+
+        [VDA Q5.2b]'
+      typical_evidence: + Documentation risk management process
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.c-must
+      description: + Cybersecurity assets and their cybersecurity properties are identified
+      annotation: 'Reference: [VDA Q2.1d]'
+      typical_evidence: + Risk mitigation plan as per UN R155 Annex 5 Part B and C
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.c-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.c-should
+      description: + The security properties CIA are extended
+      annotation: 'Reference: [RQ-15-03]'
+      typical_evidence: + Risk mitigation plan as per UN R155 Annex 5 Part B and C
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.d-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.d-must
+      description: '+ Threat scenarios that could result in damage scenarios are identified.
+        At least the following threat scenarios are considered
+
+        - Applicable threat scenarios from [UN R-155, Annex 5]
+
+        - Applicable threat scenarios provided by customers and suppliers
+
+        - Applicable threat scenarios identified by the involved experts'
+      annotation: 'Reference: [RQ-15-03]'
+      typical_evidence: "+ Guideline for cybersecurity risk identification methods\
+        \ (e.g., how to define attack path and threat scenarios) that cover all phases\
+        \ of the product lifecycle, including:\n- Asset catalogue associated and classified\
+        \ with cybersecurity properties (e.g., CIA)\n- Damage scenarios assigned to\
+        \ the assets\n- Catalogue of threat scenarios updated in accordance with new\
+        \ information from the vulnerabilities database, in-field monitoring, etc.\n\
+        - Supporting information for developers, such as Wikis, how-to\u2019s, etc."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.d-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.d-should
+      description: + Risk assessments are kept current and changes in threat scenarios
+        are considered
+      annotation: 'Reference: [RQ-08-04 NOTE 3]'
+      typical_evidence: "+ Guideline for cybersecurity risk identification methods\
+        \ (e.g., how to define attack path and threat scenarios) that cover all phases\
+        \ of the product lifecycle, including:\n- Asset catalogue associated and classified\
+        \ with cybersecurity properties (e.g., CIA)\n- Damage scenarios assigned to\
+        \ the assets\n- Catalogue of threat scenarios updated in accordance with new\
+        \ information from the vulnerabilities database, in-field monitoring, etc.\n\
+        - Supporting information for developers, such as Wikis, how-to\u2019s, etc."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.e-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.e-must
+      description: '+ Damage scenarios are identified. At least the following damage
+        scenarios are considered
+
+        - Applicable damage scenarios provided by customers and suppliers
+
+        - Applicable damage scenarios identified by the involved experts'
+      annotation: 'Reference: [RQ-15-01]'
+      typical_evidence: '+ [WP-15-01] Damage scenarios
+
+        + [WP-15-02] Assets with cybersecurity properties
+
+        + [WP-15-03] Threat scenarios
+
+        + [WP-15-04] Impact ratings with associated impact categories
+
+        + [WP-15-05] Attack paths
+
+        + [WP-15-06] Attack feasibility ratings
+
+        + [WP-15-07] Risk value'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.f-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.f-must
+      description: + Method for categorising the impact from damage scenarios is determined.
+        At least safety, financial, operational, privacy aspects are considered
+      annotation: 'Reference: [RQ-15-04]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.g-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.g-must
+      description: + Method for specifying impact rating for damage scenarios is determined
+      annotation: 'Reference: [RQ-15-05]
+
+        [RQ-15-06]
+
+        [PM-15-07]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.h-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.h-must
+      description: + Specific methods for analysing and building attack paths are
+        defined
+      annotation: 'Reference: [RQ-15-08]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.h-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.h-should
+      description: '+ An attack path analysis is based on
+
+        - top-down approaches that deduce attack paths by analysing the different
+        ways in which a threat scenario could be realised, e.g. attack trees, attack
+        graphs; and/or
+
+        - bottom-up approaches that build attack paths from the vulnerabilities identified'
+      annotation: 'Reference: [RQ-15-08 Note1]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.i-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.i-must
+      description: + Method for attack feasibility rating for each attack path is
+        determined
+      annotation: 'Reference: [RQ-15-09]
+
+        [RQ-15-10]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.i-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.i-should
+      description: '+ The attack feasibility rating method is defined based on one
+        of the following approaches: Attack potential based approach, CVSS exploitability,
+        CVSS attack-vector'
+      annotation: 'Reference: [RC-15-11]
+
+        [RC-15-12]
+
+        [RC-15-13]
+
+        [RC-15-14]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.ii-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.ii-should
+      description: '+ The attack feasibility rating values are divided into four levels:
+        high, medium, low and very low'
+      annotation: 'Reference: [RQ-15-10]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.j-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.j-must
+      description: + Method for calculating risk value is determined
+      annotation: 'Reference: [RQ-15-15]
+
+
+        + Methods for risk value determination:
+
+        - risk matrices
+
+        - risk formulas'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1.j-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.1
+      ref_id: 3.1.j-should
+      description: + Risk values for each threat scenario are determined from the
+        impact rating and attack feasibility rating
+      annotation: 'Reference: [RQ-15-15]
+
+
+        + Methods for risk value determination:
+
+        - risk matrices
+
+        - risk formulas'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3
+      ref_id: '3.2'
+      name: Are processes established to treat cybersecurity risks for an item across
+        the vehicle lifecycle?
+      description: The objective is to select the appropriate risk treatment option
+        for the identified threat scenarios.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2
+      ref_id: 3.2.a-must
+      description: "+ For each threat scenario, cybersecurity risks are treated on\
+        \ the basis of calculated risk values as per the following risk treatment\
+        \ options \n- Avoiding the risk\n- Reducing the risk\n- Sharing the risk\n\
+        - Retaining the risk"
+      annotation: "Reference: [RQ-15-17]\n[RQ-09-04]\n\n+ Risk sharing is achieved\
+        \ through CIAD or transferred by buying risk insurance (cybersecurity claims)\
+        \ \n- The justifications for risk sharing/transfer are recorded as cybersecurity\
+        \ claims and are subject to cybersecurity monitoring and vulnerability management\n\
+        + Risk avoidance is achieved through removing the source of risk or by not\
+        \ starting the activity that contributes to the risk"
+      typical_evidence: + Relevant mitigation plan as per UN-R-155 Annex 5
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2
+      ref_id: 3.2.a-should
+      description: + Cybersecurity assurance level (CAL) requirements are assigned
+        to applicable cybersecurity goal
+      annotation: "Reference: [RQ-09-05]\n\n+ Risk sharing is achieved through CIAD\
+        \ or transferred by buying risk insurance (cybersecurity claims) \n- The justifications\
+        \ for risk sharing/transfer are recorded as cybersecurity claims and are subject\
+        \ to cybersecurity monitoring and vulnerability management\n+ Risk avoidance\
+        \ is achieved through removing the source of risk or by not starting the activity\
+        \ that contributes to the risk"
+      typical_evidence: + Relevant mitigation plan as per UN-R-155 Annex 5
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2
+      ref_id: 3.2.b-must
+      description: + Cybersecurity goals are defined in order to implement risk reduction
+        as a risk treatment decision
+      annotation: 'Reference: [RQ-09-05]'
+      typical_evidence: "+ Guideline for risk treatment covering all phases of product\
+        \ lifecycle, including:\n- Decision tree for risk treatment (e.g., to accept,\
+        \ to transfer, to mitigate) \n- Risk matrix containing the risk values and\
+        \ residual risks\n- Escalation path to a higher management level for significant\
+        \ residual risks [VDA Q3.2 Ex]"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2.b-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2
+      ref_id: 3.2.b-should
+      description: + The risk treatment is carried out in accordance with the state-of-the-art
+        technology, e.g. the use of current cryptographic procedures
+      annotation: 'Reference: [VDA Q3.2e]'
+      typical_evidence: "+ Guideline for risk treatment covering all phases of product\
+        \ lifecycle, including:\n- Decision tree for risk treatment (e.g., to accept,\
+        \ to transfer, to mitigate) \n- Risk matrix containing the risk values and\
+        \ residual risks\n- Escalation path to a higher management level for significant\
+        \ residual risks [VDA Q3.2 Ex]"
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2
+      ref_id: 3.2.c-must
+      description: + Cybersecurity claims are specified in order to implement risk
+        sharing/transfer as a risk treatment decision
+      annotation: 'Reference: [RQ-09-06b]'
+      typical_evidence: '+ [WP-09-04] Cybersecurity claims
+
+        + [WP-09-03] Cybersecurity goals
+
+        + [WP-09-02] TARA resulting from [WP-09-04] and [WP-09-03]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2.d-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.2
+      ref_id: 3.2.d-must
+      description: '+ Risk treatment is complete, correct and consistent with respect
+        to the cybersecurity goals and claims
+
+        - The validation of the item confirms that all cybersecurity risks identified
+        are accepted or have been treated such that they are accepted'
+      annotation: 'Reference: [RQ-09-07]
+
+        [RQ-09-07b]
+
+        [VDA Q3.2d]
+
+
+        + Validation of the item is mapped to the cybersecurity concept (requirements
+        on item and operational environment)'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3
+      ref_id: '3.3'
+      name: Are processes established to transparently communicate cybersecurity risks?
+      description: The risk methodology as well as residual risks  needs to be communicated
+        to the customer.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.3.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.3
+      ref_id: 3.3.a-must
+      description: + Customer relevant risks arising from TARA results are made transparent
+        and communicated in an effective manner
+      annotation: 'Reference: [RQ-07-04d NOTE1.2, 1.7]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.3.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:3.3
+      ref_id: 3.3.a-should
+      description: + Formal communication channels are established to communicate
+        changes in the risk assessment
+      annotation: 'Reference: [VDA DIA]'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Internal Assessments
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:4
+      ref_id: '4.1'
+      name: Are processes established to review the effectiveness of CSMS within the
+        organization?
+      description: The aim is to verify the effectiveness of the CSMS measures and
+        associated work products generated thereof thus ensure that the relevant risks
+        are reduced as a result.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1
+      ref_id: 4.1.a-must
+      description: + Compliance with cybersecurity policies and procedures is verified
+        at organizational level through periodical and independent internal audits
+      annotation: 'Reference: [VDA Q4.1 Ex]
+
+        [RQ-05-17]
+
+
+        + Formal processes to check new and evolving technologies and integration
+        into CSMS'
+      typical_evidence: '+ Peer review of cybersecurity risk analysis
+
+        + Cybersecurity assessment report'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1
+      ref_id: 4.1.a-should
+      description: None
+      annotation: + Formal processes to check new and evolving technologies and integration
+        into CSMS
+      typical_evidence: '+ Peer review of cybersecurity risk analysis
+
+        + Cybersecurity assessment report'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1
+      ref_id: 4.1.b-must
+      description: + Effectiveness of cybersecurity risk management is adequately
+        verified
+      annotation: 'Reference: [VDA Q4.1 Ex]
+
+
+        + Providing information to relevant stakeholders about vulnerabilities and
+        root causes of a cybersecurity incident'
+      typical_evidence: "+ Periodical internal audit of cybersecurity risk management\
+        \ processes\n - KPI reports on effectiveness of cybersecurity risk management\n\
+        \ - Periodic internal review of relevant cybersecurity work products (evidences)\n\
+        [VDA Q4.1 Ex]"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1
+      ref_id: 4.1.c-must
+      description: + Results of Audits performed are recorded and retained
+      annotation: 'Reference: [VDA Q9.1 Ex]
+
+
+        + Provide information about item/component changes that may require work product
+        updates'
+      typical_evidence: + [WP-05-05] Organizational cybersecurity audit report"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1.d-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:4.1
+      ref_id: 4.1.d-must
+      description: + Corrective actions for potential non-compliances (deviations)
+        are initiated and tracked
+      annotation: "Reference: [ISO/PAS 5112 \xA76.4.9]"
+      typical_evidence: + Lessons learned and Corrective Action Protocols
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Concept and Product development Phase
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5
+      ref_id: '5.1'
+      name: Are processes established to define the item and specify cybersecurity
+        requirements?
+      description: Cybersecurity design and requirements are developed in parallel
+        with the vehicle items or component . Processes need to be established in
+        order to define cybersecurity activities for the different levels of software/component
+        development.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      ref_id: 5.1.a-must
+      description: '+ Cybersecurity goals, based on risk treatment decisions including
+        risk reduction are determined
+
+        - Cybersecurity concepts are derived from cybersecurity goals'
+      annotation: 'Reference: [RQ-09-05]
+
+
+        + Cybersecurity specifications consists of item cybersecurity requirements
+        plus requirements on the items operational environment'
+      typical_evidence: '+ [WP-15-08] Risk treatment decisions
+
+        + [WP-09-02] TARA results
+
+        + [WP-09-03] Cybersecurity goals
+
+        + [WP-09-05] Verification report for cybersecurity goals
+
+        + [WP-09-06] Cybersecurity concept
+
+        + [WP-09-07] Verification report of cybersecurity concept'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      ref_id: 5.1.a-should
+      description: + Vulnerability analysis is performed when integrating off-the-shelf
+        component or during reuse analysis of component
+      annotation: 'Reference: [RQ-06-16b]
+
+        [RQ-06-22]
+
+
+        + Cybersecurity specifications consists of item cybersecurity requirements
+        plus requirements on the items operational environment'
+      typical_evidence: '+ [WP-15-08] Risk treatment decisions
+
+        + [WP-09-02] TARA results
+
+        + [WP-09-03] Cybersecurity goals
+
+        + [WP-09-05] Verification report for cybersecurity goals
+
+        + [WP-09-06] Cybersecurity concept
+
+        + [WP-09-07] Verification report of cybersecurity concept'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      ref_id: 5.1.b-must
+      description: + Cybersecurity claims, based on risk treatment decision that includes
+        risk sharing or risk retaining are determined
+      annotation: 'Reference: [RQ-09-06]
+
+
+        + Cybersecurity specifications include the specification of interfaces between
+        sub-components of the defined architectural design related to the fulfilment
+        of the defined cybersecurity requirements, including their usage, static and
+        dynamic aspects'
+      typical_evidence: + [WP-09-04] Cybersecurity claims
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1.b-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      ref_id: 5.1.b-should
+      description: + The architectural design is analysed to identify and manage weaknesses
+        and vulnerabilities
+      annotation: 'Reference: [RQ-10-07] Note 8
+
+
+        + Cybersecurity specifications include the specification of interfaces between
+        sub-components of the defined architectural design related to the fulfilment
+        of the defined cybersecurity requirements, including their usage, static and
+        dynamic aspects'
+      typical_evidence: + [WP-09-04] Cybersecurity claims
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      ref_id: 5.1.c-must
+      description: + Item or component functions, boundary, operational environment
+        and preliminary architecture is determined
+      annotation: 'Reference: [RQ-09-08a]
+
+
+        + Cybersecurity specifications include the identification of configuration
+        and calibration parameters/settings needed to fulfil the cybersecurity requirements'
+      typical_evidence: + [WP-09-01] Item definition
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1.d-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      ref_id: 5.1.d-must
+      description: + Cybersecurity requirements for item and for the operational environment
+        of the item is defined
+      annotation: 'Reference: [RQ-09-09]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1.e-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      ref_id: 5.1.e-must
+      description: + Completeness, correctness and consistency of requirements with
+        respect to cybersecurity goals and cybersecurity claims is verified
+      annotation: 'Reference: [RQ-09-11]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1.f-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.1
+      ref_id: 5.1.f-must
+      description: + The defined cybersecurity requirements are allocated to components
+        of the architectural design
+      annotation: 'Reference: [RQ-10-02]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5
+      ref_id: '5.2'
+      name: Are processes established to verify the fulfilment of cybersecurity requirements
+        on components during the development phase?
+      description: The aim is to ensure that the results of the tests performed at
+        the implementation and integration phase of the item conforms to the derived
+        cybersecurity specifications.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.2.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.2
+      ref_id: 5.2.a-must
+      description: + The defined cybersecurity specifications conform to the cybersecurity
+        specifications from higher level of abstraction (e.g., architectural design)
+      annotation: 'Reference: [RQ-10-08]
+
+
+        + Verification methods can include
+
+        - Review
+
+        - Analysis
+
+        - Simulation
+
+        - Prototyping [RQ-10-08 Note 10]'
+      typical_evidence: '+ [WP-10-04] Verification report for the cybersecurity specifications
+
+        + [WP-10-05] Weakness found during product development, if applicable
+
+        + [WP-10-06] Integration and verification specification
+
+        + [WP-10-07] Integration and verification reports'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.2.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.2
+      ref_id: 5.2.a-should
+      description: + Testing is adopted as a verification procedure to achieve the
+        verification objectives
+      annotation: 'Reference: [RQ-10-13]
+
+        [RC-10-12]
+
+
+        + Verification methods can include
+
+        - Review
+
+        - Analysis
+
+        - Simulation
+
+        - Prototyping [RQ-10-08 Note 10]'
+      typical_evidence: '+ [WP-10-04] Verification report for the cybersecurity specifications
+
+        + [WP-10-05] Weakness found during product development, if applicable
+
+        + [WP-10-06] Integration and verification specification
+
+        + [WP-10-07] Integration and verification reports'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.2.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.2
+      ref_id: 5.2.b-must
+      description: + The results of the implementation and integration of components
+        are verified to conform to the cybersecurity specification
+      annotation: 'Reference: [RQ-10-09]
+
+
+        + Testing methods can include: Functional testing, fuzz testing, vulnerability
+        scanning and/or penetration testing'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5
+      ref_id: '5.3'
+      name: Are processes established that validate cybersecurity goal and claims
+        on item level during the development phase?
+      description: The goal is to ensure that the verified item not only conforms
+        to derived cybersecurity specifications but also fulfils cybersecurity goals
+        (at vehicle level) as per the customer requirements.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.3.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.3
+      ref_id: 5.3.a-must
+      description: + Validation activities are selected and implemented to confirm
+        the adequacy and achievement of cybersecurity goals and validity of cybersecurity
+        claims
+      annotation: 'Reference: [RQ-11-01]
+
+        [RQ-11-02]
+
+
+        + CAL can be used to determine the depth and rigor of validation activities'
+      typical_evidence: + [WP-11-01] Validation report
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.3.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.3
+      ref_id: 5.3.a-should
+      description: + Testing is adopted to achieve the validation objectives
+      annotation: 'Reference: [RQ-11-01 NOTE 2]
+
+        [RQ-09-09 NOTE 4]
+
+
+        + CAL can be used to determine the depth and rigor of validation activities'
+      typical_evidence: + [WP-11-01] Validation report
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.3.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:5.3
+      ref_id: 5.3.b-must
+      description: + It is determined that no unreasonable risks remain
+      annotation: "Reference: [ISO/SAE 21434 \xA711.2c]"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Post-Development Phase (excluding operations and maintenance)
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:6
+      ref_id: '6.1'
+      name: Are processes established for the release of an item or component for
+        post-development phases?
+      description: The cybersecurity assessment report must confirm that the required
+        degree of cybersecurity has been achieved enabling the release of the product
+        for post-development and production activities.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.1
+      ref_id: 6.1.a-must
+      description: + Requirements are identified and reviewed for release of item
+        into post-development
+      annotation: "Reference: [ISO/SAE 21434 \xA712.1]\n\n+ Review of changes in production\
+        \ processes against Production Control Plan to prevent introduction of new\
+        \ vulnerabilities"
+      typical_evidence: "+ [WP-06-04] Report on release for post-development\n- [WP-06-01]\
+        \ Cybersecurity plan \n- [WP-06-02] Cybersecurity case\n- [WP-06-03] Cybersecurity\
+        \ assessment report"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.1
+      ref_id: 6.1.a-should
+      description: None
+      annotation: + Review of changes in production processes against Production Control
+        Plan to prevent introduction of new vulnerabilities
+      typical_evidence: "+ [WP-06-04] Report on release for post-development\n- [WP-06-01]\
+        \ Cybersecurity plan \n- [WP-06-02] Cybersecurity case\n- [WP-06-03] Cybersecurity\
+        \ assessment report"
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.1.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.1
+      ref_id: 6.1.b-must
+      description: + Cybersecurity requirements for post-development phase are accepted
+      annotation: 'Reference: [RQ-06-34 c]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:6
+      ref_id: '6.2'
+      name: Are processes established to apply cybersecurity requirements during production
+        phase?
+      description: Cybersecurity is applied during the production phase of the item
+        or component and such requirements are incorporated into production control
+        plan.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.2.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.2
+      ref_id: 6.2.a-must
+      description: "+ Cybersecurity requirements are applied for production phase\
+        \ \n- A production control plan shall be created that applies the cybersecurity\
+        \ requirements for post-development\n- The production control plan shall be\
+        \ implemented"
+      annotation: "Reference: [ISO/SAE 21434 \xA712.1]\n[RQ-12-01]\n[RQ-12-02]\n[RQ-12-03]"
+      typical_evidence: + [WP-12-01] Production Control Plan
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.2.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:6.2
+      ref_id: 6.2.a-should
+      description: None
+      typical_evidence: + [WP-12-01] Production Control Plan
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Operations Security
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7
+      ref_id: '7.1'
+      name: Are processes established for updates to items or components?
+      description: The aim is to ensure that updating of items or components to retain/enhance
+        cybersecurity is performed logically sound and testable and that they function
+        in a safe secure and reliable way
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.1
+      ref_id: 7.1.a-must
+      description: + Process is established to develop updates and update capabilities
+        to items or components within the vehicle
+      annotation: "Reference: [RQ-09-09 Note 3]\n\n+ Software and Hardware versions\
+        \ are revised using revision control mechanisms\n- Software update management\
+        \ related to cybersecurity \n- Related work products which are required according\
+        \ to ISO/SAE 21434: 2021 from concept and product development phases"
+      typical_evidence: + Update process documentation of relevant work products
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.1
+      ref_id: 7.1.a-should
+      description: None
+      annotation: "+ Software and Hardware versions are revised using revision control\
+        \ mechanisms\n- Software update management related to cybersecurity \n- Related\
+        \ work products which are required according to ISO/SAE 21434: 2021 from concept\
+        \ and product development phases"
+      typical_evidence: + Update process documentation of relevant work products
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7
+      ref_id: '7.2'
+      name: Are processes established for communicating end of cybersecurity support
+        for an item/component to customer?
+      description: When the organization decides to end cybersecurity support for
+        an item or component the decision needs to be communicated to the customer.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.2.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.2
+      ref_id: 7.2.a-should
+      description: + Process is established that communicates the decision to end
+        cybersecurity support to an item/component to customers
+      annotation: 'Reference: [RQ-07-04f]
+
+        [RQ-14-01]
+
+
+        + The supplier can communicate when EOL for the item or component needs to
+        happen. If that is not the case, supplier needs to show proof that the customer
+        has specified the time period and regulated it contractually or through DIA.'
+      typical_evidence: + [WP-14-01] Procedures to communicate the end of cybersecurity
+        support
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7
+      ref_id: '7.3'
+      name: Are processes established to make available cybersecurity requirements
+        for decommissioning?
+      description: The procedure is established, implemented, and maintained for making
+        available cybersecurity requirements for decommissioning.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.3.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.3
+      ref_id: 7.3.a-must
+      description: + A procedure is established to make available cybersecurity requirements
+        for post-development with regard to decommissioning
+      annotation: 'Reference: [RQ-14-02]
+
+
+        + Appropriate documentation (e.g. instructions, user manuals) relating to
+        such requirements can enable decommissioning with regard to cybersecurity'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.3.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.3
+      ref_id: 7.3.a-should
+      description: None
+      annotation: + Appropriate documentation (e.g. instructions, user manuals) relating
+        to such requirements can enable decommissioning with regard to cybersecurity
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7
+      ref_id: '7.4'
+      name: Is a process established to respond to cybersecurity incidents?
+      description: The goal of orderly processing of cyber attacks is to limit potential
+        damage and prevent recurrence.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.4.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.4
+      ref_id: 7.4.a-must
+      description: "+ A cybersecurity incident response plan for each cybersecurity\
+        \ incident is created, which includes\n- Remediation actions for the cybersecurity\
+        \ incident \n- Communication plan involving interested stakeholders\n- Responsibilities\
+        \ and resources for remedial action is assigned\n- A method for determining\
+        \ progress of incident response is defined\n- Criteria for closure and actions\
+        \ for closure is defined\n- A reasonable timeframe based on the risk assessment\
+        \ is created\n- Criteria to determine the timeframe are defined"
+      annotation: 'Reference: [RQ-13-01]
+
+        [VDA Q7.5e, f]
+
+
+        + A communication plan can include identification of internal and external
+        communication partners (e.g., development, researchers, the public, authorities)
+        and communication packages for various audiences
+
+        + Procedures to determine the progress criteria during the remediation actions
+        can include:
+
+        - Percentage of affected items or components that are covered within a defined
+        timeframe
+
+        - Percentage of items or components affected by remediation actions
+
+        + Information relevant to the cybersecurity Incident and tracking of the status
+        of cybersecurity Incident remediation is recorded'
+      typical_evidence: "+ Digital investigation process documentation\n+ Investigation\
+        \ reports\n+ Corrective action protocols \n+ [WP-13-01] Cybersecurity incident\
+        \ response plan"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.4.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.4
+      ref_id: 7.4.a-should
+      description: '+ Sufficient data forensics capabilities are available
+
+        - Cybersecurity information relevant to the incident  is included in the cybersecurity
+        incident report'
+      annotation: 'Reference: [RQ-13-01 d Note 5]
+
+
+        + A communication plan can include identification of internal and external
+        communication partners (e.g., development, researchers, the public, authorities)
+        and communication packages for various audiences
+
+        + Procedures to determine the progress criteria during the remediation actions
+        can include:
+
+        - Percentage of affected items or components that are covered within a defined
+        timeframe
+
+        - Percentage of items or components affected by remediation actions
+
+        + Information relevant to the cybersecurity Incident and tracking of the status
+        of cybersecurity Incident remediation is recorded'
+      typical_evidence: "+ Digital investigation process documentation\n+ Investigation\
+        \ reports\n+ Corrective action protocols \n+ [WP-13-01] Cybersecurity incident\
+        \ response plan"
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7
+      ref_id: '7.5'
+      name: Is a process established to validate the effectiveness and adequacy of
+        the response to a cybersecurity incident?
+      description: The goal is to prove the effectiveness and adequacy of cybersecurity
+        incident response process.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.5.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.5
+      ref_id: 7.5.a-must
+      description: + Post incident response review is conducted
+      annotation: 'Reference: [VDA Q7.6]'
+      typical_evidence: '+ Incident response reports
+
+        + Vulnerability scanning reports
+
+        + Consumer usage information
+
+        + Repair information
+
+        + Mechanism to feed incident response results into risk assessment methodology'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.5.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:7.5
+      ref_id: 7.5.a-should
+      description: None
+      typical_evidence: '+ Incident response reports
+
+        + Vulnerability scanning reports
+
+        + Consumer usage information
+
+        + Repair information
+
+        + Mechanism to feed incident response results into risk assessment methodology'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Supply Chain Relationships
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:8
+      ref_id: '8.1'
+      name: Are processes established to manage dependencies between the auditee organization
+        and its VCS relevant suppliers?
+      description: The aim is to identify, assess and deal with dependencies involving
+        contractual partners and suppliers and the resulting cyber risks.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1
+      ref_id: 8.1.a-must
+      description: '+ Auditee organization has selected and evaluated the cybersecurity
+        capability of existing suppliers and supplier candidates
+
+        - Supplier candidates have the appropriate cybersecurity capabilities'
+      annotation: 'Reference: [RQ-07-01]
+
+        [RQ-07-02]
+
+
+        + Cybersecurity Assurance Level CAL ( as per security requirement level)
+
+        Ref: ISO/SAE 21434, Annex E: ISO/SAE 21434]'
+      typical_evidence: "+ Documentation \"Record of cybersecurity capability\" [RC-07-02]\n\
+        - Cybersecurity \"best practices\" from development, post-development, governance,\
+        \ quality and information security\n - Evidence of continual cybersecurity\
+        \ activities and cybersecurity incident response and previous cybersecurity\
+        \ assessment reports (audit and assessment results, if available)"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1
+      ref_id: 8.1.a-should
+      description: '+ RfQ includes interactions, dependencies and responsibilities
+        between organization and its suppliers
+
+        - RfQ includes cybersecurity goals and set of cybersecurity requirements relevant
+        to the item/component to be developed by supplier'
+      annotation: 'Reference: [RQ-07-03]
+
+        [RQ-07-04]
+
+
+        + Cybersecurity Assurance Level CAL ( as per security requirement level)
+
+        Ref: ISO/SAE 21434, Annex E: ISO/SAE 21434]'
+      typical_evidence: "+ Documentation \"Record of cybersecurity capability\" [RC-07-02]\n\
+        - Cybersecurity \"best practices\" from development, post-development, governance,\
+        \ quality and information security\n - Evidence of continual cybersecurity\
+        \ activities and cybersecurity incident response and previous cybersecurity\
+        \ assessment reports (audit and assessment results, if available)"
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1
+      ref_id: 8.1.b-must
+      description: + The auditee organization establishes a process for quotation
+        aspects that defines interactions, dependencies and responsibilities between
+        itself and its suppliers
+      annotation: 'Reference: [RQ-07-03b]
+
+
+        + RASIC Chart to assign responsibilities [RC-07-08] [Annex C: ISO/SAE 21434]'
+      typical_evidence: '+ Cybersecurity Interface Agreement for Development(CIAD)
+
+        + TISAX ISMS Label'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1.b-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1
+      ref_id: 8.1.b-should
+      description: "+ The list of aligned/shared responsibilities include\n- Cybersecurity\
+        \ activities (distribution, review and feedback mechanism)\n- Handling vulnerabilities\
+        \ \n- If requirements are unclear, conflicting, not feasible, both parties\
+        \ are notified and appropriate decisions and action have been taken\n- Sharing\
+        \ of information and work products\n- Milestones regarding the distributed\
+        \ cybersecurity activities\n- Definition of the end of cybersecurity support\
+        \ for the item or component"
+      annotation: 'Reference: [RQ-06-10]
+
+        [RQ-07-04d, e, f]
+
+        [RQ-07-06]
+
+        [RQ-07-07]
+
+
+        + RASIC Chart to assign responsibilities [RC-07-08] [Annex C: ISO/SAE 21434]'
+      typical_evidence: '+ Cybersecurity Interface Agreement for Development(CIAD)
+
+        + TISAX ISMS Label'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1
+      ref_id: 8.1.c-must
+      description: + Cybersecurity goals and cybersecurity requirements of the item
+        or component are identified and communicated to the supplier
+      annotation: 'Reference: [RQ-07-03c]
+
+
+        + Recommendation on distribution of cybersecurity activities:
+
+        - Appointments of cybersecurity SPOC at auditee organisation and supplier
+        respectively
+
+        - Identification of activities to be performed by auditee organization and
+        supplier respectively
+
+        - Joint tailoring of activities
+
+        - Sharing of information and cybersecurity findings (e.g.: residual risks,
+        results of cybersecurity assessments)'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1.d-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:8.1
+      ref_id: 8.1.d-must
+      description: + Auditee organization has processes to specify distributed cybersecurity
+        activities between organization and supplier
+      annotation: 'Reference: [RQ-07-04]
+
+
+        + Identification of cybersecurity activities that are to be performed by auditee
+        organization and supplier, respectively
+
+        - EXAMPLE 1 Cybersecurity validation at the vehicle level performed by the
+        customer
+
+        - EXAMPLE 2 The distribution of cybersecurity activities regarding post-development
+
+        - EXAMPLE 3 The cybersecurity assessment concerning the components or work
+        products developed by the supplier can be performed by a third party, the
+        auditee organization or the supplier [RQ-07-04b]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Continual Cybersecurity Activities
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9
+      ref_id: '9.1'
+      name: Are processes established to monitor cyber security information and to
+        identify cybersecurity events from the monitored information?
+      description: The goal is to ensure cybersecurity over the life of the vehicle
+        by monitoring and collecting cybersecurity relevant information and identifying
+        cybersecurity events that may threaten components.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1
+      ref_id: 9.1.a-must
+      description: "+ Internal/external sources are selected to receive cybersecurity\
+        \ information\n - Selected sources are managed (e.g.: prioritising the selected\
+        \ sources by order of relevance)"
+      annotation: 'Reference: [RQ-08-01]
+
+
+        + External sources for cybersecurity information can include researchers,
+        commercial and non-commercial sources, organisations supply chain incl. customers,
+        govt sources, industry platforms on cybersecurity[VDA Q7.1 Ex]'
+      typical_evidence: '+ [WP-08-01] Sources of selected information (external/internal)
+
+        + [WP-08-02] Triggers
+
+        + [WP-08-03] Cybersecurity events from the triaged information'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1
+      ref_id: 9.1.a-should
+      description: None
+      annotation: + External sources for cybersecurity information can include researchers,
+        commercial and non-commercial sources, organisations supply chain incl. customers,
+        govt sources, industry platforms on cybersecurity[VDA Q7.1 Ex]
+      typical_evidence: '+ [WP-08-01] Sources of selected information (external/internal)
+
+        + [WP-08-02] Triggers
+
+        + [WP-08-03] Cybersecurity events from the triaged information'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1
+      ref_id: 9.1.b-must
+      description: + Triggers are defined and maintained for the triage of cybersecurity
+        information
+      annotation: 'Reference: [RQ-08-02]
+
+
+        + Internal sources for cybersecurity information can include results from
+        vulnerability analyses, Information received from the field (e.g., vulnerability
+        scanning reports, repair information, consumer usage information), Configuration
+        information, such as hardware or software bill of materials [VDA Q7.1 Ex]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1
+      ref_id: 9.1.c-must
+      description: + Monitoring and triaging of the collected cybersecurity information
+        is performed
+      annotation: "Reference: [RQ-08-03]\n\n+ Criteria for the triage that can be\
+        \ used to define trigger thresholds can include:\n- The familiarity and credibility\
+        \ of the cybersecurity information sources\n- The determined cybersecurity\
+        \ risk of the threat scenarios \n- The types of information obtained (e.g.,\
+        \ an active attack or proof of concept) [VDA Q7.2 Ex]"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1.d-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.1
+      ref_id: 9.1.d-must
+      description: + Cybersecurity information has been checked if it becomes a cybersecurity
+        event
+      annotation: 'Reference: [RQ-08-03]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9
+      ref_id: '9.2'
+      name: Are processes established to evaluate cybersecurity events?
+      description: The goal is to identify attack vectors, known and emerging cyber
+        threats, and cyber vulnerabilities. By continuously assessing and classifying
+        the identified threats, cybersecurity information can be classified as cybersecurity
+        events and further course of action can be decided.
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.2.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.2
+      ref_id: 9.2.a-must
+      description: + Cybersecurity event is evaluated to identify weaknesses in an
+        item or component
+      annotation: "Reference: [RQ-08-04]\n\n+ The responsibilities are defined, and\
+        \ assigned [RQ-07-04] \n+ The customer and the supplier shall specify the\
+        \ distributed cybersecurity activities in a cybersecurity interface agreement\
+        \ including: \n- the appointment of the customer\u2019s and the supplier\u2019\
+        s points of contact regarding cybersecurity \n- if applicable, a joint tailoring\
+        \ of the cybersecurity activities\n- the identification of the cybersecurity\
+        \ activities that are to be performed by the customer and by the supplier,\
+        \ respectively\n+ Weaknesses can include:\n- Missing requirements or specifications\n\
+        - Architecture or design weaknesses, including incorrect design of communication\
+        \ protocols\n- Implementation weaknesses, including hardware and software\
+        \ bugs and incorrect implementation\n- Weakness in operating processes and\
+        \ procedures, including misuse and inadequate user training\n- Usage of outdated\
+        \ or deprecated functions, including cryptographic algorithms [VDA Q7.3 Ex]"
+      typical_evidence: '+ RASIC table(Responsible, Accountable, Support, Consulted,
+        Informed)(Annex C)(ISO/SAE 21434)
+
+        + [WP-08-04] Weaknesses from cybersecurity events'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.2.a-should
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.2
+      ref_id: 9.2.a-should
+      description: None
+      annotation: "+ The responsibilities are defined, and assigned [RQ-07-04] \n\
+        + The customer and the supplier shall specify the distributed cybersecurity\
+        \ activities in a cybersecurity interface agreement including: \n- the appointment\
+        \ of the customer\u2019s and the supplier\u2019s points of contact regarding\
+        \ cybersecurity \n- if applicable, a joint tailoring of the cybersecurity\
+        \ activities\n- the identification of the cybersecurity activities that are\
+        \ to be performed by the customer and by the supplier, respectively\n+ Weaknesses\
+        \ can include:\n- Missing requirements or specifications\n- Architecture or\
+        \ design weaknesses, including incorrect design of communication protocols\n\
+        - Implementation weaknesses, including hardware and software bugs and incorrect\
+        \ implementation\n- Weakness in operating processes and procedures, including\
+        \ misuse and inadequate user training\n- Usage of outdated or deprecated functions,\
+        \ including cryptographic algorithms [VDA Q7.3 Ex]"
+      typical_evidence: '+ RASIC table(Responsible, Accountable, Support, Consulted,
+        Informed)(Annex C)(ISO/SAE 21434)
+
+        + [WP-08-04] Weaknesses from cybersecurity events'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9
+      ref_id: '9.3'
+      name: Are processes established to identify and analyse vulnerabilities?
+      description: The aim is to identify vulnerabilities from weaknesses
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.3.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.3
+      ref_id: 9.3.a-must
+      description: + Weaknesses shall be analysed to identify vulnerabilities
+      annotation: 'Reference: [RQ-08-05]'
+      typical_evidence: + [WP-08-05] Vulnerability analysis
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.3.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.3
+      ref_id: 9.3.b-must
+      description: + Relevant results from weakness analysis and vulnerability remediation
+        must be communicated to the customer in a timely manner
+      annotation: 'Reference: [RQ-07-04]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.3.c-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.3
+      ref_id: 9.3.c-must
+      description: + A rationale shall be provided for a weakness that is not identified
+        as a vulnerability
+      annotation: 'Reference: [RQ-08-06]
+
+
+        + Rationale for not categorizing weakness as vulnerability can include arguments
+        such as follows:
+
+        - Verification report that shows that the vulnerabilities have been eliminated
+
+        - Analysis, risk assessment and management of vulnerabilities [VDA Q7.4 Ex]'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9
+      ref_id: '9.4'
+      name: Are processes established to manage identified vulnerabilities?
+      description: The aim is to manage the identified vulnerabilities
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.4.a-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.4
+      ref_id: 9.4.a-must
+      description: + Identified vulnerabilities are managed based on a rationale such
+        that the corresponding resulting residual risk can be accepted
+      annotation: 'Reference: [RQ-08-07a]
+
+
+        + Rules and processes regarding vulnerability disclosure are established'
+      typical_evidence: + [WP-08-06] Evidence of managed vulnerabilities
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.4.b-must
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:vcsa-v1.1:9.4
+      ref_id: 9.4.b-must
+      description: + A contractual model for responsibility assignment with actions
+        to manage identified vulnerabilities is established
+      annotation: 'Reference: [RQ-07-06]'
+      implementation_groups:
+      - must
