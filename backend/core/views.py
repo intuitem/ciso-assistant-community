@@ -4056,6 +4056,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "status",
         "ebios_rm_studies",
         "assets",
+        "evidences",
     ]
     search_fields = ["name", "description", "ref_id"]
 
