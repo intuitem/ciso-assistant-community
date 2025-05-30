@@ -96,7 +96,7 @@ Conventions:
             - target_node_id(*)
             - relationship(*)
             - rationale
-            - stregth_of_relationship
+            - strength_of_relationship
     For Answers:
         The first line is a header, with the following possible fields (* for required):
             - id(*)
@@ -899,9 +899,9 @@ for tab in dataframe:
                 rationale = (
                     row[header["rationale"]].value if "rationale" in header else None
                 )
-                stregth_of_relationship = (
-                    row[header["stregth_of_relationship"]].value
-                    if "stregth_of_relationship" in header
+                strength_of_relationship = (
+                    row[header["strength_of_relationship"]].value
+                    if "strength_of_relationship" in header
                     else None
                 )
                 requirement_mappings.append(
@@ -910,7 +910,7 @@ for tab in dataframe:
                         "target_requirement_urn": target_requirement_urn,
                         "relationship": relationship,
                         "rationale": rationale,
-                        "stregth_of_relationship": stregth_of_relationship,
+                        "strength_of_relationship": strength_of_relationship,
                     }
                 )
 
