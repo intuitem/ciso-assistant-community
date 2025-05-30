@@ -56,7 +56,7 @@
 							{/if}
 						{:else if URLModel === 'risk-matrices'}
 							<a
-								href="/libraries?object_type=risk_matrix"
+								href="/libraries?object_type=risk_matrices"
 								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"
@@ -64,7 +64,7 @@
 							>
 						{:else if URLModel === 'frameworks'}
 							<a
-								href="/libraries?object_type=framework"
+								href="/libraries?object_type=frameworks"
 								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"
@@ -72,7 +72,7 @@
 							>
 						{:else if URLModel === 'requirement-mapping-sets'}
 							<a
-								href="/libraries?object_type=requirement_mapping_set"
+								href="/libraries?object_type=requirement_mapping_sets"
 								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 								data-testid="add-button"
 								id="add-button"

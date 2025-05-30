@@ -66,16 +66,27 @@ class LibraryMixinFilterSet(df.FilterSet):
 
 class StoredLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
-        choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
+        choices=list(
+            zip(
+                LibraryImporter.OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
+            )
+        ),
         method="filter_object_type",
     )
 
     def filter_object_type(self, queryset, name, value: list[str]):
+        # For backward compatibility
+        if "risk_matrices" in value:
+            value.append("risk_matrix")
+        if "requirement_mapping_sets" in value:
+            value.append("requirement_mapping_set")
+        if "frameworks" in value:
+            value.append("framework")
         union_qs = Q()
         _value = {f"content__{v}__isnull": False for v in value}
         for item in _value:
             union_qs |= Q(**{item: _value[item]})
-
         return queryset.filter(union_qs)
 
     class Meta:
@@ -253,12 +264,17 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get all library objects types")
     def object_type(self, request):
-        return Response(LibraryImporter.OBJECT_FIELDS)
+        return Response(LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS)
 
 
 class LoadedLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
-        choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
+        choices=list(
+            zip(
+                LibraryImporter.OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
+            )
+        ),
         method="filter_object_type",
     )
     has_update = df.BooleanFilter(method="filter_has_update")
@@ -284,6 +300,11 @@ class LoadedLibraryFilterSet(LibraryMixinFilterSet):
             )
 
     def filter_object_type(self, queryset, name, value: list[str]):
+        # For backward compatibility
+        if "risk_matrix" in value:
+            value.append("risk_matrices")
+        if "requirement_mapping_set" in value:
+            value.append("requirement_mapping_sets")
         union_qs = Q()
         _value = {
             k: v
