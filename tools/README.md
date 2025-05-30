@@ -109,7 +109,7 @@ Conventions:
             - target_node_id(*)
             - relationship(*)
             - rationale
-            - stregth_of_relationship
+            - strength_of_relationship
     For Answers:
         The first line is a header, with the following possible fields (* for required):
             - id(*)
