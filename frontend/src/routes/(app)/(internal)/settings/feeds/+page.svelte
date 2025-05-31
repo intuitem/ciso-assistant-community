@@ -50,6 +50,14 @@
 		open={false}
 		style="hover:text-primary-700"
 		icon="fa-solid fa-shield-halved"
+		header="Prowler Cloud"
+	>
+		<div class="flex flex-col space-y-4">Prowler Cloud</div>
+	</Dropdown>
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-shield-halved"
 		header="Lynis audit"
 	>
 		<div class="flex flex-col space-y-4">Lynis settings</div>
