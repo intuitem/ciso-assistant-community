@@ -364,6 +364,100 @@ export const FeatureFlagsSchema = z.object({
 	privacy: z.boolean().optional(),
 	experimental: z.boolean().optional()
 });
+export const FeedsSettingsSchema = z.object({
+	// Provider Configuration
+	prowler_provider: z.string().optional(),
+
+	// AWS Configuration
+	prowler_aws_account_id: z.string().optional(),
+	prowler_aws_access_key_id: z.string().optional(),
+	prowler_aws_secret_access_key: z.string().optional(),
+	prowler_aws_session_token: z.string().optional(),
+
+	// Azure Configuration
+	prowler_azure_subscription_id: z.string().optional(),
+	prowler_azure_sp_env_auth: z.boolean().optional(),
+	prowler_azure_client_id: z.string().optional(),
+	prowler_azure_client_secret: z.string().optional(),
+	prowler_azure_tenant_id: z.string().optional(),
+
+	// Microsoft 365 Configuration
+	prowler_m365_sp_env_auth: z.boolean().optional(),
+	prowler_m365_client_id: z.string().optional(),
+	prowler_m365_client_secret: z.string().optional(),
+	prowler_m365_tenant_id: z.string().optional(),
+
+	// GCP Configuration
+	prowler_gcp_project_id: z.string().optional(),
+	prowler_gcp_credentials_file: z.string().optional(),
+
+	// Kubernetes Configuration
+	prowler_k8s_kubeconfig_file: z.string().optional(),
+
+	// Check Configuration
+	prowler_checks_include: z.string().optional(),
+	prowler_checks_exclude: z.string().optional(),
+	prowler_services_include: z.string().optional(),
+	prowler_services_exclude: z.string().optional(),
+	prowler_severity: z.string().optional(),
+	prowler_only_fail: z.boolean().optional(),
+
+	// Output Configuration
+	prowler_output_format: z.string().optional(),
+	prowler_output_directory: z.string().optional(),
+	prowler_quiet: z.boolean().optional(),
+	prowler_no_banner: z.boolean().optional(),
+
+	// Compliance Frameworks
+	prowler_compliance_cis: z.boolean().optional(),
+	prowler_compliance_pci: z.boolean().optional(),
+	prowler_compliance_gdpr: z.boolean().optional(),
+	prowler_compliance_hipaa: z.boolean().optional(),
+	prowler_compliance_nist: z.boolean().optional(),
+	prowler_compliance_iso27001: z.boolean().optional(),
+
+	// Advanced Settings
+	prowler_max_workers: z.number().min(1).max(50).optional(),
+	prowler_timeout: z.number().min(30).max(3600).optional(),
+	prowler_ignore_exit_code_3: z.boolean().optional(),
+	prowler_based_on_findings: z.boolean().optional(),
+
+	// Scheduling
+	prowler_schedule_enabled: z.boolean().optional(),
+	prowler_schedule_frequency: z.string().optional(),
+	prowler_cron_expression: z.string().optional(),
+
+	// Additional Security Tool Settings (for future expansion)
+
+	// Prowler Cloud Configuration
+	prowler_cloud_enabled: z.boolean().optional(),
+	prowler_cloud_api_key: z.string().optional(),
+	prowler_cloud_api_url: z.string().optional(),
+
+	// Lynis Configuration
+	lynis_enabled: z.boolean().optional(),
+	lynis_audit_mode: z.string().optional(),
+	lynis_tests_include: z.string().optional(),
+	lynis_tests_exclude: z.string().optional(),
+	lynis_quick_scan: z.boolean().optional(),
+	lynis_report_format: z.string().optional(),
+
+	// Wazuh Configuration
+	wazuh_enabled: z.boolean().optional(),
+	wazuh_api_url: z.string().optional(),
+	wazuh_api_username: z.string().optional(),
+	wazuh_api_password: z.string().optional(),
+	wazuh_verify_ssl: z.boolean().optional(),
+	wazuh_agent_groups: z.string().optional(),
+
+	// General Feed Settings
+	feeds_enabled: z.boolean().optional(),
+	feeds_sync_interval: z.number().min(5).max(1440).optional(), // minutes
+	feeds_auto_import: z.boolean().optional(),
+	feeds_retention_days: z.number().min(1).max(365).optional(),
+	feeds_notification_enabled: z.boolean().optional(),
+	feeds_notification_email: z.string().email().optional()
+});
 
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().optional(),
@@ -820,6 +914,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,
+	'feeds-settings': FeedsSettingsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

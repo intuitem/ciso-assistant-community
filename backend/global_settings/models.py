@@ -14,6 +14,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         GENERAL = "general", "General"
         SSO = "sso", "SSO"
         FEATURE_FLAGS = "feature-flags", "Feature Flags"
+        FEEDS_SETTINGS = "feeds-settings", "Feeds Settings"
 
     # Name of the setting category.
     name = models.CharField(

@@ -57,6 +57,7 @@ export const URL_MODEL = [
 	'sso-settings',
 	'general-settings',
 	'feature-flags',
+	'feeds-settings',
 	'requirement-mapping-sets',
 	'entities',
 	'entity-assessments',

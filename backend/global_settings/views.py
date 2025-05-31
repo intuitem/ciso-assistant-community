@@ -10,6 +10,7 @@ from .serializers import (
     GlobalSettingsSerializer,
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
+    FeedsSettingsSerializer,
 )
 
 from .models import GlobalSettings
@@ -57,6 +58,31 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj, _ = self.model.objects.get_or_create(name="feature-flags")
+        obj.is_published = True  # we could do that at creation, but it's ok here
+        obj.save(update_fields=["is_published"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
+class FeedsSettingsViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = FeedsSettingsSerializer
+    queryset = GlobalSettings.objects.filter(name="feeds-settings")
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj, _ = self.model.objects.get_or_create(name="feeds-settings")
         obj.is_published = True  # we could do that at creation, but it's ok here
         obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)

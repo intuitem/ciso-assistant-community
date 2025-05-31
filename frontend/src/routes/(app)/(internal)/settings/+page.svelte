@@ -1,6 +1,11 @@
 <script lang="ts">
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
+	import {
+		SSOSettingsSchema,
+		GeneralSettingsSchema,
+		FeatureFlagsSchema,
+		FeedsSettingsSchema
+	} from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 
@@ -18,6 +23,7 @@
 	<Tab bind:group={tabSet} name="featureFlags" value={2}
 		><i class="fa-solid fa-flag" /> {m.featureFlags()}</Tab
 	>
+	<Tab bind:group={tabSet} name="feedsSettings" value={3}><i class="fa-solid fa-flag" /> Feeds</Tab>
 </TabGroup>
 {#if tabSet === 0}
 	<div>
@@ -50,6 +56,17 @@
 			model={data.featureFlagModel}
 			cancelButton={false}
 			action="?/featureFlags"
+		/>
+	</div>
+{:else if tabSet === 3}
+	<div>
+		<span class="text-gray-500">Feeds</span>
+		<ModelForm
+			form={data.feedsSettingsForm}
+			schema={FeedsSettingsSchema}
+			model={data.feedsSettingsModel}
+			cancelButton={false}
+			action="?/feedsSettings"
 		/>
 	</div>
 {/if}

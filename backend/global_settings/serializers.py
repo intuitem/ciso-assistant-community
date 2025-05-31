@@ -1,3 +1,4 @@
+from iam import models
 from rest_framework import serializers
 
 from .models import GlobalSettings
@@ -49,6 +50,16 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         model = GlobalSettings
         exclude = ["is_published", "folder"]
         read_only_fields = ["name"]
+
+
+class FeedsSettingsSerializer(serializers.ModelSerializer):
+    kubeconfig = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
+
+    class Meta:
+        model = GlobalSettings
+        fields = ["kubeconfig"]
 
 
 class FeatureFlagsSerializer(serializers.ModelSerializer):

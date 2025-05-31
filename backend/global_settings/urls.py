@@ -8,6 +8,7 @@ from .views import (
     get_sso_info,
     GeneralSettingsViewSet,
     FeatureFlagsViewSet,
+    FeedsSettingsViewSet,
 )
 from .routers import DefaultSettingsRouter
 
@@ -33,6 +34,11 @@ settings_router.register(
     basename="feature-flags",
 )
 
+settings_router.register(
+    r"feeds-settings",
+    FeedsSettingsViewSet,
+    basename="feeds-settings",
+)
 
 urlpatterns = [
     path(r"", include(router.urls)),

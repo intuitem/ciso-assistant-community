@@ -1,7 +1,12 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
+import {
+	SSOSettingsSchema,
+	GeneralSettingsSchema,
+	FeatureFlagsSchema,
+	FeedsSettingsSchema
+} from '$lib/utils/schemas';
 import { m } from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -17,12 +22,16 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`).then((res) =>
 		res.json()
 	);
+	const feedsSettings = await fetch(`${BASE_API_URL}/settings/feeds-settings/`).then((res) =>
+		res.json()
+	);
 
 	const selectOptions: Record<string, any> = {};
 
 	const ssoModel = getModelInfo('sso-settings');
 	const generalSettingModel = getModelInfo('general-settings');
 	const featureFlagModel = getModelInfo('feature-flags');
+	const feedsSettingsModel = getModelInfo('feeds-settings');
 
 	if (ssoModel.selectFields) {
 		for (const selectField of ssoModel.selectFields) {
@@ -88,6 +97,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		errors: false
 	});
 
+	const feedsSettingsForm = await superValidate(feedsSettings, zod(FeedsSettingsSchema), {
+		errors: false
+	});
 	return {
 		ssoSettings,
 		ssoForm,
@@ -98,6 +110,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		featureFlagSettings,
 		featureFlagForm,
 		featureFlagModel,
+		feedsSettingsForm,
+		feedsSettingsModel,
 		title: m.settings()
 	};
 };
