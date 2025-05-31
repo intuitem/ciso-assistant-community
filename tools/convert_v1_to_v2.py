@@ -95,12 +95,12 @@ def convert_v1_to_v2(input_path: str, output_path: str):
 
 
         if obj_type == "framework":
-            if "scores" in declared_tabs:
+            if scores_logical_name:
                 meta_rows.append(("scores_definition", scores_logical_name))
-            if "implementation_groups" in declared_tabs:
+            if ig_logical_name:
                 meta_rows.append(("implementation_groups_definition", ig_logical_name))
             if answers_logical_name:
-                meta_rows.append(("answers", answers_logical_name))
+                meta_rows.append(("answers_definition", answers_logical_name))
         elif obj_type == "answers":
             meta_rows.append(("name", tab_name))
         elif obj_type == "implementation_groups":

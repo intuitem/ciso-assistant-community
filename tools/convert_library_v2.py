@@ -633,6 +633,9 @@ def create_library(input_file: str, output_file: str, compat: bool = False):
                 for row in rows[1:]:
                     counter += 1
                     data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
+                    if all(value is None for value in data.values()):
+                        print(f"empty line {counter}")
+                        continue
                     depth = int(data.get("depth", 1))
                     ref_id = data.get("ref_id")
                     ref_id = str(ref_id).strip() if ref_id is not None else None
